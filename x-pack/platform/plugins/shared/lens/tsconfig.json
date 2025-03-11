@@ -119,6 +119,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-capabilities-common",
     "@kbn/presentation-panel-plugin",
+    "@kbn/esql-types",
   ],
   "exclude": ["target/**/*"]
 }

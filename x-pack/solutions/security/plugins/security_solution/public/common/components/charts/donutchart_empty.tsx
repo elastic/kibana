@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
@@ -15,11 +14,9 @@ interface DonutChartEmptyProps {
 }
 
 /*
- ** @deprecated use getEmptyDonutColor instead
+ ** @deprecated
  */
 export const emptyDonutColor = '#FAFBFD';
-
-export const getEmptyDonutColor = (euiTheme: EuiThemeComputed) => euiTheme.colors.textSubdued;
 
 const EmptyDonutChartComponent: React.FC<DonutChartEmptyProps> = ({
   size = 90,

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { EnableRiskScore } from '../enable_risk_score';
@@ -18,7 +18,7 @@ import { usersSelectors } from '../../../explore/users/store';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { buildEntityNameFilter, EntityType } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
@@ -28,7 +28,7 @@ import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.euiSizeL};
+  margin-top: ${({ theme: { euiTheme } }) => euiTheme.size.l};
 `;
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
@@ -36,19 +36,19 @@ type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProp
 const RiskDetailsTabBodyComponent: React.FC<
   Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
-    riskEntity: RiskScoreEntity;
+    riskEntity: EntityType;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
   const queryId = useMemo(
     () =>
-      riskEntity === RiskScoreEntity.host
+      riskEntity === EntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    riskEntity === RiskScoreEntity.host
+    riskEntity === EntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
@@ -65,7 +65,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     useQueryToggle(`${queryId} contributors`);
 
   const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
+    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
     [entityName, riskEntity]
   );
 
@@ -93,7 +93,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     [setContributorsToggleStatus]
   );
 
-  const privileges = useMissingRiskEnginePrivileges();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   if (RiskScoreUpsell) {

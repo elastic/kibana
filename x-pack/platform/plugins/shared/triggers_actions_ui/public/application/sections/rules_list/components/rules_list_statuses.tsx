@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, useEuiTheme } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import {
@@ -27,6 +27,7 @@ interface RulesListStatusesProps {
 }
 
 export const RulesListStatuses = (props: RulesListStatusesProps) => {
+  const { euiTheme } = useEuiTheme();
   const { rulesStatuses, rulesLastRunOutcomes } = props;
 
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
@@ -35,27 +36,27 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
+          <EuiHealth color={euiTheme.colors.success} data-test-subj="totalActiveRulesCount">
             {RULE_STATUS_ACTIVE(rulesStatuses.active)}
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
+          <EuiHealth color={euiTheme.colors.danger} data-test-subj="totalErrorRulesCount">
             {RULE_STATUS_ERROR(rulesStatuses.error)}
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
+          <EuiHealth color={euiTheme.colors.warning} data-test-subj="totalWarningRulesCount">
             {RULE_STATUS_WARNING(rulesStatuses.warning)}
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
+          <EuiHealth color={euiTheme.colors.primary} data-test-subj="totalOkRulesCount">
             {RULE_STATUS_OK(rulesStatuses.ok)}
           </EuiHealth>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
+          <EuiHealth color={euiTheme.colors.accent} data-test-subj="totalPendingRulesCount">
             {RULE_STATUS_PENDING(rulesStatuses.pending)}
           </EuiHealth>
         </EuiFlexItem>
@@ -71,17 +72,17 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiHealth color="success" data-test-subj="totalSucceededRulesCount">
+        <EuiHealth color={euiTheme.colors.success} data-test-subj="totalSucceededRulesCount">
           {RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION(rulesLastRunOutcomes.succeeded)}
         </EuiHealth>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiHealth color="danger" data-test-subj="totalFailedRulesCount">
+        <EuiHealth color={euiTheme.colors.danger} data-test-subj="totalFailedRulesCount">
           {RULE_LAST_RUN_OUTCOME_FAILED_DESCRIPTION(rulesLastRunOutcomes.failed)}
         </EuiHealth>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
+        <EuiHealth color={euiTheme.colors.warning} data-test-subj="totalWarningRulesCount">
           {RULE_LAST_RUN_OUTCOME_WARNING_DESCRIPTION(rulesLastRunOutcomes.warning)}
         </EuiHealth>
       </EuiFlexItem>

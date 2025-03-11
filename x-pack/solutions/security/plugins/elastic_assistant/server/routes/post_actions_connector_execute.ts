@@ -12,9 +12,11 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
 import {
   API_VERSIONS,
+  newContentReferencesStore,
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
+  pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
@@ -67,7 +69,7 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         try {
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -86,6 +88,7 @@ export const postActionsConnectorExecuteRoute = (
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
+          const screenContext = request.body.screenContext;
           const connectorId = decodeURIComponent(request.params.connectorId);
 
           // if message is undefined, it means the user is regenerating a message from the stored conversation
@@ -99,6 +102,7 @@ export const postActionsConnectorExecuteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const inference = ctx.elasticAssistant.inference;
+          const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
           const productDocsAvailable =
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -110,12 +114,16 @@ export const postActionsConnectorExecuteRoute = (
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
+          const contentReferencesStore = newContentReferencesStore();
+
           onLlmResponse = async (
             content: string,
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
+              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
@@ -123,6 +131,7 @@ export const postActionsConnectorExecuteRoute = (
                 replacements: latestReplacements,
                 isError,
                 traceData,
+                contentReferences,
               });
             }
           };
@@ -140,6 +149,7 @@ export const postActionsConnectorExecuteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
+            contentReferencesStore,
             isOssModel,
             conversationId,
             context: ctx,
@@ -153,6 +163,8 @@ export const postActionsConnectorExecuteRoute = (
             request,
             response,
             telemetry,
+            savedObjectsClient,
+            screenContext,
             systemPrompt,
             ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });

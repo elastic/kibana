@@ -417,8 +417,8 @@ export class TaskRunner<
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
           actionSchedulerResult = await actionScheduler.run({
-            activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
-            recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
+            activeAlerts: alertsClient.getProcessedAlerts('active'),
+            recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
           });
         }
       })
@@ -430,10 +430,9 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-        alertsClient.getAlertsToSerialize();
-      alertsToReturn = alerts;
-      recoveredAlertsToReturn = recovered;
+      const alerts = alertsClient.getRawAlertInstancesForState();
+      alertsToReturn = alerts.rawActiveAlerts;
+      recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
     }
 
     return {
@@ -540,6 +539,10 @@ export class TaskRunner<
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
+      // Clear gap range that was persisted in the rule SO
+      if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
+        this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
+      }
       (async () => {
         try {
           await clearExpiredSnoozes({
@@ -608,6 +611,13 @@ export class TaskRunner<
           runDate: this.runDate,
         });
 
+        const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
+        if (gap) {
+          this.alertingEventLogger.reportGap({
+            gap,
+          });
+        }
+
         if (!this.cancelled) {
           this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
           if (outcome === 'failure') {
@@ -620,6 +630,7 @@ export class TaskRunner<
               )} - ${JSON.stringify(lastRun)}`
             );
           }
+
           await this.updateRuleSavedObjectPostRun(ruleId, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,

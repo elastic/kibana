@@ -5,68 +5,85 @@
  * 2.0.
  */
 
-import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { PackageList } from '@kbn/fleet-plugin/common';
 import type { RuleMigrationIntegration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
-
-/* This will be removed once the package registry changes is performed */
-import integrationsFile from './integrations_temp.json';
-import type { IndexNameProvider } from './rule_migrations_data_client';
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 40 as const;
 /* The number of integrations the RAG will return, sorted by score */
 const RETURNED_INTEGRATIONS = 5 as const;
 
-/* This is a temp implementation to allow further development until https://github.com/elastic/package-registry/issues/1252 */
-const INTEGRATIONS = integrationsFile as RuleMigrationIntegration[];
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
-  constructor(
-    getIndexName: IndexNameProvider,
-    currentUser: AuthenticatedUser,
-    esScopedClient: IScopedClusterClient,
-    logger: Logger,
-    private packageService?: PackageService
-  ) {
-    super(getIndexName, currentUser, esScopedClient, logger);
-  }
-
   async getIntegrationPackages(): Promise<PackageList | undefined> {
-    return this.packageService?.asInternalUser.getPackages();
+    return this.dependencies.packageService?.asInternalUser.getPackages({
+      prerelease: true,
+    });
   }
 
   /** Indexes an array of integrations to be used with ELSER semantic search queries */
-  async create(): Promise<void> {
+  async populate(): Promise<void> {
     const index = await this.getIndexName();
-    await this.esClient
-      .bulk(
-        {
-          refresh: 'wait_for',
-          operations: INTEGRATIONS.flatMap((integration) => [
-            { update: { _index: index, _id: integration.id } },
-            {
-              doc: {
-                title: integration.title,
-                description: integration.description,
-                data_streams: integration.data_streams,
-                elser_embedding: integration.elser_embedding,
-                '@timestamp': new Date().toISOString(),
+    const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
+      prerelease: true,
+    });
+    if (packages) {
+      const ragIntegrations = packages.map<RuleMigrationIntegration>((pkg) => ({
+        title: pkg.title,
+        id: pkg.name,
+        description: pkg?.description || '',
+        data_streams:
+          pkg.data_streams
+            ?.filter((stream) => stream.type === 'logs')
+            .map((stream) => ({
+              dataset: stream.dataset,
+              index_pattern: `${stream.type}-${stream.dataset}-*`,
+              title: stream.title,
+            })) || [],
+        elser_embedding: [
+          pkg.title,
+          pkg.description,
+          ...(pkg.data_streams
+            ?.filter((stream) => stream.type === 'logs')
+            .map((stream) => stream.title) || []),
+        ].join(' - '),
+      }));
+      await this.esClient
+        .bulk(
+          {
+            refresh: 'wait_for',
+            operations: ragIntegrations.flatMap((integration) => [
+              { update: { _index: index, _id: integration.id } },
+              {
+                doc: {
+                  title: integration.title,
+                  description: integration.description,
+                  data_streams: integration.data_streams,
+                  elser_embedding: integration.elser_embedding,
+                },
+                doc_as_upsert: true,
               },
-              doc_as_upsert: true,
-            },
-          ]),
-        },
-        { requestTimeout: 10 * 60 * 1000 }
-      )
-      .catch((error) => {
-        this.logger.error(`Error preparing integrations for SIEM migration ${error.message}`);
-        throw error;
-      });
+            ]),
+          },
+          { requestTimeout: 10 * 60 * 1000 } // 10 minutes
+        )
+        .then((response) => {
+          if (response.errors) {
+            // use the first error to throw
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
+          }
+        })
+        .catch((error) => {
+          this.logger.error(`Error indexing integrations embeddings: ${error.message}`);
+          throw error;
+        });
+    } else {
+      this.logger.warn('Package service not available, not able not populate integrations index');
+    }
   }
 
   /** Based on a LLM generated semantic string, returns the 5 best results with a score above 40 */

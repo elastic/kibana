@@ -22,7 +22,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact`;
+const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact\nservice,service-001,extreme_impact`;
 const invalidLinesAsText = `user,user-001,wow_impact\ntest,user-002,medium_impact\nuser,user-003,medium_impact,extra_column`;
 
 export default {
@@ -89,7 +89,7 @@ export const ValidationStep: Story<void> = () => {
                 size: 100,
                 validLines: {
                   text: validLinesAsText,
-                  count: 5,
+                  count: 6,
                 },
                 invalidLines: {
                   text: invalidLinesAsText,
@@ -127,7 +127,7 @@ export const ValidationStep: Story<void> = () => {
                 size: 100,
                 validLines: {
                   text: validLinesAsText,
-                  count: 5,
+                  count: 6,
                 },
                 invalidLines: {
                   text: invalidLinesAsText,
@@ -196,7 +196,7 @@ export const ResultsStep: Story<void> = () => {
                   { message: 'error message 3', index: 5 },
                 ],
                 stats: {
-                  total: 5,
+                  total: 6,
                   successful: 2,
                   failed: 3,
                 },

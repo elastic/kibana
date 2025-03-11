@@ -9,11 +9,8 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { D3SecurityConfigSchema, D3SecuritySecretsSchema } from '../../../common/d3security/schema';
 import { renderParameterTemplates } from './render';
 import { D3SecurityConnector } from './d3security';

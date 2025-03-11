@@ -34,10 +34,10 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const privileges = await client.asCurrentUser.security.hasPrivileges({
-        index: [{ names: ['.elastic-connectors'], privileges: ['read', 'write'] }],
+        cluster: ['manage_connector', 'monitor_connector'],
       });
-      const canManageConnectors = privileges.index['.elastic-connectors'].write;
-      const canReadConnectors = privileges.index['.elastic-connectors'].read;
+      const canManageConnectors = privileges.cluster.manage_connector;
+      const canReadConnectors = privileges.cluster.monitor_connector;
 
       const connectors = canReadConnectors ? await fetchConnectors(client.asCurrentUser) : [];
 

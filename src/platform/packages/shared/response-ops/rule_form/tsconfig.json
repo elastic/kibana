@@ -2,19 +2,10 @@
   "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-types",
     "@kbn/i18n",
@@ -40,5 +31,6 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-user-profile-browser",
+    "@kbn/fields-metadata-plugin"
   ]
 }

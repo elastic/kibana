@@ -8,6 +8,7 @@
 import { resolve } from 'path';
 
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -32,6 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const auditLogPath = resolve(__dirname, './packages/helpers/audit/pki.log');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/pki')],
     servers,
     security: { disableTestUser: true },

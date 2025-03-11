@@ -15,7 +15,9 @@ type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsD
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
 type AttackDiscoveryDataClientContract = PublicMethodsOf<AttackDiscoveryDataClient>;
 export type AttackDiscoveryDataClientMock = jest.Mocked<AttackDiscoveryDataClientContract>;
-type KnowledgeBaseDataClientContract = PublicMethodsOf<AIAssistantKnowledgeBaseDataClient>;
+type KnowledgeBaseDataClientContract = PublicMethodsOf<AIAssistantKnowledgeBaseDataClient> & {
+  isSetupInProgress: AIAssistantKnowledgeBaseDataClient['isSetupInProgress'];
+};
 export type KnowledgeBaseDataClientMock = jest.Mocked<KnowledgeBaseDataClientContract>;
 
 const createConversationsDataClientMock = () => {
@@ -60,6 +62,8 @@ const createKnowledgeBaseDataClientMock = () => {
     addKnowledgeBaseDocuments: jest.fn(),
     createInferenceEndpoint: jest.fn(),
     createKnowledgeBaseEntry: jest.fn(),
+    updateKnowledgeBaseEntry: jest.fn(),
+    deleteKnowledgeBaseEntry: jest.fn(),
     findDocuments: jest.fn(),
     getAssistantTools: jest.fn(),
     getKnowledgeBaseDocumentEntries: jest.fn(),
@@ -67,11 +71,15 @@ const createKnowledgeBaseDataClientMock = () => {
     getRequiredKnowledgeBaseDocumentEntries: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
     isInferenceEndpointExists: jest.fn(),
+    getInferenceEndpointId: jest.fn(),
     isModelInstalled: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
     isSetupAvailable: jest.fn(),
+    isSetupInProgress: jest.fn().mockReturnValue(false)(),
     isUserDataExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
+    getLoadedSecurityLabsDocsCount: jest.fn(),
+    getProductDocumentationStatus: jest.fn(),
   };
   return mocked;
 };

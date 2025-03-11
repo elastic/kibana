@@ -64,7 +64,6 @@ import { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-solutio
 import { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
 import { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
-import { EndpointUploadActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/upload/upload.gen';
 import {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
@@ -123,7 +122,6 @@ import {
   InstallMigrationRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
-import { InstallTranslatedMigrationRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
@@ -138,10 +136,6 @@ import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/
 import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
-import {
-  RetryRuleMigrationRequestParamsInput,
-  RetryRuleMigrationRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
@@ -161,7 +155,10 @@ import { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plug
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
-import { UpdateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  UpdateRuleMigrationRequestParamsInput,
+  UpdateRuleMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   UpdateWorkflowInsightRequestParamsInput,
   UpdateWorkflowInsightRequestBodyInput,
@@ -718,13 +715,12 @@ If a record already exists for the specified entity, that record is overwritten 
     /**
      * Upload a file to an endpoint.
      */
-    endpointUploadAction(props: EndpointUploadActionProps, kibanaSpace: string = 'default') {
+    endpointUploadAction(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/endpoint/action/upload', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     entityStoreGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
@@ -1011,6 +1007,16 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+     * Identifies the privileges required for a SIEM rules migration and returns the missing privileges
+     */
+    getRuleMigrationPrivileges(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/siem_migrations/rules/missing_privileges', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves resources for an existing SIEM rules migration
      */
     getRuleMigrationResources(
@@ -1212,27 +1218,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Installs all translated migration rules
-     */
-    installTranslatedMigrationRules(
-      props: InstallTranslatedMigrationRulesProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(
-          routeWithNamespace(
-            replaceParams(
-              '/internal/siem_migrations/rules/{migration_id}/install_translated',
-              props.params
-            ),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/internal/asset_criticality/upload_csv', kibanaSpace))
@@ -1351,7 +1336,7 @@ finalize it.
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .post(routeWithNamespace('/api/detection_engine/signals/migration_status', kibanaSpace))
+        .get(routeWithNamespace('/api/detection_engine/signals/migration_status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1416,22 +1401,6 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
-    },
-    /**
-     * Retries a SIEM rules migration using the migration id provided
-     */
-    retryRuleMigration(props: RetryRuleMigrationProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(
-          routeWithNamespace(
-            replaceParams('/internal/siem_migrations/rules/{migration_id}/retry', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
     },
     riskEngineGetPrivileges(kibanaSpace: string = 'default') {
       return supertest
@@ -1619,7 +1588,12 @@ detection engine rules.
      */
     updateRuleMigration(props: UpdateRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
+        .put(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1775,9 +1749,6 @@ export interface EndpointSuspendProcessActionProps {
 export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
 }
-export interface EndpointUploadActionProps {
-  body: EndpointUploadActionRequestBodyInput;
-}
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
   body: ExportRulesRequestBodyInput;
@@ -1880,9 +1851,6 @@ export interface InstallMigrationRulesProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
-export interface InstallTranslatedMigrationRulesProps {
-  params: InstallTranslatedMigrationRulesRequestParamsInput;
-}
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
 }
@@ -1916,10 +1884,6 @@ export interface ReadRuleProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
-}
-export interface RetryRuleMigrationProps {
-  params: RetryRuleMigrationRequestParamsInput;
-  body: RetryRuleMigrationRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
@@ -1963,6 +1927,7 @@ export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
 }
 export interface UpdateRuleMigrationProps {
+  params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {

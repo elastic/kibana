@@ -17,15 +17,13 @@ import { intersection as lodashIntersection, isArray } from 'lodash';
 
 import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
-import type { ConfigType } from '../../../../config';
-import type { Ancestor, SignalSource, SignalSourceHit } from '../types';
+import type { Ancestor, SecuritySharedParams, SignalSource, SignalSourceHit } from '../types';
 import { buildAlertFields, buildAncestors, generateAlertId } from '../factories/utils/build_alert';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import type { EqlSequence } from '../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from '../factories/utils/generate_building_block_ids';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
@@ -48,17 +46,10 @@ export interface ExtraFieldsForShellAlert {
 }
 
 export interface BuildAlertGroupFromSequence {
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  sharedParams: SecuritySharedParams;
   sequence: EqlSequence<SignalSource>;
-  completeRule: CompleteRule<RuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  spaceId: string | null | undefined;
   buildReasonMessage: BuildReasonMessage;
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
   applyOverrides?: boolean;
-  publicBaseUrl?: string;
-  intendedTimestamp?: Date;
 }
 
 // eql shell alerts can have a subAlerts property
@@ -75,20 +66,23 @@ export type WrappedEqlShellOptionalSubAlertsType = WrappedFieldsLatest<EqlShellF
  * @param completeRule object representing the rule that found the sequence
  */
 export const buildAlertGroupFromSequence = ({
-  ruleExecutionLogger,
+  sharedParams,
   sequence,
-  completeRule,
-  mergeStrategy,
-  spaceId,
   buildReasonMessage,
-  indicesToQuery,
-  alertTimestampOverride,
-  publicBaseUrl,
-  intendedTimestamp,
 }: BuildAlertGroupFromSequence): {
   shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest> | undefined;
   buildingBlocks: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
 } => {
+  const {
+    alertTimestampOverride,
+    intendedTimestamp,
+    mergeStrategy,
+    completeRule,
+    spaceId,
+    inputIndex: indicesToQuery,
+    ruleExecutionLogger,
+    publicBaseUrl,
+  } = sharedParams;
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return { shellAlert: undefined, buildingBlocks: [] };
@@ -106,6 +100,7 @@ export const buildAlertGroupFromSequence = ({
         completeRule,
         doc: event,
         mergeStrategy,
+        // TODO: respect ignore fields
         ignoreFields: {},
         ignoreFieldsRegexes: [],
         applyOverrides: false,
@@ -208,7 +203,7 @@ export const buildAlertRoot = ({
   const reason = buildReasonMessage({
     name: completeRule.ruleConfig.name,
     severity: completeRule.ruleParams.severity,
-    mergedDoc: mergedAlerts as SignalSourceHit,
+    mergedDoc: { _source: mergedAlerts } as SignalSourceHit,
   });
   const doc = buildAlertFields({
     docs: wrappedBuildingBlocks,

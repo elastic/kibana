@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
@@ -29,6 +29,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_DELETE,
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_IMPORT_URL,
 } from '../../../../../common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
@@ -260,14 +261,14 @@ export const getFindResultWithMultiHits = ({
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    path: DETECTION_ENGINE_RULES_IMPORT_URL,
     body: { file: hapiStream },
   });
 
 export const getImportRulesRequestOverwriteTrue = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    path: DETECTION_ENGINE_RULES_IMPORT_URL,
     body: { file: hapiStream },
     query: { overwrite: true },
   });

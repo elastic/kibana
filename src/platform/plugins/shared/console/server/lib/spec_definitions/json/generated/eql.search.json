@@ -6,6 +6,8 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_indices": "__flag__",
+      "allow_partial_search_results": "__flag__",
+      "allow_partial_sequence_results": "__flag__",
       "expand_wildcards": [
         "all",
         "open",

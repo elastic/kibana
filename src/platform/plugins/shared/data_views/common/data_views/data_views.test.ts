@@ -51,8 +51,9 @@ const savedObject = {
     typeMeta: '{}',
     type: '',
     runtimeFieldMap:
-      '{"aRuntimeField": { "type": "keyword", "script": {"source": "emit(\'hello\')"}}}',
-    fieldAttrs: '{"aRuntimeField": { "count": 5, "customLabel": "A Runtime Field"}}',
+      '{"aRuntimeField": { "type": "keyword", "script": {"source": "emit(\'hello\')"}}, "wrongCountType": { "type": "keyword", "script": {"source": "emit(\'test\')"}}}',
+    fieldAttrs:
+      '{"aRuntimeField": { "count": 5, "customLabel": "A Runtime Field" }, "wrongCountType": { "count": "50" }}',
   },
   type: 'index-pattern',
   references: [],
@@ -219,9 +220,7 @@ describe('IndexPatterns', () => {
   });
 
   test('getFieldsForIndexPattern called with allowHidden set to undefined as default', async () => {
-    await indexPatterns.getFieldsForIndexPattern({ id: '1' } as DataViewSpec, {
-      pattern: 'something',
-    });
+    await indexPatterns.getFieldsForIndexPattern({ id: '1' } as DataViewSpec);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith({
       allowHidden: undefined,
       allowNoIndex: true,
@@ -233,9 +232,7 @@ describe('IndexPatterns', () => {
   });
 
   test('getFieldsForIndexPattern called with allowHidden set to true', async () => {
-    await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: true } as DataViewSpec, {
-      pattern: 'something',
-    });
+    await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: true } as DataViewSpec);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith({
       allowHidden: true,
       allowNoIndex: true,
@@ -247,9 +244,7 @@ describe('IndexPatterns', () => {
   });
 
   test('getFieldsForIndexPattern called with allowHidden set to false', async () => {
-    await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: false } as DataViewSpec, {
-      pattern: 'something',
-    });
+    await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: false } as DataViewSpec);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith({
       allowHidden: false,
       allowNoIndex: true,
@@ -261,12 +256,10 @@ describe('IndexPatterns', () => {
   });
 
   test('getFieldsForIndexPattern called with getAllowHidden returning true', async () => {
-    await indexPatterns.getFieldsForIndexPattern(
-      { id: '1', getAllowHidden: () => true } as DataView,
-      {
-        pattern: 'something',
-      }
-    );
+    await indexPatterns.getFieldsForIndexPattern({
+      id: '1',
+      getAllowHidden: () => true,
+    } as DataView);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith({
       allowHidden: true,
       allowNoIndex: true,
@@ -278,12 +271,10 @@ describe('IndexPatterns', () => {
   });
 
   test('getFieldsForIndexPattern called with getAllowHidden returning false', async () => {
-    await indexPatterns.getFieldsForIndexPattern(
-      { id: '1', getAllowHidden: () => false } as DataView,
-      {
-        pattern: 'something',
-      }
-    );
+    await indexPatterns.getFieldsForIndexPattern({
+      id: '1',
+      getAllowHidden: () => false,
+    } as DataView);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith({
       allowHidden: false,
       allowNoIndex: true,
@@ -690,6 +681,23 @@ describe('IndexPatterns', () => {
     // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
     expect(attrs).toHaveProperty('fieldFormatMap');
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
+  });
+
+  test('gets the correct field attrs', async () => {
+    const id = 'id';
+    setDocsourcePayload(id, savedObject);
+    const dataView = await indexPatterns.get(id);
+    expect(dataView.getFieldByName('aRuntimeField')).toEqual(
+      expect.objectContaining({
+        count: 5,
+        customLabel: 'A Runtime Field',
+      })
+    );
+    expect(dataView.getFieldByName('wrongCountType')).toEqual(
+      expect.objectContaining({
+        count: 50,
+      })
+    );
   });
 
   describe('defaultDataViewExists', () => {

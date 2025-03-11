@@ -10,6 +10,8 @@ import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/type
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
+import type { SOSecret } from '..';
+
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
 
@@ -44,6 +46,7 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
+  agentless?: AgentlessPolicy;
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled?: boolean;
@@ -62,6 +65,21 @@ export interface NewAgentPolicy {
       max_retries?: number;
       init_dur?: string;
       max_dur?: string;
+    };
+  };
+  required_versions?: AgentTargetVersion[] | null;
+}
+
+export interface AgentTargetVersion {
+  version: string;
+  percentage: number;
+}
+
+export interface AgentlessPolicy {
+  resources?: {
+    requests?: {
+      memory?: string;
+      cpu?: string;
     };
   };
 }
@@ -110,6 +128,7 @@ export interface FullAgentPolicyInput {
   };
   streams?: FullAgentPolicyInputStream[];
   processors?: FullAgentPolicyAddFields[];
+  ssl?: BaseSSLConfig;
   [key: string]: any;
 }
 
@@ -129,6 +148,7 @@ export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescri
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
   proxy_url?: string;
   proxy_headers?: any;
+  ssl?: BaseSSLConfig;
   [key: string]: any;
 };
 
@@ -205,16 +225,22 @@ export interface FullAgentPolicy {
   };
 }
 
+export interface BaseSSLConfig {
+  verification_mode?: string;
+  certificate_authorities?: string[];
+  renegotiation?: string;
+  certificate?: string;
+  key?: string;
+  client_authentication?: string;
+}
+
 export interface FullAgentPolicyFleetConfig {
   hosts: string[];
   proxy_url?: string;
   proxy_headers?: any;
-  ssl?: {
-    verification_mode?: string;
-    certificate_authorities?: string[];
-    renegotiation?: string;
-    certificate?: string;
-    key?: string;
+  ssl?: BaseSSLConfig;
+  secrets?: {
+    ssl?: { key?: SOSecret };
   };
 }
 

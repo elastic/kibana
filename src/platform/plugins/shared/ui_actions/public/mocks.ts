@@ -19,9 +19,11 @@ export type Start = jest.Mocked<UiActionsPublicStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     addTriggerAction: jest.fn(),
+    addTriggerActionAsync: jest.fn(),
     attachAction: jest.fn(),
     detachAction: jest.fn(),
     registerAction: jest.fn(),
+    registerActionAsync: jest.fn(),
     registerTrigger: jest.fn(),
     unregisterAction: jest.fn(),
   };

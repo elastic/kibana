@@ -187,21 +187,5 @@ describe('FROM', () => {
 
       expect(errors.length > 0).toBe(true);
     });
-
-    it('when open square bracket "[" is entered', () => {
-      const text = 'FROM kibana_sample_data_logs [';
-      const { errors } = parse(text);
-
-      expect(errors.length > 0).toBe(true);
-      expect(errors[0].message.toLowerCase().includes('metadata')).toBe(true);
-    });
-
-    it('when close square bracket "]" is entered', () => {
-      const text = 'FROM kibana_sample_data_logs []';
-      const { errors } = parse(text);
-
-      expect(errors.length > 0).toBe(true);
-      expect(errors[0].message.toLowerCase().includes('metadata')).toBe(true);
-    });
   });
 });

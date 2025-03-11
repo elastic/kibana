@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import type OpenAI from 'openai';
 import { from, identity, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
+import { convertUpstreamError, isNativeFunctionCallingSupported } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
-import {
-  parseInlineFunctionCalls,
-  wrapWithSimulatedFunctionCalling,
-} from '../../simulated_function_calling';
-import {
-  toolsToOpenAI,
-  toolChoiceToOpenAI,
-  messagesToOpenAI,
-  processOpenAIStream,
-} from '../openai';
+import { parseInlineFunctionCalls } from '../../simulated_function_calling';
+import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
+import { createRequest } from './create_openai_request';
 
 export const inferenceAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -30,29 +23,27 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     toolChoice,
     tools,
     functionCalling,
+    temperature,
+    modelName,
     logger,
     abortSignal,
+    metadata,
   }) => {
-    const simulatedFunctionCalling = functionCalling === 'simulated';
+    const useSimulatedFunctionCalling =
+      functionCalling === 'auto'
+        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        : functionCalling === 'simulated';
 
-    let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
-    if (simulatedFunctionCalling) {
-      const wrapped = wrapWithSimulatedFunctionCalling({
-        system,
-        messages,
-        toolChoice,
-        tools,
-      });
-      request = {
-        messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
-      };
-    } else {
-      request = {
-        messages: messagesToOpenAI({ system, messages }),
-        tool_choice: toolChoiceToOpenAI(toolChoice),
-        tools: toolsToOpenAI(tools),
-      };
-    }
+    const request = createRequest({
+      connector: executor.getConnector(),
+      system,
+      messages,
+      toolChoice,
+      tools,
+      simulatedFunctionCalling: useSimulatedFunctionCalling,
+      temperature,
+      modelName,
+    });
 
     return from(
       executor.invoke({
@@ -60,14 +51,17 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         subActionParams: {
           body: request,
           signal: abortSignal,
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError('Error calling the inference API', {
-              rootError: response.serviceMessage,
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
             })
           );
         }
@@ -79,7 +73,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         );
       }),
       processOpenAIStream(),
-      simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      emitTokenCountEstimateIfMissing({ request }),
+      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
 };

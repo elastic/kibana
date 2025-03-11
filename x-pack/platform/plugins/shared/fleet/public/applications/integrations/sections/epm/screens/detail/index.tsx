@@ -21,6 +21,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,8 +48,8 @@ import {
   useIntegrationsStateContext,
   useGetSettingsQuery,
 } from '../../../../hooks';
+import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService } from '../../../../services';
 import {
   useGetPackageInfoByKeyQuery,
   useLink,
@@ -88,7 +89,6 @@ import { CustomViewPage } from './custom';
 import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
-import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 
@@ -130,12 +130,14 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 }
 
 export function Detail() {
+  const theme = useEuiTheme();
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
+  const { isAgentlessIntegration } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -162,8 +164,6 @@ export function Detail() {
 
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
-  const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
-    ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
   const isOverviewPage = panel === 'overview';
 
@@ -412,10 +412,10 @@ export function Detail() {
         currentPath,
         integration,
         isCloud,
-        isExperimentalAddIntegrationPageEnabled,
         isFirstTimeAgentUser,
         isGuidedOnboardingActive,
         pkgkey,
+        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
       });
 
       /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
@@ -444,12 +444,13 @@ export function Detail() {
       hash,
       history,
       integration,
+      isAgentlessIntegration,
       isCloud,
-      isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
       onboardingAppId,
       onboardingLink,
+      packageInfo,
       pathname,
       pkgkey,
       search,
@@ -805,7 +806,10 @@ export function Detail() {
       rightColumnGrow={false}
       topContent={securityCallout}
       tabs={headerTabs}
-      tabsClassName="fleet__epm__shiftNavTabs"
+      tabsCss={`
+        margin-left: calc(${theme.euiTheme.size.base} * 6 + ${theme.euiTheme.size.xl} * 2 +
+          ${theme.euiTheme.size.l});
+      `}
     >
       {integrationInfo || packageInfo ? (
         <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />

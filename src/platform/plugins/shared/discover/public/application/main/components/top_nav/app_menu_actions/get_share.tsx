@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuActionPrimary, AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import type { AppMenuActionPrimary } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { DiscoverStateContainer } from '../../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
-import { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
-import { AppMenuDiscoverParams } from './types';
-import { DiscoverServices } from '../../../../../build_services';
+import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
+import type { AppMenuDiscoverParams } from './types';
+import type { DiscoverServices } from '../../../../../build_services';
 
 export const getShareAppMenuItem = ({
   discoverParams,
@@ -100,7 +101,7 @@ export const getShareAppMenuItem = ({
         services.share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: false,
-          allowShortUrl: !!services.capabilities.discover.createShortUrl,
+          allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
           shareableUrl,
           shareableUrlForSavedObject,
           shareableUrlLocatorParams: { locator, params },

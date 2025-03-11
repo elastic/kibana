@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   fetch$,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { Router } from '@kbn/shared-ux-router';
@@ -49,7 +49,7 @@ export const getErrorBudgetEmbeddableFactory = ({
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
       const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
@@ -57,12 +57,12 @@ export const getErrorBudgetEmbeddableFactory = ({
 
       const api = buildApi(
         {
-          ...titlesApi,
-          defaultPanelTitle: defaultTitle$,
+          ...titleManager.api,
+          defaultTitle$,
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTitles(),
+                ...titleManager.serialize(),
                 sloId: sloId$.getValue(),
                 sloInstanceId: sloInstanceId$.getValue(),
               },
@@ -72,7 +72,7 @@ export const getErrorBudgetEmbeddableFactory = ({
         {
           sloId: [sloId$, (value) => sloId$.next(value)],
           sloInstanceId: [sloInstanceId$, (value) => sloInstanceId$.next(value)],
-          ...titleComparators,
+          ...titleManager.comparators,
         }
       );
 

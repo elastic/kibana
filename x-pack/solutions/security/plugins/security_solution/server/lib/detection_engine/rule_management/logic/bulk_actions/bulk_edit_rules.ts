@@ -8,7 +8,6 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type { ExperimentalFeatures } from '../../../../../../common';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -22,6 +21,7 @@ import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_o
 import { ruleParamsModifier } from './rule_params_modifier';
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 import { validateBulkEditRule } from './validations';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export interface BulkEditRulesArguments {
   actionsClient: ActionsClient;
@@ -30,7 +30,7 @@ export interface BulkEditRulesArguments {
   actions: BulkActionEditPayload[];
   rules: RuleAlertType[];
   mlAuthz: MlAuthz;
-  experimentalFeatures: ExperimentalFeatures;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
 /**
@@ -47,7 +47,7 @@ export const bulkEditRules = async ({
   rules,
   actions,
   mlAuthz,
-  experimentalFeatures,
+  ruleCustomizationStatus,
 }: BulkEditRulesArguments) => {
   // Split operations
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
@@ -70,39 +70,38 @@ export const bulkEditRules = async ({
   const result = await rulesClient.bulkEdit<RuleParams>({
     ids: rules.map((rule) => rule.id),
     operations,
-    paramsModifier: async (rule) => {
-      const ruleParams = rule.params;
+    paramsModifier: async (currentRule) => {
+      const ruleParams = currentRule.params;
 
       await validateBulkEditRule({
         mlAuthz,
         ruleType: ruleParams.type,
         edit: actions,
         immutable: ruleParams.immutable,
-        experimentalFeatures,
+        ruleCustomizationStatus,
       });
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         ruleParams,
-        paramsActions,
-        experimentalFeatures
+        paramsActions
       );
 
-      // Update rule source
-      const updatedRule = {
-        ...rule,
+      const nextRule = convertAlertingRuleToRuleResponse({
+        ...currentRule,
         params: modifiedParams,
-      };
-      const ruleResponse = convertAlertingRuleToRuleResponse(updatedRule);
+      });
+
       let isCustomized = false;
-      if (ruleResponse.immutable === true) {
+      if (nextRule.immutable === true) {
         isCustomized = calculateIsCustomized({
-          baseRule: baseVersionsMap.get(ruleResponse.rule_id),
-          nextRule: ruleResponse,
-          isRuleCustomizationEnabled: experimentalFeatures.prebuiltRulesCustomizationEnabled,
+          baseRule: baseVersionsMap.get(nextRule.rule_id),
+          currentRule: convertAlertingRuleToRuleResponse(currentRule),
+          nextRule,
+          ruleCustomizationStatus,
         });
       }
 
       const ruleSource =
-        ruleResponse.immutable === true
+        nextRule.immutable === true
           ? {
               type: 'external' as const,
               isCustomized,

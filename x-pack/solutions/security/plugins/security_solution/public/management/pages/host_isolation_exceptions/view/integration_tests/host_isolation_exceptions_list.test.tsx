@@ -60,10 +60,10 @@ describe('When on the host isolation exceptions page', () => {
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
     const { renderResult, apiMocks, user } = prepareTest();
-    const { findAllByTestId } = renderResult;
+    const { getAllByTestId } = renderResult;
 
-    await waitFor(async () => {
-      expect(await findAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
+    await waitFor(() => {
+      expect(getAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
@@ -160,10 +160,10 @@ describe('When on the host isolation exceptions page', () => {
 
       it('should hide the Create and Edit actions when host isolation exceptions write authz is not allowed, but HIE entries exist', async () => {
         const { renderResult, user } = prepareTest();
-        const { findAllByTestId, queryByTestId, getByTestId } = await renderResult;
+        const { getAllByTestId, queryByTestId, getByTestId } = await renderResult;
 
-        await waitFor(async () => {
-          await expect(findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
+        await waitFor(() => {
+          expect(getAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
         });
         await getFirstCard(user, renderResult, {
           showActions: true,
@@ -177,10 +177,10 @@ describe('When on the host isolation exceptions page', () => {
 
       it('should allow Delete action', async () => {
         const { apiMocks, renderResult, user } = prepareTest();
-        const { findAllByTestId, getByTestId } = await renderResult;
+        const { getAllByTestId, getByTestId } = await renderResult;
 
-        await waitFor(async () => {
-          await expect(findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
+        await waitFor(() => {
+          expect(getAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
         });
         await getFirstCard(user, renderResult, {
           showActions: true,

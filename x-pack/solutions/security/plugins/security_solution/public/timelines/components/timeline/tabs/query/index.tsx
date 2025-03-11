@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -41,7 +41,6 @@ import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
-
 import type { TimelineModel } from '../../../../store/model';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { isTimerangeSame } from '../shared/utils';
@@ -199,8 +198,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       itemsPerPage * pageIndex,
       itemsPerPage * (pageIndex + 1)
     );
-
-    loadNotesOnEventsLoad(eventsOnCurrentPage);
+    if (eventsOnCurrentPage.length > 0) {
+      loadNotesOnEventsLoad(eventsOnCurrentPage);
+    }
   }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
 
   /**
@@ -281,10 +281,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   );
 
   const leadingControlColumns = useTimelineControlColumn({
-    columns,
-    sort,
     timelineId,
-    activeTab: TimelineTabs.query,
     refetch,
     events,
     pinnedEventIds,

@@ -16,8 +16,10 @@ import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -135,6 +137,38 @@ describe('Timeline', () => {
       );
       expect(screen.queryByTestId(analyzerTabSubj)).not.toBeInTheDocument();
       expect(screen.queryByTestId(sessionViewTabSubj)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('privileges', () => {
+    it('should show notes and pinned tabs for users with the required privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: true },
+        notesPrivileges: { read: true },
+      });
+
+      render(
+        <TestProviders>
+          <TabsContent {...defaultProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('timelineTabs-notes')).not.toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).not.toBeDisabled();
+    });
+
+    it('should not show notes and pinned tabs for users with the insufficient privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: false },
+        notesPrivileges: { read: false },
+      });
+
+      render(
+        <TestProviders>
+          <TabsContent {...defaultProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('timelineTabs-notes')).toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).toBeDisabled();
     });
   });
 });

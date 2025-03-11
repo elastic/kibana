@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NOTES_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import {
+  NOTES_PATH,
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
+  NOTES_FEATURE_ID,
+} from '../../common/constants';
 import { NOTES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
@@ -18,9 +23,10 @@ export const links: LinkItem = {
     defaultMessage:
       'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
   }),
-  capabilities: [`${SERVER_APP_ID}.show`],
+  // It only makes sense to show this link when the user is also granted access to security solution
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${NOTES_FEATURE_ID}.read`]],
   landingIcon: 'filebeatApp',
   skipUrlState: true,
-  hideTimeline: true,
+  hideTimeline: false,
   hideWhenExperimentalKey: 'securitySolutionNotesDisabled',
 };

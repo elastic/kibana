@@ -10,6 +10,7 @@ import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { parse } from 'query-string';
 
 import {
   EuiInMemoryTable,
@@ -40,7 +41,7 @@ export interface Props {
   isLoading: boolean;
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
-  onDeletePipelineClick: (pipelineName: string[]) => void;
+  onDeletePipelineClick: (pipelineName: Pipeline[]) => void;
 }
 
 export const deprecatedPipelineBadge = {
@@ -124,7 +125,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
     initialSort: { field: 'name', direction: 'asc' },
     pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
-
   const filteredPipelines = useMemo(() => {
     // Filter pipelines list by whatever the user entered in the search bar
     const pipelinesAfterSearch = (pipelines || []).filter((pipeline) => {
@@ -152,7 +152,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
       deprecated,
       managed,
     } = qs.parse(history?.location?.search || '');
-
     if (searchQuery) {
       setQueryText(searchQuery as string);
     }
@@ -172,12 +171,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
     const isDefaultFilters = isDefaultFilterOptions(serializedFilterOptions);
     const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
 
-    // When the default filters are set, clear them up from the url
-    if (isDefaultFilterConfiguration) {
-      history.push('');
-    } else {
-      // Otherwise, we can go ahead and update the query params with whatever
-      // the user has set.
+    if (!isDefaultFilterConfiguration) {
+      const { pipeline } = parse(location.search.substring(1));
       history.push({
         pathname: '',
         search:
@@ -186,6 +181,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
             {
               ...(!isQueryEmpty ? { queryText } : {}),
               ...(!isDefaultFilters ? serializedFilterOptions : {}),
+              ...(pipeline ? { pipeline } : {}),
             },
             { strict: false, arrayFormat: 'index' }
           ),
@@ -246,7 +242,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         selection.length > 0 ? (
           <EuiButton
             data-test-subj="deletePipelinesButton"
-            onClick={() => onDeletePipelineClick(selection.map((pipeline) => pipeline.name))}
+            onClick={() => onDeletePipelineClick(selection)}
             color="danger"
           >
             <FormattedMessage
@@ -423,7 +419,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
             type: 'icon',
             icon: 'trash',
             color: 'danger',
-            onClick: ({ name }) => onDeletePipelineClick([name]),
+            onClick: (pipeline) => onDeletePipelineClick([pipeline]),
           },
         ],
       },

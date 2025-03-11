@@ -9,19 +9,23 @@
 
 import { render } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
+import { apm } from '@elastic/apm-rum';
 
-import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import { KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorService } from '../services/error_service';
+import { KibanaErrorBoundary } from './error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
+
+jest.mock('@elastic/apm-rum');
 
 describe('<KibanaErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     services = getServicesMock();
+    (apm.captureError as jest.Mock).mockClear();
   });
 
   const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
@@ -48,8 +52,8 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText(strings.recoverable.callout.title())).toBeVisible();
-    expect(await findByText(strings.recoverable.callout.pageReloadButton())).toBeVisible();
+    expect(await findByText(strings.page.callout.recoverable.title())).toBeVisible();
+    expect(await findByText(strings.page.callout.recoverable.pageReloadButton())).toBeVisible();
 
     (await findByTestId('errorBoundaryRecoverablePromptReloadBtn')).click();
 
@@ -66,10 +70,10 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText(strings.fatal.callout.title())).toBeVisible();
-    expect(await findByText(strings.fatal.callout.body())).toBeVisible();
-    expect(await findByText(strings.fatal.callout.showDetailsButton())).toBeVisible();
-    expect(await findByText(strings.fatal.callout.pageReloadButton())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.title())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.body())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.showDetailsButton())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.pageReloadButton())).toBeVisible();
 
     (await findByTestId('errorBoundaryFatalPromptReloadBtn')).click();
 
@@ -92,7 +96,7 @@ describe('<KibanaErrorBoundary>', () => {
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'BadComponent',
-      error_message: 'Error: This is an error to show the test user!',
+      error_message: 'FatalReactError: This is an error to show the test user!',
     });
   });
 
@@ -114,8 +118,30 @@ describe('<KibanaErrorBoundary>', () => {
     ).toBe(true);
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack.startsWith(
-        'Error: This is an error to show the test user!'
+        'FatalReactError: This is an error to show the test user!'
       )
     ).toBe(true);
+  });
+
+  it('integrates with apm to capture the error', async () => {
+    const { findByTestId } = render(
+      <Template>
+        <BadComponent />
+      </Template>
+    );
+    (await findByTestId('clickForErrorBtn')).click();
+
+    expect(apm.captureError).toHaveBeenCalledTimes(1);
+    expect(apm.captureError).toHaveBeenCalledWith(
+      new Error('This is an error to show the test user!')
+    );
+    expect(Object.keys((apm.captureError as jest.Mock).mock.calls[0][0])).toEqual([
+      'react_error_type',
+      'original_name',
+      'name',
+    ]);
+    expect((apm.captureError as jest.Mock).mock.calls[0][0].react_error_type).toEqual(
+      'fatal-error-react'
+    );
   });
 });

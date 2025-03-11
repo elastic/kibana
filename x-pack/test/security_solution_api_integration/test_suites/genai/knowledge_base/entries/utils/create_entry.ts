@@ -9,6 +9,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
@@ -42,7 +43,7 @@ export const createEntry = async ({
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
     .send(entry)
     .expect(expectedHttpCode);
 
@@ -78,7 +79,7 @@ export const createEntryForUser = async ({
     .post(route)
     .auth(user.username, user.password)
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
     .send(entry)
     .expect(expectedHttpCode);
 

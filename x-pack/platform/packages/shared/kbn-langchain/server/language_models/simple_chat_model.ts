@@ -18,6 +18,7 @@ import { get } from 'lodash/fp';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { parseGeminiStreamAsAsyncIterator, parseGeminiStream } from '../utils/gemini';
 import { parseBedrockStreamAsAsyncIterator, parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
@@ -37,6 +38,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   temperature?: number;
   streaming: boolean;
   maxTokens?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 function _formatMessages(messages: BaseMessage[]) {
@@ -62,6 +64,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   streaming: boolean;
   model?: string;
   temperature?: number;
+  telemetryMetadata?: TelemetryMetadata;
 
   constructor({
     actionsClient,
@@ -73,6 +76,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     signal,
     streaming,
     maxTokens,
+    telemetryMetadata,
   }: CustomChatModelInput) {
     super({});
 
@@ -86,6 +90,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.model = model;
     this.temperature = temperature;
     this.streaming = streaming;
+    this.telemetryMetadata = telemetryMetadata;
   }
 
   _llmType() {
@@ -119,6 +124,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
+          telemetryMetadata: {
+            pluginId: this.telemetryMetadata?.pluginId,
+            aggregateBy: this.telemetryMetadata?.aggregateBy,
+          },
           ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },
@@ -214,6 +223,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
+          telemetryMetadata: {
+            pluginId: this.telemetryMetadata?.pluginId,
+            aggregateBy: this.telemetryMetadata?.aggregateBy,
+          },
           ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { DiscoverServices } from '../build_services';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import type { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -41,13 +42,13 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
-import { SearchSourceDependencies } from '@kbn/data-plugin/common';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { urlTrackerMock } from './url_tracker.mock';
+import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 import { DiscoverEBTManager } from '../services/discover_ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
+import { createUrlTrackerMock } from './url_tracker.mock';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -174,10 +175,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     docLinks: docLinksServiceMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     capabilities: {
-      visualize: {
+      visualize_v2: {
         show: true,
       },
-      discover: {
+      discover_v2: {
         save: false,
       },
       advancedSettings: {
@@ -247,7 +248,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
-    urlTracker: urlTrackerMock,
+    urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),

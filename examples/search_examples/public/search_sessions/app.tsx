@@ -707,10 +707,8 @@ function doSearch(
   const req = {
     params: {
       index: dataView.title,
-      body: {
-        aggs: aggsDsl,
-        query,
-      },
+      aggs: aggsDsl,
+      query,
     },
   };
 

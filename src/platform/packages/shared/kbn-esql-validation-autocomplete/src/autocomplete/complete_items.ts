@@ -9,35 +9,91 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ItemKind, SuggestionRawDefinition } from './types';
-import { builtinFunctions } from '../definitions/builtin';
-import {
-  getOperatorSuggestion,
-  getSuggestionCommandDefinition,
-  TRIGGER_SUGGESTION_COMMAND,
-} from './factories';
-import { CommandDefinition } from '../definitions/types';
+import { operatorsDefinitions } from '../definitions/all_operators';
+import { getOperatorSuggestion, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
+import { getCommandDefinition } from '../shared/helpers';
+import { getCommandSignature } from '../definitions/helpers';
+import { buildDocumentation } from './documentation_util';
+
+const techPreviewLabel = i18n.translate(
+  'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
+  {
+    defaultMessage: `Technical Preview`,
+  }
+);
 
 export function getAssignmentDefinitionCompletitionItem() {
-  const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
+  const assignFn = operatorsDefinitions.find(({ name }) => name === '=')!;
   return getOperatorSuggestion(assignFn);
 }
 
 export const getCommandAutocompleteDefinitions = (
   commands: Array<CommandDefinition<string>>
-): SuggestionRawDefinition[] =>
-  commands.filter(({ hidden }) => !hidden).map(getSuggestionCommandDefinition);
+): SuggestionRawDefinition[] => {
+  const suggestions: SuggestionRawDefinition[] = [];
+
+  for (const command of commands) {
+    if (command.hidden) {
+      continue;
+    }
+
+    const commandDefinition = getCommandDefinition(command.name);
+    const label = commandDefinition.name.toUpperCase();
+    const text = commandDefinition.signature.params.length
+      ? `${commandDefinition.name.toUpperCase()} $0`
+      : commandDefinition.name.toUpperCase();
+    const types: CommandTypeDefinition[] = command.types ?? [
+      {
+        name: '',
+        description: '',
+      },
+    ];
+
+    for (const type of types) {
+      let detail = type.description || commandDefinition.description;
+      if (commandDefinition.preview) {
+        detail = `[${techPreviewLabel}] ${detail}`;
+      }
+      const commandSignature = getCommandSignature(commandDefinition, type.name);
+      const suggestion: SuggestionRawDefinition = {
+        label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
+        text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
+        asSnippet: true,
+        kind: 'Method',
+        detail,
+        documentation: {
+          value: buildDocumentation(commandSignature.declaration, commandSignature.examples),
+        },
+        sortText: 'A-' + label + '-' + type.name,
+        command: TRIGGER_SUGGESTION_COMMAND,
+      };
+
+      suggestions.push(suggestion);
+    }
+  }
+
+  return suggestions;
+};
 
 function buildCharCompleteItem(
   label: string,
   detail: string,
-  { sortText, quoted }: { sortText?: string; quoted: boolean } = { quoted: false }
+  {
+    sortText,
+    quoted,
+    advanceCursorAndOpenSuggestions,
+  }: { sortText?: string; quoted: boolean; advanceCursorAndOpenSuggestions?: boolean } = {
+    quoted: false,
+  }
 ): SuggestionRawDefinition {
   return {
     label,
-    text: quoted ? `"${label}"` : label,
+    text: (quoted ? `"${label}"` : label) + (advanceCursorAndOpenSuggestions ? ' ' : ''),
     kind: 'Keyword',
     detail,
     sortText,
+    command: advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   };
 }
 export const pipeCompleteItem: SuggestionRawDefinition = {
@@ -64,14 +120,14 @@ export const colonCompleteItem = buildCharCompleteItem(
   i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.colonDoc', {
     defaultMessage: 'Colon (:)',
   }),
-  { sortText: 'A', quoted: true }
+  { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
 );
 export const semiColonCompleteItem = buildCharCompleteItem(
   ';',
   i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.semiColonDoc', {
     defaultMessage: 'Semi colon (;)',
   }),
-  { sortText: 'A', quoted: true }
+  { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
 );
 
 export const listCompleteItem: SuggestionRawDefinition = {

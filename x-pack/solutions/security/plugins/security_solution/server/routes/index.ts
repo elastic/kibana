@@ -53,6 +53,7 @@ import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
+import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -75,7 +76,7 @@ export const initRoutes = (
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router, config);
+  registerPrebuiltRulesRoutes(router);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -138,4 +139,6 @@ export const initRoutes = (
   getFleetManagedIndexTemplatesRoute(router);
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
+
+  registerAssetInventoryRoutes({ router, config, logger, getStartServices });
 };

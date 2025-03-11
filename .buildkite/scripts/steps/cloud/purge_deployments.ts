@@ -11,20 +11,27 @@ import { execSync } from 'child_process';
 import { getKibanaDir } from '#pipeline-utils';
 
 const deploymentsListJson = execSync('ecctl deployment list --output json').toString();
-const { deployments } = JSON.parse(deploymentsListJson);
+const { deployments } = JSON.parse(deploymentsListJson) as {
+  deployments: Array<{ name: string; id: string }>;
+};
 
-const prDeployments = deployments.filter((deployment: any) =>
-  deployment.name.startsWith('kibana-pr-')
-);
+const prDeployments = deployments.filter((deployment) => deployment.name.startsWith('kibana-pr-'));
 
-const deploymentsToPurge = [];
+const deploymentsToPurge: typeof deployments = [];
 
 const NOW = new Date().getTime() / 1000;
 const DAY_IN_SECONDS = 60 * 60 * 24;
+const CLOUD_DELETE_ON_ERROR = process.env.CLOUD_DELETE_ON_ERROR?.match(/^(true|1)$/i);
 
 for (const deployment of prDeployments) {
   try {
-    const prNumber = deployment.name.match(/^kibana-pr-([0-9]+)$/)[1];
+    const prNumber: string | undefined = deployment.name.match(/^kibana-pr-([0-9]+)$/)?.[1];
+    if (!prNumber) {
+      throw new Error(
+        `Invalid deployment name: ${deployment.name}; expected kibana-pr-{PR_NUMBER}).`
+      );
+    }
+
     const prJson = execSync(`gh pr view '${prNumber}' --json state,labels,updatedAt`).toString();
     const pullRequest = JSON.parse(prJson);
     const prOpen = pullRequest.state === 'OPEN';
@@ -59,9 +66,13 @@ for (const deployment of prDeployments) {
       deploymentsToPurge.push(deployment);
     }
   } catch (ex) {
+    console.error(`Error deleting deployment (${deployment.id}; ${deployment.name})`);
     console.error(ex.toString());
-    // deploymentsToPurge.push(deployment); // TODO should we delete on error?
-    process.exitCode = 1;
+    if (CLOUD_DELETE_ON_ERROR) {
+      deploymentsToPurge.push(deployment);
+    } else {
+      process.exitCode = 1;
+    }
   }
 }
 

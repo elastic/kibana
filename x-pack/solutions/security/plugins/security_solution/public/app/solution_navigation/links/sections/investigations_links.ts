@@ -7,7 +7,7 @@
 
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
 import { INVESTIGATIONS_PATH } from '../../../../../common/constants';
-import { SERVER_APP_ID } from '../../../../../common';
+import { SECURITY_FEATURE_ID } from '../../../../../common';
 import type { LinkItem } from '../../../../common/links/types';
 import type { SolutionNavLink } from '../../../../common/links';
 import { IconOsqueryLazy, IconTimelineLazy } from './lazy_icons';
@@ -18,7 +18,7 @@ const investigationsAppLink: LinkItem = {
   id: SecurityPageName.investigations,
   title: i18n.INVESTIGATIONS_TITLE,
   path: INVESTIGATIONS_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   hideTimeline: true,
   skipUrlState: true,
   links: [], // timeline and note links are added via the methods below

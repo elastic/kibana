@@ -1240,32 +1240,12 @@
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/types.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
             "plugin": "upgradeAssistant",
             "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
           },
           {
             "plugin": "upgradeAssistant",
             "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -1372,16 +1352,16 @@
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1466,56 +1446,40 @@
             "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           }
         ],
         "initialIsOpen": false
@@ -2023,24 +1987,24 @@
             "path": "x-pack/platform/plugins/private/graph/public/types/persistence.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
             "plugin": "streamsApp",
-            "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
-            "plugin": "streamsApp",
-            "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
           },
           {
             "plugin": "dashboard",
@@ -2228,50 +2192,6 @@
           },
           {
             "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/components/connected/tag_list.tsx"
           },
           {
@@ -2311,6 +2231,14 @@
             "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
+          },
+          {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },
@@ -2377,6 +2305,18 @@
           {
             "plugin": "controls",
             "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
           },
           {
             "plugin": "canvas",
@@ -2441,26 +2381,6 @@
           {
             "plugin": "uiActionsEnhanced",
             "path": "src/platform/plugins/shared/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "savedObjectsTagging",

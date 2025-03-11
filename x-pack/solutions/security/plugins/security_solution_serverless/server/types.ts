@@ -21,7 +21,7 @@ import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
-import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant-plugin/server';
+import type { AutomaticImportPluginSetup } from '@kbn/automatic-import-plugin/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -41,7 +41,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
   actions: ActionsPluginSetupContract;
-  integrationAssistant?: IntegrationAssistantPluginSetup;
+  automaticImport?: AutomaticImportPluginSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
@@ -77,6 +77,11 @@ export interface UsageSource {
 
 export type Tier = ProductTier | 'none';
 
+export interface BackfillConfig {
+  enabled: boolean;
+  maxRecords?: number;
+}
+
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
@@ -88,6 +93,7 @@ export interface SecurityUsageReportingTaskSetupContract {
   version: string;
   meteringCallback: MeteringCallback;
   usageReportingService: UsageReportingService;
+  backfillConfig?: BackfillConfig;
 }
 
 export interface SecurityUsageReportingTaskStartContract {

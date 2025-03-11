@@ -39,10 +39,4 @@ export {
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
-export {
-  apiHasSerializableState,
-  type HasSerializableState,
-  type HasSnapshottableState,
-  type SerializedPanelState,
-} from './interfaces/serialized_state';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';

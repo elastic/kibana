@@ -201,6 +201,19 @@
             "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.localShipper",
+            "type": "boolean",
+            "tags": [],
+            "label": "localShipper",
+            "description": [
+              "Should use the local EBT shipper to persist events in the local ES"
+            ],
+            "path": "src/platform/plugins/shared/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -790,7 +803,7 @@
           "id": "def-server.TelemetryPluginStart.getIsOptedIn",
           "type": "Function",
           "tags": [
-            "track-adoption"
+            "deprecated"
           ],
           "label": "getIsOptedIn",
           "description": [
@@ -800,16 +813,16 @@
             "() => Promise<boolean>"
           ],
           "path": "src/platform/plugins/shared/telemetry/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": true,
+          "deprecated": true,
+          "trackAdoption": false,
           "references": [
-            {
-              "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.ts"
-            },
             {
               "plugin": "datasetQuality",
               "path": "x-pack/platform/plugins/shared/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.ts"
             },
             {
               "plugin": "securitySolution",
@@ -846,6 +859,51 @@
           ],
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "telemetry",
+          "id": "def-server.TelemetryPluginStart.isOptedIn$",
+          "type": "Object",
+          "tags": [
+            "track-adoption"
+          ],
+          "label": "isOptedIn$",
+          "description": [
+            "\nAn Observable object that can be subscribed to for changes in global telemetry config.\n\nPushes `true` when sending usage to Elastic is enabled.\nPushes `false` when the user explicitly opts out of sending usage data to Elastic.\n\nAdditionally, pushes the actual value on Kibana startup, except if the (previously opted-out) user\nhaven't chosen yet to opt-in or out after a minor or major upgrade. In that case, pushing the new\nvalue waits until the user decides.\n"
+          ],
+          "signature": [
+            "Observable",
+            "<boolean>"
+          ],
+          "path": "src/platform/plugins/shared/telemetry/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": true,
+          "references": [
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/solutions/observability/plugins/synthetics/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.test.ts"
+            }
+          ]
         }
       ],
       "lifecycle": "start",

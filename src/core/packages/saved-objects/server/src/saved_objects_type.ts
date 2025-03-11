@@ -31,6 +31,10 @@ export interface SavedObjectsType<Attributes = any> {
    */
   name: string;
   /**
+   * The attribute path to the saved object's name
+   */
+  nameAttribute?: string;
+  /**
    * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
    * declared as an `extraType` when creating the repository.
    * It is recommended to hide the type for better backward compatibility.
@@ -239,6 +243,12 @@ export interface SavedObjectsType<Attributes = any> {
    *          allowing types owners to switch their types before the milestone (and for testing purposes).
    */
   switchToModelVersionAt?: string;
+
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
+  getTitle?: (savedObject: Attributes) => string;
 }
 
 /**

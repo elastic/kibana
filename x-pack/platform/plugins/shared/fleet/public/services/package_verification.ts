@@ -11,8 +11,6 @@ import type { PackageInfo, PackageListItem } from '../types';
 
 import type { RequestError } from '../hooks';
 
-import { ExperimentalFeaturesService } from '.';
-
 export function isPackageUnverified(
   pkg: PackageInfo | PackageListItem,
   packageVerificationKeyId?: string
@@ -22,11 +20,10 @@ export function isPackageUnverified(
   const { verification_status: verificationStatus, verification_key_id: verificationKeyId } =
     pkg?.installationInfo;
 
-  const { packageVerification: isPackageVerificationEnabled } = ExperimentalFeaturesService.get();
   const isKeyOutdated = !!verificationKeyId && verificationKeyId !== packageVerificationKeyId;
   const isUnverified =
     verificationStatus === 'unverified' || (verificationStatus === 'verified' && isKeyOutdated);
-  return isPackageVerificationEnabled && isUnverified;
+  return isUnverified;
 }
 
 export const isVerificationError = (err?: FleetErrorResponse | RequestError) =>

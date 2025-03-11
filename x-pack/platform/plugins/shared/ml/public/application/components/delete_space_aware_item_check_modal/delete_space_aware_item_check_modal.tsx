@@ -229,6 +229,7 @@ interface Props {
   ids: string[];
   setDidUntag?: React.Dispatch<React.SetStateAction<boolean>>;
   hasManagedJob?: boolean;
+  onUntagCallback?: () => void;
 }
 
 export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
@@ -239,6 +240,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   ids,
   setDidUntag,
   hasManagedJob,
+  onUntagCallback,
 }) => {
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
@@ -316,6 +318,9 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
     onCloseCallback();
     if (typeof refreshJobsCallback === 'function') {
       refreshJobsCallback();
+    }
+    if (typeof onUntagCallback === 'function') {
+      onUntagCallback();
     }
   };
 

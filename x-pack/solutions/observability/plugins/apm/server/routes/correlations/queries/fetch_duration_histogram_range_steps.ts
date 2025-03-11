@@ -73,20 +73,18 @@ export const fetchDurationHistogramRangeSteps = async ({
     apm: {
       events: [getEventType(chartType, searchMetrics)],
     },
-    body: {
-      track_total_hits: 1,
-      size: 0,
-      query: getCommonCorrelationsQuery({
-        start,
-        end,
-        environment,
-        kuery,
-        query: filteredQuery,
-      }),
-      aggs: {
-        duration_min: { min: { field: durationField } },
-        duration_max: { max: { field: durationField } },
-      },
+    track_total_hits: 1,
+    size: 0,
+    query: getCommonCorrelationsQuery({
+      start,
+      end,
+      environment,
+      kuery,
+      query: filteredQuery,
+    }),
+    aggs: {
+      duration_min: { min: { field: durationField } },
+      duration_max: { max: { field: durationField } },
     },
   });
 

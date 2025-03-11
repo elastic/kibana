@@ -18,11 +18,53 @@ export interface SecuritySolutionServerlessSearch extends Omit<SearchSecureServi
 export interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
   createSuperTest: (role?: string) => Promise<TestAgent<any>>;
+  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
   createSearch: (role?: string) => Promise<SecuritySolutionServerlessSearch>;
+  cleanUpCustomRole: () => Promise<void>;
+}
+
+interface FeaturesPrivileges {
+  [featureId: string]: string[];
+}
+
+interface ElasticsearchIndices {
+  names: string[];
+  privileges: string[];
+}
+
+export interface Role {
+  name: string;
+  privileges: {
+    elasticsearch: ElasticSearchPrivilege;
+    kibana: KibanaPrivilege[];
+  };
+}
+export interface ElasticSearchPrivilege {
+  cluster?: string[];
+  indices?: ElasticsearchIndices[];
+}
+
+export interface KibanaPrivilege {
+  spaces: string[];
+  base?: string[];
+  feature?: FeaturesPrivileges;
+}
+
+export interface User {
+  username: string;
+  password: string;
+  description?: string;
+  roles: string[];
 }
 
 export interface SecuritySolutionESSUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
   createSearch: (role?: string) => Promise<SearchService>;
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
+  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
+  cleanUpCustomRole: () => Promise<void>;
+  createUser: (user: User) => Promise<any>;
+  deleteUsers: (userNames: string[]) => Promise<any>;
+  createRole: (name: string, role: Role) => Promise<any>;
+  deleteRoles: (roleNames: string[]) => Promise<any>;
 }

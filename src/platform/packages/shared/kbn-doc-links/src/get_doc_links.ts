@@ -22,7 +22,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const DOC_LINK_VERSION = meta.version;
   const ECS_VERSION = meta.ecs_version;
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
-  const DOCS_WEBSITE_URL = meta.docsWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
 
@@ -34,11 +33,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
   const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
-  const APP_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
-  const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
-  const SEARCH_UI_DOCS = `${DOCS_WEBSITE_URL}search-ui/`;
+  const SEARCH_UI_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/search-ui/current/`;
   const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
   const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
@@ -111,6 +108,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
       elasticsearchModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`,
       elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
+      kafkaOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/kafka-output.html`,
       startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
       exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
       suricataModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-suricata.html`,
@@ -120,33 +118,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
       auditdModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-auditd.html`,
       systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
-    },
-    appSearch: {
-      adaptiveRelevance: `${APP_SEARCH_DOCS}curations-guide.html#curations-reference-adaptive-relevance`,
-      apiRef: `${APP_SEARCH_DOCS}api-reference.html`,
-      apiClients: `${APP_SEARCH_DOCS}api-clients.html`,
-      apiKeys: `${APP_SEARCH_DOCS}authentication.html#authentication-api-keys`,
-      authentication: `${APP_SEARCH_DOCS}authentication.html`,
-      crawlRules: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
-      curations: `${APP_SEARCH_DOCS}curations-guide.html`,
-      duplicateDocuments: `${APP_SEARCH_DOCS}web-crawler-reference.html#web-crawler-reference-content-deduplication`,
-      elasticsearchIndexedEngines: `${APP_SEARCH_DOCS}elasticsearch-engines.html`,
-      entryPoints: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-entry-points`,
-      gettingStarted: `${APP_SEARCH_DOCS}getting-started.html`,
-      guide: `${APP_SEARCH_DOCS}index.html`,
-      indexingDocuments: `${APP_SEARCH_DOCS}indexing-documents-guide.html`,
-      indexingDocumentsSchema: `${APP_SEARCH_DOCS}indexing-documents-guide.html#indexing-documents-guide-schema`,
-      logSettings: `${APP_SEARCH_DOCS}logs.html`,
-      metaEngines: `${APP_SEARCH_DOCS}meta-engines-guide.html`,
-      precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
-      relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
-      resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
-      searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
-      security: `${APP_SEARCH_DOCS}security-and-users.html`,
-      synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
-      webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
-      webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
-      webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
     },
     enterpriseSearch: {
       aiSearchDoc: `${ESRE_DOCS}`,
@@ -201,6 +172,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
       inferenceApiCreate: `${ELASTICSEARCH_DOCS}put-inference-api.html`,
+      inferenceApisConfigureChunking: `${ELASTICSEARCH_DOCS}inference-apis.html#infer-chunking-config`,
       ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
       knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
@@ -228,41 +200,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
-    },
-    workplaceSearch: {
-      apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
-      box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
-      confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
-      confluenceCloudConnectorPackage: `${WORKPLACE_SEARCH_DOCS}confluence-cloud.html`,
-      confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
-      contentSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-content-sources.html`,
-      customConnectorPackage: `${WORKPLACE_SEARCH_DOCS}custom-connector-package.html`,
-      customSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html`,
-      customSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
-      documentPermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-sources-document-permissions.html`,
-      dropbox: `${WORKPLACE_SEARCH_DOCS}workplace-search-dropbox-connector.html`,
-      externalSharePointOnline: `${WORKPLACE_SEARCH_DOCS}sharepoint-online-external.html`,
-      externalIdentities: `${WORKPLACE_SEARCH_DOCS}workplace-search-external-identities-api.html`,
-      gatedFormBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
-      gettingStarted: `${WORKPLACE_SEARCH_DOCS}workplace-search-getting-started.html`,
-      gitHub: `${WORKPLACE_SEARCH_DOCS}workplace-search-github-connector.html`,
-      gmail: `${WORKPLACE_SEARCH_DOCS}workplace-search-gmail-connector.html`,
-      googleDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-google-drive-connector.html`,
-      indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
-      jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
-      jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
-      networkDrive: `${WORKPLACE_SEARCH_DOCS}network-drives.html`,
-      oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
-      permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html`,
-      privateSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
-      salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
-      security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
-      serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
-      sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
-      sharePointServer: `${WORKPLACE_SEARCH_DOCS}sharepoint-server.html`,
-      slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
-      synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
-      zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
     },
     metricbeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -358,11 +295,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
       restApis: `${KIBANA_DOCS}api.html`,
       dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
+      upgradeNotes: `${KIBANA_DOCS}breaking-changes-summary.html`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+      unfreezeApi: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
@@ -461,6 +400,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
       setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
       apiCompatibilityHeader: `${ELASTICSEARCH_DOCS}api-conventions.html#api-compatibility`,
+      migrationGuide: `${ELASTICSEARCH_DOCS}breaking-changes.html`,
     },
     siem: {
       guide: `${SECURITY_SOLUTION_DOCS}index.html`,
@@ -476,6 +416,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     server: {
       protocol: `${KIBANA_DOCS}settings.html#server-protocol`,
+    },
+    logging: {
+      enableDeprecationHttpDebugLogs: `${KIBANA_DOCS}logging-settings.html#enable-http-debug-logs`,
     },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
@@ -503,6 +446,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html`,
+      updatePrebuiltDetectionRules: isServerless
+        ? `${SERVERLESS_DOCS}security-prebuilt-rules-management.html#update-prebuilt-rules`
+        : `${SECURITY_SOLUTION_DOCS}prebuilt-rules-management.html#update-prebuilt-rules`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -513,6 +459,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
+      legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
+      legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -638,6 +586,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}observability-synthetics-get-started-project.html`
         : `${OBSERVABILITY_DOCS}synthetic-run-tests.html#synthetic-monitor-choose-project`,
       syntheticsMigrateFromIntegration: `${OBSERVABILITY_DOCS}synthetics-migrate-from-integration.html`,
+      slo: isServerless
+        ? `${SERVERLESS_DOCS}observability-slos.html`
+        : `${OBSERVABILITY_DOCS}slo.html`,
       sloBurnRateRule: isServerless
         ? `${SERVERLESS_DOCS}observability-create-slo-burn-rate-alert-rule.html`
         : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
@@ -731,6 +682,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
       deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
+      enableElasticSearchSecurityFeatures: `${ELASTICSEARCH_DOCS}security-minimal-setup.html#_enable_elasticsearch_security_features`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
@@ -894,7 +846,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
       elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
       policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
-      remoteESOoutput: `${FLEET_DOCS}monitor-elastic-agent.html#external-elasticsearch-monitoring`,
+      remoteESOoutput: `${FLEET_DOCS}remote-elasticsearch-output.html`,
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,

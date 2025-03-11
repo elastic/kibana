@@ -161,6 +161,7 @@ async function refreshFieldsInDocs(
     // @ts-expect-error @elastic/elasticsearch _source is not in the type!
     const freshDoc = freshResponse._source;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const conflictDoc = conflictRequest.doc as Record<string, any>;
     if (!freshDoc || !conflictDoc) continue;
 

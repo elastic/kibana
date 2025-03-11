@@ -39,22 +39,26 @@ describe('Mobile transactions page', () => {
       synthtrace.clean();
     });
 
-    describe('when click on tab shows correct table', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/207040
+    describe.skip('when click on tab shows correct table', () => {
       it('shows version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmAppVersionTab').click().should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmAppVersionTab').click();
+        cy.getByTestSubj('apmAppVersionTab').should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=app_version_tab');
       });
 
       it('shows OS version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmOsVersionTab').click().should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmOsVersionTab').click();
+        cy.getByTestSubj('apmOsVersionTab').should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=os_version_tab');
       });
 
       it('shows devices tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmDevicesTab').click().should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmDevicesTab').click();
+        cy.getByTestSubj('apmDevicesTab').should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=devices_tab');
       });
     });

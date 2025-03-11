@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_presentation_panel.scss';
-
 import { EuiErrorBoundary, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import { isPromise } from '@kbn/std';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
-import { getErrorLoadingPanel } from './presentation_panel_strings';
+import { usePanelErrorCss } from './use_panel_error_css';
+
+const errorLoadingPanel = i18n.translate('presentationPanel.error.errorWhenLoadingPanel', {
+  defaultMessage: 'An error occurred while loading this panel.',
+});
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -27,6 +30,7 @@ export const PresentationPanel = <
     hidePanelChrome?: boolean;
   }
 ) => {
+  const panelErrorCss = usePanelErrorCss();
   const { Component, hidePanelChrome, ...passThroughProps } = props;
   const { euiTheme } = useEuiTheme();
   const { loading, value } = useAsync(async () => {
@@ -88,14 +92,15 @@ export const PresentationPanel = <
     return (
       <EuiFlexGroup
         alignItems="center"
-        className="eui-fullHeight embPanel__error"
+        css={panelErrorCss}
+        className="eui-fullHeight"
         data-test-subj="embeddableError"
         justifyContent="center"
       >
         {PanelError ? (
-          <PanelError error={new Error(value?.loadErrorReason ?? getErrorLoadingPanel())} />
+          <PanelError error={new Error(value?.loadErrorReason ?? errorLoadingPanel)} />
         ) : (
-          value?.loadErrorReason ?? getErrorLoadingPanel()
+          value?.loadErrorReason ?? errorLoadingPanel
         )}
       </EuiFlexGroup>
     );

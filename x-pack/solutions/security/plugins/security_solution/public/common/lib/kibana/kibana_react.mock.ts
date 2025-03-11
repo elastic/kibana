@@ -32,7 +32,7 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -58,6 +58,7 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
+import { createSiemMigrationsMock } from '../../mock/mock_siem_migrations_service';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -128,6 +129,7 @@ export const createStartServicesMock = (
   const mockSetHeaderActionMenu = jest.fn();
   const timelineDataService = dataPluginMock.createStartContract();
   const alerting = alertingPluginMock.createStartContract();
+  const siemMigrations = createSiemMigrationsMock();
 
   /*
    * Below mocks are needed by unified field list
@@ -201,9 +203,17 @@ export const createStartServicesMock = (
       ...core.application,
       capabilities: {
         ...core.application.capabilities,
-        [SERVER_APP_ID]: {
+        [SECURITY_FEATURE_ID]: {
           crud: true,
           read: true,
+        },
+        securitySolutionTimeline: {
+          crud: true,
+          read: true,
+        },
+        savedQueryManagement: {
+          showQueries: true,
+          saveQuery: true,
         },
       },
     },
@@ -250,6 +260,7 @@ export const createStartServicesMock = (
     upselling: new UpsellingService(),
     timelineDataService,
     alerting,
+    siemMigrations,
   } as unknown as StartServices;
 };
 

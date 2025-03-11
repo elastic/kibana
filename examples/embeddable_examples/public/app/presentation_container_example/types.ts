@@ -13,7 +13,6 @@ import {
   HasSerializedChildState,
   HasRuntimeChildState,
   PresentationContainer,
-  SerializedPanelState,
   HasSaveNotification,
 } from '@kbn/presentation-containers';
 import {
@@ -21,6 +20,7 @@ import {
   PublishesDataLoading,
   PublishesTimeRange,
   PublishesUnsavedChanges,
+  SerializedPanelState,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';

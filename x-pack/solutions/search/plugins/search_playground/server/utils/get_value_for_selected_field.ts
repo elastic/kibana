@@ -14,11 +14,8 @@ export const getValueForSelectedField = (hit: SearchHit, path: string): string =
   }
 
   // for semantic_text matches
-  const innerHitPath = `${hit._index}.${path}`;
-  if (!!hit.inner_hits?.[innerHitPath]) {
-    return hit.inner_hits[innerHitPath].hits.hits
-      .map((innerHit) => innerHit._source.text)
-      .join('\n --- \n');
+  if (hit.highlight && hit.highlight[path]) {
+    return hit.highlight[path].flat().join('\n --- \n');
   }
 
   return has(hit._source, `${path}.text`)

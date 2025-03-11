@@ -6,10 +6,10 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import {
+  API_VERSIONS,
   DEFEND_INSIGHTS,
   type DefendInsightsResponse,
   DefendInsightStatusEnum,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { useEffect, useRef } from 'react';
 import { WORKFLOW_INSIGHTS } from '../../translations';
@@ -19,12 +19,14 @@ interface UseFetchOngoingScansConfig {
   isPolling: boolean;
   endpointId: string;
   onSuccess: () => void;
+  onInsightGenerationFailure: () => void;
 }
 
 export const useFetchOngoingScans = ({
   isPolling,
   endpointId,
   onSuccess,
+  onInsightGenerationFailure,
 }: UseFetchOngoingScansConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
@@ -45,12 +47,23 @@ export const useFetchOngoingScans = ({
     async () => {
       try {
         const response = await http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
-          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          version: API_VERSIONS.internal.v1,
           query: {
             status: DefendInsightStatusEnum.running,
             endpoint_ids: [endpointId],
           },
         });
+        if (response.data.length) {
+          const failedInsight = response.data.find((insight) => insight.status === 'failed');
+
+          if (failedInsight) {
+            toasts.addDanger({
+              title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
+              text: failedInsight.failureReason,
+            });
+            onInsightGenerationFailure();
+          }
+        }
         return response.data;
       } catch (error) {
         toasts.addDanger({

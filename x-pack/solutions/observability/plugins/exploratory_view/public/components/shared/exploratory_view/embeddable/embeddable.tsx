@@ -15,9 +15,8 @@ import {
   LensPublicStart,
   XYState,
 } from '@kbn/lens-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useEBTTelemetry } from '../hooks/use_ebt_telemetry';
@@ -211,7 +210,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
         extraActions={actions}
-        viewMode={ViewMode.VIEW}
+        viewMode={'view'}
         searchSessionId={searchSessionId}
         onLoad={(loading, inspectorAdapters) => {
           reportEvent(inspectorAdapters);
@@ -247,6 +246,7 @@ const Wrapper = styled.div<{
 }>`
   height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `100%;`)};
   position: relative;
+  min-width: 80px;
   &&& {
     > :nth-child(2) {
       height: ${(props) =>
@@ -266,16 +266,16 @@ const Wrapper = styled.div<{
             : 'center;'};
       }
       justify-content: flex-end;
-      .legacyMtrVis__container {
+      &__container {
         padding: 0;
-        > :nth-child(2) {
+        [data-test-subj='metric_label'] {
           ${({ noLabel }) =>
             noLabel &&
             ` display: none;
         `}
         }
       }
-      .legacyMtrVis__value {
+      &__value {
         line-height: ${({ lineHeight }) => lineHeight}px !important;
         font-size: ${({ fontSize }) => fontSize}px !important;
       }

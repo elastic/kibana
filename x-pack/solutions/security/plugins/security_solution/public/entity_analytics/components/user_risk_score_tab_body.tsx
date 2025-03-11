@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
 import { EuiPanel } from '@elastic/eui';
+import { EMPTY_SEVERITY_COUNT, EntityType } from '../../../common/search_strategy';
 import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../api/hooks/use_risk_score';
 import { UserRiskScoreQueryId } from '../common/utils';
@@ -20,7 +21,6 @@ import type { State } from '../../common/store';
 import { UserRiskScoreTable } from './user_risk_score_table';
 import { usersSelectors } from '../../explore/users/store';
 import { useQueryToggle } from '../../common/containers/query_toggle';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../common/search_strategy';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
 import { useUpsellingComponent } from '../../common/hooks/use_upselling';
@@ -64,13 +64,13 @@ export const UserRiskScoreQueryTabBody = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const privileges = useMissingRiskEnginePrivileges();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
     useRiskScore({
       filterQuery,
       pagination,
-      riskEntity: RiskScoreEntity.user,
+      riskEntity: EntityType.user,
       skip: querySkip,
       sort,
       timerange,
@@ -78,7 +78,7 @@ export const UserRiskScoreQueryTabBody = ({
 
   const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
     skip: querySkip,
   });
 
@@ -100,7 +100,7 @@ export const UserRiskScoreQueryTabBody = ({
   if (isDisabled) {
     return (
       <EuiPanel hasBorder>
-        <EnableRiskScore isDisabled={isDisabled} entityType={RiskScoreEntity.host} />
+        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.host} />
       </EuiPanel>
     );
   }
@@ -111,7 +111,7 @@ export const UserRiskScoreQueryTabBody = ({
     data &&
     data.length === 0
   ) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
+    return <RiskScoresNoDataDetected entityType={EntityType.user} />;
   }
 
   return (

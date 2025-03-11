@@ -9,6 +9,7 @@ Object {
   "slo": Object {
     "budgetingMethod": "occurrences",
     "createdAt": 2024-01-01T00:00:00.000Z,
+    "createdBy": "irrelevant",
     "description": "irrelevant",
     "enabled": true,
     "groupBy": "*",
@@ -54,6 +55,7 @@ Object {
       "type": "rolling",
     },
     "updatedAt": 2024-01-01T00:00:00.000Z,
+    "updatedBy": "irrelevant",
     "version": 1,
   },
 }

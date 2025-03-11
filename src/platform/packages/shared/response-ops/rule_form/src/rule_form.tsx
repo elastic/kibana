@@ -7,32 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
+import './rule_form.scss';
+import { RuleFormScreenContextProvider } from './rule_form_screen_context';
 import {
-  RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
+  RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
-import { RuleFormPlugins } from './types';
+import { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 
 const queryClient = new QueryClient();
 
-export interface RuleFormProps {
+export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaData> {
   plugins: RuleFormPlugins;
+  id?: string;
+  ruleTypeId?: string;
+  isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  onChangeMetaData?: (metadata: MetaData) => void;
+  consumer?: string;
+  connectorFeatureId?: string;
+  multiConsumerSelection?: RuleCreationValidConsumer | null;
+  hideInterval?: boolean;
+  validConsumers?: RuleCreationValidConsumer[];
+  filteredRuleTypes?: string[];
+  shouldUseRuleProducer?: boolean;
+  canShowConsumerSelection?: boolean;
+  showMustacheAutocompleteSwitch?: boolean;
+  initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
+  initialMetadata?: MetaData;
+  isServerless?: boolean;
 }
 
-export const RuleForm = (props: RuleFormProps) => {
-  const { plugins: _plugins, onCancel, onSubmit } = props;
-  const { id, ruleTypeId } = useParams<{
-    id?: string;
-    ruleTypeId?: string;
-  }>();
+export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
+  props: RuleFormProps<MetaData>
+) => {
+  const {
+    plugins: _plugins,
+    onCancel,
+    onSubmit,
+    onChangeMetaData,
+    id,
+    ruleTypeId,
+    isFlyout,
+    consumer,
+    connectorFeatureId,
+    multiConsumerSelection,
+    hideInterval,
+    validConsumers,
+    filteredRuleTypes,
+    shouldUseRuleProducer,
+    canShowConsumerSelection,
+    showMustacheAutocompleteSwitch,
+    initialValues,
+    initialMetadata,
+    isServerless,
+  } = props;
 
   const {
     http,
@@ -49,6 +85,7 @@ export const RuleForm = (props: RuleFormProps) => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    fieldsMetadata,
   } = _plugins;
 
   const ruleFormComponent = useMemo(() => {
@@ -67,9 +104,27 @@ export const RuleForm = (props: RuleFormProps) => {
       docLinks,
       ruleTypeRegistry,
       actionTypeRegistry,
+      fieldsMetadata,
     };
+
+    // Passing the MetaData type all the way down the component hierarchy is unnecessary, this type is
+    // only used for the benefit of consumers of the RuleForm component. Retype onChangeMetaData to ignore this type.
+    const retypedOnChangeMetaData = onChangeMetaData as (metadata?: RuleTypeMetaData) => void;
+
     if (id) {
-      return <EditRuleForm id={id} plugins={plugins} onCancel={onCancel} onSubmit={onSubmit} />;
+      return (
+        <EditRuleForm
+          id={id}
+          plugins={plugins}
+          onCancel={onCancel}
+          onSubmit={onSubmit}
+          onChangeMetaData={retypedOnChangeMetaData}
+          isFlyout={isFlyout}
+          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
+          connectorFeatureId={connectorFeatureId}
+          initialMetadata={initialMetadata}
+        />
+      );
     }
     if (ruleTypeId) {
       return (
@@ -78,6 +133,20 @@ export const RuleForm = (props: RuleFormProps) => {
           plugins={plugins}
           onCancel={onCancel}
           onSubmit={onSubmit}
+          onChangeMetaData={retypedOnChangeMetaData}
+          isFlyout={isFlyout}
+          consumer={consumer}
+          connectorFeatureId={connectorFeatureId}
+          multiConsumerSelection={multiConsumerSelection}
+          hideInterval={hideInterval}
+          validConsumers={validConsumers}
+          filteredRuleTypes={filteredRuleTypes}
+          shouldUseRuleProducer={shouldUseRuleProducer}
+          canShowConsumerSelection={canShowConsumerSelection}
+          showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
+          initialValues={initialValues}
+          initialMetadata={initialMetadata}
+          isServerless={isServerless}
         />
       );
     }
@@ -108,11 +177,30 @@ export const RuleForm = (props: RuleFormProps) => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    isServerless,
     id,
     ruleTypeId,
+    validConsumers,
+    multiConsumerSelection,
     onCancel,
     onSubmit,
+    onChangeMetaData,
+    isFlyout,
+    showMustacheAutocompleteSwitch,
+    connectorFeatureId,
+    initialMetadata,
+    consumer,
+    hideInterval,
+    filteredRuleTypes,
+    shouldUseRuleProducer,
+    canShowConsumerSelection,
+    initialValues,
+    fieldsMetadata,
   ]);
 
-  return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RuleFormScreenContextProvider>{ruleFormComponent}</RuleFormScreenContextProvider>
+    </QueryClientProvider>
+  );
 };

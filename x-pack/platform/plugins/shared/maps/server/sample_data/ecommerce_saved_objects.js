@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { emsWorldLayerId } from '../../common/constants';
+import { DEFAULT_EMS_ROADMAP_DESATURATED_ID } from '@kbn/maps-ems-plugin/common';
 
 const layerList = [
   {
@@ -15,7 +16,7 @@ const layerList = [
     sourceDescriptor: {
       type: 'EMS_TMS',
       isAutoSelect: true,
-      lightModeDefault: 'road_map_desaturated',
+      lightModeDefault: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
     },
     visible: true,
     style: {},
@@ -486,7 +487,7 @@ export const getEcommerceSavedObjects = () => {
         }),
         description: '',
         mapStateJSON:
-          '{"zoom":2.11,"center":{"lon":-15.07605,"lat":45.88578},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"}}',
+          '{"zoom":2.11,"center":{"lon":-15.07605,"lat":45.88578},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"},"settings":{"projection":"globeInterpolate"}}',
         layerListJSON: JSON.stringify(layerList),
         uiStateJSON: '{"isDarkMode":false}',
         bounds: {

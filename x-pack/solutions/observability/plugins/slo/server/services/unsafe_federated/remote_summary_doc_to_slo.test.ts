@@ -154,4 +154,79 @@ describe('FromRemoteSummaryDocToSlo', () => {
       expect(slo).toMatchSnapshot();
     });
   });
+
+  describe('with kibana >= v8.18', () => {
+    it('uses the provided updatedBy and createdBy', () => {
+      const slo = fromRemoteSummaryDocumentToSloDefinition(
+        {
+          service: {
+            environment: null,
+            name: null,
+          },
+          transaction: {
+            name: null,
+            type: null,
+          },
+          monitor: {
+            name: null,
+            config_id: null,
+          },
+          observer: {
+            name: null,
+            geo: {
+              name: null,
+            },
+          },
+          slo: {
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: 'irrelvant',
+                good: 'irrelevant',
+                total: 'irrelevant',
+                timestampField: 'irrelevant',
+              }, // added in 8.14
+            },
+            timeWindow: {
+              duration: '7d',
+              type: 'rolling',
+            },
+            groupBy: ALL_VALUE,
+            groupings: {},
+            instanceId: ALL_VALUE,
+            name: 'irrelevant',
+            description: 'irrelevant',
+            id: 'irrelevant',
+            budgetingMethod: 'occurrences',
+            revision: 1,
+            objective: {
+              target: 0.9999,
+            },
+            tags: ['prod'],
+            createdAt: '2024-02-01T00:00:00.000Z', // added in 8.14
+            updatedAt: '2024-02-01T00:00:00.000Z', // added in 8.14
+            createdBy: 'john',
+            updatedBy: 'jane',
+          },
+          goodEvents: 0,
+          totalEvents: 0,
+          errorBudgetEstimated: false,
+          errorBudgetRemaining: 1,
+          errorBudgetConsumed: 0,
+          errorBudgetInitial: 1 - 0.9999,
+          sliValue: -1,
+          statusCode: 0,
+          status: 'NO_DATA',
+          isTempDoc: true,
+          spaceId: 'irrelevant',
+          kibanaUrl: 'http://kibana.com/base-path', // added in 8.14
+          summaryUpdatedAt: null,
+          latestSliTimestamp: null,
+        },
+        loggerMock
+      );
+
+      expect(slo).toMatchSnapshot();
+    });
+  });
 });

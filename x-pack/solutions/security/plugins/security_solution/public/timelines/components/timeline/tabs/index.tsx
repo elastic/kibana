@@ -42,8 +42,9 @@ import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
-import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
+import { fetchNotesBySavedObjectIds, makeSelectNotesBySavedObjectId } from '../../../../notes';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -297,6 +298,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     [timelineSavedObjectId]
   );
 
+  const {
+    notesPrivileges: { read: canSeeNotes },
+    timelinePrivileges: { read: canSeePinnedTab },
+  } = useUserPrivileges();
+
   // new note system
   const fetchNotes = useCallback(
     () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
@@ -308,11 +314,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [fetchNotes, isTimelineSaved]);
 
+  const selectNotesBySavedObjectId = useMemo(() => makeSelectNotesBySavedObjectId(), []);
+
   const notesNewSystem = useSelector((state: State) =>
-    selectSortedNotesBySavedObjectId(state, {
-      savedObjectId: timelineSavedObjectId,
-      sort: { field: 'created', direction: 'asc' },
-    })
+    selectNotesBySavedObjectId(state, timelineSavedObjectId)
   );
   const numberOfNotesNewSystem = useMemo(
     () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
@@ -433,7 +438,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeeNotes || timelineType === TimelineTypeEnum.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
@@ -444,7 +449,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeePinnedTab || timelineType === TimelineTypeEnum.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >

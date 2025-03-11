@@ -19,12 +19,12 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -61,6 +61,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { hasAccessToSecuritySolution } from './helpers_access';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -76,7 +77,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _store?: SecurityAppStore;
   private _securityStoreForDiscover?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
-  private _alertsTableRegistered?: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -99,7 +99,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, triggersActionsUi, usageCollection, management, cases } = plugins;
+    const { home, usageCollection, management, cases } = plugins;
+    const { productFeatureKeys$ } = this.contract;
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
@@ -130,7 +131,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
 
         await this.registerActions(store, params.history, core, services);
-        await this.registerAlertsTableConfiguration(triggersActionsUi);
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
@@ -203,6 +203,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
       },
     });
+
+    productFeatureKeys$
+      .pipe(combineLatestWith(plugins.licensing.license$))
+      .subscribe(([productFeatureKeys, license]) => {
+        if (!productFeatureKeys || !license) {
+          return;
+        }
+
+        const isAssistantAvailable =
+          productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          license?.hasAtLeast('enterprise');
+        const assistantManagementApp = management?.sections.section.kibana.getApp(
+          'securityAiAssistantManagement'
+        );
+
+        if (!isAssistantAvailable) {
+          assistantManagementApp?.disable();
+        }
+      });
 
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
@@ -295,7 +314,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
-        kubernetes: new subPluginClasses.Kubernetes(),
         onboarding: new subPluginClasses.Onboarding(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
@@ -330,7 +348,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
-      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       onboarding: subPlugins.onboarding.start(),
       overview: subPlugins.overview.start(),
@@ -344,7 +361,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       investigations: subPlugins.investigations.start(),
       machineLearning: subPlugins.machineLearning.start(),
       siemMigrations: subPlugins.siemMigrations.start(
-        this.experimentalFeatures.siemMigrationsEnabled
+        !this.experimentalFeatures.siemMigrationsDisabled
       ),
     };
   }
@@ -413,23 +430,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Registers the alerts tables configurations to the triggersActionsUi plugin.
-   */
-  private async registerAlertsTableConfiguration(
-    triggersActionsUi: TriggersAndActionsUIPublicPluginSetup
-  ) {
-    if (!this._alertsTableRegistered) {
-      const { registerAlertsTableConfiguration } =
-        await this.lazyRegisterAlertsTableConfiguration();
-      registerAlertsTableConfiguration(
-        triggersActionsUi.alertsTableConfigurationRegistry,
-        this.storage
-      );
-      this._alertsTableRegistered = true;
-    }
-  }
-
-  /**
    * Registers the plugin updates including status, visibleIn, and deepLinks via the plugin updater$.
    */
   private async registerPluginUpdates(core: CoreStart, plugins: StartPlugins) {
@@ -438,7 +438,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (!capabilities.siem?.show && !capabilities.securitySolutionCasesV2?.read_cases) {
+    if (
+      !hasAccessToSecuritySolution(capabilities) &&
+      !capabilities.securitySolutionCasesV2?.read_cases
+    ) {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
         visibleIn: [],
@@ -592,17 +595,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return import(
       /* webpackChunkName: "lazy_sub_plugins" */
       './lazy_sub_plugins'
-    );
-  }
-
-  private lazyRegisterAlertsTableConfiguration() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_register_alerts_table_configuration" */
-      './common/lib/triggers_actions_ui/register_alerts_table_configuration'
     );
   }
 

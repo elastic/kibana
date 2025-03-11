@@ -11,12 +11,8 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
-import {
-  DataSourceCategory,
-  DataSourceProfileProviderParams,
-  RootContext,
-  SolutionType,
-} from '../../../profiles';
+import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
@@ -28,9 +24,20 @@ const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logsDataSourceProfileProvider', () => {
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(mockServices);
-  const VALID_INDEX_PATTERN = 'logs-nginx.access-*';
-  const MIXED_INDEX_PATTERN = 'logs-nginx.access-*,metrics-*';
-  const INVALID_INDEX_PATTERN = 'my_source-access-*';
+
+  const VALID_IMPLICIT_DATA_INDEX_PATTERN = 'logs-nginx.access-*';
+  const VALID_INDEX_PATTERNS: Array<[string, string]> = [
+    ['explicit data', 'logs-nginx.access-*::data'],
+    ['implicit data', VALID_IMPLICIT_DATA_INDEX_PATTERN],
+    ['mixed data selector qualification', 'logs-nginx.access-*::data,logs-nginx.error-*'],
+  ];
+  const INVALID_INDEX_PATTERNS: Array<[string, string]> = [
+    ['forbidden implicit data', 'my_source-access-*'],
+    ['mixed implicit data', 'logs-nginx.access-*,metrics-*'],
+    ['mixed explicit data', 'logs-nginx.access-*::data,metrics-*::data'],
+    ['mixed selector', 'logs-nginx.access-*,logs-nginx.access-*::failures'],
+  ];
+
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
@@ -43,64 +50,62 @@ describe('logsDataSourceProfileProvider', () => {
     isMatch: false,
   };
 
-  it('should match ES|QL sources with an allowed index pattern in its query', () => {
-    expect(
-      logsDataSourceProfileProvider.resolve({
-        rootContext: ROOT_CONTEXT,
-        dataSource: createEsqlDataSource(),
-        query: { esql: `from ${VALID_INDEX_PATTERN}` },
-      })
-    ).toEqual(RESOLUTION_MATCH);
-  });
+  it.each(VALID_INDEX_PATTERNS)(
+    'should match ES|QL sources with an allowed %s index pattern in its query',
+    (_, validIndexPattern) => {
+      expect(
+        logsDataSourceProfileProvider.resolve({
+          rootContext: ROOT_CONTEXT,
+          dataSource: createEsqlDataSource(),
+          query: { esql: `from ${validIndexPattern}` },
+        })
+      ).toEqual(RESOLUTION_MATCH);
+    }
+  );
 
-  it('should NOT match ES|QL sources with a mixed or not allowed index pattern in its query', () => {
-    expect(
-      logsDataSourceProfileProvider.resolve({
-        rootContext: ROOT_CONTEXT,
-        dataSource: createEsqlDataSource(),
-        query: { esql: `from ${INVALID_INDEX_PATTERN}` },
-      })
-    ).toEqual(RESOLUTION_MISMATCH);
-    expect(
-      logsDataSourceProfileProvider.resolve({
-        rootContext: ROOT_CONTEXT,
-        dataSource: createEsqlDataSource(),
-        query: { esql: `from ${MIXED_INDEX_PATTERN}` },
-      })
-    ).toEqual(RESOLUTION_MISMATCH);
-  });
+  it.each(INVALID_INDEX_PATTERNS)(
+    'should NOT match ES|QL sources with a %s index pattern in its query',
+    (_, invalidIndexPattern) => {
+      expect(
+        logsDataSourceProfileProvider.resolve({
+          rootContext: ROOT_CONTEXT,
+          dataSource: createEsqlDataSource(),
+          query: { esql: `from ${invalidIndexPattern}` },
+        })
+      ).toEqual(RESOLUTION_MISMATCH);
+    }
+  );
 
-  it('should match data view sources with an allowed index pattern', () => {
-    expect(
-      logsDataSourceProfileProvider.resolve({
-        rootContext: ROOT_CONTEXT,
-        dataSource: createDataViewDataSource({ dataViewId: VALID_INDEX_PATTERN }),
-        dataView: createStubIndexPattern({ spec: { title: VALID_INDEX_PATTERN } }),
-      })
-    ).toEqual(RESOLUTION_MATCH);
-  });
+  it.each(VALID_INDEX_PATTERNS)(
+    'should match data view sources with an allowed %s index pattern',
+    (_, validIndexPattern) => {
+      expect(
+        logsDataSourceProfileProvider.resolve({
+          rootContext: ROOT_CONTEXT,
+          dataSource: createDataViewDataSource({ dataViewId: validIndexPattern }),
+          dataView: createStubIndexPattern({ spec: { title: validIndexPattern } }),
+        })
+      ).toEqual(RESOLUTION_MATCH);
+    }
+  );
 
-  it('should NOT match data view sources with a mixed or not allowed index pattern', () => {
-    expect(
-      logsDataSourceProfileProvider.resolve({
-        rootContext: ROOT_CONTEXT,
-        dataSource: createDataViewDataSource({ dataViewId: INVALID_INDEX_PATTERN }),
-        dataView: createStubIndexPattern({ spec: { title: INVALID_INDEX_PATTERN } }),
-      })
-    ).toEqual(RESOLUTION_MISMATCH);
-    expect(
-      logsDataSourceProfileProvider.resolve({
-        rootContext: ROOT_CONTEXT,
-        dataSource: createDataViewDataSource({ dataViewId: MIXED_INDEX_PATTERN }),
-        dataView: createStubIndexPattern({ spec: { title: MIXED_INDEX_PATTERN } }),
-      })
-    ).toEqual(RESOLUTION_MISMATCH);
-  });
+  it.each(INVALID_INDEX_PATTERNS)(
+    'should NOT match data view sources with a %s index pattern',
+    (_, invalidIndexPattern) => {
+      expect(
+        logsDataSourceProfileProvider.resolve({
+          rootContext: ROOT_CONTEXT,
+          dataSource: createDataViewDataSource({ dataViewId: invalidIndexPattern }),
+          dataView: createStubIndexPattern({ spec: { title: invalidIndexPattern } }),
+        })
+      ).toEqual(RESOLUTION_MISMATCH);
+    }
+  );
 
   it('does NOT match data view sources when solution type is not Observability', () => {
     const params: Omit<DataSourceProfileProviderParams, 'rootContext'> = {
       dataSource: createEsqlDataSource(),
-      query: { esql: `from ${VALID_INDEX_PATTERN}` },
+      query: { esql: `from ${VALID_IMPLICIT_DATA_INDEX_PATTERN}` },
     };
     expect(logsDataSourceProfileProvider.resolve({ ...params, rootContext: ROOT_CONTEXT })).toEqual(
       RESOLUTION_MATCH
@@ -127,7 +132,7 @@ describe('logsDataSourceProfileProvider', () => {
 
   const dataViewWithLogLevel = createStubIndexPattern({
     spec: {
-      title: VALID_INDEX_PATTERN,
+      title: VALID_IMPLICIT_DATA_INDEX_PATTERN,
       fields: {
         'log.level': {
           name: 'log.level',
@@ -146,7 +151,7 @@ describe('logsDataSourceProfileProvider', () => {
 
   const dataViewWithoutLogLevel = createStubIndexPattern({
     spec: {
-      title: VALID_INDEX_PATTERN,
+      title: VALID_IMPLICIT_DATA_INDEX_PATTERN,
     },
   });
 
@@ -163,7 +168,7 @@ describe('logsDataSourceProfileProvider', () => {
       });
 
       expect(getRowIndicator).toBeDefined();
-      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90b0d1', label: 'Info' });
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90bdff', label: 'Info' });
     });
 
     it('should not return a color for a missing log level in the document', () => {

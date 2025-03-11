@@ -8,7 +8,7 @@
 import moment from 'moment';
 import React, { useCallback } from 'react';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { AllSeries, RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { useHistory } from 'react-router-dom';
 
@@ -31,7 +31,7 @@ export function PageViewsChart({ breakdown }: Props) {
 
   const { uxUiFilters, urlParams } = useLegacyUrlParams();
 
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { reportDefinitions, time } = useExpViewAttributes();
 
@@ -43,7 +43,7 @@ export function PageViewsChart({ breakdown }: Props) {
       name: 'ux-series-1',
       selectedMetricField: RECORDS_FIELD,
       breakdown: breakdown?.fieldName,
-      color: theme.eui.euiColorVis1,
+      color: euiTheme.colors.vis.euiColorVis1,
       filters: getExploratoryViewFilter(uxUiFilters, urlParams),
     },
   ];

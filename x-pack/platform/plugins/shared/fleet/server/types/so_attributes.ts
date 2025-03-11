@@ -17,6 +17,7 @@ import type {
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
   OutputPreset,
+  AgentlessPolicy,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -65,6 +66,7 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
+  agentless?: AgentlessPolicy;
   version?: string;
 }
 
@@ -109,6 +111,13 @@ export interface FleetServerHostSOAttributes {
   is_preconfigured: boolean;
   is_internal?: boolean;
   proxy_id?: string | null;
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+      es_key?: { id: string };
+    };
+  };
+  ssl?: string | null;
 }
 
 export interface PackagePolicySOAttributes {
@@ -156,6 +165,11 @@ interface OutputSoBaseAttributes {
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 
 interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
@@ -168,16 +182,18 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   service_token?: string;
   secrets?: {
     service_token?: { id: string };
-  };
-}
-
-interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
-  type: OutputType['Logstash'];
-  secrets?: {
+    kibana_api_key?: { id: string };
     ssl?: {
       key?: { id: string };
     };
   };
+  sync_integrations?: boolean;
+  kibana_url?: string;
+  kibana_api_key?: string;
+}
+
+interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Logstash'];
 }
 
 export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {

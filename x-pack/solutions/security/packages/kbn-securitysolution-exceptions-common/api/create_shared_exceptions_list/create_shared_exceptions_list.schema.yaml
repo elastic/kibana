@@ -27,6 +27,13 @@ paths:
               required:
                 - name
                 - description
+              example:
+                list_id: simple_list
+                name: Sample Detection Exception List
+                description: This is a sample detection type exception list.
+                namespace_type: single
+                tags: [malware]
+                os_types: [linux]
       responses:
         200:
           description: Successful response
@@ -34,6 +41,25 @@ paths:
             application/json:
               schema:
                 $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionList'
+              examples:
+                sharedList:
+                  value:
+                    id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                    list_id: simple_list
+                    type: detection
+                    name: Sample Detection Exception List
+                    description: This is a sample detection type exception list.
+                    immutable: false
+                    namespace_type: single
+                    os_types: [linux]
+                    tags: [malware]
+                    version: 1
+                    _version: WzIsMV0=
+                    tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                    created_at: 2025-01-07T19:34:27.942Z
+                    created_by: elastic
+                    updated_at: 2025-01-07T19:34:27.942Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -42,27 +68,54 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request body]: list_id: Expected string, received number'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    message: 'Unable to create exception-list'
+                    status_code: 403
         409:
           description: Exception list already exists response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                alreadyExists:
+                  value:
+                    message: 'exception list id: "simple_list" already exists'
+                    status_code: 409
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

@@ -14,20 +14,22 @@ import {
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
-  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-
+import React, { useMemo } from 'react';
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import { contentReferenceParser } from '../content_reference/content_reference_parser';
+import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import { ContentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   content: string;
+  contentReferences: StreamingOrFinalContentReferences;
+  contentReferencesVisible: boolean;
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -35,30 +37,32 @@ interface Props {
 
 const ANIMATION_TIME = 1;
 
-const cursorCss = css`
-  @keyframes blink {
-    0% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
+export const Cursor = () => {
+  const { euiTheme } = useEuiTheme();
 
-  animation: blink ${ANIMATION_TIME}s infinite;
-  width: 10px;
-  height: 16px;
-  vertical-align: middle;
-  display: inline-block;
-  background: ${transparentize(euiThemeVars.euiColorDarkShade, 0.25)};
-`;
+  const cursorCss = css`
+    @keyframes blink {
+      0% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
 
-const Cursor = () => (
-  <span data-test-subj="cursor" key="cursor" className={classNames(cursorCss, 'cursor')} />
-);
+    width: 10px;
+    height: 16px;
+    vertical-align: middle;
+    display: inline-block;
+    animation: blink ${ANIMATION_TIME}s infinite;
+    background: ${euiTheme.colors.backgroundLightText};
+  `;
+
+  return <span data-test-subj="cursor" key="cursor" css={cursorCss} />;
+};
 
 // a weird combination of different whitespace chars to make sure it stays
 // invisible even when we cannot properly parse the text while still being
@@ -99,7 +103,15 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const getPluginDependencies = () => {
+interface GetPluginDependencies {
+  contentReferences: StreamingOrFinalContentReferences;
+  contentReferencesVisible: boolean;
+}
+
+const getPluginDependencies = ({
+  contentReferences,
+  contentReferencesVisible,
+}: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -108,11 +120,19 @@ const getPluginDependencies = () => {
 
   processingPlugins[1][1].components = {
     ...components,
+    contentReference: (contentReferenceNode) => {
+      return (
+        <ContentReferenceComponentFactory
+          contentReferencesVisible={contentReferencesVisible}
+          contentReferenceNode={contentReferenceNode}
+        />
+      );
+    },
     cursor: Cursor,
     customCodeBlock: (props) => {
       return (
         <>
-          <CustomCodeBlock value={props.value} />
+          <CustomCodeBlock value={props.value} lang={props.lang} />
           <EuiSpacer size="m" />
         </>
       );
@@ -139,20 +159,39 @@ const getPluginDependencies = () => {
   };
 
   return {
-    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins],
+    parsingPluginList: [
+      loadingCursorPlugin,
+      customCodeBlockLanguagePlugin,
+      ...parsingPlugins,
+      contentReferenceParser({ contentReferences }),
+    ],
     processingPluginList: processingPlugins,
   };
 };
 
-export function MessageText({ loading, content, index, 'data-test-subj': dataTestSubj }: Props) {
-  const containerClassName = css`
+export function MessageText({
+  loading,
+  content,
+  contentReferences,
+  contentReferencesVisible,
+  index,
+  'data-test-subj': dataTestSubj,
+}: Props) {
+  const containerCss = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  const { parsingPluginList, processingPluginList } = useMemo(
+    () =>
+      getPluginDependencies({
+        contentReferences,
+        contentReferencesVisible,
+      }),
+    [contentReferences, contentReferencesVisible]
+  );
 
   return (
-    <EuiText className={containerClassName} data-test-subj={dataTestSubj}>
+    <EuiText css={containerCss} data-test-subj={dataTestSubj}>
       <EuiMarkdownFormat
         // used by augmentMessageCodeBlocks
         className={`message-${index}`}

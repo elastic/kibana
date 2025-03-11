@@ -40,5 +40,6 @@
     "@kbn/inference-common",
     "@kbn/storybook",
     "@kbn/ai-assistant-icon",
+    "@kbn/datemath",
   ]
 }

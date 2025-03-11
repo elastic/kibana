@@ -124,6 +124,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 "order": undefined,
                 "requiresPageReload": false,
                 "savedValue": true,
+                "solution": undefined,
                 "type": "boolean",
                 "unsavedFieldId": "Usage collection-unsaved",
               }
@@ -269,9 +270,12 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "appendServerlessChannelsSuffix": false,
         "banner": true,
         "labels": Object {},
+        "localShipper": false,
         "optIn": true,
         "sendUsageFrom": "browser",
         "sendUsageTo": "staging",
+        "telemetryNotifyUserAboutOptInDefault": true,
+        "userCanChangeSettings": true,
       },
       "fetchExample": [Function],
       "fetchLastReported": [Function],
@@ -315,7 +319,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       },
       "isScreenshotMode": false,
       "notifications": Object {
-        "showErrorDialog": [MockFunction],
         "toasts": Object {
           "add": [MockFunction],
           "addDanger": [MockFunction],
@@ -327,7 +330,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
           "remove": [MockFunction],
         },
       },
-      "reportOptInStatus": [Function],
+      "reportOptInStatus": [MockFunction],
       "reportOptInStatusChange": false,
       "setOptIn": [Function],
       "setUserHasSeenNotice": [Function],

@@ -42,8 +42,8 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
     const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
       entityType: asset.type,
       entityId: asset.id,
-      from: new Date(dateRange.from).toISOString(),
-      to: new Date(dateRange.to).toISOString(),
+      from: dateRange.from,
+      to: dateRange.to,
     });
 
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);

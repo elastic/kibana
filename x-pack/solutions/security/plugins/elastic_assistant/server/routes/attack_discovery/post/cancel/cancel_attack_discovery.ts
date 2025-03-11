@@ -9,7 +9,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryCancelResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   AttackDiscoveryCancelRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -34,7 +34,7 @@ export const cancelAttackDiscoveryRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(AttackDiscoveryCancelRequestParams),
@@ -57,7 +57,7 @@ export const cancelAttackDiscoveryRoute = (
         try {
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           const connectorId = decodeURIComponent(request.params.connectorId);
           if (authenticatedUser == null) {
             return resp.error({

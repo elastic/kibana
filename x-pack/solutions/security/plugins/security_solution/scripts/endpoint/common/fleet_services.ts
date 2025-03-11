@@ -122,6 +122,7 @@ const getAgentPolicyDataForUpdate = (
     'download_source_id',
     'fleet_server_host_id',
     'global_data_tags',
+    'agentless',
     'has_fleet_server',
     'id',
     'inactivity_timeout',
@@ -189,9 +190,7 @@ export const checkInFleetAgent = async (
     id: agentId,
     refresh: 'wait_for',
     retry_on_conflict: 5,
-    body: {
-      doc: update,
-    },
+    doc: update,
   });
 };
 

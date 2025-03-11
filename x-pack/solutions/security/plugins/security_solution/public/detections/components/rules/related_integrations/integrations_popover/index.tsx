@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../../detection_engine/rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import type { RelatedIntegrationArray } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { IntegrationDescription } from '../integrations_description';
 import { useRelatedIntegrations } from '../use_related_integrations';
@@ -55,7 +55,7 @@ const IntegrationListItem = styled('li')`
 const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopoverProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const { integrations, isLoaded } = useRelatedIntegrations(relatedIntegrations);
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
 
   const enabledIntegrations = useMemo(() => {
     return integrations.filter(
@@ -67,13 +67,13 @@ const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopov
   const numIntegrationsEnabled = enabledIntegrations.length;
 
   const badgeTitle = useMemo(() => {
-    if (isPrebuiltRulesCustomizationEnabled) {
+    if (isRulesCustomizationEnabled) {
       return isLoaded ? `${numIntegrationsEnabled}/${numIntegrations}` : `${numIntegrations}`;
     }
     return isLoaded
       ? `${numIntegrationsEnabled}/${numIntegrations} ${i18n.INTEGRATIONS_BADGE}`
       : `${numIntegrations} ${i18n.INTEGRATIONS_BADGE}`;
-  }, [isLoaded, isPrebuiltRulesCustomizationEnabled, numIntegrations, numIntegrationsEnabled]);
+  }, [isLoaded, isRulesCustomizationEnabled, numIntegrations, numIntegrationsEnabled]);
 
   return (
     <IntegrationsPopoverWrapper

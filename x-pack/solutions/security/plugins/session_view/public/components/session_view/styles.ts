@@ -15,7 +15,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { border, size } = euiTheme;
@@ -50,13 +50,13 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       border: border.thin,
       borderRadius: border.radius.medium,
       '> .sessionViewerToolbar': {
-        backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+        backgroundColor: `${euiTheme.components.forms.backgroundDisabled}`,
         padding: `${size.m} ${size.base}`,
       },
     };
 
     const fakeDisabled: CSSObject = {
-      color: euiVars.euiButtonColorDisabledText,
+      color: euiTheme.colors.disabled,
     };
 
     return {
@@ -67,7 +67,7 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       fakeDisabled,
       sessionViewerComponent,
     };
-  }, [euiTheme, isFullScreen, height, euiVars]);
+  }, [euiTheme, isFullScreen, height]);
 
   return cached;
 };

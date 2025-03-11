@@ -19,6 +19,7 @@ import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
+import { BehaviorSubject } from 'rxjs';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -83,16 +84,16 @@ export function initializeEditApi(
     extractInheritedViewModeObservable(parentApi)
   );
 
-  const { disabledActionIds, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
+  const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
-    : { disabledActionIds: undefined, setDisabledActionIds: noop };
-  const [disabledActionIds$, disabledActionIdsComparator] = buildObservableVariable<
-    string[] | undefined
-  >(disabledActionIds);
+    : {
+        disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
+        setDisabledActionIds: noop,
+      };
 
   if (isTextBasedLanguage(initialState)) {
     // do not expose the drilldown action for ES|QL
-    disabledActionIds$.next(disabledActionIds$.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
+    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
   }
 
   /**
@@ -162,7 +163,8 @@ export function initializeEditApi(
     inspectorApi,
     startDependencies,
     navigateToLensEditor,
-    uuid
+    uuid,
+    parentApi
   );
 
   /**
@@ -179,10 +181,10 @@ export function initializeEditApi(
       return false;
     }
     return (
-      Boolean(capabilities.visualize.save) ||
+      Boolean(capabilities.visualize_v2.save) ||
       (!getState().savedObjectId &&
-        Boolean(capabilities.dashboard?.showWriteControls) &&
-        Boolean(capabilities.visualize.show))
+        Boolean(capabilities.dashboard_v2?.showWriteControls) &&
+        Boolean(capabilities.visualize_v2.show))
     );
   };
 
@@ -192,18 +194,18 @@ export function initializeEditApi(
     : true;
 
   return {
-    comparators: { disabledActionIds: disabledActionIdsComparator },
+    comparators: { disabledActionIds$: [disabledActionIds$, setDisabledActionIds] },
     serialize: emptySerializer,
     cleanup: noop,
     api: {
       uuid,
-      viewMode: viewMode$,
+      viewMode$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.lens.embeddableDisplayName', {
           defaultMessage: 'Lens',
         }),
       supportedTriggers,
-      disabledActionIds: disabledActionIds$,
+      disabledActionIds$,
       setDisabledActionIds,
 
       /**

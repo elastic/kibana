@@ -9,7 +9,7 @@ import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -79,7 +79,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
 
-    const canUseMaps = kibana.services.application.capabilities.maps.show;
+    const canUseMaps = kibana.services.application.capabilities.maps_v2.show;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {

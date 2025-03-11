@@ -11,9 +11,7 @@ export {
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
   panelBadgeTrigger,
-  panelHoverTrigger,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
-  PANEL_HOVER_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from './triggers';

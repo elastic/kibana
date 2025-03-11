@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_MODEL } from '../../../../../../../common/constants';
 import {
   isCloudAdvancedOptionsEnabled,
   validateCloudRemoteAddress,
@@ -35,7 +36,7 @@ describe('Cloud remote address', () => {
       const actual = isCloudAdvancedOptionsEnabled({
         name: 'test',
         proxyAddress: '',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
       expect(actual).toBe(false);
     });
@@ -45,7 +46,7 @@ describe('Cloud remote address', () => {
         name: 'test',
         proxyAddress: 'some-proxy:9400',
         serverName: 'some-proxy',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
       expect(actual).toBe(false);
     });
@@ -54,7 +55,7 @@ describe('Cloud remote address', () => {
         name: 'test',
         proxyAddress: 'some-proxy:9400',
         serverName: 'some-server-name',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
       expect(actual).toBe(true);
     });
@@ -64,7 +65,7 @@ describe('Cloud remote address', () => {
         proxyAddress: 'some-proxy:9400',
         serverName: 'some-proxy-name',
         proxySocketConnections: 19,
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
       expect(actual).toBe(true);
     });

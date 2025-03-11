@@ -45,6 +45,7 @@ import {
 } from '../../../rule_creation/components/related_integrations/test_helpers';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 // Set the extended default timeout for all define rule step form test
 jest.setTimeout(10 * 1000);
@@ -207,6 +208,7 @@ jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_fro
 
 jest.mock('../../../../common/hooks/esql/use_esql_availability');
 jest.mock('../../../../common/components/ml/hooks/use_ml_rule_config');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
@@ -225,6 +227,9 @@ describe('StepDefineRule', () => {
       hasMlLicense: true,
       loading: false,
       mlSuppressionFields: [],
+    });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
     });
   });
 
@@ -787,6 +792,186 @@ describe('StepDefineRule', () => {
       await selectRuleType('machine_learning');
 
       expect(screen.queryByTestId('ai-assistant')).toBe(null);
+    });
+  });
+
+  describe('query validation', () => {
+    describe('Query rule', () => {
+      it('shows query is required when filters and query empty', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: '', language: 'kuery' },
+            filters: [],
+            saved_id: null,
+          },
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('detectionEngineStepDefineRuleQueryBar')).toHaveTextContent(
+            'A custom query is required'
+          );
+        });
+      });
+
+      it('does not show query is required when filters not empty and query empty', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: '', language: 'kuery' },
+            filters: [
+              {
+                meta: {},
+                query: {
+                  exists: {
+                    field: '_index',
+                  },
+                },
+              },
+            ],
+            saved_id: null,
+          },
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await expect(
+          waitFor(() => {
+            expect(screen.getByTestId('detectionEngineStepDefineRuleQueryBar')).toHaveTextContent(
+              'A custom query is required'
+            );
+          })
+        ).rejects.toThrow();
+      });
+    });
+
+    describe('ES|QL rule', () => {
+      it('shows ES|QL query is required when it is empty', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: '', language: 'esql' },
+            filters: [],
+            saved_id: null,
+          },
+          ruleType: 'esql' as const,
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('ruleEsqlQueryBar')).toHaveTextContent(
+            'ES|QL query is required'
+          );
+        });
+      });
+
+      it('does not show ES|QL query is required when it is not empty', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: 'from my_index metadata _id', language: 'esql' },
+            filters: [],
+            saved_id: null,
+          },
+          ruleType: 'esql' as const,
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await expect(
+          waitFor(() => {
+            expect(screen.getByTestId('ruleEsqlQueryBar')).toHaveTextContent(
+              'ES|QL query is required'
+            );
+          })
+        ).rejects.toThrow();
+      });
+    });
+
+    describe('EQL rule', () => {
+      it('shows EQL query is required when it is empty', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: '', language: 'eql' },
+            filters: [],
+            saved_id: null,
+          },
+          ruleType: 'eql' as const,
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('ruleEqlQueryBar')).toHaveTextContent('EQL query is required');
+        });
+      });
+
+      it('shows EQL query is required when query empty, but filters non-empty', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: '', language: 'eql' },
+            filters: [
+              {
+                meta: {},
+                query: {
+                  exists: {
+                    field: '_index',
+                  },
+                },
+              },
+            ],
+            saved_id: null,
+          },
+          ruleType: 'eql' as const,
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('ruleEqlQueryBar')).toHaveTextContent('EQL query is required');
+        });
+      });
+
+      it('does not show EQL query is required when it is not empty', async () => {
+        const initialState = {
+          queryBar: {
+            query: { query: 'any where true', language: 'eql' },
+            filters: [],
+            saved_id: null,
+          },
+          ruleType: 'eql' as const,
+        };
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
+
+        await submitForm();
+
+        await expect(
+          waitFor(() => {
+            expect(screen.getByTestId('detectionEngineStepDefineRuleQueryBar')).toHaveTextContent(
+              'EQL query is required'
+            );
+          })
+        ).rejects.toThrow();
+      });
     });
   });
 });

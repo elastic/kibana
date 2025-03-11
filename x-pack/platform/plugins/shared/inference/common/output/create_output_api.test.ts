@@ -33,12 +33,14 @@ describe('createOutputApi', () => {
       connectorId: '.my-connector',
       system: 'system',
       input: 'input message',
+      modelName: 'gpt-4o',
     });
 
     expect(chatComplete).toHaveBeenCalledTimes(1);
     expect(chatComplete).toHaveBeenCalledWith({
       connectorId: '.my-connector',
       functionCalling: 'native',
+      modelName: 'gpt-4o',
       stream: false,
       system: 'system',
       messages: [

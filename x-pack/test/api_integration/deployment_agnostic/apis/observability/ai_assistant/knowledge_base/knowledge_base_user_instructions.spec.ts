@@ -10,20 +10,24 @@ import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  TINY_ELSER,
   clearConversations,
   clearKnowledgeBase,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 import { getConversationCreatedEvent } from '../helpers';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+
+const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -33,19 +37,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const retry = getService('retry');
 
   describe('Knowledge base user instructions', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
     before(async () => {
-      await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-      expect(status).to.be(200);
+      await importTinyElserModel(ml);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
     after(async () => {
@@ -69,18 +64,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             isPublic: false,
           },
           {
-            username: 'secondary_editor' as const,
+            username: 'admin' as const,
             isPublic: true,
           },
           {
-            username: 'secondary_editor' as const,
+            username: 'admin' as const,
             isPublic: false,
           },
         ].map(async ({ username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
-          const user = username === 'editor' ? 'editor' : 'admin';
 
-          const { status } = await observabilityAIAssistantAPIClient[user]({
+          const { status } = await observabilityAIAssistantAPIClient[username]({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
@@ -95,6 +89,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await Promise.all(promises);
       });
+
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
         await retry.try(async () => {
           const res = await observabilityAIAssistantAPIClient.editor({
@@ -103,8 +98,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           const instructions = res.body.userInstructions;
           expect(instructions).to.have.length(3);
-
-          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 
           expect(sortById(instructions)).to.eql(
             sortById([
@@ -119,9 +112,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 text: 'Public user instruction from "editor"',
               },
               {
-                id: 'public-doc-from-secondary_editor',
+                id: 'public-doc-from-admin',
                 public: true,
-                text: 'Public user instruction from "secondary_editor"',
+                text: 'Public user instruction from "admin"',
               },
             ])
           );
@@ -137,8 +130,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const instructions = res.body.userInstructions;
           expect(instructions).to.have.length(3);
 
-          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
-
           expect(sortById(instructions)).to.eql(
             sortById([
               {
@@ -147,20 +138,79 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 text: 'Public user instruction from "editor"',
               },
               {
-                id: 'public-doc-from-secondary_editor',
+                id: 'public-doc-from-admin',
                 public: true,
-                text: 'Public user instruction from "secondary_editor"',
+                text: 'Public user instruction from "admin"',
               },
               {
-                id: 'private-doc-from-secondary_editor',
+                id: 'private-doc-from-admin',
                 public: false,
-                text: 'Private user instruction from "secondary_editor"',
+                text: 'Private user instruction from "admin"',
               },
             ])
           );
         });
       });
     });
+
+    describe('when a public instruction already exists', () => {
+      const adminInstruction = {
+        id: `public-doc-from-admin-not-to-be-overwritten`,
+        text: `public user instruction from "admin" not to be overwritten by other users`,
+        public: true,
+      };
+
+      const editorInstruction = {
+        id: `public-doc-from-editor-must-not-overwrite-admin-instruction`,
+        text: `public user instruction from "admin" must not overwrite admin instruction`,
+        public: true,
+      };
+
+      before(async () => {
+        await clearKnowledgeBase(es);
+
+        const { status: statusAdmin } = await observabilityAIAssistantAPIClient.admin({
+          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+          params: { body: adminInstruction },
+        });
+
+        expect(statusAdmin).to.be(200);
+
+        // wait for the public instruction to be indexed before proceeding
+        await pRetry(async () => {
+          const res = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const hasPublicAdminInstruction = res.body.userInstructions.some(
+            (instruction) => instruction.id === 'public-doc-from-admin-not-to-be-overwritten'
+          );
+
+          if (!hasPublicAdminInstruction) {
+            throw new Error('Public instruction not found');
+          }
+        });
+
+        const { status: statusEditor } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+          params: {
+            body: editorInstruction,
+          },
+        });
+
+        expect(statusEditor).to.be(200);
+      });
+
+      it("another user's public instruction will not overwrite it", async () => {
+        const res = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        });
+
+        const instructions = res.body.userInstructions;
+        expect(sortById(instructions)).to.eql(sortById([adminInstruction, editorInstruction]));
+      });
+    });
+
     describe('when updating an existing user instructions', () => {
       before(async () => {
         await clearKnowledgeBase(es);
@@ -207,15 +257,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when a user instruction exist and a conversation is created', () => {
+      // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
+      this.tags(['failsOnMKI']);
+
       let proxy: LlmProxy;
       let connectorId: string;
 
       const userInstructionText =
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
-      async function getConversationForUser(username: string) {
-        const user = username === 'editor' ? 'editor' : 'admin';
-
+      async function getConversationForUser(username: 'editor' | 'admin') {
         // the user instruction is always created by "editor" user
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
@@ -230,18 +281,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(status).to.be(200);
 
-        const interceptPromises = proxy
-          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
-          .completeAfterIntercept();
+        void proxy.interceptTitle('This is a conversation title');
+        void proxy.interceptConversation('I, the LLM, hear you!');
 
         const messages: Message[] = [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'You are a helpful assistant',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -251,7 +294,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         ];
 
-        const createResponse = await observabilityAIAssistantAPIClient[user]({
+        const createResponse = await observabilityAIAssistantAPIClient[username]({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
             body: {
@@ -265,11 +308,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(createResponse.status).to.be(200);
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
-        const res = await observabilityAIAssistantAPIClient[user]({
+        const res = await observabilityAIAssistantAPIClient[username]({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -278,7 +321,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        await interceptPromises;
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         const conversation = res.body;
         return conversation;
@@ -302,10 +345,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('adds the instruction to the system prompt', async () => {
         const conversation = await getConversationForUser('editor');
-        const systemMessage = conversation.messages.find(
-          (message) => message.message.role === MessageRole.System
-        )!;
-        expect(systemMessage.message.content).to.contain(userInstructionText);
+        expect(conversation.systemMessage).to.contain(userInstructionText);
       });
 
       it('does not add the instruction to the context', async () => {
@@ -323,13 +363,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('does not add the instruction conversation for other users', async () => {
-        const conversation = await getConversationForUser('secondary_editor');
-        const systemMessage = conversation.messages.find(
-          (message) => message.message.role === MessageRole.System
-        )!;
+        const conversation = await getConversationForUser('admin');
 
-        expect(systemMessage.message.content).to.not.contain(userInstructionText);
-        expect(conversation.messages.length).to.be(5);
+        expect(conversation.systemMessage).to.not.contain(userInstructionText);
+        expect(conversation.messages.length).to.be(4);
       });
     });
 
@@ -361,6 +398,83 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         const res2 = await updateInstruction('');
         expect(res2).to.be('');
+      });
+    });
+
+    describe('Forwarding User Instructions via System Message to the LLM', () => {
+      // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
+      this.tags(['failsOnMKI']);
+
+      let proxy: LlmProxy;
+      let connectorId: string;
+      const userInstructionText = 'This is a private instruction';
+      let systemMessage: string;
+
+      before(async () => {
+        proxy = await createLlmProxy(log);
+        connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
+          port: proxy.getPort(),
+        });
+        const res = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+          params: {
+            body: {
+              id: 'private-instruction-id',
+              text: userInstructionText,
+              public: false,
+            },
+          },
+        });
+        expect(res.status).to.be(200);
+
+        const { status, body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/functions',
+          params: {
+            query: {
+              scopes: ['all'],
+            },
+          },
+        });
+
+        expect(status).to.be(200);
+        systemMessage = body.systemMessage;
+      });
+
+      after(async () => {
+        proxy.close();
+        await observabilityAIAssistantAPIClient.deleteActionConnector({
+          actionId: connectorId,
+        });
+      });
+
+      it('includes private KB instructions in the system message sent to the LLM', async () => {
+        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+        const messages: Message[] = [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: 'Today we will be testing user instructions!',
+            },
+          },
+        ];
+        await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: false,
+              screenContexts: [],
+              scopes: ['all'],
+            },
+          },
+        });
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        const simulator = await simulatorPromise;
+        const requestData = simulator.requestBody;
+        expect(requestData.messages[0].content).to.contain(userInstructionText);
+        expect(requestData.messages[0].content).to.eql(systemMessage);
       });
     });
 

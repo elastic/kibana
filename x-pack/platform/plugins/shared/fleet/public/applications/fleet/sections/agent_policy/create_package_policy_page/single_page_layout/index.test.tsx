@@ -83,7 +83,13 @@ jest.mock('../../../../hooks', () => {
       data: { item: {} },
     }),
     sendCreatePackagePolicy: jest.fn().mockResolvedValue({
-      data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agent-policy-1'] } },
+      data: {
+        item: {
+          id: 'policy-1',
+          inputs: [],
+          policy_ids: ['agent-policy-1'],
+        },
+      },
     }),
     sendCreateAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-2', name: 'Agent policy 2', namespace: 'default' } },
@@ -190,7 +196,16 @@ describe('When on the package policy create page', () => {
                 },
               ],
               multiple: true,
-              deployment_modes: { agentless: { enabled: options?.agentlessEnabled } },
+              deployment_modes: options?.agentlessEnabled
+                ? {
+                    agentless: {
+                      enabled: true,
+                      organization: 'org',
+                      division: 'division',
+                      team: 'team',
+                    },
+                  }
+                : { agentless: { enabled: false } },
             },
           ],
           data_streams: [
@@ -740,8 +755,12 @@ describe('When on the package policy create page', () => {
       });
 
       test('should create agentless agent policy and package policy when in cloud and agentless API url is set', async () => {
-        fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+
         fireEvent.click(renderResult.getAllByText('Agentless')[0]);
+
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });

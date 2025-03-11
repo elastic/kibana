@@ -6,6 +6,7 @@
  */
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
@@ -36,6 +37,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles,
       servers,
       services,
@@ -81,7 +83,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
-          '--xpack.integration_assistant.enabled=true',
+          '--xpack.automatic_import.enabled=true',
         ],
       },
     };

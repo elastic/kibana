@@ -15,8 +15,9 @@ import {
   getMonitorRecentPingsAction,
   getMonitorAction,
   updateMonitorLastRunAction,
+  getMonitorLastErrorRunAction,
 } from './actions';
-import { fetchSyntheticsMonitor, fetchMonitorRecentPings, fetchMonitorLastRun } from './api';
+import { fetchSyntheticsMonitor, fetchMonitorRecentPings, fetchLatestTestRun } from './api';
 import { selectLastRunMetadata } from './selectors';
 
 export function* fetchSyntheticsMonitorEffect() {
@@ -32,9 +33,18 @@ export function* fetchSyntheticsMonitorEffect() {
   yield takeLeading(
     getMonitorLastRunAction.get,
     fetchEffectFactory(
-      fetchMonitorLastRun,
+      fetchLatestTestRun,
       getMonitorLastRunAction.success,
       getMonitorLastRunAction.fail
+    )
+  );
+
+  yield takeLeading(
+    getMonitorLastErrorRunAction.get,
+    fetchEffectFactory(
+      fetchLatestTestRun,
+      getMonitorLastErrorRunAction.success,
+      getMonitorLastErrorRunAction.fail
     )
   );
 

@@ -12,7 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { getSavedSearch } from './get_saved_searches';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { GetSavedSearchDependencies } from './get_saved_searches';
 
 describe('getSavedSearch', () => {
@@ -42,7 +42,7 @@ describe('getSavedSearch', () => {
     }
 
     expect(errorMessage).toBe(
-      'Could not locate that search (id: ccf1af80-2297-11ec-86e0-1155ffb9c7a7)'
+      'Could not locate that Discover session (id: ccf1af80-2297-11ec-86e0-1155ffb9c7a7)'
     );
   });
 

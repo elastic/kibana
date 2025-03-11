@@ -22,6 +22,9 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -55,6 +58,9 @@ export interface TriggersActionsUiExampleComponentParams {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -69,6 +75,8 @@ const TriggersActionsUiExampleApp = ({
   charts,
   dataViews,
   unifiedSearch,
+  fieldFormats,
+  licensing,
   ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
@@ -170,7 +178,17 @@ const TriggersActionsUiExampleApp = ({
             path="/alerts_table"
             render={() => (
               <Page title="Alerts Table">
-                <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+                <AlertsTableSandbox
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    settings,
+                  }}
+                />
               </Page>
             )}
           />
@@ -276,6 +294,9 @@ export const renderApp = (
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              fieldFormats={deps.fieldFormats}
+              licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
               {...core}
             />
           </IntlProvider>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
@@ -368,6 +370,11 @@ export interface TaskInstance {
    * Meta data related to the API key associated with this task
    */
   userScope?: TaskUserScope;
+
+  /*
+   * Optionally override the priority defined in the task type for this specific task instance
+   */
+  priority?: TaskPriority;
 }
 
 /**

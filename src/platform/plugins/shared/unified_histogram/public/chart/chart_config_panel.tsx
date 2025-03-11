@@ -41,7 +41,7 @@ export function ChartConfigPanel({
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  dataLoading$?: LensEmbeddableOutput['dataLoading'];
+  dataLoading$?: LensEmbeddableOutput['dataLoading$'];
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;

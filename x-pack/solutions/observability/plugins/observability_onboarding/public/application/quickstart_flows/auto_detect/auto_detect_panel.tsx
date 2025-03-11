@@ -32,7 +32,6 @@ import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
-import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
 import { SupportedIntegrationsList } from './supported_integrations_list';
 
 export const AutoDetectPanel: FunctionComponent = () => {
@@ -42,16 +41,6 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const {
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
-
-  useAutoDetectTelemetry(
-    status,
-    installedIntegrations.map(({ title, pkgName, pkgVersion, installSource }) => ({
-      title,
-      pkgName,
-      pkgVersion,
-      installSource,
-    }))
-  );
 
   if (error) {
     return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;

@@ -185,11 +185,13 @@ describe('Es Query utils', () => {
   });
 
   test('should return an empty array if raw runtime fields are malformed JSON', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawFields: any = null;
     expect(convertRawRuntimeFieldtoFieldOption(rawFields)).toEqual([]);
   });
 
   test('should not return FieldOption if raw runtime fields do not include the type', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawFields: any = {
       day_of_week: {
         test: 'keyword',

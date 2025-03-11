@@ -9,7 +9,7 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { KeyValueTable } from '../key_value_table';
+import { KeyValueTable } from '@kbn/key-value-metadata-table';
 
 interface Props {
   properties: Array<{ field: string; value: string[] | number[] }>;

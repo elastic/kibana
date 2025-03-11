@@ -115,7 +115,7 @@ interface NotesTabContentProps {
  */
 export const OldNotes: React.FC<NotesTabContentProps> = React.memo(({ timelineId }) => {
   const dispatch = useDispatch();
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { notesPrivileges } = useUserPrivileges();
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
@@ -182,7 +182,7 @@ export const OldNotes: React.FC<NotesTabContentProps> = React.memo(({ timelineId
       <EuiFlexItem component={ScrollableDiv} grow={2} id="scrollableNotes">
         <NotePreviews notes={notes} timelineId={timelineId} showTimelineDescription />
         <EuiSpacer size="s" />
-        {!isImmutable && kibanaSecuritySolutionsPrivileges.crud === true && (
+        {!isImmutable && notesPrivileges.crud === true && (
           <AddNote
             associateNote={associateNote}
             newNote={newNote}

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { BuilderItem } from '../types';

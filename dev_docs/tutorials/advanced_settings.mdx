@@ -204,64 +204,7 @@ To change or remove a `uiSetting`, you must migrate the whole `config` Saved Obj
 
 For example, in 7.9.0, `siem` as renamed to `securitySolution`, and in 8.0.0, `theme:version` was removed:
 
-**src/core/server/ui_settings/saved_objects/migrations.ts**
-
-```ts
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-
-export const migrations = {
-  '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
-    ...doc,
-    ...(doc.attributes && {
-      attributes: Object.keys(doc.attributes).reduce(
-        (acc, key) =>
-          key.startsWith('siem:')
-            ? {
-                ...acc,
-                [key.replace('siem', 'securitySolution')]: doc.attributes[key],
-              }
-            : {
-                ...acc,
-                [key]: doc.attributes[key],
-              },
-        {}
-      ),
-    }),
-    references: doc.references || [],
-  }),
-  '7.12.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({...}),
-  '7.13.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({...}),
-    '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
-    ...doc,
-    ...(doc.attributes && {
-      attributes: Object.keys(doc.attributes).reduce(
-        (acc, key) =>
-          [
-            // owner: Team:Geo [1]
-            'visualization:regionmap:showWarnings',
-            ...
-            // owner: Team:Core
-            ...
-            'theme:version',
-            // owner: Team:AppServices
-            ...
-          ].includes(key)
-            ? {
-                ...acc,
-              }
-            : {
-                ...acc,
-                [key]: doc.attributes[key],
-              },
-        {}
-      ),
-    }),
-    references: doc.references || [],
-  }),
-  '8.1.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({...}),
-};
-```
-[1] Since all `uiSettings` migrations are added to the same migration function, while not required, grouping settings by team is good practice.
+As of 8.17, the advanced settings migrations are defined in `src/core/packages/ui-settings/server-internal/src/saved_objects/migrations.ts`.
 
 ### Creating Transforms
 
@@ -271,4 +214,4 @@ first upgraded. Note that you might need to add an extra attribute to verify tha
 applied again in the future.
 
 For example, we needed to transform the `defaultIndex` attribute, and we added an extra `isDefaultIndexMigrated` attribute for this purpose.
-See `src/core/server/ui_settings/saved_objects/transforms.ts` and [#13339](https://github.com/elastic/kibana/pull/133339) for an example.
+Refer to `src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.ts` and [#13339](https://github.com/elastic/kibana/pull/133339) for an example.

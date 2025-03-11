@@ -14,11 +14,10 @@ import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { EmbeddableApiContext, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
 import { uiActions } from '../kibana_services';
 import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
@@ -63,9 +62,15 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
       });
   }, [api, isEditable]);
 
-  const panelTitle = useStateFromPublishingSubject(api?.panelTitle);
+  const panelTitle = useStateFromPublishingSubject(api?.title$);
   const ariaLabel = useMemo(
-    () => (panelTitle ? getErrorCallToAction(panelTitle) : label),
+    () =>
+      panelTitle
+        ? i18n.translate('presentationPanel.error.editButton', {
+            defaultMessage: 'Edit {value}',
+            values: { value: panelTitle },
+          })
+        : label,
     [label, panelTitle]
   );
 
@@ -75,20 +80,26 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
     const subscription = new Subscription();
     (async () => {
       const editPanelAction = await uiActions.getAction(ACTION_EDIT_PANEL);
-      if (canceled || !editPanelAction?.couldBecomeCompatible?.({ embeddable: api })) return;
-
-      const initiallyCompatible = await editPanelAction?.isCompatible({
+      const context = {
         embeddable: api,
         trigger: { id: CONTEXT_MENU_TRIGGER },
-      } as EmbeddableApiContext & ActionExecutionMeta);
+      };
+      if (canceled || !editPanelAction?.couldBecomeCompatible?.(context)) return;
+
+      const initiallyCompatible = await editPanelAction?.isCompatible(context);
       if (canceled) return;
       setIsEditable(initiallyCompatible);
-
-      subscription.add(
-        editPanelAction?.subscribeToCompatibilityChanges?.({ embeddable: api }, (isCompatible) => {
+      const compatibilitySubscription = editPanelAction
+        ?.getCompatibilityChangesSubject?.(context)
+        ?.pipe(
+          switchMap(async () => {
+            return await editPanelAction.isCompatible(context);
+          })
+        )
+        .subscribe(async (isCompatible) => {
           if (!canceled) setIsEditable(isCompatible);
-        })
-      );
+        });
+      subscription.add(compatibilitySubscription);
     })();
 
     return () => {

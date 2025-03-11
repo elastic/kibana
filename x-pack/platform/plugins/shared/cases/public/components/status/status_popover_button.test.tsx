@@ -69,7 +69,7 @@ describe('StatusPopoverButton', () => {
           .find(`[data-test-subj="case-status-badge-popover-button-open"]`)
           .first()
           .prop('color')
-      ).toBe('primary');
+      ).toBe('success');
     });
 
     it('shows the correct color when status is in-progress', async () => {
@@ -82,7 +82,7 @@ describe('StatusPopoverButton', () => {
           .find(`[data-test-subj="case-status-badge-popover-button-in-progress"]`)
           .first()
           .prop('color')
-      ).toBe('warning');
+      ).toBe('primary');
     });
 
     it('shows the correct color when status is closed', async () => {

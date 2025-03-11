@@ -15,7 +15,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   updateSearchSource,
   generateLink,
-  updateFilterReferences,
   getSmallerDataViewSpec,
   fetchSearchSourceQuery,
 } from './fetch_search_source_query';
@@ -35,6 +34,7 @@ import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
+import { updateFilterReferences } from '@kbn/es-query';
 
 const createDataView = () => {
   const id = 'test-id';

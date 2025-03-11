@@ -42,7 +42,7 @@ The best place to reference information for each field is in the metricbeat modu
 - [Elasticsearch](https://github.com/elastic/beats/blob/main/metricbeat/module/elasticsearch/_meta/README.md)
 - [Kibana](https://github.com/elastic/beats/blob/main/metricbeat/module/kibana/_meta/README.md)
 - [Logstash](https://github.com/elastic/beats/blob/main/metricbeat/module/logstash/_meta/README.md)
-- [Beat](https://github.com/elastic/beats/blob/main/metricbeat/module/beat/_meta/README.md) (\*beat, apm-server, fleet server)
+- [Beat](https://github.com/elastic/beats/blob/main/metricbeat/module/beat/_meta/) (\*beat, apm-server, fleet server)
 - [Enterprise Search](https://github.com/elastic/beats/tree/main/x-pack/metricbeat/module/enterprisesearch/_meta/README.md)
 
 ## Aliasing

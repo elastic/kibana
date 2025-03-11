@@ -115,7 +115,7 @@ export const RulePageNameInput = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            color="success"
+            color="primary"
             iconType="check"
             size="m"
             onClick={onCancelEdit}

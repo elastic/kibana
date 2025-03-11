@@ -11,9 +11,15 @@ import { EuiText, EuiAvatar } from '@elastic/eui';
 
 import type { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
+import { css } from '@emotion/react';
+
 import moment from 'moment';
 import * as i18n from './translations';
 import { WithCopyToClipboard } from '../../common/lib/clipboard/with_copy_to_clipboard';
+
+const commentCss = css`
+  white-space: pre-wrap;
+`;
 
 /**
  * Formats ExceptionItem.comments into EuiCommentList format
@@ -26,7 +32,11 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
     timestamp: moment(commentItem.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
     event: i18n.COMMENT_EVENT,
     timelineAvatar: <EuiAvatar size="l" name={commentItem.created_by.toUpperCase()} />,
-    children: <EuiText size="s">{commentItem.comment}</EuiText>,
+    children: (
+      <EuiText size="s" css={commentCss}>
+        {commentItem.comment}
+      </EuiText>
+    ),
     actions: (
       <WithCopyToClipboard
         data-test-subj="copy-to-clipboard"

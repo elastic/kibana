@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
@@ -38,5 +39,9 @@
     "@kbn/core-chrome-browser",
     "@kbn/ai-assistant-icon",
     "@kbn/product-doc-base-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/datemath",
   ]
 }

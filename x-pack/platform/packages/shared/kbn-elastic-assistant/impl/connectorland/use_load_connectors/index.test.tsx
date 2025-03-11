@@ -9,6 +9,13 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+
+const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
+
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  isInferenceEndpointExists: jest.fn(),
+}));
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
@@ -57,6 +64,7 @@ const defaultProps = { http, toasts } as unknown as Props;
 describe('useLoadConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedIsInferenceEndpointExists.mockResolvedValue(true);
   });
   it('should call api to load action types', async () => {
     renderHook(() => useLoadConnectors(defaultProps), {

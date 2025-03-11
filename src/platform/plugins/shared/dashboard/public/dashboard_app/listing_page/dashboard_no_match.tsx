@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { LANDING_PAGE_PATH } from '../../dashboard_constants';
+import { LANDING_PAGE_PATH } from '../../plugin_constants';
 import { coreServices, urlForwardingService } from '../../services/kibana_services';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 

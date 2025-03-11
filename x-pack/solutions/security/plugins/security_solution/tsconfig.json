@@ -13,13 +13,10 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "emotion.d.ts"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -43,7 +40,6 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/features-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/kubernetes-security-plugin",
     "@kbn/licensing-plugin",
     "@kbn/lists-plugin",
     "@kbn/maps-plugin",
@@ -188,6 +184,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-embeddable-utils",
+    "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-ui-settings-server",
@@ -207,7 +204,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
-    "@kbn/integration-assistant-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/avc-banner",
     "@kbn/config",
     "@kbn/openapi-common",
@@ -231,12 +228,18 @@
     "@kbn/langchain",
     "@kbn/discover-shared-plugin",
     "@kbn/react-hooks",
+    "@kbn/response-ops-alerts-fields-browser",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/alerting-types",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
+    "@kbn/security-solution-connectors",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/ai-assistant-icon",
     "@kbn/llm-tasks-plugin",
     "@kbn/charts-theme",
-    "@kbn/product-doc-base-plugin"
+    "@kbn/product-doc-base-plugin",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/security-ai-prompts"
   ]
 }
