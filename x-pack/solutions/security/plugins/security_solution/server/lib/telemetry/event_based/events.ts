@@ -11,7 +11,13 @@ import type {
   ResponseActionStatus,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
+import type {
+  DataStreams,
+  IlmPolicies,
+  IlmsStats,
+  IndicesSettings,
+  IndicesStats,
+} from '../indices.metadata.types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -304,6 +310,14 @@ export const TELEMETRY_DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
             type: 'keyword',
             _meta: { description: 'Name of the data stream' },
           },
+          ilm_policy: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'ILM policy associated to the datastream' },
+          },
+          template: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Template associated to the datastream' },
+          },
           indices: {
             type: 'array',
             items: {
@@ -316,7 +330,7 @@ export const TELEMETRY_DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'Datastream settings' },
     },
   },
 };
@@ -417,7 +431,40 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'Index stats' },
+    },
+  },
+};
+
+export const TELEMETRY_INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
+  eventType: 'telemetry_index_settings_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          index_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the index.' },
+          },
+          default_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Pipeline applied if no pipeline parameter specified when indexing.',
+            },
+          },
+          final_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description:
+                'Pipeline applied to the document at the end of the indexing process, after the document has been indexed.',
+            },
+          },
+        },
+      },
+      _meta: { description: 'Index settings' },
     },
   },
 };
@@ -527,7 +574,7 @@ export const TELEMETRY_ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'ILM policies' },
     },
   },
 };
@@ -568,7 +615,7 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'ILM stats' },
     },
   },
 };
@@ -1042,6 +1089,7 @@ export const events = [
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
+  TELEMETRY_INDEX_SETTINGS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,

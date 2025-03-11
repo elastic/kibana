@@ -97,6 +97,7 @@ import type {
   IlmPolicy,
   IlmStats,
   Index,
+  IndexSettings,
   IndexStats,
 } from './indices.metadata.types';
 import { chunkStringsByMaxLength } from './collections_helpers';
@@ -252,7 +253,7 @@ export interface ITelemetryReceiver {
 
   setNumDocsToSample(n: number): void;
 
-  getIndices(): Promise<string[]>;
+  getIndices(): Promise<IndexSettings[]>;
   getDataStreams(): Promise<DataStream[]>;
   getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
   getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
@@ -1321,7 +1322,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this._esClient;
   }
 
-  public async getIndices(): Promise<string[]> {
+  public async getIndices(): Promise<IndexSettings[]> {
     const es = this.esClient();
 
     this.logger.l('Fetching indices');
@@ -1329,12 +1330,24 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const request: IndicesGetRequest = {
       index: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['*.settings.index.provided_name'],
+      filter_path: [
+        '*.settings.index.final_pipeline',
+        '*.settings.index.default_pipeline',
+        '*.settings.index.provided_name',
+      ],
     };
 
     return es.indices
       .get(request)
-      .then((indices) => Array.from(Object.keys(indices)))
+      .then((indices) =>
+        Object.entries(indices).map(([index, value]) => {
+          return {
+            index_name: index,
+            default_pipeline: value.settings?.index?.default_pipeline,
+            final_pipeline: value.settings?.index?.final_pipeline,
+          } as IndexSettings;
+        })
+      )
       .catch((error) => {
         this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
         throw error;
@@ -1349,7 +1362,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const request: IndicesGetDataStreamRequest = {
       name: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['data_streams.name', 'data_streams.indices'],
+      filter_path: [
+        'data_streams.indices.ilm_policy',
+        'data_streams.indices.index_name',
+        'data_streams.name',
+        'ilm_policy',
+        'template',
+      ],
     };
 
     return es.indices
@@ -1358,6 +1377,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         response.data_streams.map((ds) => {
           return {
             datastream_name: ds.name,
+            ilm_policy: ds.ilm_policy,
+            template: ds.template,
             indices:
               ds.indices?.map((index) => {
                 return {

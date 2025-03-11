@@ -65,6 +65,16 @@ export interface IndexStats {
   index_failed_due_to_version_conflict?: number;
 }
 
+export interface IndicesSettings {
+  items: IndexSettings[];
+}
+
+export interface IndexSettings {
+  index_name: string;
+  default_pipeline?: string;
+  final_pipeline?: string;
+}
+
 export interface Index {
   index_name: string;
   ilm_policy?: string;
@@ -75,5 +85,7 @@ export interface DataStreams {
 }
 export interface DataStream {
   datastream_name: string;
+  ilm_policy?: string;
+  template?: string;
   indices?: Index[];
 }

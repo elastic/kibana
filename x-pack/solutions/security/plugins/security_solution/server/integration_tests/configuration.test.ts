@@ -114,6 +114,7 @@ describe('configuration', () => {
         indices_metadata_config: {
           indices_threshold: getRandomInt(1, 100),
           datastreams_threshold: getRandomInt(1, 100),
+          indices_settings_threshold: getRandomInt(1, 100),
           max_prefixes: getRandomInt(1, 100),
           max_group_size: getRandomInt(1, 100),
         },

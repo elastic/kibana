@@ -10,11 +10,13 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   cleanupDatastreams,
+  cleanupIngestPipelines,
   cleanupPolicies,
   ensureBackingIndices,
   launchTask,
   randomDatastream,
   randomIlmPolicy,
+  randomIngestPipeline,
   taskHasRun,
   waitFor,
 } from '../../../../common/utils/security_solution';
@@ -26,6 +28,7 @@ const TELEMETRY_INDEX_STATS_EVENT = 'telemetry_index_stats_event';
 const TELEMETRY_ILM_STATS_EVENT = 'telemetry_ilm_stats_event';
 const TELEMETRY_ILM_POLICY_EVENT = 'telemetry_ilm_policy_event';
 const TELEMETRY_DATA_STREAM_EVENT = 'telemetry_data_stream_event';
+const TELEMETRY_INDEX_SETTINGS_EVENT = 'telemetry_index_settings_event';
 
 export default ({ getService }: FtrProviderContext) => {
   const ebtServer = getService('kibana_ebt_server');
@@ -36,6 +39,8 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Indices metadata task telemetry', function () {
     let dsName: string;
     let policyName: string;
+    let defaultPipeline: string;
+    let finalPipeline: string;
 
     describe('@ess @serverless indices metadata', () => {
       beforeEach(async () => {
@@ -71,13 +76,16 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         policyName = await randomIlmPolicy(es);
-        dsName = await randomDatastream(es, policyName);
+        defaultPipeline = await randomIngestPipeline(es);
+        finalPipeline = await randomIngestPipeline(es);
+        dsName = await randomDatastream(es, { policyName, defaultPipeline, finalPipeline });
         await ensureBackingIndices(dsName, NUM_INDICES, es);
       });
 
       afterEach(async () => {
         await cleanupDatastreams(es);
         await cleanupPolicies(es);
+        await cleanupIngestPipelines(es);
       });
 
       it('should publish ilm policy events', async () => {
@@ -182,6 +190,19 @@ export default ({ getService }: FtrProviderContext) => {
             return (ev as any).index_failed === 1;
           })
         ).toBeTruthy();
+      });
+
+      it('should publish indices settings', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_INDEX_SETTINGS_EVENT],
+          index: dsName,
+        });
+
+        expect(events.length).toEqual(NUM_INDICES);
+        expect(events.filter((v) => v.default_pipeline === defaultPipeline)).toHaveLength(
+          NUM_INDICES
+        );
+        expect(events.filter((v) => v.final_pipeline === finalPipeline)).toHaveLength(NUM_INDICES);
       });
     });
 
