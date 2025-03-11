@@ -1432,6 +1432,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
 
+# Observability-ui folder level permissions (need to be before individual files inside the folder)
+/x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
+/test/functional/apps/discover/observability @elastic/observability-ui
+
 # obs-ux-logs-team
 /x-pack/test/functional/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality @elastic/obs-ux-logs-team
@@ -1461,12 +1465,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 
 # Observability-ui
-/x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
 /x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
 /x-pack/test/functional/page_objects/observability_page.ts @elastic/observability-ui
 /x-pack/test_serverless/**/test_suites/observability/config.ts @elastic/observability-ui
-/test/functional/apps/discover/observability @elastic/observability-ui
 
 # Observability onboarding tour
 /x-pack/solutions/observability/plugins/observability_shared/public/components/tour @elastic/appex-sharedux

@@ -20,6 +20,21 @@ export interface ThrottleOptions {
   trailing?: boolean;
 }
 
+/**
+ * Custom hook that returns a React safe  throttled version of the provided function.
+ *
+ * @param {Function} fn - The function to throttle.
+ * @param {Object} [options] - Optional configuration options for throttle.
+ * @param {number} [options.wait=1000] - The number of milliseconds to delay.
+ * @param {boolean} [options.leading=true] - Specify invoking on the leading edge of the timeout.
+ * @param {boolean} [options.trailing=false] - Specify invoking on the trailing edge of the timeout.
+ *
+ * @returns {Object} - An object containing the throttled function (`run`), and methods to cancel (`cancel`) or flush (`flush`) the throttle.
+ *
+ * @throws {Error} - Throws an error if the provided `fn` is not a function.
+ *
+ * @caveat The throttle does not cancel if `options` or `wait` are changed between calls.
+ */
 export function useThrottleFn<T extends Noop>(fn: T, options?: ThrottleOptions) {
   if (!isFunction(fn)) {
     throw Error(`useThrottleFn expected parameter is a function, got ${typeof fn}`);
