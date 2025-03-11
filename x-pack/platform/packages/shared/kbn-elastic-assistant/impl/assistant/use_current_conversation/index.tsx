@@ -13,6 +13,7 @@ import {
   RefetchQueryFilters,
 } from '@tanstack/react-query';
 import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { LastConversation } from '../../assistant_context';
 import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';
@@ -23,9 +24,12 @@ import { Conversation } from '../../..';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
+  connectors?: AIConnector[];
+  currentAppId?: string;
   lastConversation: LastConversation;
   conversations: Record<string, Conversation>;
   defaultConnector?: AIConnector;
+  spaceId: string;
   mayUpdateConversations: boolean;
   refetchCurrentUserConversations: <TPageData>(
     options?: RefetchOptions & RefetchQueryFilters<TPageData>
@@ -60,8 +64,11 @@ interface UseCurrentConversation {
  */
 export const useCurrentConversation = ({
   allSystemPrompts,
+  connectors,
+  currentAppId,
   lastConversation,
   conversations,
+  spaceId,
   defaultConnector,
   mayUpdateConversations,
   refetchCurrentUserConversations,
@@ -191,9 +198,32 @@ export const useCurrentConversation = ({
     [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, setLastConversation]
   );
 
+  const [localSecuritySolutionAssistantConnectorId] = useLocalStorage<string | undefined>(
+    `securitySolution.onboarding.assistantCard.connectorId.default`
+  );
+
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle, apiConfig }: { apiConfig?: ApiConfig; cId: string; cTitle?: string }) => {
       if (cId === '') {
+        if (
+          currentAppId === 'securitySolutionUI' &&
+          localSecuritySolutionAssistantConnectorId &&
+          !apiConfig &&
+          connectors?.length
+        ) {
+          const configuredConnector = connectors.find(
+            (connector) => connector.id === localSecuritySolutionAssistantConnectorId
+          );
+          if (configuredConnector) {
+            return getNewConversation({
+              apiConfig: {
+                connectorId: configuredConnector.id,
+                actionTypeId: configuredConnector.actionTypeId,
+              },
+              cTitle,
+            });
+          }
+        }
         return getNewConversation({ apiConfig, cTitle });
       }
       // refetch will set the currentConversation
@@ -207,8 +237,16 @@ export const useCurrentConversation = ({
         throw e;
       }
     },
-    [getNewConversation, refetchCurrentConversation, setLastConversation]
+    [
+      connectors,
+      currentAppId,
+      getNewConversation,
+      localSecuritySolutionAssistantConnectorId,
+      refetchCurrentConversation,
+      setLastConversation,
+    ]
   );
+
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;
     handleOnConversationSelected({ cId: lastConversation.id, cTitle: lastConversation.title });
