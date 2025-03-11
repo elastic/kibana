@@ -226,8 +226,7 @@ export function GraphVisualization({
                       y={ky}
                     >
                       <p
-                        // TODO: Delete classNames
-                        className="gphNode__label gphNode__label--html gphNoUserSelect"
+                        className="gphNode__label gphNode__label--html"
                         css={[
                           svgTextStyles,
                           css({ textAlign: 'center', cursor: 'pointer' }),

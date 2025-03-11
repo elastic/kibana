@@ -44,12 +44,7 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
               <li className="list-group-item">
                 {urlTemplate.icon && (
                   <>
-                    <IconRenderer
-                      icon={urlTemplate.icon}
-                      // TODO: Delete gphNoUserSelect className
-                      className="gphNoUserSelect"
-                      css={noUserSelectStyles}
-                    />{' '}
+                    <IconRenderer icon={urlTemplate.icon} css={noUserSelectStyles} />{' '}
                   </>
                 )}
                 <a aria-hidden="true" onClick={onOpenUrlTemplate}>
