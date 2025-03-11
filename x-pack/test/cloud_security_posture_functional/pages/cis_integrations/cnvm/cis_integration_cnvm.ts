@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { policiesSavedObjects } from '../constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -24,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
     });
 
     beforeEach(async () => {

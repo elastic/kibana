@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { testSubjectIds } from '../../../constants/test_subject_ids';
+import { policiesSavedObjects } from '../constants';
 
 const {
   CIS_GCP_OPTION_TEST_ID,
@@ -37,13 +38,12 @@ export default function (providerContext: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
     });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
-
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 

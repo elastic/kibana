@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { policiesSavedObjects } from '../constants';
 
 const CIS_EKS_OPTION_TEST_ID = 'cisEksTestId';
 const EKS_DIRECT_ACCESS_TEST_ID = 'directAccessKeyTestId';
@@ -32,7 +33,7 @@ export default function (providerContext: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
     });
 
     beforeEach(async () => {

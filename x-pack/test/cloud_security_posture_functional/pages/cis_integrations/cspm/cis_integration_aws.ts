@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { testSubjectIds } from '../../../constants/test_subject_ids';
+import { policiesSavedObjects } from '../constants';
 
 const {
   CIS_AWS_OPTION_TEST_ID,
@@ -39,7 +40,7 @@ export default function (providerContext: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
     });
 
     beforeEach(async () => {
@@ -83,7 +84,6 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/187470
     describe('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
