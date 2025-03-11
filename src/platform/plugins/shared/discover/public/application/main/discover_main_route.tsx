@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, memo, useCallback, useMemo, lazy, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState, memo, useCallback, useMemo, lazy } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -28,7 +29,7 @@ import type {
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
-import { MainHistoryLocationState } from '../../../common';
+import type { MainHistoryLocationState } from '../../../common';
 import { DiscoverMainApp } from './discover_main_app';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
@@ -36,17 +37,16 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './state_management/discover_state_provider';
+import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
-  CustomizationCallback,
-  DiscoverCustomizationContext,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
+import type { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { useDefaultAdHocDataViews, useRootProfile } from '../../context_awareness';
+import type { RuntimeStateManager } from './state_management/redux';
 import {
-  RuntimeStateManager,
   RuntimeStateProvider,
   createRuntimeStateManager,
   useRuntimeState,
