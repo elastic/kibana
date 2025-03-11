@@ -260,7 +260,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.rerank!;
+    return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
   }
 
   /**

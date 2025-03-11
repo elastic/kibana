@@ -81,6 +81,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index was created using version: 6.8.13",
@@ -94,6 +95,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index has version: 7.17.28-8.0.0",
@@ -107,6 +109,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": "index-closed",
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index was created using version: 6.8.13",
@@ -175,6 +178,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "excludedActions": Array [],
         "transformIds": Array [
           "abc",
         ],
@@ -191,6 +195,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index has version: 7.17.25",
@@ -204,6 +209,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "metadata": Object {
+          "excludedActions": Array [],
           "ignoredIndicesRequiringUpgrade": Array [],
           "ignoredIndicesRequiringUpgradeCount": 0,
           "indicesRequiringUpgrade": Array [

@@ -23,7 +23,7 @@ import type {
 } from '../../../../../../../../../common/types';
 
 interface Props {
-  meta: DataStreamMetadata;
+  meta?: DataStreamMetadata | null;
   resolutionType?: DataStreamResolutionType;
   closeFlyout: () => void;
 }
@@ -48,8 +48,8 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
-            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read only} other {migrated}}."
-            values={{ count: meta.indicesRequiringUpgradeCount, resolutionType }}
+            defaultMessage="Success! {count, plural, =0 {backing indices} =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read-only} other {migrated}}."
+            values={{ count: meta?.indicesRequiringUpgradeCount || 0, resolutionType }}
           />
         </p>
       </EuiFlyoutBody>
