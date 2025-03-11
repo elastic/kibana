@@ -29,11 +29,6 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
       options: {
         access: 'public',
         summary: `Get features`,
-        tags: ['oas-tag:system'],
-        availability: {
-          stability: 'experimental'
-        },
-        description: `Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.`
       },
       validate: {
         query: schema.object({ ignoreValidLicenses: schema.boolean({ defaultValue: false }) }),
