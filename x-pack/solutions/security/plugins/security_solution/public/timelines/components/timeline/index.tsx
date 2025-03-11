@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash/fp';
 import { EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -30,6 +30,7 @@ import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_ful
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
+import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`
   height: 100%;
@@ -37,7 +38,6 @@ const TimelineBody = styled.div`
   flex-direction: column;
 `;
 
-export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
