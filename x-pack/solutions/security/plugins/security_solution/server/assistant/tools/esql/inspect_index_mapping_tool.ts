@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
-import { formatEntriesAtKey, getEntriesAtKey, GetEntriesAtKeyMapping } from './utils/inspect_index';
+import { formatEntriesAtKey, getEntriesAtKey, GetEntriesAtKeyMapping } from './utils/inspect_index_utils';
 
 const toolDetails = {
   name: 'inspect_index_mapping',

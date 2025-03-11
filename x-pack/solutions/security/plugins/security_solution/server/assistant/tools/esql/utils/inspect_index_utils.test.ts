@@ -1,4 +1,4 @@
-import { formatEntriesAtKey, getEntriesAtKey, GetEntriesAtKeyMapping } from "./inspect_index"
+import { formatEntriesAtKey, getEntriesAtKey, GetEntriesAtKeyMapping } from "./inspect_index_utils"
 
 const sampleMapping1 = {
     "mappings": {
