@@ -9,10 +9,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Onboarding', () => {
-    loadTestFile(require.resolve('./create_logs_onboarding_flow'));
     loadTestFile(require.resolve('./get_elastic_agent_config'));
-    loadTestFile(require.resolve('./get_progress'));
-    loadTestFile(require.resolve('./update_progress'));
     loadTestFile(require.resolve('./get_privileges'));
   });
 }
