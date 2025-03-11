@@ -67,10 +67,13 @@ export const createAgentGraph = async ({
 
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
-    .addEdge('__start__', 'agent')
     .addNode('tools', toolHandler)
+    .addEdge('__start__', 'agent')
     .addEdge('tools', 'agent')
-    .addConditionalEdges('agent', shouldContinue)
+    .addConditionalEdges('agent', shouldContinue, {
+      tools: 'tools',
+      __end__: '__end__',
+    })
     .compile();
 
   return graph;

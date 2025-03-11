@@ -11,15 +11,21 @@ import { i18n } from '@kbn/i18n';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import { ChatMessageText } from './chat_message_text';
 import { ChatMessageAvatar } from './chat_message_avatar';
-import type { ConversationItem } from '../utils/get_chart_conversation_items';
+import {
+  type UserMessageConversationItem,
+  type AssistantMessageConversationItem,
+  isUserMessageItem,
+} from '../utils/conversation_items';
 
-interface ChatMessageProps {
-  message: ConversationItem;
+type UserOrAssistantMessageItem = UserMessageConversationItem | AssistantMessageConversationItem;
+
+interface ChatConversationMessageProps {
+  message: UserOrAssistantMessageItem;
   currentUser: AuthenticatedUser | undefined;
 }
 
-const getUserLabel = (message: ConversationItem) => {
-  if (message.user === 'user') {
+const getUserLabel = (item: UserOrAssistantMessageItem) => {
+  if (isUserMessageItem(item)) {
     return i18n.translate('xpack.workchatApp.chat.messages.userLabel', {
       defaultMessage: 'You',
     });
@@ -29,9 +35,16 @@ const getUserLabel = (message: ConversationItem) => {
   });
 };
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }) => {
-  const isUserMessage = useMemo(() => {
-    return message.user === 'user';
+export const ChatConversationMessage: React.FC<ChatConversationMessageProps> = ({
+  message,
+  currentUser,
+}) => {
+  const userMessage = useMemo(() => {
+    return isUserMessageItem(message);
+  }, [message]);
+
+  const messageContent = useMemo(() => {
+    return message.message.content;
   }, [message]);
 
   return (
@@ -39,17 +52,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, currentUser }
       username={getUserLabel(message)}
       timelineAvatar={
         <ChatMessageAvatar
-          role={message.user}
+          eventType={userMessage ? 'user' : 'assistant'}
           loading={message.loading}
           currentUser={currentUser}
         />
       }
       event=""
-      eventColor={isUserMessage ? 'primary' : 'subdued'}
+      eventColor={userMessage ? 'primary' : 'subdued'}
       actions={<></>}
     >
       <EuiPanel hasShadow={false} paddingSize="s">
-        <ChatMessageText content={message.content} loading={message.loading} />
+        <ChatMessageText content={messageContent} loading={message.loading} />
       </EuiPanel>
     </EuiComment>
   );

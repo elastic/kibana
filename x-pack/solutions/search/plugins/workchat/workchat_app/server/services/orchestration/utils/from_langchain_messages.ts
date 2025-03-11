@@ -11,18 +11,36 @@ import {
   isAIMessage,
   isHumanMessage,
 } from '@langchain/core/messages';
-import { userMessage, assistantMessage } from '../../../../common/utils/messages';
+import type { ToolCall as LangchainToolCall } from '@langchain/core/messages/tool';
+import {
+  createUserMessage,
+  createAssistantMessage,
+  type ToolCall,
+} from '../../../../common/conversation_events';
 
 export const messageFromLangchain = (message: BaseMessage) => {
   if (isAIMessage(message)) {
-    return assistantMessage(extractTextContent(message));
+    const toolCalls = message.tool_calls?.map(convertLangchainToolCall) ?? [];
+    return createAssistantMessage({
+      id: message.id,
+      content: extractTextContent(message),
+      toolCalls,
+    });
   }
   if (isHumanMessage(message)) {
-    return userMessage(extractTextContent(message));
+    return createUserMessage({ id: message.id, content: extractTextContent(message) });
   }
 
   // tools will come later
   throw new Error(`Unsupported message type ${message}`);
+};
+
+const convertLangchainToolCall = (toolCall: LangchainToolCall): ToolCall => {
+  return {
+    toolCallId: toolCall.id!, // TODO: figure out a default, e.g {messageId}_{callIndex}
+    toolName: toolCall.name,
+    args: toolCall.args,
+  };
 };
 
 export const extractTextContent = (message: BaseMessage): string => {

@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import type { ConversationEvent } from '../../common/conversations';
+import type { ConversationEvent } from '../../common/conversation_events';
 
 export const conversationTypeName = 'workchat_conversation' as const;
 

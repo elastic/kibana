@@ -28,11 +28,16 @@ import {
   conversationCreatedEvent,
   conversationUpdatedEvent,
   isMessageEvent,
+  isToolResultEvent,
 } from '../../../common/utils/chat_events';
 import { createChatError, isChatError } from '../../../common/errors';
-import { userMessageEvent, messageEvent } from '../../../common/utils/conversation';
-import type { ChatEvent } from '../../../common/chat_events';
-import type { Conversation, ConversationEvent } from '../../../common/conversations';
+import {
+  type ConversationEvent,
+  createUserMessage,
+  createToolResult,
+} from '../../../common/conversation_events';
+import type { ChatEvent, ToolResultEvent, MessageEvent } from '../../../common/chat_events';
+import type { Conversation } from '../../../common/conversations';
 import { AgentFactory } from '../orchestration';
 import { ConversationService, ConversationClient } from '../conversations';
 import { generateConversationTitle } from './generate_conversation_title';
@@ -75,7 +80,7 @@ export class ChatService {
     };
 
     const isNewConversation = !conversationId;
-    const nextUserEvent = userMessageEvent(nextUserMessage);
+    const nextUserEvent = createUserMessage({ content: nextUserMessage });
 
     return forkJoin({
       agent: defer(() => this.agentFactory.getAgent({ request, connectorId, agentId })),
@@ -117,7 +122,7 @@ export class ChatService {
           ? generatedTitle$({ chatModel, conversationEvents$ })
           : conversation$.pipe(
               switchMap((conversation) => {
-                return conversation.title;
+                return of(conversation.title);
               })
             );
 
@@ -215,14 +220,25 @@ const extractNewConversationEvents$ = ({
   agentEvents$,
 }: {
   agentEvents$: Observable<ChatEvent>;
-}) => {
+}): Observable<ConversationEvent[]> => {
   return agentEvents$.pipe(
-    filter(isMessageEvent),
-    map((event) => event.message),
+    filter((event): event is MessageEvent | ToolResultEvent => {
+      return isMessageEvent(event) || isToolResultEvent(event);
+    }),
     toArray(),
     mergeMap((newMessages) => {
-      const newEvents = newMessages.map((message) => messageEvent(message));
-      return of(newEvents);
+      return of(
+        newMessages.map((message) => {
+          if (isMessageEvent(message)) {
+            return message.message;
+          } else {
+            return createToolResult({
+              toolCallId: message.toolResult.callId,
+              toolResult: message.toolResult.result,
+            });
+          }
+        })
+      );
     }),
     shareReplay()
   );

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
+import { InternalIntegrationServices } from '@kbn/wci-common';
 import { IntegrationToolInputSchema } from '../../types';
 import { IntegrationTool } from '../../types';
-import { InternalIntegrationServices } from '@kbn/wci-common';
-import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { Integration } from './integration';
 
 /*
@@ -42,7 +42,7 @@ For external (SSE) based integrations:
 */
 export class IntegrationsSession {
   static TOOL_NAME_SEPARATOR = '___';
-  private clients: Record<string, Client>;
+  private clients: Record<string, Client> = {};
   private connected = false;
 
   constructor(public services: InternalIntegrationServices, public integrations: Integration[]) {}
