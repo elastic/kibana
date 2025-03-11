@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const { dashboard } = getPageObjects([ 'dashboard']);
+  const { dashboard } = getPageObjects(['dashboard']);
 
   describe('discover session multiple data views', () => {
     before(async () => {
@@ -62,11 +62,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Should display results from logstash-* when filtered by animals data view', async function () {
         const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
-          expect(
-            await (
-              await logstashSavedSearchPanel.findByCssSelector('[data-document-number]')
-            ).getAttribute('data-document-number')
-          ).to.be('500');
+        expect(
+          await (
+            await logstashSavedSearchPanel.findByCssSelector('[data-document-number]')
+          ).getAttribute('data-document-number')
+        ).to.be('500');
       });
     });
   });
