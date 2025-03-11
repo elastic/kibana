@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
@@ -149,21 +149,12 @@ export const AppRoutes = memo(() => {
     INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy
   );
   const allowedToAccess = authz.integrations.readIntegrationPolicies || authz.fleet.all;
-  const [permissionsErrors, setPermissionsErrors] = useState<string>();
+  const missingPrivilegesString = 'MISSING_PRIVILEGES';
 
-  useEffect(() => {
-    (async () => {
-      setPermissionsErrors(undefined);
-      if (!allowedToAccess) {
-        setPermissionsErrors('MISSING_PRIVILEGES');
-      }
-    })();
-  }, [allowedToAccess]);
-
-  if (permissionsErrors) {
+  if (allowedToAccess) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
-        <PermissionsError callingApplication="Integrations" error={permissionsErrors!} />
+        <PermissionsError callingApplication="Integrations" error={missingPrivilegesString} />
       </ErrorLayout>
     );
   }
