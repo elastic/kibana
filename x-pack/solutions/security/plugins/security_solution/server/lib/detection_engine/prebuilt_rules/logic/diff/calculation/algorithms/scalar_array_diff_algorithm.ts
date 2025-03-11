@@ -21,18 +21,28 @@ import {
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { mergeDedupedArrays } from './helpers';
 
-type ScalarArrayDiffAlgorithmFn<TValue> = (
+type ScalarArrayDiffAlgorithm<TValue> = (
   versions: ThreeVersionsOf<TValue[]>,
   isRuleCustomized: boolean
 ) => ThreeWayDiff<TValue[]>;
 
-export enum ScalarArrayDiffAlgorithmMergeStrategyEnum {
+/**
+ * This strategy applies when all these conditions are met:
+ * 1) when the base version is missing;
+ * 2) and there is an update from Elastic (current version != target version);
+ * 3) and the rule IS marked as customized.
+ *
+ * When all that is true, the scalar array diff algorithm uses this strategy
+ * to determine what to do, exactly.
+ */
+export enum ScalarArrayDiffMissingBaseVersionStrategy {
   /**
-   * Merge current and target values
+   * Merge the current and target versions and return the result as the merged version.
    */
   Merge = 'Merge',
+
   /**
-   * Use target value
+   * Return the target version as the merged version.
    */
   UseTarget = 'UseTarget',
 }
@@ -42,7 +52,7 @@ interface ScalarArrayDiffAlgorithmOptions {
    * Algorithm's behavior when the base version is missing and current field's
    * value differs from the target value.
    */
-  missingBaseCanUpdateMergeStrategy: ScalarArrayDiffAlgorithmMergeStrategyEnum;
+  missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy;
 }
 
 /**
@@ -52,8 +62,11 @@ interface ScalarArrayDiffAlgorithmOptions {
  */
 export function createScalarArrayDiffAlgorithm<TValue>(
   options: ScalarArrayDiffAlgorithmOptions
-): ScalarArrayDiffAlgorithmFn<TValue> {
-  return (versions: ThreeVersionsOf<TValue[]>, isRuleCustomized: boolean) => {
+): ScalarArrayDiffAlgorithm<TValue> {
+  return function scalarArrayDiffAlgorithm(
+    versions: ThreeVersionsOf<TValue[]>,
+    isRuleCustomized: boolean
+  ) {
     const {
       base_version: baseVersion,
       current_version: currentVersion,
@@ -175,18 +188,27 @@ const mergeVersions = <TValue>({
         };
       }
 
-      return options.missingBaseCanUpdateMergeStrategy ===
-        ScalarArrayDiffAlgorithmMergeStrategyEnum.Merge
-        ? {
+      switch (options.missingBaseVersionStrategy) {
+        case ScalarArrayDiffMissingBaseVersionStrategy.Merge: {
+          return {
             mergedVersion: union(dedupedCurrentVersion, dedupedTargetVersion),
             mergeOutcome: ThreeWayMergeOutcome.Merged,
             conflict: ThreeWayDiffConflict.SOLVABLE,
-          }
-        : {
+          };
+        }
+
+        case ScalarArrayDiffMissingBaseVersionStrategy.UseTarget: {
+          return {
             mergedVersion: targetVersion,
             mergeOutcome: ThreeWayMergeOutcome.Target,
             conflict: ThreeWayDiffConflict.SOLVABLE,
           };
+        }
+
+        default: {
+          return assertUnreachable(options.missingBaseVersionStrategy);
+        }
+      }
     }
     default:
       return assertUnreachable(diffOutcome);

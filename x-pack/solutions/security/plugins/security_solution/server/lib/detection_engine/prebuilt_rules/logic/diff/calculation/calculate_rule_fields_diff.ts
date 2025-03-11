@@ -50,7 +50,7 @@ import {
   forceTargetVersionDiffAlgorithm,
 } from './algorithms';
 import {
-  ScalarArrayDiffAlgorithmMergeStrategyEnum,
+  ScalarArrayDiffMissingBaseVersionStrategy,
   createScalarArrayDiffAlgorithm,
 } from './algorithms/scalar_array_diff_algorithm';
 
@@ -219,7 +219,7 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   version: forceTargetVersionDiffAlgorithm,
   name: singleLineStringDiffAlgorithm,
   tags: createScalarArrayDiffAlgorithm({
-    missingBaseCanUpdateMergeStrategy: ScalarArrayDiffAlgorithmMergeStrategyEnum.Merge,
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.Merge,
   }),
   description: multiLineStringDiffAlgorithm,
   severity: singleLineStringDiffAlgorithm,
@@ -227,7 +227,7 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   risk_score: numberDiffAlgorithm,
   risk_score_mapping: simpleDiffAlgorithm,
   references: createScalarArrayDiffAlgorithm({
-    missingBaseCanUpdateMergeStrategy: ScalarArrayDiffAlgorithmMergeStrategyEnum.Merge,
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.Merge,
   }),
   false_positives: simpleDiffAlgorithm,
   threat: simpleDiffAlgorithm,
@@ -312,7 +312,7 @@ const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMat
   data_source: dataSourceDiffAlgorithm,
   threat_query: kqlQueryDiffAlgorithm,
   threat_index: createScalarArrayDiffAlgorithm({
-    missingBaseCanUpdateMergeStrategy: ScalarArrayDiffAlgorithmMergeStrategyEnum.UseTarget,
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
   }),
   threat_mapping: simpleDiffAlgorithm,
   threat_indicator_path: singleLineStringDiffAlgorithm,
@@ -365,7 +365,7 @@ const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFiel
   kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
   new_terms_fields: createScalarArrayDiffAlgorithm({
-    missingBaseCanUpdateMergeStrategy: ScalarArrayDiffAlgorithmMergeStrategyEnum.UseTarget,
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
   }),
   history_window_start: singleLineStringDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,

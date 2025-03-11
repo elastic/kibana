@@ -13,113 +13,115 @@ import {
   ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine';
 import {
-  ScalarArrayDiffAlgorithmMergeStrategyEnum,
+  ScalarArrayDiffMissingBaseVersionStrategy,
   createScalarArrayDiffAlgorithm,
 } from './scalar_array_diff_algorithm';
 
 describe('scalarArrayDiffAlgorithm', () => {
   describe.each([
-    [ScalarArrayDiffAlgorithmMergeStrategyEnum.Merge],
-    [ScalarArrayDiffAlgorithmMergeStrategyEnum.UseTarget],
+    [ScalarArrayDiffMissingBaseVersionStrategy.Merge],
+    [ScalarArrayDiffMissingBaseVersionStrategy.UseTarget],
   ])('with missingBaseCanUpdateMergeStrategy = %s', (mergeStrategy) => {
     const scalarArrayDiffAlgorithm = createScalarArrayDiffAlgorithm({
-      missingBaseCanUpdateMergeStrategy: mergeStrategy,
+      missingBaseVersionStrategy: mergeStrategy,
     });
 
-    it('returns current_version as merged output if there is no update - scenario AAA', () => {
-      const mockVersions: ThreeVersionsOf<string[]> = {
-        base_version: ['one', 'two', 'three'],
-        current_version: ['one', 'two', 'three'],
-        target_version: ['one', 'two', 'three'],
-      };
+    describe('base cases', () => {
+      it('returns current_version as merged output if there is no update - scenario AAA', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: ['one', 'two', 'three'],
+          current_version: ['one', 'two', 'three'],
+          target_version: ['one', 'two', 'three'],
+        };
 
-      const result = scalarArrayDiffAlgorithm(mockVersions, false);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
-    });
+        expect(result).toEqual(
+          expect.objectContaining({
+            merged_version: mockVersions.current_version,
+            diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Current,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
 
-    it('returns current_version as merged output if current_version is different and there is no update - scenario ABA', () => {
-      const mockVersions: ThreeVersionsOf<string[]> = {
-        base_version: ['one', 'two', 'three'],
-        current_version: ['one', 'three', 'four'],
-        target_version: ['one', 'two', 'three'],
-      };
+      it('returns current_version as merged output if current_version is different and there is no update - scenario ABA', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: ['one', 'two', 'three'],
+          current_version: ['one', 'three', 'four'],
+          target_version: ['one', 'two', 'three'],
+        };
 
-      const result = scalarArrayDiffAlgorithm(mockVersions, false);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
-    });
+        expect(result).toEqual(
+          expect.objectContaining({
+            merged_version: mockVersions.current_version,
+            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Current,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
 
-    it('returns target_version as merged output if current_version is the same and there is an update - scenario AAB', () => {
-      const mockVersions: ThreeVersionsOf<string[]> = {
-        base_version: ['one', 'two', 'three'],
-        current_version: ['one', 'two', 'three'],
-        target_version: ['one', 'four', 'three'],
-      };
+      it('returns target_version as merged output if current_version is the same and there is an update - scenario AAB', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: ['one', 'two', 'three'],
+          current_version: ['one', 'two', 'three'],
+          target_version: ['one', 'four', 'three'],
+        };
 
-      const result = scalarArrayDiffAlgorithm(mockVersions, false);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
-    });
+        expect(result).toEqual(
+          expect.objectContaining({
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
 
-    it('returns current_version as merged output if current version is different but it matches the update - scenario ABB', () => {
-      const mockVersions: ThreeVersionsOf<string[]> = {
-        base_version: ['one', 'two', 'three'],
-        current_version: ['one', 'three', 'four'],
-        target_version: ['one', 'four', 'three'],
-      };
+      it('returns current_version as merged output if current version is different but it matches the update - scenario ABB', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: ['one', 'two', 'three'],
+          current_version: ['one', 'three', 'four'],
+          target_version: ['one', 'four', 'three'],
+        };
 
-      const result = scalarArrayDiffAlgorithm(mockVersions, false);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
-    });
+        expect(result).toEqual(
+          expect.objectContaining({
+            merged_version: mockVersions.current_version,
+            diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Current,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
 
-    it('returns custom merged version as merged output if all three versions are different - scenario ABC', () => {
-      const mockVersions: ThreeVersionsOf<string[]> = {
-        base_version: ['one', 'two', 'three'],
-        current_version: ['two', 'three', 'four', 'five'],
-        target_version: ['one', 'three', 'four', 'six'],
-      };
-      const expectedMergedVersion = ['three', 'four', 'five', 'six'];
+      it('returns custom merged version as merged output if all three versions are different - scenario ABC', () => {
+        const mockVersions: ThreeVersionsOf<string[]> = {
+          base_version: ['one', 'two', 'three'],
+          current_version: ['two', 'three', 'four', 'five'],
+          target_version: ['one', 'three', 'four', 'six'],
+        };
+        const expectedMergedVersion = ['three', 'four', 'five', 'six'];
 
-      const result = scalarArrayDiffAlgorithm(mockVersions, false);
+        const result = scalarArrayDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          merged_version: expectedMergedVersion,
-          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Merged,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            merged_version: expectedMergedVersion,
+            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Merged,
+            conflict: ThreeWayDiffConflict.SOLVABLE,
+          })
+        );
+      });
     });
 
     describe('edge cases', () => {
@@ -303,7 +305,7 @@ describe('scalarArrayDiffAlgorithm', () => {
       });
     });
 
-    describe('if base_version is missing', () => {
+    describe('and base_version is missing', () => {
       describe('returns target_version as merged output if current_version and target_version are the same - scenario -AA', () => {
         it('returns NONE conflict if rule is not customized', () => {
           const mockVersions: ThreeVersionsOf<string[]> = {
@@ -369,57 +371,61 @@ describe('scalarArrayDiffAlgorithm', () => {
             })
           );
         });
-
-        if (mergeStrategy === ScalarArrayDiffAlgorithmMergeStrategyEnum.Merge) {
-          it('returns merged version of current and target as merged output if rule is customized', () => {
-            const mockVersions: ThreeVersionsOf<string[]> = {
-              base_version: MissingVersion,
-              current_version: ['one', 'two', 'three'],
-              target_version: ['one', 'four', 'three'],
-            };
-
-            const expectedMergedVersion = ['one', 'two', 'three', 'four'];
-
-            const result = scalarArrayDiffAlgorithm(mockVersions, true);
-
-            expect(result).toEqual(
-              expect.objectContaining({
-                has_base_version: false,
-                base_version: undefined,
-                merged_version: expectedMergedVersion,
-                diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-                merge_outcome: ThreeWayMergeOutcome.Merged,
-                conflict: ThreeWayDiffConflict.SOLVABLE,
-              })
-            );
-          });
-        }
-
-        if (mergeStrategy === ScalarArrayDiffAlgorithmMergeStrategyEnum.UseTarget) {
-          it('returns target version of current and target as merged output if rule is customized', () => {
-            const targetVersion = ['one', 'four', 'three'];
-
-            const mockVersions: ThreeVersionsOf<string[]> = {
-              base_version: MissingVersion,
-              current_version: ['one', 'two', 'three'],
-              target_version: targetVersion,
-            };
-
-            const result = scalarArrayDiffAlgorithm(mockVersions, true);
-
-            expect(result).toEqual(
-              expect.objectContaining({
-                has_base_version: false,
-                base_version: undefined,
-                merged_version: targetVersion,
-                diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-                merge_outcome: ThreeWayMergeOutcome.Target,
-                conflict: ThreeWayDiffConflict.SOLVABLE,
-              })
-            );
-          });
-        }
       });
+    });
+  });
+
+  describe('when base_version is missing', () => {
+    it('returns merged version of current and target as merged output if rule is customized', () => {
+      const mockVersions: ThreeVersionsOf<string[]> = {
+        base_version: MissingVersion,
+        current_version: ['one', 'two', 'three'],
+        target_version: ['one', 'four', 'three'],
+      };
+
+      const expectedMergedVersion = ['one', 'two', 'three', 'four'];
+
+      const scalarArrayDiffAlgorithm = createScalarArrayDiffAlgorithm({
+        missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.Merge,
+      });
+      const result = scalarArrayDiffAlgorithm(mockVersions, true);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          has_base_version: false,
+          base_version: undefined,
+          merged_version: expectedMergedVersion,
+          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Merged,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
+        })
+      );
+    });
+
+    it('returns target version of current and target as merged output if rule is customized', () => {
+      const targetVersion = ['one', 'four', 'three'];
+
+      const mockVersions: ThreeVersionsOf<string[]> = {
+        base_version: MissingVersion,
+        current_version: ['one', 'two', 'three'],
+        target_version: targetVersion,
+      };
+
+      const scalarArrayDiffAlgorithm = createScalarArrayDiffAlgorithm({
+        missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
+      });
+      const result = scalarArrayDiffAlgorithm(mockVersions, true);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          has_base_version: false,
+          base_version: undefined,
+          merged_version: targetVersion,
+          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Target,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
+        })
+      );
     });
   });
 });
