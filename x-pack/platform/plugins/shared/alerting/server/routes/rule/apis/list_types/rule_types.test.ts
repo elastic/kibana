@@ -68,7 +68,7 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<
-      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers'>>
+      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers' | 'solution'>>
     > = [
       {
         id: '1',
