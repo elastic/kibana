@@ -223,7 +223,7 @@
     "d3-time": "^1.1.0",
     "dedent": "^0.7.0",
     "deep-freeze-strict": "^1.1.1",
-    "deepmerge": "^4.2.2",
+    "deepmerge": "^4.3.1",
     "del": "^6.1.0",
     "elastic-apm-node": "^4.10.0",
     "email-addresses": "^5.0.0",
