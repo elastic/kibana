@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ACTIONS_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
 export const TIMESTAMP_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.timeStamp',
   {

@@ -22,6 +22,18 @@ import type {
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import type { EuiDataGridProps } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
+import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
+import { useDispatch } from 'react-redux';
+import type { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { groupIdSelector } from '../../../../common/store/grouping/selectors';
+import { updateGroups } from '../../../../common/store/grouping/actions';
 import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
 import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -34,6 +46,7 @@ import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { MoreActionsRowControlColumn } from '../leading_controls/more_actions';
 import { AssistantRowControlColumn } from '../leading_controls/assistant';
 import {
+  ACTIONS_COLUMN,
   RELATION_INTEGRATION_COLUMN,
   RULE_NAME_COLUMN,
   SEVERITY_COLUMN,
@@ -45,10 +58,14 @@ import { transformTimelineItemToUnifiedRows } from '../../../../timelines/compon
 import { useKibana } from '../../../../common/lib/kibana';
 import { IOCPanelKey } from '../../../../flyout/ai_for_soc/constants/panel_keys';
 
+const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
+
 /**
  *
  */
 const rowsPerPageOptions = [10, 25, 50, 100];
+
+export const RULE_TYPE_IDS = [ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID];
 
 /**
  *
@@ -73,6 +90,65 @@ const customGridColumnsConfiguration: CustomGridColumnsConfiguration = {
     displayAsText: RULE_NAME_COLUMN,
   }),
 };
+const columns: EuiDataGridProps['columns'] = [
+  {
+    id: TIMESTAMP,
+    displayAsText: TIMESTAMP_COLUMN,
+    initialWidth: 225,
+  },
+  {
+    id: RELATED_INTEGRATION,
+    displayAsText: RELATION_INTEGRATION_COLUMN,
+    initialWidth: 225,
+  },
+  {
+    id: SEVERITY,
+    displayAsText: SEVERITY_COLUMN,
+    initialWidth: 225,
+  },
+  {
+    id: RULE_NAME,
+    displayAsText: RULE_NAME_COLUMN,
+    initialWidth: 225,
+  },
+];
+
+export interface RenderAdditionalToolbarControlsProps {
+  /**
+   *
+   */
+  dataView: DataView;
+}
+
+export const RenderAdditionalToolbarControls = memo(
+  ({ dataView }: RenderAdditionalToolbarControlsProps) => {
+    const dispatch = useDispatch();
+
+    const onGroupChange = useCallback(
+      (selectedGroups: string[]) =>
+        dispatch(
+          updateGroups({ activeGroups: selectedGroups, tableId: TableId.alertsOnAlertSummaryPage })
+        ),
+      [dispatch]
+    );
+    const groupId = useMemo(() => groupIdSelector(), []);
+    const { options: defaultGroupingOptions } = useDeepEqualSelector((state) =>
+      groupId(state, TableId.alertsOnAlertSummaryPage)
+    ) ?? {
+      options: [],
+    };
+    const groupSelector = useGetGroupSelectorStateless({
+      groupingId: TableId.alertsOnAlertSummaryPage,
+      onGroupChange,
+      fields: dataView.fields,
+      defaultGroupingOptions,
+      maxGroupingLevels: 3,
+    });
+
+    return <>{groupSelector}</>;
+  }
+);
+RenderAdditionalToolbarControls.displayName = 'RenderAdditionalToolbarControls';
 
 export interface TableProps {
   /**
@@ -94,13 +170,17 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
 
   const {
     services: {
-      uiSettings,
-      fieldFormats,
-      storage,
+      application,
+      data,
       dataViewFieldEditor,
-      notifications: { toasts: toastsService },
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      storage,
       theme,
-      data: dataPluginContract,
+      uiSettings,
+      settings,
     },
   } = useKibana();
 
@@ -109,7 +189,6 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
   const { browserFields } = getDataViewStateFromIndexFields('', dataView.toSpec().fields);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
-
   const combinedQuery = useMemo(() => {
     return combineQueries({
       config: getEsQueryConfig(uiSettings),
@@ -121,6 +200,12 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
       kqlMode: globalQuery.language,
     });
   }, [browserFields, dataView, filters, globalQuery, uiSettings]);
+  const finalBoolQuery: AlertsTableProps['query'] = useMemo(() => {
+    if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
+      return { bool: {} };
+    }
+    return { bool: { filter: JSON.parse(combinedQuery?.filterQuery) } };
+  }, [combinedQuery?.filterQuery, combinedQuery?.kqlError]);
 
   const [loadingState, { events, totalCount }] = useTimelineEvents({
     dataViewId: dataView.id as string,
@@ -151,20 +236,24 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
       theme,
       fieldFormats,
       storage,
-      toastNotifications: toastsService,
+      toastNotifications: notifications.toasts,
       uiSettings,
       dataViewFieldEditor,
-      data: dataPluginContract,
+      data,
     }),
-    [
-      theme,
+    [theme, fieldFormats, storage, notifications.toasts, uiSettings, dataViewFieldEditor, data]
+  );
+  const services2 = useMemo(
+    () => ({
+      data,
+      http,
+      notifications,
       fieldFormats,
-      storage,
-      toastsService,
-      uiSettings,
-      dataViewFieldEditor,
-      dataPluginContract,
-    ]
+      application,
+      licensing,
+      settings,
+    }),
+    [application, data, fieldFormats, http, licensing, notifications, settings]
   );
 
   const externalCustomRenderers: CustomCellRenderer = {
@@ -177,14 +266,14 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () => [
       {
-        id: '',
+        id: '1',
         headerAriaLabel: '',
         renderControl: (Control: RowControlComponent, props: RowControlRowProps) => (
           <AssistantRowControlColumn />
         ),
       },
       {
-        id: '',
+        id: '2',
         headerAriaLabel: '',
         renderControl: (Control: RowControlComponent, props: RowControlRowProps) => (
           <MoreActionsRowControlColumn ecs={props.record.ecs} />
@@ -195,6 +284,20 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
   );
 
   const { openFlyout } = useExpandableFlyoutApi();
+  const onOpenFlyout = useCallback(
+    (doc) => {
+      debugger;
+      openFlyout({
+        right: {
+          id: IOCPanelKey,
+          params: {
+            doc,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
   const onSetExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       if (doc) {
@@ -214,33 +317,92 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
     [openFlyout]
   );
 
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
+    () => [
+      {
+        id: '1',
+        width: 62,
+        headerCellRender: () => <>{ACTIONS_COLUMN}</>,
+        rowCellRender: (cellData) => (
+          <>
+            <EuiButtonIcon
+              iconType="expand"
+              onClick={() => onOpenFlyout(cellData)}
+              size="s"
+              color="primary"
+            />
+            <AssistantRowControlColumn />
+            <MoreActionsRowControlColumn ecs={cellData.ecsAlertsData[cellData.rowIndex]} />
+          </>
+        ),
+      },
+    ],
+    []
+  );
+
+  const renderCellValue = (cellData) => {
+    const { alert, columnId } = cellData;
+    if (columnId === RELATED_INTEGRATION) {
+      return <KibanaAlertRelatedIntegrationCellRenderer value={alert[columnId]} />;
+    }
+
+    if (columnId === SEVERITY) {
+      return <KibanaAlertSeverityCellRenderer value={alert[columnId]} />;
+    }
+
+    const value = alert[columnId];
+    const displayValue: string = Array.isArray(value) ? value[0] : value;
+    return <>{displayValue}</>;
+  };
+
+  const renderAdditionalToolbarControls = () => (
+    <RenderAdditionalToolbarControls dataView={dataView} />
+  );
+
   return (
-    <UnifiedDataTable
-      ariaLabelledBy=""
-      columns={COLUMN_IDS}
-      configRowHeight={2}
-      customGridColumnsConfiguration={customGridColumnsConfiguration}
-      dataView={dataView}
-      expandedDoc={expandedDoc}
-      externalCustomRenderers={externalCustomRenderers}
-      isSortEnabled={false}
-      loadingState={loadingState}
-      onSetColumns={onSetColumns}
-      onUpdateRowsPerPage={onUpdateRowsPerPage}
-      renderDocumentView={EmptyComponent}
-      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-      rows={rows}
-      rowsPerPageOptions={rowsPerPageOptions}
-      rowsPerPageState={rowsPerPage}
-      showTimeCol={showTimeCol}
-      sort={[]}
-      sampleSizeState={SAMPLE_SIZE}
-      services={services}
-      setExpandedDoc={onSetExpandedDoc}
-      showFullScreenButton={false}
-      showKeyboardShortcuts={false}
-      totalHits={totalCount}
-    />
+    <>
+      {true ? (
+        <AlertsTable
+          browserFields={browserFields}
+          columns={columns}
+          consumers={ALERT_TABLE_CONSUMERS}
+          id={TableId.alertsOnAlertSummaryPage}
+          leadingControlColumns={leadingControlColumns}
+          query={finalBoolQuery}
+          renderAdditionalToolbarControls={renderAdditionalToolbarControls}
+          renderCellValue={renderCellValue}
+          ruleTypeIds={RULE_TYPE_IDS}
+          services={services2}
+        />
+      ) : (
+        <UnifiedDataTable
+          ariaLabelledBy=""
+          columns={COLUMN_IDS}
+          configRowHeight={2}
+          customGridColumnsConfiguration={customGridColumnsConfiguration}
+          dataView={dataView}
+          expandedDoc={expandedDoc}
+          externalCustomRenderers={externalCustomRenderers}
+          isSortEnabled={false}
+          loadingState={loadingState}
+          onSetColumns={onSetColumns}
+          onUpdateRowsPerPage={onUpdateRowsPerPage}
+          renderDocumentView={EmptyComponent}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+          rows={rows}
+          rowsPerPageOptions={rowsPerPageOptions}
+          rowsPerPageState={rowsPerPage}
+          showTimeCol={showTimeCol}
+          sort={[]}
+          sampleSizeState={SAMPLE_SIZE}
+          services={services}
+          setExpandedDoc={onSetExpandedDoc}
+          showFullScreenButton={false}
+          showKeyboardShortcuts={false}
+          totalHits={totalCount}
+        />
+      )}
+    </>
   );
 });
 

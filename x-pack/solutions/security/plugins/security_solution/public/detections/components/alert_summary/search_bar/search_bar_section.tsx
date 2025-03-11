@@ -14,6 +14,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SourceFilterButton } from './sources_filter_button';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { inputsActions } from '../../../../common/store/inputs';
@@ -115,15 +116,24 @@ export const SearchBarSection = memo(({ dataView, installedPackages }: SearchBar
           <SourceFilterButton sources={sources} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <SearchBar
-            dateRangeFrom={dateRange.from}
-            dateRangeTo={dateRange.to}
-            indexPatterns={[dataView]}
-            onQuerySubmit={onQuerySubmit}
-            query={query}
-            showFilterBar={false}
-            showQueryMenu={false}
-          />
+          {true ? (
+            <SiemSearchBar
+              hideFilterBar
+              hideQueryMenu
+              id={InputsModelId.global}
+              sourcererDataView={dataView.toSpec()}
+            />
+          ) : (
+            <SearchBar
+              dateRangeFrom={dateRange.from}
+              dateRangeTo={dateRange.to}
+              indexPatterns={[dataView]}
+              onQuerySubmit={onQuerySubmit}
+              query={query}
+              showFilterBar={false}
+              showQueryMenu={false}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

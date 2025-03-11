@@ -11,6 +11,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { useDispatch } from 'react-redux';
+import { DetectionEngineAlertsTable } from '../../alerts_table';
 import { RELATED_INTEGRATION, RULE_NAME, SEVERITY, TIMESTAMP } from '../constants/fields';
 import { Table } from './table';
 import { updateGroups } from '../../../../common/store/grouping/actions';
@@ -55,6 +56,19 @@ export const GroupedTable = memo(({ dataView }: TableProps) => {
     (groupingFilters: Filter[]) => <Table dataView={dataView} groupingFilters={groupingFilters} />,
     [dataView]
   );
+  const renderChildDetectionEngineComponent = useCallback((groupingFilters: Filter[]) => {
+    return (
+      <DetectionEngineAlertsTable
+        tableType={TableId.alertsOnAlertSummaryPage}
+        inputFilters={groupingFilters}
+        isLoading={false}
+      />
+    );
+  }, []);
+  const renderChildAlertsTableComponent = useCallback(
+    (groupingFilters: Filter[]) => <Table dataView={dataView} groupingFilters={groupingFilters} />,
+    [dataView]
+  );
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
@@ -83,21 +97,39 @@ export const GroupedTable = memo(({ dataView }: TableProps) => {
 
   return (
     <>
-      {groupSelector}
-      <GroupedAlertsTable
-        dataView={dataView}
-        from={from}
-        globalFilters={globalFilters}
-        globalQuery={globalQuery}
-        hasIndexMaintenance={hasIndexMaintenance}
-        hasIndexWrite={hasIndexWrite}
-        loading={false}
-        renderChildComponent={renderChildComponent}
-        runtimeMappings={runtimeMappings}
-        signalIndexName={indexNames}
-        tableId={TableId.alertsOnAlertSummaryPage}
-        to={to}
-      />
+      {true ? (
+        <GroupedAlertsTable
+          from={from}
+          globalFilters={globalFilters}
+          globalQuery={globalQuery}
+          hasIndexMaintenance={hasIndexMaintenance}
+          hasIndexWrite={hasIndexWrite}
+          loading={false}
+          renderChildComponent={renderChildAlertsTableComponent}
+          runtimeMappings={runtimeMappings}
+          signalIndexName={indexNames}
+          tableId={TableId.alertsOnAlertSummaryPage}
+          to={to}
+        />
+      ) : (
+        <>
+          {groupSelector}
+          <GroupedAlertsTable
+            dataView={dataView}
+            from={from}
+            globalFilters={globalFilters}
+            globalQuery={globalQuery}
+            hasIndexMaintenance={hasIndexMaintenance}
+            hasIndexWrite={hasIndexWrite}
+            loading={false}
+            renderChildComponent={renderChildComponent}
+            runtimeMappings={runtimeMappings}
+            signalIndexName={indexNames}
+            tableId={TableId.alertsOnAlertSummaryPage}
+            to={to}
+          />
+        </>
+      )}
     </>
   );
 });
