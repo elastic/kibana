@@ -77,7 +77,6 @@
     "@kbn/inference-common",
     "@kbn/observability-ai-server",
     "@kbn/observability-ai-common",
-    "@kbn/llm-tasks-plugin",
     "@kbn/charts-theme",
     "@kbn/ai-assistant-icon",
     "@kbn/product-doc-base-plugin",
