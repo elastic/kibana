@@ -131,13 +131,7 @@ export type RegisterRenderFunctionDefinition<
 > = (name: string, render: RenderFunction<TFunctionArguments, TFunctionResponse>) => void;
 
 export type ChatRegistrationRenderFunction = ({}: {
-  registerRenderFunction<
-    TFunctionArguments = any,
-    TFunctionResponse extends FunctionResponse = any
-  >(
-    name: string,
-    render: RenderFunction<TFunctionArguments, TFunctionResponse>
-  ): void;
+  registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
 export interface ConfigSchema {

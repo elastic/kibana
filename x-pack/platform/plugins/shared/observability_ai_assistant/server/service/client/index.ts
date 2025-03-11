@@ -96,7 +96,7 @@ export class ObservabilityAIAssistantClient {
       user: {
         id?: string;
         name: string;
-      };
+      } | null;
       knowledgeBaseService: KnowledgeBaseService;
       productDocBase: ProductDocBaseStartContract;
       scopes: AssistantScope[];
@@ -144,7 +144,7 @@ export class ObservabilityAIAssistantClient {
       conversation: {
         last_updated: lastUpdated,
       },
-      user: this.dependencies.user,
+      ...(this.dependencies.user ? { user: this.dependencies.user } : {}),
       namespace: this.dependencies.namespace,
     };
   };

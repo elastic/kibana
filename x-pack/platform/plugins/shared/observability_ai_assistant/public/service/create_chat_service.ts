@@ -32,7 +32,11 @@ import {
   type StreamingChatResponseEvent,
   type StreamingChatResponseEventWithoutError,
 } from '../../common/conversation_complete';
-import { FunctionDefinition, FunctionRegistry } from '../../common/functions/types';
+import {
+  FunctionDefinition,
+  FunctionRegistry,
+  FunctionResponse,
+} from '../../common/functions/types';
 import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { untilAborted } from '../../common/utils/until_aborted';
@@ -137,7 +141,7 @@ function serialize(
 
 class ChatService {
   private functionRegistry: FunctionRegistry;
-  private renderFunctionRegistry: Map<string, RenderFunction<any, any>>;
+  private renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>>;
   private abortSignal: AbortSignal;
   private apiClient: ObservabilityAIAssistantAPIClient;
   public scope$: BehaviorSubject<AssistantScope[]>;

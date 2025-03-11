@@ -6,11 +6,7 @@
  */
 
 import type { CoreSetup, IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type {
-  SearchRequest,
-  SearchResponse,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { isEmpty, compact, orderBy, sumBy, get } from 'lodash';
 import { encode, decode } from 'gpt-tokenizer';
 import { ProductDocumentationAttributes } from '@kbn/product-doc-common';
@@ -32,76 +28,26 @@ import {
   KnowledgeBaseType,
   aiAssistantSearchConnectorIndexPattern,
 } from '../../../common';
-import { ML_INFERENCE_PREFIX, kbQueryToDsl, kbQueryToSparseVector } from './kb_query_to_dsl';
 import { getAccessQuery } from '../util/get_access_query';
-import { getElserModelId } from './get_elser_model_id';
+import {
+  formatKnowledgeBaseTextQueries,
+  getSparseVectorFieldsQuery,
+  getTextFieldsQuery,
+  wrapExistingQuery,
+} from './get_queries';
 
 interface KnowledgeBaseClientDependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   user: {
     id?: string;
     name: string;
-  };
+  } | null;
   spaceId: string;
   scopedClusterClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
   pluginsStart: Pick<ObservabilityAIAssistantPluginStartDependencies, 'productDocBase'>;
   config: ObservabilityAIAssistantConfig;
-}
-
-function wrapExistingQuery(
-  query?: QueryDslQueryContainer | undefined,
-  wrap?: { should?: QueryDslQueryContainer[]; must?: QueryDslQueryContainer[] }
-) {
-  if (!wrap?.must && !wrap?.should) {
-    return query;
-  }
-
-  return {
-    bool: {
-      should: wrap.should,
-      must: [...(wrap.must ?? []), ...(query ? [query] : [])],
-    },
-  };
-}
-
-function formatKnowledgeBaseTextQueries({
-  queries,
-  textFields,
-  query,
-}: {
-  queries?: KnowledgeBaseQueryContainer[];
-  textFields: string[];
-} & Pick<SearchRequest, 'query'>) {
-  return queries?.length
-    ? wrapExistingQuery(query, {
-        must: [...(query ? [query] : [])],
-        should: queries.map((kbQuery) => {
-          return kbQueryToDsl(kbQuery, textFields);
-        }),
-      })
-    : query;
-}
-
-function formatKnowledgeBaseSparseVectorQueries({
-  queries,
-  textFields,
-  modelId,
-  query,
-}: {
-  queries?: KnowledgeBaseQueryContainer[];
-  modelId: string;
-  textFields: string[];
-} & Pick<SearchRequest, 'query'>) {
-  return queries?.length
-    ? wrapExistingQuery(query, {
-        must: [...(query ? [query] : [])],
-        should: queries.map((kbQuery) => {
-          return kbQueryToSparseVector(kbQuery, textFields, modelId);
-        }),
-      })
-    : query;
 }
 
 function getHighlights(fields: string[]) {
@@ -117,7 +63,7 @@ export class KnowledgeBaseClient {
     queries,
     ...request
   }: {
-    queries?: KnowledgeBaseQueryContainer[];
+    queries: KnowledgeBaseQueryContainer[];
   } & SearchRequest): Promise<SearchResponse<KnowledgeBaseEntry>> {
     const formattedRequest = {
       ...request,
@@ -160,25 +106,21 @@ export class KnowledgeBaseClient {
     queries,
     ...request
   }: {
-    queries?: KnowledgeBaseQueryContainer[];
+    queries: KnowledgeBaseQueryContainer[];
   } & SearchRequest) {
     const productDocIndexPattern = this.dependencies.pluginsStart.productDocBase.getIndexPattern();
 
-    const textFieldCaps = await this.dependencies.scopedClusterClient.asCurrentUser.fieldCaps({
-      index: productDocIndexPattern,
-      allow_no_indices: true,
-      fields: '*',
-      types: ['text'],
+    const { query, highlight } = await getTextFieldsQuery({
+      client: this.dependencies.scopedClusterClient.asInternalUser,
+      indexPattern: this.dependencies.pluginsStart.productDocBase.getIndexPattern(),
+      queries,
     });
 
-    const textFields = Object.keys(textFieldCaps.fields);
-
-    const query = formatKnowledgeBaseTextQueries({ queries, textFields });
     const formattedRequest = {
       ...request,
       query: query ? wrapExistingQuery(request.query, { should: [query] }) : request.query,
       index: productDocIndexPattern,
-      highlight: getHighlights(textFields),
+      highlight,
     };
 
     return this.dependencies.scopedClusterClient.asInternalUser.search<ProductDocumentationAttributes>(
@@ -190,51 +132,26 @@ export class KnowledgeBaseClient {
     queries,
     ...request
   }: {
-    queries?: KnowledgeBaseQueryContainer[];
+    queries: KnowledgeBaseQueryContainer[];
   } & SearchRequest) {
     const { connectors = [], indexPattern } = await this.getConnectors();
 
-    const [textFieldCaps, sparseVectorFieldCaps] = await Promise.all([
-      this.dependencies.scopedClusterClient.asCurrentUser.fieldCaps({
-        index: indexPattern,
-        allow_no_indices: true,
-        fields: '*',
-        types: ['text'],
+    const [text, sparseVector] = await Promise.all([
+      getTextFieldsQuery({
+        client: this.dependencies.scopedClusterClient.asCurrentUser,
+        indexPattern,
+        queries,
       }),
-      this.dependencies.scopedClusterClient.asCurrentUser.fieldCaps({
-        index: indexPattern,
-        allow_no_indices: true,
-        fields: `${ML_INFERENCE_PREFIX}*`,
-        types: ['sparse_vector'],
-        filters: '-metadata,-parent',
-      }),
-    ]);
-
-    const textFields = Object.keys(textFieldCaps.fields);
-
-    const fieldsWithVectors = Object.keys(sparseVectorFieldCaps.fields).map((field) =>
-      field.replace('_expanded.predicted_value', '').replace(ML_INFERENCE_PREFIX, '')
-    );
-
-    let elserModelId: string | undefined;
-
-    if (fieldsWithVectors.length) {
-      elserModelId = await getElserModelId({
+      getSparseVectorFieldsQuery({
+        client: this.dependencies.scopedClusterClient.asCurrentUser,
         core: this.dependencies.core,
         logger: this.dependencies.logger,
-      });
-    }
-
-    const clauses = compact([
-      formatKnowledgeBaseTextQueries({ queries, textFields }),
-      elserModelId
-        ? formatKnowledgeBaseSparseVectorQueries({
-            queries,
-            textFields: fieldsWithVectors,
-            modelId: elserModelId,
-          })
-        : null,
+        indexPattern,
+        queries,
+      }),
     ]);
+
+    const clauses = compact([text.query, sparseVector.query]);
 
     const formattedRequest = {
       ...request,
@@ -242,7 +159,10 @@ export class KnowledgeBaseClient {
         should: clauses,
       }),
       index: indexPattern,
-      highlight: getHighlights(textFields.concat(fieldsWithVectors)),
+      highlight: {
+        ...text.highlight,
+        ...sparseVector.highlight,
+      },
     };
 
     return this.dependencies.scopedClusterClient.asCurrentUser
@@ -314,6 +234,7 @@ export class KnowledgeBaseClient {
       timeout: '1ms',
       track_total_hits: 1,
       size: 0,
+      queries: [],
     };
 
     function getHasHitsFromResponse(response: SearchResponse) {

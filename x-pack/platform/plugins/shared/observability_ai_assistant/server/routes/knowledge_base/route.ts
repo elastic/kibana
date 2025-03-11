@@ -19,6 +19,9 @@ import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
+// here to minimize changes in a single PR,
+// should be removed entirely in a follow-up,
+// see https://github.com/elastic/kibana/pull/213596
 export interface LegacyKnowledgeBaseStatus {
   errorMessage?: string;
   ready: boolean;

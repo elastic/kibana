@@ -90,7 +90,7 @@ export class ObservabilityAIAssistantService {
     ]);
 
     // user will not be found when executed from system connector context
-    const user = plugins.security.authc.getCurrentUser(request)!;
+    const user = plugins.security.authc.getCurrentUser(request);
 
     const soClient = coreStart.savedObjects.getScopedClient(request);
 
@@ -119,10 +119,12 @@ export class ObservabilityAIAssistantService {
       esClient: coreStart.elasticsearch.client.asScoped(request),
       inferenceClient,
       logger: this.logger,
-      user: {
-        id: user.profile_uid,
-        name: user.username,
-      },
+      user: user
+        ? {
+            id: user.profile_uid,
+            name: user.username,
+          }
+        : null,
       knowledgeBaseService: kbService,
       scopes: scopes || ['all'],
       productDocBase: plugins.productDocBase,

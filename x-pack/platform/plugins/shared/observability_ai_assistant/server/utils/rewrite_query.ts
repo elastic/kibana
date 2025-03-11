@@ -36,9 +36,7 @@ export async function rewriteQuery({
       : '';
   }
 
-  const serializedConversation = messages.map((message) => {
-    return JSON.stringify(pick(message.message, 'content', 'name', 'function_call', 'role'));
-  });
+  const serializedConversation = messages.map(serialize);
 
   const parts: string[] = [
     `Below is a conversation from the user. Given

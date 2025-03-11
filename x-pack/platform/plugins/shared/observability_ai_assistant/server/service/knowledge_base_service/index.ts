@@ -23,7 +23,7 @@ import {
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
 import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
-import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
+import { getAccessQuery, getUserAccessQuery } from '../util/get_access_query';
 import {
   isKnowledgeBaseIndexWriteBlocked,
   isSemanticTextUnsupportedError,
@@ -69,7 +69,7 @@ export class KnowledgeBaseService {
 
   getUserInstructions = async (
     namespace: string,
-    user?: { name: string }
+    user: { name: string; id?: string } | null
   ): Promise<Array<Instruction & { public?: boolean }>> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
@@ -184,7 +184,7 @@ export class KnowledgeBaseService {
     namespace,
   }: {
     isPublic: boolean;
-    user?: { name: string; id?: string };
+    user: { name: string; id?: string } | null;
     namespace?: string;
   }) => {
     if (!this.dependencies.config.enableKnowledgeBase) {
@@ -200,7 +200,7 @@ export class KnowledgeBaseService {
             { term: { namespace } },
             {
               bool: {
-                should: [...getUserAccessFilters(user)],
+                should: [getUserAccessQuery(user)],
                 minimum_should_match: 1,
               },
             },
@@ -220,8 +220,8 @@ export class KnowledgeBaseService {
     namespace,
   }: {
     docId: string;
-    user?: { name: string; id?: string };
-    namespace?: string;
+    user: { name: string; id?: string } | null;
+    namespace: string | null;
   }) => {
     const query = {
       bool: {
@@ -253,7 +253,7 @@ export class KnowledgeBaseService {
     namespace,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
-    user?: { name: string; id?: string };
+    user: { name: string; id?: string } | null;
     namespace: string;
   }): Promise<void> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
@@ -270,7 +270,7 @@ export class KnowledgeBaseService {
           '@timestamp': new Date().toISOString(),
           ...doc,
           ...(doc.text ? { semantic_text: doc.text } : {}),
-          user,
+          ...(user ? { user } : {}),
           namespace,
         },
         refresh: 'wait_for',
