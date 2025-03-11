@@ -109,7 +109,7 @@ fi
 
 if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
 {
-  echo "⚠️ Scout playwright configs without tests:"
+  echo "Scout Playwright configs without tests:"
   echo ""
   for config in "${configWithoutTests[@]}"; do
     echo "- $config"
