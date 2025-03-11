@@ -24,7 +24,6 @@ import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management';
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
 import * as dfaRoutes from '../../routing/routes/data_frame_analytics_management';
-import * as suppliedConfigsRoutes from '../../routing/routes/supplied_configurations';
 import * as settingsRoutes from '../../routing/routes/settings';
 import * as trainedModelsRoutes from '../../routing/routes/trained_models';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
@@ -146,9 +145,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
             break;
           case MANAGEMENT_SECTION_IDS.TRAINED_MODELS:
             currentRoutes = trainedModelsRoutes as RouteToApp;
-            break;
-          case MANAGEMENT_SECTION_IDS.SUPPLIED_CONFIGURATIONS:
-            currentRoutes = suppliedConfigsRoutes as RouteToApp;
             break;
           case MANAGEMENT_SECTION_IDS.AD_SETTINGS:
             currentRoutes = settingsRoutes as RouteToApp;

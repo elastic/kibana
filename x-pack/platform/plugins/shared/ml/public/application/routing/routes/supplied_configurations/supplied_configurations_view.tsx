@@ -12,11 +12,16 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { MlRoute } from '../../router';
-import { PageLoader } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
+import {
+  type NavigateToApp,
+  getMlManagementBreadcrumb,
+  getStackManagementBreadcrumb,
+} from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
+import { ML_PAGES } from '../../../../locator';
 
 const SuppliedConfigurations = dynamic(async () => ({
   default: (await import('../../../supplied_configurations/supplied_configurations'))
@@ -25,18 +30,19 @@ const SuppliedConfigurations = dynamic(async () => ({
 
 export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'supplied_configurations',
-  path: '/',
+  path: createPath(ML_PAGES.SUPPLIED_CONFIGURATIONS),
   title: i18n.translate('xpack.ml.suppliedConfigurations.suppliedConfigurations.docTitle', {
     defaultMessage: 'Supplied configurations',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
     getStackManagementBreadcrumb(navigateToApp),
+    getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate(
         'xpack.ml.suppliedConfigurationsBreadcrumbs.suppliedConfigurationsLabel',
         {
-          defaultMessage: 'Anomaly Detection Supplied Configurations',
+          defaultMessage: 'Supplied Configurations',
         }
       ),
     },

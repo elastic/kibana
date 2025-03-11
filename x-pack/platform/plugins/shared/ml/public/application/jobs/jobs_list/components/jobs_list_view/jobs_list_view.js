@@ -464,7 +464,7 @@ export class JobsListViewUI extends Component {
                       showNodeInfo={this.props.showNodeInfo}
                     />
                   </EuiFlexItem>
-                  <EuiFlexGroup grow={false} direction="row" gutterSize="none">
+                  <EuiFlexGroup grow={false} direction="row" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <ExportJobsFlyout isDisabled={false} currentTab={'anomaly-detector'} />
                     </EuiFlexItem>
@@ -472,6 +472,7 @@ export class JobsListViewUI extends Component {
                       <ImportJobsFlyout isDisabled={false} onImportComplete={this.refreshJobs} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
+
                   <EuiFlexItem grow={false}>
                     <NewJobButton />
                   </EuiFlexItem>

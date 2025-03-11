@@ -46,12 +46,6 @@ export const MANAGEMENT_SECTIONS = {
       defaultMessage: 'Trained Models',
     }
   ),
-  [MANAGEMENT_SECTION_IDS.SUPPLIED_CONFIGURATIONS]: i18n.translate(
-    'xpack.ml.management.suppliedConfigurationsTitle',
-    {
-      defaultMessage: 'Supplied Configurations',
-    }
-  ),
   [MANAGEMENT_SECTION_IDS.AD_SETTINGS]: i18n.translate('xpack.ml.management.settingsTitle', {
     defaultMessage: 'Settings',
   }),

@@ -19,7 +19,6 @@ import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
   formatAnomalyDetectionJobManagementUrl,
-  formatSuppliedConfigurationsManagementUrl,
   formatExplorerUrl,
   formatSingleMetricViewerUrl,
   formatDataFrameAnalyticsCreateJobUrl,
@@ -52,9 +51,6 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
     switch (params.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
         path = formatAnomalyDetectionJobManagementUrl('', params.pageState);
-        break;
-      case ML_PAGES.SUPPLIED_CONFIGURATIONS:
-        path = formatSuppliedConfigurationsManagementUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_EXPLORER:
         path = formatExplorerUrl('', params.pageState);

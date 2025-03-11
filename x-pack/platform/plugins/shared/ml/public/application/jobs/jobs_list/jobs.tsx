@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
@@ -20,6 +20,10 @@ import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
+import {
+  AnomalyDetectionSettingsButton,
+  SuppliedConfigurationsButton,
+} from './components/supplied_configurations_button';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -58,7 +62,20 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly Detection Jobs" />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.ml.jobsList.title"
+              defaultMessage="Anomaly Detection Jobs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SuppliedConfigurationsButton />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AnomalyDetectionSettingsButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </MlPageHeader>
       <HeaderMenuPortal>
         <JobsActionMenu />

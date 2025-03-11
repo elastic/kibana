@@ -13,7 +13,7 @@ export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
   trained_models: 'trained_models',
   notifications: 'overview?_g=(tab:notifications)&',
   memory_usage: 'overview',
-  supplied_configurations: 'supplied_configurations',
+  supplied_configurations: 'anomaly_detection/ad_supplied_configurations',
   settings: 'ad_settings',
   'settings/calendars_list': 'ad_settings/calendars_list',
   'settings/calendars_list/new_calendar': 'ad_settings/calendars_list/new_calendar',
@@ -39,7 +39,7 @@ export const ML_PAGES = {
   MEMORY_USAGE: 'memory_usage',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
-  SUPPLIED_CONFIGURATIONS: 'supplied_configurations',
+  SUPPLIED_CONFIGURATIONS: 'ad_supplied_configurations',
   /**
    * Page: Data Visualizer
    */
