@@ -30,7 +30,6 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       }
 
       .euiFormControlLayout {
-        background-color: transparent;
         border: none;
         border-radius: 0;
       }

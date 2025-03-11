@@ -271,7 +271,7 @@ export function InternalDashboardTopNav({
         'data-test-subj': 'dashboardUnsavedChangesBadge',
         badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
         title: '',
-        color: '#F6E58D',
+        color: "warning",
         toolTipProps: {
           content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
           position: 'bottom',

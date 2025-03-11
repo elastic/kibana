@@ -18,6 +18,7 @@ import {
   EuiProgress,
   useEuiBackgroundColor,
   useEuiPaddingSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -39,6 +40,7 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = () => {
+  const { euiTheme } = useEuiTheme();
   const { api, stateManager } = useOptionsListContext();
 
   const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
@@ -87,8 +89,8 @@ export const OptionsListPopoverFooter = () => {
           {!allowExpensiveQueries && (
             <EuiFlexItem data-test-subj="optionsList-allow-expensive-queries-warning" grow={false}>
               <EuiIconTip
-                type="warning"
-                color="warning"
+                type="warningFilled"
+                color={euiTheme.colors.warning}
                 content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
                 aria-label={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
               />

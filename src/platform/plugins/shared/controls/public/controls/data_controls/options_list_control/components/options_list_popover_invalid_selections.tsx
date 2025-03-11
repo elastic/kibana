@@ -18,6 +18,7 @@ import {
   EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -28,6 +29,7 @@ import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
 export const OptionsListPopoverInvalidSelections = () => {
+  const { euiTheme } = useEuiTheme();
   const { api } = useOptionsListContext();
 
   const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
@@ -71,7 +73,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           <EuiFlexItem grow={false}>
             <EuiIcon
               type="warningFilled"
-              color="warning"
+              color={euiTheme.colors.warning}
               title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
               size="s"
             />
