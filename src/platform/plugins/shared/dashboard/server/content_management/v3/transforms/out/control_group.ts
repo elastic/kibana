@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaults, flow } from 'lodash';
+import { defaults, flow, pick } from 'lodash';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
@@ -47,7 +47,11 @@ function transformIgnoreParentSettings(
   return {
     ...restControlGroupInput,
     ignoreParentSettings: ignoreParentSettingsJSON
-      ? flow(JSON.parse, transformIgnoreParentSettingsSetDefaults)(ignoreParentSettingsJSON)
+      ? flow(
+          JSON.parse,
+          transformIgnoreParentSettingsSetDefaults,
+          pickSupportedIgnoreParentSettings
+        )(ignoreParentSettingsJSON)
       : DEFAULT_IGNORE_PARENT_SETTINGS,
   };
 }
@@ -57,6 +61,17 @@ function transformIgnoreParentSettingsSetDefaults(
   ignoreParentSettings: ParentIgnoreSettings
 ): ParentIgnoreSettings {
   return defaults(ignoreParentSettings, DEFAULT_IGNORE_PARENT_SETTINGS);
+}
+
+function pickSupportedIgnoreParentSettings(
+  ignoreParentSettings: ParentIgnoreSettings
+): ParentIgnoreSettings {
+  return pick(ignoreParentSettings, [
+    'ignoreFilters',
+    'ignoreQuery',
+    'ignoreTimerange',
+    'ignoreValidations',
+  ]);
 }
 
 function transformShowApplySelections(
