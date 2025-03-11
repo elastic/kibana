@@ -398,6 +398,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
+      it('should not allow to update field type to system', async () => {
+        const body: IngestStreamUpsertRequest = {
+          dashboards: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: {
+                fields: {
+                  myfield: {
+                    type: 'system',
+                  },
+                },
+                routing: [],
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.willfail', body, 400);
+      });
+
       it('should not roll over more often than necessary', async () => {
         const expectedIndexCounts: Record<string, number> = {
           logs: 1,
