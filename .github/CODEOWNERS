@@ -444,6 +444,7 @@ src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 examples/esql_ast_inspector @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
+src/platform/packages/private/kbn-expression-utils @elastic/kibana-presentation
 src/platform/packages/shared/kbn-esql-types @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
