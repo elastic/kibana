@@ -23,7 +23,7 @@ paths:
         - Bulk API
       requestBody:
         description: |
-          A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.
+          A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to be specified in this rule.
           > info
           > All unspecified fields are deleted. You cannot modify the `id` or `rule_id` values.
         required: true
