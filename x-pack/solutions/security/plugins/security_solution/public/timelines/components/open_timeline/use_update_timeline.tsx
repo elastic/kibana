@@ -64,14 +64,17 @@ export const useUpdateTimeline = () => {
         // The `changed` field is set to true because the duplicated timeline needs to be saved.
         _timeline = { ...timeline, updated: undefined, changed: true, version: null };
       }
+
+      if (newDataViewPickerEnabled) {
+        selectDataView({
+          id: _timeline.dataViewId,
+          fallbackPatterns: _timeline.indexNames,
+          scope: [DataViewManagerScopeName.timeline],
+        });
+      }
+
       if (!isEmpty(_timeline.indexNames)) {
-        if (newDataViewPickerEnabled) {
-          selectDataView({
-            id: _timeline.dataViewId,
-            fallbackPatterns: _timeline.indexNames,
-            scope: [DataViewManagerScopeName.timeline],
-          });
-        } else {
+        if (!newDataViewPickerEnabled) {
           dispatch(
             sourcererActions.setSelectedDataView({
               id: SourcererScopeName.timeline,
