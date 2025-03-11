@@ -19,6 +19,7 @@ import {
 } from '../../../common/types';
 import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
+import { getSpaceQuery } from '../util/get_space_query';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
@@ -259,14 +260,17 @@ export class KnowledgeBaseService {
     query,
     sortBy,
     sortDirection,
+    namespace,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
+    namespace: string;
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
     }
+
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<
         KnowledgeBaseEntry & { doc_id?: string }
@@ -281,8 +285,12 @@ export class KnowledgeBaseService {
                 : []),
               {
                 // exclude user instructions
-                bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } },
+                bool: {
+                  must_not: { term: { type: KnowledgeBaseType.UserInstruction } },
+                },
               },
+              // filter by space
+              ...getSpaceQuery({ namespace }),
             ],
           },
         },
@@ -425,6 +433,7 @@ export class KnowledgeBaseService {
         },
         refresh: 'wait_for',
       });
+
       this.dependencies.logger.debug(`Entry added to knowledge base`);
     } catch (error) {
       this.dependencies.logger.debug(`Failed to add entry to knowledge base ${error}`);
