@@ -44,7 +44,7 @@ export const discoverPlaywrightConfigs: Command<void> = {
         ? 'No Playwright config files found'
         : `Found Playwright config files in '${pluginsMap.size}' plugins`;
 
-    if (pluginsMap.size > 0 && flagsReader.boolean('save')) {
+    if (flagsReader.boolean('save')) {
       if (!fs.existsSync(SCOUT_OUTPUT_ROOT)) {
         fs.mkdirSync(SCOUT_OUTPUT_ROOT, { recursive: true });
       }
