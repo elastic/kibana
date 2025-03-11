@@ -144,7 +144,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('The third request', () => {
+      describe('The third request - Requesting ESQL documentation', () => {
         it('contains the `request_documentation` tool call request', () => {
           const hasToolCall = thirdRequestBody.messages.some(
             // @ts-expect-error
