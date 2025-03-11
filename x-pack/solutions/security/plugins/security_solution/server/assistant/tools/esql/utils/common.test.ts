@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEsqlFromContent } from './common';
+import { extractEsqlFromContent } from './common';
 
 describe('common', () => {
   it.each([
@@ -15,6 +15,6 @@ describe('common', () => {
     ['```esql\nFROM sample_data\n```', ['FROM sample_data']],
     ['```esql\nFROM sample_data\n| LIMIT 3\n```', ['FROM sample_data\n| LIMIT 3']],
   ])('should add %s and %s', (input: string, expectedResult: string[]) => {
-    expect(getEsqlFromContent(input)).toEqual(expectedResult);
+    expect(extractEsqlFromContent(input)).toEqual(expectedResult);
   });
 });

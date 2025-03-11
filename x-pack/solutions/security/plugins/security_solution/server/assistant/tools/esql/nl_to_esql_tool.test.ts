@@ -12,7 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { loggerMock } from '@kbn/logging-mocks';
-import { getPromptSuffixForOssModel } from './common';
+import { getPromptSuffixForOssModel } from './utils/common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 

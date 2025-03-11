@@ -10,7 +10,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { z } from '@kbn/zod';
 import { HumanMessage } from '@langchain/core/messages';
 import { APP_UI_ID } from '../../../../common';
-import { getPromptSuffixForOssModel } from './common';
+import { getPromptSuffixForOssModel } from './utils/common';
 import { getEsqlSelfHealingGraph } from './esqlSelfHealingGraph';
 
 // select only some properties of AssistantToolParams

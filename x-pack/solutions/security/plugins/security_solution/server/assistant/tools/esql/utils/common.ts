@@ -14,7 +14,7 @@ export const getPromptSuffixForOssModel = (toolName: string) => `
 
   It is important that ES|QL query is preceeded by a new line.`;
 
-export const getEsqlFromContent = (content: string): string[] => {
+export const extractEsqlFromContent = (content: string): string[] => {
   const extractedEsql = [];
   let index = 0;
   while (index < content.length) {

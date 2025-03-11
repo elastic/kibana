@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Command, END } from '@langchain/langgraph';
-import { getEsqlFromContent } from './common';
+import { extractEsqlFromContent } from './utils/common';
 import type { EsqlSelfHealingAnnotation } from './state';
 import { NL_TO_ESQL_AGENT_NODE } from './constants';
 import { lastMessageWithErrorReport, validateEsql } from './utils/validator_utils';
@@ -17,7 +17,7 @@ export const getValidatorNode = ({ esClient }: { esClient: ElasticsearchClient }
     const { messages } = state;
     const lastMessage = messages[messages.length - 1];
 
-    const generatedQueries = getEsqlFromContent(lastMessage.content as string);
+    const generatedQueries = extractEsqlFromContent(lastMessage.content as string);
 
     if (!generatedQueries.length) {
       return new Command({
