@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -22,28 +21,18 @@ import {
   degradedFieldMaximumCharacterLimitColumnName,
   degradedFieldPotentialCauseColumnName,
   degradedFieldValuesColumnName,
-  readLess,
-  readMore,
 } from '../../../../../common/translations';
+import { ExpandableTruncatedText } from '../expandable_truncated_text';
 
-const MAX_CHAR_LENGTH = 200;
+const MAX_CHAR_LENGTH = 150;
 
 export const DegradedFieldInfo = () => {
-  const [expandedValues, setExpandedValues] = useState<{ [key: number]: boolean }>({});
-
   const {
     degradedFieldValues,
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
     degradedFieldAnalysis,
   } = useQualityIssues();
-
-  const handleToggleExpansion = (idx: number) => {
-    setExpandedValues((prev) => ({
-      ...prev,
-      [idx]: !prev[idx],
-    }));
-  };
 
   return (
     <>
@@ -127,28 +116,9 @@ export const DegradedFieldInfo = () => {
               >
                 <EuiBadgeGroup gutterSize="s">
                   {degradedFieldValues?.values.map((value, idx) => {
-                    const isExpanded = expandedValues[idx] || false;
-                    const truncatedText = isExpanded
-                      ? value
-                      : `${value.slice(0, MAX_CHAR_LENGTH)}${'... '}`;
-                    const shouldShowToggle = value.length > MAX_CHAR_LENGTH;
-
                     return (
                       <div key={idx} css={{ lineHeight: '1.6' }}>
-                        <EuiFlexGroup direction="column" gutterSize="none">
-                          <EuiCode>{truncatedText}</EuiCode>
-                          {shouldShowToggle && (
-                            <EuiCode>
-                              <button
-                                onClick={() => handleToggleExpansion(idx)}
-                                color="primary"
-                                css={{ fontWeight: 'bold' }}
-                              >
-                                {isExpanded ? readLess : readMore}
-                              </button>
-                            </EuiCode>
-                          )}
-                        </EuiFlexGroup>
+                        <ExpandableTruncatedText text={value} maxCharLength={MAX_CHAR_LENGTH} />
                       </div>
                     );
                   })}
