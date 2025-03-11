@@ -8,11 +8,10 @@
 import React from 'react';
 import { within, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
-import {
-  CreateMaintenanceWindowFormProps,
-  CreateMaintenanceWindowForm,
-} from './create_maintenance_windows_form';
+import type { AppMockRenderer } from '../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../lib/test_utils';
+import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
+import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../services/rule_api', () => ({
@@ -125,6 +124,11 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should prefill the form when provided with initialValue', async () => {
+    useUiSetting.mockImplementation((key: string) => {
+      if (key === 'dateFormat') return 'YYYY.MM.DD, h:mm:ss';
+      return 'America/Los_Angeles';
+    });
+
     const result = appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
@@ -154,8 +158,8 @@ describe('CreateMaintenanceWindowForm', () => {
     );
 
     expect(titleInput).toHaveValue('test');
-    expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
-    expect(dateInputs[1]).toHaveValue('03/25/2023 09:00 PM');
+    expect(dateInputs[0]).toHaveValue('2023.03.23, 9:00:00');
+    expect(dateInputs[1]).toHaveValue('2023.03.25, 9:00:00');
     expect(recurringInput).toBeChecked();
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });

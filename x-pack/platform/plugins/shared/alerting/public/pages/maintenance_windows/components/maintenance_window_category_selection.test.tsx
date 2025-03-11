@@ -8,7 +8,8 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { MaintenanceWindowSolutionSelection } from './maintenance_window_category_selection';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../lib/test_utils';
 
 const mockOnChange = jest.fn();
 
