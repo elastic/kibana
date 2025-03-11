@@ -7,95 +7,13 @@
 
 import { ColorMapping } from '@kbn/coloring';
 import { MultiFieldKey, RangeKey, SerializedValue } from '@kbn/data-plugin/common';
-import { XYDataLayerConfig, XYState } from '../../types';
-import { DatasourceLayers, OperationDescriptor } from '../../../../types';
-
-interface ColorCode {
-  type: 'colorCode';
-  colorCode: string;
-}
-
-interface CategoricalColor {
-  type: 'categorical';
-  paletteId: string;
-  colorIndex: number;
-}
-
-interface GradientColor {
-  type: 'gradient';
-}
-
-interface LoopColor {
-  type: 'loop';
-}
-
-interface RuleAuto {
-  type: 'auto';
-}
-interface RuleMatchExactly {
-  type: 'matchExactly';
-  values: Array<string | string[]>;
-}
-interface RuleMatchExactlyCI {
-  type: 'matchExactlyCI';
-  values: string[];
-}
-
-interface RuleRange {
-  type: 'range';
-  min: number;
-  max: number;
-  minInclusive: boolean;
-  maxInclusive: boolean;
-}
-
-interface RuleRegExp {
-  type: 'regex';
-  values: string;
-}
-
-interface RuleOthers {
-  type: 'other';
-}
-
-interface Assignment<R, C> {
-  rule: R;
-  color: C;
-  touched: boolean;
-}
-
-interface CategoricalColorMode {
-  type: 'categorical';
-}
-interface GradientColorMode {
-  type: 'gradient';
-  steps: Array<(CategoricalColor | ColorCode) & { touched: boolean }>;
-  sort: 'asc' | 'desc';
-}
-
-interface Config {
-  paletteId: string;
-  colorMode: CategoricalColorMode | GradientColorMode;
-  assignments: Array<
-    Assignment<
-      RuleAuto | RuleMatchExactly | RuleMatchExactlyCI | RuleRange | RuleRegExp,
-      CategoricalColor | ColorCode | GradientColor
-    >
-  >;
-  specialAssignments: Array<Assignment<RuleOthers, CategoricalColor | ColorCode | LoopColor>>;
-}
-
-interface OldXYMappingLayer extends Omit<XYDataLayerConfig, 'colorMapping'> {
-  colorMapping: Config;
-}
-
-interface OldState extends Omit<XYState, 'layers'> {
-  layers: Array<OldXYMappingLayer | XYDataLayerConfig>;
-}
+import { XYDataLayerConfig, XYState } from '../../../types';
+import { DatasourceLayers, OperationDescriptor } from '../../../../../types';
+import { DeprecatedColorMappingConfig, DeprecatedColorMappingsState } from './types';
 
 export const convertToRawColorMappingsFn =
   (datasourceLayers: DatasourceLayers) =>
-  (state: OldState | XYState): XYState => {
+  (state: DeprecatedColorMappingsState | XYState): XYState => {
     const hasLayersToConvert = state.layers.some((layer) => {
       return (
         layer.layerType === 'data' &&
@@ -149,7 +67,7 @@ export const convertToRawColorMappingsFn =
   };
 
 export function convertColorMappingAssignment(
-  oldAssignment: Config['assignments'][number],
+  oldAssignment: DeprecatedColorMappingConfig['assignments'][number],
   column?: OperationDescriptor | null
 ): ColorMapping.Assignment {
   return {
@@ -160,8 +78,9 @@ export function convertColorMappingAssignment(
 }
 
 const NO_VALUE = Symbol('no-value');
+
 export function convertColorMappingRule(
-  rule: Config['assignments'][number]['rule'],
+  rule: DeprecatedColorMappingConfig['assignments'][number]['rule'],
   column?: OperationDescriptor | null
 ): ColorMapping.ColorRule[] {
   switch (rule.type) {
