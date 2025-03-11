@@ -99,7 +99,7 @@ export function convertColorMappingRule(
 
         return {
           type: 'match',
-          pattern: String(value), // should not be an array at this point
+          pattern: String(value),
           matchEntireWord: true,
           matchCase: true,
         };
