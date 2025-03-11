@@ -13,7 +13,7 @@ import type {
   ServiceMapConnections,
   GroupResourceNodesResponse,
 } from './types';
-import { getServiceMapNodes } from './get_service_map_nodes';
+import { getServiceMapNodes, getWarnings } from './get_service_map_nodes';
 import { getExternalConnectionNode, getServiceConnectionNode } from './utils';
 
 /**
@@ -228,9 +228,11 @@ describe('getServiceMapNodes', () => {
 
         {
           source: getServiceConnectionNode(javaService),
-          destination: getExternalConnectionNode(
-            createExitSpan({ ...nodejsExternal, ...javaService, spanType: 'foo' })
-          ),
+          destination: getExternalConnectionNode({
+            ...nodejsExternal,
+            ...javaService,
+            spanType: 'foo',
+          }),
         },
         {
           source: getServiceConnectionNode(javaService),
@@ -319,6 +321,47 @@ describe('getServiceMapNodes', () => {
       'opbeans-java~opbeans-node',
       'opbeans-python~opbeans-java',
     ]);
+  });
+
+  describe('getWarnings', () => {
+    it('should return the correct warning for shared destinations', () => {
+      const exitSpanDestinations = [
+        {
+          from: getExternalConnectionNode({ ...httpLoadBalancer, ...javaService }),
+          to: getServiceConnectionNode(nodejsService),
+        },
+        {
+          from: getExternalConnectionNode({ ...httpLoadBalancer, ...goService }),
+          to: getServiceConnectionNode(javaService),
+        },
+      ];
+
+      const result = getWarnings({ exitSpanDestinations });
+      expect(result.sharedDestinations).toBe(true);
+    });
+
+    it('should return the correct warning when no shared destinations', () => {
+      const exitSpanDestinations = [
+        {
+          from: getExternalConnectionNode({ ...nodejsExternal, ...javaService }),
+          to: getServiceConnectionNode(goService),
+        },
+        {
+          from: getExternalConnectionNode({
+            ...createExitSpan({
+              spanDestinationServiceResource: 'go-svc',
+              spanType: 'external',
+              spanSubtype: 'http',
+            }),
+            ...goService,
+          }),
+          to: getServiceConnectionNode(pythonService),
+        },
+      ];
+
+      const result = getWarnings({ exitSpanDestinations });
+      expect(result.sharedDestinations).toBe(false);
+    });
   });
 });
 

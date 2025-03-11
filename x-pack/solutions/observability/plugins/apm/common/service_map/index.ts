@@ -18,12 +18,13 @@ import type {
   ServiceMapResponse,
   ServiceMapConnections,
   ServiceMapTelemetry,
+  ServiceMapWarnings,
   NodeStats,
   NodeItem,
 } from './types';
 
 export * from './utils';
-export { getServiceMapNodes } from './get_service_map_nodes';
+export { getServiceMapNodes, getWarnings } from './get_service_map_nodes';
 export { getPaths } from './get_paths';
 
 export type {
@@ -39,6 +40,7 @@ export type {
   ServiceMapConnections,
   ServiceMapResponse,
   ServiceMapTelemetry,
+  ServiceMapWarnings,
   NodeStats,
   NodeItem,
 };

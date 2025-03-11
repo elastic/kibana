@@ -6,23 +6,29 @@
  */
 import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type {
-  ServiceMapRawResponse,
-  ServiceMapTelemetry,
-} from '../../../../common/service_map/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import type { Environment } from '../../../../common/environment_rt';
-import { getServiceMapNodes, getPaths } from '../../../../common/service_map';
-import type { GroupResourceNodesResponse } from '../../../../common/service_map';
+import { getServiceMapNodes, getPaths, getWarnings } from '../../../../common/service_map';
+import type {
+  GroupResourceNodesResponse,
+  ServiceMapTelemetry,
+  ServiceMapWarnings,
+} from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
-type SeriviceMapState = GroupResourceNodesResponse & Pick<ServiceMapTelemetry, 'tracesCount'>;
+interface SeriviceMapState {
+  nodes: GroupResourceNodesResponse & Pick<ServiceMapTelemetry, 'tracesCount'>;
+  warnings?: ServiceMapWarnings;
+}
+
 const INITIAL_SERVICE_MAP_STATE: SeriviceMapState = {
-  elements: [],
-  nodesCount: 0,
-  tracesCount: 0,
+  nodes: {
+    elements: [],
+    nodesCount: 0,
+    tracesCount: 0,
+  },
 };
 export const useServiceMap = ({
   start,
@@ -106,12 +112,22 @@ export const useServiceMap = ({
     if (data) {
       if ('spans' in data) {
         try {
-          const transformedData = processServiceMapData(data);
+          const paths = getPaths({ spans: data.spans });
+          const transformedData = getServiceMapNodes({
+            connections: paths.connections,
+            exitSpanDestinations: paths.exitSpanDestinations,
+            servicesData: data.servicesData,
+            anomalies: data.anomalies,
+          });
+
           setServiceMapNodes({
             data: {
-              elements: transformedData.elements,
-              nodesCount: transformedData.nodesCount,
-              tracesCount: data.tracesCount,
+              nodes: {
+                elements: transformedData.elements,
+                nodesCount: transformedData.nodesCount,
+                tracesCount: data.tracesCount,
+              },
+              warnings: getWarnings({ exitSpanDestinations: paths.exitSpanDestinations }),
             },
             status: FETCH_STATUS.SUCCESS,
           });
@@ -124,7 +140,10 @@ export const useServiceMap = ({
         }
       } else {
         setServiceMapNodes({
-          data,
+          data: {
+            ...INITIAL_SERVICE_MAP_STATE,
+            nodes: data,
+          },
           status: FETCH_STATUS.SUCCESS,
         });
       }
@@ -132,14 +151,4 @@ export const useServiceMap = ({
   }, [data, status, error]);
 
   return serviceMapNodes;
-};
-
-const processServiceMapData = (data: ServiceMapRawResponse): GroupResourceNodesResponse => {
-  const paths = getPaths({ spans: data.spans });
-  return getServiceMapNodes({
-    connections: paths.connections,
-    exitSpanDestinations: paths.exitSpanDestinations,
-    servicesData: data.servicesData,
-    anomalies: data.anomalies,
-  });
 };
