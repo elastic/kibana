@@ -80,6 +80,10 @@ const AppWithExecutionContext = ({
   const isAgentlessEnabled =
     (isCloud || isServerless) && plugins.fleet?.config.agentless?.enabled === true;
 
+  const indexMappingComponent = plugins.indexManagementPlugin?.getIndexMappingComponent({
+    history: params.history,
+  });
+
   const appContext = {
     connectorTypes,
     isCloud,
@@ -87,6 +91,7 @@ const AppWithExecutionContext = ({
     plugins,
     isAgentlessEnabled,
     kibanaVersion: 'main',
+    indexMappingComponent,
   };
   return (
     <Router history={params.history}>

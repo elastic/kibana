@@ -38,12 +38,14 @@ import {
 } from './access_control_index_selector/access_control_index_selector';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 import { stripSearchPrefix } from '../../utils/strip_search_prefix';
+import { useAppContext } from '../../app_context';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic);
+  const { indexMappingComponent } = useAppContext();
 
-  const IndexMappingComponent = useMemo(() => indexMappingComponent, []);
+  const IndexMappingComponent = useMemo(() => indexMappingComponent, [indexMappingComponent]);
 
   const [selectedIndexType, setSelectedIndexType] =
     useState<AccessControlSelectorOption['value']>('content-index');

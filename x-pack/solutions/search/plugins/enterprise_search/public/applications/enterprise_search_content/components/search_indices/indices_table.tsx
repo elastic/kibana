@@ -21,7 +21,12 @@ import { i18n } from '@kbn/i18n';
 
 import { ElasticsearchViewIndex, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
 
-import { EuiLinkTo, EuiBadgeTo } from '@kbn/search-connectors-plugin/public';
+import {
+  EuiLinkTo,
+  EuiBadgeTo,
+  ingestionStatusToText,
+  ingestionStatusToColor,
+} from '@kbn/search-connectors-plugin/public';
 
 import { Meta } from '../../../../../common/types/pagination';
 import { healthColorsMap } from '../../../shared/constants/health_colors';
@@ -29,10 +34,6 @@ import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ingestionMethodToText, isConnectorIndex } from '../../utils/indices';
-import {
-  ingestionStatusToColor,
-  ingestionStatusToText,
-} from '../../utils/ingestion_status_helpers';
 
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];

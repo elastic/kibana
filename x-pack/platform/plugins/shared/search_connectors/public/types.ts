@@ -14,6 +14,7 @@ import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { Pagination } from '@elastic/eui';
+import { IndexManagementPluginStart, IndexMappingProps } from '@kbn/index-management-shared-types';
 
 export interface SearchConnectorsPluginSetup {
   // we don't have docLinks here yet
@@ -35,6 +36,7 @@ export interface SearchConnectorsPluginStartDependencies {
   fleet?: FleetStart;
   cloud?: CloudSetup & CloudStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
+  indexManagementPlugin?: IndexManagementPluginStart;
 }
 
 export interface AppDependencies {
@@ -44,6 +46,7 @@ export interface AppDependencies {
   hasPlatinumLicense: boolean;
   plugins: SearchConnectorsPluginStartDependencies;
   isAgentlessEnabled: boolean;
+  indexMappingComponent?: React.FC<IndexMappingProps>;
 }
 
 export const DEFAULT_DOCS_PER_PAGE = 25;

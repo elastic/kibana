@@ -45,6 +45,7 @@ export {
 } from './components/search_index/connector';
 
 export { DefaultSettingsFlyout } from './components/settings/default_settings_flyout';
+export { ingestionStatusToColor, ingestionStatusToText } from './utils/ingestion_status_helpers';
 
 export {
   SyncJobs,
@@ -58,4 +59,16 @@ export {
   ConnectorNameAndDescriptionLogic,
 } from './components/connector_detail';
 
-export { mappingsWithPropsApiLogic } from './api';
+export type {
+  CancelSyncsActions,
+  DeleteIndexApiLogicArgs,
+  DeleteIndexApiLogicValues,
+  FetchIndexActions,
+  FetchIndexApiResponse,
+} from './api';
+export {
+  mappingsWithPropsApiLogic,
+  CancelSyncsApiLogic,
+  DeleteIndexApiLogic,
+  FetchIndexApiLogic,
+} from './api';

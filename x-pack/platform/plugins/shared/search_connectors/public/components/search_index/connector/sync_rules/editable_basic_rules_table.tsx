@@ -37,9 +37,9 @@ import { docLinks } from '../../../shared/doc_links';
 import {
   InlineEditableTableLogic,
   InlineEditableTableProps,
-} from '../../../shared/inline_editable_table/inline_editable_table_logic';
-import { InlineEditableTable } from '../../../shared/inline_editable_table';
-import { FormErrors, InlineEditableTableColumn } from '../../../shared/inline_editable_table/types';
+} from '../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import { InlineEditableTable } from '../../../shared/tables/inline_editable_table';
+import { FormErrors, InlineEditableTableColumn } from '../../../shared/tables/inline_editable_table/types';
 import { ItemWithAnID } from '../../../shared/types';
 
 const instanceId = 'FilteringRulesTable';

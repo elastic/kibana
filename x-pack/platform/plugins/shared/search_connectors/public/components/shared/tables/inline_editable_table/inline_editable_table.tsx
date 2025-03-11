@@ -21,7 +21,8 @@ import { InlineEditableTableLogic } from './inline_editable_table_logic';
 import { FormErrors, InlineEditableTableColumn } from './types';
 
 import './inline_editable_tables.scss';
-import { ItemWithAnID } from '../types';
+import { ItemWithAnID } from '../../types';
+import { PageIntroduction } from '../../page_introduction/page_introduction';
 
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
