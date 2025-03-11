@@ -58,4 +58,3 @@ export const getValidatorNode = ({ esClient }: { esClient: ElasticsearchClient }
     });
   };
 };
-
