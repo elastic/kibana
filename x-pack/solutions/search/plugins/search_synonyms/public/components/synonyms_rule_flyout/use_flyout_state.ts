@@ -51,7 +51,7 @@ export const useFlyoutState = ({
         }) !== synonymRule.synonyms;
 
   const canSave =
-    !!fromTerms.length &&
+    fromTerms.length > 0 &&
     !(isExplicit && !mapToTerms) &&
     hasChanges &&
     !isFromTermsInvalid &&
@@ -67,19 +67,14 @@ export const useFlyoutState = ({
   };
 
   const isValid = (value: string) => {
-    if (value !== '' && value.trim() === '') {
+    const trimmedValue = value.trim();
+    if (value !== '' && trimmedValue === '') {
       setIsFromTermsInvalid(true);
       setFromTermErrors([ERROR_MESSAGES.empty_from_term]);
       return false;
     }
 
-    if (
-      isExplicit &&
-      value
-        .trim()
-        .split(',')
-        .some((term) => term.trim().includes('=>'))
-    ) {
+    if (isExplicit && trimmedValue.includes('=>')) {
       setIsFromTermsInvalid(true);
       setFromTermErrors([ERROR_MESSAGES.multiple_explicit_separator]);
       return false;
@@ -97,17 +92,18 @@ export const useFlyoutState = ({
   };
 
   const isMapToValid = (value: string) => {
-    if (value !== '' && value.trim() === '') {
+    const trimmedValue = value.trim();
+    if (value !== '' && trimmedValue === '') {
       setIsMapToTermsInvalid(true);
       setMapToTermErrors([ERROR_MESSAGES.empty_to_term]);
       return false;
     }
-    if (value.trim().includes('=>')) {
+    if (trimmedValue.includes('=>')) {
       setIsMapToTermsInvalid(true);
       setMapToTermErrors([ERROR_MESSAGES.multiple_explicit_separator]);
       return false;
     }
-    if (value.trim().split(',').includes('') || value.trim().split(',').includes(' ')) {
+    if (trimmedValue.split(',').some((term) => term.trim() === '')) {
       setIsMapToTermsInvalid(true);
       setMapToTermErrors([ERROR_MESSAGES.empty_to_term]);
       return false;

@@ -112,7 +112,7 @@ describe('SynonymRuleFlyout', () => {
       expect(screen.queryByTestId(TEST_IDS.MapToTermsInput)).not.toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
     });
     it('should render the flyout for explicit synonyms', () => {
       render(
@@ -144,7 +144,7 @@ describe('SynonymRuleFlyout', () => {
       expect(screen.getByTestId(TEST_IDS.MapToTermsInput)).toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
     });
 
     it('should call backend with correct payload for equivalent synonyms', () => {
@@ -162,8 +162,12 @@ describe('SynonymRuleFlyout', () => {
           />
         </Wrapper>
       );
+
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+
       ACTIONS.AddFromTerm('from1');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
 
       ACTIONS.AddFromTerm('from2');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
@@ -193,8 +197,10 @@ describe('SynonymRuleFlyout', () => {
       );
       ACTIONS.AddFromTerm('from1');
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
 
       ACTIONS.AddMapToTerm('to1');
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
       ACTIONS.PressSaveChangesButton();
 
       expect(mutateMock).toHaveBeenCalledWith({
@@ -267,7 +273,7 @@ describe('SynonymRuleFlyout', () => {
       expect(screen.queryByTestId(TEST_IDS.MapToTermsInput)).not.toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
     });
 
     it('should call backend with correct payload for equivalent synonyms', () => {
@@ -286,7 +292,9 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
 
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
       ACTIONS.AddFromTerm('synonym3');
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('3 terms');
 
       ACTIONS.PressSaveChangesButton();
@@ -331,7 +339,7 @@ describe('SynonymRuleFlyout', () => {
       expect(screen.getByTestId(TEST_IDS.MapToTermsInput)).toHaveValue('explicit-to');
       expect(screen.queryByTestId(TEST_IDS.HasChangesBadge)).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_IDS.ResetChangesButton)).toBeDisabled();
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
     });
     it('should call backend with correct payload for explicit synonyms', () => {
       render(
@@ -349,7 +357,9 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
 
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
       ACTIONS.AddMapToTerm('explicit-to-2');
+      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
       ACTIONS.PressSaveChangesButton();
 
       expect(mutateMock).toHaveBeenCalledWith({

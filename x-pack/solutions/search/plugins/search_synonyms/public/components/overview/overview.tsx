@@ -46,7 +46,7 @@ export const SearchSynonymsOverview = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
     >
-      {synonymsData && !isInitialLoading && !isError && synonymsData._meta.totalItemCount !== 0 && (
+      {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
           pageTitle="Synonyms"
           restrictWidth
