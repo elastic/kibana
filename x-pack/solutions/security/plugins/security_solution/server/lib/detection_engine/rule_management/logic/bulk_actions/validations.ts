@@ -104,7 +104,7 @@ export const validateBulkEditRule = async ({
     }
 
     // Rule customization is disabled; only certain actions can be applied to immutable rules
-    const canRuleBeEdited = istEditApplicableToImmutableRule(edit);
+    const canRuleBeEdited = isEditApplicableToImmutableRule(edit);
     if (!canRuleBeEdited) {
       await throwDryRunError(
         () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
@@ -120,7 +120,7 @@ export const validateBulkEditRule = async ({
 /**
  * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
  */
-const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
+const isEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
   const applicableActions: BulkActionEditType[] = [
     BulkActionEditTypeEnum.set_rule_actions,
     BulkActionEditTypeEnum.add_rule_actions,
