@@ -6,17 +6,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
 import avcBannerBackground from '@kbn/avc-banner/src/avc_banner_background.svg';
-import { EuiSpacer, EuiButton, EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiButton } from '@elastic/eui';
 import { type CallOutMessage } from '../../../../common/components/callouts';
 import { useCallOutStorage } from '../../../../common/components/callouts/use_callout_storage';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { BackgroundImageCallout } from '../background_image_callout';
 
 export function BlogPostPrebuiltRuleCustomizationCallout() {
-  const { euiTheme } = useEuiTheme();
-
   // URL is currently only available in ESS. So we are only showing this callout in ESS for now.
   const blogPostUrl =
     useKibana().services.docLinks.links.securitySolution.prebuiltRuleCustomizationPromoBlog;
@@ -48,21 +46,14 @@ export function BlogPostPrebuiltRuleCustomizationCallout() {
   if (blogPostUrl && isVisible(calloutMessage)) {
     return (
       <>
-        <EuiCallOut
+        <BackgroundImageCallout
+          backgroundImage={avcBannerBackground}
           title={calloutMessage.title}
+          description={calloutMessage.description}
           color={calloutMessage.type}
           iconType="cheer"
           onDismiss={handleDismiss}
-          css={css`
-            padding-left: ${euiTheme.size.xl};
-            background-image: url(${avcBannerBackground});
-            background-repeat: no-repeat;
-            background-position-x: right;
-            background-position-y: bottom;
-          `}
-        >
-          {calloutMessage.description}
-        </EuiCallOut>
+        />
         <EuiSpacer size="l" />
       </>
     );
