@@ -173,7 +173,9 @@ describe('Migrations: Translated Rules Page', () => {
 
   describe('With No MigrationId', () => {
     test('should render empty page when no translated rules are available', () => {
-      renderTestComponent();
+      renderTestComponent({
+        wrapper: TestProviders,
+      });
 
       expect(screen.getByTestId('siemMigrationsTranslatedRulesEmptyPageHeader')).toBeVisible();
       expect(screen.queryByTestId('siemMigrationsRulesTable')).toBeNull();
