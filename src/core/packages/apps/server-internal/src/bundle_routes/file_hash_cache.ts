@@ -22,8 +22,8 @@ export interface IFileHashCache {
 export class FileHashCache implements IFileHashCache {
   private lru: LRUCache<string, Promise<string>>;
 
-  constructor(maxSize: number = 250) {
-    this.lru = new LRUCache({ max: maxSize });
+  constructor(maxItems: number = 250) {
+    this.lru = new LRUCache({ max: maxItems });
   }
 
   get(key: string) {
