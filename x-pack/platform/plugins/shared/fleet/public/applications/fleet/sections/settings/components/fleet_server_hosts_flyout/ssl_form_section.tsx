@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiTextArea, EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTextArea,
+  EuiFormRow,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiPanel,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -26,10 +33,12 @@ interface Props {
     sslESKey: boolean;
   };
   onToggleSecretAndClearValue: (secretEnabled: boolean) => void;
+  hasTitle?: boolean;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs, useSecretsStorage, isConvertedToSecret, onToggleSecretAndClearValue } = props;
+  const { inputs, useSecretsStorage, isConvertedToSecret, onToggleSecretAndClearValue, hasTitle } =
+    props;
 
   const clientAuthenticationsOptions = [
     {
@@ -50,207 +59,222 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
   ];
   return (
     <>
-      <MultiRowInput
-        placeholder={i18n.translate(
-          'xpack.fleet.settings.fleetServerHosts.sslCertificateAuthoritiesInputPlaceholder',
-          {
-            defaultMessage: 'Specify certificate authority',
-          }
+      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+        {hasTitle && (
+          <EuiTitle size="s">
+            <h3 id="FleetEditOutputFlyoutKafkaAuthenticationTitle">
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.sslAuthenticationTitle"
+                defaultMessage="Authentication"
+              />
+            </h3>
+          </EuiTitle>
         )}
-        label={i18n.translate(
-          'xpack.fleet.settings.fleetServerHosts.sslCertificateAuthoritiesInputLabel',
-          {
-            defaultMessage: 'Server SSL certificate authorities',
-          }
-        )}
-        multiline={true}
-        sortable={false}
-        {...inputs.sslCertificateAuthoritiesInput.props}
-      />
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHosts.sslCertificateInputLabel"
-            defaultMessage="Client SSL certificate"
-          />
-        }
-        {...inputs.sslCertificateInput.formRowProps}
-      >
-        <EuiTextArea
-          fullWidth
-          rows={5}
-          {...inputs.sslCertificateInput.props}
+        <EuiSpacer size="s" />
+        <MultiRowInput
           placeholder={i18n.translate(
-            'xpack.fleet.settings.fleetServerHosts.sslCertificateInputPlaceholder',
+            'xpack.fleet.settings.fleetServerHosts.sslCertificateAuthoritiesInputPlaceholder',
             {
-              defaultMessage: 'Specify SSL certificate',
+              defaultMessage: 'Specify certificate authority',
             }
           )}
+          label={i18n.translate(
+            'xpack.fleet.settings.fleetServerHosts.sslCertificateAuthoritiesInputLabel',
+            {
+              defaultMessage: 'Server SSL certificate authorities',
+            }
+          )}
+          multiline={true}
+          sortable={false}
+          {...inputs.sslCertificateAuthoritiesInput.props}
         />
-      </EuiFormRow>
-      {!useSecretsStorage ? (
-        <SecretFormRow
+        <EuiFormRow
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.fleet.settings.fleetServerHosts.sslKeyInputLabel"
-              defaultMessage="Client SSL certificate key"
+              id="xpack.fleet.settings.fleetServerHosts.sslCertificateInputLabel"
+              defaultMessage="Client SSL certificate"
             />
           }
-          {...inputs.sslKeyInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-          disabled={!useSecretsStorage}
+          {...inputs.sslCertificateInput.formRowProps}
         >
           <EuiTextArea
             fullWidth
             rows={5}
-            {...inputs.sslKeyInput.props}
+            {...inputs.sslCertificateInput.props}
             placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHosts.sslKeyInputPlaceholder',
+              'xpack.fleet.settings.fleetServerHosts.sslCertificateInputPlaceholder',
               {
-                defaultMessage: 'Specify certificate key',
+                defaultMessage: 'Specify SSL certificate',
               }
             )}
           />
-        </SecretFormRow>
-      ) : (
-        <SecretFormRow
-          fullWidth
-          title={i18n.translate('xpack.fleet.settings.fleetServerHosts.sslKeySecretInputTitle', {
-            defaultMessage: 'Client SSL certificate key',
-          })}
-          {...inputs.sslKeySecretInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          isConvertedToSecret={isConvertedToSecret.sslKey}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-          cancelEdit={inputs.sslKeySecretInput.cancelEdit}
-        >
-          <EuiTextArea
+        </EuiFormRow>
+        {!useSecretsStorage ? (
+          <SecretFormRow
             fullWidth
-            rows={5}
-            {...inputs.sslKeySecretInput.props}
-            data-test-subj="sslKeySecretInput"
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHosts.sslKeySecretInputPlaceholder',
-              {
-                defaultMessage: 'Specify certificate key',
-              }
-            )}
-          />
-        </SecretFormRow>
-      )}
-
-      <MultiRowInput
-        placeholder={i18n.translate(
-          'xpack.fleet.settings.fleetServerHosts.sslEsCertificateAuthoritiesInputPlaceholder',
-          {
-            defaultMessage: 'Specify Elasticsearch certificate authority',
-          }
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHosts.sslKeyInputLabel"
+                defaultMessage="Client SSL certificate key"
+              />
+            }
+            {...inputs.sslKeyInput.formRowProps}
+            useSecretsStorage={useSecretsStorage}
+            onToggleSecretStorage={onToggleSecretAndClearValue}
+            disabled={!useSecretsStorage}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeyInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslKeyInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        ) : (
+          <SecretFormRow
+            fullWidth
+            title={i18n.translate('xpack.fleet.settings.fleetServerHosts.sslKeySecretInputTitle', {
+              defaultMessage: 'Client SSL certificate key',
+            })}
+            {...inputs.sslKeySecretInput.formRowProps}
+            useSecretsStorage={useSecretsStorage}
+            isConvertedToSecret={isConvertedToSecret.sslKey}
+            onToggleSecretStorage={onToggleSecretAndClearValue}
+            cancelEdit={inputs.sslKeySecretInput.cancelEdit}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeySecretInput.props}
+              data-test-subj="sslKeySecretInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslKeySecretInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
         )}
-        label={i18n.translate(
-          'xpack.fleet.settings.fleetServerHosts.sslEsCertificateAuthoritiesInputLabel',
-          {
-            defaultMessage: 'Elasticsearch certificate authorities',
-          }
-        )}
-        multiline={true}
-        sortable={false}
-        {...inputs.sslEsCertificateAuthoritiesInput.props}
-      />
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHosts.sslEsCertificateInputLabel"
-            defaultMessage="SSL certificate for Elasticsearch"
-          />
-        }
-        {...inputs.sslEsCertificateInput.formRowProps}
-      >
-        <EuiTextArea
-          fullWidth
-          rows={5}
-          {...inputs.sslEsCertificateInput.props}
+        <MultiRowInput
           placeholder={i18n.translate(
-            'xpack.fleet.settings.fleetServerHosts.sslEsCertificateInputPlaceholder',
+            'xpack.fleet.settings.fleetServerHosts.sslEsCertificateAuthoritiesInputPlaceholder',
             {
-              defaultMessage: 'Specify Elasticsearch SSL certificate',
+              defaultMessage: 'Specify Elasticsearch certificate authority',
             }
           )}
+          label={i18n.translate(
+            'xpack.fleet.settings.fleetServerHosts.sslEsCertificateAuthoritiesInputLabel',
+            {
+              defaultMessage: 'Elasticsearch certificate authorities',
+            }
+          )}
+          multiline={true}
+          sortable={false}
+          {...inputs.sslEsCertificateAuthoritiesInput.props}
         />
-      </EuiFormRow>
-      {!useSecretsStorage ? (
-        <SecretFormRow
+        <EuiFormRow
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.fleet.settings.fleetServerHosts.sslEsKeyInputLabel"
-              defaultMessage="SSL certificate key for Elasticsearch"
+              id="xpack.fleet.settings.fleetServerHosts.sslEsCertificateInputLabel"
+              defaultMessage="SSL certificate for Elasticsearch"
             />
           }
-          {...inputs.sslESKeyInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-          disabled={!useSecretsStorage}
+          {...inputs.sslEsCertificateInput.formRowProps}
         >
           <EuiTextArea
             fullWidth
             rows={5}
-            {...inputs.sslESKeyInput.props}
+            {...inputs.sslEsCertificateInput.props}
             placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHosts.sslKeyInputPlaceholder',
+              'xpack.fleet.settings.fleetServerHosts.sslEsCertificateInputPlaceholder',
               {
-                defaultMessage: 'Specify certificate key',
+                defaultMessage: 'Specify Elasticsearch SSL certificate',
               }
             )}
           />
-        </SecretFormRow>
-      ) : (
-        <SecretFormRow
+        </EuiFormRow>
+        {!useSecretsStorage ? (
+          <SecretFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHosts.sslEsKeyInputLabel"
+                defaultMessage="SSL certificate key for Elasticsearch"
+              />
+            }
+            {...inputs.sslESKeyInput.formRowProps}
+            useSecretsStorage={useSecretsStorage}
+            onToggleSecretStorage={onToggleSecretAndClearValue}
+            disabled={!useSecretsStorage}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslESKeyInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslKeyInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        ) : (
+          <SecretFormRow
+            fullWidth
+            title={i18n.translate(
+              'xpack.fleet.settings.fleetServerHosts.sslEsKeySecretInputTitle',
+              {
+                defaultMessage: 'SSL certificate key for Elasticsearch',
+              }
+            )}
+            {...inputs.sslESKeySecretInput.formRowProps}
+            useSecretsStorage={useSecretsStorage}
+            isConvertedToSecret={isConvertedToSecret.sslKey}
+            onToggleSecretStorage={onToggleSecretAndClearValue}
+            cancelEdit={inputs.sslESKeySecretInput.cancelEdit}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslESKeySecretInput.props}
+              data-test-subj="sslESKeySecretInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslESKeySecretInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        )}
+        <EuiSpacer size="m" />
+        <EuiFormRow
           fullWidth
-          title={i18n.translate('xpack.fleet.settings.fleetServerHosts.sslEsKeySecretInputTitle', {
-            defaultMessage: 'SSL certificate key for Elasticsearch',
-          })}
-          {...inputs.sslESKeySecretInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          isConvertedToSecret={isConvertedToSecret.sslKey}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-          cancelEdit={inputs.sslESKeySecretInput.cancelEdit}
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.fleetServerHosts.clientAuthenticationInputLabel"
+              defaultMessage="Client auth"
+            />
+          }
         >
-          <EuiTextArea
-            fullWidth
-            rows={5}
-            {...inputs.sslESKeySecretInput.props}
-            data-test-subj="sslESKeySecretInput"
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHosts.sslESKeySecretInputPlaceholder',
-              {
-                defaultMessage: 'Specify certificate key',
-              }
-            )}
+          <EuiRadioGroup
+            style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 30 }}
+            data-test-subj={'fleetServerHosts.clientAuthenticationRadioInput'}
+            options={clientAuthenticationsOptions}
+            compressed
+            {...inputs.sslClientAuthInput.props}
           />
-        </SecretFormRow>
-      )}
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHosts.clientAuthenticationInputLabel"
-            defaultMessage="Client auth"
-          />
-        }
-      >
-        <EuiRadioGroup
-          style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 30 }}
-          data-test-subj={'fleetServerHosts.clientAuthenticationRadioInput'}
-          options={clientAuthenticationsOptions}
-          compressed
-          {...inputs.sslClientAuthInput.props}
-        />
-      </EuiFormRow>
+        </EuiFormRow>
+      </EuiPanel>
     </>
   );
 };

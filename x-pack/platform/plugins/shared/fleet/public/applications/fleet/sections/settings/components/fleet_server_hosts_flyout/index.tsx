@@ -299,6 +299,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
           </EuiFormRow>
           <EuiSpacer size="l" />
           <SSLFormSection
+            hasTitle={true}
             inputs={inputs}
             useSecretsStorage={enableSSLSecrets && useSecretsStorage}
             onToggleSecretAndClearValue={onToggleSecretAndClearValue}
