@@ -110,7 +110,6 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_language_clients: '/language_clients/:pkgkey/overview',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const pagePathGetters: {

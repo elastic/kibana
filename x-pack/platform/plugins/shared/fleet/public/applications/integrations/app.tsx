@@ -34,7 +34,7 @@ import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_con
 import { FleetServerFlyout } from '../fleet/components';
 
 import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
-import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
+import { FLEET_ROUTING_PATHS, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
@@ -145,10 +145,9 @@ export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
-  const isAddIntegrationsPath = !!useRouteMatch(
-    INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy
-  );
-  const allowedToAccess = authz.integrations.readIntegrationPolicies || authz.fleet.all;
+  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const allowedToAccess =
+    authz.integrations.readIntegrationPolicies || authz.integrations.all || authz.fleet.all;
   const missingPrivilegesString = 'MISSING_PRIVILEGES';
 
   if (!allowedToAccess) {
