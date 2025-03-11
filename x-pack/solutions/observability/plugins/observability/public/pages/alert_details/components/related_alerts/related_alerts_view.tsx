@@ -1,0 +1,181 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
+import {
+  ALERT_GROUP,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_UUID,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
+import dedent from 'dedent';
+import moment from 'moment';
+import React from 'react';
+import { TopAlert } from '../../../..';
+import {
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  observabilityAlertFeatureIds,
+} from '../../../../../common/constants';
+import { ObservabilityFields } from '../../../../../common/utils/alerting/types';
+import { useKibana } from '../../../../utils/kibana_react';
+
+interface Props {
+  alert: TopAlert<ObservabilityFields>;
+}
+
+export function RelatedAlertsView({ alert }: Props) {
+  const { services } = useKibana();
+
+  const groups = alert.fields[ALERT_GROUP];
+  const shouldGroups =
+    groups?.map(({ field, value }) => ({
+      bool: {
+        boost: 2.0,
+        must: [
+          { term: { 'kibana.alert.group.field': field } },
+          { term: { 'kibana.alert.group.value': value } },
+        ],
+      },
+    })) ?? [];
+  const shouldRule = alert.fields[ALERT_RULE_UUID]
+    ? [
+        {
+          term: {
+            'kibana.alert.rule.uuid': {
+              value: alert.fields[ALERT_RULE_UUID],
+              boost: 1.0,
+            },
+          },
+        },
+      ]
+    : [];
+  const startDate = moment(alert.fields[ALERT_START]);
+  const tags = alert.fields[ALERT_RULE_TAGS] ?? [];
+  const instanceId = alert.fields[ALERT_INSTANCE_ID]?.split(',') ?? [];
+
+  const esQuery: QueryDslQueryContainer = {
+    bool: {
+      filter: [
+        {
+          range: {
+            'kibana.alert.start': {
+              gte: startDate.clone().subtract(6, 'days').toISOString(),
+              lte: startDate.clone().add(3, 'days').toISOString(),
+            },
+          },
+        },
+      ],
+      should: [
+        ...shouldGroups,
+        ...shouldRule,
+        {
+          function_score: {
+            functions: [
+              {
+                exp: {
+                  [ALERT_START]: {
+                    origin: startDate.toISOString(),
+                    scale: '10m',
+                    offset: '10m',
+                    decay: 0.5,
+                  },
+                },
+                weight: 10,
+              },
+              {
+                script_score: {
+                  script: {
+                    source: dedent(`
+                      double jaccardSimilarity(Set a, Set b) {
+                        if (a.size() == 0 || b.size() == 0) return 0.0;
+                        Set intersection = new HashSet(a);
+                        intersection.retainAll(b);
+                        Set union = new HashSet(a);
+                        union.addAll(b);
+                        return (double) intersection.size() / union.size();
+                      }
+                      Set tagsQuery = new HashSet(params.tags);
+                      Set tagsDoc = new HashSet(doc.containsKey('tags.keyword') ? doc['tags.keyword'].values : []);
+                      return jaccardSimilarity(tagsQuery, tagsDoc);
+                    `),
+                    params: {
+                      tags,
+                    },
+                  },
+                },
+                weight: 5,
+              },
+              {
+                script_score: {
+                  script: {
+                    source: dedent(`
+                      double jaccardSimilarity(Set a, Set b) {
+                        if (a.size() == 0 || b.size() == 0) return 0.0;
+                        Set intersection = new HashSet(a);
+                        intersection.retainAll(b);
+                        Set union = new HashSet(a);
+                        union.addAll(b);
+                        return (double) intersection.size() / union.size();
+                      }
+                      Set instanceIdQuery = new HashSet(params.instanceId);
+                      Set instanceIdDoc = new HashSet();
+                      if (doc.containsKey('kibana.alert.instance.id')) {
+                        String instanceIdStr = doc['kibana.alert.instance.id'].value;
+                        if (instanceIdStr != null && !instanceIdStr.isEmpty()) {
+                          StringTokenizer tokenizer = new StringTokenizer(instanceIdStr, ',');
+                          while (tokenizer.hasMoreTokens()) {
+                            instanceIdDoc.add(tokenizer.nextToken());
+                          }
+                        }
+                      }
+
+                      return jaccardSimilarity(instanceIdQuery, instanceIdDoc);
+                    `),
+                    params: {
+                      instanceId,
+                    },
+                  },
+                },
+                weight: 5,
+              },
+            ],
+            boost_mode: 'multiply',
+          },
+        },
+      ],
+    },
+  };
+
+  const { data } = useSearchAlertsQuery({
+    data: services.data,
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+    consumers: observabilityAlertFeatureIds,
+    query: esQuery,
+    useDefaultContext: true,
+    pageSize: 100,
+    sort: [{ _score: { order: 'desc' } }],
+  });
+
+  console.dir(data);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiSpacer size="xs" />
+      {data?.alerts?.map((a) => (
+        <EuiFlexItem key={a._id}>
+          <span>
+            {a['kibana.alert.rule.name'] ?? 'alert'} -
+            {a['kibana.alert.instance.id'] ?? 'instanceId'} - Relevance: {a._score}
+          </span>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+}
