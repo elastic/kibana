@@ -177,6 +177,13 @@ export class CoreAppsService {
         options: {
           authRequired: true,
         },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'The route is opted out of the authorization since it is a wrapper around core app view',
+          },
+        },
       },
       async (context, request, response) => {
         return response.renderCoreApp();
@@ -188,6 +195,13 @@ export class CoreAppsService {
       {
         path: '/status',
         validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'The route is opted out of the authorization since it is a wrapper around core app view',
+          },
+        },
         options: {
           authRequired: !anonymousStatusPage,
         },
@@ -338,6 +352,12 @@ export class CoreAppsService {
           }),
           query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'The route is opted out of the authorization since it is a catch-all route',
+          },
+        },
       },
       async (context, req, res) => {
         const { query, params } = req;
@@ -366,8 +386,18 @@ export class CoreAppsService {
       }
     );
 
-    router.get({ path: '/core', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
+    router.get(
+      {
+        path: '/core',
+        validate: false,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'The route is opted out of the authorization since it returns static response',
+          },
+        },
+      },
+      async (context, req, res) => res.ok({ body: { version: '0.0.1' } })
     );
 
     registerBundleRoutes({
