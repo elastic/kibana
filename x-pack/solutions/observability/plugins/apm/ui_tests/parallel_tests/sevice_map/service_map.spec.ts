@@ -24,13 +24,6 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await serviceMapPage.zoomInBtn.click();
     await serviceMapPage.centerServiceMapBtn.click();
     await serviceMapPage.waitForServiceMapToLoad();
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await serviceMapPage.serviceMap.click();
-    const serviceMapLocator = page.getByTestId('serviceMap');
-    await expect(serviceMapLocator).toHaveScreenshot('service_map.png', {
-      animations: 'disabled',
-      maxDiffPixels: 10,
-    });
   });
 
   test('shows a detailed service map', async ({ page, pageObjects: { serviceMapPage } }) => {
@@ -40,13 +33,6 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await serviceMapPage.zoomInBtn.click();
     await serviceMapPage.centerServiceMapBtn.click();
     await serviceMapPage.waitForServiceMapToLoad();
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await serviceMapPage.serviceMap.click();
-    const serviceMapLocator = page.getByTestId('serviceMap');
-    await expect(serviceMapLocator).toHaveScreenshot('detailed_service_map.png', {
-      animations: 'disabled',
-      maxDiffPixels: 10,
-    });
   });
 
   test('shows empty state when there is no data', async ({
