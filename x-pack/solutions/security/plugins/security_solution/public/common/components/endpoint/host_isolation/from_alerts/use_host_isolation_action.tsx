@@ -25,6 +25,8 @@ export interface UseHostIsolationActionProps {
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
 }
 
+const emptyArray: AlertTableContextMenuItem[] = [];
+
 export const useHostIsolationAction = ({
   closePopover,
   detailsData,
@@ -77,7 +79,7 @@ export const useHostIsolationAction = ({
   return useMemo<AlertTableContextMenuItem[]>(() => {
     // If user has no Authz, then don't show the menu item at all
     if ((isHostIsolated && !canUnIsolateHost) || !canIsolateHost) {
-      return [];
+      return emptyArray;
     }
 
     const menuItem: AlertTableContextMenuItem = {
