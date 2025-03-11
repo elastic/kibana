@@ -147,7 +147,7 @@ export const OptionsListControl = ({
     delimiter,
     invalidSelections,
     api.uuid,
-    euiTheme.colors.warning
+    euiTheme.colors.warning,
   ]);
 
   const button = (
