@@ -43761,8 +43761,14 @@ paths:
       x-state: Technical Preview
     post:
       description: |
-        Start a new reindex or resume a paused reindex. The following steps are performed during a reindex task:
-        1. Set the index to read-only. 1. Create a new index. 1. Reindex documents into the new index. 1. Create an index alias for the new index. 1. Delete the old index.
+        Start a new reindex or resume a paused reindex.
+        The following steps are performed during a reindex task:
+
+        1. Set the index to read-only.
+        1. Create a new index.
+        1. Reindex documents into the new index.
+        1. Create an index alias for the new index.
+        1. Delete the old index.
       operationId: start-upgrade-reindex
       parameters:
         - description: The name of the index to reindex.

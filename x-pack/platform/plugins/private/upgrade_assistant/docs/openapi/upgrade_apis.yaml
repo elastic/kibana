@@ -166,7 +166,7 @@ paths:
                     }
     post:
       summary: Start or resume reindexing
-      description: >
+      description: |
         Start a new reindex or resume a paused reindex.
         The following steps are performed during a reindex task:
         
