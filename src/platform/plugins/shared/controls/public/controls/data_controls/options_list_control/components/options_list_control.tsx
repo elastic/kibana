@@ -15,10 +15,11 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInputPopover,
-  EuiToken,
   EuiToolTip,
   htmlIdGenerator,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedOptionalPublishingSubjects,
@@ -39,6 +40,7 @@ export const OptionsListControl = ({
 }: {
   controlPanelClassName: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const { api, stateManager, displaySettings } = useOptionsListContext();
 
@@ -121,13 +123,10 @@ export const OptionsListControl = ({
                 )}
                 delay="long"
               >
-                <EuiToken
+                <EuiIcon
                   tabIndex={0}
-                  iconType="alert"
-                  size="s"
-                  color="euiColorVis5"
-                  shape="square"
-                  fill="dark"
+                  type="warningFilled"
+                  color={euiTheme.colors.warning}
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                     invalidSelections.size
                   )}

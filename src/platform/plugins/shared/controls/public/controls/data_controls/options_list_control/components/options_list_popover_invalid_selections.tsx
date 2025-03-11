@@ -70,7 +70,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon
-              type="warning"
+              type="warningFilled"
               color="warning"
               title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
               size="s"

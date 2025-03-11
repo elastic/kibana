@@ -243,7 +243,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
               fieldFormatter={fieldFormatter}
-              isInvalid={selectionHasNotResults}
+              isInvalid={Boolean(value) && selectionHasNotResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               max={max}
               min={min}

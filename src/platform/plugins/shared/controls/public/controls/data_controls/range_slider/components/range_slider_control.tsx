@@ -13,7 +13,7 @@ import {
   EuiRangeTick,
   EuiDualRange,
   EuiDualRangeProps,
-  EuiToken,
+  EuiIcon,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -133,8 +133,10 @@ export const RangeSliderControl: FC<Props> = ({
     [isLoading, displayedMin, displayedMax]
   );
 
-  const euiTheme = useEuiTheme();
-  const styles = rangeSliderControlStyles(euiTheme);
+  const euiThemeContext = useEuiTheme();
+  const {euiTheme} = euiThemeContext;
+  
+  const styles = rangeSliderControlStyles(euiThemeContext);
 
   const getCommonInputProps = useCallback(
     ({
@@ -212,12 +214,10 @@ export const RangeSliderControl: FC<Props> = ({
                 content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
                 delay="long"
               >
-                <EuiToken
+                <EuiIcon
                   tabIndex={0}
-                  iconType="alert"
-                  size="s"
-                  color="euiColorVis5"
-                  shape="square"
+                  type="warningFilled"
+                  color={euiTheme.colors.warning}
                   fill="dark"
                   title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
                 />

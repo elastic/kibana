@@ -30,6 +30,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       }
 
       .euiFormControlLayout {
+        background-color: transparent;
         border: none;
         border-radius: 0;
       }
@@ -50,12 +51,18 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       &:has(input:invalid) {
         --euiFormControlStateColor: ${euiTheme.colors.danger};
       }
+
+      /* Remove the append background so the caution icon looks more natural */
+      .euiFormControlLayout__append {
+        background-color: transparent;
+      }
     `,
 
     // Inputs
     fieldNumbers: {
       rangeSliderFieldNumber: css`
         font-weight: ${euiTheme.font.weight.medium};
+
         &:placeholder-shown,
         &::placeholder {
           font-weight: ${euiTheme.font.weight.regular};
@@ -64,14 +71,12 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       `,
       invalid: css`
         &:not(:invalid) {
-          &::placeholder {
-            color: ${euiTheme.colors.textWarning};
-          }
+          --euiFormControlStateColor: ${euiTheme.colors.warning};
+          color: ${euiTheme.colors.textWarning};
         }
         &:invalid {
-          &::placeholder {
-            color: ${euiTheme.colors.textDanger};
-          }
+          --euiFormControlStateColor: ${euiTheme.colors.danger};
+          color: ${euiTheme.colors.textDanger};
         }
       `,
       // unset the red underline for values between steps
