@@ -24,19 +24,14 @@ import {
 } from '../../common/runtime_types';
 
 export class MonitorConfigRepository {
-  soClient: SavedObjectsClientContract;
-  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   constructor(
-    soClient: SavedObjectsClientContract,
-    encryptedSavedObjectsClient: EncryptedSavedObjectsClient
-  ) {
-    this.soClient = soClient;
-    this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
-  }
+    private soClient: SavedObjectsClientContract,
+    private encryptedSavedObjectsClient: EncryptedSavedObjectsClient
+  ) {}
 
-  get = async (id: string) => {
+  async get(id: string) {
     return await this.soClient.get<EncryptedSyntheticsMonitorAttributes>(syntheticsMonitorType, id);
-  };
+  }
 
   async getDecrypted(id: string, spaceId: string): Promise<SavedObject<SyntheticsMonitor>> {
     const decryptedMonitor =
@@ -118,7 +113,7 @@ export class MonitorConfigRepository {
     });
   }
 
-  findDecryptedMonitors = async ({ spaceId, filter }: { spaceId: string; filter?: string }) => {
+  async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         {
@@ -138,7 +133,7 @@ export class MonitorConfigRepository {
     finder.close().catch(() => {});
 
     return decryptedMonitors;
-  };
+  }
 
   async delete(monitorId: string) {
     return this.soClient.delete(syntheticsMonitorType, monitorId);
@@ -150,7 +145,7 @@ export class MonitorConfigRepository {
     );
   }
 
-  getAll = async ({
+  async getAll({
     search,
     fields,
     filter,
@@ -162,7 +157,7 @@ export class MonitorConfigRepository {
     search?: string;
     filter?: string;
     showFromAllSpaces?: boolean;
-  } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
+  } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) {
     return withApmSpan('get_all_monitors', async () => {
       const finder = this.soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
         type: syntheticsMonitorType,
@@ -185,5 +180,5 @@ export class MonitorConfigRepository {
 
       return hits;
     });
-  };
+  }
 }
