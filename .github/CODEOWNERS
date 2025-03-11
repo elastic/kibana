@@ -1010,7 +1010,6 @@ x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generat
 x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
-x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
@@ -2553,12 +2552,10 @@ x-pack/test/automatic_import_api_integration @elastic/security-scalability
 ## Packages
 x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 ## Plugins
-x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 ## Security Solution sub teams
 x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
