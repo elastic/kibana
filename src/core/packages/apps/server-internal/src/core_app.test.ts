@@ -166,7 +166,6 @@ describe('CoreApp', () => {
             },
             authc: {
               enabled: true,
-              reason: expect.any(String),
             },
           },
         },
