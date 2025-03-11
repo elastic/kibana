@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { css } from '@emotion/css'; // We can't use @emotion/react - this component gets used with plugins that use both styled-components and Emotion
 import { i18n } from '@kbn/i18n';
 import {
@@ -15,6 +15,7 @@ import {
   RuleNotifyWhen,
   RuleAction,
   RuleActionFrequency,
+  AdvancedThrottle,
 } from '@kbn/alerting-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -32,11 +33,15 @@ import {
   EuiContextMenuItem,
   useEuiTheme,
   EuiSuperSelectOption,
+  EuiSwitch,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { DEFAULT_FREQUENCY } from '../constants';
 import { getTimeOptions } from '../utils';
+import { RuleActionsAdvancedThrottle } from './rule_actions_advanced_throttle';
+import { RuleFormActionsErrors } from '../types';
+import { SettingsStart } from '@kbn/core/packages/ui-settings/browser';
 
 const FOR_EACH_ALERT = i18n.translate('responseOpsRuleForm.actiActionsonNotifyWhen.forEachOption', {
   defaultMessage: 'For each alert',
@@ -161,6 +166,8 @@ export interface RuleActionsNotifyWhenProps {
   showMinimumThrottleWarning?: boolean;
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  actionErrors: RuleFormActionsErrors;
+  settings: SettingsStart;
   onChange: (frequency: RuleActionFrequency) => void;
   onUseDefaultMessage: () => void;
 }
@@ -173,12 +180,16 @@ export const RuleActionsNotifyWhen = ({
   showMinimumThrottleWarning,
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
+  actionErrors,
+  settings,
   onChange,
   onUseDefaultMessage,
 }: RuleActionsNotifyWhenProps) => {
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
   const showCustomThrottleOpts = frequency?.notifyWhen === RuleNotifyWhen.THROTTLE;
+
+  const [useAdvancedThrottle, setUseAdvancedThrottle] = useState(!!frequency?.advancedThrottle);
 
   const onNotifyWhenValueChange = useCallback(
     (newValue: RuleNotifyWhenType) => {
@@ -191,6 +202,23 @@ export const RuleActionsNotifyWhen = ({
     },
     [onChange, throttle, throttleUnit, frequency]
   );
+
+  const onAdvancedThrottleChange = useCallback(
+    (advancedThrottle: AdvancedThrottle) => {
+      onChange({
+        ...frequency,
+        advancedThrottle: advancedThrottle,
+      });
+    },
+    [onChange, frequency]
+  );
+
+  useEffect(() => {
+    if (!useAdvancedThrottle) {
+      const { advancedThrottle, ...frequencyWithoutAdvancedThrottle } = frequency;
+      onChange(frequencyWithoutAdvancedThrottle);
+    }
+  }, [useAdvancedThrottle]);
 
   const summaryNotifyWhenOptions = useMemo(
     () => notifyWhenSelectOptions.filter((o) => o.isSummaryOption).map((o) => o.value),
@@ -333,54 +361,84 @@ export const RuleActionsNotifyWhen = ({
           />
           {showCustomThrottleOpts && (
             <>
-              <EuiSpacer size="s" />
+              <EuiSpacer size="m" />
               <EuiFormRow fullWidth>
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={2}>
-                    <EuiFieldNumber
-                      isInvalid={showMinimumThrottleWarning}
-                      min={1}
-                      value={throttle ?? 1}
-                      name="throttle"
-                      data-test-subj="throttleInput"
-                      prepend={i18n.translate(
-                        'responseOpsRuleForm.ruleActionsNotifyWhen.frequencyNotifyWhen.label',
-                        {
-                          defaultMessage: 'Run every',
-                        }
-                      )}
-                      onChange={(e) => {
-                        pipe(
-                          some(e.target.value.trim()),
-                          filter((value) => value !== ''),
-                          map((value) => parseInt(value, 10)),
-                          filter((value) => !isNaN(value)),
-                          map((value) => {
-                            onChange({
-                              ...frequency,
-                              throttle: `${value}${throttleUnit}`,
-                            });
-                          })
-                        );
-                      }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={3}>
-                    <EuiSelect
-                      isInvalid={showMinimumThrottleUnitWarning}
-                      data-test-subj="throttleUnitInput"
-                      value={throttleUnit}
-                      options={getTimeOptions(throttle ?? 1)}
-                      onChange={(e) => {
-                        onChange({
-                          ...frequency,
-                          throttle: `${throttle}${e.target.value}`,
-                        });
-                      }}
+                  <EuiFlexItem>
+                    <EuiSwitch
+                      label="Use advanced settings"
+                      checked={useAdvancedThrottle}
+                      onChange={(e) => setUseAdvancedThrottle(e.target.checked)}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFormRow>
+              {useAdvancedThrottle ? (
+                <RuleActionsAdvancedThrottle
+                  interval={frequency.advancedThrottle?.interval}
+                  freq={frequency.advancedThrottle?.freq}
+                  bymonthday={frequency.advancedThrottle?.bymonthday}
+                  byweekday={frequency.advancedThrottle?.byweekday}
+                  byhour={
+                    frequency.advancedThrottle?.byhour && frequency.advancedThrottle?.byhour[0]
+                  }
+                  byminute={
+                    frequency.advancedThrottle?.byminute && frequency.advancedThrottle?.byminute[0]
+                  }
+                  tzid={frequency.advancedThrottle?.tzid}
+                  actionErrors={actionErrors}
+                  settings={settings}
+                  onChange={onAdvancedThrottleChange}
+                />
+              ) : (
+                <EuiFormRow fullWidth>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={2}>
+                      <EuiFieldNumber
+                        isInvalid={showMinimumThrottleWarning}
+                        min={1}
+                        value={throttle ?? 1}
+                        name="throttle"
+                        data-test-subj="throttleInput"
+                        prepend={i18n.translate(
+                          'responseOpsRuleForm.ruleActionsNotifyWhen.frequencyNotifyWhen.label',
+                          {
+                            defaultMessage: 'Run every',
+                          }
+                        )}
+                        onChange={(e) => {
+                          pipe(
+                            some(e.target.value.trim()),
+                            filter((value) => value !== ''),
+                            map((value) => parseInt(value, 10)),
+                            filter((value) => !isNaN(value)),
+                            map((value) => {
+                              onChange({
+                                ...frequency,
+                                throttle: `${value}${throttleUnit}`,
+                              });
+                            })
+                          );
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={3}>
+                      <EuiSelect
+                        isInvalid={showMinimumThrottleUnitWarning}
+                        data-test-subj="throttleUnitInput"
+                        value={throttleUnit}
+                        options={getTimeOptions(throttle ?? 1)}
+                        onChange={(e) => {
+                          onChange({
+                            ...frequency,
+                            throttle: `${throttle}${e.target.value}`,
+                          });
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              )}
               {(showMinimumThrottleWarning || showMinimumThrottleUnitWarning) && (
                 <>
                   <EuiSpacer size="xs" />

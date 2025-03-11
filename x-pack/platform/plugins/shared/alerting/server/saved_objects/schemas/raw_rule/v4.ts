@@ -8,6 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { rawRuleSchema as rawRuleSchemaV3 } from './v3';
 
+export * from './v3';
+
 const outcome = schema.oneOf([
   schema.literal('succeeded'),
   schema.literal('warning'),

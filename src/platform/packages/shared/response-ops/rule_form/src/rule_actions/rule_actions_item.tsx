@@ -351,8 +351,9 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       if (frequency.summary !== action.frequency?.summary) {
         onDefaultParamsChange(action.group, frequency.summary);
       }
+      validateActionBase(action);
     },
-    [action, onDefaultParamsChange, dispatch]
+    [action, onDefaultParamsChange, dispatch, validateActionBase]
   );
 
   const onActionGroupChange = useCallback(

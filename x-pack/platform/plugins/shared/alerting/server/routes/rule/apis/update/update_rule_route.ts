@@ -12,8 +12,8 @@ import type {
   UpdateRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/update';
 import {
-  updateBodySchemaV1,
-  updateParamsSchemaV1,
+  updateBodySchemaV2,
+  updateParamsSchemaV2,
 } from '../../../../../common/routes/rule/apis/update';
 import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
@@ -40,8 +40,8 @@ export const updateRuleRoute = (
       },
       validate: {
         request: {
-          body: updateBodySchemaV1,
-          params: updateParamsSchemaV1,
+          body: updateBodySchemaV2,
+          params: updateParamsSchemaV2,
         },
         response: {
           200: {

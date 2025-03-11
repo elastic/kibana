@@ -36,3 +36,20 @@ export type {
   UpdateRuleRequestBody as UpdateRuleRequestBodyV1,
   UpdateRuleResponse as UpdateRuleResponseV1,
 } from './types/v1';
+
+// v2
+export {
+  actionFrequencySchema as actionFrequencySchemaV2,
+  actionAlertsFilterSchema as actionAlertsFilterSchemaV2,
+  actionSchema as actionSchemaV2,
+  updateBodySchema as updateBodySchemaV2,
+  updateParamsSchema as updateParamsSchemaV2,
+} from './schemas/v2';
+
+export type {
+  UpdateRuleAction as UpdateRuleActionV2,
+  UpdateRuleActionFrequency as UpdateRuleActionFrequencyV2,
+  UpdateRuleRequestParams as UpdateRuleRequestParamsV2,
+  UpdateRuleRequestBody as UpdateRuleRequestBodyV2,
+  UpdateRuleResponse as UpdateRuleResponseV2,
+} from './types/v2';

@@ -7,8 +7,8 @@
 
 import { omit } from 'lodash';
 import type {
-  UpdateRuleActionV1,
-  UpdateRuleRequestBodyV1,
+  UpdateRuleActionV2,
+  UpdateRuleRequestBodyV2,
 } from '../../../../../../../common/routes/rule/apis/update';
 import type { UpdateRuleData } from '../../../../../../application/rule/methods/update';
 import type {
@@ -17,7 +17,7 @@ import type {
   SystemActionRequest,
 } from '../../../../../../application/rule/types';
 
-export const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): ActionRequest[] => {
+export const transformUpdateBodyActions = (actions: UpdateRuleActionV2[]): ActionRequest[] => {
   if (!actions) {
     return [];
   }
@@ -41,10 +41,13 @@ export const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): Actio
         ...(frequency
           ? {
               frequency: {
-                ...omit(frequency, 'notify_when'),
+                ...omit(frequency, 'notify_when', 'advanced_throttle'),
                 summary: frequency.summary,
                 throttle: frequency.throttle,
                 notifyWhen: frequency.notify_when,
+                ...(frequency.advanced_throttle && {
+                  advancedThrottle: frequency.advanced_throttle,
+                }),
               },
             }
           : {}),
@@ -55,7 +58,7 @@ export const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): Actio
 };
 
 export const transformUpdateBodySystemActions = (
-  actions: UpdateRuleActionV1[]
+  actions: UpdateRuleActionV2[]
 ): SystemActionRequest[] => {
   if (!actions) {
     return [];
@@ -71,7 +74,7 @@ export const transformUpdateBodySystemActions = (
 };
 
 const transformUpdateBodyFlapping = <Params extends RuleParams = never>(
-  flapping: UpdateRuleRequestBodyV1<Params>['flapping']
+  flapping: UpdateRuleRequestBodyV2<Params>['flapping']
 ) => {
   if (!flapping) {
     return flapping;
@@ -87,9 +90,9 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
   actions,
   systemActions,
 }: {
-  updateBody: UpdateRuleRequestBodyV1<Params>;
-  actions: UpdateRuleRequestBodyV1<Params>['actions'];
-  systemActions: UpdateRuleRequestBodyV1<Params>['actions'];
+  updateBody: UpdateRuleRequestBodyV2<Params>;
+  actions: UpdateRuleRequestBodyV2<Params>['actions'];
+  systemActions: UpdateRuleRequestBodyV2<Params>['actions'];
 }): UpdateRuleData<Params> => {
   return {
     name: updateBody.name,

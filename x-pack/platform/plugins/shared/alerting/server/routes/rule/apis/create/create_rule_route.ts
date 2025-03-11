@@ -7,13 +7,13 @@
 
 import { RouteOptions } from '../../..';
 import type {
-  CreateRuleRequestBodyV1,
-  CreateRuleRequestParamsV1,
-  CreateRuleResponseV1,
+  CreateRuleRequestBodyV2,
+  CreateRuleRequestParamsV2,
+  CreateRuleResponseV2,
 } from '../../../../../common/routes/rule/apis/create';
 import {
-  createBodySchemaV1,
-  createParamsSchemaV1,
+  createBodySchemaV2,
+  createParamsSchemaV2,
 } from '../../../../../common/routes/rule/apis/create';
 import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
@@ -41,8 +41,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
       },
       validate: {
         request: {
-          body: createBodySchemaV1,
-          params: createParamsSchemaV1,
+          body: createBodySchemaV2,
+          params: createParamsSchemaV2,
         },
         response: {
           200: {
@@ -70,8 +70,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
-          const params: CreateRuleRequestParamsV1 = req.params;
+          const createRuleData: CreateRuleRequestBodyV2<RuleParamsV1> = req.body;
+          const params: CreateRuleRequestParamsV2 = req.params;
 
           countUsageOfPredefinedIds({
             predefinedId: params?.id,
@@ -109,7 +109,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type
-            const response: CreateRuleResponseV1<RuleParamsV1> = {
+            const response: CreateRuleResponseV2<RuleParamsV1> = {
               body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule),
             };
 

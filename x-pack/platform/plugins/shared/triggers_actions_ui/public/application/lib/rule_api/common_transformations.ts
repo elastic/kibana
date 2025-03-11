@@ -25,6 +25,9 @@ const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
             summary: action.frequency.summary,
             notifyWhen: action.frequency.notify_when,
             throttle: action.frequency.throttle,
+            ...(action.frequency.advanced_throttle && {
+              advancedThrottle: action.frequency.advanced_throttle,
+            }),
           },
         }
       : {}),

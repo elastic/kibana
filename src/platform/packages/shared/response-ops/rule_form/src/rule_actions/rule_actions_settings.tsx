@@ -200,7 +200,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   return (
     <EuiFlexGroup direction="column" data-test-subj="ruleActionsSettings">
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="flexEnd">
+        <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem>
             <RuleActionsNotifyWhen
               frequency={action.frequency}
@@ -211,37 +211,43 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
               onUseDefaultMessage={onUseDefaultMessageChange}
               showMinimumThrottleWarning={showMinimumThrottleWarning}
               showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+              actionErrors={actionError}
+              settings={settings}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             {showSelectActionGroup && (
-              <EuiSuperSelect
-                prepend={
-                  <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}>
-                    {ACTION_GROUP_RUN_WHEN}
-                  </EuiFormLabel>
-                }
-                data-test-subj="ruleActionsSettingsSelectActionGroup"
-                fullWidth
-                id={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
-                options={actionGroups.map(({ id: value, name }) => ({
-                  value,
-                  ['data-test-subj']: `addNewActionConnectorActionGroup-${value}`,
-                  inputDisplay: actionGroupDisplay({
-                    ruleType: selectedRuleType,
-                    actionGroupId: value,
-                    actionGroupName: name,
-                    actionTypeId: action.actionTypeId,
-                  }),
-                  disabled: isActionGroupDisabledForActionType(
-                    selectedRuleType,
+              <EuiFormRow fullWidth label={' '}>
+                <EuiSuperSelect
+                  prepend={
+                    <EuiFormLabel
+                      htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                    >
+                      {ACTION_GROUP_RUN_WHEN}
+                    </EuiFormLabel>
+                  }
+                  data-test-subj="ruleActionsSettingsSelectActionGroup"
+                  fullWidth
+                  id={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                  options={actionGroups.map(({ id: value, name }) => ({
                     value,
-                    action.actionTypeId
-                  ),
-                }))}
-                valueOfSelected={selectedActionGroup.id}
-                onChange={onActionGroupChange}
-              />
+                    ['data-test-subj']: `addNewActionConnectorActionGroup-${value}`,
+                    inputDisplay: actionGroupDisplay({
+                      ruleType: selectedRuleType,
+                      actionGroupId: value,
+                      actionGroupName: name,
+                      actionTypeId: action.actionTypeId,
+                    }),
+                    disabled: isActionGroupDisabledForActionType(
+                      selectedRuleType,
+                      value,
+                      action.actionTypeId
+                    ),
+                  }))}
+                  valueOfSelected={selectedActionGroup.id}
+                  onChange={onActionGroupChange}
+                />
+              </EuiFormRow>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
