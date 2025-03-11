@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys } from 'lodash';
 import { Alert } from '../alert/alert';
-import {
-  AlertFactory,
-  createAlertFactory,
-  getPublicAlertFactory,
-} from '../alert/create_alert_factory';
+import type { AlertFactory } from '../alert/create_alert_factory';
+import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { toRawAlertInstances, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import type {

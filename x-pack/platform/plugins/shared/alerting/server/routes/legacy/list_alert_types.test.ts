@@ -13,7 +13,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RecoveredActionGroup } from '../../../common';
-import { RegistryAlertTypeWithAuth } from '../../authorization';
+import type { RegistryAlertTypeWithAuth } from '../../authorization';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 

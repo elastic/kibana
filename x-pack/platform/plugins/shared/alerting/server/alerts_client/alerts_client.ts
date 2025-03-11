@@ -33,10 +33,10 @@ import type {
 } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
-import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
 import type { AlertRule, DetermineDelayedAlertsOpts, LogAlertsOpts, SearchResult } from './types';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
-import {
+import type {
   IAlertsClient,
   InitializeExecutionOpts,
   TrackedAlerts,
