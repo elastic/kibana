@@ -15,6 +15,7 @@ import { processingRoutes } from './streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
 import { lifecycleRoutes } from './streams/lifecycle/route';
 import { groupRoutes } from './streams/group/route';
+import { contentPacksRoutes } from './content_packs/route';
 
 export const streamsRouteRepository = {
   ...esqlRoutes,
@@ -27,6 +28,7 @@ export const streamsRouteRepository = {
   ...ingestRoutes,
   ...lifecycleRoutes,
   ...groupRoutes,
+  ...contentPacksRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;
