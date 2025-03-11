@@ -3047,6 +3047,10 @@ describe('Package policy service', () => {
         references: [],
       };
 
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [{ ...mockPackagePolicy }],
+      });
+
       soClient.get.mockResolvedValueOnce({
         ...mockPackagePolicy,
       });
