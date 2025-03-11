@@ -25,35 +25,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
   const ml = getService('ml');
-  const log = getService('log');
 
   describe('recall', function () {
     before(async () => {
-      await deleteKnowledgeBaseModel(ml).catch(() => {
-        log.error('Failed to delete knowledge base model');
-      });
-      await deleteInferenceEndpoint({ es }).catch(() => {
-        log.error('Failed to delete inference endpoint');
-      });
-      await clearKnowledgeBase(es).catch(() => {
-        log.error('Failed to clear knowledge base');
-      });
-      await es.indices
-        .delete({ index: customSearchConnectorIndex }, { ignore: [404] })
-        .catch(() => {
-          log.error('Failed to clear custom index');
-        });
-
       await addSampleDocsToInternalKb(getService);
       await addSampleDocsToCustomIndex(getService);
     });
 
     after(async () => {
-      // await deleteKnowledgeBaseModel(ml);
-      // await deleteInferenceEndpoint({ es });
-      // await clearKnowledgeBase(es);
-      // // clear custom index
-      // await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] });
+      await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es });
+      await clearKnowledgeBase(es);
+      // clear custom index
+      await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] });
     });
 
     describe('GET /internal/observability_ai_assistant/functions/recall', () => {
