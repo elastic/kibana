@@ -172,8 +172,7 @@ export default ({ getService }: FtrProviderContext) => {
           const url = await browser.getCurrentUrl();
           const from = 'rangeFrom:now-30d';
           const to = 'rangeTo:now';
-          const status =
-            '(exclude:!f,existsSelected:!f,fieldName:kibana.alert.status,hideActionBar:!t,selectedOptions:!(active),title:Status)';
+          const status = 'selectedOptions:!(active),title:Status';
 
           expect(url.includes('tabId=alerts')).to.be(true);
           expect(url.includes(status.replaceAll(':', '%3A').replaceAll(',', '%2C'))).to.be(true);
@@ -191,8 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
           const url = await browser.getCurrentUrl();
           const from = 'rangeFrom:now-30d';
           const to = 'rangeTo:now';
-          const status =
-            '(exclude:!f,existsSelected:!f,fieldName:kibana.alert.status,hideActionBar:!t,selectedOptions:!(),title:Status)';
+          const status = 'selectedOptions:!(),title:Status';
 
           expect(url.includes('tabId=alerts')).to.be(true);
           expect(url.includes(status.replaceAll(':', '%3A').replaceAll(',', '%2C'))).to.be(true);
