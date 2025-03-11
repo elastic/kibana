@@ -81,6 +81,7 @@ interface PolicyTemplateVarsFormProps {
   setupTechnology: SetupTechnology;
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
+  showCloudConnectors: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({

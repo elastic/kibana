@@ -40,7 +40,6 @@ import type {
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 import {
-  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/get_aws_credentials_form_options';
@@ -219,10 +218,13 @@ export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): stri
 
 export const getDefaultAwsCredentialsType = (
   packageInfo: PackageInfo,
+  showCloudConnectors: boolean,
   setupTechnology?: SetupTechnology
 ): AwsCredentialsType => {
   if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
+    return showCloudConnectors
+      ? AWS_CREDENTIALS_TYPE.ASSUME_ROLE
+      : AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
   }
 
   const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
@@ -286,13 +288,14 @@ export const getDefaultGcpHiddenVars = (
 export const getPostureInputHiddenVars = (
   inputType: PostureInput,
   packageInfo: PackageInfo,
-  setupTechnology: SetupTechnology
+  setupTechnology: SetupTechnology,
+  showCloudConnectors: boolean
 ): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
       return {
         'aws.credentials.type': {
-          value: getDefaultAwsCredentialsType(packageInfo, setupTechnology),
+          value: getDefaultAwsCredentialsType(packageInfo, showCloudConnectors, setupTechnology),
           type: 'text',
         },
       };

@@ -100,6 +100,7 @@ export interface AwsFormProps {
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
+  showCloudConnectors: boolean;
 }
 
 const CloudFormationSetup = ({

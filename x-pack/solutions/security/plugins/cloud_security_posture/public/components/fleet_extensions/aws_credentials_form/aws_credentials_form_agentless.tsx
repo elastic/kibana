@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common/types';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
@@ -100,8 +99,8 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
     [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
       intro: (
         <FormattedMessage
-          id="xpack.csp.agentlessForm.cloudFormation.guide.cloudConnectors.description"
-          defaultMessage="An IAM role Amazon Resource Name (ARN) is an IAM identity that you can create in your AWS account. When creating an IAM role, users can define the role’s permissions. Roles do not have standard long-term credentials such as passwords or access keys."
+          id="xpack.csp.agentlessForm.cloudFormation.guide.description.cloudConnectors"
+          defaultMessage="An IAM role Amazon Resource Name (ARN) is an IAM identity that you can create in your AWS account. When creating an IAM role, users can define the role’s permissions. Roles do not have standard long-term credentials such as passwords or access keys. {learnMore}."
           values={{
             learnMore: (
               <EuiLink
@@ -239,9 +238,10 @@ export const AwsCredentialsFormAgentless = ({
   isEditPage,
   setupTechnology,
   hasInvalidRequiredVars,
+  showCloudConnectors,
 }: AwsFormProps) => {
   const { cloud } = useKibana().services;
-  const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
+
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
   // Elastic Service ID refers to the deployment ID or project ID
@@ -258,15 +258,10 @@ export const AwsCredentialsFormAgentless = ({
         ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
         ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
     : undefined;
-  // Todo: Remove feature flag cloudConnectorsEnabled  before release.
-  // Feature flag to detect if serverless project or deployment was created on AWS cluster
-  const showCloudConnectors =
-    cloud?.csp === 'aws' && !!cloudConnectorRemoteRoleTemplate && cloudConnectorsEnabled;
 
-  const awsCredentialsType = getAgentlessCredentialsType(input, true);
+  const awsCredentialsType = getAgentlessCredentialsType(input, showCloudConnectors);
 
   const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
-
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
@@ -310,7 +305,7 @@ export const AwsCredentialsFormAgentless = ({
   const isCloudFormationSupported =
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
     awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
-  const agentlessOptions = true // Todo change to showCloudConnectors
+  const agentlessOptions = showCloudConnectors
     ? getAwsCloudConnectorsCredentialsFormOptions()
     : getAwsAgentlessFormOptions();
 
@@ -344,8 +339,8 @@ export const AwsCredentialsFormAgentless = ({
         type={awsCredentialsType}
         options={
           showCloudConnectors
-            ? getAwsCredentialsFormAgentlessOptions()
-            : getAwsCloudConnectorsFormAgentlessOptions()
+            ? getAwsCloudConnectorsFormAgentlessOptions()
+            : getAwsCredentialsFormAgentlessOptions()
         }
         disabled={!!isEditPage && awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE}
         onChange={(optionId) => {
