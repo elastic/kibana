@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+
+import { useStartServices } from '../hooks';
 
 import { MissingESRequirementsPage } from '../applications/fleet/sections/agents/agent_requirements_page';
 
@@ -44,6 +46,8 @@ export const PermissionsError: React.FunctionComponent<{
   requiredFleetRole?: string;
   callingApplication: string;
 }> = React.memo(({ error, requiredFleetRole, callingApplication }) => {
+  const { docLinks } = useStartServices();
+
   if (error === 'MISSING_SECURITY') {
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }
@@ -74,11 +78,23 @@ export const PermissionsError: React.FunctionComponent<{
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.permissionDeniedErrorMessage"
-                  defaultMessage="You are not authorized to access {callingApplication}. Kibana privileges are required to access {callingApplication}; the {roleName2} or {roleName1} privilege is required to access {callingApplication}"
+                  defaultMessage="You are not currently authorized to access {callingApplication}. For access, your Kibana role must include the {roleName2} or {roleName1} privilege for {callingApplication}. {guideLink}"
                   values={{
                     callingApplication,
                     roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
                     roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
+                    guideLink: (
+                      <EuiLink
+                        href={docLinks.links.fleet.roleAndPrivileges}
+                        target="_blank"
+                        external
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.settings.rolesAndPrivilegesGuideLink"
+                          defaultMessage="Learn more."
+                        />
+                      </EuiLink>
+                    ),
                   }}
                 />
               )}
