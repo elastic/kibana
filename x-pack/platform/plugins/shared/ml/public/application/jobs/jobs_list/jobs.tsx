@@ -24,6 +24,7 @@ import {
   AnomalyDetectionSettingsButton,
   SuppliedConfigurationsButton,
 } from './components/supplied_configurations_button';
+import { NewJobButton } from './components/new_job_button';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -63,18 +64,23 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
     <>
       <MlPageHeader>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem grow={true}>
             <FormattedMessage
               id="xpack.ml.jobsList.title"
               defaultMessage="Anomaly Detection Jobs"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SuppliedConfigurationsButton />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AnomalyDetectionSettingsButton />
-          </EuiFlexItem>
+          <EuiFlexGroup grow={false} direction="row" gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <SuppliedConfigurationsButton />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AnomalyDetectionSettingsButton />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <NewJobButton size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </MlPageHeader>
       <HeaderMenuPortal>

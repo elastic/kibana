@@ -15,7 +15,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useMlManagementLocator } from '../../../../contexts/kibana';
 
-export function NewJobButton() {
+export function NewJobButton({ size = 's' }) {
+  //@TODO: remove
+  console.log(`--@@size`, size);
   const canCreateJob = usePermissionCheck('canCreateJob');
   const buttonEnabled = canCreateJob && mlNodesAvailable();
   const mlLocator = useMlManagementLocator();
@@ -33,7 +35,7 @@ export function NewJobButton() {
     <EuiButton
       data-test-subj="mlCreateNewJobButton"
       onClick={redirectToCreateJobSelectIndexPage}
-      size="s"
+      size={size}
       disabled={buttonEnabled === false}
       fill
       iconType="plusInCircle"

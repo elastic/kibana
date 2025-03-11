@@ -18,6 +18,7 @@ export const SuppliedConfigurationsButton = () => {
 
   return (
     <EuiButtonEmpty
+      size="m"
       iconType="listAdd"
       onClick={redirectToSuppliedConfigurationsPage}
       flush="left"
@@ -39,6 +40,7 @@ export const AnomalyDetectionSettingsButton = () => {
 
   return (
     <EuiButtonEmpty
+      size="m"
       iconType="gear"
       onClick={redirectToAnomalyDetectionSettingsPage}
       flush="left"

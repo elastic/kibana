@@ -44,7 +44,7 @@ export const jobListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
     },
   ],
   'data-test-subj': 'mlPageJobManagement',
-  enableDatePicker: true,
+  enableDatePicker: false,
 });
 
 const PageWrapper: FC = () => {
