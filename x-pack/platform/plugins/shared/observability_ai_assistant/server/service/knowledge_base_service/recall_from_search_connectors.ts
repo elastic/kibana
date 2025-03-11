@@ -72,24 +72,31 @@ async function recallFromSemanticTextConnectors({
     index: connectorIndices,
     fields: `*`,
     allow_no_indices: true,
-    types: ['semantic_text'],
+    types: ['text'],
     filters: '-metadata,-parent',
   });
 
-  const semanticTextFields = Object.keys(fieldCaps.fields);
-  if (!semanticTextFields.length) {
+  const textFields = Object.keys(fieldCaps.fields);
+  if (!textFields.length) {
+    logger.debug(`No text fields found in indices: ${connectorIndices}`);
     return [];
   }
-  logger.debug(`Semantic text field for search connectors: ${semanticTextFields}`);
+
+  logger.debug(`Text field for search connectors: ${textFields}`);
 
   const params = {
     index: connectorIndices,
     size: 20,
     query: {
       bool: {
-        should: semanticTextFields.flatMap((field) => {
+        should: textFields.flatMap((field) => {
           return queries.map(({ text, boost = 1 }) => ({
-            semantic: { field, query: text, boost },
+            match: {
+              [field]: {
+                query: text,
+                boost,
+              },
+            },
           }));
         }),
         minimum_should_match: 1,
