@@ -129,7 +129,7 @@ RUN /bin/echo -e '\n--enable-fips' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
 ENV OPENSSL_CONF=/usr/share/kibana/config/nodejs.cnf
 ENV OPENSSL_MODULES=/usr/lib64/ossl-modules
-# RUN /bin/echo -e '\nxpack.security.fipsMode.enabled: true' >> config/kibana.yml
+RUN /bin/echo -e '\nxpack.security.fipsMode.enabled: true' >> config/kibana.yml
 
 {{/fips}}
 
