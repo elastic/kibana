@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -15,25 +15,46 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useFetchCurrentUserConversations } from '../assistant/api';
+import { useAssistantContext } from '../assistant_context';
 import * as i18n from './translations';
 
 interface Props {
   id?: string;
 }
 
-const conversations = ['Conversation 1', 'Conversation 2', 'Conversation 3'];
 export const Conversations: React.FC<Props> = ({ id }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    http,
+    assistantAvailability: { isAssistantEnabled },
+    showAssistantOverlay,
+  } = useAssistantContext();
+  const { data: conversations, isFetched: conversationsLoaded } = useFetchCurrentUserConversations({
+    http,
+    isAssistantEnabled,
+    filter: `messages:{ content : "${id}" }`,
+  });
+  const conversationCount = useMemo(() => Object.keys(conversations).length, [conversations]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const onSelectConversation = useCallback(
+    (conversationId: string) => {
+      closePopover();
+      showAssistantOverlay({ showOverlay: true, selectedConversation: { id: conversationId } });
+    },
+    [closePopover, showAssistantOverlay]
+  );
+
   return (
     <>
       <EuiTitle size={'s'}>
@@ -41,48 +62,57 @@ export const Conversations: React.FC<Props> = ({ id }) => {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiPanel paddingSize="s" color="subdued" hasBorder={true}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <p>{i18n.YOUR_CONVERSATIONS}</p>
-                </EuiText>
-              </EuiFlexItem>
+        {conversationsLoaded ? (
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <p>{i18n.YOUR_CONVERSATIONS}</p>
+                  </EuiText>
+                </EuiFlexItem>
 
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color="hollow"
+                    css={css`
+                      color: ${euiTheme.colors.textPrimary};
+                    `}
+                  >
+                    {conversationCount}
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {conversationCount > 0 && (
               <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color="hollow"
-                  css={css`
-                    color: ${euiTheme.colors.textPrimary};
-                  `}
+                <EuiPopover
+                  button={
+                    <EuiButtonEmpty iconSide="right" iconType="arrowDown" onClick={togglePopover}>
+                      {i18n.VIEW}
+                    </EuiButtonEmpty>
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  anchorPosition="downRight"
                 >
-                  {'3'}
-                </EuiBadge>
+                  <EuiContextMenuPanel>
+                    {Object.values(conversations).map((conversation) => (
+                      <EuiContextMenuItem
+                        key={conversation.id}
+                        onClick={() => onSelectConversation(conversation.id)}
+                      >
+                        {conversation.title}
+                      </EuiContextMenuItem>
+                    ))}
+                  </EuiContextMenuPanel>
+                </EuiPopover>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty iconSide="right" iconType="arrowDown" onClick={togglePopover}>
-                  {i18n.VIEW}
-                </EuiButtonEmpty>
-              }
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              anchorPosition="downRight"
-            >
-              <EuiContextMenuPanel>
-                {conversations.map((conversation, index) => (
-                  <EuiContextMenuItem key={index} onClick={closePopover}>
-                    {conversation}
-                  </EuiContextMenuItem>
-                ))}
-              </EuiContextMenuPanel>
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            )}
+          </EuiFlexGroup>
+        ) : (
+          <EuiSkeletonText lines={1} size="xs" />
+        )}
       </EuiPanel>
     </>
   );
