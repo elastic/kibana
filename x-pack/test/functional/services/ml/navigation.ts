@@ -46,7 +46,6 @@ export function MachineLearningNavigationProvider({
           'anomaly_detection',
           'analytics',
           'trained_models',
-          'supplied_configurations',
           'ad_settings',
         ],
       });
@@ -263,10 +262,14 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToSuppliedConfigurations() {
-      await this.navigateToArea(
-        '~mlMainTab & ~suppliedConfigurations',
-        'mlPageSuppliedConfigurations'
-      );
+      await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
+
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('mlSuppliedConfigurationsButton');
+
+        await testSubjects.click('mlSuppliedConfigurationsButton');
+        await testSubjects.existOrFail('mlPageSuppliedConfigurations');
+      });
     },
 
     async navigateToJobManagement() {

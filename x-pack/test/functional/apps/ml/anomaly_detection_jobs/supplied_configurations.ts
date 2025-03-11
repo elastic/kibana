@@ -15,10 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('loads supplied configuration page', async () => {
       await ml.testExecution.logTestStep('loads all supplied configurations');
-      await ml.navigation.navigateToStackManagementMlSection(
-        'supplied_configurations',
-        'mlPageSuppliedConfigurations'
-      );
+      await ml.navigation.navigateToSuppliedConfigurations();
       await ml.suppliedConfigurations.assertAllConfigurationsAreLoaded();
     });
 
