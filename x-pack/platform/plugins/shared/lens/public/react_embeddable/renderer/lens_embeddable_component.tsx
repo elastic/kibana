@@ -43,7 +43,10 @@ export function LensEmbeddableComponent({
     api.rendered$,
     api.viewMode$
   );
-  const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
+  const canEdit = Boolean(
+    api.isEditingEnabled?.() &&
+      [latestViewMode, getViewMode(api.viewMode$)].some((mode) => mode === 'edit')
+  );
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
