@@ -19,6 +19,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePluginStart {}
