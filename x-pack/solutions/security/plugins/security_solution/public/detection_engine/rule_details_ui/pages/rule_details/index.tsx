@@ -575,7 +575,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiConfirmModal
           title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={() => handleDeletionConfirm()}
           confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"

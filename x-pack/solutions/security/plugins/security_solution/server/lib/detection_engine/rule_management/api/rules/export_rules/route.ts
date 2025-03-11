@@ -23,6 +23,7 @@ import { getExportByObjectIds } from '../../../logic/export/get_export_by_object
 import { getExportAll } from '../../../logic/export/get_export_all';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -73,7 +74,12 @@ export const exportRulesRoute = (
 
         const client = getClient({ includedHiddenTypes: ['action'] });
         const actionsExporter = getExporter(client);
-        const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
+        const prebuiltRulesCustomizationStatus = detectionRulesClient.getRuleCustomizationStatus();
+
+        const isPrebuiltRulesExportAllowed =
+          prebuiltRulesCustomizationStatus.isRulesCustomizationEnabled ||
+          prebuiltRulesCustomizationStatus.customizationDisabledReason ===
+            PrebuiltRulesCustomizationDisabledReason.License;
 
         try {
           const exportSizeLimit = config.maxRuleImportExportSize;
@@ -85,7 +91,7 @@ export const exportRulesRoute = (
           } else {
             let rulesCount = 0;
 
-            if (isRulesCustomizationEnabled) {
+            if (isPrebuiltRulesExportAllowed) {
               rulesCount = await getRulesCount({
                 rulesClient,
                 filter: '',
@@ -95,6 +101,7 @@ export const exportRulesRoute = (
                 rulesClient,
               });
             }
+
             if (rulesCount > exportSizeLimit) {
               return siemResponse.error({
                 statusCode: 400,
@@ -112,7 +119,7 @@ export const exportRulesRoute = (
                   actionsExporter,
                   request,
                   actionsClient,
-                  isRulesCustomizationEnabled
+                  isPrebuiltRulesExportAllowed
                 )
               : await getExportAll(
                   rulesClient,
@@ -120,7 +127,7 @@ export const exportRulesRoute = (
                   actionsExporter,
                   request,
                   actionsClient,
-                  isRulesCustomizationEnabled
+                  isPrebuiltRulesExportAllowed
                 );
 
           const responseBody = request.query.exclude_export_details

@@ -203,6 +203,10 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
+  public async refreshIndex(): Promise<void> {
+    await this.esContext.esAdapter.refreshIndex();
+  }
+
   private async getNamespace() {
     const space = await this.spacesService?.getActiveSpace(this.request);
     return space && this.spacesService?.spaceIdToNamespace(space.id);
