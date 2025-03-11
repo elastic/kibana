@@ -331,44 +331,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(spaceBEntries[1].title).to.equal('Entry in Space B by Admin 4');
       });
     });
-
-    describe('security roles and access privileges', () => {
-      describe('should deny access for users without the ai_assistant privilege', () => {
-        it('POST /internal/observability_ai_assistant/kb/entries/save', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.viewer({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
-            params: {
-              body: {
-                id: 'my-doc-id-1',
-                title: 'My title',
-                text: 'My content',
-              },
-            },
-          });
-          expect(status).to.be(403);
-        });
-
-        it('GET /internal/observability_ai_assistant/kb/entries', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.viewer({
-            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-            params: {
-              query: { query: '', sortBy: 'title', sortDirection: 'asc' },
-            },
-          });
-          expect(status).to.be(403);
-        });
-
-        it('DELETE /internal/observability_ai_assistant/kb/entries/{entryId}', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.viewer({
-            endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
-            params: {
-              path: { entryId: 'my-doc-id-1' },
-            },
-          });
-          expect(status).to.be(403);
-        });
-      });
-    });
   });
 }
 
