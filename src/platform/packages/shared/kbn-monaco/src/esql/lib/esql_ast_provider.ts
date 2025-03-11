@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../monaco_imports';
 import { type ESQLCallbacks, suggest, validateQuery } from '@kbn/esql-validation-autocomplete';
+import { monaco } from '../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
 import { wrapAsMonacoMessages } from './converters/positions';
 import { getHoverItem } from './hover/hover';
