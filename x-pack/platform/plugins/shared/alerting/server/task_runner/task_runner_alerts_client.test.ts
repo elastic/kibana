@@ -304,9 +304,9 @@ describe('Task Runner', () => {
           .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
           .mockImplementation(() => ruleRunMetricsStore);
         mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
-        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
         ruleRunMetricsStore.getMetrics.mockReturnValue({
           numSearches: 3,
@@ -663,9 +663,9 @@ describe('Task Runner', () => {
         mockAlertsService.createAlertsClient.mockImplementation(() => {
           throw new Error('Could not initialize!');
         });
-        mockLegacyAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockLegacyAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
         ruleRunMetricsStore.getMetrics.mockReturnValue({
           numSearches: 3,
@@ -757,9 +757,9 @@ describe('Task Runner', () => {
         const spy2 = jest
           .spyOn(RuleRunMetricsStoreModule, 'RuleRunMetricsStore')
           .mockImplementation(() => ruleRunMetricsStore);
-        mockLegacyAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockLegacyAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
         ruleRunMetricsStore.getMetrics.mockReturnValue({
           numSearches: 3,
@@ -843,9 +843,9 @@ describe('Task Runner', () => {
 
       test('should use rule specific flapping settings if global flapping is enabled', async () => {
         mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
-        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
 
         const taskRunner = new TaskRunner({
@@ -900,9 +900,9 @@ describe('Task Runner', () => {
         });
 
         mockAlertsService.createAlertsClient.mockImplementation(() => mockAlertsClient);
-        mockAlertsClient.getAlertsToSerialize.mockResolvedValue({
-          alertsToReturn: {},
-          recoveredAlertsToReturn: {},
+        mockAlertsClient.getRawAlertInstancesForState.mockResolvedValue({
+          rawActiveAlerts: {},
+          rawRecoveredAlerts: {},
         });
 
         const taskRunner = new TaskRunner({
@@ -990,15 +990,7 @@ describe('Task Runner', () => {
       expect(alertsClientToUse.checkLimitUsage).toHaveBeenCalled();
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
-        alertDelay: 0,
-        flappingSettings: {
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        },
-        ruleRunMetricsStore,
-      });
+      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith();
 
       expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
@@ -1011,12 +1003,12 @@ describe('Task Runner', () => {
       expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();
       expect(alertsClientNotToUse.persistAlerts).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('activeCurrent');
-      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('recoveredCurrent');
+      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('active');
+      expect(alertsClientToUse.getProcessedAlerts).toHaveBeenCalledWith('recovered');
       expect(alertsClientNotToUse.getProcessedAlerts).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.getAlertsToSerialize).toHaveBeenCalled();
-      expect(alertsClientNotToUse.getAlertsToSerialize).not.toHaveBeenCalled();
+      expect(alertsClientToUse.getRawAlertInstancesForState).toHaveBeenCalled();
+      expect(alertsClientNotToUse.getRawAlertInstancesForState).not.toHaveBeenCalled();
     }
   }
 });
