@@ -196,6 +196,11 @@ export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
 
+// OpenTelemetry span links
+
+export const LINKS_SPAN_ID = 'links.span_id';
+export const LINKS_TRACE_ID = 'links.trace_id';
+
 // Metadata
 export const TIER = '_tier';
 export const INDEX = '_index';
