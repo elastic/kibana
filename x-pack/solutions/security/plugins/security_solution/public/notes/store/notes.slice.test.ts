@@ -117,7 +117,8 @@ describe('notesSlice', () => {
       expect(notesReducer(initalEmptyState, { type: 'unknown' })).toEqual(initalEmptyState);
     });
 
-    describe('fetchNotesByDocumentIds', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/213905
+    describe.skip('fetchNotesByDocumentIds', () => {
       it('should set correct status state when fetching notes by document ids', () => {
         const action = { type: fetchNotesByDocumentIds.pending.type };
 
