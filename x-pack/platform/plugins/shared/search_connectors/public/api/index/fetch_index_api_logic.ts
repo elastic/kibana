@@ -6,8 +6,8 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
+import { ElasticsearchIndexWithIngestion } from '@kbn/search-connectors';
 import { Actions, createApiLogic } from '../api_logic/create_api_logic';
-import { ElasticsearchIndexWithIngestion } from '../../../server/types/indices';
 
 export interface FetchIndexApiParams {
   indexName: string;

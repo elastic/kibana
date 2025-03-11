@@ -13,6 +13,7 @@ import { FleetStart } from '@kbn/fleet-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { Pagination } from '@elastic/eui';
 
 export interface SearchConnectorsPluginSetup {
   // we don't have docLinks here yet
@@ -38,8 +39,16 @@ export interface SearchConnectorsPluginStartDependencies {
 
 export interface AppDependencies {
   connectorTypes: ConnectorDefinition[];
+  kibanaVersion: string;
   isCloud: boolean;
   hasPlatinumLicense: boolean;
   plugins: SearchConnectorsPluginStartDependencies;
   isAgentlessEnabled: boolean;
 }
+
+export const DEFAULT_DOCS_PER_PAGE = 25;
+export const INDEX_DOCUMENTS_META_DEFAULT: Pagination = {
+  pageIndex: 0,
+  pageSize: DEFAULT_DOCS_PER_PAGE,
+  totalItemCount: 0,
+};

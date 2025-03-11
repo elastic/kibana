@@ -6,8 +6,8 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
+import { APIKeyResponse } from '../../../common/types/api';
 import { createApiLogic } from '../api_logic/create_api_logic';
-import { APIKeyResponse } from '../../types';
 
 export const getApiKeyById = async (id: string, http?: HttpSetup) => {
   const route = `/internal/enterprise_search/api_keys/${id}`;

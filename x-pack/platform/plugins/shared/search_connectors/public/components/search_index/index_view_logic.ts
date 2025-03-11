@@ -54,7 +54,7 @@ import {
 import { IndexNameLogic } from './index_name_logic';
 import { Actions } from '../../api/api_logic/create_api_logic';
 import { Status } from '../../../common/types/api';
-import { flashSuccessToast } from '../flash_messages';
+import { flashSuccessToast } from '../shared/flash_messages';
 
 type StartSyncApiActions = Actions<StartSyncArgs, {}>;
 type StartIncrementalSyncApiActions = Actions<StartIncrementalSyncArgs, {}>;

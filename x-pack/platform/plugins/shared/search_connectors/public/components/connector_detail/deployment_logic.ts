@@ -13,8 +13,7 @@ import {
   GenerateConfigApiActions,
   GenerateConfigApiLogic,
 } from '../../api/connector/generate_connector_config_api_logic';
-import { HttpError, Status } from '../../../common/types/api';
-import { APIKeyResponse } from '../../types';
+import { APIKeyResponse, HttpError, Status } from '../../../common/types/api';
 
 export interface DeploymentLogicValues {
   generateConfigurationError: HttpError;

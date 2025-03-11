@@ -19,12 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ConnectorOverviewPanels } from '@kbn/search-connectors-plugin/public';
+
 import { KibanaLogic } from '../../../shared/kibana';
 import { isConnectorIndex } from '../../utils/indices';
 
 import { languageToText } from '../../utils/language_to_text';
 
-import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
 import { NameAndDescriptionStats } from './name_and_description_stats';
 import { OverviewLogic } from './overview.logic';
 

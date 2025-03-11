@@ -24,7 +24,7 @@ import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { Status } from '../../../../common/types/api';
-import { generateEncodedPath } from '../../../encode_path_params';
+import { generateEncodedPath } from '../../shared/encode_path_params';
 import { useAppContext } from '../../../app_context';
 import { UnsavedChangesPrompt } from '../../shared/unsaved_changes_prompt';
 

@@ -31,6 +31,8 @@ import { Connector, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connector
 
 import { AttachIndexLogic } from './attach_index_logic';
 import { Status } from '../../../common/types/api';
+import { FetchAvailableIndicesAPILogic } from '../../api/index/fetch_available_indices_api_logic';
+import { formatApiName } from '../../utils/format_api_name';
 
 const CREATE_NEW_INDEX_GROUP_LABEL = i18n.translate(
   'xpack.enterpriseSearch.attachIndexBox.optionsGroup.createNewIndex',
@@ -177,6 +179,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     if (!connector.index_name && connector.name && sanitizedName) {
       checkIndexExists({ indexName: sanitizedName });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector.id]);
 
   useEffect(() => {
@@ -184,11 +187,13 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     if (query?.searchValue) {
       checkIndexExists({ indexName: query.searchValue });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   useEffect(() => {
     // Suggested name for managed connector should include the content- prefix
     setSanitizedName(prefixConnectorIndex(sanitizedNameWithoutPrefix));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector.name]);
 
   const { hash } = useLocation();

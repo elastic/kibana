@@ -41,7 +41,7 @@ import {
 
 import { AgentlessConnectorStatusBadge } from './agentless_status_badge';
 import { ConnectorDetailTabId } from './connector_detail';
-import { generateEncodedPath } from '../../encode_path_params';
+import { generateEncodedPath } from '../shared/encode_path_params';
 import { useAppContext } from '../../app_context';
 import { EuiButtonEmptyTo, EuiButtonTo } from '../shared/react_router_helpers';
 

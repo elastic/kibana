@@ -25,7 +25,7 @@ import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { ConnectorDetailTabId } from '../connector_detail';
-import { generateEncodedPath } from '../../../encode_path_params';
+import { generateEncodedPath } from '../../shared/encode_path_params';
 import { useAppContext } from '../../../app_context';
 import { EuiButtonTo } from '../../shared/react_router_helpers';
 import { SyncsContextMenu } from '../../shared/header_actions/syncs_context_menu';

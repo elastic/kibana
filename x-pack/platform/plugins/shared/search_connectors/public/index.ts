@@ -32,3 +32,19 @@ export {
   EuiCardTo,
   EuiBadgeTo,
 } from './components/shared/react_router_helpers';
+
+export {
+  ConnectorSyncRules,
+  ConnectorScheduling,
+  ConvertConnectorLogic,
+  ConnectorNameAndDescriptionFlyout,
+  ConnectorOverviewPanels,
+} from './components/search_index/connector';
+
+export { SyncJobs, SearchIndexDocuments } from './components/search_index';
+export {
+  ConnectorConfiguration,
+  ConnectorNameAndDescriptionLogic,
+} from './components/connector_detail';
+
+export { mappingsWithPropsApiLogic } from './api';

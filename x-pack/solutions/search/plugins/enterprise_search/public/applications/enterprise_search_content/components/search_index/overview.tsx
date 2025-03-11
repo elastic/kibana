@@ -15,6 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ConvertConnectorLogic } from '@kbn/search-connectors-plugin/public';
+
+import { SyncJobs } from '@kbn/search-connectors-plugin/public';
+
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 import { isApiIndex, isConnectorIndex } from '../../utils/indices';
@@ -22,12 +26,10 @@ import { isApiIndex, isConnectorIndex } from '../../utils/indices';
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 
 import { ApiTotalStats } from './api_total_stats';
-import { ConvertConnectorLogic } from './connector/native_connector_configuration/convert_connector_logic';
 import { ConnectorTotalStats } from './connector_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
-import { SyncJobs } from './sync_jobs/sync_jobs';
 
 export const SearchIndexOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);

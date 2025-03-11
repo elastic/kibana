@@ -16,6 +16,14 @@ import {
 
 import { ConnectorViewActions, ConnectorViewLogic } from './connector_view_logic';
 import { HttpError, Status } from '../../../common/types/api';
+import {
+  IndexExistsApiLogic,
+  IndexExistsApiLogicActions,
+} from '../../api/index/index_exists_api_logic';
+import {
+  CreateApiIndexApiLogic,
+  CreateApiIndexApiLogicActions,
+} from '../../api/index/create_api_index_api_logic';
 
 export interface AttachIndexActions {
   attachIndex: AttachIndexApiLogicActions['makeRequest'];
@@ -105,14 +113,12 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
     connector: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setConnector: (_, connector) => connector,
       },
     ],
     indexExists: [
       {},
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         checkIndexExistsApiSuccess: (state, { exists, indexName }) => ({
           ...state,
           [indexName]: exists,

@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
+import { ElasticsearchIndexWithIngestion } from '@kbn/search-connectors';
 import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 
 import {
@@ -18,7 +19,6 @@ import {
 } from './fetch_index_api_logic';
 import { Actions } from '../api_logic/create_api_logic';
 import { Status } from '../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../server/types/indices';
 
 const FETCH_INDEX_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds

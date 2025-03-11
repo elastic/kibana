@@ -12,7 +12,7 @@ import {
   clearFlashMessages,
   flashAPIErrors,
   flashSuccessToast,
-} from '../../components/flash_messages';
+} from '../../components/shared/flash_messages';
 
 export interface Values<T> {
   apiStatus: ApiStatus<T>;

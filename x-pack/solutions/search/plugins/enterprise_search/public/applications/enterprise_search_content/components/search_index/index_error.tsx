@@ -23,8 +23,9 @@ import { i18n } from '@kbn/i18n';
 
 import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 
+import { mappingsWithPropsApiLogic } from '@kbn/search-connectors-plugin/public';
+
 import { KibanaLogic } from '../../../shared/kibana';
-import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 
 export interface IndexErrorProps {
   indexName: string;

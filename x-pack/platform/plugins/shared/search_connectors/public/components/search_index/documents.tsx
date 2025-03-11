@@ -16,25 +16,17 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
 
-import {
-  DocumentList,
-  DocumentsOverview,
-  INDEX_DOCUMENTS_META_DEFAULT,
-} from '@kbn/search-index-documents';
-
-import { Status } from '../../../../../common/types/api';
-
-import { KibanaLogic } from '../../../shared/kibana';
-
+import { Status } from '../../../common/types/api';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
-import { searchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
 
+import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
 import {
   AccessControlIndexSelector,
   AccessControlSelectorOption,
-} from './components/access_control_index_selector/access_control_index_selector';
-import { IndexNameLogic } from './index_name_logic';
-import { IndexViewLogic } from './index_view_logic';
+} from './access_control_index_selector/access_control_index_selector';
+import { INDEX_DOCUMENTS_META_DEFAULT } from '../../types';
+import { searchDocumentsApiLogic } from '../../api/search_documents/search_documents_api_logic';
 
 const DEFAULT_PAGINATION = {
   pageIndex: INDEX_DOCUMENTS_META_DEFAULT.pageIndex,
@@ -45,7 +37,6 @@ const DEFAULT_PAGINATION = {
 export const SearchIndexDocuments: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod, hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
-  const { productFeatures } = useValues(KibanaLogic);
   const [selectedIndexType, setSelectedIndexType] =
     useState<AccessControlSelectorOption['value']>('content-index');
   const indexToShow =
@@ -66,8 +57,7 @@ export const SearchIndexDocuments: React.FC = () => {
   const searchQueryCallback = (searchQ: string) => {
     setSearchQuery(searchQ);
   };
-  const shouldShowAccessControlSwitcher =
-    hasDocumentLevelSecurityFeature && productFeatures.hasDocumentLevelSecurityEnabled;
+  const shouldShowAccessControlSwitcher = hasDocumentLevelSecurityFeature;
 
   const isAccessControlIndexNotFound =
     shouldShowAccessControlSwitcher && error?.body?.statusCode === 404;
@@ -81,12 +71,14 @@ export const SearchIndexDocuments: React.FC = () => {
       },
       query: searchQuery,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexToShow, pagination, searchQuery]);
 
   useEffect(() => {
     setSearchQuery('');
     setPagination(DEFAULT_PAGINATION);
     getMappings({ indexName: indexToShow });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexToShow]);
   return (
     <DocumentsOverview

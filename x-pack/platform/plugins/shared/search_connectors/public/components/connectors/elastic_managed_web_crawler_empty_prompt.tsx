@@ -10,10 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
 import { CRAWLERS_PATH } from '../routes';
 import { BACK_BUTTON_LABEL, COMING_SOON_LABEL } from './translations';
 import { SearchEmptyPrompt } from '../search_empty_prompt';
-import { DecorativeHorizontalStepper } from '../decorative_horizontal_stepper';
 
 export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
   const {

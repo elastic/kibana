@@ -28,7 +28,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GetApiKeyByIdLogic } from '../../api/api_key/get_api_key_by_id_api_logic';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
@@ -43,15 +42,13 @@ import { WaitingForConnectorStep } from './components/waiting_for_connector_step
 import { ConnectorViewLogic } from './connector_view_logic';
 import { DeploymentLogic } from './deployment_logic';
 import { Status } from '../../../common/types/api';
+import { useAppContext } from '../../app_context';
 
 export const ConnectorDeployment: React.FC = () => {
   const [selectedDeploymentMethod, setSelectedDeploymentMethod] = useState<'docker' | 'source'>(
     'docker'
   );
-  const { kibanaVersion } = useValues(KibanaLogic);
-  const {
-    services: {  }
-  } = useKibana();
+  const { kibanaVersion } = useAppContext();
   const { generatedData, isGenerateLoading } = useValues(DeploymentLogic);
   const { index, isLoading, connector, connectorId } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);

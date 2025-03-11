@@ -14,7 +14,7 @@ import {
 } from '../../../api/connector/add_connector_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { Actions } from '../../../api/api_logic/create_api_logic';
-import { generateEncodedPath } from '../../../encode_path_params';
+import { generateEncodedPath } from '../../shared/encode_path_params';
 import { ErrorCode } from '../../../../common/types/error_codes';
 import { SearchIndexTabId } from '../../../../common/constants';
 

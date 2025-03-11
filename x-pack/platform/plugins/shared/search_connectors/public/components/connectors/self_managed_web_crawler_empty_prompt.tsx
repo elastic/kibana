@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
 import { GithubIcon } from '../icons/github_icon';
 import { SearchEmptyPrompt } from '../search_empty_prompt';
-import { DecorativeHorizontalStepper } from '../decorative_horizontal_stepper';
 
 export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
   return (

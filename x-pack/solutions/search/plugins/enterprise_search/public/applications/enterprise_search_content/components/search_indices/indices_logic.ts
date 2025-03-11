@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { IngestionMethod } from '@kbn/search-connectors';
+import { ElasticsearchViewIndex, IngestionMethod } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 import { Meta } from '../../../../../common/types/pagination';
@@ -30,7 +30,6 @@ import {
   FetchIndicesApiActions,
   FetchIndicesAPILogic,
 } from '../../api/index/fetch_indices_api_logic';
-import { ElasticsearchViewIndex } from '../../types';
 import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';
 
 export interface IndicesActions {

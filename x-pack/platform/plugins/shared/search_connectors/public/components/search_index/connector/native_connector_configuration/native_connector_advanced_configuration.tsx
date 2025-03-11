@@ -19,7 +19,7 @@ import { SearchIndexTabId } from '../../../../../common/constants';
 import { IndexNameLogic } from '../../index_name_logic';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
-import { generateEncodedPath } from '../../../../encode_path_params';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { SyncsContextMenu } from '../../../shared/header_actions/syncs_context_menu';
 
 export const NativeConnectorAdvancedConfiguration: React.FC = () => {

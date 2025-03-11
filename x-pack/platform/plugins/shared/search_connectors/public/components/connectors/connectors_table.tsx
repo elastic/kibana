@@ -32,7 +32,7 @@ import { ConnectorViewIndexLink } from '../shared/connector_view_search_indices_
 
 import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
-import { generateEncodedPath } from '../../encode_path_params';
+import { generateEncodedPath } from '../shared/encode_path_params';
 import { useAppContext } from '../../app_context';
 
 interface ConnectorsTableProps {

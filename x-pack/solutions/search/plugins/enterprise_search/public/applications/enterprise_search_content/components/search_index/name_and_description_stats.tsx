@@ -18,12 +18,16 @@ import {
   EuiStatProps,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import {
+  ConnectorNameAndDescriptionFlyout,
+  ConnectorNameAndDescriptionLogic,
+} from '@kbn/search-connectors-plugin/public';
 
 import { DESCRIPTION_LABEL, NAME_LABEL } from '../../../shared/constants';
 import { isConnectorIndex } from '../../utils/indices';
 
-import { ConnectorNameAndDescriptionFlyout } from './connector/connector_name_and_description/connector_name_and_description_flyout';
-import { ConnectorNameAndDescriptionLogic } from './connector/connector_name_and_description/connector_name_and_description_logic';
 import { OverviewLogic } from './overview.logic';
 
 const EditDescription: React.FC<{
@@ -33,7 +37,11 @@ const EditDescription: React.FC<{
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
+      <EuiButtonEmpty data-test-subj="enterpriseSearchEditDescriptionEditButton" onClick={onClick}>
+        {i18n.translate('xpack.enterpriseSearch.editDescription.editButtonEmptyLabel', {
+          defaultMessage: 'Edit',
+        })}
+      </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

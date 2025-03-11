@@ -19,11 +19,10 @@ import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connect
 import { ConnectorConfiguration } from './connector_configuration';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
-import { generateEncodedPath } from '../../encode_path_params';
+import { generateEncodedPath } from '../shared/encode_path_params';
 import { useAppContext } from '../../app_context';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
-import { SearchIndexPipelines } from '../search_index/pipelines';
 
 export enum ConnectorDetailTabId {
   // all indices
@@ -197,7 +196,7 @@ export const ConnectorDetail: React.FC = () => {
     },
   ];
 
-  const PIPELINES_TAB = {
+  /* const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
     disabled: !index || connector?.is_native,
     id: ConnectorDetailTabId.PIPELINES,
@@ -215,7 +214,7 @@ export const ConnectorDetail: React.FC = () => {
           tabId: ConnectorDetailTabId.PIPELINES,
         })
       ),
-  };
+  }; */
 
   interface TabMenuItem {
     content: JSX.Element;
@@ -231,7 +230,7 @@ export const ConnectorDetail: React.FC = () => {
   const tabs: TabMenuItem[] = [
     ...ALL_INDICES_TABS,
     ...CONNECTOR_TABS,
-    ...[PIPELINES_TAB],
+    // ...[PIPELINES_TAB],
     ...CONFIG_TAB,
   ];
 

@@ -36,6 +36,8 @@ import {
   AccessControlIndexSelector,
   AccessControlSelectorOption,
 } from './access_control_index_selector/access_control_index_selector';
+import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
+import { stripSearchPrefix } from '../../utils/strip_search_prefix';
 
 export const SearchIndexIndexMappings: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);

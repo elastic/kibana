@@ -21,7 +21,7 @@ import { SyncJobs } from '../search_index/sync_jobs/sync_jobs';
 import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorStats } from './connector_stats';
 import { ConnectorViewLogic } from './connector_view_logic';
-import { generateEncodedPath } from '../../encode_path_params';
+import { generateEncodedPath } from '../shared/encode_path_params';
 import { IndexViewLogic } from '../search_index/index_view_logic';
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { EuiButtonTo } from '../shared/react_router_helpers';

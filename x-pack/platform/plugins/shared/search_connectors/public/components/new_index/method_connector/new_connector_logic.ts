@@ -33,11 +33,10 @@ import {
   ConnectorViewLogic,
 } from '../../connector_detail/connector_view_logic';
 import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
-import { Status } from '../../../../common/types/api';
+import { APIKeyResponse, Status } from '../../../../common/types/api';
 import { Actions } from '../../../api/api_logic/create_api_logic';
-import { generateEncodedPath } from '../../../encode_path_params';
+import { generateEncodedPath } from '../../shared/encode_path_params';
 import { SearchIndexTabId } from '../../../../common/constants';
-import { APIKeyResponse } from '../../../types';
 
 export interface NewConnectorValues {
   canConfigureConnector: boolean;

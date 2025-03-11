@@ -7,7 +7,12 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
+import {
+  Connector,
+  ElasticsearchViewIndex,
+  IngestionMethod,
+  IngestPipelineParams,
+} from '@kbn/search-connectors';
 
 import { HttpSetup } from '@kbn/core/public';
 import {
@@ -45,7 +50,6 @@ import {
 } from './connector_name_and_description_logic';
 import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
 import { Status } from '../../../common/types/api';
-import { ElasticsearchViewIndex } from '../../types';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];

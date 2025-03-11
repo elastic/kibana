@@ -34,7 +34,7 @@ import {
 } from '../../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { Actions } from '../../../../api/api_logic/create_api_logic';
-import { clearFlashMessages } from '../../../flash_messages';
+import { clearFlashMessages } from '../../../shared/flash_messages';
 
 type ConnectorFilteringActions = Pick<
   Actions<PutConnectorFilteringArgs, PutConnectorFilteringResponse>,

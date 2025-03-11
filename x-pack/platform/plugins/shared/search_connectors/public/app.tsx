@@ -86,6 +86,7 @@ const AppWithExecutionContext = ({
     hasPlatinumLicense: true,
     plugins,
     isAgentlessEnabled,
+    kibanaVersion: 'main',
   };
   return (
     <Router history={params.history}>

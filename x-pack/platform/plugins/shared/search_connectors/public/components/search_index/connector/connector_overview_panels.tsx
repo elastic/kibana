@@ -19,7 +19,7 @@ import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
 import { IndexViewLogic } from '../index_view_logic';
-import { generateEncodedPath } from '../../../encode_path_params';
+import { generateEncodedPath } from '../../shared/encode_path_params';
 import { SearchIndexTabId } from '../../../../common/constants';
 import { EuiLinkTo } from '../../shared/react_router_helpers';
 import {

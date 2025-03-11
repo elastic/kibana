@@ -37,7 +37,7 @@ import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic'
 
 import connectorLogo from './assets/connector_logo.svg';
 import { useAppContext } from '../../../app_context';
-import { generateEncodedPath } from '../../../encode_path_params';
+import { generateEncodedPath } from '../../shared/encode_path_params';
 import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
 import { IndexViewLogic } from '../../search_index/index_view_logic';
 import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
