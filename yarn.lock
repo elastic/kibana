@@ -8924,7 +8924,7 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@^1.7.1":
+"@openfeature/core@^1.7.2":
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.7.2.tgz#b2663f7beb93310dfeef003509cb140e33790fb7"
   integrity sha512-pbpREdO/8D6ocFYWIzAJ24iJ1td04Anl+TehUzx9r1xR8vKJab+O4TlC/XP7s9JuD5hRPBfmo5gDha/KWVSG4A==
