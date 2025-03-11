@@ -20,7 +20,6 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container';
 import {
   getDashboardBackupService,
   PANELS_CONTROL_GROUP_KEY,
@@ -29,6 +28,7 @@ import { coreServices, dataService, shareService } from '../../../services/kiban
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
+import { DashboardLocatorParams } from '../../../dashboard_api/types';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -41,9 +41,9 @@ export interface ShowShareModalProps {
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.dashboard) return false;
+  if (!anonymousUserCapabilities.dashboard_v2) return false;
 
-  const dashboard = anonymousUserCapabilities.dashboard;
+  const dashboard = anonymousUserCapabilities.dashboard_v2;
 
   return !!dashboard.show;
 };
@@ -245,6 +245,7 @@ export function ShowShareModal({
                 : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
+          computeAnonymousCapabilities: showPublicUrlSwitch,
         },
       },
     },
@@ -266,7 +267,6 @@ export function ShowShareModal({
         component: EmbedUrlParamExtension,
       },
     ],
-    showPublicUrlSwitch,
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,

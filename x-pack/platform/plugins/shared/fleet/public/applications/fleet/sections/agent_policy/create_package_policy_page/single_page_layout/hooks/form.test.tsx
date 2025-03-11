@@ -84,6 +84,8 @@ describe('useOnSubmit', () => {
         newAgentPolicy: { name: 'test', namespace: '' },
         queryParamsPolicyId: undefined,
         hasFleetAddAgentsPrivileges: true,
+        setNewAgentPolicy: jest.fn(),
+        setSelectedPolicyTab: jest.fn(),
       })
     );
 

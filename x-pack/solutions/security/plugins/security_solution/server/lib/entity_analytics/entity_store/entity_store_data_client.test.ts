@@ -12,13 +12,16 @@ import {
 } from '@kbn/core/server/mocks';
 import { EntityStoreDataClient } from './entity_store_data_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
 import { mockGlobalState } from '../../../../public/common/mock';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+import { EntityType } from '../../../../common/search_strategy';
+import type { InitEntityEngineResponse } from '../../../../common/api/entity_analytics';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { defaultOptions } from './constants';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
@@ -31,11 +34,14 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
     indexMappings: {},
     indexPatterns: [],
     settings: {
+      timeout: '180s',
+      docsPerSecond: undefined,
       syncDelay: '1m',
       frequency: '1m',
       timestampField: '@timestamp',
       lookbackPeriod: '24h',
     },
+    dynamic: false,
   },
   { namespace: 'test', filter: '' }
 );
@@ -55,6 +61,7 @@ describe('EntityStoreDataClient', () => {
     appClient: {} as AppClient,
     config: {} as EntityStoreConfig,
     experimentalFeatures: mockGlobalState.app.enableExperimental,
+    taskManager: {} as TaskManagerStartContract,
   });
 
   const defaultSearchParams = {
@@ -89,7 +96,7 @@ describe('EntityStoreDataClient', () => {
     it('searches in the entities store indices', async () => {
       await dataClient.searchEntities({
         ...defaultSearchParams,
-        entityTypes: ['host', 'user'],
+        entityTypes: [EntityType.host, EntityType.user],
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
@@ -270,7 +277,7 @@ describe('EntityStoreDataClient', () => {
           installed: true,
         },
         {
-          id: 'security_host_test',
+          id: 'indexTemplates_id',
           installed: true,
           resource: 'index_template',
         },
@@ -335,6 +342,26 @@ describe('EntityStoreDataClient', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('enable entities', () => {
+    let spyInit: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      spyInit = jest
+        .spyOn(dataClient, 'init')
+        .mockImplementation(() => Promise.resolve({} as InitEntityEngineResponse));
+    });
+
+    it('only enable engine for the given entityType', async () => {
+      await dataClient.enable({
+        ...defaultOptions,
+        entityTypes: [EntityType.host],
+      });
+
+      expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
     });
   });
 });

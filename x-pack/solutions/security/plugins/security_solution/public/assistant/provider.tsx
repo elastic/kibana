@@ -14,7 +14,7 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
   bulkUpdateConversations,
-  getUserConversations,
+  getUserConversationsExist,
   getPrompts,
   bulkUpdatePrompts,
 } from '@kbn/elastic-assistant';
@@ -30,7 +30,6 @@ import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
-import { useBaseConversations } from './use_conversation_store';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
@@ -144,6 +143,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     userProfile,
     chrome,
+    productDocBase,
   } = useKibana().services;
 
   let inferenceEnabled = false;
@@ -157,7 +157,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
 
   const basePath = useBasePath();
 
-  const baseConversations = useBaseConversations();
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
   const currentAppId = useObservable(currentAppId$, '');
@@ -169,10 +168,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
         assistantAvailability.isAssistantEnabled &&
         assistantAvailability.hasAssistantPrivilege
       ) {
-        const res = await getUserConversations({
+        const conversationsExist = await getUserConversationsExist({
           http,
         });
-        if (res.total === 0) {
+        if (!conversationsExist) {
           await createConversations(notifications, http, storage);
         }
       }
@@ -230,11 +229,11 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-      baseConversations={baseConversations}
       getComments={getComments}
       http={http}
       inferenceEnabled={inferenceEnabled}
       navigateToApp={navigateToApp}
+      productDocBase={productDocBase}
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}

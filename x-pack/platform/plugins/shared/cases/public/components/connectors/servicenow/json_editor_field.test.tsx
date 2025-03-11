@@ -40,7 +40,8 @@ jest.mock('@kbn/es-ui-shared-plugin/public', () => {
   };
 });
 
-describe('JsonEditorField', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/207077
+describe.skip('JsonEditorField', () => {
   const setValue = jest.fn();
   const props = {
     field: {

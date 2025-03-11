@@ -925,7 +925,15 @@ export function FormulaEditor({
 
         {/* fix the css here */}
         {isFullscreen && isHelpOpen ? (
-          <div className="lnsFormula__docs documentation__docs--inline">
+          <div
+            className="lnsFormula__docs documentation__docs--inline"
+            css={css`
+              display: flex;
+              flex-direction: column;
+              // make sure docs are rendered in front of monaco
+              z-index: 1;
+            `}
+          >
             <LanguageDocumentationPopoverContent
               language="Formula"
               sections={documentationSections}

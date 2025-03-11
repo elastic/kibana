@@ -12,6 +12,7 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import type {
+  MicrosoftDefenderEndpointAgentListResponse,
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
@@ -57,6 +58,11 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_DETAILS:
           return responseActionsClientMock.createConnectorActionExecuteResponse({
             data: createMicrosoftMachineMock(),
+          });
+
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftGetMachineListApiResponseMock(),
           });
 
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST:
@@ -147,21 +153,38 @@ const createMicrosoftMachineActionMock = (
   };
 };
 
-const createMicrosoftGetActionsApiResponseMock =
-  (): MicrosoftDefenderEndpointGetActionsResponse => {
-    return {
-      '@odata.context': 'some-context',
-      '@odata.count': 1,
-      total: 1,
-      page: 1,
-      pageSize: 0,
-      value: [createMicrosoftMachineActionMock()],
-    };
+const createMicrosoftGetActionsApiResponseMock = (
+  overrides: Partial<MicrosoftDefenderEndpointMachineAction> = {}
+): MicrosoftDefenderEndpointGetActionsResponse => {
+  return {
+    '@odata.context': 'some-context',
+    '@odata.count': 1,
+    total: 1,
+    page: 1,
+    pageSize: 0,
+    value: [createMicrosoftMachineActionMock(overrides)],
   };
+};
+
+const createMicrosoftGetMachineListApiResponseMock = (
+  /** Any overrides to the 1 machine action that is included in the mock response */
+  machineActionOverrides: Partial<MicrosoftDefenderEndpointMachine> = {}
+): MicrosoftDefenderEndpointAgentListResponse => {
+  return {
+    '@odata.context': 'some-context',
+    '@odata.count': 1,
+    total: 1,
+    page: 1,
+    pageSize: 0,
+    value: [createMicrosoftMachineMock(machineActionOverrides)],
+  };
+};
 
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
+  createMsConnectorActionsClient: createMsConnectorActionsClientMock,
   createMachineAction: createMicrosoftMachineActionMock,
   createMachine: createMicrosoftMachineMock,
   createGetActionsApiResponse: createMicrosoftGetActionsApiResponseMock,
+  createMicrosoftGetMachineListApiResponse: createMicrosoftGetMachineListApiResponseMock,
 };

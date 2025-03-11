@@ -65,7 +65,7 @@ describe('createAddToTimelineCellAction', () => {
   });
 
   it('should return display name', () => {
-    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to timeline');
+    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to Timeline');
   });
 
   it('should return icon type', () => {
@@ -103,6 +103,54 @@ describe('createAddToTimelineCellAction', () => {
           ],
         })
       ).toEqual(false);
+    });
+
+    it('should return true if the user has read access to timeline', async () => {
+      const factory = createAddToTimelineCellActionFactory({
+        store,
+        services: {
+          ...services,
+          application: {
+            ...services.application,
+            capabilities: {
+              ...services.application.capabilities,
+              securitySolutionTimeline: {
+                read: true,
+              },
+            },
+          },
+        },
+      });
+      const addToTimelineActionIsCompatible = factory({
+        id: 'testAddToTimeline',
+        order: 1,
+      });
+
+      expect(await addToTimelineActionIsCompatible.isCompatible(context)).toEqual(true);
+    });
+
+    it('should return false if the user does not have access to timeline', async () => {
+      const factory = createAddToTimelineCellActionFactory({
+        store,
+        services: {
+          ...services,
+          application: {
+            ...services.application,
+            capabilities: {
+              ...services.application.capabilities,
+              securitySolutionTimeline: {
+                read: false,
+              },
+            },
+          },
+        },
+      });
+      const addToTimelineActionIsCompatible = factory({
+        id: 'testAddToTimeline',
+        order: 1,
+      });
+
+      expect(await addToTimelineActionIsCompatible.isCompatible(context)).toEqual(false);
     });
   });
 

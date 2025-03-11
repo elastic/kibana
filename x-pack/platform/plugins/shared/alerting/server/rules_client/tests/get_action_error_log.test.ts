@@ -120,6 +120,10 @@ const findResults = {
   total: 5,
   data: [
     {
+      _id: 'test-id-0',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.106Z',
       event: {
         provider: 'actions',
@@ -169,6 +173,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-1',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.102Z',
       event: {
         provider: 'actions',
@@ -218,6 +226,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-2',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.098Z',
       event: {
         provider: 'actions',
@@ -267,6 +279,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-3',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.096Z',
       event: {
         provider: 'actions',
@@ -316,6 +332,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-4',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.086Z',
       event: {
         provider: 'actions',

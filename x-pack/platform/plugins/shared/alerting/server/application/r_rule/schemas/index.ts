@@ -6,4 +6,3 @@
  */
 
 export { rRuleSchema } from './r_rule_schema';
-export { rRuleRequestSchema } from './r_rule_request_schema';

@@ -15,10 +15,12 @@ export { getRegistryUrl } from './epm/registry/registry_url';
  */
 
 export interface AgentPolicyServiceInterface {
+  create: (typeof agentPolicyService)['create'];
   get: (typeof agentPolicyService)['get'];
   list: (typeof agentPolicyService)['list'];
+  delete: (typeof agentPolicyService)['delete'];
   getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
-  getByIds: (typeof agentPolicyService)['getByIDs'];
+  getByIds: (typeof agentPolicyService)['getByIds'];
   turnOffAgentTamperProtections: (typeof agentPolicyService)['turnOffAgentTamperProtections'];
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
@@ -36,6 +38,7 @@ export { outputService } from './output';
 export { downloadSourceService } from './download_source';
 export { settingsService };
 export { dataStreamService } from './data_streams';
+export { fleetServerHostService } from './fleet_server_host';
 
 // Plugin services
 export { appContextService } from './app_context';

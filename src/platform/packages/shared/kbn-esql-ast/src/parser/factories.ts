@@ -84,7 +84,7 @@ const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
   incomplete: Boolean(ctx.exception),
 });
 
-export const createCommand = (name: string, ctx: ParserRuleContext) =>
+export const createCommand = <Name extends string>(name: Name, ctx: ParserRuleContext) =>
   Builder.command({ name, args: [] }, createParserFields(ctx));
 
 export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>

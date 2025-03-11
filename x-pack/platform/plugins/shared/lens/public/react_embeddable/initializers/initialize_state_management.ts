@@ -53,7 +53,7 @@ export function initializeStateManagement(
     LensRuntimeState['savedObjectId']
   >(initialState.savedObjectId);
 
-  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews);
+  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews$);
   const [dataLoading$] = buildObservableVariable<boolean | undefined>(internalApi.dataLoading$);
   const [rendered$] = buildObservableVariable<boolean>(internalApi.hasRenderCompleted$);
   const [abortController$, abortControllerComparator] = buildObservableVariable<
@@ -63,16 +63,16 @@ export function initializeStateManagement(
   // This is the way to communicate to the embeddable panel to render a blocking error with the
   // default panel error component - i.e. cannot find a Lens SO type of thing.
   // For Lens specific errors, we use a Lens specific error component.
-  const [blockingError$] = buildObservableVariable<Error | undefined>(undefined);
+  const [blockingError$] = buildObservableVariable<Error | undefined>(internalApi.blockingError$);
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
       updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) =>
         savedObjectId$.next(newSavedObjectId),
-      savedObjectId: savedObjectId$,
-      dataViews: dataViews$,
-      dataLoading: dataLoading$,
-      blockingError: blockingError$,
+      savedObjectId$,
+      dataViews$,
+      dataLoading$,
+      blockingError$,
       rendered$,
     },
     serialize: () => {

@@ -146,6 +146,12 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
             ]);
           });
+
+          test('allows WHERE clause', async () => {
+            const { expectErrors } = await setup();
+
+            await expectErrors('FROM a_index | STATS var0 = avg(doubleField) WHERE 123', []);
+          });
         });
 
         describe('... BY <grouping>', () => {
@@ -164,6 +170,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               'from a_index | stats avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
               []
             );
+            await expectErrors('from a_index | stats ?func(doubleField)', []);
             for (const op of ['+', '-', '*', '/', '%']) {
               await expectErrors(
                 `from a_index | stats avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,
@@ -266,18 +273,18 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
 
           for (const nesting of NESTED_DEPTHS) {
             describe(`depth = ${nesting}`, () => {
-              describe('builtin', () => {
-                const builtinWrapping = Array(nesting).fill('+1').join('');
+              describe('operators', () => {
+                const operatorsWrapping = Array(nesting).fill('+1').join('');
 
                 test('no errors', async () => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | stats 5 + avg(doubleField) ${builtinWrapping}`,
+                    `from a_index | stats 5 + avg(doubleField) ${operatorsWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats 5 ${builtinWrapping} + avg(doubleField)`,
+                    `from a_index | stats 5 ${operatorsWrapping} + avg(doubleField)`,
                     []
                   );
                 });
@@ -285,16 +292,16 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                 test('errors', async () => {
                   const { expectErrors } = await setup();
 
-                  await expectErrors(`from a_index | stats 5 ${builtinWrapping} + doubleField`, [
-                    `At least one aggregation function required in [STATS], found [5${builtinWrapping}+doubleField]`,
+                  await expectErrors(`from a_index | stats 5 ${operatorsWrapping} + doubleField`, [
+                    `At least one aggregation function required in [STATS], found [5${operatorsWrapping}+doubleField]`,
                   ]);
-                  await expectErrors(`from a_index | stats 5 + doubleField ${builtinWrapping}`, [
-                    `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
+                  await expectErrors(`from a_index | stats 5 + doubleField ${operatorsWrapping}`, [
+                    `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                   ]);
                   await expectErrors(
-                    `from a_index | stats 5 + doubleField ${builtinWrapping}, var0 = sum(doubleField)`,
+                    `from a_index | stats 5 + doubleField ${operatorsWrapping}, var0 = sum(doubleField)`,
                     [
-                      `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
+                      `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                     ]
                   );
                 });

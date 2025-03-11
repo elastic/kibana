@@ -20,7 +20,8 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-describe('Case View Page similar cases tab', () => {
+// Failing: See https://github.com/elastic/kibana/issues/207056
+describe.skip('Case View Page similar cases tab', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

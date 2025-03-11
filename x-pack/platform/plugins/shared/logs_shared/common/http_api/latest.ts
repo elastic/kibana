@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './log_entries/v1';
 export * from './log_views/v1';

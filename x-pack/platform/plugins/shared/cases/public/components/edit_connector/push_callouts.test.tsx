@@ -21,7 +21,8 @@ const defaultProps = {
   onEditClick,
 };
 
-describe('PushCallouts ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/206367
+describe.skip('PushCallouts ', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

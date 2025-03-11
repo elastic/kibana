@@ -22,18 +22,18 @@ const DEFAULT_PAGINATION = {
   size: DEFAULT_DOCUMENT_PAGE_SIZE,
   total: 0,
 };
-export const INDEX_SEARCH_POLLING = 5 * 1000;
+export const INDEX_SEARCH_POLLING = 30000;
 export const useIndexDocumentSearch = (indexName: string) => {
   const {
     services: { http },
   } = useKibana();
-  const response = useQuery({
+  const { data, isInitialLoading } = useQuery({
     queryKey: [QueryKeys.SearchDocuments, indexName],
     refetchInterval: INDEX_SEARCH_POLLING,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
     queryFn: async ({ signal }) =>
-      http.post<IndexDocuments>(`/internal/serverless_search/indices/${indexName}/search`, {
+      http.post<IndexDocuments>(`/internal/search_indices/${indexName}/documents/search`, {
         body: JSON.stringify({
           searchQuery: '',
           trackTotalHits: true,
@@ -46,7 +46,8 @@ export const useIndexDocumentSearch = (indexName: string) => {
       }),
   });
   return {
-    ...response,
-    meta: pageToPagination(response?.data?.results?._meta?.page ?? DEFAULT_PAGINATION),
+    data,
+    isInitialLoading,
+    meta: pageToPagination(data?.results?._meta?.page ?? DEFAULT_PAGINATION),
   };
 };

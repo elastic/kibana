@@ -18,15 +18,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import {
-  CREATE_NEW_DASHBOARD_URL,
-  createDashboardEditUrl,
-  createDashboardListingFilterUrl,
-  DASHBOARD_APP_ID,
-  LANDING_PAGE_PATH,
-  VIEW_DASHBOARD_URL,
-} from '../dashboard_constants';
-import { RedirectToProps } from '../dashboard_container/types';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../plugin_constants';
+import { RedirectToProps } from './types';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
@@ -35,6 +28,12 @@ import { DashboardMountContext } from './hooks/dashboard_mount_context';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { DashboardNoMatch } from './listing_page/dashboard_no_match';
 import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
+import {
+  CREATE_NEW_DASHBOARD_URL,
+  VIEW_DASHBOARD_URL,
+  createDashboardEditUrl,
+  createDashboardListingFilterUrl,
+} from '../utils/urls';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',

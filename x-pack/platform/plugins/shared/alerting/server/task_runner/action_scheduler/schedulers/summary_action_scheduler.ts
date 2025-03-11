@@ -81,13 +81,13 @@ export class SummaryActionScheduler<
   }
 
   public async getActionsToSchedule({
-    activeCurrentAlerts,
-    recoveredCurrentAlerts,
+    activeAlerts,
+    recoveredAlerts,
     throttledSummaryActions,
   }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     ActionsToSchedule[]
   > {
-    const alerts = { ...activeCurrentAlerts, ...recoveredCurrentAlerts };
+    const alerts = { ...activeAlerts, ...recoveredAlerts };
     const executables: Array<{
       action: RuleAction;
       summarizedAlerts: CombinedSummarizedAlerts;
@@ -206,7 +206,9 @@ export class SummaryActionScheduler<
         actionToEnqueue: formatActionToEnqueue({
           action: actionToRun,
           apiKey: this.context.apiKey,
+          apiKeyId: this.context.apiKeyId,
           executionId: this.context.executionId,
+          priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,
           ruleId: this.context.rule.id,
           ruleTypeId: this.context.ruleType.id,

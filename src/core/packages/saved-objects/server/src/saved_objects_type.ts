@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
@@ -30,6 +30,10 @@ export interface SavedObjectsType<Attributes = any> {
    * The name of the type, which is also used as the internal id.
    */
   name: string;
+  /**
+   * The attribute path to the saved object's name
+   */
+  nameAttribute?: string;
   /**
    * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
    * declared as an `extraType` when creating the repository.
@@ -239,6 +243,12 @@ export interface SavedObjectsType<Attributes = any> {
    *          allowing types owners to switch their types before the milestone (and for testing purposes).
    */
   switchToModelVersionAt?: string;
+
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
+  getTitle?: (savedObject: Attributes) => string;
 }
 
 /**

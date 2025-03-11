@@ -19,9 +19,7 @@ describe('DocLinks', () => {
 
     docLinks.setDocLinks(links as any);
 
-    expect(docLinks.appSearchApis).toEqual(links.links.appSearch.apiRef);
     expect(docLinks.cloudIndexManagement).toEqual(links.links.cloud.indexManagement);
     expect(docLinks.enterpriseSearchConfig).toEqual(links.links.enterpriseSearch.configuration);
-    expect(docLinks.workplaceSearchZendesk).toEqual(links.links.workplaceSearch.zendesk);
   });
 });

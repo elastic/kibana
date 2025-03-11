@@ -39,15 +39,18 @@ import {
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
+  stringifyAfterKey,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import * as i18n from '../translations';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
+): SecurityAlertType<NewTermsRuleParams, { isLoggedRequestsEnabled?: boolean }, {}, 'default'> => {
   const { logger, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
     createOptions;
   return {
@@ -94,30 +97,28 @@ export const createNewTermsAlertType = (
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
+      const { sharedParams, services, params, spaceId, state } = execOptions;
+
       const {
-        runOpts: {
-          ruleExecutionLogger,
-          bulkCreate,
-          completeRule,
-          tuple,
-          mergeStrategy,
-          inputIndex,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          aggregatableTimestampField,
-          exceptionFilter,
-          unprocessedExceptions,
-          alertTimestampOverride,
-          publicBaseUrl,
-          alertWithSuppression,
-          intendedTimestamp,
-        },
-        services,
-        params,
-        spaceId,
-        state,
-      } = execOptions;
+        ruleExecutionLogger,
+        bulkCreate,
+        completeRule,
+        tuple,
+        mergeStrategy,
+        inputIndex,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        aggregatableTimestampField,
+        exceptionFilter,
+        unprocessedExceptions,
+        alertTimestampOverride,
+        publicBaseUrl,
+        intendedTimestamp,
+      } = sharedParams;
+
+      const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
+      const loggedRequests: RulePreviewLoggedRequest[] = [];
 
       // Validate the history window size compared to `from` at runtime as well as in the `validate`
       // function because rule preview does not use the `validate` function defined on the rule type
@@ -157,6 +158,7 @@ export const createNewTermsAlertType = (
       if (exceptionsWarning) {
         result.warningMessages.push(exceptionsWarning);
       }
+      let pageNumber = 0;
 
       // There are 2 conditions that mean we're finished: either there were still too many alerts to create
       // after deduplication and the array of alerts was truncated before being submitted to ES, or there were
@@ -165,10 +167,16 @@ export const createNewTermsAlertType = (
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
       while (result.createdSignalsCount <= params.maxSignals) {
+        pageNumber++;
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
-        const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+        const {
+          searchResult,
+          searchDuration,
+          searchErrors,
+          loggedRequests: firstPhaseLoggedRequests = [],
+        } = await singleSearchAfter({
           aggregations: buildRecentTermsAgg({
             fields: params.newTermsFields,
             after: afterKey,
@@ -185,7 +193,17 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           runtimeMappings,
+          loggedRequestsConfig: isLoggedRequestsEnabled
+            ? {
+                type: 'findAllTerms',
+                description: i18n.FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION(
+                  stringifyAfterKey(afterKey)
+                ),
+                skipRequestQuery: pageNumber > 2,
+              }
+            : undefined,
         });
+        loggedRequests.push(...firstPhaseLoggedRequests);
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
         if (!searchResultWithAggs.aggregations) {
           throw new Error('Aggregations were missing on recent terms search result');
@@ -264,17 +282,13 @@ export const createNewTermsAlertType = (
 
             if (isAlertSuppressionActive) {
               bulkCreateResult = await bulkCreateSuppressedNewTermsAlertsInMemory({
+                sharedParams,
                 eventsAndTerms: eventAndTermsChunk,
                 toReturn: result,
                 wrapHits,
-                bulkCreate,
                 services,
-                ruleExecutionLogger,
-                tuple,
                 alertSuppression: params.alertSuppression,
                 wrapSuppressedHits,
-                alertTimestampOverride,
-                alertWithSuppression,
                 experimentalFeatures,
               });
             } else {
@@ -304,6 +318,7 @@ export const createNewTermsAlertType = (
         // it uses paging through composite aggregation
         if (params.newTermsFields.length > 1) {
           const bulkCreateResult = await multiTermsComposite({
+            sharedParams,
             filterArgs,
             buckets: bucketsForField,
             params,
@@ -312,13 +327,14 @@ export const createNewTermsAlertType = (
             services,
             result,
             logger,
-            runOpts: execOptions.runOpts,
             afterKey,
             createAlertsHook,
             isAlertSuppressionActive,
+            isLoggedRequestsEnabled,
           });
+          loggedRequests.push(...(bulkCreateResult?.loggedRequests ?? []));
 
-          if (bulkCreateResult?.alertsWereTruncated) {
+          if (bulkCreateResult && 'alertsWereTruncated' in bulkCreateResult) {
             break;
           }
         } else {
@@ -330,6 +346,7 @@ export const createNewTermsAlertType = (
             searchResult: pageSearchResult,
             searchDuration: pageSearchDuration,
             searchErrors: pageSearchErrors,
+            loggedRequests: pageSearchLoggedRequests = [],
           } = await singleSearchAfter({
             aggregations: buildNewTermsAgg({
               newValueWindowStart: tuple.from,
@@ -350,9 +367,17 @@ export const createNewTermsAlertType = (
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
+            loggedRequestsConfig: isLoggedRequestsEnabled
+              ? {
+                  type: 'findNewTerms',
+                  description: i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(stringifyAfterKey(afterKey)),
+                  skipRequestQuery: pageNumber > 2,
+                }
+              : undefined,
           });
           result.searchAfterTimes.push(pageSearchDuration);
           result.errors.push(...pageSearchErrors);
+          loggedRequests.push(...pageSearchLoggedRequests);
 
           logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
@@ -374,6 +399,7 @@ export const createNewTermsAlertType = (
               searchResult: docFetchSearchResult,
               searchDuration: docFetchSearchDuration,
               searchErrors: docFetchSearchErrors,
+              loggedRequests: docFetchLoggedRequests = [],
             } = await singleSearchAfter({
               aggregations: buildDocFetchAgg({
                 timestampField: aggregatableTimestampField,
@@ -392,9 +418,19 @@ export const createNewTermsAlertType = (
               pageSize: 0,
               primaryTimestamp,
               secondaryTimestamp,
+              loggedRequestsConfig: isLoggedRequestsEnabled
+                ? {
+                    type: 'findDocuments',
+                    description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(
+                      stringifyAfterKey(afterKey)
+                    ),
+                    skipRequestQuery: pageNumber > 2,
+                  }
+                : undefined,
             });
             result.searchAfterTimes.push(docFetchSearchDuration);
             result.errors.push(...docFetchSearchErrors);
+            loggedRequests.push(...docFetchLoggedRequests);
 
             const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
 
@@ -424,7 +460,7 @@ export const createNewTermsAlertType = (
         responseActions: completeRule.ruleParams.responseActions,
       });
 
-      return { ...result, state };
+      return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     },
   };
 };

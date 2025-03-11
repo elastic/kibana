@@ -15,8 +15,6 @@ import {
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-  ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
-  ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   ES_SEARCH_PLAYGROUND_ID,
   SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
   SEARCH_HOMEPAGE,
@@ -34,8 +32,6 @@ export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
 export type EnterpriseSearchContentApp = typeof ENTERPRISE_SEARCH_CONTENT_APP_ID;
 export type EnterpriseSearchApplicationsApp = typeof ENTERPRISE_SEARCH_APPLICATIONS_APP_ID;
 export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_APP_ID;
-export type EnterpriseSearchAppsearchApp = typeof ENTERPRISE_SEARCH_APPSEARCH_APP_ID;
-export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID;
 export type ServerlessSearchApp = typeof SERVERLESS_ES_APP_ID;
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type ServerlessWebCrawlers = typeof SERVERLESS_ES_WEB_CRAWLERS_ID;
@@ -50,11 +46,9 @@ export type SearchVectorSearch = typeof SEARCH_VECTOR_SEARCH;
 export type SearchSemanticSearch = typeof SEARCH_SEMANTIC_SEARCH;
 export type SearchAISearch = typeof SEARCH_AI_SEARCH;
 
-export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
+export type ContentLinkId = 'connectors' | 'webCrawlers';
 
 export type ApplicationsLinkId = 'searchApplications';
-
-export type AppsearchLinkId = 'engines';
 
 export type SearchInferenceEndpointsLinkId = 'inferenceEndpoints';
 
@@ -67,8 +61,6 @@ export type DeepLinkId =
   | EnterpriseSearchContentApp
   | EnterpriseSearchApplicationsApp
   | EnterpriseSearchAnalyticsApp
-  | EnterpriseSearchAppsearchApp
-  | EnterpriseSearchWorkplaceSearchApp
   | ServerlessSearchApp
   | ConnectorsId
   | ServerlessWebCrawlers
@@ -78,7 +70,6 @@ export type DeepLinkId =
   | SearchHomepage
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
-  | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`
   | `${SearchInferenceEndpointsId}:${SearchInferenceEndpointsLinkId}`
   | `${SearchSynonymsId}:${SynonymsLinkId}`
   | SearchStart

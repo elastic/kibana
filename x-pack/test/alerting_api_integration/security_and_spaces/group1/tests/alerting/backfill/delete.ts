@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import {
   getTestRuleData,

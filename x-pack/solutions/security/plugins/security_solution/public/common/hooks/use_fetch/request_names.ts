@@ -12,10 +12,6 @@ export const REQUEST_NAMES = {
   SECURITY_CREATE_TAG: `${APP_UI_ID} fetch security create tag`,
   CTI_TAGS: `${APP_UI_ID} fetch cti tags`,
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
-  GET_RISK_SCORE_DEPRECATED: `${APP_UI_ID} fetch is risk score deprecated`,
-  ENABLE_RISK_SCORE: `${APP_UI_ID} fetch enable risk score`,
-  REFRESH_RISK_SCORE: `${APP_UI_ID} fetch refresh risk score`,
-  UPGRADE_RISK_SCORE: `${APP_UI_ID} fetch upgrade risk score`,
 } as const;
 
 export type RequestName = (typeof REQUEST_NAMES)[keyof typeof REQUEST_NAMES];

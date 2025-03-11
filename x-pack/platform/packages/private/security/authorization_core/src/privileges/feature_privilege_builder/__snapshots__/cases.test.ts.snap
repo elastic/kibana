@@ -18,6 +18,7 @@ Array [
   "cases:observability/updateConfiguration",
   "cases:observability/createComment",
   "cases:observability/reopenCase",
+  "cases:observability/assignCase",
 ]
 `;
 

@@ -39,7 +39,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/root/eui_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +61,7 @@
               },
               ">"
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,7 +90,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/root/root_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -112,7 +112,7 @@
               },
               ">"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,9 +142,9 @@
           },
           " extends Pick<",
           "EuiProviderProps",
-          "<{}>, \"modify\" | \"colorMode\">"
+          "<{}>, \"colorMode\" | \"modify\">"
         ],
-        "path": "packages/react/kibana_context/root/eui_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -164,7 +164,7 @@
                 "text": "ThemeServiceStart"
               }
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -180,7 +180,7 @@
               "UserProfileService",
               ", \"getUserProfile$\"> | undefined"
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,7 +194,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -227,7 +227,7 @@
             "text": "KibanaEuiProviderProps"
           }
         ],
-        "path": "packages/react/kibana_context/root/root_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,7 +243,7 @@
             "signature": [
               "I18nStart"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -261,7 +261,7 @@
               "AnalyticsServiceStart",
               ", \"reportEvent\"> | undefined"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,7 +278,7 @@
               "ExecutionContextSetup",
               " | undefined"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

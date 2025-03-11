@@ -37,25 +37,26 @@ export interface Conversation {
   id: string;
   title: string;
   messages: ClientMessage[];
-  updatedAt?: Date;
-  createdAt?: Date;
+  updatedAt?: string;
+  createdAt?: string;
   replacements: Replacements;
-  isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
 
 export interface AssistantTelemetry {
-  reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
+  reportAssistantInvoked: (params: { invokedBy: string }) => void;
   reportAssistantMessageSent: (params: {
-    conversationId: string;
     role: string;
     actionTypeId: string;
     model?: string;
     provider?: string;
     isEnabledKnowledgeBase: boolean;
   }) => void;
-  reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
+  reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantSettingToggled: (params: {
+    assistantStreamingEnabled?: boolean;
+    alertsCountUpdated?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {
@@ -83,4 +84,5 @@ export type GetAssistantMessages = (commentArgs: {
   currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
+  contentReferencesVisible: boolean;
 }) => EuiCommentProps[];

@@ -16,7 +16,7 @@ const ROLES = [
       kibana: [
         {
           feature: {
-            siem: ['read'],
+            siemV2: ['read'],
           },
           spaces: ['default'],
         },

@@ -35,14 +35,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
-          },
-          {
             "plugin": "presentationUtil",
             "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
@@ -52,35 +44,35 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/attribute_service.tsx"
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/legacy/embeddable/attribute_service.tsx"
+            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/library_add_action.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/save_modal/save_modal.tsx"
           },
           {
             "plugin": "discover",
@@ -89,6 +81,14 @@
           {
             "plugin": "discover",
             "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
           },
           {
             "plugin": "links",

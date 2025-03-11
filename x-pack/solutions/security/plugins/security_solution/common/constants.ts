@@ -22,8 +22,11 @@ export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
+export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
+export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
+export const SECURITY_FEATURE_ID = 'siemV2' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
@@ -67,7 +70,6 @@ export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
-export const SECURITY_FEATURE_ID = 'Security' as const;
 export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
@@ -113,7 +115,6 @@ export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const INVESTIGATIONS_PATH = '/investigations' as const;
 export const MACHINE_LEARNING_PATH = '/ml' as const;
 export const ASSETS_PATH = '/assets' as const;
-export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -211,6 +212,13 @@ export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
+export const ENABLE_GRAPH_VISUALIZATION_SETTING =
+  'securitySolution:enableGraphVisualization' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
+export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -246,6 +254,7 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
+export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
 
@@ -282,7 +291,6 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
-export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -323,6 +331,7 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
  Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
+export const MINIMUM_RULE_CUSTOMIZATION_LICENSE = 'enterprise' as const;
 
 /**
  Machine Learning constants
@@ -355,10 +364,6 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
-
-export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
-
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -382,7 +387,7 @@ export const STARTED_TRANSFORM_STATES = new Set([
 ]);
 
 /**
- * How many rules to update at a time is set to 50 from errors coming from
+ * How many rules to update at a time is set to 20 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
  * seeing timeout issues.
  *
@@ -397,14 +402,14 @@ export const STARTED_TRANSFORM_STATES = new Set([
  * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
  * which in turn could create additional connections we want to avoid.
  *
- * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
- * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
- * reducing the 50 above to a lower number.
+ * See file import_rules_route.ts for another area where 20 was chosen, therefore I chose
+ * 20 here to mimic it as well. If you see this re-opened or what similar to it, consider
+ * reducing the 20 above to a lower number.
  *
  * See the original ticket here:
  * https://github.com/elastic/kibana/issues/94418
  */
-export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 
@@ -426,6 +431,8 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
+  SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -433,19 +440,6 @@ export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
-
-// TODO: https://github.com/elastic/kibana/pull/142950
-/**
- * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
- */
-export enum BulkActionsDryRunErrCode {
-  IMMUTABLE = 'IMMUTABLE',
-  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
-  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
-  ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
-  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
-  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
-}
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 

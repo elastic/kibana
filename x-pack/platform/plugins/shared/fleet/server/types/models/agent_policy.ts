@@ -13,7 +13,7 @@ import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
-import { PackagePolicySchema } from './package_policy';
+import { PackagePolicySchema, PackagePolicyResponseSchema } from './package_policy';
 
 export const AgentPolicyNamespaceSchema = schema.string({
   minLength: 1,
@@ -36,6 +36,20 @@ const TWO_WEEKS_SECONDS = 1209600;
 function isInteger(n: number) {
   if (!Number.isInteger(n)) {
     return `${n} is not a valid integer`;
+  }
+}
+
+const memoryRegex = /^\d+(Mi|Gi)$/;
+function validateMemory(s: string) {
+  if (!memoryRegex.test(s)) {
+    return 'Invalid memory format';
+  }
+}
+
+const cpuRegex = /^(\d+m|\d+(\.\d+)?)$/;
+function validateCPU(s: string) {
+  if (!cpuRegex.test(s)) {
+    return 'Invalid CPU format';
   }
 }
 
@@ -132,6 +146,20 @@ export const AgentPolicyBaseSchema = {
       }
     )
   ),
+  agentless: schema.maybe(
+    schema.object({
+      resources: schema.maybe(
+        schema.object({
+          requests: schema.maybe(
+            schema.object({
+              memory: schema.maybe(schema.string({ validate: validateMemory })),
+              cpu: schema.maybe(schema.string({ validate: validateCPU })),
+            })
+          ),
+        })
+      ),
+    })
+  ),
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),
   monitoring_http: schema.maybe(
     schema.object({
@@ -157,6 +185,27 @@ export const AgentPolicyBaseSchema = {
         })
       ),
     })
+  ),
+  required_versions: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(
+        schema.object({
+          version: schema.string({
+            meta: {
+              description: 'Target version for automatic agent upgrade',
+            },
+          }),
+          percentage: schema.number({
+            min: 0,
+            max: 100,
+            meta: {
+              description: 'Target percentage of agents to auto upgrade',
+            },
+          }),
+        })
+      ),
+    ])
   ),
 };
 
@@ -232,7 +281,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   package_policies: schema.maybe(
     schema.oneOf([
       schema.arrayOf(schema.string()),
-      schema.arrayOf(PackagePolicySchema, {
+      schema.arrayOf(PackagePolicyResponseSchema, {
         meta: {
           description:
             'This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter',
@@ -244,6 +293,17 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
 
 export const GetAgentPolicyResponseSchema = schema.object({
   item: AgentPolicyResponseSchema,
+});
+
+export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
+  currentVersions: schema.arrayOf(
+    schema.object({
+      version: schema.string(),
+      agents: schema.number(),
+      failedUpgradeAgents: schema.number(),
+    })
+  ),
+  totalAgents: schema.number(),
 });
 
 export const FullAgentPolicyResponseSchema = schema.object({
@@ -279,6 +339,17 @@ export const FullAgentPolicyResponseSchema = schema.object({
             certificate: schema.maybe(schema.string()),
             key: schema.maybe(schema.string()),
             renegotiation: schema.maybe(schema.string()),
+          })
+        ),
+        secrets: schema.maybe(
+          schema.object({
+            ssl: schema.maybe(
+              schema.object({
+                key: schema.object({
+                  id: schema.maybe(schema.string()),
+                }),
+              })
+            ),
           })
         ),
       }),
@@ -360,6 +431,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
         metrics: schema.boolean(),
         logs: schema.boolean(),
         traces: schema.boolean(),
+        apm: schema.maybe(schema.any()),
       }),
       download: schema.object({
         sourceURI: schema.string(),

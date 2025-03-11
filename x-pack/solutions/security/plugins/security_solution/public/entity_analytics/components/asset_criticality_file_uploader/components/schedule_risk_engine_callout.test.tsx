@@ -48,7 +48,6 @@ describe('ScheduleRiskEngineCallout', () => {
   it('should show the remaining time for the next risk engine run', async () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
-        isNewRiskScoreModuleInstalled: true,
         risk_engine_status: RiskEngineStatusEnum.ENABLED,
         risk_engine_task_status: {
           status: 'idle',
@@ -70,7 +69,6 @@ describe('ScheduleRiskEngineCallout', () => {
   it('should show "now running" status when the risk engine status is "running"', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
-        isNewRiskScoreModuleInstalled: true,
         risk_engine_status: RiskEngineStatusEnum.ENABLED,
         risk_engine_task_status: {
           status: 'running',
@@ -89,7 +87,6 @@ describe('ScheduleRiskEngineCallout', () => {
   it('should show "now running" status when the next schedule run is in the past', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
-        isNewRiskScoreModuleInstalled: true,
         risk_engine_status: RiskEngineStatusEnum.ENABLED,
         risk_engine_task_status: {
           status: 'idle',
@@ -110,7 +107,6 @@ describe('ScheduleRiskEngineCallout', () => {
   it('should update the count down time when time has passed', () => {
     mockUseRiskEngineStatus.mockReturnValueOnce({
       data: {
-        isNewRiskScoreModuleInstalled: true,
         risk_engine_status: RiskEngineStatusEnum.ENABLED,
         risk_engine_task_status: {
           status: 'idle',
@@ -127,7 +123,6 @@ describe('ScheduleRiskEngineCallout', () => {
     // simulate useQuery re-render after fetching data
     mockUseRiskEngineStatus.mockReturnValueOnce({
       data: {
-        isNewRiskScoreModuleInstalled: true,
         risk_engine_status: RiskEngineStatusEnum.ENABLED,
         risk_engine_task_status: {
           status: 'idle',
@@ -143,7 +138,6 @@ describe('ScheduleRiskEngineCallout', () => {
   it('should call the run risk engine api when button is clicked', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
-        isNewRiskScoreModuleInstalled: true,
         risk_engine_status: RiskEngineStatusEnum.ENABLED,
         risk_engine_task_status: {
           status: 'idle',
@@ -163,9 +157,7 @@ describe('ScheduleRiskEngineCallout', () => {
 
   it('should not show the callout if the risk engine is not installed', () => {
     mockUseRiskEngineStatus.mockReturnValue({
-      data: {
-        isNewRiskScoreModuleInstalled: false,
-      },
+      data: {},
     });
 
     const { queryByTestId } = render(<ScheduleRiskEngineCallout />, {
@@ -178,7 +170,6 @@ describe('ScheduleRiskEngineCallout', () => {
   it('should not show the callout if the risk engine is disabled', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
-        isNewRiskScoreModuleInstalled: true,
         risk_engine_status: RiskEngineStatusEnum.DISABLED,
       },
     });

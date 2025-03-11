@@ -8,7 +8,6 @@ The package is structure as follow:
 ```
 src
  | autocomplete         // => the autocomplete/suggest service logic
- | code_actions         // => the quick fixes service logic
  | definitions          // => static assets to define all components behaviour of a ES|QL query: commands, functions, etc...
  | validation           // => the validation logic
 
@@ -335,7 +334,7 @@ They look like this
 testSuggestions('from a | eval a = 1 year /', [
   ',',
   '| ',
-  ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+  ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
     'time_interval',
   ]),
 ]);

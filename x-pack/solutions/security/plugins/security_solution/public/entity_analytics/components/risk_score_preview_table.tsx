@@ -12,9 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreLevel } from './severity/common';
-
-import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
-import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
+import { EntityDetailsLink } from '../../common/components/links';
+import type { EntityType } from '../../../common/entity_analytics/types';
 
 type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
   field: keyof EntityRiskScoreRecord;
@@ -25,7 +24,7 @@ export const RiskScorePreviewTable = ({
   type,
 }: {
   items: EntityRiskScoreRecord[];
-  type: RiskScoreEntity;
+  type: EntityType;
 }) => {
   const columns: RiskScoreColumn[] = [
     {
@@ -36,13 +35,9 @@ export const RiskScorePreviewTable = ({
           defaultMessage="Name"
         />
       ),
-      render: (itemName: string) => {
-        return type === RiskScoreEntity.host ? (
-          <HostDetailsLink hostName={itemName} />
-        ) : (
-          <UserDetailsLink userName={itemName} />
-        );
-      },
+      render: (entityName: string) => (
+        <EntityDetailsLink entityName={entityName} entityType={type} />
+      ),
     },
     {
       field: 'calculated_level',
@@ -80,9 +75,7 @@ export const RiskScorePreviewTable = ({
 
   return (
     <EuiInMemoryTable<EntityRiskScoreRecord>
-      data-test-subj={
-        type === RiskScoreEntity.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
-      }
+      data-test-subj={`${type}-risk-preview-table`}
       responsiveBreakpoint={false}
       items={items}
       columns={columns}

@@ -23,6 +23,7 @@ import { getExportByObjectIds } from '../../../logic/export/get_export_by_object
 import { getExportAll } from '../../../logic/export/get_export_all';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -56,15 +57,29 @@ export const exportRulesRoute = (
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
-        const rulesClient = await (await context.alerting).getRulesClient();
-        const exceptionsClient = (await context.lists)?.getExceptionListClient();
-        const actionsClient = (await context.actions)?.getActionsClient();
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'actions',
+          'lists',
+        ]);
 
-        const { getExporter, getClient } = (await context.core).savedObjects;
+        const rulesClient = await ctx.alerting.getRulesClient();
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
+        const actionsClient = ctx.actions.getActionsClient();
+        const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
+
+        const { getExporter, getClient } = ctx.core.savedObjects;
 
         const client = getClient({ includedHiddenTypes: ['action'] });
         const actionsExporter = getExporter(client);
-        const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
+        const prebuiltRulesCustomizationStatus = detectionRulesClient.getRuleCustomizationStatus();
+
+        const isPrebuiltRulesExportAllowed =
+          prebuiltRulesCustomizationStatus.isRulesCustomizationEnabled ||
+          prebuiltRulesCustomizationStatus.customizationDisabledReason ===
+            PrebuiltRulesCustomizationDisabledReason.License;
 
         try {
           const exportSizeLimit = config.maxRuleImportExportSize;
@@ -76,7 +91,7 @@ export const exportRulesRoute = (
           } else {
             let rulesCount = 0;
 
-            if (prebuiltRulesCustomizationEnabled) {
+            if (isPrebuiltRulesExportAllowed) {
               rulesCount = await getRulesCount({
                 rulesClient,
                 filter: '',
@@ -86,6 +101,7 @@ export const exportRulesRoute = (
                 rulesClient,
               });
             }
+
             if (rulesCount > exportSizeLimit) {
               return siemResponse.error({
                 statusCode: 400,
@@ -103,7 +119,7 @@ export const exportRulesRoute = (
                   actionsExporter,
                   request,
                   actionsClient,
-                  prebuiltRulesCustomizationEnabled
+                  isPrebuiltRulesExportAllowed
                 )
               : await getExportAll(
                   rulesClient,
@@ -111,7 +127,7 @@ export const exportRulesRoute = (
                   actionsExporter,
                   request,
                   actionsClient,
-                  prebuiltRulesCustomizationEnabled
+                  isPrebuiltRulesExportAllowed
                 );
 
           const responseBody = request.query.exclude_export_details

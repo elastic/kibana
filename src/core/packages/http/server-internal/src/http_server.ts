@@ -37,10 +37,11 @@ import type {
   IAuthHeadersStorage,
   RouterDeprecatedApiDetails,
   RouteMethod,
+  VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity, isObject } from 'lodash';
+import { identity, isNil, isObject, omitBy } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
@@ -140,6 +141,7 @@ export interface HttpServerSetup {
   staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
+  prototypeHardening: boolean;
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -306,6 +308,7 @@ export class HttpServer {
         ),
       basePath: basePathService,
       csp: config.csp,
+      prototypeHardening: config.prototypeHardening,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
@@ -410,10 +413,12 @@ export class HttpServer {
           .map((route) => {
             const access = route.options.access;
             if (route.isVersioned === true) {
-              return [...route.handlers.entries()].map(([_, { options }]) => {
-                const deprecated = options.options?.deprecated;
-                return { route, version: `${options.version}`, deprecated, access };
-              });
+              return [...(route as VersionedRouterRoute).handlers.entries()].map(
+                ([_, { options }]) => {
+                  const deprecated = options.options?.deprecated;
+                  return { route, version: `${options.version}`, deprecated, access };
+                }
+              );
             }
 
             return { route, version: undefined, deprecated: route.options.deprecated, access };
@@ -764,6 +769,7 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
+      ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

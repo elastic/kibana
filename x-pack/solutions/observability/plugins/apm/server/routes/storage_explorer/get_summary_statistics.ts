@@ -55,28 +55,26 @@ async function getTracesPerMinute({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(start, end),
-            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-              : []),
-            isRootTransaction(searchAggregatedTransactions),
-          ],
-        },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...rangeQuery(start, end),
+          ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+            ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+            : []),
+          isRootTransaction(searchAggregatedTransactions),
+        ],
       },
-      aggs: {
-        traces_count: {
-          value_count: {
-            field: getDurationFieldForTransactions(searchAggregatedTransactions),
-          },
+    },
+    aggs: {
+      traces_count: {
+        value_count: {
+          field: getDurationFieldForTransactions(searchAggregatedTransactions),
         },
       },
     },
@@ -117,40 +115,38 @@ async function getMainSummaryStats({
           ProcessorEvent.metric,
         ],
       },
-      body: {
-        size: 0,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...rangeQuery(start, end),
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                : []),
-            ],
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...rangeQuery(start, end),
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
+        },
+      },
+      aggs: {
+        services_count: {
+          cardinality: {
+            field: SERVICE_NAME,
           },
         },
-        aggs: {
-          services_count: {
-            cardinality: {
-              field: SERVICE_NAME,
-            },
-          },
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              indices: {
-                terms: {
-                  field: INDEX,
-                  size: 500,
-                },
-                aggs: {
-                  number_of_metric_docs: {
-                    value_count: {
-                      field: INDEX,
-                    },
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            indices: {
+              terms: {
+                field: INDEX,
+                size: 500,
+              },
+              aggs: {
+                number_of_metric_docs: {
+                  value_count: {
+                    field: INDEX,
                   },
                 },
               },

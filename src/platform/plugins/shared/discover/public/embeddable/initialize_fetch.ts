@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
+import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 
-import { KibanaExecutionContext } from '@kbn/core/types';
+import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -18,38 +19,38 @@ import {
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import {
-  apiHasExecutionContext,
-  apiHasParentApi,
-  fetch$,
+import type {
   FetchContext,
   HasParentApi,
   PublishesDataViews,
-  PublishesPanelTitle,
+  PublishesTitle,
   PublishesSavedObjectId,
+  PublishesDataLoading,
+  PublishesBlockingError,
 } from '@kbn/presentation-publishing';
-import { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import { apiHasExecutionContext, apiHasParentApi, fetch$ } from '@kbn/presentation-publishing';
+import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
-import { DiscoverServices } from '../build_services';
+import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
-import { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
+import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
+  PublishesBlockingError &
+  PublishesDataLoading &
   PublishesDataViews &
-  PublishesPanelTitle &
+  PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
-    dataLoading: BehaviorSubject<boolean | undefined>;
-    blockingError: BehaviorSubject<Error | undefined>;
     fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
   } & Partial<HasParentApi>;
 
@@ -66,8 +67,8 @@ const getExecutionContext = async (
   const childContext: KibanaExecutionContext = {
     type: SEARCH_EMBEDDABLE_TYPE,
     name: 'discover',
-    id: api.savedObjectId.getValue(),
-    description: api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
+    id: api.savedObjectId$.getValue(),
+    description: api.title$?.getValue() || api.defaultTitle$?.getValue() || '',
     url: editUrl,
   };
   const executionContext =
@@ -84,15 +85,19 @@ export function initializeFetch({
   api,
   stateManager,
   discoverServices,
+  setDataLoading,
+  setBlockingError,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
+  setDataLoading: (dataLoading: boolean | undefined) => void;
+  setBlockingError: (error: Error | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews])
+  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews$])
     .pipe(
       tap(() => {
         // abort any in-progress requests
@@ -103,7 +108,7 @@ export function initializeFetch({
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
-        api.blockingError.next(undefined);
+        setBlockingError(undefined);
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
@@ -127,7 +132,7 @@ export function initializeFetch({
         inspectorAdapters.requests.reset();
 
         try {
-          api.dataLoading.next(true);
+          setDataLoading(true);
 
           // Get new abort controller
           const currentAbortController = new AbortController();
@@ -148,7 +153,7 @@ export function initializeFetch({
             // Request ES|QL data
             const result = await fetchEsql({
               query: searchSourceQuery,
-              inputTimeRange: getTimeRangeFromFetchContext(fetchContext),
+              timeRange: getTimeRangeFromFetchContext(fetchContext),
               inputQuery: fetchContext.query,
               filters: fetchContext.filters,
               dataView,
@@ -214,9 +219,9 @@ export function initializeFetch({
       })
     )
     .subscribe((next) => {
-      api.dataLoading.next(false);
+      setDataLoading(false);
       if (!next || Object.hasOwn(next, 'error')) {
-        api.blockingError.next(next?.error);
+        setBlockingError(next?.error);
         return;
       }
 

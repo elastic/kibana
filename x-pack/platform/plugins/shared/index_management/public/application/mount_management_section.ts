@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../index.scss';
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
 import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';

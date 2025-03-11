@@ -37,6 +37,7 @@ const urlServiceMock = {
     }),
   },
 };
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('Data Streams - Project level max retention', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();

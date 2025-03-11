@@ -11,6 +11,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 
 /**
  * Types that are no longer registered and need to be removed
+ * As of 8.8, no new types are allowed to be removed.
+ * Removing saved object types is not backward compatible
  */
 export const REMOVED_TYPES: string[] = [
   'apm-services-telemetry',

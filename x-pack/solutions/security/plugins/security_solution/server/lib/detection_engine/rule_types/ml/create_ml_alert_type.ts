@@ -18,7 +18,12 @@ import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
+): SecurityAlertType<
+  MachineLearningRuleParams,
+  { isLoggedRequestsEnabled?: boolean },
+  {},
+  'default'
+> => {
   const { experimentalFeatures, ml, licensing, scheduleNotificationResponseActionsService } =
     createOptions;
   return {
@@ -49,69 +54,32 @@ export const createMlAlertType = (
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
-      const {
-        runOpts: {
-          bulkCreate,
-          completeRule,
-          listClient,
-          ruleExecutionLogger,
-          tuple,
-          wrapHits,
-          exceptionFilter,
-          unprocessedExceptions,
-          mergeStrategy,
-          alertTimestampOverride,
-          publicBaseUrl,
-          alertWithSuppression,
-          primaryTimestamp,
-          secondaryTimestamp,
-          intendedTimestamp,
-        },
-        services,
-        spaceId,
-        state,
-      } = execOptions;
+      const { sharedParams, services, state } = execOptions;
 
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
-        alertSuppression: completeRule.ruleParams.alertSuppression,
+        alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
         licensing,
       });
+      const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
 
       const wrapSuppressedHits: WrapSuppressedHits = (events, buildReasonMessage) =>
         wrapSuppressedAlerts({
           events,
-          spaceId,
-          completeRule,
-          mergeStrategy,
-          indicesToQuery: [],
           buildReasonMessage,
-          alertTimestampOverride,
-          ruleExecutionLogger,
-          publicBaseUrl,
-          primaryTimestamp,
-          secondaryTimestamp,
-          intendedTimestamp,
+          sharedParams,
         });
 
-      const result = await mlExecutor({
-        completeRule,
-        tuple,
+      const { result, loggedRequests } = await mlExecutor({
+        sharedParams,
         ml,
-        listClient,
         services,
-        ruleExecutionLogger,
-        bulkCreate,
-        wrapHits,
-        exceptionFilter,
-        unprocessedExceptions,
         wrapSuppressedHits,
-        alertTimestampOverride,
-        alertWithSuppression,
         isAlertSuppressionActive,
         experimentalFeatures,
         scheduleNotificationResponseActionsService,
+        isLoggedRequestsEnabled,
       });
-      return { ...result, state };
+      return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     },
   };
 };

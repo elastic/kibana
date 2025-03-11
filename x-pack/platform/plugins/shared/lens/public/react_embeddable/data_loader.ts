@@ -7,6 +7,7 @@
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
@@ -30,17 +31,19 @@ import { buildUserMessagesHelpers } from './user_messages/api';
 import { getLogError } from './expressions/telemetry';
 import type { SharingSavedObjectProps, UserMessagesDisplayLocationId } from '../types';
 import { apiHasLensComponentCallbacks } from './type_guards';
-import { getRenderMode, getParentContext } from './helper';
+import { getRenderMode, getParentContext, buildObservableVariable } from './helper';
 import { addLog } from './logger';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getMergedSearchContext } from './expressions/merged_search_context';
+import { getEmbeddableVariables } from './initializers/utils';
 
 const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
   'visualizationOnEmbeddable',
 ];
 
-type ReloadReason =
+export type ReloadReason =
+  | 'ESQLvariables'
   | 'attributes'
   | 'savedObjectId'
   | 'overrides'
@@ -48,7 +51,7 @@ type ReloadReason =
   | 'viewMode'
   | 'searchContext';
 
-function getSearchContext(parentApi: unknown) {
+function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable[] = []) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
     ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
     : {
@@ -59,6 +62,7 @@ function getSearchContext(parentApi: unknown) {
       };
 
   return {
+    esqlVariables,
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
@@ -93,14 +97,7 @@ export function loadEmbeddableData(
     updateWarnings,
     resetMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(
-    api,
-    internalApi,
-    services,
-    onBeforeBadgesRender,
-    services.spaces,
-    metaInfo
-  );
+  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
@@ -122,6 +119,8 @@ export function loadEmbeddableData(
     }
   };
 
+  const [controlESQLVariables$] = buildObservableVariable<ESQLControlVariable[]>([]);
+
   async function reload(
     // make reload easier to debug
     sourceId: ReloadReason
@@ -136,9 +135,7 @@ export function loadEmbeddableData(
     internalApi.updateDataLoading(true);
 
     // the component is ready to load
-    if (apiHasLensComponentCallbacks(parentApi)) {
-      parentApi.onLoad?.(true);
-    }
+    onLoad?.(true);
 
     const currentState = getState();
 
@@ -169,11 +166,12 @@ export function loadEmbeddableData(
       internalApi.updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
+
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading);
+      onLoad?.(false, adapters, api.dataLoading$);
 
       api.loadViewUnderlyingData();
 
@@ -196,14 +194,14 @@ export function loadEmbeddableData(
 
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi),
+      getSearchContext(parentApi, controlESQLVariables$?.getValue()),
       api.timeRange$,
       parentApi,
       services
     );
 
     // Go concurrently: build the expression and fetch the dataViews
-    const [{ params, abortController, ...rest }, dataViews] = await Promise.all([
+    const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
         searchContext,
         api,
@@ -243,9 +241,12 @@ export function loadEmbeddableData(
     });
 
     // Publish the used dataViews on the Lens API
-    internalApi.updateDataViews(dataViews);
+    internalApi.updateDataViews(dataViewIds);
 
-    if (params?.expression != null && !dispatchBlockingErrorIfAny()) {
+    // This will catch also failed loaded dataViews
+    const hasBlockingErrors = dispatchBlockingErrorIfAny();
+
+    if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
 
@@ -260,6 +261,10 @@ export function loadEmbeddableData(
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
+    controlESQLVariables$.pipe(
+      waitUntilChanged(),
+      map(() => 'ESQLvariables' as ReloadReason)
+    ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
@@ -274,7 +279,7 @@ export function loadEmbeddableData(
       }),
       map(() => 'attributes' as ReloadReason)
     ),
-    api.savedObjectId.pipe(
+    api.savedObjectId$.pipe(
       waitUntilChanged(),
       map(() => 'savedObjectId' as ReloadReason)
     ),
@@ -290,8 +295,14 @@ export function loadEmbeddableData(
 
   const subscriptions: Subscription[] = [
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // In case of changes to the dashboard ES|QL controls, re-map them
+    internalApi.esqlVariables$.subscribe((newVariables: ESQLControlVariable[]) => {
+      const query = internalApi.attributes$.getValue().state?.query;
+      const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
+      controlESQLVariables$.next(esqlVariables);
+    }),
     // make sure to reload on viewMode change
-    api.viewMode.subscribe(() => {
+    api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
       if (getState().enhancements?.dynamicActions) {
         reload('viewMode');

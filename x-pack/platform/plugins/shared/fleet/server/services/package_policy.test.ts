@@ -50,6 +50,7 @@ import type {
   NewPackagePolicyInput,
   PackagePolicyPackage,
   DeletePackagePoliciesResponse,
+  PackagePolicyAssetsMap,
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
@@ -120,7 +121,7 @@ const ASSETS_MAP_FIXTURES = new Map([
   {{/each}}
   `),
   ],
-]);
+]) as PackagePolicyAssetsMap;
 
 async function mockedGetInstallation(params: any) {
   let pkg;
@@ -188,6 +189,7 @@ jest.mock('./epm/registry', () => ({
 
 jest.mock('./epm/packages/get', () => ({
   getPackageAssetsMap: jest.fn().mockResolvedValue(new Map()),
+  getAgentTemplateAssetsMap: jest.fn().mockResolvedValue(new Map()),
 }));
 
 jest.mock('./agent_policy');
@@ -208,6 +210,10 @@ jest.mock('./upgrade_sender', () => {
 jest.mock('./audit_logging');
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
+jest.mock('./secrets', () => ({
+  isSecretStorageEnabled: jest.fn(),
+}));
+
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
 const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
@@ -227,7 +233,7 @@ const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
       });
     }
   );
-  mockAgentPolicyService.getByIDs.mockImplementation(
+  mockAgentPolicyService.getByIds.mockImplementation(
     // @ts-ignore
     (_soClient: SavedObjectsClientContract, ids: string[]) => {
       return Promise.resolve(
@@ -5236,10 +5242,17 @@ describe('Package policy service', () => {
         name: 'apache-1',
         namespace: '',
         description: '',
-        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        output_id: undefined,
+        package: {
+          name: 'apache',
+          title: 'Apache',
+          version: '1.0.0',
+          experimental_data_stream_features: undefined,
+        },
         enabled: true,
         policy_id: '1',
         policy_ids: ['1'],
+        supports_agentless: undefined,
         inputs: [
           {
             enabled: false,
@@ -5254,6 +5267,67 @@ describe('Package policy service', () => {
                 },
               },
             ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/var/log/apache2/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+
+    it('should disable inputs if supports_agentless == true if inputs are not allowed', async () => {
+      const newPolicy = {
+        name: 'apache-1',
+        inputs: [
+          { type: 'logfile', enabled: false },
+          { type: 'tcp', enabled: true },
+        ],
+        package: { name: 'apache', version: '0.3.3' },
+        policy_id: '1',
+        policy_ids: ['1'],
+        supports_agentless: true,
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'apache-1',
+        namespace: '',
+        description: '',
+        output_id: undefined,
+        package: {
+          name: 'apache',
+          title: 'Apache',
+          version: '1.0.0',
+          experimental_data_stream_features: undefined,
+        },
+        enabled: true,
+        policy_id: '1',
+        policy_ids: ['1'],
+        supports_agentless: true,
+        inputs: [
+          {
+            enabled: false,
+            type: 'logfile',
+            policy_template: 'log',
+            streams: [
+              {
+                enabled: false,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.access',
+                },
+              },
+            ],
+          },
+          {
+            enabled: false,
+            type: 'tcp',
+            streams: undefined,
           },
         ],
         vars: {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ReplaySubject, firstValueFrom, combineLatest } from 'rxjs';
-
 import type {
   SearchHit,
   UpdateResponse,
@@ -15,15 +13,23 @@ import type {
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import { ReplaySubject, firstValueFrom, combineLatest } from 'rxjs';
+import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 
 import type {
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
-
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
-import { buildEsQueryParams, createDatastream, createPipeline, generateInsightId } from './helpers';
+import {
+  buildEsQueryParams,
+  checkIfRemediationExists,
+  createDatastream,
+  createPipeline,
+  generateInsightId,
+  getUniqueInsights,
+} from './helpers';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
 
@@ -38,6 +44,7 @@ interface SetupInterface {
 
 interface StartInterface {
   esClient: ElasticsearchClient;
+  registerDefendInsightsCallback: (callbackId: CallbackIds, callback: Function) => void;
 }
 
 class SecurityWorkflowInsightsService {
@@ -76,7 +83,7 @@ class SecurityWorkflowInsightsService {
     this.setup$.next();
   }
 
-  public async start({ esClient }: StartInterface) {
+  public async start({ esClient, registerDefendInsightsCallback }: StartInterface) {
     if (!this.isFeatureEnabled) {
       return;
     }
@@ -85,6 +92,7 @@ class SecurityWorkflowInsightsService {
     await firstValueFrom(this.setup$);
 
     try {
+      this.registerDefendInsightsCallbacks(registerDefendInsightsCallback);
       await createPipeline(esClient);
       await this.ds?.install({
         logger: this.logger,
@@ -121,21 +129,38 @@ class SecurityWorkflowInsightsService {
   public async createFromDefendInsights(
     defendInsights: DefendInsight[],
     request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
-  ): Promise<WriteResponseBase[]> {
+  ): Promise<Array<Awaited<WriteResponseBase | void>>> {
+    if (!defendInsights || !defendInsights.length) {
+      return [];
+    }
+
     await this.isInitialized;
 
     const workflowInsights = await buildWorkflowInsights({
       defendInsights,
       request,
       endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
+      esClient: this.esClient,
     });
-    return Promise.all(workflowInsights.map((insight) => this.create(insight)));
+    const uniqueInsights = getUniqueInsights(workflowInsights);
+
+    return Promise.all(uniqueInsights.map((insight) => this.create(insight)));
   }
 
-  public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase> {
+  public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase | void> {
     await this.isInitialized;
 
     const id = generateInsightId(insight);
+
+    const remediationExists = await checkIfRemediationExists({
+      insight,
+      exceptionListsClient: this.endpointContext.getExceptionListsClient(),
+      endpointMetadataClient: this.endpointContext.getEndpointMetadataService(),
+    });
+
+    if (remediationExists) {
+      return;
+    }
 
     // if insight already exists, update instead
     const existingInsights = await this.fetch({ ids: [id] });
@@ -145,8 +170,10 @@ class SecurityWorkflowInsightsService {
 
     const response = await this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
-      body: { ...insight, id },
+      id,
+      document: insight,
       refresh: 'wait_for',
+      op_type: 'create',
     });
 
     return response;
@@ -172,7 +199,7 @@ class SecurityWorkflowInsightsService {
     const response = await this.esClient.update<SecurityWorkflowInsight>({
       index,
       id,
-      body: { doc: insight },
+      doc: insight,
       refresh: 'wait_for',
     });
 
@@ -188,15 +215,13 @@ class SecurityWorkflowInsightsService {
     const termFilters = params ? buildEsQueryParams(params) : [];
     const response = await this.esClient.search<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
-      body: {
-        query: {
-          bool: {
-            must: termFilters,
-          },
+      query: {
+        bool: {
+          must: termFilters,
         },
-        size,
-        from,
       },
+      size,
+      from,
     });
 
     return response?.hits?.hits ?? [];
@@ -224,6 +249,15 @@ class SecurityWorkflowInsightsService {
     }
 
     return this._endpointContext;
+  }
+
+  private registerDefendInsightsCallbacks(
+    registerCallback: (callbackId: CallbackIds, callback: Function) => void
+  ) {
+    registerCallback(
+      CallbackIds.DefendInsightsPostCreate,
+      this.createFromDefendInsights.bind(this)
+    );
   }
 }
 

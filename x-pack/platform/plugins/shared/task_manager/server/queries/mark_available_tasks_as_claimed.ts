@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
 import {
@@ -128,7 +128,9 @@ function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombina
         // TODO: we could do this locally as well, but they may starve
         source: `
           String taskType = doc['task.taskType'].value;
-          if (params.priority_map.containsKey(taskType)) {
+          if (doc['task.priority'].size() != 0) {
+            return doc['task.priority'].value;
+          } else if (params.priority_map.containsKey(taskType)) {
             return params.priority_map[taskType];
           } else {
             return ${TaskPriority.Normal};

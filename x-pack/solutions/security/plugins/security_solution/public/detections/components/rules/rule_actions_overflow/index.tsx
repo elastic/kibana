@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../detection_engine/rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -36,6 +35,7 @@ import { useDownloadExportedRules } from '../../../../detection_engine/rule_mana
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -73,7 +73,9 @@ const RuleActionsOverflowComponent = ({
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const isPrebuiltRulesCustomizationFeatureFlagEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -141,7 +143,7 @@ const RuleActionsOverflowComponent = ({
               icon="exportAction"
               disabled={
                 !userHasPermissions ||
-                (isPrebuiltRulesCustomizationEnabled === false && rule.immutable)
+                (isPrebuiltRulesCustomizationFeatureFlagEnabled === false && rule.immutable)
               }
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
@@ -211,7 +213,7 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
-      isPrebuiltRulesCustomizationEnabled,
+      isPrebuiltRulesCustomizationFeatureFlagEnabled,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,

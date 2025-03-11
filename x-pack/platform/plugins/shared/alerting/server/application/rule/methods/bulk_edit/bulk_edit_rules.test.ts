@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -58,8 +60,8 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-jest.mock('../../../../lib/snooze/is_snooze_active', () => ({
-  isSnoozeActive: jest.fn(),
+jest.mock('../../../../lib/snooze/get_active_snooze_if_exist', () => ({
+  getActiveSnoozeIfExist: jest.fn(),
 }));
 
 jest.mock('uuid', () => {
@@ -71,7 +73,9 @@ jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
 }));
 
-const { isSnoozeActive } = jest.requireMock('../../../../lib/snooze/is_snooze_active');
+const { getActiveSnoozeIfExist } = jest.requireMock(
+  '../../../../lib/snooze/get_active_snooze_if_exist'
+);
 const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
 const taskManager = taskManagerMock.createStart();
@@ -1884,7 +1888,7 @@ describe('bulkEdit()', () => {
 
   describe('snoozeSchedule operations', () => {
     afterEach(() => {
-      isSnoozeActive.mockImplementation(() => false);
+      getActiveSnoozeIfExist.mockImplementation(() => false);
     });
 
     const getSnoozeSchedule = (useId: boolean = true) => {

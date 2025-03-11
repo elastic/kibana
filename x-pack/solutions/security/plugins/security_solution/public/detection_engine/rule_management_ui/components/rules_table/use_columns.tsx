@@ -46,7 +46,8 @@ import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 import type { TimeRange } from '../../../rule_gaps/types';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -70,7 +71,7 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
 
   const loadingIds = useMemo(
     () =>
-      ['disable', 'enable', 'edit', 'delete'].includes(loadingRulesAction ?? '')
+      ['disable', 'enable', 'edit', 'delete', 'run'].includes(loadingRulesAction ?? '')
         ? loadingRuleIds
         : [],
     [loadingRuleIds, loadingRulesAction]
@@ -295,7 +296,12 @@ export const useRulesColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled, customizationDisabledReason } =
+    usePrebuiltRulesCustomizationStatus();
+  const shouldShowModifiedColumn =
+    isRulesCustomizationEnabled ||
+    customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License;
+
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -310,15 +316,14 @@ export const useRulesColumns = ({
   });
   const snoozeColumn = useRuleSnoozeColumn();
 
-  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
-  if (isPrebuiltRulesCustomizationEnabled) {
+  if (shouldShowModifiedColumn) {
     INTEGRATIONS_COLUMN.width = '70px';
   }
 
   return useMemo(
     () => [
       ruleNameColumn,
-      ...(isPrebuiltRulesCustomizationEnabled ? [MODIFIED_COLUMN] : []),
+      ...(shouldShowModifiedColumn ? [MODIFIED_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -390,7 +395,7 @@ export const useRulesColumns = ({
     ],
     [
       ruleNameColumn,
-      isPrebuiltRulesCustomizationEnabled,
+      shouldShowModifiedColumn,
       showRelatedIntegrations,
       executionStatusColumn,
       snoozeColumn,
@@ -418,7 +423,12 @@ export const useMonitoringColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled, customizationDisabledReason } =
+    usePrebuiltRulesCustomizationStatus();
+  const shouldShowModifiedColumn =
+    isRulesCustomizationEnabled ||
+    customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License;
+
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -432,8 +442,7 @@ export const useMonitoringColumns = ({
     mlJobs,
   });
 
-  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
-  if (isPrebuiltRulesCustomizationEnabled) {
+  if (shouldShowModifiedColumn) {
     INTEGRATIONS_COLUMN.width = '70px';
   }
 
@@ -443,7 +452,7 @@ export const useMonitoringColumns = ({
         ...ruleNameColumn,
         width: '28%',
       },
-      ...(isPrebuiltRulesCustomizationEnabled ? [MODIFIED_COLUMN] : []),
+      ...(shouldShowModifiedColumn ? [MODIFIED_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -515,6 +524,20 @@ export const useMonitoringColumns = ({
         truncateText: true,
         width: '14%',
       },
+      {
+        field: 'gap_info.total_unfilled_duration_ms',
+        name: i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION,
+        render: (value: number | undefined) => (
+          <EuiText data-test-subj="gap_info" size="s">
+            {value != null && value > 0
+              ? moment.duration(value, 'ms').humanize()
+              : getEmptyTagValue()}
+          </EuiText>
+        ),
+        sortable: false,
+        truncateText: true,
+        width: '14%',
+      },
       executionStatusColumn,
       {
         field: 'execution_summary.last_execution.date',
@@ -548,8 +571,8 @@ export const useMonitoringColumns = ({
       enabledColumn,
       executionStatusColumn,
       hasCRUDPermissions,
-      isPrebuiltRulesCustomizationEnabled,
       ruleNameColumn,
+      shouldShowModifiedColumn,
       showRelatedIntegrations,
     ]
   );

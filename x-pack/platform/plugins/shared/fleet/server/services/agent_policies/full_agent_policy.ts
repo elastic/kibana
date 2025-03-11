@@ -28,6 +28,7 @@ import type {
   AgentPolicy,
 } from '../../types';
 import type {
+  FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
   PackageInfo,
@@ -44,7 +45,7 @@ import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
-import { getOutputSecretReferences } from '../secrets';
+import { getFleetServerHostsSecretReferences, getOutputSecretReferences } from '../secrets';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -87,7 +88,7 @@ export async function getFullAgentPolicy(
     outputs,
     proxies,
     dataOutput,
-    fleetServerHosts,
+    fleetServerHost,
     monitoringOutput,
     downloadSourceUri,
     downloadSourceProxyUri,
@@ -119,20 +120,46 @@ export async function getFullAgentPolicy(
       packageInfoCache.set(pkgKey, packageInfo);
     })
   );
+  const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
 
-  const inputs = await storedPackagePoliciesToAgentInputs(
-    agentPolicy.package_policies as PackagePolicy[],
-    packageInfoCache,
-    getOutputIdForAgentPolicy(dataOutput),
-    agentPolicy.namespace,
-    agentPolicy.global_data_tags
-  );
+  const inputs = (
+    await storedPackagePoliciesToAgentInputs(
+      agentPolicy.package_policies as PackagePolicy[],
+      packageInfoCache,
+      getOutputIdForAgentPolicy(dataOutput),
+      agentPolicy.namespace,
+      agentPolicy.global_data_tags
+    )
+  ).map((input) => {
+    // fix output id for default output
+    const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
+    if (output) {
+      input.use_output = getOutputIdForAgentPolicy(output);
+    }
+    if (input.type === 'fleet-server' && fleetServerHost) {
+      const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
+      if (sslInputConfig) {
+        input = {
+          ...input,
+          ...sslInputConfig,
+          ...(bootstrapOutputConfig
+            ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
+            : {}),
+        };
+      }
+    }
+    return input;
+  });
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
   }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
 
   const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
+  const fleetserverHostSecretReferences = fleetServerHost
+    ? getFleetServerHostsSecretReferences(fleetServerHost)
+    : [];
+
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
@@ -140,18 +167,22 @@ export async function getFullAgentPolicy(
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
+      ...(bootstrapOutputConfig ? bootstrapOutputConfig : {}),
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
           standalone
         );
-
         return acc;
       }, {}),
     },
     inputs,
-    secret_references: [...outputSecretReferences, ...packagePolicySecretReferences],
+    secret_references: [
+      ...outputSecretReferences,
+      ...fleetserverHostSecretReferences,
+      ...packagePolicySecretReferences,
+    ],
     revision: agentPolicy.revision,
     agent: {
       download: {
@@ -257,8 +288,8 @@ export async function getFullAgentPolicy(
   }, {});
 
   // only add fleet server hosts if not in standalone
-  if (!standalone && fleetServerHosts) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
+  if (!standalone && fleetServerHost) {
+    fullAgentPolicy.fleet = generateFleetConfig(agentPolicy, fleetServerHost, proxies, outputs);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -308,19 +339,59 @@ export async function getFullAgentPolicy(
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }
-
   return fullAgentPolicy;
 }
 
 export function generateFleetConfig(
-  fleetServerHosts: FleetServerHost,
-  proxies: FleetProxy[]
+  agentPolicy: AgentPolicy,
+  fleetServerHost: FleetServerHost,
+  proxies: FleetProxy[],
+  outputs: Output[]
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
-    hosts: fleetServerHosts.host_urls,
+    hosts: fleetServerHost.host_urls,
   };
-  const fleetServerHostproxy = fleetServerHosts.proxy_id
-    ? proxies.find((proxy) => proxy.id === fleetServerHosts.proxy_id)
+
+  // generating the ssl configs for checking into Fleet
+  // These are set in ES or remote ES outputs and correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
+  const output =
+    agentPolicy?.data_output_id || agentPolicy?.monitoring_output_id
+      ? outputs.find((o) => o.id === agentPolicy.data_output_id)
+      : outputs.find((o) => o.is_default);
+
+  if (
+    output &&
+    (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+  ) {
+    if (output?.ssl) {
+      config.ssl = {
+        ...(output.ssl?.certificate_authorities && {
+          certificate_authorities: output.ssl.certificate_authorities,
+        }),
+        ...(output.ssl?.certificate && {
+          certificate: output.ssl.certificate,
+        }),
+        ...(output.ssl?.key &&
+          !output?.secrets?.ssl?.key && {
+            key: output.ssl.key,
+          }),
+      };
+    }
+
+    if (output?.secrets) {
+      config.secrets = {
+        ssl: {
+          ...(output.secrets?.ssl?.key &&
+            !output?.ssl?.key && {
+              key: output.secrets.ssl.key,
+            }),
+        },
+      };
+    }
+  }
+
+  const fleetServerHostproxy = fleetServerHost.proxy_id
+    ? proxies.find((proxy) => proxy.id === fleetServerHost.proxy_id)
     : null;
   if (fleetServerHostproxy) {
     config.proxy_url = fleetServerHostproxy.url;
@@ -343,7 +414,42 @@ export function generateFleetConfig(
       };
     }
   }
+
   return config;
+}
+
+// Generate the SSL configs for fleet-server type input
+// Corresponding to --fleet-server-cert, --fleet-server-cert-key, --certificate-authorites cli options
+function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) {
+  const inputConfig: Partial<FullAgentPolicyInput> = {};
+
+  if (fleetServerHost?.ssl) {
+    inputConfig.ssl = {
+      ...(fleetServerHost.ssl.certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl.certificate && {
+        certificate: fleetServerHost.ssl.certificate,
+      }),
+      ...(fleetServerHost.ssl.key &&
+        !fleetServerHost?.secrets?.ssl?.key && {
+          key: fleetServerHost.ssl.key,
+        }),
+      ...(fleetServerHost.ssl.client_auth && {
+        client_authentication: fleetServerHost.ssl.client_auth,
+      }),
+    };
+  }
+
+  if (fleetServerHost?.secrets) {
+    inputConfig.secrets = {
+      ...(fleetServerHost?.secrets?.ssl?.key &&
+        !fleetServerHost?.ssl?.key && {
+          ssl: { key: fleetServerHost.secrets?.ssl?.key },
+        }),
+    };
+  }
+  return inputConfig;
 }
 
 export function transformOutputToFullPolicyOutput(
@@ -467,9 +573,13 @@ export function transformOutputToFullPolicyOutput(
     ...kafkaData,
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
-    ...(ssl ? { ssl } : {}),
-    ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
+    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
+      ? { ssl }
+      : {}),
+    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && secrets
+      ? { secrets }
+      : {}),
   };
 
   if (proxy) {
@@ -508,6 +618,9 @@ export function transformOutputToFullPolicyOutput(
 
   if (output.type === outputType.RemoteElasticsearch) {
     newOutput.service_token = output.service_token;
+    newOutput.kibana_api_key = output.kibana_api_key;
+    newOutput.kibana_url = output.kibana_url;
+    newOutput.sync_integrations = output.sync_integrations;
   }
 
   if (outputTypeSupportPresets(output.type)) {
@@ -515,6 +628,45 @@ export function transformOutputToFullPolicyOutput(
   }
 
   return newOutput;
+}
+
+// Generate the SSL configs for fleet server connection to ES
+// Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
+// This function generates a `bootstrap output` to be sent directly to elastic-agent
+function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
+  | {
+      [key: string]: FullAgentPolicyOutput;
+    }
+  | undefined {
+  if (!fleetServerHost || (!fleetServerHost?.ssl && !fleetServerHost.secrets)) return undefined;
+
+  const outputConfig: FullAgentPolicyOutput = { type: 'elasticsearch' };
+  if (fleetServerHost?.ssl) {
+    outputConfig.ssl = {
+      ...(fleetServerHost.ssl.es_certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl.es_certificate && {
+        certificate: fleetServerHost.ssl.es_certificate,
+      }),
+      ...(fleetServerHost.ssl.es_key &&
+        !fleetServerHost?.secrets?.ssl?.es_key && {
+          key: fleetServerHost.ssl.es_key,
+        }),
+    };
+  }
+  if (fleetServerHost?.secrets) {
+    outputConfig.secrets = {
+      ...(fleetServerHost?.secrets?.ssl?.es_key &&
+        !fleetServerHost?.ssl?.es_key && {
+          ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
+        }),
+    };
+  }
+
+  return {
+    [`fleetserver-output-${fleetServerHost?.id}`]: outputConfig,
+  };
 }
 
 export function getFullMonitoringSettings(

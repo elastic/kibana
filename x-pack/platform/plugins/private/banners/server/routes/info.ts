@@ -15,6 +15,12 @@ export const registerInfoRoute = (router: BannersRouter, config: BannersConfigTy
   router.get(
     {
       path: '/api/banners/info',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: {
         authRequired: 'optional',

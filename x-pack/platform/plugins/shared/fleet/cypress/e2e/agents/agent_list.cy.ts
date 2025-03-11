@@ -123,6 +123,8 @@ describe('View agents list', () => {
       updating: 0,
       other: 0,
       events: 0,
+      orphaned: 0,
+      uninstalled: 0,
     });
     cy.intercept('GET', /\/api\/fleet\/agents/).as('getAgents');
   });
@@ -210,10 +212,11 @@ describe('View agents list', () => {
       cy.get('li').contains('Unhealthy').click();
       cy.get('li').contains('Updating').click();
       cy.get('li').contains('Offline').click();
+      cy.get('li').contains('Orphaned').click();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
       cy.wait('@getAgents');
     };
-    it('should filter on healthy (16 result)', () => {
+    it('should filter on healthy (18 results)', () => {
       cy.visit('/app/fleet/agents');
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();

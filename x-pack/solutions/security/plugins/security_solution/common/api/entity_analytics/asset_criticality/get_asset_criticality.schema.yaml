@@ -17,6 +17,7 @@ paths:
           required: true
           schema:
             type: string
+          example: 'my_host'
           description: The ID value of the asset.
         - name: id_field
           in: query

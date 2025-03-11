@@ -9,19 +9,24 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { internalElserInferenceId } from '../../../../common/consts';
+import { isLegacySemanticTextVersion } from '../utils';
 
 export const createIndex = async ({
   esClient,
   indexName,
+  manifestVersion,
   mappings,
   log,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
+  manifestVersion: string;
   mappings: MappingTypeMapping;
   log: Logger;
 }) => {
   log.debug(`Creating index ${indexName}`);
+
+  const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
 
   overrideInferenceId(mappings, internalElserInferenceId);
 
@@ -31,6 +36,7 @@ export const createIndex = async ({
     settings: {
       number_of_shards: 1,
       auto_expand_replicas: '0-1',
+      'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
     },
   });
 };

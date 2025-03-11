@@ -98,6 +98,8 @@ export async function findBackfill(
       ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
     });
 
+    const actionsClient = await context.getActionsClient();
+
     const transformedData: Backfill[] = data.map((so: SavedObject<AdHocRunSO>) => {
       context.auditLogger?.log(
         adHocRunAuditEvent({
@@ -110,7 +112,10 @@ export async function findBackfill(
         })
       );
 
-      return transformAdHocRunToBackfillResult(so) as Backfill;
+      return transformAdHocRunToBackfillResult({
+        adHocRunSO: so,
+        isSystemAction: (id: string) => actionsClient.isSystemAction(id),
+      }) as Backfill;
     });
 
     return {

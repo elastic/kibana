@@ -144,7 +144,11 @@ export function createRetryTask(
 
       appContextService
         .getLogger()
-        .debug(`Retry #${retryParams.retryCount} of task ${taskInstance.id}`);
+        .debug(
+          retryParams.retryCount === 1
+            ? `Running task ${taskInstance.id}`
+            : `Retry #${retryParams.retryCount} of task ${taskInstance.id}`
+        );
 
       if (retryParams.searchAfter) {
         appContextService.getLogger().info('Continuing task from batch ' + retryParams.searchAfter);

@@ -4,10 +4,13 @@ set -euo pipefail
 synchronize_lexer_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
+  source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/lexer"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_lexer.g4"
+  destination_lib_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr/lexer"
 
   # Copy the file
   cp "$source_file" "$destination_file"
+  cp -r "$source_lib_dir" "$destination_lib_dir"
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -26,10 +29,13 @@ synchronize_lexer_grammar () {
 synchronize_parser_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseParser.g4"
+  source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/parser"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_parser.g4"
+  destination_lib_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr/parser"
 
   # Copy the file
   cp "$source_file" "$destination_file"
+  cp -r "$source_lib_dir" "$destination_lib_dir"
 
   # Insert the license header
   temp_file=$(mktemp)

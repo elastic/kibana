@@ -55,11 +55,11 @@ export const getParser = (
   };
 };
 
-export const createParser = (text: string) => {
+export const createParser = (src: string) => {
   const errorListener = new ESQLErrorListener();
-  const parseListener = new ESQLAstBuilderListener();
+  const parseListener = new ESQLAstBuilderListener(src);
 
-  return getParser(CharStreams.fromString(text), errorListener, parseListener);
+  return getParser(CharStreams.fromString(src), errorListener, parseListener);
 };
 
 // These will need to be manually updated whenever the relevant grammar changes.
@@ -106,7 +106,7 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
       return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
     }
     const errorListener = new ESQLErrorListener();
-    const parseListener = new ESQLAstBuilderListener();
+    const parseListener = new ESQLAstBuilderListener(text);
     const { tokens, parser } = getParser(
       CharStreams.fromString(text),
       errorListener,

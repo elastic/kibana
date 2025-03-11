@@ -36,12 +36,16 @@ export const RULE_MIGRATION_PROGRESS_DESCRIPTION = (totalRules: number) =>
     defaultMessage: `Processing migration of {totalRules} rules.`,
     values: { totalRules },
   });
+export const RULE_MIGRATION_IN_PROGRESS_BADGE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.progress.badge',
+  { defaultMessage: `Translation in progress` }
+);
 export const RULE_MIGRATION_PREPARING = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.preparing',
+  'xpack.securitySolution.siemMigrations.rules.panel.progress.preparing',
   { defaultMessage: `Preparing environment for the AI powered translation.` }
 );
 export const RULE_MIGRATION_TRANSLATING = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translating',
+  'xpack.securitySolution.siemMigrations.rules.panel.progress.translating',
   { defaultMessage: `Translating rules` }
 );
 
@@ -57,6 +61,10 @@ export const RULE_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedA
     values: { createdAt, finishedAt },
   });
 
+export const RULE_MIGRATION_COMPLETE_BADGE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.result.badge',
+  { defaultMessage: `Translation complete` }
+);
 export const RULE_MIGRATION_SUMMARY_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.result.summary.title',
   { defaultMessage: 'Translation Summary' }
@@ -98,4 +106,17 @@ export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = i18n.translat
 export const RULE_MIGRATION_UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button',
   { defaultMessage: 'Upload' }
+);
+
+export const RULE_MIGRATION_EXPAND = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.expand',
+  { defaultMessage: 'Expand rule migration' }
+);
+export const RULE_MIGRATION_COLLAPSE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.collapse',
+  { defaultMessage: 'Collapse rule migration' }
+);
+export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.error',
+  { defaultMessage: 'The last execution of this migration failed with the following message:' }
 );

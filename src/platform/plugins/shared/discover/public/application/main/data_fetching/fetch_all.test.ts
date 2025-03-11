@@ -8,14 +8,15 @@
  */
 
 import { FetchStatus } from '../../types';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
-import { SearchSource } from '@kbn/data-plugin/public';
+import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
-import {
+import type {
   DataDocumentsMsg,
   DataMainMsg,
   DataTotalHitsMsg,
@@ -26,6 +27,7 @@ import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
+import { createInternalStateStore, createRuntimeStateManager } from '../state_management/redux';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -67,20 +69,9 @@ describe('test fetchAll', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       getAppState: () => ({}),
-      getInternalState: () => ({
-        dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
+      internalState: createInternalStateStore({
+        services: discoverServiceMock,
+        runtimeStateManager: createRuntimeStateManager(),
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -259,20 +250,9 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
-      getInternalState: () => ({
-        dataView: undefined,
-        isDataViewLoading: false,
-        savedDataViews: [],
-        adHocDataViews: [],
-        expandedDoc: undefined,
-        customFilters: [],
-        overriddenVisContextAfterInvalidation: undefined,
-        resetDefaultProfileState: {
-          resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-        },
+      internalState: createInternalStateStore({
+        services: discoverServiceMock,
+        runtimeStateManager: createRuntimeStateManager(),
       }),
     };
     fetchAll(subjects, false, deps);
@@ -382,20 +362,9 @@ describe('test fetchAll', () => {
         savedSearch: savedSearchMock,
         services: discoverServiceMock,
         getAppState: () => ({ query }),
-        getInternalState: () => ({
-          dataView: undefined,
-          isDataViewLoading: false,
-          savedDataViews: [],
-          adHocDataViews: [],
-          expandedDoc: undefined,
-          customFilters: [],
-          overriddenVisContextAfterInvalidation: undefined,
-          resetDefaultProfileState: {
-            resetId: 'test',
-            columns: false,
-            rowHeight: false,
-            breakdownField: false,
-          },
+        internalState: createInternalStateStore({
+          services: discoverServiceMock,
+          runtimeStateManager: createRuntimeStateManager(),
         }),
       };
       fetchAll(subjects, false, deps);

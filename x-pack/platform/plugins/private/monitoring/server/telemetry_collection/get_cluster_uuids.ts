@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -43,28 +43,26 @@ export async function fetchClusterUuids(
     index: INDEX_PATTERN_ELASTICSEARCH,
     ignore_unavailable: true,
     filter_path: 'aggregations.cluster_uuids.buckets.key',
-    body: {
-      size: 0,
-      query: createQuery({
-        start,
-        end,
-        filters: [
-          {
-            bool: {
-              should: [
-                { term: { type: 'cluster_stats' } },
-                { term: { 'metricset.name': 'cluster_stats' } },
-              ],
-            },
+    size: 0,
+    query: createQuery({
+      start,
+      end,
+      filters: [
+        {
+          bool: {
+            should: [
+              { term: { type: 'cluster_stats' } },
+              { term: { 'metricset.name': 'cluster_stats' } },
+            ],
           },
-        ],
-      }) as estypes.QueryDslQueryContainer,
-      aggs: {
-        cluster_uuids: {
-          terms: {
-            field: 'cluster_uuid',
-            size: maxBucketSize,
-          },
+        },
+      ],
+    }) as estypes.QueryDslQueryContainer,
+    aggs: {
+      cluster_uuids: {
+        terms: {
+          field: 'cluster_uuid',
+          size: maxBucketSize,
         },
       },
     },

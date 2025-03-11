@@ -18,9 +18,13 @@ import {
 } from '.';
 import type { FlattenedBucket, RawBucket } from '../../types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { renderHook } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 
 describe('legend', () => {
-  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS, euiTheme);
 
   describe('getLegendItemFromRawBucket', () => {
     const bucket: RawBucket = {
@@ -56,7 +60,7 @@ describe('legend', () => {
           showColor: true,
           stackByField0: 'kibana.alert.rule.name',
         }).color
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
 
     it('returns the expected count', () => {
@@ -166,7 +170,7 @@ describe('legend', () => {
           })
         )
       ).toEqual({
-        color: '#54b399',
+        color: '#54B399',
         count: 12,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
@@ -212,35 +216,35 @@ describe('legend', () => {
         }).map((x) => omit(['render', 'dataProviderId'], x))
       ).toEqual([
         {
-          color: '#54b399',
+          color: '#54B399',
           count: 34,
           field: 'kibana.alert.rule.name',
           value: 'matches everything',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#da8b45',
+          color: '#DA8B45',
           count: 28,
           field: 'kibana.alert.rule.name',
           value: 'EQL process sequence',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#d6bf57',
+          color: '#D6BF57',
           count: 19,
           field: 'kibana.alert.rule.name',
           value: 'Endpoint Security',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#e7664c',
+          color: '#E7664C',
           count: 5,
           field: 'kibana.alert.rule.name',
           value: 'mimikatz process started',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#e7664c',
+          color: '#E7664C',
           count: 1,
           field: 'kibana.alert.rule.name',
           value: 'Threshold rule',

@@ -90,8 +90,13 @@ export function registerFavoritesRoutes({
           )
         ),
       },
-      // we don't protect the route with any access tags as
-      // we only give access to the current user's favorites ids
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "we don't protect the route with any access tags as we only give access to the current user's favorites ids",
+        },
+      },
     },
     async (requestHandlerContext, request, response) => {
       const coreRequestHandlerContext = await requestHandlerContext.core;
@@ -148,8 +153,13 @@ export function registerFavoritesRoutes({
           type: typeSchema,
         }),
       },
-      // we don't protect the route with any access tags as
-      // we only give access to the current user's favorites ids
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "we don't protect the route with any access tags as we only give access to the current user's favorites ids",
+        },
+      },
     },
     async (requestHandlerContext, request, response) => {
       const coreRequestHandlerContext = await requestHandlerContext.core;
@@ -187,8 +197,13 @@ export function registerFavoritesRoutes({
           type: typeSchema,
         }),
       },
-      // we don't protect the route with any access tags as
-      // we only give access to the current user's favorites ids
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "we don't protect the route with any access tags as we only give access to the current user's favorites ids",
+        },
+      },
     },
     async (requestHandlerContext, request, response) => {
       const coreRequestHandlerContext = await requestHandlerContext.core;

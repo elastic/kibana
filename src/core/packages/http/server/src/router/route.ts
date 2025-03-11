@@ -128,6 +128,8 @@ export interface RouteDeprecationInfo {
   documentationUrl: string;
   /**
    * The description message to be displayed for the deprecation.
+   * This will also appear in the '299 Kibana-{version} {message}' header warning when someone calls the route.
+   * Keep the message concise to avoid long header values. It is recommended to keep the message under 255 characters.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
   message?: string;
@@ -392,6 +394,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @default false
    */
   excludeFromOAS?: boolean;
+
+  /**
+   * Whether the rate limiter should never throttle this route.
+   *
+   * @default false
+   */
+  excludeFromRateLimiter?: boolean;
 
   /**
    * Release version or date that this route will be removed

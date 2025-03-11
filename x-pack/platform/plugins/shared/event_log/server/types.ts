@@ -11,16 +11,25 @@ import { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
+import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IEvent } from '../generated/schemas';
-import { AggregateOptionsType, FindOptionsType } from './event_log_client';
+import {
+  AggregateOptionsType,
+  FindOptionsSearchAfterType,
+  FindOptionsType,
+} from './event_log_client';
 import {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
+  InternalFields,
+  QueryEventsBySavedObjectSearchAfterResult,
 } from './es/cluster_client_adapter';
 
 export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
+  InternalFields,
+  IValidatedEventInternalDocInfo,
 } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
@@ -77,10 +86,24 @@ export interface IEventLogClient {
     namespaces?: Array<string | undefined>,
     includeSpaceAgnostic?: boolean
   ): Promise<AggregateEventsBySavedObjectResult>;
+  findEventsByDocumentIds(
+    docs: Array<{ _id: string; _index: string }>
+  ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>>;
+  findEventsBySavedObjectIdsSearchAfter(
+    type: string,
+    ids: string[],
+    options?: Partial<FindOptionsSearchAfterType>,
+    legacyIds?: string[]
+  ): Promise<QueryEventsBySavedObjectSearchAfterResult>;
+  closePointInTime(pitId: string): Promise<void>;
+  refreshIndex(): Promise<void>;
 }
 
 export interface IEventLogger {
   logEvent(properties: IEvent): void;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
+  updateEvents(
+    events: Array<{ internalFields: InternalFields; event: IEvent }>
+  ): Promise<BulkResponse>;
 }

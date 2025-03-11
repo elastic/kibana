@@ -8,60 +8,47 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
-import {
-  createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
-  StateContainer,
-  withNotifyOnErrors,
-} from '@kbn/kibana-utils-plugin/public';
-import {
-  DataPublicPluginStart,
-  noSearchSessionStorageCapabilityMessage,
-  SearchSessionInfoProvider,
-} from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
+import type { History } from 'history';
+import type { IKbnUrlStateStorage, StateContainer } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import { AggregateQuery, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isFunction } from 'lodash';
+import type { DiscoverServices } from '../../..';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
-import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
+import type { DiscoverDataStateContainer } from './discover_data_state_container';
+import { getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
-import {
-  DiscoverAppState,
-  DiscoverAppStateContainer,
-  getDiscoverAppStateContainer,
-} from './discover_app_state_container';
-import {
-  DiscoverInternalStateContainer,
-  getInternalStateContainer,
-} from './discover_internal_state_container';
-import { DiscoverServices } from '../../../build_services';
-import {
-  getDefaultAppState,
-  getSavedSearchContainer,
-  DiscoverSavedSearchContainer,
-} from './discover_saved_search_container';
+import type { DiscoverAppLocatorParams } from '../../../../common';
+import { DISCOVER_APP_LOCATOR } from '../../../../common';
+import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
+import { getDiscoverAppStateContainer } from './discover_app_state_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
-import {
-  getDiscoverGlobalStateContainer,
-  DiscoverGlobalStateContainer,
-} from './discover_global_state_container';
+import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
+import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
   createDataViewDataSource,
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
+import type { InternalStateStore, RuntimeStateManager } from './redux';
+import { createInternalStateStore, internalStateActions } from './redux';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { getDefaultAppState, getSavedSearchContainer } from './discover_saved_search_container';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -84,6 +71,10 @@ export interface DiscoverStateContainerParams {
    * a custom url state storage
    */
   stateStorageContainer?: IKbnUrlStateStorage;
+  /**
+   * State manager for runtime state that can't be stored in Redux
+   */
+  runtimeStateManager: RuntimeStateManager;
 }
 
 export interface LoadParams {
@@ -121,7 +112,11 @@ export interface DiscoverStateContainer {
   /**
    * Internal shared state that's used at several places in the UI
    */
-  internalState: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
+  /**
+   * State manager for runtime state that can't be stored in Redux
+   */
+  runtimeStateManager: RuntimeStateManager;
   /**
    * State of saved search, the saved object of Discover
    */
@@ -236,6 +231,7 @@ export function getDiscoverStateContainer({
   services,
   customizationContext,
   stateStorageContainer,
+  runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -266,24 +262,25 @@ export function getDiscoverStateContainer({
   const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
 
   /**
+   * Internal state store, state that's not persisted and not part of the URL
+   */
+  const internalState = createInternalStateStore({ services, runtimeStateManager });
+
+  /**
    * Saved Search State Container, the persisted saved object of Discover
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
     globalStateContainer,
+    internalState,
   });
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
 
   /**
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    internalStateContainer,
+    internalState,
     savedSearchContainer,
     services,
   });
@@ -301,7 +298,7 @@ export function getDiscoverStateContainer({
   };
 
   const setDataView = (dataView: DataView) => {
-    internalStateContainer.transitions.setDataView(dataView);
+    internalState.dispatch(internalStateActions.setDataView(dataView));
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
@@ -310,14 +307,15 @@ export function getDiscoverStateContainer({
     services,
     searchSessionManager,
     appStateContainer,
-    internalStateContainer,
+    internalState,
+    runtimeStateManager,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
 
   const loadDataViewList = async () => {
-    const dataViewList = await services.dataViews.getIdsWithTitle(true);
-    internalStateContainer.transitions.setSavedDataViews(dataViewList);
+    const savedDataViews = await services.dataViews.getIdsWithTitle(true);
+    internalState.dispatch(internalStateActions.setSavedDataViews(savedDataViews));
   };
 
   /**
@@ -325,7 +323,7 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const prevDataView = internalStateContainer.getState().dataView;
+    const prevDataView = runtimeStateManager.currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
     const nextDataView = await services.dataViews.create({
@@ -335,13 +333,15 @@ export function getDiscoverStateContainer({
 
     services.dataViews.clearInstanceCache(prevDataView.id);
 
-    updateFiltersReferences({
+    await updateFiltersReferences({
       prevDataView,
       nextDataView,
       services,
     });
 
-    internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView);
+    internalState.dispatch(
+      internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
+    );
 
     if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
       await appStateContainer.replaceUrlState({
@@ -386,7 +386,10 @@ export function getDiscoverStateContainer({
   };
 
   const transitionFromDataViewToESQL = (dataView: DataView) => {
-    const queryString = getInitialESQLQuery(dataView);
+    const appState = appStateContainer.get();
+    const { query } = appState;
+    const filterQuery = query && isOfQueryType(query) ? query : undefined;
+    const queryString = getInitialESQLQuery(dataView, filterQuery);
 
     appStateContainer.update({
       query: { esql: queryString },
@@ -403,7 +406,7 @@ export function getDiscoverStateContainer({
 
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
-      internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
+      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
       await loadDataViewList();
     }
@@ -430,7 +433,8 @@ export function getDiscoverStateContainer({
     return loadSavedSearchFn(params ?? {}, {
       appStateContainer,
       dataStateContainer,
-      internalStateContainer,
+      internalState,
+      runtimeStateManager,
       savedSearchContainer,
       globalStateContainer,
       services,
@@ -460,7 +464,8 @@ export function getDiscoverStateContainer({
         appState: appStateContainer,
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
-        internalState: internalStateContainer,
+        internalState,
+        runtimeStateManager,
         services,
         setDataView,
       })
@@ -472,7 +477,7 @@ export function getDiscoverStateContainer({
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
       savedSearchContainer.update({
-        nextDataView: internalStateContainer.getState().dataView,
+        nextDataView: runtimeStateManager.currentDataView$.getValue(),
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
       });
@@ -488,7 +493,7 @@ export function getDiscoverStateContainer({
       }),
       {
         isDisabled: () =>
-          services.capabilities.discover.storeSearchSession
+          services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,
@@ -511,8 +516,7 @@ export function getDiscoverStateContainer({
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }
-    internalStateContainer.transitions.appendAdHocDataViews(newDataView);
-
+    internalState.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
     await onChangeDataView(newDataView);
     return newDataView;
   };
@@ -535,10 +539,12 @@ export function getDiscoverStateContainer({
   /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
-  const onChangeDataView = async (id: string | DataView) => {
-    await changeDataView(id, {
+  const onChangeDataView = async (dataViewId: string | DataView) => {
+    await changeDataView({
+      dataViewId,
       services,
-      internalState: internalStateContainer,
+      internalState,
+      runtimeStateManager,
       appState: appStateContainer,
     });
   };
@@ -565,7 +571,7 @@ export function getDiscoverStateContainer({
       });
     }
 
-    internalStateContainer.transitions.resetOnSavedSearchChange();
+    internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
@@ -596,7 +602,8 @@ export function getDiscoverStateContainer({
   return {
     globalState: globalStateContainer,
     appState: appStateContainer,
-    internalState: internalStateContainer,
+    internalState,
+    runtimeStateManager,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     stateStorage,

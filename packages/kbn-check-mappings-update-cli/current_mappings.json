@@ -1092,6 +1092,9 @@
       "status": {
         "type": "keyword"
       },
+      "timestampField": {
+        "type": "keyword"
+      },
       "type": {
         "type": "keyword"
       }
@@ -1624,6 +1627,10 @@
           }
         }
       },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
+      },
       "data_output_id": {
         "type": "keyword"
       },
@@ -1678,6 +1685,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1702,6 +1713,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
@@ -1730,6 +1742,7 @@
     "properties": {}
   },
   "fleet-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
@@ -1994,6 +2007,10 @@
           }
         }
       },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
+      },
       "data_output_id": {
         "type": "keyword"
       },
@@ -2060,6 +2077,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2104,6 +2125,7 @@
     }
   },
   "ingest-outputs": {
+    "dynamic": false,
     "properties": {
       "allow_edit": {
         "enabled": false
@@ -2322,6 +2344,7 @@
     }
   },
   "ingest-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
@@ -3014,6 +3037,33 @@
   "search-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "security-ai-prompt": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "model": {
+        "type": "keyword"
+      },
+      "prompt": {
+        "properties": {
+          "default": {
+            "type": "text"
+          }
+        }
+      },
+      "promptGroupId": {
+        "type": "keyword"
+      },
+      "promptId": {
+        "type": "keyword"
+      },
+      "provider": {
+        "type": "keyword"
+      }
+    }
   },
   "security-rule": {
     "dynamic": false,

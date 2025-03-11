@@ -6,36 +6,26 @@
  */
 
 import React, { forwardRef, useState } from 'react';
-import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import type { FieldHook } from '../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../shared_imports';
-
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 
 /* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
-  id: string;
   field: FieldHook;
   dataTestSubj: string;
   idAria: string;
   isDisabled?: boolean;
-  bottomRightContent?: React.ReactNode;
   includePlugins?: boolean;
 };
 /* eslint-enable react/no-unused-prop-types */
 
-const BottomContentWrapper = styled(EuiFlexGroup)`
-  ${({ theme }) => `
-    padding: ${theme.eui.euiSizeM} 0;
-  `}
-`;
-
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    ({ id, field, dataTestSubj, idAria, bottomRightContent, includePlugins }, ref) => {
+    ({ field, dataTestSubj, idAria, includePlugins, placeholder }, ref) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
@@ -50,23 +40,16 @@ export const MarkdownEditorForm = React.memo(
           label={field.label}
           labelAppend={field.labelAppend}
         >
-          <>
-            <MarkdownEditor
-              ref={ref}
-              ariaLabel={idAria}
-              editorId={id}
-              onChange={field.setValue}
-              value={field.value as string}
-              data-test-subj={`${dataTestSubj}-markdown-editor`}
-              setIsMarkdownInvalid={setIsMarkdownInvalid}
-              includePlugins={includePlugins}
-            />
-            {bottomRightContent && (
-              <BottomContentWrapper justifyContent={'flexEnd'}>
-                <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
-              </BottomContentWrapper>
-            )}
-          </>
+          <MarkdownEditor
+            ref={ref}
+            ariaLabel={idAria}
+            onChange={field.setValue}
+            value={field.value as string}
+            data-test-subj={`${dataTestSubj}-markdown-editor`}
+            setIsMarkdownInvalid={setIsMarkdownInvalid}
+            includePlugins={includePlugins}
+            placeholder={placeholder}
+          />
         </EuiFormRow>
       );
     }

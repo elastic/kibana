@@ -9,6 +9,8 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { UseEuiTheme, euiShadow } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -61,7 +63,10 @@ export const useDebounceWithOptions = (
   );
 };
 
-const quotedWarningMessageRegexp = /"(.*?)"/g;
+// Quotes can be used as separators for multiple warnings unless
+// they are escaped with backslashes. This regexp will match any
+// quoted string that is not escaped.
+const quotedWarningMessageRegexp = /"(?:[^"\\]*(?:\\.[^"\\]*)*)"/g;
 
 export const parseWarning = (warning: string): MonacoMessage[] => {
   if (quotedWarningMessageRegexp.test(warning)) {
@@ -69,7 +74,8 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
     if (matches) {
       return matches.map((message) => {
         // start extracting the quoted message and with few default positioning
-        let warningMessage = message.replace(/"/g, '');
+        // replaces the quotes only if they are not escaped
+        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
         let startColumn = 1;
         let startLineNumber = 1;
         // initialize the length to 10 in case no error word found
@@ -309,4 +315,38 @@ export const onKeyDownResizeHandler = (
       setSecondPanelHeight?.(secondPanelHeightValidated);
     }
   }
+};
+
+export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
+  return css`
+    .monaco-hover {
+      display: block !important;
+    }
+    .hover-row.status-bar {
+      display: none;
+    }
+    .margin-view-overlays .line-numbers {
+      color: ${theme.euiTheme.colors.textDisabled};
+    }
+    .current-line ~ .line-numbers {
+      color: ${theme.euiTheme.colors.textSubdued};
+    }
+
+    .suggest-widget,
+    .suggest-details-container {
+      border-radius: ${theme.euiTheme.border.radius.medium};
+      ${euiShadow(theme, 'l')}
+    }
+
+    .suggest-details-container {
+      background-color: ${theme.euiTheme.colors.backgroundBasePlain};
+      line-height: 1.5rem;
+    }
+    .suggest-details {
+      padding-left: ${theme.euiTheme.size.s};
+    }
+    .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
+      border-radius: ${theme.euiTheme.border.radius.medium};
+    }
+  `;
 };

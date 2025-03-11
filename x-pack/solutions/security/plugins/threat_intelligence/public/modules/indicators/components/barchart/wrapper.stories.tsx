@@ -10,7 +10,6 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
 import { Story } from '@storybook/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -27,19 +26,6 @@ export default {
 };
 
 const mockTimeRange: TimeRange = { from: '', to: '' };
-
-const mockIndexPattern: DataView = {
-  fields: [
-    {
-      name: '@timestamp',
-      type: 'date',
-    } as DataViewField,
-    {
-      name: 'threat.feed.name',
-      type: 'string',
-    } as DataViewField,
-  ],
-} as DataView;
 
 const validDate: string = '1 Jan 2022 00:00:00 GMT';
 const numberOfDays: number = 1;
@@ -135,7 +121,6 @@ export const Default: Story<void> = () => {
       <IndicatorsBarChartWrapper
         dateRange={{ min: moment(), max: moment() }}
         timeRange={mockTimeRange}
-        indexPattern={mockIndexPattern}
         series={[]}
         field={mockField}
         onFieldChange={mockOnFieldChange}
@@ -159,7 +144,6 @@ export const InitialLoad: Story<void> = () => {
       <IndicatorsBarChartWrapper
         dateRange={{ min: moment(), max: moment() }}
         timeRange={mockTimeRange}
-        indexPattern={mockIndexPattern}
         series={[]}
         isLoading={true}
         isFetching={false}
@@ -208,7 +192,6 @@ export const UpdatingData: Story<void> = () => {
       <IndicatorsBarChartWrapper
         dateRange={{ min: moment(), max: moment() }}
         timeRange={mockTimeRange}
-        indexPattern={mockIndexPattern}
         series={mockIndicators}
         isLoading={false}
         isFetching={true}

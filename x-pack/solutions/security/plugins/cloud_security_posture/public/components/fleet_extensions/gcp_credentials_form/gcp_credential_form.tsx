@@ -31,6 +31,7 @@ import { GcpCredentialsType } from '../../../../common/types_old';
 import { CLOUDBEAT_GCP } from '../../../../common/constants';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import {
+  fieldIsInvalid,
   findVariableDef,
   getCspmCloudShellDefaultValue,
   getPosturePolicy,
@@ -114,18 +115,28 @@ const GoogleCloudShellSetup = ({
   onChange,
   input,
   disabled,
+  hasInvalidRequiredVars,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
   input: NewPackagePolicyInput;
   disabled: boolean;
+  hasInvalidRequiredVars: boolean;
 }) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
   const projectIdFields = getFieldById('gcp.project_id');
+  const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
+  const projectIdError = `${projectIdFields?.label} is required`;
+
   const organizationIdFields = getFieldById('gcp.organization_id');
+  const organizationIdValueInvalid = fieldIsInvalid(
+    organizationIdFields?.value,
+    hasInvalidRequiredVars
+  );
+  const organizationIdError = `${organizationIdFields?.label} is required`;
   return (
     <>
       <EuiText
@@ -177,7 +188,12 @@ const GoogleCloudShellSetup = ({
       <EuiSpacer size="l" />
       <EuiForm component="form">
         {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
+          <EuiFormRow
+            fullWidth
+            label={gcpField.fields['gcp.organization_id'].label}
+            isInvalid={organizationIdValueInvalid}
+            error={organizationIdValueInvalid ? organizationIdError : undefined}
+          >
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
@@ -185,11 +201,17 @@ const GoogleCloudShellSetup = ({
               fullWidth
               value={organizationIdFields.value || ''}
               onChange={(event) => onChange(organizationIdFields.id, event.target.value)}
+              isInvalid={organizationIdValueInvalid}
             />
           </EuiFormRow>
         )}
         {projectIdFields && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
+          <EuiFormRow
+            fullWidth
+            label={gcpField.fields['gcp.project_id'].label}
+            isInvalid={projectIdValueInvalid}
+            error={projectIdValueInvalid ? projectIdError : undefined}
+          >
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
@@ -197,6 +219,7 @@ const GoogleCloudShellSetup = ({
               fullWidth
               value={projectIdFields.value || ''}
               onChange={(event) => onChange(projectIdFields.id, event.target.value)}
+              isInvalid={projectIdValueInvalid}
             />
           </EuiFormRow>
         )}
@@ -298,6 +321,7 @@ export interface GcpFormProps {
   onChange: any;
   disabled: boolean;
   isEditPage?: boolean;
+  hasInvalidRequiredVars: boolean;
 }
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
@@ -314,17 +338,16 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFiel
     });
 
 const getSetupFormatFromInput = (
-  input: Extract<
-    NewPackagePolicyPostureInput,
-    { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' | 'cloudbeat/cis_gcp' }
-  >
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
 ): SetupFormatGCP => {
-  const credentialsType = input.streams[0].vars?.setup_access?.value;
+  const credentialsType = getGcpCredentialsType(input);
+
   // Google Cloud shell is the default value
   if (!credentialsType) {
     return GCP_SETUP_ACCESS.CLOUD_SHELL;
   }
-  if (credentialsType !== GCP_SETUP_ACCESS.CLOUD_SHELL) {
+
+  if (credentialsType !== GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE) {
     return GCP_SETUP_ACCESS.MANUAL;
   }
 
@@ -403,6 +426,7 @@ export const GcpCredentialsForm = ({
   onChange,
   disabled,
   isEditPage,
+  hasInvalidRequiredVars,
 }: GcpFormProps) => {
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
   const subsetOfGcpField = (({ ['gcp.credentials.file']: a, ['gcp.credentials.json']: b }) => ({
@@ -449,10 +473,6 @@ export const GcpCredentialsForm = ({
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
-          setup_access: {
-            value: GCP_SETUP_ACCESS.CLOUD_SHELL,
-            type: 'text',
-          },
           'gcp.credentials.type': {
             value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
@@ -465,10 +485,6 @@ export const GcpCredentialsForm = ({
     } else {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
-          setup_access: {
-            value: GCP_SETUP_ACCESS.MANUAL,
-            type: 'text',
-          },
           'gcp.credentials.type': {
             // Restoring last manual credentials type
             value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
@@ -516,6 +532,7 @@ export const GcpCredentialsForm = ({
             updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
           }
           input={input}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
         />
       ) : (
         <GcpInputVarFields
@@ -527,6 +544,7 @@ export const GcpCredentialsForm = ({
           isOrganization={isOrganization}
           packageInfo={packageInfo}
           isEditPage={isEditPage}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
         />
       )}
 
@@ -544,6 +562,7 @@ export const GcpInputVarFields = ({
   disabled,
   packageInfo,
   isEditPage,
+  hasInvalidRequiredVars,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
@@ -551,17 +570,67 @@ export const GcpInputVarFields = ({
   disabled: boolean;
   packageInfo: PackageInfo;
   isEditPage?: boolean;
+  hasInvalidRequiredVars: boolean;
 }) => {
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
   };
 
   const organizationIdFields = getFieldById('gcp.organization_id');
+  const organizationIdValueInvalid = fieldIsInvalid(
+    organizationIdFields?.value,
+    hasInvalidRequiredVars
+  );
+  const organizationIdError = i18n.translate(
+    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    {
+      defaultMessage: '{field} is required',
+      values: {
+        field: organizationIdFields?.label,
+      },
+    }
+  );
 
   const projectIdFields = getFieldById('gcp.project_id');
+  const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
+  const projectIdError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
+    defaultMessage: '{field} is required',
+    values: {
+      field: projectIdFields?.label,
+    },
+  });
+
   const credentialsTypeFields = getFieldById('gcp.credentials.type');
+
   const credentialFilesFields = getFieldById('gcp.credentials.file');
+  const credentialFilesFieldsInvalid = fieldIsInvalid(
+    credentialFilesFields?.value,
+    hasInvalidRequiredVars
+  );
+  const credentialFilesError = i18n.translate(
+    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    {
+      defaultMessage: '{field} is required',
+      values: {
+        field: credentialFilesFields?.label,
+      },
+    }
+  );
+
   const credentialJSONFields = getFieldById('gcp.credentials.json');
+  const credentialJSONFieldsInvalid = fieldIsInvalid(
+    credentialJSONFields?.value,
+    hasInvalidRequiredVars
+  );
+  const credentialJSONError = i18n.translate(
+    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    {
+      defaultMessage: '{field} is required',
+      values: {
+        field: credentialJSONFields?.label,
+      },
+    }
+  );
 
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
@@ -575,7 +644,12 @@ export const GcpInputVarFields = ({
     <div>
       <EuiForm component="form">
         {organizationIdFields && isOrganization && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
+          <EuiFormRow
+            fullWidth
+            label={gcpField.fields['gcp.organization_id'].label}
+            isInvalid={organizationIdValueInvalid}
+            error={organizationIdValueInvalid ? organizationIdError : undefined}
+          >
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
@@ -583,11 +657,17 @@ export const GcpInputVarFields = ({
               fullWidth
               value={organizationIdFields.value || ''}
               onChange={(event) => onChange(organizationIdFields.id, event.target.value)}
+              isInvalid={organizationIdValueInvalid}
             />
           </EuiFormRow>
         )}
         {projectIdFields && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
+          <EuiFormRow
+            fullWidth
+            label={gcpField.fields['gcp.project_id'].label}
+            isInvalid={projectIdValueInvalid}
+            error={projectIdValueInvalid ? projectIdError : undefined}
+          >
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
@@ -595,6 +675,7 @@ export const GcpInputVarFields = ({
               fullWidth
               value={projectIdFields.value || ''}
               onChange={(event) => onChange(projectIdFields.id, event.target.value)}
+              isInvalid={projectIdValueInvalid}
             />
           </EuiFormRow>
         )}
@@ -612,13 +693,19 @@ export const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.file'].label}>
+          <EuiFormRow
+            fullWidth
+            label={gcpField.fields['gcp.credentials.file'].label}
+            isInvalid={credentialFilesFieldsInvalid}
+            error={credentialFilesFieldsInvalid ? credentialFilesError : undefined}
+          >
             <EuiFieldText
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
               fullWidth
               value={credentialFilesFields.value || ''}
               onChange={(event) => onChange(credentialFilesFields.id, event.target.value)}
+              isInvalid={credentialFilesFieldsInvalid}
             />
           </EuiFormRow>
         )}
@@ -636,7 +723,12 @@ export const GcpInputVarFields = ({
             `}
           >
             <EuiSpacer size="m" />
-            <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
+            <EuiFormRow
+              fullWidth
+              label={gcpField.fields['gcp.credentials.json'].label}
+              isInvalid={credentialJSONFieldsInvalid}
+              error={credentialJSONFieldsInvalid ? credentialJSONError : undefined}
+            >
               <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                 <LazyPackagePolicyInputVarField
                   data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
@@ -651,7 +743,7 @@ export const GcpInputVarFields = ({
                   onChange={(value) => {
                     onChange(credentialJSONFields.id, value);
                   }}
-                  errors={[]}
+                  errors={credentialJSONFieldsInvalid ? [credentialJSONError] : []}
                   forceShowErrors={false}
                   isEditPage={isEditPage}
                 />

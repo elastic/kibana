@@ -5,10 +5,19 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
+import { i18n } from '@kbn/i18n';
+import { WorkflowId } from '@kbn/search-shared-ui';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
@@ -17,31 +26,38 @@ import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
-import { useCreateIndexCodingExamples } from './hooks/use_create_index_coding_examples';
 import { LanguageSelector } from './language_selector';
+import { GuideSelector } from './guide_selector';
+import { Workflow } from '../../code_examples/workflows';
+import { CreateIndexCodeExamples } from '../../types';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
   indexName: string;
   changeCodingLanguage: (language: AvailableLanguages) => void;
+  changeWorkflowId: (workflowId: WorkflowId) => void;
+  selectedWorkflow?: Workflow;
   canCreateApiKey?: boolean;
   analyticsEvents: {
     runInConsole: string;
     installCommands: string;
     createIndex: string;
   };
+  selectedCodeExamples: CreateIndexCodeExamples;
 }
 
 export const CreateIndexCodeView = ({
   analyticsEvents,
   canCreateApiKey,
   changeCodingLanguage,
+  changeWorkflowId,
+  selectedWorkflow,
   indexName,
   selectedLanguage,
+  selectedCodeExamples,
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const selectedCodeExamples = useCreateIndexCodingExamples();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
@@ -64,8 +80,37 @@ export const CreateIndexCodeView = ({
           <APIKeyCallout apiKey={apiKey} />
         </EuiFlexItem>
       )}
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem css={{ maxWidth: '300px' }}>
+      <EuiHorizontalRule margin="none" />
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h5>
+            {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
+              defaultMessage: 'Select a workflow guide',
+            })}
+          </h5>
+        </EuiTitle>
+        <EuiSpacer />
+        <GuideSelector
+          selectedWorkflowId={selectedWorkflow?.id || 'default'}
+          onChange={changeWorkflowId}
+          showTour={false}
+        />
+      </EuiFlexItem>
+      {!!selectedWorkflow && (
+        <>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>{selectedWorkflow?.title}</h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              <p>{selectedWorkflow?.summary}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </>
+      )}
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false} css={{ maxWidth: '300px' }}>
           <LanguageSelector
             options={LanguageOptions}
             selectedLanguage={selectedLanguage}

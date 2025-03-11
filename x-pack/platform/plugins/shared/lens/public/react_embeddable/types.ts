@@ -13,9 +13,9 @@ import type {
   TimeRange,
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   HasParentApi,
   HasSupportedTriggers,
@@ -27,8 +27,8 @@ import type {
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesRendered,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
+  PublishesWritableDescription,
+  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
   ViewMode,
@@ -392,14 +392,13 @@ export type LensApi = Simplify<
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
-    PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
+    PublishesWritableTitle &
+    PublishesWritableDescription &
     // This embeddable can narrow down specific triggers usage
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasInPlaceLibraryTransforms &
-    HasLibraryTransforms<LensRuntimeState> &
+    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
     // Let the container know the view mode
     PublishesViewMode &
     // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface
@@ -419,6 +418,7 @@ export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
     PublishesDataViews &
     VisualizationContextHelper & {
+      esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
@@ -440,6 +440,8 @@ export type LensInternalApi = Simplify<
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
+      blockingError$: PublishingSubject<Error | undefined>;
+      updateBlockingError: (newBlockingError: Error | undefined) => void;
       resetAllMessages: () => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
     }
@@ -523,3 +525,24 @@ export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
+
+export interface ControlGroupApi {
+  addNewPanel: (panelState: Record<string, unknown>) => void;
+}
+
+interface ESQLVariablesCompatibleDashboardApi {
+  esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  children$: PublishingSubject<{ [key: string]: unknown }>;
+}
+
+export const isApiESQLVariablesCompatible = (
+  api: unknown | null
+): api is ESQLVariablesCompatibleDashboardApi => {
+  return Boolean(
+    api &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
+  );
+};

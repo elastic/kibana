@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
+import type {
+  Criteria,
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiSearchBarOnChangeArgs,
+  EuiSwitchEvent,
+  Query,
+} from '@elastic/eui';
 import {
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
@@ -28,6 +35,7 @@ import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -54,18 +62,33 @@ export interface Props extends StartServices {
   cloudOrgUrl?: string;
 }
 
+interface RolesTableState {
+  query: Query;
+  sort: Criteria<Role>['sort'];
+  from: number;
+  size: number;
+  filters: {
+    showReservedRoles?: boolean;
+  };
+}
+
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
-const getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {
-  return roles.filter((role) => {
-    const normalized = `${role.name}`.toLowerCase();
-    const normalizedQuery = filter.toLowerCase();
-    return (
-      normalized.indexOf(normalizedQuery) !== -1 && (includeReservedRoles || !isRoleReserved(role))
-    );
-  });
+const MAX_PAGINATED_ITEMS = 10000;
+
+const DEFAULT_TABLE_STATE = {
+  query: EuiSearchBar.Query.MATCH_ALL,
+  sort: {
+    field: 'name' as const,
+    direction: 'asc' as const,
+  },
+  from: 0,
+  size: 25,
+  filters: {
+    showReservedRoles: true,
+  },
 };
 
 export const RolesGridPage: FC<Props> = ({
@@ -77,25 +100,28 @@ export const RolesGridPage: FC<Props> = ({
   cloudOrgUrl,
   ...startServices
 }) => {
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [visibleRoles, setVisibleRoles] = useState<Role[]>([]);
+  const [rolesResponse, setRolesResponse] = useState<QueryRolesResult>({} as QueryRolesResult);
+
   const [selection, setSelection] = useState<Role[]>([]);
-  const [filter, setFilter] = useState<string>('');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
   const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
-  const [includeReservedRoles, setIncludeReservedRoles] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    loadRoles();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
-  const loadRoles = async () => {
+  const loadRoles = async (tableStateArgs: RolesTableState) => {
+    const queryText = tableStateArgs.query.text;
+
+    const requestBody = {
+      ...tableStateArgs,
+      ...(tableStateArgs.sort ? { sort: tableStateArgs.sort } : DEFAULT_TABLE_STATE.sort),
+      query: queryText,
+    };
+
     try {
       setIsLoading(true);
-      const rolesFromApi = await rolesAPIClient.getRoles();
-      setRoles(rolesFromApi);
-      setVisibleRoles(getVisibleRoles(rolesFromApi, filter, includeReservedRoles));
+      const rolesFromApi = await rolesAPIClient.queryRoles(requestBody);
+      setRolesResponse(rolesFromApi);
     } catch (e) {
       if (_.get(e, 'body.statusCode') === 403) {
         setPermissionDenied(true);
@@ -112,9 +138,19 @@ export const RolesGridPage: FC<Props> = ({
     }
   };
 
+  useEffect(() => {
+    loadRoles(DEFAULT_TABLE_STATE);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onIncludeReservedRolesChange = (e: EuiSwitchEvent) => {
-    setIncludeReservedRoles(e.target.checked);
-    setVisibleRoles(getVisibleRoles(roles, filter, e.target.checked));
+    const newTableStateArgs = {
+      ...tableState,
+      filters: {
+        showReservedRoles: e.target.checked,
+      },
+    };
+    setTableState(newTableStateArgs);
+    loadRoles(newTableStateArgs);
   };
 
   const getRoleStatusBadges = (role: Role) => {
@@ -162,7 +198,7 @@ export const RolesGridPage: FC<Props> = ({
   const handleDelete = () => {
     setSelection([]);
     setShowDeleteConfirmation(false);
-    loadRoles();
+    loadRoles(tableState);
   };
 
   const deleteOneRole = (roleToDelete: Role) => {
@@ -203,10 +239,32 @@ export const RolesGridPage: FC<Props> = ({
               defaultMessage="Show reserved roles"
             />
           }
-          checked={includeReservedRoles}
+          checked={tableState.filters.showReservedRoles ?? true}
           onChange={onIncludeReservedRolesChange}
         />
       );
+    }
+  };
+
+  const onTableChange = ({ page, sort }: CriteriaWithPagination<Role>) => {
+    const newState = {
+      ...tableState,
+      from: page?.index! * page?.size!,
+      size: page?.size!,
+      sort: sort ?? tableState.sort,
+    };
+    setTableState(newState);
+    loadRoles(newState);
+  };
+
+  const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
+    if (!args.error) {
+      const newState = {
+        ...tableState,
+        query: args.query,
+      };
+      setTableState(newState);
+      loadRoles(newState);
     }
   };
 
@@ -234,7 +292,7 @@ export const RolesGridPage: FC<Props> = ({
         name: i18n.translate('xpack.security.management.roles.descriptionColumnName', {
           defaultMessage: 'Role Description',
         }),
-        sortable: true,
+        sortable: false,
         truncateText: { lines: 3 },
         render: (description: string, record: Role) => (
           <EuiToolTip position="top" content={description} display="block">
@@ -251,7 +309,7 @@ export const RolesGridPage: FC<Props> = ({
         name: i18n.translate('xpack.security.management.roles.statusColumnName', {
           defaultMessage: 'Status',
         }),
-        sortable: (role: Role) => isRoleEnabled(role) && !isRoleDeprecated(role),
+        sortable: false,
         render: (_metadata: Role['metadata'], record: Role) => getRoleStatusBadges(record),
       });
     }
@@ -330,6 +388,19 @@ export const RolesGridPage: FC<Props> = ({
   const onCancelDelete = () => {
     setShowDeleteConfirmation(false);
   };
+
+  const tableItems = rolesResponse.roles ?? [];
+  const totalItemCount = rolesResponse.total ?? 0;
+
+  const displayedItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEMS);
+
+  const pagination = {
+    pageIndex: tableState.from / tableState.size,
+    pageSize: tableState.size,
+    totalItemCount: displayedItemCount,
+    pageSizeOptions: [25, 50, 100],
+  };
+  const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEMS;
 
   return permissionDenied ? (
     <PermissionDenied />
@@ -416,16 +487,25 @@ export const RolesGridPage: FC<Props> = ({
             incremental: true,
             'data-test-subj': 'searchRoles',
           }}
-          onChange={(query: Record<string, any>) => {
-            setFilter(query.queryText);
-            setVisibleRoles(getVisibleRoles(roles, query.queryText, includeReservedRoles));
-          }}
+          onChange={onSearchChange}
           toolsLeft={renderToolsLeft()}
           toolsRight={renderToolsRight()}
         />
         <EuiSpacer size="s" />
-        <EuiInMemoryTable
-          data-test-subj="rolesTable"
+        {exceededResultCount && (
+          <>
+            <EuiText color="subdued" size="s" data-test-subj="rolesTableTooManyResultsLabel">
+              <FormattedMessage
+                id="xpack.security.management.roles.table.tooManyResultsLabel"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# role} other {# roles}}"
+                values={{ totalItemCount, limit: MAX_PAGINATED_ITEMS }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <EuiBasicTable
+          data-test-subj={`${!isLoading ? 'rolesTable' : 'rolesTableLoading'}`}
           itemId="name"
           columns={getColumnConfig()}
           selection={
@@ -439,11 +519,9 @@ export const RolesGridPage: FC<Props> = ({
                   selected: selection,
                 }
           }
-          pagination={{
-            initialPageSize: 20,
-            pageSizeOptions: [10, 20, 30, 50, 100],
-          }}
-          message={
+          onChange={onTableChange}
+          pagination={pagination}
+          noItemsMessage={
             buildFlavor === 'serverless' ? (
               <FormattedMessage
                 id="xpack.security.management.roles.noCustomRolesFound"
@@ -456,13 +534,10 @@ export const RolesGridPage: FC<Props> = ({
               />
             )
           }
-          items={visibleRoles}
+          items={tableItems}
           loading={isLoading}
           sorting={{
-            sort: {
-              field: 'name',
-              direction: 'asc',
-            },
+            sort: tableState.sort,
           }}
           rowProps={{ 'data-test-subj': 'roleRow' }}
         />

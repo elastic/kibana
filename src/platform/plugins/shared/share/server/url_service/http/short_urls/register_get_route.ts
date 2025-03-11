@@ -15,6 +15,13 @@ export const registerGetRoute = (router: IRouter, url: ServerUrlService) => {
   router.get(
     {
       path: '/api/short_url/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization, because the url service is a wrapper around the Saved Object client',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get a short URL`,

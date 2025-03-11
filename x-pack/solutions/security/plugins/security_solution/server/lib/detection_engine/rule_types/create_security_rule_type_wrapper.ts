@@ -8,7 +8,8 @@
 import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -17,6 +18,7 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -35,13 +37,13 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
+import { bulkCreateFactory, wrapHitsFactory } from './factories';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { getInputIndex, DataViewError } from './utils/get_input_output_index';
+import { getInputIndex } from './utils/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
@@ -237,15 +239,18 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               inputIndex = index ?? [];
               runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
-              const errorMessage =
-                exc instanceof DataViewError
-                  ? `Data View not found ${exc}`
-                  : `Check for indices to search failed ${exc}`;
-
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.failed,
-                message: errorMessage,
-              });
+              if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum.failed,
+                  message: `Data View not found ${exc}`,
+                  userError: true,
+                });
+              } else {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum.failed,
+                  message: `Check for indices to search failed ${exc}`,
+                });
+              }
 
               return { state: result.state };
             }
@@ -257,16 +262,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let skipExecution: boolean = false;
           try {
             if (!isMachineLearningParams(params)) {
-              const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
+              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
+              const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
 
-              const readIndexWarningMessage = await hasReadIndexPrivileges({
-                privileges,
-                ruleExecutionLogger,
-                uiSettingsClient,
-              });
+              if (existingIndices.length > 0) {
+                const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
+                const readIndexWarningMessage = await hasReadIndexPrivileges({
+                  privileges,
+                  ruleExecutionLogger,
+                  uiSettingsClient,
+                });
 
-              if (readIndexWarningMessage != null) {
-                wrapperWarnings.push(readIndexWarningMessage);
+                if (readIndexWarningMessage != null) {
+                  wrapperWarnings.push(readIndexWarningMessage);
+                }
               }
 
               const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
@@ -308,6 +317,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             tuples,
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
+            gap,
           } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
@@ -329,7 +339,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
               message: gapErrorMessage,
-              metrics: { executionGap: remainingGap },
+              metrics: {
+                executionGap: remainingGap,
+                gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+              },
             });
           }
 
@@ -378,18 +391,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               intendedTimestamp,
             });
 
-            const wrapSequences = wrapSequencesFactory({
-              ruleExecutionLogger,
-              ignoreFields: [...ignoreFields, ...legacySignalFields],
-              mergeStrategy,
-              completeRule,
-              spaceId,
-              publicBaseUrl,
-              indicesToQuery: inputIndex,
-              alertTimestampOverride,
-              intendedTimestamp,
-            });
-
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
               startedAt,
               alias: null,
@@ -405,7 +406,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ...options,
                   services,
                   state: runState,
-                  runOpts: {
+                  sharedParams: {
                     completeRule,
                     inputIndex,
                     exceptionFilter,
@@ -418,7 +419,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     tuple,
                     bulkCreate,
                     wrapHits,
-                    wrapSequences,
                     listClient,
                     ruleDataClient,
                     mergeStrategy,
@@ -432,6 +432,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     publicBaseUrl,
                     experimentalFeatures,
                     intendedTimestamp,
+                    spaceId,
                   },
                 });
 
@@ -508,6 +509,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
+                  gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
                 },
                 userError: result.userError,
               });

@@ -106,14 +106,12 @@ async function getIndicesFromPattern(
   const params = {
     index: pattern,
     ignore_unavailable: true,
-    body: {
-      size: 0, // no hits
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: MAX_INDICES,
-          },
+    size: 0, // no hits
+    aggs: {
+      indices: {
+        terms: {
+          field: '_index',
+          size: MAX_INDICES,
         },
       },
     },
@@ -121,6 +119,7 @@ async function getIndicesFromPattern(
   const response = await esClient.search(params);
   // TODO: Investigate when the status field might appear here, type suggests it shouldn't ever happen
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((response as any).status === 404 || !response.aggregations) {
     return [];
   }

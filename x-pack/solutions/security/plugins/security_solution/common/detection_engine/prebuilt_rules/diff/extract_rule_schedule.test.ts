@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import { getRulesSchemaMock } from '../../../api/detection_engine/model/rule_schema/mocks';
+import type { RuleResponse } from '../../../api/detection_engine';
 import { extractRuleSchedule } from './extract_rule_schedule';
 
 describe('extractRuleSchedule', () => {
-  it('normalizes lookback strings to seconds', () => {
-    const mockRule = { ...getRulesSchemaMock(), from: 'now-6m', interval: '5m', to: 'now' };
-    const normalizedRuleSchedule = extractRuleSchedule(mockRule);
+  it('returns rule schedule', () => {
+    const ruleSchedule = extractRuleSchedule({
+      from: 'now-6m',
+      interval: '5m',
+      to: 'now',
+    } as RuleResponse);
 
-    expect(normalizedRuleSchedule).toEqual({ interval: '5m', lookback: '60s' });
+    expect(ruleSchedule).toEqual({ interval: '5m', from: 'now-6m', to: 'now' });
+  });
+
+  it('returns default values', () => {
+    const ruleSchedule = extractRuleSchedule({} as RuleResponse);
+
+    expect(ruleSchedule).toEqual({ interval: '5m', from: 'now-6m', to: 'now' });
   });
 });

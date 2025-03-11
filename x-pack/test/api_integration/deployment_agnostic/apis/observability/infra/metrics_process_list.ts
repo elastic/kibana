@@ -21,15 +21,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('API /api/metrics/process_list', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
+
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
         useCookieHeader: true,
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes'
+      );
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes'
+      );
       await supertestWithAdminScope.destroy();
     });
 
@@ -42,7 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw',
             },
             sourceId: 'default',
-            to: 1564432800000,
+            to: 1680027660000,
             sortBy: {
               name: 'cpu',
               isAscending: false,
@@ -59,7 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const { processList, summary } = decodeOrThrow(ProcessListAPIResponseRT)(response.body);
 
       expect(processList.length).to.be(10);
-      expect(summary.total).to.be(178);
+      expect(summary.total).to.be(313);
     });
   });
 }

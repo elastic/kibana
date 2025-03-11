@@ -13,14 +13,11 @@ export const fetchInferenceEndpoints = async (
 ): Promise<{
   inferenceEndpoints: InferenceAPIConfigResponse[];
 }> => {
-  const { endpoints } = await client.transport.request<{
-    endpoints: any;
-  }>({
-    method: 'GET',
-    path: `/_inference/_all`,
+  const { endpoints } = await client.inference.get({
+    inference_id: '_all',
   });
 
   return {
-    inferenceEndpoints: endpoints,
+    inferenceEndpoints: endpoints as InferenceAPIConfigResponse[],
   };
 };

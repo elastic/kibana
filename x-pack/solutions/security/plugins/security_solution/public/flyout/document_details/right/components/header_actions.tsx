@@ -13,10 +13,6 @@ import { NewChatByTitle } from '@kbn/elastic-assistant';
 import { useGetFlyoutLink } from '../hooks/use_get_flyout_link';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useAssistant } from '../hooks/use_assistant';
-import {
-  ALERT_SUMMARY_CONVERSATION_ID,
-  EVENT_SUMMARY_CONVERSATION_ID,
-} from '../../../../common/components/event_details/translations';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
@@ -35,7 +31,7 @@ export const HeaderActions: VFC = memo(() => {
 
   const showShareAlertButton = isAlert && alertDetailsLink;
 
-  const { showAssistant, promptContextId } = useAssistant({
+  const { showAssistant, showAssistantOverlay } = useAssistant({
     dataFormattedForFieldBrowser,
     isAlert,
   });
@@ -50,13 +46,7 @@ export const HeaderActions: VFC = memo(() => {
     >
       {showAssistant && (
         <EuiFlexItem grow={false}>
-          <NewChatByTitle
-            conversationTitle={
-              isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
-            }
-            promptContextId={promptContextId}
-            iconOnly
-          />
+          <NewChatByTitle showAssistantOverlay={showAssistantOverlay} iconOnly />
         </EuiFlexItem>
       )}
       {showShareAlertButton && (

@@ -17,6 +17,13 @@ export const registerGetGuideStateRoute = (router: IRouter) => {
   router.get(
     {
       path: `${API_BASE_PATH}/guides`,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "This route is opted out from authorization, because it's a wrapper around the Saved Object client",
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {

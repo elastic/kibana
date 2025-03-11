@@ -41,42 +41,22 @@ describe('Enterprise Search Telemetry API', () => {
   });
 
   describe('PUT /internal/enterprise_search/stats', () => {
-    it('increments the saved objects counter for App Search', async () => {
+    it('increments the saved objects counter for Enterprise Search', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
 
       await mockRouter.callRoute({
         body: {
-          product: 'app_search',
+          product: 'enterprise_search',
           action: 'viewed',
           metric: 'setup_guide',
         },
       });
 
       expect(incrementUICounter).toHaveBeenCalledWith({
-        id: 'app_search_telemetry',
+        id: 'enterprise_search_telemetry',
         savedObjects: expect.any(Object),
         uiAction: 'ui_viewed',
         metric: 'setup_guide',
-      });
-      expect(mockRouter.response.ok).toHaveBeenCalledWith({ body: successResponse });
-    });
-
-    it('increments the saved objects counter for Workplace Search', async () => {
-      (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
-
-      await mockRouter.callRoute({
-        body: {
-          product: 'workplace_search',
-          action: 'clicked',
-          metric: 'onboarding_card_button',
-        },
-      });
-
-      expect(incrementUICounter).toHaveBeenCalledWith({
-        id: 'workplace_search_telemetry',
-        savedObjects: expect.any(Object),
-        uiAction: 'ui_clicked',
-        metric: 'onboarding_card_button',
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({ body: successResponse });
     });
@@ -112,21 +92,21 @@ describe('Enterprise Search Telemetry API', () => {
     describe('validates', () => {
       it('correctly', () => {
         const request = {
-          body: { product: 'workplace_search', action: 'viewed', metric: 'setup_guide' },
+          body: { product: 'enterprise_search', action: 'viewed', metric: 'setup_guide' },
         };
         mockRouter.shouldValidate(request);
       });
 
       it('wrong product string', () => {
         const request = {
-          body: { product: 'workspace_space_search', action: 'viewed', metric: 'setup_guide' },
+          body: { product: 'enterprise_space_search', action: 'viewed', metric: 'setup_guide' },
         };
         mockRouter.shouldThrow(request);
       });
 
       it('wrong action string', () => {
         const request = {
-          body: { product: 'app_search', action: 'invalid', metric: 'setup_guide' },
+          body: { product: 'enterprise_search', action: 'invalid', metric: 'setup_guide' },
         };
         mockRouter.shouldThrow(request);
       });
@@ -142,12 +122,12 @@ describe('Enterprise Search Telemetry API', () => {
       });
 
       it('action is missing', () => {
-        const request = { body: { product: 'app_search', metric: 'engines_overview' } };
+        const request = { body: { product: 'enterprise_search', metric: 'setup_guide' } };
         mockRouter.shouldThrow(request);
       });
 
       it('metric is missing', () => {
-        const request = { body: { product: 'app_search', action: 'error' } };
+        const request = { body: { product: 'enterprise_search', action: 'error' } };
         mockRouter.shouldThrow(request);
       });
     });

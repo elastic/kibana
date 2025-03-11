@@ -11,14 +11,14 @@ import { sortBy } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { join } from 'path';
 import type { Package } from './types';
 import { BASE_FOLDER, EXCLUDED_MODULES, KIBANA_FOLDER } from './constants';
 import { calculateModuleTargetFolder, isInTargetFolder } from './utils/relocate';
 import { createModuleTable } from './utils/logging';
+import { safeExec } from './utils/exec';
 
 export const listModules = async (listFlag: string, log: ToolingLog) => {
-  // get all modules
-  const modules = getPackages(REPO_ROOT);
   const devOnly: Package[] = [];
   const test: Package[] = [];
   const examples: Package[] = [];
@@ -26,47 +26,36 @@ export const listModules = async (listFlag: string, log: ToolingLog) => {
   const incorrect: Package[] = [];
   const correct: Package[] = [];
 
+  // get all modules
+  await safeExec('yarn kbn bootstrap');
+  const modules = getPackages(REPO_ROOT);
+
   // find modules selected by user filters
   sortBy(modules, 'directory')
     // explicit exclusions
     .filter(({ id }) => !EXCLUDED_MODULES.includes(id))
     .forEach((module) => {
-      if (module.isDevOnly()) {
-        devOnly.push(module);
-        return;
-      }
+      const directory = module.directory.startsWith(BASE_FOLDER)
+        ? module.directory
+        : join(BASE_FOLDER, module.directory);
 
       if (
-        module.directory.includes(`/${KIBANA_FOLDER}/test/`) ||
-        module.directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`)
+        directory.includes(`/${KIBANA_FOLDER}/test/`) ||
+        directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`)
       ) {
         test.push(module);
-        return;
-      }
-
-      if (
-        module.directory.includes(`/${KIBANA_FOLDER}/examples/`) ||
-        module.directory.includes(`/${KIBANA_FOLDER}/x-pack/examples/`)
+      } else if (
+        directory.includes(`/${KIBANA_FOLDER}/examples/`) ||
+        directory.includes(`/${KIBANA_FOLDER}/x-pack/examples/`)
       ) {
         examples.push(module);
-        return;
-      }
-
-      if (!module.group || module.group === 'common' || !module.visibility) {
-        // log.warning(`The module ${module.id} does not specify 'group' or 'visibility'. Skipping`);
+      } else if (!module.group || module.group === 'common' || !module.visibility) {
         uncategorised.push(module);
-        return;
-      }
-
-      if (!isInTargetFolder(module)) {
+      } else if (!isInTargetFolder(module)) {
         incorrect.push(module);
-        // log.warning(dedent`The module ${module.id} is not in the correct folder:
-        //   - ${module.directory}
-        //   - ${calculateModuleTargetFolder(module)}`);
-
-        return;
+      } else {
+        correct.push(module);
       }
-      correct.push(module);
     });
 
   if (listFlag === 'all') {

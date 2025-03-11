@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 
 interface BuildEntityAlertsQueryParams {
-  field: 'user.name' | 'host.name';
+  field: string;
   to: string;
   from: string;
   queryValue?: string;

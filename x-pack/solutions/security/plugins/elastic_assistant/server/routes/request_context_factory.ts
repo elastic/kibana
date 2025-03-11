@@ -48,7 +48,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<ElasticAssistantApiRequestHandlerContext> {
     const { options } = this;
-    const { core } = options;
+    const { core, plugins } = options;
 
     const [coreStart, startPlugins] = await core.getStartServices();
     const coreContext = await context.core;
@@ -56,7 +56,28 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
-    const getCurrentUser = () => coreContext.security.authc.getCurrentUser();
+    const getCurrentUser = async () => {
+      let contextUser = coreContext.security.authc.getCurrentUser();
+
+      if (contextUser && !contextUser?.profile_uid) {
+        try {
+          const users = await coreContext.elasticsearch.client.asCurrentUser.security.getUser({
+            username: contextUser.username,
+            with_profile_uid: true,
+          });
+
+          if (users[contextUser.username].profile_uid) {
+            contextUser = { ...contextUser, profile_uid: users[contextUser.username].profile_uid };
+          }
+        } catch (e) {
+          this.logger.error(`Failed to get user profile_uid: ${e}`);
+        }
+      }
+
+      return contextUser;
+    };
+
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     return {
       core: coreContext,
@@ -80,13 +101,13 @@ export class RequestContextFactory implements IRequestContextFactory {
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
-
+      savedObjectsClient,
       telemetry: core.analytics,
 
       // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
       getAIAssistantKnowledgeBaseDataClient: memoize(async (params) => {
-        const currentUser = getCurrentUser();
+        const currentUser = await getCurrentUser();
 
         const { securitySolutionAssistant } = await coreStart.capabilities.resolveCapabilities(
           request,
@@ -102,11 +123,16 @@ export class RequestContextFactory implements IRequestContextFactory {
           modelIdOverride: params?.modelIdOverride,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
+          // uses internal user to interact with ML API
+          trainedModelsProvider: plugins.ml.trainedModelsProvider(
+            {} as KibanaRequest,
+            coreStart.savedObjects.createInternalRepository()
+          ),
         });
       }),
 
-      getAttackDiscoveryDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getAttackDiscoveryDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAttackDiscoveryDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -115,8 +141,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getDefendInsightsDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getDefendInsightsDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createDefendInsightsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -125,8 +151,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAIAssistantPromptsDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getAIAssistantPromptsDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -135,8 +161,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAIAssistantAnonymizationFieldsDataClient: memoize(() => {
-        const currentUser = getCurrentUser();
+      getAIAssistantAnonymizationFieldsDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantAnonymizationFieldsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
@@ -145,13 +171,14 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAIAssistantConversationsDataClient: memoize(async () => {
-        const currentUser = getCurrentUser();
+      getAIAssistantConversationsDataClient: memoize(async (params) => {
+        const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantConversationsDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
+          contentReferencesEnabled: params?.contentReferencesEnabled,
         });
       }),
     };

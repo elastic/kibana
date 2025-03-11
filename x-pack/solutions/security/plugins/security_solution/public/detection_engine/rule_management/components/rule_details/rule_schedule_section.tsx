@@ -8,9 +8,10 @@
 import React from 'react';
 import { EuiDescriptionList, EuiText } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
+import { normalizeDateMath } from '@kbn/securitysolution-utils/date_math';
+import { toSimpleRuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
@@ -36,16 +37,12 @@ const Interval = ({ interval }: IntervalProps) => (
   <AccessibleTimeValue timeValue={interval} data-test-subj="intervalPropertyValue" />
 );
 
-interface FromProps {
-  from: string;
-  interval: string;
+interface LookBackProps {
+  value: string;
 }
 
-const From = ({ from, interval }: FromProps) => (
-  <AccessibleTimeValue
-    timeValue={getHumanizedDuration(from, interval)}
-    data-test-subj={`fromPropertyValue-${from}`}
-  />
+const LookBack = ({ value }: LookBackProps) => (
+  <AccessibleTimeValue timeValue={value} data-test-subj={`lookBackPropertyValue-${value}`} />
 );
 
 export interface RuleScheduleSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
@@ -62,18 +59,46 @@ export const RuleScheduleSection = ({
     return null;
   }
 
-  const ruleSectionListItems = [];
+  const to = rule.to ?? 'now';
 
-  ruleSectionListItems.push(
-    {
-      title: <span data-test-subj="intervalPropertyTitle">{i18n.INTERVAL_FIELD_LABEL}</span>,
-      description: <Interval interval={rule.interval} />,
-    },
-    {
-      title: <span data-test-subj="fromPropertyTitle">{i18n.FROM_FIELD_LABEL}</span>,
-      description: <From from={rule.from} interval={rule.interval} />,
-    }
-  );
+  const simpleRuleSchedule = toSimpleRuleSchedule({
+    interval: rule.interval,
+    from: rule.from,
+    to,
+  });
+
+  const ruleSectionListItems = !simpleRuleSchedule
+    ? [
+        {
+          title: <span data-test-subj="intervalPropertyTitle">{i18n.INTERVAL_FIELD_LABEL}</span>,
+          description: <Interval interval={rule.interval} />,
+        },
+        {
+          title: (
+            <span data-test-subj="fromToPropertyTitle">
+              {i18n.RULE_SOURCE_EVENTS_TIME_RANGE_FIELD_LABEL}
+            </span>
+          ),
+          description: (
+            <span data-test-subj="fromToPropertyValue">
+              {i18n.RULE_SOURCE_EVENTS_TIME_RANGE(
+                normalizeDateMath(rule.from),
+                normalizeDateMath(to)
+              )}
+            </span>
+          ),
+        },
+      ]
+    : [
+        {
+          title: <span data-test-subj="intervalPropertyTitle">{i18n.INTERVAL_FIELD_LABEL}</span>,
+          description: <Interval interval={simpleRuleSchedule.interval} />,
+        },
+        {
+          title: <span data-test-subj="lookBackPropertyTitle">{i18n.LOOK_BACK_FIELD_LABEL}</span>,
+          description: <LookBack value={simpleRuleSchedule.lookback} />,
+        },
+      ];
 
   return (
     <div data-test-subj="listItemColumnStepRuleDescription">

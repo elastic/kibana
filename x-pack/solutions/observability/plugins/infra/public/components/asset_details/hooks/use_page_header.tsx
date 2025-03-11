@@ -149,8 +149,8 @@ const useMetricsTabs = () => {
   const { dataStreams } = useEntitySummary({
     entityType: asset.type,
     entityId: asset.id,
-    from: new Date(dateRange.from).toISOString(),
-    to: new Date(dateRange.to).toISOString(),
+    from: dateRange.from,
+    to: dateRange.to,
   });
 
   const isMetrics = isMetricsSignal(dataStreams);

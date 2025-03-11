@@ -61,9 +61,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
           const columns = table.columns.map((col) => {
             return {
-              id: col.id,
-              name: col.name,
+              id: col.variable ?? col.id,
+              name: col.variable ? `?${col.variable}` : col.name,
               meta: col?.meta ?? { type: 'number' },
+              variable: col.variable,
               compatible:
                 props.isMetricDimension && hasNumberTypeColumns
                   ? props.filterOperations({
@@ -127,12 +128,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           existingFields={allColumns ?? []}
           selectedField={selectedField}
           onChoose={(choice) => {
-            const meta = allColumns?.find((f) => f.name === choice.field)?.meta;
+            const column = allColumns?.find((f) => f.name === choice.field);
             const newColumn = {
               columnId: props.columnId,
               fieldName: choice.field,
+              meta: column?.meta,
+              variable: column?.variable,
               label: choice.field,
-              meta,
             };
             return props.setState(
               !selectedField
@@ -155,7 +157,12 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                         columns: props.state.layers[props.layerId].columns.map((col) =>
                           col.columnId !== props.columnId
                             ? col
-                            : { ...col, fieldName: choice.field, meta }
+                            : {
+                                ...col,
+                                fieldName: choice.field,
+                                meta: column?.meta,
+                                variable: column?.variable,
+                              }
                         ),
                       },
                     },

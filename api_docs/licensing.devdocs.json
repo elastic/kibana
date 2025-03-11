@@ -843,6 +843,10 @@
               "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx"
+            },
+            {
               "plugin": "searchprofiler",
               "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
             },
@@ -2153,10 +2157,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "graph",
-              "path": "x-pack/plugins/graph/server/plugin.ts"
-            },
-            {
               "plugin": "spaces",
               "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.ts"
             },
@@ -2185,6 +2185,10 @@
               "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts"
             },
             {
+              "plugin": "graph",
+              "path": "x-pack/platform/plugins/private/graph/server/plugin.ts"
+            },
+            {
               "plugin": "indexLifecycleManagement",
               "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/services/license.ts"
             },
@@ -2207,6 +2211,10 @@
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/data_streams/data_stream_reindex_service.ts"
             },
             {
               "plugin": "aiops",
@@ -2235,6 +2243,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/solutions/observability/plugins/apm/server/routes/fleet/api_keys/add_api_keys_to_policies_if_missing.ts"
             },
             {
               "plugin": "searchprofiler",

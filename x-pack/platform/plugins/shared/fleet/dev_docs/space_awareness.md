@@ -4,12 +4,12 @@ Fleet is in the process to become space aware. This means that different Fleet o
 
 ## How to enable the feature
 
-The feature is behind a feature flag `useSpaceAwareness`. If you are testing space awareness you could also be interested in testing `subfeaturePrivileges` at the same time which enables granular privileges to different parts of Fleet.
+The feature is behind a feature flag `useSpaceAwareness`.
 
 In your `kibana.yml` config
 
 ```yaml
-xpack.fleet.enableExperimental: ['useSpaceAwareness', 'subfeaturePrivileges']
+xpack.fleet.enableExperimental: ['useSpaceAwareness']
 ```
 
 After the feature flag is enabled you will have to do another step to opt-in for the feature, that call will migrate the current space agnostic saved objects to new space aware saved objects.

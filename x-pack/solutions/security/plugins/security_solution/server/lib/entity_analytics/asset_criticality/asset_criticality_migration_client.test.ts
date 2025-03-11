@@ -98,10 +98,8 @@ describe('AssetCriticalityMigrationClient', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: assetCriticalityDataClient.getIndex(),
-          body: expect.objectContaining({
-            query: expect.any(Object),
-            script: expect.any(Object),
-          }),
+          query: expect.any(Object),
+          script: expect.any(Object),
         }),
         expect.any(Object)
       );

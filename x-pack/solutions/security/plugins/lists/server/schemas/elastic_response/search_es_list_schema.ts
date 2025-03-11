@@ -16,7 +16,7 @@ import {
   nullableMetaOrUndefined,
   serializerOrUndefined,
   tie_breaker_id,
-  timestampOrUndefined,
+  timestampFromEsResponse,
   type,
   updated_at,
   updated_by,
@@ -25,7 +25,7 @@ import { version } from '@kbn/securitysolution-io-ts-types';
 
 export const searchEsListSchema = t.exact(
   t.type({
-    '@timestamp': timestampOrUndefined,
+    '@timestamp': timestampFromEsResponse,
     created_at,
     created_by,
     description,

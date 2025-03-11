@@ -7,7 +7,6 @@
 
 export const ROOT_PATH = '/';
 
-export const SETUP_GUIDE_PATH = '/setup_guide';
 export const ERROR_STATE_PATH = '/error_state';
 
 export const SEARCH_INDICES_PATH = `${ROOT_PATH}search_indices`;
@@ -16,14 +15,8 @@ export const CRAWLERS_PATH = `${ROOT_PATH}crawlers`;
 export const CRAWLERS_ELASTIC_MANAGED_PATH = `${CRAWLERS_PATH}/elastic_managed`;
 export const SETTINGS_PATH = `${ROOT_PATH}settings`;
 
-export const NEW_INDEX_PATH = `${SEARCH_INDICES_PATH}/new_index`;
-export const NEW_API_PATH = `${NEW_INDEX_PATH}/api`;
-export const NEW_ES_INDEX_PATH = `${NEW_INDEX_PATH}/elasticsearch`;
-export const NEW_DIRECT_UPLOAD_PATH = `${NEW_INDEX_PATH}/upload`;
 export const NEW_INDEX_SELECT_CONNECTOR_PATH = `${CONNECTORS_PATH}/select_connector`;
-export const NEW_CONNECTOR_PATH = `${CONNECTORS_PATH}/new_connector`;
 export const NEW_CONNECTOR_FLOW_PATH = `${CONNECTORS_PATH}/new_connector_flow`;
-export const NEW_CRAWLER_PATH = `${CRAWLERS_PATH}/new_crawler`;
 export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${CONNECTORS_PATH}/select_connector?filter=native`;
 export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${CONNECTORS_PATH}/select_connector?filter=connector_clients`;
 
@@ -40,3 +33,7 @@ export const DEV_TOOLS_CONSOLE_PATH = '/app/dev_tools#/console';
 
 export const CONNECTOR_DETAIL_PATH = `${CONNECTORS_PATH}/:connectorId`;
 export const CONNECTOR_DETAIL_TAB_PATH = `${CONNECTOR_DETAIL_PATH}/:tabId`;
+export const CONNECTOR_INTEGRATION_DETAIL_PATH = `/app/integrations/detail/elastic_connectors/policies?integration=:serviceType`;
+export const FLEET_AGENT_DETAIL_PATH = `/app/fleet/agents/:agentId`;
+export const FLEET_AGENT_DETAIL_LOGS_PATH = `${FLEET_AGENT_DETAIL_PATH}/logs`;
+export const FLEET_POLICY_DETAIL_PATH = `/app/fleet/policies/:policyId`;

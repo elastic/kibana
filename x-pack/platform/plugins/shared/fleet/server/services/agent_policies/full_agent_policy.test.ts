@@ -16,6 +16,7 @@ import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 import { appContextService } from '../app_context';
 import { getPackageInfo } from '../epm/packages';
+import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 
 import {
   generateFleetConfig,
@@ -26,6 +27,7 @@ import {
 import { getMonitoringPermissions } from './monitoring_permissions';
 
 jest.mock('../epm/packages');
+jest.mock('../fleet_server_host');
 
 const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
   ReturnType<typeof getMonitoringPermissions>
@@ -34,6 +36,9 @@ const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentP
 
 const soClientMock = savedObjectsClientMock.create();
 const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as jest.Mock<
+  ReturnType<typeof getFleetServerHostsForAgentPolicy>
+>;
 
 function mockAgentPolicy(data: Partial<AgentPolicy>) {
   mockedAgentPolicyService.get.mockResolvedValue({
@@ -50,18 +55,6 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
     ...data,
   });
 }
-
-jest.mock('../fleet_server_host', () => {
-  return {
-    getFleetServerHostsForAgentPolicy: async () => {
-      return {
-        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-        is_default: true,
-        host_urls: ['http://fleetserver:8220'],
-      };
-    },
-  };
-});
 
 jest.mock('../agent_policy');
 
@@ -154,6 +147,14 @@ function getAgentPolicyUpdateMock() {
 
 describe('getFullAgentPolicy', () => {
   beforeEach(() => {
+    mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
+      name: 'default Fleet Server',
+      id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+      is_preconfigured: false,
+    });
+
     getAgentPolicyUpdateMock().mockClear();
     mockedAgentPolicyService.get.mockReset();
     mockedGetElasticAgentMonitoringPermissions.mockReset();
@@ -476,6 +477,126 @@ describe('getFullAgentPolicy', () => {
           enabled: true,
           package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
           output_id: 'test-remote-id',
+          inputs: [
+            {
+              type: 'test-logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'some-logs' },
+                },
+              ],
+            },
+            {
+              type: 'test-metrics',
+              enabled: false,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: false,
+                  data_stream: { type: 'metrics', dataset: 'some-metrics' },
+                },
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+        {
+          id: 'package-policy-no-output',
+          name: 'test-policy-2',
+          namespace: '',
+          enabled: true,
+          package: { name: 'system', version: '1.0.0', title: 'System' },
+          inputs: [
+            {
+              type: 'test-logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'some-logs' },
+                },
+              ],
+            },
+            {
+              type: 'test-metrics',
+              enabled: false,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: false,
+                  data_stream: { type: 'metrics', dataset: 'some-metrics' },
+                },
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ],
+      is_managed: false,
+      namespace: 'defaultspace',
+      revision: 1,
+      name: 'Policy',
+      updated_at: '2020-01-01',
+      updated_by: 'qwerty',
+      is_protected: false,
+      data_output_id: 'data-output-id',
+    });
+
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsClientMock.create(),
+      'integration-output-policy'
+    );
+    expect(agentPolicy).toMatchSnapshot();
+  });
+
+  it('should return the right outputs and permissions when package policies use their own outputs (with default output)', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'elastic_agent.metricbeat',
+        },
+        {
+          type: 'metrics',
+          dataset: 'elastic_agent.metricbeat',
+        },
+        {
+          type: 'logs',
+          dataset: 'elastic_agent.filebeat',
+        },
+        {
+          type: 'metrics',
+          dataset: 'elastic_agent.filebeat',
+        },
+      ],
+    } as PackageInfo);
+    mockAgentPolicy({
+      id: 'integration-output-policy',
+      status: 'active',
+      package_policies: [
+        {
+          id: 'package-policy-using-output',
+          name: 'test-policy-1',
+          namespace: 'policyspace',
+          enabled: true,
+          package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+          output_id: 'test-id',
           inputs: [
             {
               type: 'test-logs',
@@ -908,6 +1029,42 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
+  it('should have ssl options in outputs when fleet server host has es ssl options', async () => {
+    mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
+      name: 'default Fleet Server',
+      id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+      is_preconfigured: false,
+      ssl: {
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+        certificate: 'my-cert',
+        key: 'my-key',
+        es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        es_certificate: 'my-es-cert',
+        es_key: 'my-es-key',
+      },
+    });
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    expect(agentPolicy?.outputs).toMatchObject({
+      default: {
+        hosts: ['http://127.0.0.1:9201'],
+        preset: 'balanced',
+        type: 'elasticsearch',
+      },
+      'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+        ssl: {
+          certificate: 'my-es-cert',
+          certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+          key: 'my-es-key',
+        },
+        type: 'elasticsearch',
+      },
+    });
+  });
 });
 
 describe('getFullMonitoringSettings', () => {
@@ -1189,7 +1346,7 @@ ssl.test: 123
         type: 'logstash',
       },
       undefined,
-      true
+      false
     );
 
     expect(policyOutput).toMatchInlineSnapshot(`
@@ -1258,11 +1415,26 @@ ssl.test: 123
 });
 
 describe('generateFleetConfig', () => {
+  const agentPolicy = {
+    id: 'agent-policy',
+    status: 'active',
+    package_policies: [],
+    is_managed: false,
+    namespace: 'default',
+    revision: 1,
+    name: 'Policy',
+    updated_at: '2020-01-01',
+    updated_by: 'qwerty',
+    is_protected: false,
+  } as any;
+
   it('should work without proxy', () => {
     const res = generateFleetConfig(
+      agentPolicy,
       {
         host_urls: ['https://test.fr'],
       } as any,
+      [],
       []
     );
 
@@ -1277,6 +1449,7 @@ describe('generateFleetConfig', () => {
 
   it('should work with proxy', () => {
     const res = generateFleetConfig(
+      agentPolicy,
       {
         host_urls: ['https://test.fr'],
         proxy_id: 'proxy-1',
@@ -1286,7 +1459,8 @@ describe('generateFleetConfig', () => {
           id: 'proxy-1',
           url: 'https://proxy.fr',
         } as any,
-      ]
+      ],
+      []
     );
 
     expect(res).toMatchInlineSnapshot(`
@@ -1301,6 +1475,7 @@ describe('generateFleetConfig', () => {
 
   it('should work with proxy with headers and certificate authorities', () => {
     const res = generateFleetConfig(
+      agentPolicy,
       {
         host_urls: ['https://test.fr'],
         proxy_id: 'proxy-1',
@@ -1312,7 +1487,8 @@ describe('generateFleetConfig', () => {
           certificate_authorities: ['/tmp/ssl/ca.crt'],
           proxy_headers: { Authorization: 'xxx' },
         } as any,
-      ]
+      ],
+      []
     );
 
     expect(res).toMatchInlineSnapshot(`
@@ -1336,27 +1512,28 @@ describe('generateFleetConfig', () => {
       }
     `);
   });
-});
 
-it('should work with proxy with headers and certificate authorities and certificate and key', () => {
-  const res = generateFleetConfig(
-    {
-      host_urls: ['https://test.fr'],
-      proxy_id: 'proxy-1',
-    } as any,
-    [
+  it('should work with proxy with headers and certificate authorities and certificate and key', () => {
+    const res = generateFleetConfig(
+      agentPolicy,
       {
-        id: 'proxy-1',
-        url: 'https://proxy.fr',
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
-        proxy_headers: { Authorization: 'xxx' },
-        certificate: 'my-cert',
-        certificate_key: 'my-key',
+        host_urls: ['https://test.fr'],
+        proxy_id: 'proxy-1',
       } as any,
-    ]
-  );
+      [
+        {
+          id: 'proxy-1',
+          url: 'https://proxy.fr',
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          proxy_headers: { Authorization: 'xxx' },
+          certificate: 'my-cert',
+          certificate_key: 'my-key',
+        } as any,
+      ],
+      []
+    );
 
-  expect(res).toMatchInlineSnapshot(`
+    expect(res).toMatchInlineSnapshot(`
     Object {
       "hosts": Array [
         "https://test.fr",
@@ -1378,4 +1555,221 @@ it('should work with proxy with headers and certificate authorities and certific
       },
     }
   `);
+  });
+
+  it('should generate ssl config when a default ES output has ssl options', () => {
+    const outputs = [
+      {
+        id: 'output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default_monitoring: true,
+        is_default: true,
+        hosts: ['http://test.fr:9200'],
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          certificate: 'my-cert',
+          key: 'my-key',
+        },
+      },
+      {
+        id: 'output-2',
+        name: 'Output 2',
+        type: 'remote_elasticsearch',
+        is_default_monitoring: false,
+        hosts: ['http://test.fr:9200'],
+        is_default: false,
+      },
+    ] as any;
+
+    const res = generateFleetConfig(
+      agentPolicy,
+      {
+        host_urls: ['https://test.fr'],
+      } as any,
+      [], // no proxies
+      outputs
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            "/tmp/ssl/ca.crt",
+          ],
+          "key": "my-key",
+        },
+      }
+  `);
+  });
+
+  it('should generate ssl config when a default remote_elasticsearch output has ssl options', () => {
+    const outputs = [
+      {
+        id: 'output-1',
+        name: 'Output 1',
+        type: 'remote_elasticsearch',
+        is_default_monitoring: true,
+        is_default: true,
+        hosts: ['http://test.fr:9200'],
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          certificate: 'my-cert',
+          key: 'my-key',
+        },
+      },
+      {
+        id: 'output-2',
+        name: 'Output 2',
+        type: 'remote_elasticsearch',
+        is_default_monitoring: false,
+        hosts: ['http://test.fr:9200'],
+        is_default: false,
+      },
+    ] as any;
+
+    const res = generateFleetConfig(
+      agentPolicy,
+      {
+        host_urls: ['https://test.fr'],
+      } as any,
+      [], // no proxies
+      outputs
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            "/tmp/ssl/ca.crt",
+          ],
+          "key": "my-key",
+        },
+      }
+  `);
+  });
+
+  it('should generate ssl config when a ES custom output has ssl options', () => {
+    const outputs = [
+      {
+        id: 'output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: true,
+        hosts: ['http://test.fr:9200'],
+      },
+      {
+        id: 'output-2',
+        name: 'Output 2',
+        type: 'elasticsearch',
+        is_default_monitoring: false,
+        hosts: ['http://test.fr:9200'],
+        is_default: false,
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          certificate: 'my-cert',
+        },
+        secrets: {
+          ssl: {
+            key: 'my-key',
+          },
+        },
+      },
+    ] as any;
+
+    const agentPolicyWithCustomOutput = { ...agentPolicy, data_output_id: 'output-2' };
+    const res = generateFleetConfig(
+      agentPolicyWithCustomOutput,
+      {
+        host_urls: ['https://test.fr'],
+      } as any,
+      [], // no proxies
+      outputs
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "secrets": Object {
+          "ssl": Object {
+            "key": "my-key",
+          },
+        },
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            "/tmp/ssl/ca.crt",
+          ],
+        },
+      }
+  `);
+  });
+
+  it('should generate ssl config when a remote_elasticsearch custom output has ssl options', () => {
+    const outputs = [
+      {
+        id: 'output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: true,
+        hosts: ['http://test.fr:9200'],
+      },
+      {
+        id: 'output-2',
+        name: 'Output 2',
+        type: 'remote_elasticsearch',
+        is_default_monitoring: false,
+        hosts: ['http://test.fr:9200'],
+        is_default: false,
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          certificate: 'my-cert',
+        },
+        secrets: {
+          ssl: {
+            key: 'my-key',
+          },
+        },
+      },
+    ] as any;
+
+    const agentPolicyWithCustomOutput = { ...agentPolicy, data_output_id: 'output-2' };
+    const res = generateFleetConfig(
+      agentPolicyWithCustomOutput,
+      {
+        host_urls: ['https://test.fr'],
+      } as any,
+      [], // no proxies
+      outputs
+    );
+
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "https://test.fr",
+        ],
+        "secrets": Object {
+          "ssl": Object {
+            "key": "my-key",
+          },
+        },
+        "ssl": Object {
+          "certificate": "my-cert",
+          "certificate_authorities": Array [
+            "/tmp/ssl/ca.crt",
+          ],
+        },
+      }
+  `);
+  });
 });

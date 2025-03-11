@@ -93,7 +93,7 @@ export class DashboardVisualizationsService extends FtrService {
     if (inViewMode) {
       await this.dashboard.switchToEditMode();
     }
-    await this.dashboardAddPanel.clickMarkdownQuickButton();
+    await this.dashboardAddPanel.clickAddMarkdownPanel();
     await this.visEditor.setMarkdownTxt(markdown);
     await this.visEditor.clickGo();
     await this.visualize.saveVisualizationExpectSuccess(name, {

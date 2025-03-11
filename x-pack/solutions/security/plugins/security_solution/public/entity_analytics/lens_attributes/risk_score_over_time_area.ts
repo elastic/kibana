@@ -180,14 +180,14 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
       adHocDataViews: {
         [internalReferenceId]: {
           id: internalReferenceId,
-          title: `ml_${stackByField}_risk_score_${extraOptions.spaceId}`,
+          title: `ea_${stackByField}_risk_score_${extraOptions.spaceId}`,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},
           runtimeFieldMap: {},
           fieldAttrs: {},
           allowNoIndex: false,
-          name: `ml_${stackByField}_risk_score_${extraOptions.spaceId}`,
+          name: `ea_${stackByField}_risk_score_${extraOptions.spaceId}`,
         },
       },
     },

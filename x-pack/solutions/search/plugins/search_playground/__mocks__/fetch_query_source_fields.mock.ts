@@ -11,10 +11,10 @@ export const SPARSE_SEMANTIC_FIELD_FIELD_CAPS = {
   indices: ['test-index2'],
   fields: {
     infer_field: {
-      semantic_text: {
-        type: 'semantic_text',
+      text: {
+        type: 'text',
         metadata_field: false,
-        searchable: false,
+        searchable: true,
         aggregatable: false,
       },
     },
@@ -127,10 +127,10 @@ export const DENSE_SEMANTIC_FIELD_FIELD_CAPS = {
   indices: ['test-index2'],
   fields: {
     infer_field: {
-      semantic_text: {
-        type: 'semantic_text',
+      text: {
+        type: 'text',
         metadata_field: false,
-        searchable: false,
+        searchable: true,
         aggregatable: false,
       },
     },

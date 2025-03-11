@@ -7,7 +7,7 @@
 
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { Config, ConfigEntryView } from '../types/types';
+import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
@@ -77,4 +77,30 @@ export const getNonEmptyValidator = (
       }
     }
   };
+};
+
+export const mapProviderFields = (
+  taskType: string,
+  newProvider: InferenceProvider
+): ConfigEntryView[] => {
+  return Object.keys(newProvider.configurations ?? {})
+    .filter((pk) =>
+      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
+    )
+    .map(
+      (k): ConfigEntryView => ({
+        key: k,
+        isValid: true,
+        validationErrors: [],
+        value: newProvider.configurations[k].default_value ?? null,
+        default_value: newProvider.configurations[k].default_value ?? null,
+        description: newProvider.configurations[k].description ?? null,
+        label: newProvider.configurations[k].label ?? '',
+        required: newProvider.configurations[k].required ?? false,
+        sensitive: newProvider.configurations[k].sensitive ?? false,
+        updatable: newProvider.configurations[k].updatable ?? false,
+        type: newProvider.configurations[k].type ?? FieldType.STRING,
+        supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
+      })
+    );
 };

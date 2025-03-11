@@ -80,7 +80,7 @@ export async function updateAgentTags(
         total: res.total,
       },
       { pitId }
-    ).runActionAsyncWithRetry();
+    ).runActionAsyncTask();
   }
 
   return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {

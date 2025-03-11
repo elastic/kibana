@@ -29,6 +29,7 @@ export interface LensDocument {
       state?: unknown;
     };
     filters: Filter[];
+    needsRefresh?: boolean;
     adHocDataViews?: Record<string, DataViewSpec>;
     internalReferences?: SavedObjectReference[];
   };

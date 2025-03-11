@@ -31,6 +31,7 @@ import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -57,6 +58,10 @@ describe('Import rules route', () => {
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
     clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
+      isRulesCustomizationEnabled: false,
+      customizationDisabledReason: PrebuiltRulesCustomizationDisabledReason.FeatureFlag,
+    });
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -68,7 +73,6 @@ describe('Import rules route', () => {
   describe('status codes', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
-
       expect(response.status).toEqual(200);
     });
 
@@ -145,10 +149,9 @@ describe('Import rules route', () => {
     describe('with prebuilt rules customization enabled', () => {
       beforeEach(() => {
         clients.detectionRulesClient.importRules.mockResolvedValueOnce([]);
-        server = serverMock.create(); // old server already registered this route
-        config = configMock.withExperimentalFeature(config, 'prebuiltRulesCustomizationEnabled');
-
-        importRulesRoute(server.router, config);
+        clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
+          isRulesCustomizationEnabled: true,
+        });
       });
 
       test('returns 500 if importing fails', async () => {

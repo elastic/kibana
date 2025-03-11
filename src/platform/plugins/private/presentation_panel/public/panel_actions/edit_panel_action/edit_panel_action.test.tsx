@@ -8,22 +8,22 @@
  */
 
 import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, take } from 'rxjs';
 import { EditPanelAction, EditPanelActionApi } from './edit_panel_action';
 
 describe('Edit panel action', () => {
   let action: EditPanelAction;
   let context: { embeddable: EditPanelActionApi };
-  let updateViewMode: (viewMode: ViewMode) => void;
+  let setViewMode: (viewMode: ViewMode) => void;
 
   beforeEach(() => {
-    const viewModeSubject = new BehaviorSubject<ViewMode>('edit');
-    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
+    const viewMode$ = new BehaviorSubject<ViewMode>('edit');
+    setViewMode = (viewMode) => viewMode$.next(viewMode);
 
     action = new EditPanelAction();
     context = {
       embeddable: {
-        viewMode: viewModeSubject,
+        viewMode$,
         onEdit: jest.fn(),
         isEditingEnabled: jest.fn().mockReturnValue(true),
         getTypeDisplayName: jest.fn().mockReturnValue('A very fun panel type'),
@@ -43,7 +43,7 @@ describe('Edit panel action', () => {
   });
 
   it('is incompatible when view mode is view', async () => {
-    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode$ = new BehaviorSubject<ViewMode>('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
 
@@ -63,10 +63,11 @@ describe('Edit panel action', () => {
     expect(await action.getHref(context)).toBe(href);
   });
 
-  it('calls onChange when view mode changes', () => {
-    const onChange = jest.fn();
-    action.subscribeToCompatibilityChanges(context, onChange);
-    updateViewMode('view');
-    expect(onChange).toHaveBeenCalledWith(false, action);
+  it('getCompatibilityChangesSubject emits when view mode changes', (done) => {
+    const subject = action.getCompatibilityChangesSubject(context);
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
+    setViewMode('view');
   });
 });

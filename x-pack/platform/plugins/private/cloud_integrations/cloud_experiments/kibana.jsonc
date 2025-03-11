@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-experiments-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.",
+  "plugin": {
+    "id": "cloudExperiments",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "experiments"
+    ],
+    "requiredPlugins": [
+      "cloud",
+      "dataViews",
+      "usageCollection"
+    ]
+  }
+}

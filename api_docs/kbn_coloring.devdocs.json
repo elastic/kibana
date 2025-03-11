@@ -45,7 +45,7 @@
           },
           ", {}, any>"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +66,7 @@
               "Config",
               "; }>>"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,7 +80,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -96,7 +96,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -116,7 +116,7 @@
                     "text": "ColorMappingProps"
                   }
                 ],
-                "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+                "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -134,7 +134,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -158,7 +158,7 @@
               },
               ">) => void"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -180,7 +180,7 @@
                   },
                   ">"
                 ],
-                "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+                "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -198,7 +198,7 @@
             "signature": [
               "() => React.JSX.Element"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -235,7 +235,7 @@
           },
           ") => { stop: number; color: string; }[]"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -255,7 +255,7 @@
                 "text": "PaletteRegistry"
               }
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -270,7 +270,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -291,7 +291,7 @@
                 "text": "DataBounds"
               }
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -318,7 +318,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -339,7 +339,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -366,7 +366,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -387,7 +387,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -418,7 +418,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/index.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -454,7 +454,7 @@
           "CustomizablePaletteProps",
           ") => React.JSX.Element>"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/index.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -486,7 +486,7 @@
         "signature": [
           "(color: string, backgroundColor: string) => boolean"
         ],
-        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -500,7 +500,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -515,7 +515,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -534,7 +534,7 @@
         "signature": [
           "(name: string | undefined) => string"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -548,7 +548,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -587,7 +587,7 @@
           },
           ", isDarkMode: boolean, index: number, total: number) => string"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -603,7 +603,7 @@
               " | ",
               "GradientColorMode"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -625,7 +625,7 @@
               "LoopColor",
               " & { paletteId: string; colorIndex: number; })"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -646,7 +646,7 @@
                 "text": "KbnPalettes"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -661,7 +661,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -676,7 +676,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -691,7 +691,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -724,7 +724,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -743,7 +743,7 @@
               "LoopColor",
               " & { paletteId: string; colorIndex: number; })"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -764,7 +764,7 @@
                 "text": "KbnPalettes"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -783,7 +783,7 @@
         "signature": [
           "(color?: string | null | undefined) => number"
         ],
-        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -797,7 +797,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -834,7 +834,7 @@
           },
           ") => (category: string | string[]) => string"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -848,7 +848,7 @@
             "signature": [
               "Config"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -869,7 +869,7 @@
                 "text": "KbnPalettes"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -884,7 +884,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -905,7 +905,7 @@
                 "text": "ColorMappingInputData"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -934,7 +934,7 @@
           "Config",
           " | undefined) => string[]"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -954,7 +954,7 @@
                 "text": "KbnPalettes"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -969,7 +969,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -985,7 +985,7 @@
               "Config",
               " | undefined"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1012,7 +1012,7 @@
           },
           ") => { min: number; max: number; }"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1026,7 +1026,7 @@
             "signature": [
               "\"number\" | \"percent\" | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1047,7 +1047,7 @@
                 "text": "DataBounds"
               }
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1073,7 +1073,7 @@
             "text": "DataBounds"
           }
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1087,7 +1087,7 @@
             "signature": [
               "\"number\" | \"percent\" | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1116,7 +1116,7 @@
           },
           ", isDarkMode: boolean) => (value: number) => string"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1130,7 +1130,7 @@
             "signature": [
               "GradientColorMode"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1151,7 +1151,7 @@
                 "text": "KbnPalettes"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1166,7 +1166,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/color_handling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1203,7 +1203,7 @@
           },
           "[] | undefined"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1223,7 +1223,7 @@
                 "text": "PaletteRegistry"
               }
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1238,7 +1238,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1267,7 +1267,7 @@
           "Config",
           " | undefined) => string[]"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1287,7 +1287,7 @@
                 "text": "KbnPalettes"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1303,7 +1303,7 @@
               "Config",
               " | undefined"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1348,7 +1348,7 @@
           },
           "; mapFromMinValue?: boolean | undefined; defaultPaletteName?: string | undefined; }) => { stop: number; color: string; }[]"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1368,7 +1368,7 @@
                 "text": "PaletteRegistry"
               }
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1389,7 +1389,7 @@
                 "text": "CustomPaletteParams"
               }
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1401,7 +1401,7 @@
             "tags": [],
             "label": "{\n    prevPalette,\n    dataBounds,\n    mapFromMinValue,\n    defaultPaletteName,\n  }",
             "description": [],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1415,7 +1415,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1435,7 +1435,7 @@
                     "text": "DataBounds"
                   }
                 ],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1449,7 +1449,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1463,7 +1463,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1485,7 +1485,7 @@
         "signature": [
           "(value: string) => string"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1499,7 +1499,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1534,7 +1534,7 @@
           },
           "[], max: number) => number"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1555,7 +1555,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1577,7 +1577,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1592,7 +1592,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1611,7 +1611,7 @@
         "signature": [
           "(colorString: string | undefined) => boolean"
         ],
-        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1625,7 +1625,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1644,7 +1644,7 @@
         "signature": [
           "(color: string, newAlpha: number) => chroma.Color"
         ],
-        "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1658,7 +1658,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1673,7 +1673,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-coloring/src/color_manipulation/index.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1700,7 +1700,7 @@
           },
           "[], {\n    newInterval,\n    oldInterval,\n    newMin,\n    oldMin,\n  }: { newInterval: number; oldInterval: number; newMin: number; oldMin: number; }) => { color: string; stop: number; }[]"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1721,7 +1721,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1733,7 +1733,7 @@
             "tags": [],
             "label": "{\n    newInterval,\n    oldInterval,\n    newMin,\n    oldMin,\n  }",
             "description": [],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1744,7 +1744,7 @@
                 "tags": [],
                 "label": "newInterval",
                 "description": [],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1755,7 +1755,7 @@
                 "tags": [],
                 "label": "oldInterval",
                 "description": [],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1766,7 +1766,7 @@
                 "tags": [],
                 "label": "newMin",
                 "description": [],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1777,7 +1777,7 @@
                 "tags": [],
                 "label": "oldMin",
                 "description": [],
-                "path": "packages/kbn-coloring/src/palettes/utils.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1805,7 +1805,7 @@
           },
           "[]) => { color: string; stop: number; }[]"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1826,7 +1826,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1845,7 +1845,7 @@
         "signature": [
           "(value: number, fractionDigits: number) => number"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1859,7 +1859,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1874,7 +1874,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1901,7 +1901,7 @@
           },
           "[], max: number) => { stop: number; color: string; }[]"
         ],
-        "path": "packages/kbn-coloring/src/palettes/utils.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1922,7 +1922,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1937,7 +1937,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-coloring/src/palettes/utils.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1957,7 +1957,7 @@
         "description": [
           "\nInformation about the structure of a chart to determine the color of a series within it."
         ],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1973,7 +1973,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1989,7 +1989,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2005,7 +2005,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2021,7 +2021,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2035,7 +2035,7 @@
         "tags": [],
         "label": "ColorMappingInputCategoricalData",
         "description": [],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2049,7 +2049,7 @@
             "signature": [
               "\"categories\""
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2065,7 +2065,7 @@
             "signature": [
               "(string | string[])[]"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2079,7 +2079,7 @@
         "tags": [],
         "label": "ColorMappingInputContinuousData",
         "description": [],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2093,7 +2093,7 @@
             "signature": [
               "\"ranges\""
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2104,7 +2104,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2115,7 +2115,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2126,7 +2126,7 @@
             "tags": [],
             "label": "bins",
             "description": [],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2142,7 +2142,7 @@
         "description": [
           "\nThe props of the CategoricalColorMapping component"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2158,7 +2158,7 @@
             "signature": [
               "Config"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2180,7 +2180,7 @@
                 "text": "KbnPalettes"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2210,7 +2210,7 @@
                 "text": "ColorMappingInputContinuousData"
               }
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2223,7 +2223,7 @@
             "description": [
               "Theme dark mode"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2239,7 +2239,7 @@
             "signature": [
               "Map<string, string>"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2257,7 +2257,7 @@
               "Config",
               ") => void"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2271,7 +2271,7 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+                "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2289,7 +2289,7 @@
         "tags": [],
         "label": "ColorStop",
         "description": [],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2300,7 +2300,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2311,7 +2311,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2325,7 +2325,7 @@
         "tags": [],
         "label": "CustomPaletteParams",
         "description": [],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2339,7 +2339,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2353,7 +2353,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2367,7 +2367,7 @@
             "signature": [
               "\"number\" | \"percent\" | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2388,7 +2388,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2402,7 +2402,7 @@
             "signature": [
               "\"fixed\" | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2416,7 +2416,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2430,7 +2430,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2453,7 +2453,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2476,7 +2476,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2490,7 +2490,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2504,7 +2504,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2518,7 +2518,7 @@
         "tags": [],
         "label": "DataBounds",
         "description": [],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2529,7 +2529,7 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2540,7 +2540,7 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2554,7 +2554,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2580,7 +2580,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2593,7 +2593,7 @@
             "description": [
               "\nUnique id of the palette (this will be persisted along with the visualization state)"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2606,7 +2606,23 @@
             "description": [
               "\nUser facing title (should be i18n-ized)"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.PaletteDefinition.tag",
+            "type": "string",
+            "tags": [],
+            "label": "tag",
+            "description": [
+              "\nUser facing tag (should be i18n-ized)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2622,7 +2638,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2645,7 +2661,7 @@
                 "text": "Ast"
               }
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2661,7 +2677,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2697,7 +2713,7 @@
               },
               " | undefined, state?: T | undefined) => string | null"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2720,7 +2736,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2742,7 +2758,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2759,7 +2775,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2779,7 +2795,7 @@
             "signature": [
               "(size: number, state?: T | undefined) => string[]"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2793,7 +2809,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2808,7 +2824,7 @@
                 "signature": [
                   "T | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2828,7 +2844,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2844,7 +2860,7 @@
             "signature": [
               "((value: number | undefined, state: T, { min, max }: { min: number; max: number; }) => string | undefined) | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2858,7 +2874,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2873,7 +2889,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2885,7 +2901,7 @@
                 "tags": [],
                 "label": "{ min, max }",
                 "description": [],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2896,7 +2912,7 @@
                     "tags": [],
                     "label": "min",
                     "description": [],
-                    "path": "packages/kbn-coloring/src/palettes/types.ts",
+                    "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2907,7 +2923,7 @@
                     "tags": [],
                     "label": "max",
                     "description": [],
-                    "path": "packages/kbn-coloring/src/palettes/types.ts",
+                    "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2936,7 +2952,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2950,7 +2966,7 @@
             "signature": [
               "\"palette\" | \"system_palette\""
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2961,7 +2977,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2975,7 +2991,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2989,7 +3005,7 @@
         "tags": [],
         "label": "PaletteRegistry",
         "description": [],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3011,7 +3027,7 @@
               },
               "<unknown>"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3025,7 +3041,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-coloring/src/palettes/types.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3051,7 +3067,7 @@
               },
               "<unknown>[]"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3069,7 +3085,7 @@
         "description": [
           "\nInformation about a series in a chart used to determine its color.\nSeries layers can be nested, this means each series layer can have an ancestor."
         ],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3082,7 +3098,7 @@
             "description": [
               "\nName of the series (can be used for lookup-based coloring)"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3095,7 +3111,7 @@
             "description": [
               "\nRank of the series compared to siblings with the same ancestor"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3108,7 +3124,7 @@
             "description": [
               "\nTotal number of series with the same ancestor"
             ],
-            "path": "packages/kbn-coloring/src/palettes/types.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3144,7 +3160,7 @@
             "text": "ColorMappingInputContinuousData"
           }
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3159,7 +3175,7 @@
         "signature": [
           "\"complementary\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3174,7 +3190,7 @@
         "signature": [
           "\"custom\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3189,7 +3205,7 @@
         "signature": [
           "5"
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3204,7 +3220,7 @@
         "signature": [
           "\"above\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3219,7 +3235,7 @@
         "signature": [
           "\"default\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3234,7 +3250,7 @@
         "signature": [
           "100"
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3249,7 +3265,7 @@
         "signature": [
           "0"
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3264,7 +3280,7 @@
         "signature": [
           "0"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3279,7 +3295,7 @@
         "signature": [
           "\"positive\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3294,7 +3310,7 @@
         "signature": [
           "\"percent\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3309,7 +3325,7 @@
         "signature": [
           "\"fixed\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3324,7 +3340,7 @@
         "signature": [
           "\"complimentary\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/constants.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3339,7 +3355,7 @@
         "signature": [
           "\"none\" | \"all\" | \"above\" | \"below\""
         ],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3352,15 +3368,7 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ reverse: boolean; name: string; rangeType: \"number\" | \"percent\"; stops: ",
-          {
-            "pluginId": "@kbn/coloring",
-            "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.ColorStop",
-            "text": "ColorStop"
-          },
-          "[]; continuity: ",
+          "{ reverse: boolean; name: string; rangeType: \"number\" | \"percent\"; continuity: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",
@@ -3368,7 +3376,15 @@
             "section": "def-common.PaletteContinuity",
             "text": "PaletteContinuity"
           },
-          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; colorStops: ",
+          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; stops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[]; colorStops: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",
@@ -3378,7 +3394,7 @@
           },
           "[]; steps: number; maxSteps?: number | undefined; }"
         ],
-        "path": "packages/kbn-coloring/src/palettes/types.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/palettes/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3394,7 +3410,7 @@
         "description": [
           "\nThe default color mapping used in Kibana, starts with the EUI color palette"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3408,7 +3424,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3422,7 +3438,7 @@
             "signature": [
               "{ rule: { type: \"other\"; }; color: { type: \"loop\"; }; touched: false; }[]"
             ],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3433,7 +3449,7 @@
             "tags": [],
             "label": "paletteId",
             "description": [],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3444,7 +3460,7 @@
             "tags": [],
             "label": "colorMode",
             "description": [],
-            "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+            "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3458,7 +3474,7 @@
                 "signature": [
                   "\"categorical\""
                 ],
-                "path": "packages/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
+                "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3477,7 +3493,7 @@
         "signature": [
           "Map<string, string>"
         ],
-        "path": "packages/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
+        "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/color/rule_matching.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

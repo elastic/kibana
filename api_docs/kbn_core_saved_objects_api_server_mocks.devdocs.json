@@ -22,7 +22,7 @@
         "tags": [],
         "label": "savedObjectsClientMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_client.mock.ts",
+        "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_client.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
               "SavedObjectsClientContract",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_client.mock.ts",
+            "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_client.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
         "tags": [],
         "label": "savedObjectsClientProviderMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/scoped_client_provider.mock.ts",
+        "path": "src/core/packages/saved-objects/api-server-mocks/src/scoped_client_provider.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,7 +70,7 @@
               "ISavedObjectsClientProvider",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/scoped_client_provider.mock.ts",
+            "path": "src/core/packages/saved-objects/api-server-mocks/src/scoped_client_provider.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -86,7 +86,7 @@
         "tags": [],
         "label": "savedObjectsExtensionsMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+        "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -102,7 +102,7 @@
               "SavedObjectsExtensions",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -120,7 +120,7 @@
               "ISavedObjectsEncryptionExtension",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -138,7 +138,7 @@
               "ISavedObjectsSecurityExtension",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -156,7 +156,7 @@
               "ISavedObjectsSpacesExtension",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -172,7 +172,7 @@
         "tags": [],
         "label": "savedObjectsRepositoryMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/repository.mock.ts",
+        "path": "src/core/packages/saved-objects/api-server-mocks/src/repository.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -188,7 +188,7 @@
               "ISavedObjectsRepository",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/repository.mock.ts",
+            "path": "src/core/packages/saved-objects/api-server-mocks/src/repository.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

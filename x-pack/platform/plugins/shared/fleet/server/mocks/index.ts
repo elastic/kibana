@@ -112,11 +112,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {
-      agentTamperProtectionEnabled: true,
-      diagnosticFileUploadEnabled: true,
-      enableReusableIntegrationPolicies: true,
-    } as ExperimentalFeatures,
+    experimentalFeatures: {} as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -144,6 +140,9 @@ export const createAppContextStartContractMock = (
       : {}),
     unenrollInactiveAgentsTask: {} as any,
     deleteUnenrolledAgentsTask: {} as any,
+    updateAgentlessDeploymentsTask: {} as any,
+    syncIntegrationsTask: {} as any,
+    automaticAgentUpgradeTask: {} as any,
   };
 };
 
@@ -228,8 +227,10 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
  */
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
+    create: jest.fn().mockReturnValue(Promise.resolve()),
     get: jest.fn().mockReturnValue(Promise.resolve()),
     list: jest.fn().mockReturnValue(Promise.resolve()),
+    delete: jest.fn().mockReturnValue(Promise.resolve()),
     getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     getByIds: jest.fn().mockReturnValue(Promise.resolve()),
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
@@ -292,6 +293,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
 
   const startContract: DeeplyMockedKeys<FleetStartContract> = {
     fleetSetupCompleted: jest.fn(async () => {}),
+    agentless: { enabled: false },
     authz: { fromRequest: jest.fn(async (_) => fleetAuthzMock) },
     packageService: createMockPackageService(),
     agentService: createMockAgentService(),
