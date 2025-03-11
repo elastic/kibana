@@ -93,7 +93,6 @@ describe('ruleTypesRoute', () => {
         },
         category: 'test',
         producer: 'test',
-        solution: 'stack',
         enabled_in_license: true,
         has_alerts_mappings: true,
         has_fields_for_a_a_d: false,
@@ -135,7 +134,6 @@ describe('ruleTypesRoute', () => {
               "name": "Recovered",
             },
             "rule_task_timeout": "10m",
-            "solution": "stack",
           },
         ],
       }

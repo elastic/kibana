@@ -182,14 +182,6 @@ export const typesRulesResponseBodySchema = schema.arrayOf(
         description: 'An identifier for the application that produces this rule type.',
       },
     }),
-    solution: schema.oneOf(
-      [schema.literal('stack'), schema.literal('observability'), schema.literal('security')],
-      {
-        meta: {
-          description: 'An identifier for the solution that owns this rule type.',
-        },
-      }
-    ),
     recovery_action_group: actionGroupSchema,
     rule_task_timeout: schema.maybe(schema.string()),
   })
