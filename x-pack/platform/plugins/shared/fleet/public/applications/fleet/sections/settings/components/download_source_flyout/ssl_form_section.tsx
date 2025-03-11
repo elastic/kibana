@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTextArea, EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow, EuiCallOut, EuiSpacer, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,110 +28,120 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
 
   return (
     <>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        title={i18n.translate('xpack.fleet.editDownloadSourcesFlyout.sslWarningCallout', {
-          defaultMessage:
-            'Invalid settings can prevent Elastic Agent from being able to upgrade. If this happens, you will need to provide valid credentials.',
-        })}
-        color="warning"
-        iconType="warning"
-      />
-      <EuiSpacer size="m" />
-      <MultiRowInput
-        placeholder={i18n.translate(
-          'xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateAuthoritiesInputPlaceholder',
-          {
-            defaultMessage: 'Specify certificate authority',
-          }
-        )}
-        label={i18n.translate(
-          'xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateAuthoritiesInputLabel',
-          {
-            defaultMessage: 'Server SSL certificate authorities (optional)',
-          }
-        )}
-        multiline={true}
-        sortable={false}
-        {...inputs.sslCertificateAuthoritiesInput.props}
-      />
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateInputLabel"
-            defaultMessage="Client SSL certificate"
-          />
-        }
-        {...inputs.sslCertificateInput.formRowProps}
-      >
-        <EuiTextArea
-          fullWidth
-          rows={5}
-          {...inputs.sslCertificateInput.props}
+      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+        <EuiTitle size="s">
+          <h3 id="FleetEditOutputFlyoutKafkaAuthenticationTitle">
+            <FormattedMessage
+              id="xpack.fleet.settings.editDownloadSourcesFlyout.sslAuthenticationTitle"
+              defaultMessage="Authentication"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          title={i18n.translate('xpack.fleet.editDownloadSourcesFlyout.sslWarningCallout', {
+            defaultMessage:
+              'Invalid settings can prevent Elastic Agent from being able to upgrade. If this happens, you will need to provide valid credentials.',
+          })}
+          color="warning"
+          iconType="warning"
+        />
+        <EuiSpacer size="m" />
+        <MultiRowInput
           placeholder={i18n.translate(
-            'xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateInputPlaceholder',
+            'xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateAuthoritiesInputPlaceholder',
             {
-              defaultMessage: 'Specify ssl certificate',
+              defaultMessage: 'Specify certificate authority',
             }
           )}
+          label={i18n.translate(
+            'xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateAuthoritiesInputLabel',
+            {
+              defaultMessage: 'Server SSL certificate authorities (optional)',
+            }
+          )}
+          multiline={true}
+          sortable={false}
+          {...inputs.sslCertificateAuthoritiesInput.props}
         />
-      </EuiFormRow>
-      {!useSecretsStorage ? (
-        <SecretFormRow
+        <EuiFormRow
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.fleet.settings.editDownloadSourcesFlyout.sslKeyInputLabel"
-              defaultMessage="Client SSL certificate key"
+              id="xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateInputLabel"
+              defaultMessage="Client SSL certificate"
             />
           }
-          {...inputs.sslKeyInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-          disabled={!useSecretsStorage}
+          {...inputs.sslCertificateInput.formRowProps}
         >
           <EuiTextArea
             fullWidth
             rows={5}
-            {...inputs.sslKeyInput.props}
+            {...inputs.sslCertificateInput.props}
             placeholder={i18n.translate(
-              'xpack.fleet.settings.editDownloadSourcesFlyout.sslKeyInputPlaceholder',
+              'xpack.fleet.settings.editDownloadSourcesFlyout.sslCertificateInputPlaceholder',
               {
-                defaultMessage: 'Specify certificate key',
+                defaultMessage: 'Specify ssl certificate',
               }
             )}
           />
-        </SecretFormRow>
-      ) : (
-        <SecretFormRow
-          fullWidth
-          title={i18n.translate(
-            'xpack.fleet.settings.editDownloadSourcesFlyout.sslKeySecretInputTitle',
-            {
-              defaultMessage: 'Client SSL certificate key',
+        </EuiFormRow>
+        {!useSecretsStorage ? (
+          <SecretFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editDownloadSourcesFlyout.sslKeyInputLabel"
+                defaultMessage="Client SSL certificate key"
+              />
             }
-          )}
-          {...inputs.sslKeySecretInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          isConvertedToSecret={isConvertedToSecret}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-          cancelEdit={inputs.sslKeySecretInput.cancelEdit}
-        >
-          <EuiTextArea
+            {...inputs.sslKeyInput.formRowProps}
+            useSecretsStorage={useSecretsStorage}
+            onToggleSecretStorage={onToggleSecretAndClearValue}
+            disabled={!useSecretsStorage}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeyInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editDownloadSourcesFlyout.sslKeyInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        ) : (
+          <SecretFormRow
             fullWidth
-            rows={5}
-            {...inputs.sslKeySecretInput.props}
-            data-test-subj="sslKeySecretInput"
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editDownloadSourcesFlyout.sslKeySecretInputPlaceholder',
+            title={i18n.translate(
+              'xpack.fleet.settings.editDownloadSourcesFlyout.sslKeySecretInputTitle',
               {
-                defaultMessage: 'Specify certificate key',
+                defaultMessage: 'Client SSL certificate key',
               }
             )}
-          />
-        </SecretFormRow>
-      )}
+            {...inputs.sslKeySecretInput.formRowProps}
+            useSecretsStorage={useSecretsStorage}
+            isConvertedToSecret={isConvertedToSecret}
+            onToggleSecretStorage={onToggleSecretAndClearValue}
+            cancelEdit={inputs.sslKeySecretInput.cancelEdit}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslKeySecretInput.props}
+              data-test-subj="sslKeySecretInput"
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editDownloadSourcesFlyout.sslKeySecretInputPlaceholder',
+                {
+                  defaultMessage: 'Specify certificate key',
+                }
+              )}
+            />
+          </SecretFormRow>
+        )}
+      </EuiPanel>
     </>
   );
 };
