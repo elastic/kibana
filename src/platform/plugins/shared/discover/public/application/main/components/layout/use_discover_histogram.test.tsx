@@ -7,28 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactElement } from 'react';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { useDiscoverHistogram, UseDiscoverHistogramProps } from './use_discover_histogram';
+import type { UseDiscoverHistogramProps } from './use_discover_histogram';
+import { useDiscoverHistogram } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import {
-  UnifiedHistogramFetchStatus,
-  UnifiedHistogramState,
-} from '@kbn/unified-histogram-plugin/public';
+import type { UnifiedHistogramState } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
-import { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
+import type { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 
