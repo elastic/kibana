@@ -814,6 +814,8 @@
       "@kbn/elasticsearch-client-plugin/*": ["test/plugin_functional/plugins/elasticsearch_client_plugin/*"],
       "@kbn/elasticsearch-client-xpack-plugin": ["x-pack/test/plugin_api_integration/plugins/elasticsearch_client"],
       "@kbn/elasticsearch-client-xpack-plugin/*": ["x-pack/test/plugin_api_integration/plugins/elasticsearch_client/*"],
+      "@kbn/embeddable-alerts-table-plugin": ["x-pack/platform/plugins/shared/embeddable_alerts_table"],
+      "@kbn/embeddable-alerts-table-plugin/*": ["x-pack/platform/plugins/shared/embeddable_alerts_table/*"],
       "@kbn/embeddable-enhanced-plugin": ["x-pack/platform/plugins/shared/embeddable_enhanced"],
       "@kbn/embeddable-enhanced-plugin/*": ["x-pack/platform/plugins/shared/embeddable_enhanced/*"],
       "@kbn/embeddable-examples-plugin": ["examples/embeddable_examples"],
