@@ -24,11 +24,13 @@ import {
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
-import { isEmpty, map, max, min } from 'lodash';
+import { intersection, isEmpty, map, max, min } from 'lodash';
 import React, { useState } from 'react';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
@@ -104,6 +106,28 @@ export function RelatedAlertsView({ alert }: Props) {
       render: (_, item: Alert) => {
         const instanceId = getAlertFieldValue(item, ALERT_INSTANCE_ID);
         return <EuiText size="s">{instanceId}</EuiText>;
+      },
+    },
+    {
+      field: 'Relation',
+      name: 'Relation',
+      render: (_, item: Alert) => {
+        const instanceId = getAlertFieldValue(item, ALERT_INSTANCE_ID);
+        const tags = getAlertFieldValue(item, ALERT_RULE_TAGS);
+        const ruleUuid = getAlertFieldValue(item, ALERT_RULE_UUID);
+        const hasSomeRelationWithInstance =
+          intersection(alert.fields[ALERT_INSTANCE_ID].split(','), instanceId.split(',')).length >
+          0;
+        const hasSomeRelationWithTags =
+          intersection(alert.fields[ALERT_RULE_TAGS], tags).length > 0;
+        const hasRelationWithRule = ruleUuid === alert.fields[ALERT_RULE_UUID];
+        return (
+          <>
+            {hasSomeRelationWithInstance && <EuiBadge>Groups</EuiBadge>}
+            {hasSomeRelationWithTags && <EuiBadge>Tags</EuiBadge>}
+            {hasRelationWithRule && <EuiBadge>Rule</EuiBadge>}
+          </>
+        );
       },
     },
   ];
