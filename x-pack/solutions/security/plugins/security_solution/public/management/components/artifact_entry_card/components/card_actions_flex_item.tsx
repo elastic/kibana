@@ -45,30 +45,25 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
       disabledTooltip: ReactNode;
     }
     const { isDisabled, disabledTooltip } = useMemo<MenuButtonDisableOptions>(() => {
-      const response: MenuButtonDisableOptions = { isDisabled: false, disabledTooltip: undefined };
-
-      if (!isSpacesEnabled) {
-        return response;
-      }
-
-      if (canManageGlobalArtifacts) {
-        return response;
+      if (!isSpacesEnabled || canManageGlobalArtifacts) {
+        return { isDisabled: false, disabledTooltip: undefined };
       }
 
       if (isGlobal) {
-        response.isDisabled = true;
-        response.disabledTooltip = MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE;
-        return response;
+        return {
+          isDisabled: true,
+          disabledTooltip: MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE,
+        };
       }
 
       if (!activeSpaceId || !ownerSpaceIds.includes(activeSpaceId)) {
-        response.isDisabled = true;
-        response.disabledTooltip = MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE;
-
-        return response;
+        return {
+          isDisabled: true,
+          disabledTooltip: MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE,
+        };
       }
 
-      return response;
+      return { isDisabled: false, disabledTooltip: undefined };
     }, [activeSpaceId, canManageGlobalArtifacts, isGlobal, isSpacesEnabled, ownerSpaceIds]);
 
     return actions && actions.length > 0 ? (
