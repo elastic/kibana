@@ -11,12 +11,10 @@ import { createBrowserHistory } from 'history';
 import { getDiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import {
-  RuntimeStateManager,
-  createRuntimeStateManager,
-} from '../application/main/state_management/redux';
+import type { RuntimeStateManager } from '../application/main/state_management/redux';
+import { createRuntimeStateManager } from '../application/main/state_management/redux';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
