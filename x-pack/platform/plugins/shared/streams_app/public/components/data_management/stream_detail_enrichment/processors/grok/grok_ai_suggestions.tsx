@@ -154,7 +154,10 @@ function InnerGrokAiSuggestions({
   previewDocuments: FlattenRecord[];
   definition: IngestStreamGetResponse;
 }) {
-  const { dependencies } = useKibana();
+  const {
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     streams: { streamsRepositoryClient },
     observabilityAIAssistant,
@@ -183,6 +186,11 @@ function InnerGrokAiSuggestions({
     setSuggestionsLoading(true);
     setSuggestionsError(undefined);
     setSuggestions(undefined);
+    const finish = telemetryClient.trackAIGrokSuggestionLatency({
+      name: definition.stream.name,
+      field: fieldValue,
+      connector_id: currentConnector,
+    });
     streamsRepositoryClient
       .fetch('POST /api/streams/{name}/processing/_suggestions', {
         signal: abortController.signal,
@@ -196,6 +204,10 @@ function InnerGrokAiSuggestions({
         },
       })
       .then((response) => {
+        finish(
+          response.patterns.length || 0,
+          response.simulations.map((item) => item.success_rate)
+        );
         setSuggestions(response);
         setSuggestionsLoading(false);
       })
@@ -210,6 +222,7 @@ function InnerGrokAiSuggestions({
     fieldValue,
     previewDocuments,
     streamsRepositoryClient,
+    telemetryClient,
   ]);
 
   let content: React.ReactNode = null;
@@ -233,6 +246,7 @@ function InnerGrokAiSuggestions({
     .map((pattern, i) => ({
       pattern,
       success_rate: suggestions.simulations[i].success_rate,
+      detected_fields_count: suggestions.simulations[i].detected_fields.length,
     }))
     .filter(
       (suggestion) =>
@@ -302,6 +316,13 @@ function InnerGrokAiSuggestions({
                           { value: suggestion.pattern },
                         ]);
                       }
+                      telemetryClient.trackAIGrokSuggestionAccepted({
+                        name: definition.stream.name,
+                        field: fieldValue,
+                        connector_id: currentConnector || 'n/a',
+                        match_rate: suggestion.success_rate,
+                        detected_fields: suggestion.detected_fields_count,
+                      });
                     }}
                     data-test-subj="streamsAppGrokAiSuggestionsButton"
                     iconType="plusInCircle"

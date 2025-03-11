@@ -18,7 +18,8 @@
       "licensing",
       "taskManager",
       "alerting",
-      "inference",
+      "telemetry",
+      "inference"
     ],
     "optionalPlugins": [
       "cloud",

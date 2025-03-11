@@ -20,6 +20,7 @@
       "fieldsMetadata",
       "datasetQuality",
       "licensing",
+      "telemetry"
     ],
     "requiredBundles": [
       "kibanaReact"

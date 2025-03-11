@@ -282,6 +282,7 @@ function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
 
   return (
     <DashboardsTable
+      entityId={definition?.stream.name}
       dashboards={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
       loading={dashboardsFetch.loading}
     />
