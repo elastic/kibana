@@ -36,7 +36,6 @@ import {
   threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
-import { checksFactory } from '../saved_objects';
 
 export function filterForEnabledFeatureModels<
   T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
@@ -79,20 +78,10 @@ export function trainedModelsRoutes(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
             const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
-            const { trainedModelsSpaces } = checksFactory(client, mlSavedObjectService);
-
-            const [models, spaces] = await Promise.all([
-              modelsClient.getTrainedModelList(),
-              trainedModelsSpaces(),
-            ]);
-
-            const mergedModels = models.map((model) => ({
-              ...model,
-              spaces: spaces.trainedModels[model.model_id] ?? [],
-            }));
+            const models = await modelsClient.getTrainedModelList(mlSavedObjectService);
 
             return response.ok({
-              body: mergedModels,
+              body: models,
             });
           } catch (e) {
             return response.customError(wrapError(e));
