@@ -99,7 +99,6 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]components[\/\\]header.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]components[\/\\]manage_agent_policies_modal.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]components[\/\\]package_icon.tsx/,
-    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]layouts[\/\\]error.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]layouts[\/\\]without_header.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]timelines[\/\\]public[\/\\]mock[\/\\]test_providers.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]triggers_actions_ui[\/\\]public[\/\\]application[\/\\]sections[\/\\]actions_connectors_list[\/\\]components[\/\\]actions_connectors_list.test.tsx/,
