@@ -6,12 +6,13 @@
  */
 
 import React, { memo, useContext, type PropsWithChildren } from 'react';
+import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { AnyArtifact } from '..';
 
-const CardArtifactContext = React.createContext<AnyArtifact | undefined>(undefined);
+const CardArtifactContext = React.createContext<MaybeImmutable<AnyArtifact> | undefined>(undefined);
 
 export interface CardArtifactProviderProps extends PropsWithChildren {
-  item: AnyArtifact;
+  item: MaybeImmutable<AnyArtifact>;
 }
 
 /**
@@ -25,7 +26,7 @@ CardArtifactProvider.displayName = 'CardArtifactProvider';
 /**
  * Retrieve the artifact item (`ExceptionListItemSchema`) that is currently being rendered
  */
-export const useCardArtifact = (): AnyArtifact => {
+export const useCardArtifact = (): MaybeImmutable<AnyArtifact> => {
   const artifact = useContext(CardArtifactContext);
 
   if (!artifact) {
