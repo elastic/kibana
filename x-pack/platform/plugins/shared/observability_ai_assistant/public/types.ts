@@ -71,7 +71,7 @@ export interface ObservabilityAIAssistantChatService {
           except: string[];
         };
     signal: AbortSignal;
-    userInstructions?: Array<string | Instruction>;
+    instructions?: Array<string | Instruction>;
     scopes: AssistantScope[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getFunctions: (options?: {

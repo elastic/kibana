@@ -311,7 +311,7 @@ class ChatService {
     persist,
     disableFunctions,
     signal,
-    userInstructions,
+    instructions,
   }) => {
     return complete(
       {
@@ -324,7 +324,7 @@ class ChatService {
         disableFunctions,
         signal,
         client: this.getClient(),
-        userInstructions,
+        instructions,
         scopes: this.getScopes(),
       },
       ({ params }) => {
