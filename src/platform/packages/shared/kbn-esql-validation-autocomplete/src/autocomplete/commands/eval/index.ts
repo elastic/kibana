@@ -22,9 +22,11 @@ export async function suggest(
     ? undefined
     : (params.command.args[params.command.args.length - 1] as ESQLSingleAstItem | undefined);
 
+  let insideAssignment = false;
   if (expressionRoot && isAssignment(expressionRoot)) {
     // EVAL foo = <use this as the expression root>
     expressionRoot = expressionRoot.args[1][0] as ESQLSingleAstItem;
+    insideAssignment = true;
   }
 
   const suggestions = await suggestForExpression({
@@ -35,7 +37,7 @@ export async function suggest(
 
   // EVAL-specific stuff
   const positionInExpression = getPosition(params.innerText, expressionRoot);
-  if (positionInExpression === 'empty_expression') {
+  if (positionInExpression === 'empty_expression' && !insideAssignment) {
     suggestions.push(getNewVariableSuggestion(params.getSuggestedVariableName()));
   }
 

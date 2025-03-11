@@ -164,12 +164,18 @@ describe('autocomplete.suggest', () => {
     test('after assignment', async () => {
       await assertSuggestions(
         'from a | eval a=/',
-        [...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true })],
+        [
+          ...getFieldNamesByType('any').map((v) => `${v} `),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ],
         { triggerCharacter: '=' }
       );
       await assertSuggestions(
         'from a | eval a=abs(doubleField), b= /',
-        [...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true })],
+        [
+          ...getFieldNamesByType('any').map((v) => `${v} `),
+          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ],
         { triggerCharacter: '=' }
       );
     });
