@@ -74,8 +74,9 @@ export const PermissionsError: React.FunctionComponent<{
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.permissionDeniedErrorMessage"
-                  defaultMessage={`You are not authorized to access ${callingApplication}. Kibana privileges are required to access ${callingApplication}; the {roleName2} or {roleName1} privilege is required to access ${callingApplication}.`}
+                  defaultMessage="You are not authorized to access {callingApplication}. Kibana privileges are required to access ${callingApplication}; the {roleName2} or {roleName1} privilege is required to access {callingApplication}"
                   values={{
+                    callingApplication,
                     roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
                     roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
                   }}
