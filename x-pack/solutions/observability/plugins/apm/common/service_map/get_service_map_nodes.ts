@@ -247,8 +247,11 @@ function markBidirectionalConnections({ connections }: { connections: Connection
 export function getServiceMapNodes({
   connections,
   exitSpanDestinations,
-  servicesData,
-  anomalies,
+  servicesData = [],
+  anomalies = {
+    serviceAnomalies: [],
+    mlJobIds: [],
+  },
 }: ServiceMapConnections): GroupResourceNodesResponse {
   const allConnections = addMessagingConnections(connections, exitSpanDestinations);
   const allNodes = getAllNodes(servicesData, allConnections);

@@ -45,8 +45,8 @@ export type ConnectionType = Connection | ConnectionLegacy;
 export type DestinationType = ExitSpanDestination | ExitSpanDestinationLegacy;
 
 export interface ServiceMapConnections {
-  servicesData: ServicesResponse[];
-  anomalies: ServiceAnomaliesResponse;
+  servicesData?: ServicesResponse[];
+  anomalies?: ServiceAnomaliesResponse;
   connections: Connection[];
   exitSpanDestinations: ExitSpanDestination[];
 }
