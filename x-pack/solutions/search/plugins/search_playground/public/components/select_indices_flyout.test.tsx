@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, useState as useStateMock } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { SelectIndicesFlyout } from './select_indices_flyout';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -16,11 +16,6 @@ jest.mock('../hooks/use_source_indices_field');
 jest.mock('../hooks/use_query_indices');
 jest.mock('../hooks/use_indices_fields', () => ({
   useIndicesFields: () => ({ fields: {} }),
-}));
-
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn(),
 }));
 
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
@@ -38,12 +33,9 @@ const mockedUseQueryIndices = useQueryIndices as jest.MockedFunction<typeof useQ
 
 describe('SelectIndicesFlyout', () => {
   const onCloseMock = jest.fn();
-  const setSelectedTempIndices = jest.fn();
-  const useStateMockImplementation = (initialState: any) => [initialState, setSelectedTempIndices];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useStateMock as jest.Mock).mockImplementation(useStateMockImplementation);
 
     mockedUseSourceIndicesFields.mockReturnValue({
       indices: ['index1', 'index2'],
@@ -55,7 +47,7 @@ describe('SelectIndicesFlyout', () => {
     });
 
     mockedUseQueryIndices.mockReturnValue({
-      indices: ['index1', 'index2', 'index3'],
+      indices: ['index1', 'index2', 'index3', 'filteredIndex1', 'filteredIndex2'],
       isLoading: false,
       isFetched: true,
     });
@@ -117,13 +109,28 @@ describe('SelectIndicesFlyout', () => {
     expect(saveButton).toBeDisabled();
   });
 
-  it('updates selectedTempIndices correctly', () => {
-    const { getByTestId } = render(<SelectIndicesFlyout onClose={onCloseMock} />, {
-      wrapper: Wrapper,
+  it('updates selectedTempIndices correctly with previous values', async () => {
+    const { getByTestId, getByPlaceholderText } = render(
+      <SelectIndicesFlyout onClose={onCloseMock} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    // Simulate typing into the search input field
+    const searchInput = getByPlaceholderText('Filter options');
+    fireEvent.change(searchInput, { target: { value: 'filteredIndex' } });
+
+    fireEvent.click(getByTestId('sourceIndex-3'));
+    fireEvent.click(getByTestId('saveButton'));
+
+    await waitFor(() => {
+      expect(mockedUseSourceIndicesFields().setIndices).toHaveBeenCalledWith([
+        'index1',
+        'index2',
+        'filteredIndex1',
+      ]);
+      expect(onCloseMock).toHaveBeenCalled();
     });
-
-    fireEvent.click(getByTestId('sourceIndex-2'));
-
-    expect(setSelectedTempIndices).toHaveBeenCalledWith(['index1', 'index2', 'index3']);
   });
 });
