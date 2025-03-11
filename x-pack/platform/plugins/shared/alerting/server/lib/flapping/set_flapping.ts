@@ -6,10 +6,10 @@
  */
 
 import { keys } from 'lodash';
-import type { Alert } from '../alert';
-import type { AlertInstanceState, AlertInstanceContext } from '../types';
+import type { Alert } from '../../alert';
+import type { AlertInstanceState, AlertInstanceContext } from '../../types';
 import { isFlapping } from './flapping_utils';
-import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 
 export function setFlapping<
   State extends AlertInstanceState,

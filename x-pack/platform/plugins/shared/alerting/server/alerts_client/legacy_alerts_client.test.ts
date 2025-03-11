@@ -12,14 +12,15 @@ import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { getAlertsForNotification, processAlerts } from '../lib';
-import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
+import { processAlerts } from '../lib';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
+import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
 
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const scheduleActions = jest.fn();
@@ -70,15 +71,15 @@ jest.mock('../lib', () => {
   };
 });
 
-jest.mock('../lib/trim_recovered_alerts', () => {
+jest.mock('../lib/flapping/determine_flapping_alerts', () => {
   return {
-    trimRecoveredAlerts: jest.fn(),
+    determineFlappingAlerts: jest.fn(),
   };
 });
 
-jest.mock('../lib/get_alerts_for_notification', () => {
+jest.mock('../lib/determine_delayed_alerts', () => {
   return {
-    getAlertsForNotification: jest.fn(),
+    determineDelayedAlerts: jest.fn(),
   };
 });
 
@@ -259,7 +260,7 @@ describe('Legacy Alerts Client', () => {
     expect(alertsClient.getMaxAlertLimit()).toBe(1000);
   });
 
-  test('processAlerts() should call processAlerts, trimRecoveredAlerts and getAlertsForNotifications', async () => {
+  test('processAlerts() should call processAlerts', async () => {
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
@@ -285,24 +286,6 @@ describe('Legacy Alerts Client', () => {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
-      currentRecoveredAlerts: {},
-      recoveredAlerts: {},
-    });
-    (trimRecoveredAlerts as jest.Mock).mockReturnValue({
-      trimmedAlertsRecovered: {},
-      earlyRecoveredAlerts: {},
-    });
-    (getAlertsForNotification as jest.Mock).mockReturnValue({
-      newAlerts: {},
-      activeAlerts: {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      currentActiveAlerts: {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
     const alertsClient = new LegacyAlertsClient({
@@ -316,11 +299,7 @@ describe('Legacy Alerts Client', () => {
 
     await alertsClient.initializeExecution(defaultExecutionOpts);
 
-    await alertsClient.processAlerts({
-      ruleRunMetricsStore,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      alertDelay: 5,
-    });
+    await alertsClient.processAlerts();
 
     expect(processAlerts).toHaveBeenCalledWith({
       alerts: {
@@ -331,33 +310,11 @@ describe('Legacy Alerts Client', () => {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
-      previouslyRecoveredAlerts: {},
       hasReachedAlertLimit: false,
       alertLimit: 1000,
       autoRecoverAlerts: true,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       startedAt: null,
     });
-
-    expect(trimRecoveredAlerts).toHaveBeenCalledWith(logger, {}, 1000);
-
-    expect(getAlertsForNotification).toHaveBeenCalledWith(
-      {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      'default',
-      5,
-      {},
-      {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      {},
-      {},
-      null
-    );
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({
       '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
@@ -399,24 +356,6 @@ describe('Legacy Alerts Client', () => {
       activeAlerts: {
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
-      currentRecoveredAlerts: {},
-      recoveredAlerts: {},
-    });
-    (trimRecoveredAlerts as jest.Mock).mockReturnValue({
-      trimmedAlertsRecovered: {},
-      earlyRecoveredAlerts: {},
-    });
-    (getAlertsForNotification as jest.Mock).mockReturnValue({
-      newAlerts: {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-      },
-      activeAlerts: {
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      currentActiveAlerts: {
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
     const alertsClient = new LegacyAlertsClient({
@@ -435,11 +374,7 @@ describe('Legacy Alerts Client', () => {
       },
     });
 
-    await alertsClient.processAlerts({
-      ruleRunMetricsStore,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      alertDelay: 5,
-    });
+    await alertsClient.processAlerts();
 
     expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
       eventLogger: alertingEventLogger,
@@ -447,28 +382,6 @@ describe('Legacy Alerts Client', () => {
       ruleTypeCategory: 'test',
       spaceId: 'space1',
     });
-
-    expect(getAlertsForNotification).toHaveBeenCalledWith(
-      {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      'default',
-      5,
-      {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', {
-          ...testAlert1,
-          meta: { ...testAlert1.meta, maintenanceWindowIds: ['test-id1', 'test-id2'] },
-        }),
-      },
-      {
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      {},
-      {},
-      null
-    );
   });
 
   test('isTrackedAlert() should return true if alert was active in a previous execution, false otherwise', async () => {
@@ -485,5 +398,97 @@ describe('Legacy Alerts Client', () => {
     expect(alertsClient.isTrackedAlert('1')).toBe(true);
     expect(alertsClient.isTrackedAlert('2')).toBe(true);
     expect(alertsClient.isTrackedAlert('3')).toBe(false);
+  });
+
+  test('determineFlappingAlerts() should call determineFlappingAlerts', async () => {
+    (determineFlappingAlerts as jest.Mock).mockReturnValue({
+      newAlerts: {},
+      activeAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      trackedActiveAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      trackedRecoveredAlerts: {},
+      recoveredAlerts: {},
+    });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution(defaultExecutionOpts);
+
+    alertsClient.determineFlappingAlerts();
+
+    expect(determineFlappingAlerts).toHaveBeenCalledWith({
+      logger,
+      newAlerts: {},
+      activeAlerts: {},
+      recoveredAlerts: {},
+      flappingSettings: {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      },
+      previouslyRecoveredAlerts: {},
+      actionGroupId: 'default',
+      maxAlerts: 1000,
+    });
+
+    expect(alertsClient.getProcessedAlerts('active')).toEqual({
+      '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+      '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+    });
+  });
+
+  test('determineDelayedAlerts() should call determineDelayedAlerts', async () => {
+    (determineDelayedAlerts as jest.Mock).mockReturnValue({
+      newAlerts: {},
+      activeAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+      },
+      trackedActiveAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+      },
+      trackedRecoveredAlerts: {},
+      recoveredAlerts: {},
+    });
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution(defaultExecutionOpts);
+
+    alertsClient.determineDelayedAlerts({
+      ruleRunMetricsStore,
+      alertDelay: 5,
+    });
+
+    expect(determineDelayedAlerts).toHaveBeenCalledWith({
+      newAlerts: {},
+      activeAlerts: {},
+      trackedActiveAlerts: {},
+      recoveredAlerts: {},
+      trackedRecoveredAlerts: {},
+      alertDelay: 5,
+      ruleRunMetricsStore,
+      startedAt: null,
+    });
+
+    expect(alertsClient.getProcessedAlerts('active')).toEqual({
+      '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+    });
   });
 });

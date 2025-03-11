@@ -220,7 +220,7 @@ describe('Per-Alert Action Scheduler', () => {
       // 2 per-alert actions * 2 alerts = 4 actions to schedule
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -249,7 +249,7 @@ describe('Per-Alert Action Scheduler', () => {
         priority: TaskPriority.Low,
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -278,7 +278,7 @@ describe('Per-Alert Action Scheduler', () => {
         apiKeyId: '23534ybfsdsnsdf',
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -310,7 +310,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
       const alertsWithMaintenanceWindow = { ...newAlertWithMaintenanceWindow, ...newAlert2 };
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithMaintenanceWindow,
+        activeAlerts: alertsWithMaintenanceWindow,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -349,7 +349,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
       const alertsWithInvalidActionGroup = { ...newAlertInvalidActionGroup, ...newAlert2 };
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithInvalidActionGroup,
+        activeAlerts: alertsWithInvalidActionGroup,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -387,7 +387,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
       const alertsWithInvalidActionGroup = { ...newAlertInvalidActionGroup, ...newAlert2 };
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithInvalidActionGroup,
+        activeAlerts: alertsWithInvalidActionGroup,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -419,7 +419,7 @@ describe('Per-Alert Action Scheduler', () => {
         ...newAlert2,
       };
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithPendingRecoveredCount,
+        activeAlerts: alertsWithPendingRecoveredCount,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -465,7 +465,7 @@ describe('Per-Alert Action Scheduler', () => {
         ...newAlert2,
       };
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithPendingRecoveredCount,
+        activeAlerts: alertsWithPendingRecoveredCount,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -492,7 +492,7 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, mutedInstanceIds: ['2'] },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -553,7 +553,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithOngoingAlert,
+        activeAlerts: alertsWithOngoingAlert,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -610,7 +610,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithOngoingAlert,
+        activeAlerts: alertsWithOngoingAlert,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -667,7 +667,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alertsWithOngoingAlert,
+        activeAlerts: alertsWithOngoingAlert,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -726,7 +726,7 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithUseAlertDataForTemplate] },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -787,7 +787,7 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithUseAlertDataForTemplate] },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -849,7 +849,7 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -911,7 +911,7 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -974,7 +974,7 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -1035,7 +1035,7 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
@@ -1078,7 +1078,7 @@ describe('Per-Alert Action Scheduler', () => {
         },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -1116,7 +1116,7 @@ describe('Per-Alert Action Scheduler', () => {
         },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -1151,7 +1151,7 @@ describe('Per-Alert Action Scheduler', () => {
       expect(alert.getLastScheduledActions()).toBeUndefined();
       expect(alert.hasScheduledActions()).toBe(true);
       await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: { '1': alert },
+        activeAlerts: { '1': alert },
       });
 
       expect(alert.getLastScheduledActions()).toEqual({
@@ -1190,7 +1190,7 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: { '1': alert },
+        activeAlerts: { '1': alert },
       });
 
       expect(alert.getLastScheduledActions()).toEqual({

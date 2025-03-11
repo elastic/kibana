@@ -8,7 +8,7 @@
 import { keys } from 'lodash';
 import type { Alert } from '../../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../../types';
-import { updateFlappingHistory } from '../flapping_utils';
+import { updateFlappingHistory } from './flapping_utils';
 import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 
 export function setFlappingHistoryAndTrackedAlerts<
