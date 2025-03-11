@@ -13,7 +13,7 @@ const RIGHT = 'right';
 test.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }, () => {
   test.beforeEach(async ({ browserAuth, detectionRuleApi }) => {
     await detectionRuleApi.deleteAll();
-    await detectionRuleApi.createCustomQueryRule();
+    await detectionRuleApi.createCustomQueryRule(CUSTOM_QUERY_RULE);
     await browserAuth.loginAsPlatformEngineer();
   });
 

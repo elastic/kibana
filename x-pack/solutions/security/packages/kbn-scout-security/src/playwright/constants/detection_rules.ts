@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+export interface CustomQueryRule {
+  index: string[];
+  enabled: boolean;
+  name: string;
+  description: string;
+  risk_score: number;
+  rule_id: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: 'query';
+  query: string;
+  from: string;
+}
+
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
   'apm-*-transaction*',
   'auditbeat-*',
@@ -17,7 +30,7 @@ export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
   '-*elastic-cloud-logs-*',
 ];
 
-export const CUSTOM_QUERY_RULE = {
+export const CUSTOM_QUERY_RULE: CustomQueryRule = {
   index: DEFAULT_SECURITY_SOLUTION_INDEXES,
   enabled: true,
   name: 'Alert Testing Query',

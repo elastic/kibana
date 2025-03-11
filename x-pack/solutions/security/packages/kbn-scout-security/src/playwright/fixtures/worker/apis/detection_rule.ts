@@ -5,35 +5,49 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/scout';
-import { CUSTOM_QUERY_RULE } from '../../../constants/detection_rules';
+import { KbnClient, measurePerformanceAsync, ScoutLogger } from '@kbn/scout';
+import { CUSTOM_QUERY_RULE, CustomQueryRule } from '../../../constants/detection_rules';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_action';
 
 export interface DetectionRuleFixture {
-  createCustomQueryRule: () => Promise<void>;
+  createCustomQueryRule: (body: CustomQueryRule) => Promise<void>;
   deleteAll: () => Promise<void>;
 }
 
-export const createDetectionRuleFixture = async ({ kbnClient }: { kbnClient: KbnClient }) => {
+export const createDetectionRuleFixture = async ({
+  kbnClient,
+  log,
+}: {
+  kbnClient: KbnClient;
+  log: ScoutLogger;
+}) => {
   const detectionRuleHelper: DetectionRuleFixture = {
     createCustomQueryRule: async (body = CUSTOM_QUERY_RULE) => {
-      await kbnClient.request({
-        method: 'POST',
-        path: DETECTION_ENGINE_RULES_URL,
-        body,
-      });
+      await measurePerformanceAsync(
+        log,
+        'security.detectionRule.createCustomQueryRule',
+        async () => {
+          await kbnClient.request({
+            method: 'POST',
+            path: DETECTION_ENGINE_RULES_URL,
+            body,
+          });
+        }
+      );
     },
 
     deleteAll: async () => {
-      await kbnClient.request({
-        method: 'POST',
-        path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: {
-          query: '',
-          action: 'delete',
-        },
+      await measurePerformanceAsync(log, 'security.detectionRule.deleteAll', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          body: {
+            query: '',
+            action: 'delete',
+          },
+        });
       });
     },
   };

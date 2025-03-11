@@ -31,8 +31,8 @@ export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
     await use(extendedPageObjects);
   },
   detectionRuleApi: [
-    async ({ kbnClient }, use) => {
-      const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient });
+    async ({ kbnClient, log }, use) => {
+      const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient, log });
       await use(detectionRuleHelper);
     },
     { scope: 'worker' },
