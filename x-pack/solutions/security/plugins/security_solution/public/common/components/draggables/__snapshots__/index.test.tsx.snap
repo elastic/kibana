@@ -3,7 +3,6 @@
 exports[`draggables rendering it renders the default Badge 1`] = `
 <DefaultDraggable
   field="some-field"
-  id="draggable-badge-default-draggable-context-id-event-id-some-field-some-value"
   queryValue="some-query-value"
   value="some-value"
 >
@@ -20,25 +19,18 @@ exports[`draggables rendering it renders the default Badge 1`] = `
 `;
 
 exports[`draggables rendering it renders the default DefaultDraggable 1`] = `
-<DraggableWrapper
-  dataProvider={
-    Object {
-      "and": Array [],
-      "enabled": true,
-      "excluded": false,
-      "id": "draggable-id",
-      "kqlQuery": "",
-      "name": "some-value",
-      "queryMatch": Object {
-        "field": "some-field",
-        "operator": ":",
-        "value": "some-query-value",
-      },
-    }
-  }
-  fieldType=""
+<CellActionsWrapper
+  field="some-field"
   hideTopN={false}
-  isAggregatable={false}
-  render={[Function]}
-/>
+  value="some-query-value"
+>
+  <Content
+    field="some-field"
+    value="some-value"
+  >
+    <span>
+      A child of this
+    </span>
+  </Content>
+</CellActionsWrapper>
 `;

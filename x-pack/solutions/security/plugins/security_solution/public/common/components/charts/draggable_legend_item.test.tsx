@@ -29,7 +29,6 @@ jest.mock('@elastic/eui', () => {
 describe('DraggableLegendItem', () => {
   const legendItem: LegendItem = {
     color: '#1EA593',
-    dataProviderId: 'draggable-legend-item-3207fda7-d008-402a-86a0-8ad632081bad-event_dataset-flow',
     field: 'event.dataset',
     value: 'flow',
     scopeId: 'test',
@@ -52,9 +51,7 @@ describe('DraggableLegendItem', () => {
   });
 
   it('renders draggable legend item text', () => {
-    expect(
-      wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).first().text()
-    ).toEqual(legendItem.value);
+    expect(wrapper.find(`[data-test-subj="legend-item"]`).first().text()).toEqual(legendItem.value);
   });
 
   it('renders a custom legend item via the `render` prop when provided', () => {
@@ -88,9 +85,7 @@ describe('DraggableLegendItem', () => {
   });
 
   it('always hides the Top N action for legend items', () => {
-    expect(
-      wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).prop('hideTopN')
-    ).toEqual(true);
+    expect(wrapper.find(`[data-test-subj="legend-item"]`).prop('hideTopN')).toEqual(true);
   });
 
   it('renders the empty value label when the value is empty', () => {
@@ -119,7 +114,7 @@ describe('DraggableLegendItem', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId(`legend-item-${legendItem.dataProviderId}`)).not.toBeInTheDocument();
+      expect(queryByTestId(`render-content-${legendItem.field}`)).not.toBeInTheDocument();
       expect(getByTestId('legendItemInlineActions')).toBeInTheDocument();
     });
   });
