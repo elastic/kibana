@@ -11,12 +11,13 @@ import { useOnboardingSuccessCallout } from './hooks/use_onboarding_success_call
 import { TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT } from '../../constants';
 
 export const OnboardingSuccessCallout = () => {
-  const { isCalloutVisible, onHideCallout } = useOnboardingSuccessCallout();
+  const { isOnboardingSuccessCalloutVisible, hideOnboardingSuccessCallout } =
+    useOnboardingSuccessCallout();
 
-  return isCalloutVisible ? (
+  return isOnboardingSuccessCalloutVisible ? (
     <>
       <EuiCallOut
-        onDismiss={onHideCallout}
+        onDismiss={hideOnboardingSuccessCallout}
         title={
           <FormattedMessage
             id="xpack.securitySolution.assetInventory.onboarding.enabledSuccessfullyTitle"

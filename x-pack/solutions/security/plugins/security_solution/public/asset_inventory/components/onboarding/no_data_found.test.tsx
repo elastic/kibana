@@ -24,8 +24,10 @@ jest.mock('../../../common/hooks/use_space_id');
 
 describe('NoDataFound Component', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     (useSpaceId as jest.Mock).mockReturnValue('default');
+  });
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it('should render loading component when spaceId is not available', () => {

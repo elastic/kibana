@@ -14,18 +14,16 @@ import { LOCAL_STORAGE_ONBOARDING_SUCCESS_CALLOUT_KEY } from '../../../constants
  * during the onboarding process.
  */
 export const useOnboardingSuccessCallout = () => {
-  const [isCalloutVisible, setIsCalloutVisible] = useLocalStorage<boolean>(
-    LOCAL_STORAGE_ONBOARDING_SUCCESS_CALLOUT_KEY,
-    false
-  );
+  const [isOnboardingSuccessCalloutVisible, setOnboardingSuccessCalloutVisible] =
+    useLocalStorage<boolean>(LOCAL_STORAGE_ONBOARDING_SUCCESS_CALLOUT_KEY, false);
 
-  const onHideCallout = () => setIsCalloutVisible(false);
+  const hideOnboardingSuccessCallout = () => setOnboardingSuccessCalloutVisible(false);
 
-  const dispatchSuccessCalloutVisibility = () => setIsCalloutVisible(true);
+  const showOnboardingSuccessCallout = () => setOnboardingSuccessCalloutVisible(true);
 
   return {
-    isCalloutVisible,
-    onHideCallout,
-    dispatchSuccessCalloutVisibility,
+    isOnboardingSuccessCalloutVisible,
+    hideOnboardingSuccessCallout,
+    showOnboardingSuccessCallout,
   };
 };

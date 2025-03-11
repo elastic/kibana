@@ -21,14 +21,14 @@ import { useOnboardingSuccessCallout } from './use_onboarding_success_callout';
 export const useEnableAssetInventory = () => {
   const { postEnableAssetInventory } = useAssetInventoryRoutes();
   const { refetch: refetchStatus } = useAssetInventoryStatus();
-  const { dispatchSuccessCalloutVisibility } = useOnboardingSuccessCallout();
+  const { showOnboardingSuccessCallout } = useOnboardingSuccessCallout();
 
   const mutation = useMutation<AssetInventoryEnableResponse, AssetInventoryServerApiError>(
     postEnableAssetInventory,
     {
       onSuccess: () => {
-        // ensure the success callout is visible after enabling Asset Inventory
-        dispatchSuccessCalloutVisibility();
+        // ensure the success callout will be visible after enabling Asset Inventory
+        showOnboardingSuccessCallout();
         // re-fetch the status API to update the UI
         refetchStatus();
       },

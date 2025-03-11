@@ -16,26 +16,29 @@ describe('useOnboardingSuccessCallout', () => {
   beforeEach(() => {
     (useLocalStorage as jest.Mock).mockReturnValue(mockLocalStorage);
   });
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('should initialize with false default value from local storage', () => {
     const { result } = renderHook(() => useOnboardingSuccessCallout());
-    expect(result.current.isCalloutVisible).toBe(false);
+    expect(result.current.isOnboardingSuccessCalloutVisible).toBe(false);
   });
 
-  it('should update local storage when dispatchSuccessCalloutVisibility is called', async () => {
+  it('should update local storage when showOnboardingSuccessCallout is called', async () => {
     const { result } = renderHook(() => useOnboardingSuccessCallout());
 
-    result.current.dispatchSuccessCalloutVisibility();
+    result.current.showOnboardingSuccessCallout();
 
     await waitFor(() => {
       expect(mockLocalStorage[1]).toHaveBeenCalledWith(true);
     });
   });
 
-  it('should update local storage when onHideCallout is called', async () => {
+  it('should update local storage when hideOnboardingSuccessCallout is called', async () => {
     const { result } = renderHook(() => useOnboardingSuccessCallout());
 
-    result.current.onHideCallout();
+    result.current.hideOnboardingSuccessCallout();
 
     await waitFor(() => {
       expect(mockLocalStorage[1]).toHaveBeenCalledWith(false);

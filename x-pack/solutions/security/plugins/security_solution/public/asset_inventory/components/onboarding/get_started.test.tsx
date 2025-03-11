@@ -11,22 +11,18 @@ import { GetStarted } from './get_started';
 import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
 import { renderWithTestProvider } from '../../test/test_provider';
 import { userEvent } from '@testing-library/user-event';
+import { mockUseEnableAssetInventory } from './hooks/use_enable_asset_inventory.mock';
 
-jest.mock('./hooks/use_enable_asset_inventory', () => ({
-  useEnableAssetInventory: jest.fn(),
-}));
+jest.mock('./hooks/use_enable_asset_inventory');
 
-const mockGetStarted = {
-  isEnabling: false,
-  error: null,
-  reset: jest.fn(),
-  enableAssetInventory: jest.fn(),
-};
+const mockGetStarted = mockUseEnableAssetInventory();
 
 describe('GetStarted Component', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     (useEnableAssetInventory as jest.Mock).mockReturnValue(mockGetStarted);
+  });
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it('renders the component', () => {
