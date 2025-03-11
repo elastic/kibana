@@ -8,8 +8,9 @@
  */
 
 import { defaults, flow } from 'lodash';
-import { Serializable, SerializableArray, SerializableRecord } from '@kbn/utility-types';
+import { SerializableRecord } from '@kbn/utility-types';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
+import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 import { ControlGroupAttributes } from '../../types';
 
 /**
@@ -25,18 +26,12 @@ export const transformControlsState: (
   transformControlsSetDefaults
 );
 
-function isValidControl(control: Serializable): control is SerializableRecord {
-  return typeof control === 'object' && control !== null && 'type' in control;
+export function transformControlObjectToArray(controls: ControlGroupSerializedState['controls']) {
+  return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
-export function transformControlObjectToArray(controls: SerializableRecord): SerializableArray {
-  return Object.entries(controls).map(([id, control]) =>
-    isValidControl(control) ? { id, ...control } : { id }
-  );
-}
-
-export function transformControlsWidthAuto(controls: SerializableArray): SerializableArray {
-  return controls.filter(isValidControl).map((control) => {
+export function transformControlsWidthAuto(controls: SerializableRecord[]) {
+  return controls.map((control) => {
     if (control.width === 'auto') {
       return { ...control, width: DEFAULT_CONTROL_WIDTH, grow: true };
     }
@@ -44,18 +39,18 @@ export function transformControlsWidthAuto(controls: SerializableArray): Seriali
   });
 }
 
-export function transformControlExplicitInput(controls: SerializableArray): SerializableArray {
-  return controls.filter(isValidControl).map(({ explicitInput, ...control }) => ({
+export function transformControlExplicitInput(
+  controls: SerializableRecord[]
+): SerializableRecord[] {
+  return controls.map(({ explicitInput, ...control }) => ({
     controlConfig: explicitInput,
     ...control,
   }));
 }
 
 // TODO We may want to remove setting defaults in the future
-export function transformControlsSetDefaults(controls: SerializableArray): SerializableArray {
-  return controls
-    .filter(isValidControl)
-    .map((control) =>
-      defaults(controls, { grow: DEFAULT_CONTROL_GROW, width: DEFAULT_CONTROL_WIDTH })
-    );
+export function transformControlsSetDefaults(controls: SerializableRecord[]) {
+  return controls.map((control) =>
+    defaults(control, { grow: DEFAULT_CONTROL_GROW, width: DEFAULT_CONTROL_WIDTH })
+  );
 }
