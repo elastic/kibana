@@ -318,6 +318,9 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .monaco-hover {
       display: block !important;
     }
+    .hover-row.status-bar {
+      display: none;
+    }
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};
     }

@@ -51,6 +51,7 @@ import * as i18n from '../translations';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
 import { logShardFailures } from '../utils/log_shard_failure';
+import { checkErrorDetails } from '../utils/check_error_details';
 import { wrapSequences } from './wrap_sequences';
 
 interface EqlExecutorParams {
@@ -214,12 +215,7 @@ export const eqlExecutor = async ({
       });
       return { result, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     } catch (error) {
-      if (
-        typeof error.message === 'string' &&
-        (error.message as string).includes('verification_exception')
-      ) {
-        // We report errors that are more related to user configuration of rules rather than system outages as "user errors"
-        // so SLO dashboards can show less noise around system outages
+      if (checkErrorDetails(error).isUserError) {
         result.userError = true;
       }
       result.errors.push(error.message);

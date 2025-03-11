@@ -57,8 +57,7 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
-const CreateRuleRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
-const EditRuleRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
+const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -129,12 +128,12 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         <Route
           exact
           path={createRuleRoute}
-          component={suspendedComponentWithProps(CreateRuleRoute, 'xl')}
+          component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
         />
         <Route
           exact
           path={editRuleRoute}
-          component={suspendedComponentWithProps(EditRuleRoute, 'xl')}
+          component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
         />
         <Route
           path={`/:section(${sectionsRegex})`}
