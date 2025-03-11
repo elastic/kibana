@@ -167,7 +167,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('The fourth request', () => {
+      describe('The fourth request - Executing the ES|QL query', () => {
         it('contains the `execute_query` tool call request', () => {
           const hasToolCall = fourthRequestBody.messages.some(
             // @ts-expect-error
