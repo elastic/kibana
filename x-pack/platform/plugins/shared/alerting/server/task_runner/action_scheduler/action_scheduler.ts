@@ -65,11 +65,11 @@ export class ActionScheduler<
   }
 
   public async run({
-    activeCurrentAlerts,
-    recoveredCurrentAlerts,
+    activeAlerts,
+    recoveredAlerts,
   }: {
-    activeCurrentAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
-    recoveredCurrentAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    activeAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
+    recoveredAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   }): Promise<RunResult> {
     const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
       actions: this.context.rule.actions,
@@ -80,8 +80,8 @@ export class ActionScheduler<
     for (const scheduler of this.schedulers) {
       allActionsToScheduleResult.push(
         ...(await scheduler.getActionsToSchedule({
-          activeCurrentAlerts,
-          recoveredCurrentAlerts,
+          activeAlerts,
+          recoveredAlerts,
           throttledSummaryActions,
         }))
       );
