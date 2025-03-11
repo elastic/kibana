@@ -8,14 +8,13 @@
 import { ScoutPage, Locator } from '@kbn/scout';
 
 const PAGE_URL = 'security/alerts';
+const EXPAND_EVENT = 'expand-event';
 
 export class AlertsTablePage {
-  public expandFirstAlertBtn: Locator;
+  public expandAlertBtn: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.expandFirstAlertBtn = this.page.locator(
-      '[aria-label^="View details for the alert or event in row 1,"][data-test-subj="expand-event"]'
-    );
+    this.expandAlertBtn = this.page.testSubj.locator(EXPAND_EVENT);
   }
 
   async navigate() {
@@ -23,7 +22,9 @@ export class AlertsTablePage {
   }
 
   async expandFirstAlertDetailsFlyout() {
-    await this.expandFirstAlertBtn.click();
+    await this.page.waitForSelector(`[data-test-subj=${EXPAND_EVENT}]`);
+    const buttons = await this.expandAlertBtn.all();
+    await buttons[0].click();
   }
 
   async getCurrentUrl() {
