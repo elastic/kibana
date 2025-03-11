@@ -38,6 +38,7 @@ pageLoadAssetSize:
   discoverEnhanced: 42730
   discoverShared: 17111
   embeddable: 24000
+  embeddableAlertsTable: 19615
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
