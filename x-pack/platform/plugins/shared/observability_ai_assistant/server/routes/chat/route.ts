@@ -41,7 +41,7 @@ const chatCompleteBaseRt = t.type({
           except: t.array(t.string),
         }),
       ]),
-      userInstructions: t.array(
+      instructions: t.array(
         t.union([
           t.string,
           t.type({
@@ -250,7 +250,7 @@ async function chatComplete(
       title,
       persist,
       screenContexts,
-      userInstructions,
+      instructions: userInstructionsOrStrings,
       disableFunctions,
       scopes,
     },
@@ -286,7 +286,7 @@ async function chatComplete(
     persist,
     signal,
     functionClient,
-    userInstructions: userInstructionsWithId,
+    userInstructions,
     simulateFunctionCalling,
     disableFunctions,
   });

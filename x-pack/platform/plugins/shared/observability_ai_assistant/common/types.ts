@@ -94,8 +94,6 @@ export interface Instruction {
   text: string;
 }
 
-export type InstructionOrPlainText = string | Instruction;
-
 export enum KnowledgeBaseType {
   // user instructions are included in the system prompt regardless of the user's input
   UserInstruction = 'user_instruction',

@@ -28,7 +28,7 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { InstructionOrPlainText, Instruction } from '../../../../common/types';
+import { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../../chat_function_client';
