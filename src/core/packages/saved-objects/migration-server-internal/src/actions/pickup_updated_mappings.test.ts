@@ -103,6 +103,7 @@ describe('pickupUpdatedMappings', () => {
       })
     );
     expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
+    // the second handler shouldn't be called since the first one is not throwing
     expect(catchClientErrorsSpy).not.toBeCalled();
   });
 });
