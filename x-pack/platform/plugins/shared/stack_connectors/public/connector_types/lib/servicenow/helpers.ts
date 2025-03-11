@@ -11,6 +11,7 @@ import type { EuiSelectOption } from '@elastic/eui';
 import type { ActionConnector, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { deprecatedMessage } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AppInfo, Choice, RESTApiError } from './types';
+import { CORSError } from './cors_error';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 
@@ -22,6 +23,8 @@ export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
 export const isRESTApiError = (res: AppInfo | RESTApiError | undefined): res is RESTApiError =>
   res != null &&
   ((res as RESTApiError).error != null || (res as RESTApiError).status === 'failure');
+
+export const isCORSError = (error: unknown): error is CORSError => error instanceof CORSError;
 
 export const isFieldInvalid = (
   field: string | undefined | null,
