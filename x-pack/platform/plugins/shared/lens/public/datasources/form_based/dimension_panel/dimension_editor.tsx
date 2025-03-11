@@ -75,6 +75,7 @@ import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
+import { operationsButtonStyles } from './shared_styles';
 import type { IndexPattern, IndexPatternField } from '../../../types';
 import { documentField } from '../document_field';
 
@@ -1298,15 +1299,5 @@ const operationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
     display: block;
     column-count: 2;
     column-gap: ${euiTheme.size.m};
-  `;
-};
-
-export const operationsButtonStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
-    > button {
-      padding-top: 0;
-      padding-bottom: 0;
-      min-block-size: ${euiTheme.size.l};
-    }
   `;
 };

@@ -831,7 +831,7 @@ export function FormulaEditor({
 
           <div css={sharedEditorStyles.editorFooter(euiThemeContext)}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
+              <EuiFlexItem grow={false}>
                 {isFullscreen ? (
                   <EuiToolTip
                     content={
@@ -881,7 +881,7 @@ export function FormulaEditor({
               </EuiFlexItem>
 
               {errorCount || warningCount ? (
-                <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
+                <EuiFlexItem grow={false}>
                   <EuiPopover
                     ownFocus={false}
                     isOpen={isWarningOpen}

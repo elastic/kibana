@@ -23,9 +23,10 @@ import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
-import { draggablePopoverButtonStyles, FilterPopover } from './filter_popover';
+import { FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
+import {draggablePopoverButtonStyles} from '../styles';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';

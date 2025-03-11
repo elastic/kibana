@@ -31,7 +31,7 @@ import type { FormBasedLayer } from '../types';
 import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
-import { operationsButtonStyles } from './dimension_editor';
+import { operationsButtonStyles } from './shared_styles';
 
 const operationDisplay = getOperationDisplay();
 

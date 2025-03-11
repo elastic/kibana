@@ -89,7 +89,7 @@ export function FrameLayout(props: FrameLayoutProps) {
             `}
           >
             <section
-              className={'hide-for-sharing'}
+              className="hide-for-sharing"
               aria-labelledby="dataPanelId"
               css={[
                 sidebarStyles(euiThemeContext),
