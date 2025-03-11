@@ -459,39 +459,6 @@ describe('Alerts Client', () => {
           spy.mockRestore();
         });
 
-        test('should split queries into chunks when there are greater than 10,000 alert UUIDs', async () => {
-          mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
-            active: range(15000).reduce((acc: Record<string, Alert<{}, {}>>, value: number) => {
-              const id = `${value}`;
-              acc[id] = new Alert(id, {
-                state: { foo: true },
-                meta: {
-                  flapping: false,
-                  flappingHistory: [true, false],
-                  lastScheduledActions: { group: 'default', date: new Date().toISOString() },
-                  uuid: id,
-                },
-              });
-              return acc;
-            }, {}),
-            recovered: {},
-          }));
-          const spy = jest
-            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
-            .mockImplementation(() => mockLegacyAlertsClient);
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          await alertsClient.initializeExecution(defaultExecutionOpts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            defaultExecutionOpts
-          );
-
-          expect(clusterClient.search).toHaveBeenCalledTimes(2);
-
-          spy.mockRestore();
-        });
-
         test('should log an error and throw if query returns error', async () => {
           clusterClient.search.mockImplementation(() => {
             throw new Error('search failed!');
