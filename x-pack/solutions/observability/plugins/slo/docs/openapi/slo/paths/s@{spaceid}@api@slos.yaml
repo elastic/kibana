@@ -65,12 +65,14 @@ get:
       example: 'slo.name:latency* and slo.tags : "prod"'
     - name: size
       in: query
-      type: number
+      schema:
+        type: integer
       example: 25
       description: Size provided for cursor based pagination
     - name: searchAfter
       in: query
-      type: string
+      schema:
+        type: string
     - name: page
       in: query
       description: The page to use for pagination, must be greater or equal than 1
