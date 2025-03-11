@@ -18,7 +18,7 @@ export function SpanMissingDestinationTooltip() {
         'xpack.apm.waterfallItem.euiToolTip.spanMissingDestinationDescription',
         {
           defaultMessage:
-            'This exit span is missing a destination which might prevent linking it to downstream transactions on features that depend on this information. i.e.: Service Map. Make sure the instrumentation of this exit span follows OTel Semantic Conventions',
+            'This exit span s missing the span.destination.service.resource field which might prevent linking it to downstream transactions on features that depend on this information. i.e.: Service Map. Make sure the instrumentation of this exit span follows OTel Semantic Conventions',
         }
       )}
     >
