@@ -28,7 +28,7 @@ export const gphSidebarHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
     },
   });
 
-export const gphSidebarPanel = ({ euiTheme }: UseEuiTheme) =>
+export const gphSidebarPanelStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
     maxHeight: `calc(${euiTheme.size.l} * 10)`,
     overflowY: 'hidden', // Invalid property hidden auto;

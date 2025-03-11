@@ -53,10 +53,12 @@ export const DrillDownIconLinks = ({
       alignItems="center"
       gutterSize="xs"
       responsive={false}
-      css={({ euiTheme }: UseEuiTheme) => css`
-        margin-top: 0.5 * ${euiTheme.size.xs};
-        margin-bottom: 0.5 * ${euiTheme.size.xs};
-      `}
+      css={({ euiTheme }: UseEuiTheme) =>
+        css({
+          marginTop: `calc(0.5 * ${euiTheme.size.xs})`,
+          marginBottom: `calc(0.5 * ${euiTheme.size.xs})`,
+        })
+      }
     >
       {drillDowns}
     </EuiFlexGroup>

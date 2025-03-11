@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
-import { gphSidebarHeaderStyles, gphSidebarPanel } from '../../styles';
+import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 
 interface MergeCandidatesProps {
   workspace: Workspace;
@@ -51,7 +51,7 @@ export const MergeCandidates = ({
   };
 
   return (
-    <div css={gphSidebarPanel}>
+    <div css={gphSidebarPanelStyles}>
       <div css={gphSidebarHeaderStyles}>
         <EuiIcon type="link" />{' '}
         {i18n.translate('xpack.graph.sidebar.linkSummaryTitle', {

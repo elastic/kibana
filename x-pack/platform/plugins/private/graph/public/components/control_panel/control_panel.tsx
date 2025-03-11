@@ -81,7 +81,7 @@ const ControlPanelComponent = ({
   };
 
   return (
-    <div id="sidebar" css={[useEuiShadow('m'), styles.gphSidebar]}>
+    <div id="sidebar" css={[css(useEuiShadow('m')), styles.gphSidebar]}>
       <ControlPanelToolBar
         workspace={workspace}
         liveResponseFields={liveResponseFields}
@@ -159,9 +159,10 @@ const styles = {
         color: euiThemeContext.euiTheme.colors.text,
       },
     }),
+
   gphSelectionList: ({ euiTheme }: UseEuiTheme) =>
     css({
-      height: `calc(${euiTheme.size.l}* 10)`,
+      height: `calc(${euiTheme.size.l} * 10)`,
       backgroundColor: euiTheme.colors.lightestShade,
       overflow: 'auto',
       marginBottom: 0,
