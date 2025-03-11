@@ -226,11 +226,14 @@ export function GraphVisualization({
                       y={ky}
                     >
                       <p
-                        className="gphNode__label gphNode__label--html"
+                        className="gphNode__label"
                         css={[
                           svgTextStyles,
-                          css({ textAlign: 'center', cursor: 'pointer' }),
-                          euiTextTruncate(),
+                          css`
+                            cursor: pointer;
+                            ${euiTextTruncate()};
+                            text-align: center;
+                          `,
                           noUserSelectStyles,
                         ]}
                       >
