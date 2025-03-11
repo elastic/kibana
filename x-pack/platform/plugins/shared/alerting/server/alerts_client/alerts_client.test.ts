@@ -7,14 +7,9 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import {
-  AlertsFilter,
-  DEFAULT_FLAPPING_SETTINGS,
-  MaintenanceWindowStatus,
-  RecoveredActionGroup,
-  RuleAlertData,
-} from '../types';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { AlertsFilter, RuleAlertData } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,
@@ -53,8 +48,9 @@ import {
 import * as LegacyAlertsClientModule from './legacy_alerts_client';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { Alert } from '../alert/alert';
-import { AlertsClient, AlertsClientParams } from './alerts_client';
-import {
+import type { AlertsClientParams } from './alerts_client';
+import { AlertsClient } from './alerts_client';
+import type {
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
   DetermineDelayedAlertsOpts,
@@ -76,10 +72,10 @@ import {
   mockAAD,
 } from './alerts_client_fixtures';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 
 const date = '2023-03-28T22:27:28.159Z';
@@ -471,7 +467,7 @@ describe('Alerts Client', () => {
         test('should split queries into chunks when there are greater than 10,000 alert UUIDs', async () => {
           mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
             active: range(15000).reduce((acc: Record<string, Alert<{}, {}>>, value: number) => {
-              const id: string = `${value}`;
+              const id = `${value}`;
               acc[id] = new Alert(id, {
                 state: { foo: true },
                 meta: {
