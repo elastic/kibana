@@ -320,7 +320,7 @@ export class KnowledgeBaseClient {
       return (response.hits.total as { value: number }).value > 0;
     }
 
-    const [productDocAvailable, elserModelStats, [internalHasDocs, connectorsHasDocs]] =
+    const [productDocAvailable, inferenceModelStats, [internalHasDocs, connectorsHasDocs]] =
       await Promise.all([
         this.dependencies.pluginsStart.productDocBase.management
           .getStatus()
@@ -352,10 +352,7 @@ export class KnowledgeBaseClient {
     return {
       enabled: true,
       has_any_docs: productDocAvailable || internalHasDocs || connectorsHasDocs,
-      internal: {
-        available: elserModelStats.ready,
-        model_status: elserModelStats,
-      },
+      internal: inferenceModelStats,
       product_documentation: {
         available: productDocAvailable,
       },
@@ -406,7 +403,7 @@ export class KnowledgeBaseClient {
         return response.hits.hits.map((result) => {
           const source = result._source!;
 
-          const document: Omit<DocSearchResult, 'highlights'> = {
+          const document: Omit<DocSearchResult, 'highlights'> & { score: number } = {
             content:
               typeof source.content_body === 'string'
                 ? source.content_body

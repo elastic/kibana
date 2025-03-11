@@ -103,7 +103,7 @@ ${
         Data that is compact enough automatically gets included in the response for the "${CONTEXT_FUNCTION_NAME}" function.`);
     }
 
-    if (knowledgeBaseStatus.internal?.available) {
+    if (knowledgeBaseStatus.enabled && knowledgeBaseStatus.internal.available) {
       if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
         instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
           Only use this function when the user asks to remember or store some information.
@@ -123,7 +123,7 @@ ${
     return instructions.map((instruction) => dedent(instruction));
   });
 
-  if (knowledgeBaseStatus.internal?.available) {
+  if (knowledgeBaseStatus.enabled && knowledgeBaseStatus.internal.available) {
     registerSummarizationFunction(registrationParameters);
   }
 

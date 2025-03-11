@@ -138,7 +138,7 @@ export function registerContextFunction({
           ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
         };
 
-        if (!knowledgeBaseStatus.has_any_docs) {
+        if (!knowledgeBaseStatus.enabled || !knowledgeBaseStatus.has_any_docs) {
           return {
             content,
             data: {

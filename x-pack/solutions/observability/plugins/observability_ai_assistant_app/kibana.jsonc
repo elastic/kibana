@@ -36,7 +36,8 @@
       "spaces",
       "slo",
       "searchConnectors",
-      "discover"
+      "discover",
+      "productDocBase"
     ],
     "optionalPlugins": [
       "cloud"

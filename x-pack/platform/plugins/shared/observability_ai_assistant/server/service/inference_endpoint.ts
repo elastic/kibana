@@ -94,20 +94,20 @@ export function isInferenceEndpointMissingOrUnavailable(error: Error) {
   );
 }
 
-interface ElserModelErrorStatus {
-  ready: false;
+export interface InferenceModelErrorStatus {
+  available: false;
   errorMessage: string;
 }
 
-interface ElserModelResolvedStatus {
-  ready: boolean;
+export interface InferenceModelResolvedStatus {
+  available: boolean;
   endpoint: InferenceInferenceEndpointInfo;
   allocation_count: number;
   deployment_state: MlDeploymentAssignmentState | undefined;
   allocation_state: MlDeploymentAllocationState | undefined;
 }
 
-export type ElserModelStatus = ElserModelErrorStatus | ElserModelResolvedStatus;
+export type InferenceModelStatus = InferenceModelErrorStatus | InferenceModelResolvedStatus;
 
 export async function getElserModelStatus({
   esClient,
@@ -115,7 +115,7 @@ export async function getElserModelStatus({
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-}): Promise<ElserModelErrorStatus | ElserModelResolvedStatus> {
+}): Promise<InferenceModelStatus> {
   let errorMessage = '';
   const endpoint = await getInferenceEndpoint({
     esClient,
@@ -127,7 +127,7 @@ export async function getElserModelStatus({
   });
 
   if (!endpoint) {
-    return { ready: false, errorMessage };
+    return { available: false, errorMessage };
   }
 
   const modelId = endpoint.service_settings?.model_id;
@@ -139,7 +139,7 @@ export async function getElserModelStatus({
     });
 
   if (!modelStats) {
-    return { ready: false, errorMessage };
+    return { available: false, errorMessage };
   }
 
   const elserModelStats = modelStats.trained_model_stats.find(
@@ -149,12 +149,12 @@ export async function getElserModelStatus({
   const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
   const allocationCount =
     elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
-  const ready =
+  const available =
     deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
 
   return {
     endpoint,
-    ready,
+    available,
     allocation_count: allocationCount,
     deployment_state: deploymentState,
     allocation_state: allocationState,

@@ -89,7 +89,7 @@ function registerKbSemanticTextMigrationTask({
                 return;
               }
 
-              await reIndexKnowledgeBaseAndPopulateSemanticTextField({ esClient, logger, config });
+              await reIndexKnowledgeBaseAndPopulateSemanticTextField({ esClient, logger });
             },
           };
         },
@@ -127,17 +127,15 @@ export async function scheduleKbSemanticTextMigrationTask({
 export async function reIndexKnowledgeBaseAndPopulateSemanticTextField({
   esClient,
   logger,
-  config,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  config: ObservabilityAIAssistantConfig;
 }) {
   logger.debug('Starting migration...');
 
   try {
     await reIndexKnowledgeBase({ logger, esClient });
-    await populateSemanticTextFieldRecursively({ esClient, logger, config });
+    await populateSemanticTextFieldRecursively({ esClient, logger });
   } catch (e) {
     logger.error(`Migration failed: ${e.message}`);
   }
@@ -148,11 +146,9 @@ export async function reIndexKnowledgeBaseAndPopulateSemanticTextField({
 async function populateSemanticTextFieldRecursively({
   esClient,
   logger,
-  config,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  config: ObservabilityAIAssistantConfig;
 }) {
   logger.debug('Populating semantic_text field for entries without it');
 
@@ -181,7 +177,7 @@ async function populateSemanticTextFieldRecursively({
 
   logger.debug(`Found ${response.hits.hits.length} entries to migrate`);
 
-  await waitForModel({ esClient, logger, config });
+  await waitForModel({ esClient, logger });
 
   // Limit the number of concurrent requests to avoid overloading the cluster
   const limiter = pLimit(10);
@@ -206,22 +202,20 @@ async function populateSemanticTextFieldRecursively({
   await Promise.all(promises);
 
   logger.debug(`Populated ${promises.length} entries`);
-  await populateSemanticTextFieldRecursively({ esClient, logger, config });
+  await populateSemanticTextFieldRecursively({ esClient, logger });
 }
 
 async function waitForModel({
   esClient,
   logger,
-  config,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  config: ObservabilityAIAssistantConfig;
 }) {
   return pRetry(
     async () => {
-      const { ready } = await getElserModelStatus({ esClient, logger, config });
-      if (!ready) {
+      const { available } = await getElserModelStatus({ esClient, logger });
+      if (!available) {
         logger.debug('Elser model is not yet ready. Retrying...');
         throw new Error('Elser model is not yet ready');
       }

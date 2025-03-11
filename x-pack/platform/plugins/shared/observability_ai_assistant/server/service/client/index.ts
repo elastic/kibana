@@ -710,7 +710,6 @@ export class ObservabilityAIAssistantClient {
     return reIndexKnowledgeBaseAndPopulateSemanticTextField({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
-      config: this.dependencies.config,
     });
   };
 

@@ -21,7 +21,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -223,17 +222,7 @@ export function KnowledgeBaseTab() {
     setQuery(e?.currentTarget.value || '');
   };
 
-  if (knowledgeBase.status.loading) {
-    return (
-      <EuiFlexGroup alignItems="center" direction="column">
-        <EuiFlexItem grow>
-          <EuiLoadingSpinner size="xl" data-test-subj="knowledgeBaseTabLoader" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  return knowledgeBase.status.value?.internal?.available ? (
+  return knowledgeBase.status.value?.ready ? (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>

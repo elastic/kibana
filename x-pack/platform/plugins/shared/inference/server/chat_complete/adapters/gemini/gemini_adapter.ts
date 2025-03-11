@@ -122,17 +122,13 @@ function toolsToGemini(tools: ToolOptions['tools']): Gemini.Tool[] {
 }
 
 function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.FunctionDeclarationSchema {
-  const convertSchemaType = ({
-    def,
-  }: {
-    def: ToolSchemaType;
-  }): Gemini.FunctionDeclarationSchemaProperty => {
+  const convertSchemaType = ({ def }: { def: ToolSchemaType }): Gemini.Schema => {
     switch (def.type) {
       case 'array':
         return {
           type: Gemini.SchemaType.ARRAY,
           description: def.description,
-          items: convertSchemaType({ def: def.items }) as Gemini.FunctionDeclarationSchema,
+          items: convertSchemaType({ def: def.items }),
         };
       case 'object':
         return {
@@ -140,33 +136,37 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           description: def.description,
           required: def.required as string[],
           properties: def.properties
-            ? Object.entries(def.properties).reduce<
-                Record<string, Gemini.FunctionDeclarationSchema>
-              >((properties, [key, prop]) => {
-                properties[key] = convertSchemaType({
-                  def: prop,
-                }) as Gemini.FunctionDeclarationSchema;
-                return properties;
-              }, {})
-            : undefined,
+            ? Object.entries(def.properties).reduce<Record<string, Gemini.Schema>>(
+                (properties, [key, prop]) => {
+                  properties[key] = convertSchemaType({
+                    def: prop,
+                  });
+                  return properties;
+                },
+                {}
+              )
+            : {},
         };
       case 'string':
         return {
           type: Gemini.SchemaType.STRING,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
-        };
+          ...(def.enum || def.const
+            ? {
+                enum: def.enum || def.const,
+                format: 'enum',
+              }
+            : {}),
+        } as Gemini.StringSchema | Gemini.EnumStringSchema;
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
       case 'number':
         return {
           type: Gemini.SchemaType.NUMBER,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
     }
   };
@@ -174,12 +174,13 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
   return {
     type: Gemini.SchemaType.OBJECT,
     required: schema.required as string[],
-    properties: Object.entries(schema.properties ?? {}).reduce<
-      Record<string, Gemini.FunctionDeclarationSchemaProperty>
-    >((properties, [key, def]) => {
-      properties[key] = convertSchemaType({ def });
-      return properties;
-    }, {}),
+    properties: Object.entries(schema.properties ?? {}).reduce<Record<string, Gemini.Schema>>(
+      (properties, [key, def]) => {
+        properties[key] = convertSchemaType({ def });
+        return properties;
+      },
+      {}
+    ),
   };
 }
 

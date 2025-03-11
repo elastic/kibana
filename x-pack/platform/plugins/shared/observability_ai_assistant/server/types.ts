@@ -24,7 +24,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import {
+import type {
   ProductDocBaseSetupContract,
   ProductDocBaseStartContract,
 } from '@kbn/product-doc-base-plugin/server';

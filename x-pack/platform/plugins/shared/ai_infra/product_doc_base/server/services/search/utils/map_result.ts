@@ -12,7 +12,6 @@ import type { DocSearchResult } from '../types';
 export const mapResult = (docHit: SearchHit<ProductDocumentationAttributes>): DocSearchResult => {
   const content = docHit._source!.content_body;
   return {
-    score: docHit._score!,
     title: docHit._source!.content_title,
     content: typeof content === 'string' ? content : content.text,
     url: docHit._source!.url,

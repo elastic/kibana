@@ -37,8 +37,8 @@ export async function getKnowledgeBaseEntries({
 }): Promise<ScoredKnowledgeBaseEntry[]> {
   const response = await rcaContext.observabilityAIAssistantClient.recall({
     queries: [
-      ...Object.values(entity).map((value) => ({ text: value, boost: 3 })),
-      { text: context },
+      ...Object.values(entity).map((value) => ({ semantic: { query: value, boost: 3 } })),
+      { semantic: { query: context } },
     ],
     limit: {
       tokenCount: Number.MAX_VALUE,

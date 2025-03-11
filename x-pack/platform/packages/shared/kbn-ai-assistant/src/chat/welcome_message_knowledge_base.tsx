@@ -72,7 +72,11 @@ export function WelcomeMessageKnowledgeBase({
       </>
     );
     // not installing and install error or the endpoint doesn't exist or model not ready
-  } else if (knowledgeBase.installError || !knowledgeBase.status.value?.internal?.available) {
+  } else if (
+    knowledgeBase.installError ||
+    knowledgeBase.status.value?.errorMessage ||
+    !knowledgeBase.status.value?.ready
+  ) {
     return (
       <>
         <EuiText color="subdued" size="s">
@@ -105,8 +109,7 @@ export function WelcomeMessageKnowledgeBase({
             // only show the "inspect issues" button if there is an install error
             // or the model is not ready but endpoint exists
             (knowledgeBase.installError ||
-              (!knowledgeBase.status.value?.internal?.available &&
-                knowledgeBase.status.value?.endpoint)) && (
+              (!knowledgeBase.status.value?.ready && knowledgeBase.status.value?.endpoint)) && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={

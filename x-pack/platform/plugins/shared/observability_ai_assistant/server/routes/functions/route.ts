@@ -10,10 +10,13 @@ import * as t from 'io-ts';
 import { v4 } from 'uuid';
 import { FunctionDefinition } from '../../../common/functions/types';
 import { KnowledgeBaseEntryRole } from '../../../common/types';
-import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { assistantScopeType } from '../runtime_types';
+import {
+  KnowledgeBaseHit,
+  KnowledgeBaseQueryContainer,
+} from '../../service/knowledge_base_service/types';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/functions',
@@ -81,23 +84,18 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
   params: t.type({
-    body: t.intersection([
-      t.type({
-        queries: t.array(
-          t.intersection([
-            t.type({
-              text: t.string,
-            }),
-            t.partial({
-              boost: t.number,
-            }),
-          ])
-        ),
-      }),
-      t.partial({
-        categories: t.array(t.string),
-      }),
-    ]),
+    body: t.type({
+      queries: t.array(
+        t.intersection([
+          t.type({
+            text: t.string,
+          }),
+          t.partial({
+            boost: t.number,
+          }),
+        ])
+      ),
+    }),
   }),
   security: {
     authz: {
@@ -107,19 +105,34 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   handler: async (
     resources
   ): Promise<{
-    entries: RecalledEntry[];
+    entries: KnowledgeBaseHit[];
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     const {
-      body: { queries, categories },
+      body: { queries },
     } = resources.params;
 
     if (!client) {
       throw notImplemented();
     }
 
-    const entries = await client.recall({ queries, categories });
+    const entries = await client.recall({
+      queries: queries.flatMap((query): KnowledgeBaseQueryContainer[] => [
+        {
+          keyword: {
+            value: [query.text],
+            boost: query.boost,
+          },
+        },
+        {
+          semantic: {
+            query: query.text,
+            boost: query.boost,
+          },
+        },
+      ]),
+    });
     return { entries };
   },
 });

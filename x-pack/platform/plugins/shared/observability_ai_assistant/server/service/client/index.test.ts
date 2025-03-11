@@ -31,6 +31,7 @@ import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
 import type { ObservabilityAIAssistantConfig } from '../../config';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 
 interface ChunkDelta {
   content?: string | undefined;
@@ -115,6 +116,8 @@ describe('Observability AI Assistant client', () => {
     fieldCaps: jest.fn(),
   } as any;
 
+  const asSecondaryAuthUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {} as any;
+
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
     recall: jest.fn(),
     getUserInstructions: jest.fn(),
@@ -131,6 +134,10 @@ describe('Observability AI Assistant client', () => {
     validate: jest.fn(),
     getInstructions: jest.fn(),
     getAdhocInstructions: jest.fn(),
+  } as any;
+
+  const productDocBaseMock: DeeplyMockedKeys<ProductDocBaseStartContract> = {
+    getIndexPattern: () => '.kibana_product_doc',
   } as any;
 
   let llmSimulator: LlmSimulator;
@@ -187,6 +194,7 @@ describe('Observability AI Assistant client', () => {
       esClient: {
         asInternalUser: internalUserEsClientMock,
         asCurrentUser: currentUserEsClientMock,
+        asSecondaryAuthUser: asSecondaryAuthUserEsClientMock,
       },
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
@@ -196,6 +204,7 @@ describe('Observability AI Assistant client', () => {
         name: 'johndoe',
       },
       scopes: ['all'],
+      productDocBase: productDocBaseMock,
     });
   }
 

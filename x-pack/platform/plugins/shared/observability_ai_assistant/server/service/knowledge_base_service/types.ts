@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ConnectorConnectorStatus } from '@elastic/elasticsearch/lib/api/types';
-import { ElserModelStatus } from '../inference_endpoint';
+import { InferenceModelResolvedStatus, InferenceModelStatus } from '../inference_endpoint';
 
 export interface KnowledgeBaseConnector {
   description: string;
@@ -61,17 +61,34 @@ export interface GetConnectorsResponse {
   indexPattern: string[];
 }
 
-export interface KnowledgeBaseStatus {
-  enabled: boolean;
-  product_documentation?: {
-    available: boolean;
-  };
-  internal?: {
-    available: boolean;
-    model_status: ElserModelStatus;
-  };
-  has_any_docs?: boolean;
+interface KnowledgeBaseStatusDisabled {
+  enabled: false;
 }
+
+interface InternalKnowledgeBaseStatusAvailable {
+  available: true;
+  model: InferenceModelResolvedStatus;
+}
+
+interface InternalKnowledgeBasseStatusUnavailable {
+  available: boolean;
+  model?: InferenceModelStatus;
+}
+
+export type InternalKnowledgeBaseStatus =
+  | InternalKnowledgeBaseStatusAvailable
+  | InternalKnowledgeBasseStatusUnavailable;
+
+interface KnowledgeBaseStatusEnabled {
+  enabled: true;
+  product_documentation: {
+    available: boolean;
+  };
+  internal: InferenceModelStatus;
+  has_any_docs: boolean;
+}
+
+export type KnowledgeBaseStatus = KnowledgeBaseStatusDisabled | KnowledgeBaseStatusEnabled;
 
 export interface KnowledgeBaseKeywordQueryContainer {
   keyword: {
