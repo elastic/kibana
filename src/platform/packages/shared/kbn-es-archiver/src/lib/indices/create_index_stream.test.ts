@@ -141,16 +141,12 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       sinon.assert.calledWith(client.indices.create as sinon.SinonSpy, {
         index: 'index',
-        body: {
-          settings: undefined,
-          mappings: undefined,
-        },
+        settings: undefined,
+        mappings: undefined,
       });
 
       sinon.assert.calledWith(client.indices.updateAliases as sinon.SinonSpy, {
-        body: {
-          actions: [{ add: { alias: 'foo', index: 'index' } }],
-        },
+        actions: [{ add: { alias: 'foo', index: 'index' } }],
       });
     });
 
@@ -343,9 +339,10 @@ describe('esArchiver: createCreateIndexStream()', () => {
 
       // only update aliases for the 'new-index'
       sinon.assert.callCount(client.indices.updateAliases as sinon.SinonSpy, 1);
-      expect((client.indices.updateAliases as sinon.SinonSpy).args[0][0]).toHaveProperty('body', {
-        actions: [{ add: { alias: 'new-index-alias', index: 'new-index' } }],
-      });
+      expect((client.indices.updateAliases as sinon.SinonSpy).args[0][0]).toHaveProperty(
+        'actions',
+        [{ add: { alias: 'new-index-alias', index: 'new-index' } }]
+      );
     });
 
     it('filters documents for skipped indices', async () => {

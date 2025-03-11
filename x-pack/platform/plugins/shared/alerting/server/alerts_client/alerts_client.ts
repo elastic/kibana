@@ -15,7 +15,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
@@ -37,7 +37,7 @@ import {
   IIndexPatternString,
 } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
+import type { AlertRule, LogAlertsOpts, SearchResult, DetermineDelayedAlertsOpts } from './types';
 import {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -231,7 +231,7 @@ export class AlertsClient<
   }
 
   public async search<Aggregation = unknown>(
-    queryBody: SearchRequest['body']
+    queryBody: SearchRequest
   ): Promise<SearchResult<AlertData, Aggregation>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
@@ -242,7 +242,7 @@ export class AlertsClient<
       aggregations,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
-      body: queryBody,
+      ...queryBody,
       ignore_unavailable: true,
     });
 
@@ -318,8 +318,16 @@ export class AlertsClient<
     return this.legacyAlertsClient.checkLimitUsage();
   }
 
-  public async processAlerts(opts: ProcessAlertsOpts) {
-    await this.legacyAlertsClient.processAlerts(opts);
+  public async processAlerts() {
+    await this.legacyAlertsClient.processAlerts();
+  }
+
+  public determineFlappingAlerts() {
+    this.legacyAlertsClient.determineFlappingAlerts();
+  }
+
+  public determineDelayedAlerts(opts: DetermineDelayedAlertsOpts) {
+    this.legacyAlertsClient.determineDelayedAlerts(opts);
   }
 
   public logAlerts(opts: LogAlertsOpts) {
@@ -327,7 +335,7 @@ export class AlertsClient<
   }
 
   public getProcessedAlerts(
-    type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
+    type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
   ) {
     return this.legacyAlertsClient.getProcessedAlerts(type);
   }
@@ -339,15 +347,8 @@ export class AlertsClient<
     return await this.updatePersistedAlertsWithMaintenanceWindowIds();
   }
 
-  public getAlertsToSerialize() {
-    // The flapping value that is persisted inside the task manager state (and used in the next execution)
-    // is different than the value that should be written to the alert document. For this reason, we call
-    // getAlertsToSerialize() twice, once before building and bulk indexing alert docs and once after to return
-    // the value for task state serialization
-
-    // This will be a blocker if ever we want to stop serializing alert data inside the task state and just use
-    // the fetched alert document.
-    return this.legacyAlertsClient.getAlertsToSerialize();
+  public getRawAlertInstancesForState() {
+    return this.legacyAlertsClient.getRawAlertInstancesForState();
   }
 
   public factory() {
@@ -423,18 +424,17 @@ export class AlertsClient<
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const { alertsToReturn, recoveredAlertsToReturn } =
-      this.legacyAlertsClient.getAlertsToSerialize(false);
+    const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
-    const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
+    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(alertsToReturn)) {
+    for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
       if (!!activeAlerts[id]) {
         if (
@@ -498,12 +498,12 @@ export class AlertsClient<
     }
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(recoveredAlertsToReturn)) {
+    for (const id of keys(rawRecoveredAlerts)) {
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         recoveredAlertsToIndex.push(
-          currentRecoveredAlerts[id]
+          recoveredAlerts[id]
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -512,7 +512,7 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: this.fetchedAlerts.data[id],
-                legacyAlert: currentRecoveredAlerts[id],
+                legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
@@ -522,7 +522,7 @@ export class AlertsClient<
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
-                legacyRawAlert: recoveredAlertsToReturn[id],
+                legacyRawAlert: rawRecoveredAlerts[id],
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 rule: this.rule,

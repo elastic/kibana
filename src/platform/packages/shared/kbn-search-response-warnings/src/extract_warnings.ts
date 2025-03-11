@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { SearchResponseWarning } from './types';

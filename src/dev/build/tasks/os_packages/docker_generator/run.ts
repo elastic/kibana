@@ -30,7 +30,7 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'wolfi' | 'ubi' | 'ubuntu';
+    baseImage: 'none' | 'wolfi' | 'ubi';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
@@ -41,7 +41,6 @@ export async function runDockerGenerator(
   }
 ) {
   let baseImageName = '';
-  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
   /**
    * Renovate config contains a regex manager to automatically updates this Chainguard reference
@@ -51,10 +50,9 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:0801a437e721bebdd2d5be62e3f63f60fc9d1d82efacabe4c5b8792d74ae7006';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:a37e513992a1ef58f04794bfe7ae514e3a77b2224f7e248cf3fc7e8d0f8a49e1';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
