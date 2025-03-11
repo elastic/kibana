@@ -44,3 +44,5 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
     await use(extendedPageObjects);
   },
 });
+
+export * as testData from './constants';

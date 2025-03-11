@@ -6,19 +6,22 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
-
-const start = '2021-10-10T00:00:00.000Z';
-const end = '2021-10-10T00:15:00.000Z';
+import { test, testData } from '../../fixtures';
 
 test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
     await browserAuth.loginAsViewer();
-    await serviceMapPage.gotoWithDateSelected(start, end);
+    await serviceMapPage.gotoWithDateSelected(
+      testData.OPBEANS_START_DATE,
+      testData.OPBEANS_END_DATE
+    );
   });
 
   test('shows the service map', async ({ page, pageObjects: { serviceMapPage } }) => {
-    await serviceMapPage.gotoWithDateSelected(start, end);
+    await serviceMapPage.gotoWithDateSelected(
+      testData.OPBEANS_START_DATE,
+      testData.OPBEANS_END_DATE
+    );
     expect(page.url()).toContain('/app/apm/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
     await serviceMapPage.zoomInBtn.click();
@@ -27,7 +30,10 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('shows a detailed service map', async ({ page, pageObjects: { serviceMapPage } }) => {
-    await serviceMapPage.gotoDetailedServiceMapWithDateSelected(start, end);
+    await serviceMapPage.gotoDetailedServiceMapWithDateSelected(
+      testData.OPBEANS_START_DATE,
+      testData.OPBEANS_END_DATE
+    );
     expect(page.url()).toContain('/services/opbeans-java/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
     await serviceMapPage.zoomInBtn.click();
