@@ -23,6 +23,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/src/core/packages/saved-objects/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/private/upgrade_assistant/docs/openapi/upgrade_apis.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/security/docs/openapi/user_session_apis.yaml`,
+      `${REPO_ROOT}/src/platform/plugins/shared/share/docs/openapi/short_url_apis.yaml`,
 
       // Observability Solution
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/apm/docs/openapi/apm/bundled.yaml`,
