@@ -11,6 +11,15 @@ import { MultiFieldKey, RangeKey, SerializedRangeKey } from './search';
 import { SerializedMultiFieldKey } from './search/aggs/buckets/multi_field_key';
 import { RawValue, SerializableField } from './serializable_field';
 
+/**
+ * All available serialized forms of complex/instance fields. Excludes non-complex/primitive fields.
+ *
+ * Use `SerializedValue` for all generalize serial values which includes non-complex/primitive fields.
+ *
+ * Currently includes:
+ * - `RangeKey`
+ * - `MultiFieldKey`
+ */
 export type SerializedField = SerializedMultiFieldKey | SerializedRangeKey;
 
 /**
