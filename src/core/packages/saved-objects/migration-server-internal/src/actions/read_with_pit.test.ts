@@ -91,7 +91,7 @@ describe('readWithPit', () => {
     );
 
     const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseException = jest.spyOn(
+    const catchSearchPhaseExceptionSpy = jest.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -105,7 +105,7 @@ describe('readWithPit', () => {
 
     // Shouldn't throw because the second handler can retry 503 responses
     await expect(task()).resolves.not.toThrow();
-    expect(catchSearchPhaseException).toHaveBeenCalledWith(retryableError);
+    expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
   });
 
@@ -122,7 +122,7 @@ describe('readWithPit', () => {
     );
 
     const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseException = jest.spyOn(
+    const catchSearchPhaseExceptionSpy = jest.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -136,7 +136,7 @@ describe('readWithPit', () => {
 
     // Shouldn't throw because the first handler can retry search_phase_execution_exception responses
     await expect(task()).resolves.not.toThrow();
-    expect(catchSearchPhaseException).toHaveBeenCalledWith(retryableError);
+    expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).not.toHaveBeenCalled();
   });
 
@@ -154,7 +154,7 @@ describe('readWithPit', () => {
     );
 
     const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
-    const catchSearchPhaseException = jest.spyOn(
+    const catchSearchPhaseExceptionSpy = jest.spyOn(
       errorHandlers,
       'catchRetryableSearchPhaseExecutionException'
     );
@@ -168,7 +168,7 @@ describe('readWithPit', () => {
 
     // Should throw because both handlers can't retry 502 responses
     await expect(task()).rejects.toThrow();
-    expect(catchSearchPhaseException).toHaveBeenCalledWith(retryableError);
+    expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
   });
 });
