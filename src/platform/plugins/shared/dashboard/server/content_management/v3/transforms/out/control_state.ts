@@ -10,7 +10,6 @@
 import { defaults, flow } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
-import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 import { ControlGroupAttributes } from '../../types';
 
 /**
@@ -26,7 +25,7 @@ export const transformControlsState: (
   transformControlsSetDefaults
 );
 
-export function transformControlObjectToArray(controls: ControlGroupSerializedState['controls']) {
+export function transformControlObjectToArray(controls: Record<string, SerializableRecord>) {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
