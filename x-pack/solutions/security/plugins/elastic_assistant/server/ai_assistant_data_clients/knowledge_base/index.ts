@@ -178,11 +178,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (elasticsearchInference) {
         return ASSISTANT_ELSER_INFERENCE_ID;
       }
-    } catch (error) {
+    } catch (_) {
       /* empty */
     }
 
-    // Fallback to the dedicated inference endpoint
+    // Fallback to the default inference endpoint
     return ELASTICSEARCH_ELSER_INFERENCE_ID;
   };
 
@@ -409,7 +409,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             (await this.isModelInstalled())
               ? Promise.resolve()
               : Promise.reject(new Error('Model not installed')),
-          { minTimeout: 30000, maxTimeout: 30000, retries: 10 }
+          { minTimeout: 30000, maxTimeout: 30000, retries: 20 }
         );
         this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
       } else {
@@ -453,7 +453,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           }
 
           this.options.logger.debug(`Loading Security Labs KB docs...`);
-          void loadSecurityLabs(this, this.options.logger);
+
+          void loadSecurityLabs(this, this.options.logger)?.then(() => {
+            this.options.setIsKBSetupInProgress(this.spaceId, false);
+          });
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
