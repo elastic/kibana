@@ -3848,10 +3848,12 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@kayahr/text-encoding@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@kayahr/text-encoding/-/text-encoding-2.0.0.tgz#637361c318048c4e7419364990d59b155eaa98bc"
-  integrity sha512-BCKXxcPHXJhgisp+SohA3MvoOQ/Kec1QEjo3LVH0lh4eFPEF9kGsGsn3GYaTdgFBRc2YkgDhND/39t+3oqU7Yw==
+"@kayahr/text-encoding@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@kayahr/text-encoding/-/text-encoding-1.3.0.tgz#90ae1007dc86d35a977cd709dfa9fe21cc2bc8c6"
+  integrity sha512-JjQVFXnN/ynXN+GDgpwNM+PJ4NwDFZwRolgSu4bYG1JKuRreVFY5uss5K/lsH6qY38+WgU7M40M2SHoiWQHKgQ==
+  dependencies:
+    tslib "^2.6.2"
 
 "@kbn/aad-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/aad":
   version "0.0.0"
