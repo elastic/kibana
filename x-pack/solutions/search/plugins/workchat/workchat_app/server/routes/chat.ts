@@ -49,11 +49,10 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
         });
 
         return res.ok({
-          // TODO uncomment when https://github.com/elastic/kibana/pull/213151 is merged
           headers: {
-            // 'Content-Type': 'text/event-stream',
-            // 'Cache-Control': 'no-cache',
-            // Connection: 'keep-alive',
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
           },
           body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
             signal: abortController.signal,
