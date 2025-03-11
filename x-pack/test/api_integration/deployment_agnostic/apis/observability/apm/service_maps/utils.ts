@@ -25,7 +25,7 @@ export function getSpans({ body }: { body: APIReturnType<'GET /internal/apm/serv
   return [];
 }
 
-type ConnectionElements = GroupResourceNodesResponse['elements'];
+export type ConnectionElements = GroupResourceNodesResponse['elements'];
 
 export function partitionElements(elements: ConnectionElements) {
   const edges = elements.filter(({ data }) => 'source' in data && 'target' in data);

@@ -9,10 +9,15 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from 'expect';
 import { serviceMap, timerange } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'node:stream';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { SupertestReturnType } from '../../../../../../apm_api_integration/common/apm_api_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { extractExitSpansConnections, getElements, getSpans } from './utils';
+import {
+  extractExitSpansConnections,
+  getElements,
+  getIds,
+  getSpans,
+  partitionElements,
+} from './utils';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =
@@ -262,7 +267,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(status).toBe(200);
 
-        const { nodes, edges } = partitionElements(body.elements);
+        const { nodes, edges } = partitionElements(getElements({ body }));
 
         expect(getIds(nodes)).toEqual([
           '>elasticsearch',
@@ -278,16 +283,4 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
   });
-}
-
-type ConnectionElements = APIReturnType<'GET /internal/apm/service-map'>['elements'];
-
-function partitionElements(elements: ConnectionElements) {
-  const edges = elements.filter(({ data }) => 'source' in data && 'target' in data);
-  const nodes = elements.filter((element) => !edges.includes(element));
-  return { edges, nodes };
-}
-
-function getIds(elements: ConnectionElements) {
-  return elements.map(({ data }) => data.id).sort();
 }
