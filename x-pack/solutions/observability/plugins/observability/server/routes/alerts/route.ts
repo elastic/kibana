@@ -6,8 +6,8 @@
  */
 
 import {
-  getRecommendedDashboardsParamsSchema,
-  GetRecommendedDashboardsResponse,
+  getRelatedDashboardsParamsSchema,
+  GetRelatedDashboardsResponse,
 } from '@kbn/observability-schema';
 import { IKibanaResponse } from '@kbn/core-http-server';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
@@ -27,8 +27,8 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     },
   },
   options: { access: 'internal' },
-  params: getRecommendedDashboardsParamsSchema,
-  handler: async (services): Promise<GetRecommendedDashboardsResponse | IKibanaResponse> => {
+  params: getRelatedDashboardsParamsSchema,
+  handler: async (services): Promise<GetRelatedDashboardsResponse | IKibanaResponse> => {
     const { dependencies, params, request, response, context, logger } = services;
     const { alertId } = params.query;
     const { ruleRegistry, dashboard } = dependencies;

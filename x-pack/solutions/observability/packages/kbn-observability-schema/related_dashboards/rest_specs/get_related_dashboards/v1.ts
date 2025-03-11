@@ -8,17 +8,15 @@
 import { z } from '@kbn/zod';
 import { relatedDashboardSchema } from '../../schema/recommended_dashboard/v1';
 
-export const getRecommendedDashboardsParamsSchema = z.object({
+export const getRelatedDashboardsParamsSchema = z.object({
   query: z.object({
     alertId: z.string(),
   }),
 });
 
-export const getRecommendedDashboardsResponseSchema = z.object({
+export const getRelatedDashboardsResponseSchema = z.object({
   suggestedDashboards: z.array(relatedDashboardSchema),
   linkedDashboards: z.array(relatedDashboardSchema),
 });
 
-export type GetRecommendedDashboardsResponse = z.output<
-  typeof getRecommendedDashboardsResponseSchema
->;
+export type GetRelatedDashboardsResponse = z.output<typeof getRelatedDashboardsResponseSchema>;
