@@ -186,5 +186,9 @@ async function waitForAlertsForRule({
   // );
 
   // Run the 'main' program, and unwrap the value out of effect
+  // Can't fail to mention this also is handling the error management
+  // to the perimeter of the main routine; in this case we are using
+  // retrying, but we could have more in depth error handling were it
+  // warranted.
   return await Effect.runPromise(Effect.retry(main, { times: 50 }));
 }
