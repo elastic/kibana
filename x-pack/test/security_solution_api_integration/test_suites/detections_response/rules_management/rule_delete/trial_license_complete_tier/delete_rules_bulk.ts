@@ -147,9 +147,9 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.success).to.be(true);
         expect(body.rules_count).to.be(2);
 
-        const investigationFields = body.attributes.results.deleted.map(
-          (rule: RuleResponse) => rule.investigation_fields
-        );
+        const investigationFields = body.attributes.results.deleted
+          .map((rule: RuleResponse) => rule.investigation_fields)
+          .sort();
 
         expect(investigationFields).to.eql([
           { field_names: ['client.address', 'agent.name'] },
