@@ -42,6 +42,7 @@ export const useTabGlueStyles = ({ isSelected }: UseTabGlueStylesProps): UseTabG
               position: absolute;
               top: -${euiTheme.size.s};
               left: 0;
+              z-index: ${Number(euiTheme.levels.header) + 1};
             `}
           />
         ) : undefined,
