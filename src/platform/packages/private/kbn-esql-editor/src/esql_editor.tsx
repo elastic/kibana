@@ -519,7 +519,15 @@ export const ESQLEditor = memo(function ESQLEditor({
     variablesService?.areSuggestionsEnabled,
   ]);
 
-  useCreateLookupIndexCommand(esqlCallbacks);
+  const onIndexCreated = useCallback(
+    (resultQueryString: string) => {
+      onQueryUpdate(resultQueryString);
+      esqlCallbacks.getJoinIndices?.();
+    },
+    [esqlCallbacks, onQueryUpdate]
+  );
+
+  useCreateLookupIndexCommand(editor1.current!, query, onIndexCreated);
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {

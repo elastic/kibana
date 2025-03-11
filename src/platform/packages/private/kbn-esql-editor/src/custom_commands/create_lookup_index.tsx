@@ -8,21 +8,82 @@
  */
 
 import React, { useCallback } from 'react';
-import { monaco, type ESQLCallbacks } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
+import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
+import type { AggregateQuery } from '@kbn/es-query';
+import { parse, mutate, BasicPrettyPrinter, ESQLSource } from '@kbn/esql-ast';
 import type { ESQLEditorDeps } from '../types';
 
-export const useCreateLookupIndexCommand = (esqlCallbacks: ESQLCallbacks) => {
+/**
+ * Returns a query with appended index name to the join command.
+ *
+ * @param query Input query
+ * @param cursorPosition
+ * @param indexName
+ *
+ * @returns {string} Query with appended index name to the join command
+ */
+export function appendIndexToJoinCommand(
+  query: string,
+  cursorPosition: monaco.Position,
+  indexName: string
+): string {
+  const { root } = parse(query);
+
+  // it could be several join command in the query, hence we need
+  // to find the correct one to append the index name
+
+  const cursorColumn = cursorPosition?.column ?? 0;
+  const cursorLine = cursorPosition?.lineNumber ?? 0;
+
+  const joinCommand = mutate.commands.join.byIndex(root, 0);
+
+  if (!joinCommand) {
+    throw new Error('Could not find join command in the query');
+  }
+
+  mutate.generic.commands.args.append(joinCommand, {
+    type: 'source',
+    sourceType: 'index',
+    incomplete: false,
+    location: {
+      min: cursorColumn,
+      max: cursorColumn + indexName.length,
+    },
+    text: indexName,
+    name: indexName,
+  } as ESQLSource);
+
+  const resultQuery = BasicPrettyPrinter.print(root);
+
+  return resultQuery;
+}
+
+export const useCreateLookupIndexCommand = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  query: AggregateQuery,
+  onIndexCreated: (resultQuery: string) => void
+) => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { uiActions, docLinks } = kibana.services;
 
-  const onUploadComplete = useCallback(() => {
-    esqlCallbacks.getJoinIndices?.();
-  }, [esqlCallbacks]);
+  const onUploadComplete = useCallback(
+    (results: FileUploadResults) => {
+      const cursorPosition = editor.getPosition();
+
+      if (!cursorPosition) {
+        throw new Error('Could not find cursor position in the editor');
+      }
+
+      const resultQuery = appendIndexToJoinCommand(query.esql, cursorPosition, results.index);
+      onIndexCreated(resultQuery);
+    },
+    [onIndexCreated, query.esql, editor]
+  );
 
   monaco.editor.registerCommand('esql.control.lookup_index.create', async (_, initialIndexName) => {
     await uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
