@@ -140,12 +140,6 @@ export interface UsageStats {
   'banners:placement': string;
   'banners:textColor': string;
   'banners:backgroundColor': string;
-  'labs:canvas:enable_ui': boolean;
-  'labs:canvas:byValueEmbeddable': boolean;
-  'labs:canvas:useDataService': boolean;
-  'labs:presentation:timeToPresent': boolean;
-  'labs:dashboard:enable_ui': boolean;
-  'labs:dashboard:deferBelowFold': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
