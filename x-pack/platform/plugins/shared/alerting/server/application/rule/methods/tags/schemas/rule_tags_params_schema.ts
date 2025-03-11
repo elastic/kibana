@@ -12,4 +12,5 @@ export const ruleTagsParamsSchema = schema.object({
   page: schema.number({ defaultValue: 1, min: 1 }),
   perPage: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
   search: schema.maybe(schema.string()),
+  ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
 });
