@@ -1733,7 +1733,7 @@ describe('validation logic', () => {
         getColumnsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
         getPreferences: /Unknown/,
         getFieldsMetadata: /Unknown/,
-        getVariablesByType: /Unknown/,
+        getVariables: /Unknown/,
         canSuggestVariables: /Unknown/,
       };
       return excludedCallback.map((callback) => (contentByCallback as any)[callback]) || [];

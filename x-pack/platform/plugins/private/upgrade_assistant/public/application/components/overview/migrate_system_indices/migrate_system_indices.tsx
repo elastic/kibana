@@ -271,7 +271,7 @@ export const getMigrateSystemIndicesStep = ({
     'data-test-subj': `migrateSystemIndicesStep-${status}`,
     children: (
       <>
-        <EuiText>
+        <EuiText data-test-subj="migrateSystemIndicesText">
           <p>{i18nTexts.bodyDescription(docLinks.links.elasticsearch.hiddenIndices)}</p>
         </EuiText>
 
