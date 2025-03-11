@@ -22,12 +22,12 @@ export function registerServices(params: RegisterServicesParams) {
 export function createApmDataAccessService(params: RegisterServicesParams) {
   const { uiSettings } = params.deps;
 
-  const getApmSources = async () => {
+  const getApmIndices = async () => {
     return uiSettings.get<APMIndices>(OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID);
   };
 
   const apmSourcesService = {
-    getApmSources,
+    getApmIndices,
   };
 
   return apmSourcesService;

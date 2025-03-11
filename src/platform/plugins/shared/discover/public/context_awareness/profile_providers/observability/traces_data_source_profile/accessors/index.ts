@@ -8,4 +8,3 @@
  */
 
 export * from './get_cell_renderers';
-export * from './get_doc_viewer';

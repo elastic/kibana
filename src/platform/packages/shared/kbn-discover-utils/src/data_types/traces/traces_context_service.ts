@@ -32,21 +32,24 @@ export const createTracesContextService = async ({
   apmSourcesAccess,
 }: TracesContextServiceDeps): Promise<TracesContextService> => {
   let traces: string;
-  let allowedDataSources: RegExp[] = [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+  let allowedDataSources: RegExp;
 
   if (apmSourcesAccess) {
-    const { transaction, span } = await apmSourcesAccess.getApmSources();
+    const { transaction, span } = await apmSourcesAccess.getApmIndices();
 
-    const allIndices = [transaction, span].flatMap((index) => index.split(','));
+    const allIndices = [transaction, span]
+      .flatMap((index) => index.split(','))
+      .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
     const uniqueIndices = Array.from(new Set(allIndices));
 
-    traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.concat(uniqueIndices).join();
-    allowedDataSources = allowedDataSources.concat(createRegExpPatternFrom(uniqueIndices, 'data'));
+    traces = uniqueIndices.join();
+    allowedDataSources = createRegExpPatternFrom(uniqueIndices, 'data');
   } else {
     traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
+    allowedDataSources = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP;
   }
 
-  return getTracesContextService(traces, allowedDataSources);
+  return getTracesContextService(traces, [allowedDataSources]);
 };
 
 export const getTracesContextService = (traces: string, allowedDataSources: RegExp[]) => ({
