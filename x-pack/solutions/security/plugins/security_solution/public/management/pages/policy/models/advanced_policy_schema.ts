@@ -2352,7 +2352,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: false',
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2363,7 +2363,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: false',
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2374,7 +2374,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: false',
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
