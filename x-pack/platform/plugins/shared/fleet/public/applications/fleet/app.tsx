@@ -77,6 +77,9 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
     authz.fleet.readAgentPolicies ||
     authz.fleet.readSettings;
 
+  const hasIntegrationsReadPrivileges =
+    authz.integrations.readIntegrationPolicies || authz.fleet.all;
+
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -111,6 +114,9 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
             if (!hasAnyFleetReadPrivileges) {
               setPermissionsError('MISSING_PRIVILEGES');
             }
+            if (!hasIntegrationsReadPrivileges && isAddIntegrationsPath) {
+              setPermissionsError('MISSING_PRIVILEGES');
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -122,7 +128,12 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts, hasAnyFleetReadPrivileges]);
+  }, [
+    notifications.toasts,
+    hasAnyFleetReadPrivileges,
+    hasIntegrationsReadPrivileges,
+    isAddIntegrationsPath,
+  ]);
 
   if (isPermissionsLoading || permissionsError) {
     return (

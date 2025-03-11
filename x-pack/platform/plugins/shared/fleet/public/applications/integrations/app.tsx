@@ -150,14 +150,15 @@ export const AppRoutes = memo(() => {
   );
   const allowedToAccess = authz.integrations.readIntegrationPolicies || authz.fleet.all;
   const [permissionsErrors, setPermissionsErrors] = useState<string>();
+
   useEffect(() => {
     (async () => {
       setPermissionsErrors(undefined);
-      if (allowedToAccess) {
+      if (!allowedToAccess) {
         setPermissionsErrors('MISSING_PRIVILEGES');
       }
     })();
-  }, [allowedToAccess, isAddIntegrationsPath]);
+  }, [allowedToAccess]);
 
   if (permissionsErrors) {
     return (
@@ -166,6 +167,7 @@ export const AppRoutes = memo(() => {
       </ErrorLayout>
     );
   }
+
   return (
     <>
       <Routes>
