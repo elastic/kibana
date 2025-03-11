@@ -18,6 +18,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
 
+    async expectToBeOnSearchIndexManagement() {
+      await testSubjects.existOrFail('elasticsearchIndexManagement');
+    },
+
     async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appTitle');
       expect(headingText).to.be('Index Management');
