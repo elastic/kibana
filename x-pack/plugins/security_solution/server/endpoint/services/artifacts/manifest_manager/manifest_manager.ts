@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import LRU from 'lru-cache';
+import { LRUCache as LRU } from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { ListResult } from '../../../../../../fleet/common';
