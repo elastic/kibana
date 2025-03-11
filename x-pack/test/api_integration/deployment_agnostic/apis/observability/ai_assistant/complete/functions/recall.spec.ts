@@ -218,6 +218,7 @@ async function addSampleDocsToCustomIndex(
 
 // Clear data before running tests
 // this is useful for debugging purposes
+// @ts-ignore
 async function clearBefore(getService: DeploymentAgnosticFtrProviderContext['getService']) {
   const log = getService('log');
   const ml = getService('ml');
