@@ -23,6 +23,11 @@ const ALERT_UUID = '413a9631-1a29-4344-a8b4-9a1dc23421ee';
 
 describe('ObservabilityAlertSearchBar', () => {
   const { http, data, dataViews, notifications, spaces } = kibanaStartMock.startContract().services;
+  spaces.getActiveSpace = jest
+    .fn()
+    .mockImplementation(() =>
+      Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
+    );
   const renderComponent = (
     props: Partial<ObservabilityAlertSearchBarProps> = {},
     services: Partial<Services> = {}

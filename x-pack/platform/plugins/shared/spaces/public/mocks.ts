@@ -13,11 +13,7 @@ import type { SpacesApiUi, SpacesApiUiComponent } from './ui_api';
 
 const createApiMock = (hasOnlyDefaultSpace: boolean): jest.Mocked<SpacesApi> => ({
   getActiveSpace$: jest.fn().mockReturnValue(of()),
-  getActiveSpace: jest
-    .fn()
-    .mockImplementation(() =>
-      Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
-    ),
+  getActiveSpace: jest.fn(),
   ui: createApiUiMock(),
   hasOnlyDefaultSpace,
   isSolutionViewEnabled: true,
