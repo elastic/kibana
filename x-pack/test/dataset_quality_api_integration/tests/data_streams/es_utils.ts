@@ -30,6 +30,11 @@ export async function addIntegrationToLogIndexTemplate({
       },
       managed_by: managedBy,
     },
+    // PUT expects string[] while GET might return string | string[]
+    ignore_missing_component_templates: indexTemplates[0].index_template
+      .ignore_missing_component_templates
+      ? [indexTemplates[0].index_template.ignore_missing_component_templates].flat()
+      : undefined,
   });
 }
 
@@ -46,5 +51,10 @@ export async function cleanLogIndexTemplate({ esClient }: { esClient: Client }) 
       package: undefined,
       managed_by: undefined,
     },
+    // PUT expects string[] while GET might return string | string[]
+    ignore_missing_component_templates: indexTemplates[0].index_template
+      .ignore_missing_component_templates
+      ? [indexTemplates[0].index_template.ignore_missing_component_templates].flat()
+      : undefined,
   });
 }

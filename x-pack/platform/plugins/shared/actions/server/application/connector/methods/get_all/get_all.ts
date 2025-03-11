@@ -8,7 +8,7 @@
 /**
  * Get all actions with in-memory connectors
  */
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { AuditLogger } from '@kbn/security-plugin-types-server';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';

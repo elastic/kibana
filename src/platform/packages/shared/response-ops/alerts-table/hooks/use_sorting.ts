@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiDataGridSorting } from '@elastic/eui';
-import { EuiDataGridColumnSortingConfig } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridColumnSortingConfig } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { useCallback, useMemo, useState } from 'react';
 import { defaultSort } from '../constants';
 

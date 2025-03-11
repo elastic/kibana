@@ -14,7 +14,7 @@ import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsBulkDeleteResponse, Logger } from '@kbn/core/server';
 
 import {
@@ -519,9 +519,7 @@ export class TaskStore {
       taskVersions = await this.esClientWithoutRetries.mget<never>({
         index: this.index,
         _source: false,
-        body: {
-          ids,
-        },
+        ids,
       });
     } catch (e) {
       this.errors$.next(e);
@@ -579,12 +577,12 @@ export class TaskStore {
     const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
       ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
     );
-    const body = queries.flatMap((query) => [{}, query]);
+    const searches = queries.flatMap((query) => [{}, query]);
 
     const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
       index: this.index,
       ignore_unavailable: true,
-      body,
+      searches,
     });
     const { responses } = result;
 
@@ -619,7 +617,8 @@ export class TaskStore {
       const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        body: { ...opts, query },
+        ...opts,
+        query,
         ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
       });
 
@@ -691,7 +690,7 @@ export class TaskStore {
       index: this.index,
       ignore_unavailable: true,
       track_total_hits: true,
-      body: ensureAggregationOnlyReturnsEnabledTaskObjects({
+      ...ensureAggregationOnlyReturnsEnabledTaskObjects({
         query,
         aggs,
         runtime_mappings,
@@ -708,7 +707,9 @@ export class TaskStore {
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
-      const // eslint-disable-next-line @typescript-eslint/naming-convention
+      const // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 types complain because the body should not be there.
+        // However, we can't use this API without the body because it fails to claim the tasks.
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
           {
             index: this.index,

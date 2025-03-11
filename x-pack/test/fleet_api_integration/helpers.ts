@@ -107,13 +107,16 @@ export async function generateAgent(
   await es.index({
     index: '.fleet-agents',
     id,
-    body: {
+    document: {
       id,
+      type: 'PERMANENT',
       active: true,
+      enrolled_at: new Date().toISOString(),
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
       policy_revision: 1,
       agent: {
+        id,
         version,
       },
       local_metadata: {
