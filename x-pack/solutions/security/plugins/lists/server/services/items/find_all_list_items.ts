@@ -50,22 +50,18 @@ export const findAllListItems = async ({
     const query = getQueryFilterWithListId({ filter, listId });
     const sort = getSortWithTieBreaker({ sortField, sortOrder });
     const { count } = await esClient.count({
-      body: {
-        query,
-      },
       ignore_unavailable: true,
       index: listItemIndex,
+      query,
     });
 
     let response = await esClient.search<SearchEsListItemSchema>({
-      body: {
-        query,
-        sort,
-      },
       ignore_unavailable: true,
       index: listItemIndex,
+      query,
       seq_no_primary_term: true,
       size: 10000,
+      sort,
     });
 
     if (count > 100000) {
@@ -80,15 +76,13 @@ export const findAllListItems = async ({
       }
 
       response = await esClient.search<SearchEsListItemSchema>({
-        body: {
-          query,
-          search_after: response.hits.hits[response.hits.hits.length - 1].sort,
-          sort,
-        },
         ignore_unavailable: true,
         index: listItemIndex,
+        query,
+        search_after: response.hits.hits[response.hits.hits.length - 1].sort,
         seq_no_primary_term: true,
         size: 10000,
+        sort,
       });
     }
     return {

@@ -7,6 +7,7 @@
 
 import {
   FilterCondition,
+  isAlwaysCondition,
   Condition,
   isFilterCondition,
   isAndCondition,
@@ -61,6 +62,9 @@ export function conditionToQueryDsl(condition: Condition): any {
         should: or,
       },
     };
+  }
+  if (isAlwaysCondition(condition)) {
+    return { match_all: {} };
   }
   return {
     match_none: {},

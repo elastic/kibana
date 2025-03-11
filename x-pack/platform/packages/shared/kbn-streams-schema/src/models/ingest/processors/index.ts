@@ -33,7 +33,7 @@ const processorBaseSchema = z.object({
   ignore_failure: z.optional(z.boolean()),
 });
 
-export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = z.strictObject({
+export const grokProcessorDefinitionSchema = z.strictObject({
   grok: z.intersection(
     processorBaseSchema,
     z.object({
@@ -43,7 +43,7 @@ export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = 
       ignore_missing: z.optional(z.boolean()),
     })
   ),
-});
+}) satisfies z.Schema<GrokProcessorDefinition>;
 
 export interface DissectProcessorConfig extends ProcessorBase {
   field: string;
@@ -56,20 +56,20 @@ export interface DissectProcessorDefinition {
   dissect: DissectProcessorConfig;
 }
 
-export const dissectProcessorDefinitionSchema: z.Schema<DissectProcessorDefinition> =
-  z.strictObject({
-    dissect: z.intersection(
-      processorBaseSchema,
-      z.object({
-        field: NonEmptyString,
-        pattern: NonEmptyString,
-        append_separator: z.optional(NonEmptyString),
-        ignore_missing: z.optional(z.boolean()),
-      })
-    ),
-  });
+export const dissectProcessorDefinitionSchema = z.strictObject({
+  dissect: z.intersection(
+    processorBaseSchema,
+    z.object({
+      field: NonEmptyString,
+      pattern: NonEmptyString,
+      append_separator: z.optional(NonEmptyString),
+      ignore_missing: z.optional(z.boolean()),
+    })
+  ),
+}) satisfies z.Schema<DissectProcessorDefinition>;
 
 export type ProcessorDefinition = DissectProcessorDefinition | GrokProcessorDefinition;
+export type ProcessorDefinitionWithId = ProcessorDefinition & { id: string };
 
 type UnionKeysOf<T extends Record<string, any>> = T extends T ? keyof T : never;
 type BodyOf<T extends Record<string, any>> = T extends T ? T[keyof T] : never;
@@ -84,6 +84,11 @@ export type ProcessorTypeOf<TProcessorDefinition extends ProcessorDefinition> =
 export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union([
   grokProcessorDefinitionSchema,
   dissectProcessorDefinitionSchema,
+]);
+
+export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithId> = z.union([
+  grokProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  dissectProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
 ]);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(

@@ -12,7 +12,6 @@ pageLoadAssetSize:
   charts: 55000
   cloud: 21076
   cloudDataMigration: 19170
-  cloudDefend: 18697
   cloudExperiments: 109746
   cloudFullStory: 18493
   cloudLinks: 55984
@@ -93,7 +92,7 @@ pageLoadAssetSize:
   kibanaReact: 74422
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
-  lens: 57135
+  lens: 76079
   licenseManagement: 41817
   licensing: 29004
   links: 8000
@@ -162,6 +161,7 @@ pageLoadAssetSize:
   stackConnectors: 67227
   streams: 16742
   streamsApp: 20537
+  streamsAppWrapper: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586

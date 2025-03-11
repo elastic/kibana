@@ -7,7 +7,8 @@
 import dedent from 'dedent';
 import { ChatFunctionClient, GET_DATA_ON_SCREEN_FUNCTION_NAME } from '.';
 import { FunctionVisibility } from '../../../common/functions/types';
-import { AdHocInstruction } from '../../../common/types';
+import { Logger } from '@kbn/logging';
+import { RegisterInstructionCallback } from '../types';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
@@ -49,6 +50,7 @@ describe('chatFunctionClient', () => {
           }),
           messages: [],
           signal: new AbortController().signal,
+          logger: getLoggerMock(),
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
@@ -87,7 +89,7 @@ describe('chatFunctionClient', () => {
       ]);
 
       const functions = client.getFunctions();
-      const adHocInstructions = client.getAdhocInstructions();
+      const instructions = client.getInstructions();
 
       expect(functions[0]).toEqual({
         definition: {
@@ -99,7 +101,11 @@ describe('chatFunctionClient', () => {
         respond: expect.any(Function),
       });
 
-      expect(adHocInstructions[0].text).toContain(
+      expect(
+        (instructions[0] as RegisterInstructionCallback)({
+          availableFunctionNames: [GET_DATA_ON_SCREEN_FUNCTION_NAME],
+        })
+      ).toContain(
         dedent(`my_dummy_data: My dummy data
         my_other_dummy_data: My other dummy data
         `)
@@ -111,6 +117,7 @@ describe('chatFunctionClient', () => {
         args: JSON.stringify({ data: ['my_dummy_data'] }),
         messages: [],
         signal: new AbortController().signal,
+        logger: getLoggerMock(),
         connectorId: 'foo',
         simulateFunctionCalling: false,
       });
@@ -131,51 +138,54 @@ describe('chatFunctionClient', () => {
     });
   });
 
-  describe('when adhoc instructions are provided', () => {
+  describe('when instructions are provided', () => {
     let client: ChatFunctionClient;
 
     beforeEach(() => {
       client = new ChatFunctionClient([]);
     });
 
-    describe('register an adhoc Instruction', () => {
-      it('should register a new adhoc instruction', () => {
-        const adhocInstruction: AdHocInstruction = {
-          text: 'Test adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
+    describe('register an Instruction', () => {
+      it('should register a new  instruction', () => {
+        const instruction = 'Test instruction';
 
-        client.registerAdhocInstruction(adhocInstruction);
+        client.registerInstruction(instruction);
 
-        expect(client.getAdhocInstructions()).toContainEqual(adhocInstruction);
+        expect(client.getInstructions()).toContainEqual(instruction);
       });
     });
 
-    describe('retrieve adHoc instructions', () => {
-      it('should return all registered adhoc instructions', () => {
-        const firstAdhocInstruction: AdHocInstruction = {
-          text: 'First adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
+    describe('retrieve instructions', () => {
+      it('should return all registered instructions', () => {
+        const firstInstruction = 'First instruction';
 
-        const secondAdhocInstruction: AdHocInstruction = {
-          text: 'Second adhoc instruction',
-          instruction_type: 'application_instruction',
-        };
+        const secondInstruction = 'Second instruction';
 
-        client.registerAdhocInstruction(firstAdhocInstruction);
-        client.registerAdhocInstruction(secondAdhocInstruction);
+        client.registerInstruction(firstInstruction);
+        client.registerInstruction(secondInstruction);
 
-        const adhocInstructions = client.getAdhocInstructions();
+        const instructions = client.getInstructions();
 
-        expect(adhocInstructions).toEqual([firstAdhocInstruction, secondAdhocInstruction]);
+        expect(instructions).toEqual([firstInstruction, secondInstruction]);
       });
 
-      it('should return an empty array if no adhoc instructions are registered', () => {
-        const adhocInstructions = client.getAdhocInstructions();
+      it('should return an empty array if no instructions are registered', () => {
+        const adhocInstructions = client.getInstructions();
 
         expect(adhocInstructions).toEqual([]);
       });
     });
   });
 });
+
+function getLoggerMock() {
+  // const consoleOrPassThrough = console.log.bind(console);
+  const consoleOrPassThrough = () => {};
+  return {
+    log: jest.fn().mockImplementation(consoleOrPassThrough),
+    error: jest.fn().mockImplementation(consoleOrPassThrough),
+    debug: jest.fn().mockImplementation(consoleOrPassThrough),
+    trace: jest.fn().mockImplementation(consoleOrPassThrough),
+    isLevelEnabled: jest.fn().mockReturnValue(true),
+  } as unknown as Logger;
+}

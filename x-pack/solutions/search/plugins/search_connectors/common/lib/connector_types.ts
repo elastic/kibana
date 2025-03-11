@@ -19,7 +19,7 @@ export function getConnectorTypes(staticAssets: IStaticAssets): ConnectorServerS
     ...connector,
     iconPath: connector.iconPath
       ? staticAssets.getPluginAssetHref(`icons/${connector.iconPath}`)
-      : 'logoEnterpriseSearch',
+      : 'logoElasticsearch',
   }));
 }
 
@@ -37,6 +37,6 @@ export function getConnectorFullTypes(staticAssets: IStaticAssets): ConnectorDef
     ...connector,
     iconPath: connector.iconPath
       ? staticAssets.getPluginAssetHref(`icons/${connector.iconPath}`)
-      : 'logoEnterpriseSearch',
+      : 'logoElasticsearch',
   }));
 }
