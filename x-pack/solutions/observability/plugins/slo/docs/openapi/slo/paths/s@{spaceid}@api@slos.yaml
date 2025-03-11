@@ -63,7 +63,7 @@ get:
       schema:
         type: string
       example: 'slo.name:latency* and slo.tags : "prod"'
-  - name: size
+    - name: size
       in: query
       description: The page size to use for cursor-based pagination, must be greater or equal than 1
       schema:
