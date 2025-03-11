@@ -15,7 +15,13 @@ export type {
 } from './src/playwright';
 
 // re-export from @kbn/scout
-export { expect, tags, createPlaywrightConfig, createLazyPageObject } from '@kbn/scout';
+export {
+  expect,
+  globalSetupHook,
+  tags,
+  createPlaywrightConfig,
+  createLazyPageObject,
+} from '@kbn/scout';
 
 export type {
   EsClient,

@@ -5,20 +5,19 @@
  * 2.0.
  */
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
-
-const start = '2021-10-10T00:00:00.000Z';
-const end = '2021-10-10T00:15:00.000Z';
+import { test, testData } from '../../fixtures';
 
 test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
-    await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(start, end);
+    await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(
+      testData.OPBEANS_START_DATE,
+      testData.OPBEANS_END_DATE
+    );
   });
 
-  test('shows the service inventory', async ({ page, pageObjects: { serviceInventoryPage } }) => {
-    await test.step('navigates to the service inventory', async () => {
-      await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(start, end);
+  test('renders page with selected date range', async ({ page }) => {
+    await test.step('shows correct heading', async () => {
       expect(page.url()).toContain('/app/apm/services');
       await expect(page.getByRole('heading', { name: 'Services', level: 1 })).toBeVisible();
     });
@@ -43,11 +42,8 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('shows the correct environment when changing the environment', async ({ page }) => {
     await page.testSubj.click('environmentFilter > comboBoxSearchInput');
-    await expect(
-      page.getByTestId('comboBoxOptionsList environmentFilter-optionsList')
-    ).toBeVisible();
-    await page.testSubj
-      .locator('comboBoxOptionsList & environmentFilter-optionsList')
+    await page
+      .getByTestId('comboBoxOptionsList environmentFilter-optionsList')
       .locator('button:has-text("production")')
       .click();
     await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue('production');

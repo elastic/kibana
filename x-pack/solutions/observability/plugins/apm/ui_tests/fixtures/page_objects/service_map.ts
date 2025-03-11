@@ -11,12 +11,16 @@ import { expect } from '@kbn/scout-oblt';
 export class ServiceMapPage {
   public serviceMap: Locator;
   public zoomInBtn: Locator;
+  public zoomOutBtn: Locator;
   public centerServiceMapBtn: Locator;
+  public noServicesPlaceholder: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
-    this.zoomInBtn = page.getByLabel('Zoom In');
+    this.zoomInBtn = page.locator('button[aria-label="Zoom in"]');
+    this.zoomOutBtn = page.locator('button[aria-label="Zoom out"]');
     this.centerServiceMapBtn = page.testSubj.locator('centerServiceMap');
+    this.noServicesPlaceholder = page.locator('.euiEmptyPrompt__content .euiTitle');
   }
 
   async gotoWithDateSelected(start: string, end: string) {
@@ -39,9 +43,9 @@ export class ServiceMapPage {
     await this.page.testSubj.waitForSelector('apmUnifiedSearchBar');
   }
 
-  async typeInTheSearchBar() {
+  async typeInTheSearchBar(text: string) {
     await this.getSearchBar();
-    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', '_id : foo');
+    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', text);
     return this.page.getByTestId('querySubmitButton').press('Enter');
   }
 

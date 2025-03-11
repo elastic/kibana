@@ -45,9 +45,6 @@ const useSynthtraceClient = async <TFields extends Fields>(
   const clean = async () => await client.clean();
 
   await use({ index, clean });
-
-  // cleanup function after all tests have ran
-  await client.clean();
 };
 
 export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture>({

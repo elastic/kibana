@@ -9,15 +9,14 @@ import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
 test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
-    await serviceMapPage.gotoWithDateSelected(
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
   });
 
-  test('shows the service map', async ({ page, pageObjects: { serviceMapPage } }) => {
+  test('renders page with selected date range', async ({
+    page,
+    pageObjects: { serviceMapPage },
+  }) => {
     await serviceMapPage.gotoWithDateSelected(
       testData.OPBEANS_START_DATE,
       testData.OPBEANS_END_DATE
@@ -36,8 +35,9 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     );
     expect(page.url()).toContain('/services/opbeans-java/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
-    await serviceMapPage.zoomInBtn.click();
+    await serviceMapPage.zoomOutBtn.click();
     await serviceMapPage.centerServiceMapBtn.click();
+    await serviceMapPage.zoomInBtn.click();
     await serviceMapPage.waitForServiceMapToLoad();
   });
 
@@ -45,10 +45,14 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { serviceMapPage },
   }) => {
-    await serviceMapPage.typeInTheSearchBar();
+    await serviceMapPage.gotoWithDateSelected(
+      testData.OPBEANS_START_DATE,
+      testData.OPBEANS_END_DATE
+    );
+    await serviceMapPage.typeInTheSearchBar('_id : foo');
     await serviceMapPage.waitForServiceMapToLoad();
-    page.getByText('No services available');
-    // search bar is still visible
+    await expect(serviceMapPage.noServicesPlaceholder).toBeVisible();
+    await expect(serviceMapPage.noServicesPlaceholder).toHaveText('No services available');
     await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
   });
 });
