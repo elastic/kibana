@@ -16,7 +16,7 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -138,7 +138,7 @@ export async function suggest(
     resourceRetriever
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
@@ -188,7 +188,7 @@ export async function suggest(
       getFieldsMap,
       getPolicies,
       getPolicyMetadata,
-      getVariablesByType,
+      getVariables,
       resourceRetriever?.getPreferences,
       resourceRetriever,
       supportsControls
@@ -217,7 +217,7 @@ export async function suggest(
       getFieldsMap,
       fullText,
       offset,
-      getVariablesByType,
+      getVariables,
       supportsControls
     );
   }
@@ -239,7 +239,7 @@ export function getFieldsByTypeRetriever(
   resourceRetriever?: ESQLCallbacks
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const getVariables = resourceRetriever?.getVariables;
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   return {
     getFieldsByType: async (
@@ -252,7 +252,7 @@ export function getFieldsByTypeRetriever(
         supportsControls,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
+      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -355,7 +355,7 @@ async function getSuggestionsWithinCommandExpression(
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getVariables?: () => ESQLControlVariable[] | undefined,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
   callbacks?: ESQLCallbacks,
   supportsControls?: boolean
@@ -396,7 +396,7 @@ async function getSuggestionsWithinCommandExpression(
       getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
       previousCommands: commands,
       callbacks,
-      getVariablesByType,
+      getVariables,
       supportsControls,
       getPolicies,
       getPolicyMetadata,
@@ -694,7 +694,7 @@ async function getExpressionSuggestionsByType(
           );
           if (isNumericType(nodeArgType) && isLiteralItem(rightArg)) {
             // ... EVAL var = 1 <suggest>
-            suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+            suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
           }
           if (isFunctionItem(rightArg)) {
             if (rightArg.args.some(isTimeIntervalItem)) {
@@ -702,7 +702,7 @@ async function getExpressionSuggestionsByType(
               const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
               if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                 // ... EVAL var = 1 year + 2 <suggest>
-                suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+                suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
             }
           }
         } else {
@@ -738,7 +738,7 @@ async function getExpressionSuggestionsByType(
                 const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
                 if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                   // ... EVAL var = 1 year + 2 <suggest>
-                  suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+                  suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
               }
             }
           }
@@ -763,7 +763,7 @@ async function getExpressionSuggestionsByType(
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
-        suggestions.push(...getCompatibleLiterals(command.name, [argDef.type]));
+        suggestions.push(...getCompatibleLiterals([argDef.type]));
       } else {
         // or it can be anything else as long as it is of the right type and the end (i.e. column or function)
         if (!nodeArg) {
@@ -907,7 +907,7 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   fullText: string,
   offset: number,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getVariables?: () => ESQLControlVariable[] | undefined,
   supportsControls?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
@@ -1031,14 +1031,13 @@ async function getFunctionArgsSuggestions(
     // Literals
     suggestions.push(
       ...getCompatibleLiterals(
-        command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           supportsControls,
         },
-        getVariablesByType
+        getVariables
       )
     );
 
@@ -1105,7 +1104,7 @@ async function getFunctionArgsSuggestions(
       if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
-          ...getCompatibleLiterals(command.name, ['time_literal_unit'], {
+          ...getCompatibleLiterals(['time_literal_unit'], {
             addComma: shouldAddComma,
             advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           })
