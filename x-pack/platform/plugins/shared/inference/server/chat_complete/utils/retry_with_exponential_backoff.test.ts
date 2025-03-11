@@ -73,7 +73,7 @@ describe('retryWithExponentialBackoff operator', () => {
         maxRetry: 5,
         initialDelay: 1000,
         backoffMultiplier: 2,
-        errorFilter: (err) => err.status === 400,
+        errorFilter: (err: any) => err.status === 400,
       })
     );
 
