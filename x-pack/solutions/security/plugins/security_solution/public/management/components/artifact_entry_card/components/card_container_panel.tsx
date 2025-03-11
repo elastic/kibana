@@ -9,6 +9,7 @@ import styled from '@emotion/styled';
 import { EuiPanel } from '@elastic/eui';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 import React, { memo } from 'react';
+import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { CardArtifactProvider } from './card_artifact_context';
 import type { AnyArtifact } from '..';
 
@@ -19,7 +20,7 @@ export const EuiPanelStyled = styled(EuiPanel)`
 `;
 
 export type CardContainerPanelProps = Exclude<EuiPanelProps, 'hasBorder' | 'paddingSize'> & {
-  item: AnyArtifact;
+  item: MaybeImmutable<AnyArtifact>;
 };
 
 export const CardContainerPanel = memo<CardContainerPanelProps>(
