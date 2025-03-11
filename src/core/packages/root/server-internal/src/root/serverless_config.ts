@@ -17,6 +17,7 @@ import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 // If we even decide to extend this further, and converting it into an object,
 // BWC can be ensured by adding the object definition as another alternative to `schema.oneOf`.
 
+// BOOKMARK - List of Kibana solutions?
 export const VALID_SERVERLESS_PROJECT_TYPES = ['es', 'oblt', 'security'];
 
 const serverlessConfigSchema = schema.maybe(

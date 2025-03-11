@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KIBANA_SOLUTIONS } from '@kbn/constants';
 import { identifyDependencyUsageWithCruiser as identifyDependencyUsage } from './cruiser.ts';
 import { cruise } from 'dependency-cruiser';
 
 import * as groupBy from '../../lib/group_by_owners.ts';
 import * as groupBySource from '../../lib/group_by_source.ts';
-import { KibanaSolutions } from '@kbn/constants';
 
 const codeOwners: Record<string, string[]> = {
   'platform/plugins/shared/security': ['team_security'],
@@ -114,7 +114,7 @@ describe('identifyDependencyUsage', () => {
     const [, configWithDepth2] = (cruise as jest.Mock).mock.calls[0];
     const [, configWithDepth1] = (cruise as jest.Mock).mock.calls[1];
 
-    const solutionsFolders = KibanaSolutions.flatMap((solution) => [
+    const solutionsFolders = KIBANA_SOLUTIONS.flatMap((solution) => [
       `x-pack/solutions/${solution}/plugins`,
       `x-pack/solutions/${solution}/packages`,
     ]).join('|');

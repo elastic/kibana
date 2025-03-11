@@ -19,7 +19,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
-import { KibanaSolutions, type KibanaGroup, type ModuleVisibility } from '@kbn/constants';
+import { KIBANA_SOLUTIONS, type KibanaGroup, type ModuleVisibility } from '@kbn/constants';
 import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
@@ -115,7 +115,7 @@ export const PackageCommand: GenerateCommand = {
           type: 'list',
           choices: [
             { name: 'platform', value: 'platform' },
-            ...KibanaSolutions.map((solution) => ({
+            ...KIBANA_SOLUTIONS.map((solution) => ({
               name: solution,
               value: solution,
             })),

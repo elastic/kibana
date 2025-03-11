@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaSolutions } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/constants';
 
 /**
  * These patterns are used to identify files that are not supposed
@@ -110,7 +110,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'src/platform/packages/shared/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',
-  ...KibanaSolutions.map((solution) => `x-pack/solutions/${solution}/packages/*`),
+  ...KIBANA_SOLUTIONS.map((solution) => `x-pack/solutions/${solution}/packages/*`),
 ];
 
 /**

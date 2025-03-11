@@ -31,11 +31,12 @@ const createSAMLResponseSchema = schema.object({
   roles: schema.arrayOf(schema.string()),
 });
 
-// CHECKPOINT TBCworkchat SKA
+// BOOKMARK - List of Kibana solutions
 const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
+  // BOOKMARK - List of Kibana solutions - TODO add new 'chat' solution - https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
 ]);
 
 const readServerlessRoles = (projectType: string) => {

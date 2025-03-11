@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { type KibanaGroup, KibanaSolutions, ModuleVisibility } from '@kbn/constants';
+import { type KibanaGroup, KIBANA_SOLUTIONS, ModuleVisibility } from '@kbn/constants';
 
 export const TEMPLATE_DIR = resolve(__dirname, '../templates');
 export const PKG_TEMPLATE_DIR = resolve(TEMPLATE_DIR, 'package');
@@ -20,7 +20,7 @@ export const PKG_DIRS: Record<string, string> = {
   'oss|platform|shared': resolve(REPO_ROOT, 'src/platform/packages/shared'),
   'xpack|platform|private': resolve(REPO_ROOT, 'x-pack/platform/packages/private'),
   'xpack|platform|shared': resolve(REPO_ROOT, 'x-pack/platform/packages/shared'),
-  ...KibanaSolutions.reduce<Record<string, string>>((agg, solution) => {
+  ...KIBANA_SOLUTIONS.reduce<Record<string, string>>((agg, solution) => {
     agg[`xpack|${solution}|private`] = resolve(REPO_ROOT, `x-pack/solutions/${solution}/packages`);
     return agg;
   }, {}),

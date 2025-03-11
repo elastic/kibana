@@ -12,7 +12,7 @@ import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { run } from '@kbn/dev-cli-runner';
-import { KibanaSolutions } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/constants';
 import { discoverPlugins } from './discover_plugins';
 import { generatePluginList } from './generate_plugin_list';
 
@@ -28,7 +28,7 @@ export function runPluginListCli() {
     log.info('looking for x-pack plugins');
     const xpackLegacyPlugins = discoverPlugins('x-pack/plugins');
     const xpackPlatformPlugins = discoverPlugins('x-pack/platform/plugins');
-    const solutionsPlugins = KibanaSolutions.flatMap((solution) =>
+    const solutionsPlugins = KIBANA_SOLUTIONS.flatMap((solution) =>
       discoverPlugins(`x-pack/solutions/${solution}/plugins`)
     );
 

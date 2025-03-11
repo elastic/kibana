@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import inquirer from 'inquirer';
-import { KibanaSolutions } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/constants';
 
 export interface Answers {
   name: string;
@@ -57,7 +57,7 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     name: 'X-Pack Platform (shared)',
     value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins/shared'),
   },
-  ...KibanaSolutions.map((solution) => ({
+  ...KIBANA_SOLUTIONS.map((solution) => ({
     name: `X-Pack ${solution}`,
     value: Path.resolve(REPO_ROOT, `x-pack/solutions/${solution}/plugins`),
   })),

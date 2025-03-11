@@ -10,27 +10,48 @@
 /**
  * The base group, for all modules that are commonly used across solutions.
  */
-export const KibanaPlatform = 'platform' as const;
+export const KIBANA_PLATFORM = 'platform' as const;
+/**
+ * Constant for the Kibana Observability solution.
+ */
+export const KIBANA_OBSERVABILITY_SOLUTION = 'observability' as const;
+/**
+ * Constant for the Kibana Security solution.
+ */
+export const KIBANA_SECURITY_SOLUTION = 'security' as const;
+/**
+ * Constant for the Kibana Search solution.
+ */
+export const KIBANA_SEARCH_SOLUTION = 'search' as const;
+/**
+ * Constant for the Kibana Chat (workchat) solution.
+ */
+export const KIBANA_CHAT_SOLUTION = 'chat' as const;
 
 /**
- * A list of all Kibana solution.
+ * A list of all Kibana solutions.
  */
-export const KibanaSolutions = ['observability', 'security', 'search', 'TBCworkchat'] as const;
+export const KIBANA_SOLUTIONS = [
+  KIBANA_OBSERVABILITY_SOLUTION,
+  KIBANA_SECURITY_SOLUTION,
+  KIBANA_SEARCH_SOLUTION,
+  KIBANA_CHAT_SOLUTION,
+] as const; // BOOKMARK - List of Kibana solutions
 
 /**
  * A type that defines the existing solutions.
  */
-export type KibanaSolution = (typeof KibanaSolutions)[number];
+export type KibanaSolution = (typeof KIBANA_SOLUTIONS)[number];
 
 /**
  * A list of all Kibana groups (platform + solutions).
  */
-export const KibanaGroups = [KibanaPlatform, ...KibanaSolutions] as const;
+export const KIBANA_GROUPS = [KIBANA_PLATFORM, ...KIBANA_SOLUTIONS] as const;
 
 /**
  * A type that defines the existing groups (platform + solutions).
  */
-export type KibanaGroup = (typeof KibanaGroups)[number];
+export type KibanaGroup = (typeof KIBANA_GROUPS)[number];
 
 /**
  * The groups to which a module can belong.

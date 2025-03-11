@@ -20,8 +20,8 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     euiIconType: 'logoKibana',
     order: 1000,
   },
+  // BOOKMARK - List of Kibana solutions - TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C061KHPJS2C/p1741691346619339
   enterpriseSearch: {
-    // CHECKPOINT TBCworkchat SKA
     id: 'enterpriseSearch',
     label: i18n.translate('core.ui.searchNavList.label', {
       defaultMessage: 'Elasticsearch',

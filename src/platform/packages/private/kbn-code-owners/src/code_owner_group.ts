@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaGroup, KibanaGroups } from '@kbn/constants';
+import { type KibanaGroup, KIBANA_GROUPS } from '@kbn/constants';
 
 /**
  * Group => kibana team mappings
  */
 export const KIBANA_GROUP_TEAMS_MAPPINGS: Record<KibanaGroup, string[]> = {
+  // BOOKMARK - List of Kibana solutions
   platform: [
     'elastic/appex-ai-infra',
     'elastic/appex-qa',
@@ -74,8 +75,8 @@ export const KIBANA_GROUP_TEAMS_MAPPINGS: Record<KibanaGroup, string[]> = {
     'elastic/security-threat-hunting-explore',
     'elastic/security-threat-hunting-investigations',
   ],
-  TBCworkchat: [
-    // CHECKPOINT SKA add owner teams here
+  chat: [
+    // BOOKMARK - List of Kibana solutions - TODO add owner teams here (once they exist)
   ],
 };
 
@@ -86,7 +87,7 @@ export const KIBANA_GROUP_TEAMS_MAPPINGS: Record<KibanaGroup, string[]> = {
  * @returns The code owner group if a match for the given owner is found
  */
 export function findGroupByOwner(owner: string): KibanaGroup | undefined {
-  for (const group of KibanaGroups) {
+  for (const group of KIBANA_GROUPS) {
     // FIXME what happens if a team appears in 2 different groups?
     const owners = KIBANA_GROUP_TEAMS_MAPPINGS[group];
 

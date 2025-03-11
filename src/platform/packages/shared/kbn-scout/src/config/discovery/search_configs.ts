@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { KibanaSolutions } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/constants';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 
@@ -37,7 +37,7 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const files = patterns.flatMap((pattern) => fastGlob.sync(pattern, { onlyFiles: true }));
 
   const typeMappings: Record<string, string> = {
-    ...KibanaSolutions.reduce<Record<string, string>>((agg, solution) => {
+    ...KIBANA_SOLUTIONS.reduce<Record<string, string>>((agg, solution) => {
       agg[`x-pack/solutions/${solution}`] = solution;
       return agg;
     }, {}),
@@ -48,7 +48,7 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const matchPluginPath = (filePath: string): { pluginPath: string; pluginName: string } | null => {
     const regexes = [
       /(x-pack\/platform\/plugins\/(?:private|shared|[^\/]+)\/([^\/]+))\/ui_tests\//,
-      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//, // covers all of KibanaSolutions
+      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//, // covers all Kibana solutions
       /(src\/platform\/plugins\/(?:private|shared)?\/?([^\/]+))\/ui_tests\//,
     ];
 

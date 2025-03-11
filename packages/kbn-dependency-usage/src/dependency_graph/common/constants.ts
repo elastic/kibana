@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaSolutions } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/constants';
 
 export const aggregationGroups: string[] = [
-  ...KibanaSolutions.flatMap((solution) => [
+  ...KIBANA_SOLUTIONS.flatMap((solution) => [
     `x-pack/solutions/${solution}/plugins`,
     `x-pack/solutions/${solution}/packages`,
   ]),

@@ -13,29 +13,33 @@ import type { KibanaSolution } from '@kbn/constants';
 import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
-  // TODO TBCworkchat handle the new project type, and ideally rename 'elasticsearch' to 'search'
-  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
+  // BOOKMARK - List of Kibana solutions
+  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|chat)$/;
   try {
     return (
-      await Promise.all([
-        projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
-        projectRequest.get('/api/v1/serverless/projects/security'),
-        projectRequest.get('/api/v1/serverless/projects/observability'),
-        // TODO TBCworkchat handle the new project type, and ideally rename 'elasticsearch' to 'search'
-      ])
-    )
-      .map((response) => response.data.items)
-      .flat()
-      .filter((project) => project.name.match(match))
-      .map((project) => {
-        const [, , prNumber, projectType] = project.name.match(match);
-        return {
-          id: project.id,
-          name: project.name,
-          prNumber,
-          type: projectType,
-        };
-      });
+      // BOOKMARK - List of Kibana solutions
+      (
+        await Promise.all([
+          // TODO ideally rename 'elasticsearch' to 'search'
+          projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
+          projectRequest.get('/api/v1/serverless/projects/security'),
+          projectRequest.get('/api/v1/serverless/projects/observability'),
+          // BOOKMARK - List of Kibana solutions - TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
+        ])
+      )
+        .map((response) => response.data.items)
+        .flat()
+        .filter((project) => project.name.match(match))
+        .map((project) => {
+          const [, , prNumber, projectType] = project.name.match(match);
+          return {
+            id: project.id,
+            name: project.name,
+            prNumber,
+            type: projectType,
+          };
+        })
+    );
   } catch (e) {
     if (e.isAxiosError) {
       const message = JSON.stringify(e.response.data) || 'unable to fetch projects';
@@ -55,7 +59,8 @@ async function deleteProject({
   name: string;
 }) {
   try {
-    // TODO TBCworkchat handle the new project type, and ideally rename 'elasticsearch' to 'search'
+    // BOOKMARK - List of Kibana solutions
+    // TODO handle the new 'chat' project type, and ideally rename 'elasticsearch' to 'search'
     await projectRequest.delete(
       `/api/v1/serverless/projects/${
         type === ('search' as KibanaSolution) ? 'elasticsearch' : type

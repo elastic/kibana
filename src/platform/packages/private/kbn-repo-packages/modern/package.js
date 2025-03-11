@@ -214,6 +214,7 @@ class Package {
         /src\/platform\/[^\/]+\/shared/.test(dir) || /x-pack\/platform\/[^\/]+\/shared/.test(dir)
           ? 'shared'
           : 'private';
+      // BOOKMARK - List of Kibana solutions
     } else if (dir.startsWith('x-pack/solutions/search/')) {
       group = 'search';
       visibility = 'private';
@@ -223,14 +224,14 @@ class Package {
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
       visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/TBCworkchat/')) {
+    } else if (dir.startsWith('x-pack/solutions/chat/')) {
       group = 'observability';
       visibility = 'private';
     } else {
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
-      // FIXME we could use KibanaSolutions array here once we modernize this / get rid of Bazel
-      visibility = ['search', 'security', 'observability', 'TBCworkchat'].includes(group)
+      //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
+      visibility = ['search', 'security', 'observability', 'chat'].includes(group)
         ? 'private'
         : this.manifest.visibility ?? 'shared';
     }
