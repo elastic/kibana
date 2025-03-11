@@ -31,17 +31,19 @@ export interface TableSectionProps {
    *
    */
   dataView: DataView;
+  /**
+   * TEMP: for demo purposes ONLY, toggles between old and unified components
+   */
+  showUnifiedComponents: boolean;
 }
 
 /**
  *
  */
-export const TableSection = memo(({ dataView }: TableSectionProps) => {
+export const TableSection = memo(({ dataView, showUnifiedComponents }: TableSectionProps) => {
   return (
     <>
-      {true ? (
-        <GroupedTable dataView={dataView} />
-      ) : (
+      {showUnifiedComponents ? (
         <EuiResizableContainer
           css={css`
             height: 600px;
@@ -62,11 +64,13 @@ export const TableSection = memo(({ dataView }: TableSectionProps) => {
                 initialSize={TABLE_INITIAL_WIDTH}
                 minSize={TABLE_MIN_WIDTH}
               >
-                <GroupedTable dataView={dataView} />
+                <GroupedTable dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
               </EuiResizablePanel>
             </>
           )}
         </EuiResizableContainer>
+      ) : (
+        <GroupedTable dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
       )}
     </>
   );

@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   installationStatuses,
   useGetPackagesQuery,
@@ -29,15 +28,15 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export interface WrapperProps {
   /**
-   *
+   * TEMP: for demo purposes ONLY, toggles between old and unified components
    */
-  dataView: DataView;
+  showUnifiedComponents: boolean;
 }
 
 /**
  *
  */
-export const Wrapper = memo(({ dataView }: WrapperProps) => {
+export const Wrapper = memo(({ dataView, showUnifiedComponents }: WrapperProps) => {
   const { fleet } = useKibana().services;
   const isAuthorizedToFetchSettings = fleet?.authz.fleet.readSettings;
   const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
@@ -85,11 +84,15 @@ export const Wrapper = memo(({ dataView }: WrapperProps) => {
         <>
           <IntegrationSection installedPackages={installedPackages} />
           <EuiHorizontalRule />
-          <SearchBarSection dataView={dataView} installedPackages={installedPackages} />
+          <SearchBarSection
+            dataView={dataView}
+            installedPackages={installedPackages}
+            showUnifiedComponents={showUnifiedComponents}
+          />
           <EuiSpacer />
           <KPIsSection dataView={dataView} />
           <EuiSpacer />
-          <TableSection dataView={dataView} />
+          <TableSection dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
         </>
       }
     />

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Wrapper } from '../../components/alert_summary/wrapper';
 import { DATAVIEW_ERROR } from './translations';
@@ -20,6 +20,7 @@ const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 export const AlertSummaryPage = () => {
   const { data } = useKibana().services;
   const [dataView, setDataView] = useState<DataView>();
+  const [showUnifiedComponents, setShowUnifiedComponents] = useState<boolean>(true);
 
   useEffect(() => {
     let dv: DataView;
@@ -45,7 +46,18 @@ export const AlertSummaryPage = () => {
     return <EuiEmptyPrompt iconType="error" color="danger" title={<h2>{DATAVIEW_ERROR}</h2>} />;
   }
 
-  return <Wrapper dataView={dataView} />;
+  return (
+    <>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={() => setShowUnifiedComponents((t) => !t)}>
+            {showUnifiedComponents ? 'Show old components' : 'Show unified components'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <Wrapper dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
+    </>
+  );
 };
 
 AlertSummaryPage.displayName = 'AlertSummaryPage';

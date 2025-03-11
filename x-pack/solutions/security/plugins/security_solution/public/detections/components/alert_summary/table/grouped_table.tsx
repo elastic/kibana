@@ -42,18 +42,28 @@ export interface TableProps {
    *
    */
   dataView: DataView;
+  /**
+   * TEMP: for demo purposes ONLY, toggles between old and unified components
+   */
+  showUnifiedComponents: boolean;
 }
 
 /**
  *
  */
-export const GroupedTable = memo(({ dataView }: TableProps) => {
+export const GroupedTable = memo(({ dataView, showUnifiedComponents }: TableProps) => {
   const dispatch = useDispatch();
   const indexNames = dataView.getIndexPattern();
   const { to, from } = useGlobalTime();
 
   const renderChildComponent = useCallback(
-    (groupingFilters: Filter[]) => <Table dataView={dataView} groupingFilters={groupingFilters} />,
+    (groupingFilters: Filter[]) => (
+      <Table
+        dataView={dataView}
+        groupingFilters={groupingFilters}
+        showUnifiedComponents={showUnifiedComponents}
+      />
+    ),
     [dataView]
   );
   const renderChildDetectionEngineComponent = useCallback((groupingFilters: Filter[]) => {
@@ -66,7 +76,13 @@ export const GroupedTable = memo(({ dataView }: TableProps) => {
     );
   }, []);
   const renderChildAlertsTableComponent = useCallback(
-    (groupingFilters: Filter[]) => <Table dataView={dataView} groupingFilters={groupingFilters} />,
+    (groupingFilters: Filter[]) => (
+      <Table
+        dataView={dataView}
+        groupingFilters={groupingFilters}
+        showUnifiedComponents={showUnifiedComponents}
+      />
+    ),
     [dataView]
   );
 
@@ -97,21 +113,7 @@ export const GroupedTable = memo(({ dataView }: TableProps) => {
 
   return (
     <>
-      {true ? (
-        <GroupedAlertsTable
-          from={from}
-          globalFilters={globalFilters}
-          globalQuery={globalQuery}
-          hasIndexMaintenance={hasIndexMaintenance}
-          hasIndexWrite={hasIndexWrite}
-          loading={false}
-          renderChildComponent={renderChildAlertsTableComponent}
-          runtimeMappings={runtimeMappings}
-          signalIndexName={indexNames}
-          tableId={TableId.alertsOnAlertSummaryPage}
-          to={to}
-        />
-      ) : (
+      {showUnifiedComponents ? (
         <>
           {groupSelector}
           <GroupedAlertsTable
@@ -129,6 +131,20 @@ export const GroupedTable = memo(({ dataView }: TableProps) => {
             to={to}
           />
         </>
+      ) : (
+        <GroupedAlertsTable
+          from={from}
+          globalFilters={globalFilters}
+          globalQuery={globalQuery}
+          hasIndexMaintenance={hasIndexMaintenance}
+          hasIndexWrite={hasIndexWrite}
+          loading={false}
+          renderChildComponent={renderChildAlertsTableComponent}
+          runtimeMappings={runtimeMappings}
+          signalIndexName={indexNames}
+          tableId={TableId.alertsOnAlertSummaryPage}
+          to={to}
+        />
       )}
     </>
   );

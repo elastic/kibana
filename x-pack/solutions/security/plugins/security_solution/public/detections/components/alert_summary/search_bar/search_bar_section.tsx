@@ -38,106 +38,112 @@ export interface SearchBarSectionProps {
    *
    */
   installedPackages: CustomIntegration[] | PackageListItem[];
+  /**
+   * TEMP: for demo purposes ONLY, toggles between old and unified components
+   */
+  showUnifiedComponents: boolean;
 }
 
 /**
  *
  */
-export const SearchBarSection = memo(({ dataView, installedPackages }: SearchBarSectionProps) => {
-  const dispatch = useDispatch();
-  const [dateRange, setDateRange] = useState<TimeRange>(defaultTimeRange);
-  const [query, setQuery] = useState<Query>(defaultQuery);
+export const SearchBarSection = memo(
+  ({ dataView, installedPackages, showUnifiedComponents }: SearchBarSectionProps) => {
+    const dispatch = useDispatch();
+    const [dateRange, setDateRange] = useState<TimeRange>(defaultTimeRange);
+    const [query, setQuery] = useState<Query>(defaultQuery);
 
-  const onQuerySubmit = useCallback(
-    (
-      {
-        dateRange: dr,
-        query: qr,
-      }: {
-        dateRange: TimeRange;
-        query?: Query | AggregateQuery | undefined;
-      },
-      isUpdate?: boolean
-    ) => {
-      setDateRange(dr);
-      const { from, to } = dr;
-      const isQuickSelection = from.includes('now') || to.includes('now');
-      const absoluteFrom = formatDate(from);
-      const absoluteTo = formatDate(to, { roundUp: true });
-      if (isQuickSelection) {
-        const actionPayload = {
-          id: InputsModelId.global,
-          fromStr: from,
-          toStr: to,
-          from: absoluteFrom,
-          to: absoluteTo,
-        };
-        if (from === to) {
-          dispatch(inputsActions.setAbsoluteRangeDatePicker(actionPayload));
+    const onQuerySubmit = useCallback(
+      (
+        {
+          dateRange: dr,
+          query: qr,
+        }: {
+          dateRange: TimeRange;
+          query?: Query | AggregateQuery | undefined;
+        },
+        isUpdate?: boolean
+      ) => {
+        setDateRange(dr);
+        const { from, to } = dr;
+        const isQuickSelection = from.includes('now') || to.includes('now');
+        const absoluteFrom = formatDate(from);
+        const absoluteTo = formatDate(to, { roundUp: true });
+        if (isQuickSelection) {
+          const actionPayload = {
+            id: InputsModelId.global,
+            fromStr: from,
+            toStr: to,
+            from: absoluteFrom,
+            to: absoluteTo,
+          };
+          if (from === to) {
+            dispatch(inputsActions.setAbsoluteRangeDatePicker(actionPayload));
+          } else {
+            dispatch(inputsActions.setRelativeRangeDatePicker(actionPayload));
+          }
         } else {
-          dispatch(inputsActions.setRelativeRangeDatePicker(actionPayload));
+          dispatch(
+            inputsActions.setAbsoluteRangeDatePicker({
+              id: InputsModelId.global,
+              from: formatDate(from),
+              to: formatDate(to),
+            })
+          );
         }
-      } else {
-        dispatch(
-          inputsActions.setAbsoluteRangeDatePicker({
-            id: InputsModelId.global,
-            from: formatDate(from),
-            to: formatDate(to),
-          })
-        );
-      }
 
-      if (qr != null) {
-        setQuery(qr);
-        dispatch(
-          inputsActions.setFilterQuery({
-            id: InputsModelId.global,
-            ...qr,
-          })
-        );
-      }
-    },
-    [dispatch]
-  );
+        if (qr != null) {
+          setQuery(qr);
+          dispatch(
+            inputsActions.setFilterQuery({
+              id: InputsModelId.global,
+              ...qr,
+            })
+          );
+        }
+      },
+      [dispatch]
+    );
 
-  const sources: EuiSelectableOption[] = useMemo(
-    () =>
-      installedPackages.map((relatedIntegration: PackageListItem) => ({
-        label: relatedIntegration.title,
-        checked: 'on',
-      })),
-    [installedPackages]
-  );
+    const sources: EuiSelectableOption[] = useMemo(
+      () =>
+        installedPackages.map((relatedIntegration: PackageListItem) => ({
+          label: relatedIntegration.title,
+          checked: 'on',
+        })),
+      [installedPackages]
+    );
 
-  return (
-    <>
-      <EuiFlexGroup gutterSize="none" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <SourceFilterButton sources={sources} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {true ? (
-            <SiemSearchBar
-              hideFilterBar
-              hideQueryMenu
-              id={InputsModelId.global}
-              sourcererDataView={dataView.toSpec()}
-            />
-          ) : (
-            <SearchBar
-              dateRangeFrom={dateRange.from}
-              dateRangeTo={dateRange.to}
-              indexPatterns={[dataView]}
-              onQuerySubmit={onQuerySubmit}
-              query={query}
-              showFilterBar={false}
-              showQueryMenu={false}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-});
+    return (
+      <>
+        <EuiFlexGroup gutterSize="none" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <SourceFilterButton sources={sources} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {showUnifiedComponents ? (
+              <SearchBar
+                dateRangeFrom={dateRange.from}
+                dateRangeTo={dateRange.to}
+                indexPatterns={[dataView]}
+                onQuerySubmit={onQuerySubmit}
+                query={query}
+                showFilterBar={false}
+                showQueryMenu={false}
+              />
+            ) : (
+              <SiemSearchBar
+                hideFilterBar
+                hideQueryMenu
+                id={InputsModelId.global}
+                sourcererDataView={dataView.toSpec()}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);
 
 SearchBarSection.displayName = 'SearchBarSection';

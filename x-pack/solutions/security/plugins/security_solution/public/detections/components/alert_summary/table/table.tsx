@@ -32,6 +32,8 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { useDispatch } from 'react-redux';
 import type { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { GetSecurityAlertsTableProp } from '../../alerts_table/types';
 import { groupIdSelector } from '../../../../common/store/grouping/selectors';
 import { updateGroups } from '../../../../common/store/grouping/actions';
 import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
@@ -57,6 +59,7 @@ import { COLUMN_IDS, SAMPLE_SIZE } from './grouped_table';
 import { transformTimelineItemToUnifiedRows } from '../../../../timelines/components/timeline/unified_components/utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import { IOCPanelKey } from '../../../../flyout/ai_for_soc/constants/panel_keys';
+import { useBulkAlertTagsItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 
 const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 
@@ -150,6 +153,31 @@ export const RenderAdditionalToolbarControls = memo(
 );
 RenderAdditionalToolbarControls.displayName = 'RenderAdditionalToolbarControls';
 
+export const ActionsCellComponent = memo(({ rowIndex, ecsAlert, leadingControlColumn }) => {
+  const Action = leadingControlColumn.rowCellRender;
+  debugger;
+
+  return <>{'hello'}</>;
+});
+ActionsCellComponent.displayName = 'ActionsCellComponent';
+
+export const getBulkActionsByTableType =
+  (): GetSecurityAlertsTableProp<'getBulkActions'> => (query, refresh) => {
+    const bulkAlertTagParams = useMemo(() => {
+      return {
+        refetch: refresh,
+      };
+    }, [refresh]);
+    const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
+
+    const items = useMemo(() => {
+      return [...alertTagsItems];
+    }, [alertTagsItems]);
+    return useMemo(() => {
+      return [{ id: 0, items }, ...alertTagsPanels];
+    }, [alertTagsPanels, items]);
+  };
+
 export interface TableProps {
   /**
    *
@@ -159,12 +187,16 @@ export interface TableProps {
    *
    */
   groupingFilters: Filter[];
+  /**
+   * TEMP: for demo purposes ONLY, toggles between old and unified components
+   */
+  showUnifiedComponents: boolean;
 }
 
 /**
  *
  */
-export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
+export const Table = memo(({ dataView, groupingFilters, showUnifiedComponents }: TableProps) => {
   const indexNames = dataView.getIndexPattern();
   const { to, from } = useGlobalTime();
 
@@ -285,17 +317,15 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
 
   const { openFlyout } = useExpandableFlyoutApi();
   const onOpenFlyout = useCallback(
-    (doc) => {
-      debugger;
+    (ecs: Ecs) =>
       openFlyout({
         right: {
           id: IOCPanelKey,
           params: {
-            doc,
+            doc: ecs,
           },
         },
-      });
-    },
+      }),
     [openFlyout]
   );
   const onSetExpandedDoc = useCallback(
@@ -321,13 +351,13 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
     () => [
       {
         id: '1',
-        width: 62,
+        width: 98,
         headerCellRender: () => <>{ACTIONS_COLUMN}</>,
         rowCellRender: (cellData) => (
           <>
             <EuiButtonIcon
               iconType="expand"
-              onClick={() => onOpenFlyout(cellData)}
+              onClick={() => onOpenFlyout(cellData.ecsAlertsData[cellData.rowIndex])}
               size="s"
               color="primary"
             />
@@ -359,22 +389,11 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
     <RenderAdditionalToolbarControls dataView={dataView} />
   );
 
+  const getBulkActions = useMemo(() => getBulkActionsByTableType(), []);
+
   return (
     <>
-      {true ? (
-        <AlertsTable
-          browserFields={browserFields}
-          columns={columns}
-          consumers={ALERT_TABLE_CONSUMERS}
-          id={TableId.alertsOnAlertSummaryPage}
-          leadingControlColumns={leadingControlColumns}
-          query={finalBoolQuery}
-          renderAdditionalToolbarControls={renderAdditionalToolbarControls}
-          renderCellValue={renderCellValue}
-          ruleTypeIds={RULE_TYPE_IDS}
-          services={services2}
-        />
-      ) : (
+      {showUnifiedComponents ? (
         <UnifiedDataTable
           ariaLabelledBy=""
           columns={COLUMN_IDS}
@@ -400,6 +419,21 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
           showFullScreenButton={false}
           showKeyboardShortcuts={false}
           totalHits={totalCount}
+        />
+      ) : (
+        <AlertsTable
+          browserFields={browserFields}
+          columns={columns}
+          consumers={ALERT_TABLE_CONSUMERS}
+          getBulkActions={getBulkActions}
+          id={TableId.alertsOnAlertSummaryPage}
+          leadingControlColumns={leadingControlColumns}
+          query={finalBoolQuery}
+          renderAdditionalToolbarControls={renderAdditionalToolbarControls}
+          // renderActionsCell={ActionsCellComponent}
+          renderCellValue={renderCellValue}
+          ruleTypeIds={RULE_TYPE_IDS}
+          services={services2}
         />
       )}
     </>
