@@ -18,7 +18,7 @@ if (!Object.hasOwn(global.URL, 'createObjectURL')) {
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!Object.hasOwn(global, 'TextEncoder')) {
-  const customTextEncoding = require('@kayahr/text-encoding');
+  const customTextEncoding = require('@kayahr/text-encoding/lib/main');
   global.TextEncoder = customTextEncoding.TextEncoder;
   global.TextDecoder = customTextEncoding.TextDecoder;
 }
