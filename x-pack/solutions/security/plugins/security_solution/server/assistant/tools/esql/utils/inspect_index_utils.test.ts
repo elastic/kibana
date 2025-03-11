@@ -61,33 +61,12 @@ describe('inspect index', () => {
     [
       {
         type: 'keyword',
-      },1,
+      },
+      1,
       {
         type: 'keyword',
       },
     ],
-    [
-        {
-          field1: {
-            type: 'keyword',
-          },
-          field2: {
-            properties: {
-              nested_field: {
-                type: 'keyword',
-              },
-            },
-          },
-        },2,
-        {
-          field1: {
-            type: 'keyword',
-          },
-          field2: {
-            properties: 'Object',
-          },
-        },
-      ],
     [
       {
         field1: {
@@ -100,7 +79,31 @@ describe('inspect index', () => {
             },
           },
         },
-      },1,
+      },
+      2,
+      {
+        field1: {
+          type: 'keyword',
+        },
+        field2: {
+          properties: 'Object',
+        },
+      },
+    ],
+    [
+      {
+        field1: {
+          type: 'keyword',
+        },
+        field2: {
+          properties: {
+            nested_field: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+      1,
       {
         field1: 'Object',
         field2: 'Object',
@@ -116,7 +119,8 @@ describe('inspect index', () => {
             },
           },
         },
-      },1,
+      },
+      1,
       {
         field1: 'keyword',
         field2: 'Object',

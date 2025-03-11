@@ -33,9 +33,10 @@ export const getEntriesAtKey = (
   return getEntriesAtKey(mapping[key], keys);
 };
 
-
-
-export const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping, maxDepth = 1): string | Record<string, string> => {
+export const formatEntriesAtKey = (
+  mapping: GetEntriesAtKeyMapping,
+  maxDepth = 1
+): string | Record<string, string> => {
   if (mapping === undefined) {
     return 'undefined';
   }
