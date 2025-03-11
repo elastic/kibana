@@ -75,7 +75,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
       return matches.map((message) => {
         // start extracting the quoted message and with few default positioning
         // replaces the quotes only if they are not escaped
-        let warningMessage = message.replace(/(?<!\\)"/g, '').replace(/\\/g, '');
+        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
         let startColumn = 1;
         let startLineNumber = 1;
         // initialize the length to 10 in case no error word found
