@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { notFound } from '@hapi/boom';
+import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -140,7 +140,7 @@ export class ObservabilityAIAssistantClient {
       return false;
     }
 
-    return conversation.user.id
+    return conversation.user.id && user.id
       ? conversation.user.id === user.id
       : conversation.user.name === user.name;
   };
@@ -159,6 +159,10 @@ export class ObservabilityAIAssistantClient {
 
     if (!conversation) {
       throw notFound();
+    }
+
+    if (!this.isConversationOwnedByUser(conversation._source!)) {
+      throw forbidden('Deleting a conversation is only allowed for the owner of the conversation.');
     }
 
     await this.dependencies.esClient.asInternalUser.delete({
@@ -558,7 +562,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
-      throw new Error('Cannot update conversation that is not owned by the user');
+      throw forbidden('Updating a conversation is only allowed for the owner of the conversation.');
     }
 
     const updatedConversation: Conversation = merge(
@@ -571,35 +575,6 @@ export class ObservabilityAIAssistantClient {
       id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
-      refresh: true,
-    });
-
-    return updatedConversation;
-  };
-
-  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const updatedConversation: Conversation = merge(
-      {},
-      conversation,
-      { conversation: { title } },
-      this.getConversationUpdateValues(new Date().toISOString())
-    );
-
-    await this.dependencies.esClient.asInternalUser.update({
-      id: document._id!,
-      index: document._index,
-      doc: { conversation: { title } },
       refresh: true,
     });
 
@@ -626,6 +601,25 @@ export class ObservabilityAIAssistantClient {
     });
 
     return createdConversation;
+  };
+
+  updatePartial = async ({
+    conversationId,
+    updates,
+  }: {
+    conversationId: string;
+    updates: Partial<{ public: boolean }>;
+  }): Promise<Conversation> => {
+    const conversation = await this.get(conversationId);
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const updatedConversation: Conversation = merge({}, conversation, {
+      ...(updates.public !== undefined && { public: updates.public }),
+    });
+
+    return this.update(conversationId, updatedConversation);
   };
 
   duplicateConversation = async (conversationId: string): Promise<Conversation> => {
