@@ -99,10 +99,10 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
       ...acc
     }
   }, {
-    query: z.string().describe("The query to search for")
+    query: z.string().describe("The query to search for").optional()
   })
 
-  server.tool("search", configuration.description, filterSchema, async ({ query, ...filters }) => {
+  server.tool("search", configuration.description, filterSchema, async ({ query, ...filters }: typeof filterSchema) => {
     const { index, } = configuration;
 
     services.logger.info(`Searching for "${query}" in index "${index}"`);
@@ -147,10 +147,13 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
       });
     } catch (error) {
       services.logger.error(`Failed to search: ${error}`);
+    };
+
+    if (!result) {
       return {
         content: []
       }
-    };
+    }
 
     services.logger.info(`Found ${result.hits.hits.length} hits`);
 
