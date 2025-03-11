@@ -39,7 +39,7 @@ export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>
 export type IndexManagementAppMountParams = Pick<
   ManagementAppMountParams,
   'setBreadcrumbs' | 'history'
-> & { element: HTMLDivElement | HTMLElement | null };
+> & { element: HTMLElement | null };
 
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;

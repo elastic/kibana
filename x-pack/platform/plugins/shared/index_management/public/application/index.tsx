@@ -96,7 +96,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
 };
 
 export const renderApp = (
-  elem: HTMLDivElement | HTMLElement | null,
+  elem: HTMLElement | null,
   { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
 ) => {
   if (!elem) {
