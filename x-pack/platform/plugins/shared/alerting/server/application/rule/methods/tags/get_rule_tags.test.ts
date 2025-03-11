@@ -26,6 +26,7 @@ import { RegistryRuleType } from '../../../../rule_type_registry';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -300,5 +301,29 @@ describe('getTags()', () => {
 
     const result = await rulesClient.getTags({ page: 1 });
     expect(result.perPage).toEqual(50);
+  });
+
+  test('combines the filters with the auth filter correctly', async () => {
+    const filter = fromKueryExpression(
+      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    );
+
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+    await rulesClient.getTags({
+      page: 1,
+      ruleTypeIds: ['.es-query', '.index-threshold'],
+      search: 'search',
+    });
+
+    const finalFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+    expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
+      `"(((alert.attributes.alertTypeId: .es-query OR alert.attributes.alertTypeId: .index-threshold) AND alert.attributes.tags: search*) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
+    );
   });
 });
