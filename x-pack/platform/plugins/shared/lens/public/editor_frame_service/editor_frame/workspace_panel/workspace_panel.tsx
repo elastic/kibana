@@ -869,6 +869,7 @@ export const pageContentBodyStyles = ({ euiTheme }: UseEuiTheme) => {
     border-radius: ${euiTheme.border.radius.medium};
     background: ${euiTheme.colors.emptyShade};
     height: 100%;
+    overflow: hidden;
     & > * {
       flex: 1 1 100%;
       display: flex;

@@ -15,7 +15,5 @@ export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
     height: 100%;
     display: flex;
     overflow: auto;
-    // important for visualizations with no padding
-    border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
   `;
 };
