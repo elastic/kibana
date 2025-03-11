@@ -101,7 +101,7 @@ actions:
     update:
       x-displayName: "System"
       description: >
-        Get information about the system status, resource usage, and installed plugins.
+        Get information about the system status, resource usage, features, and installed plugins.
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
