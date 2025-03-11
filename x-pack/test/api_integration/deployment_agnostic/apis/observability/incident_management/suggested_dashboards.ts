@@ -63,11 +63,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           alignEventsToInterval: true,
         },
       };
-      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-      await alertingApi.waitForDocumentInIndex({
-        indexName: dataForgeIndices.join(','),
-        docCountTarget: 500,
-      });
 
       const { body } = await supertestWithAuth
         .post('/api/saved_objects/_import')
@@ -98,31 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .attach('file', join(__dirname, './fixtures/dashboards_test_space.ndjson'))
         .expect(200);
-    });
 
-    after(async () => {
-      await supertestWithoutAuth
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .expect(204);
-      await esClient.deleteByQuery({
-        index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-        conflicts: 'proceed',
-      });
-      await esClient.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'rule.id': ruleId } },
-        conflicts: 'proceed',
-      });
-      await esDeleteAllIndices(dataForgeIndices);
-      await cleanup({ client: esClient, config: dataForgeConfig, logger });
-      await kibanaServer.savedObjects.cleanStandardList();
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(editorUser);
-    });
-
-    it('should return a list of suggested dashboards', async () => {
       const createdRule = await alertingApi.createRule({
         roleAuthc: editorUser,
         spaceId: 'default',
@@ -171,13 +142,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       ruleId = createdRule.id;
       expect(ruleId).not.to.be(undefined);
+
+      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      await alertingApi.waitForDocumentInIndex({
+        indexName: dataForgeIndices.join(','),
+        docCountTarget: 500,
+      });
       const executionStatus = await alertingApi.waitForRuleStatus({
         roleAuthc: editorUser,
         ruleId,
         expectedStatus: 'active',
       });
       expect(executionStatus).to.be('active');
+    });
 
+    after(async () => {
+      await supertestWithoutAuth
+        .delete(`/api/alerting/rule/${ruleId}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(204);
+      await esClient.deleteByQuery({
+        index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
+        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        conflicts: 'proceed',
+      });
+      await esClient.deleteByQuery({
+        index: '.kibana-event-log-*',
+        query: { term: { 'rule.id': ruleId } },
+        conflicts: 'proceed',
+      });
+      await esDeleteAllIndices(dataForgeIndices);
+      await cleanup({ client: esClient, config: dataForgeConfig, logger });
+      await kibanaServer.savedObjects.cleanStandardList();
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(editorUser);
+    });
+
+    it('should return a list of suggested dashboards', async () => {
       const alertResponse = await alertingApi.waitForDocumentInIndex({
         indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         docCountTarget: 1,
