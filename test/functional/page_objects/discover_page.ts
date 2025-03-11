@@ -740,7 +740,7 @@ export class DiscoverPageObject extends FtrService {
    * */
   public async dragFieldWithKeyboardToTable(fieldName: string) {
     const field = await this.find.byCssSelector(
-      `[data-test-subj="dscFieldListPanelField-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+      `[data-test-subj="dscFieldListPanelField-${fieldName}"] + [data-test-subj="domDragDrop-keyboardHandler"]`
     );
     await field.focus();
     await this.retry.try(async () => {
