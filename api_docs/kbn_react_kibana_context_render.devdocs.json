@@ -39,7 +39,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/render/render_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +61,7 @@
               },
               ">"
             ],
-            "path": "packages/react/kibana_context/render/render_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,22 +85,12 @@
         ],
         "signature": [
           "{ i18n: ",
-          {
-            "pluginId": "@kbn/core-i18n-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-public.I18nStart",
-            "text": "I18nStart"
-          },
+          "I18nStart",
           "; analytics?: Pick<",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-public.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
-          ", \"reportEvent\"> | undefined; theme: ",
+          "AnalyticsServiceStart",
+          ", \"reportEvent\"> | undefined; executionContext?: ",
+          "ExecutionContextSetup",
+          " | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
             "scope": "common",
@@ -108,15 +98,17 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          "; modify?: ",
+          "; userProfile?: Pick<",
+          "UserProfileService",
+          ", \"getUserProfile$\"> | undefined; colorMode?: ",
+          "EuiThemeColorMode",
+          " | undefined; modify?: ",
           "RecursivePartial",
           "<",
           "EuiThemeShape",
-          "> | undefined; colorMode?: ",
-          "EuiThemeColorMode",
-          " | undefined; }"
+          "> | undefined; }"
         ],
-        "path": "packages/react/kibana_context/render/render_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

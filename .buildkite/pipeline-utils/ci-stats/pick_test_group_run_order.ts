@@ -485,7 +485,10 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: expandAgentQueue('n2-4-spot'),
+            agents: {
+              ...expandAgentQueue('n2-4-spot'),
+              diskSizeGb: 75,
+            },
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },

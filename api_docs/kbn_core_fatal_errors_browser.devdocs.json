@@ -13,7 +13,7 @@
         "description": [
           "\nRepresents the `message` and `stack` of a fatal Error\n"
         ],
-        "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
+        "path": "src/core/packages/fatal-errors/browser/src/get_error_info.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,7 +24,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
+            "path": "src/core/packages/fatal-errors/browser/src/get_error_info.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -38,7 +38,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
+            "path": "src/core/packages/fatal-errors/browser/src/get_error_info.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -54,7 +54,7 @@
         "description": [
           "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
         ],
-        "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+        "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,7 +70,7 @@
             "signature": [
               "(error: string | Error, source?: string | undefined) => never"
             ],
-            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+            "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,7 +86,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -103,7 +103,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+                "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -124,16 +124,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-public.FatalErrorInfo",
-                "text": "FatalErrorInfo"
-              },
+              "FatalErrorInfo",
               ">"
             ],
-            "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+            "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -155,15 +149,9 @@
           "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-public.FatalErrorsSetup",
-            "text": "FatalErrorsSetup"
-          }
+          "FatalErrorsSetup"
         ],
-        "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
+        "path": "src/core/packages/fatal-errors/browser/src/contract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

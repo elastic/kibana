@@ -28,16 +28,10 @@
         "description": [],
         "signature": [
           "(tags: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.ThemeTags",
-            "text": "ThemeTags"
-          },
+          "ThemeTags",
           ") => boolean"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,15 +43,9 @@
             "label": "tags",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.ThemeTags",
-                "text": "ThemeTags"
-              }
+              "ThemeTags"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+            "path": "src/core/packages/ui-settings/common/src/theme.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,15 +63,9 @@
         "description": [],
         "signature": [
           "(rawValue: unknown) => ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.DarkModeValue",
-            "text": "DarkModeValue"
-          }
+          "DarkModeValue"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+        "path": "src/core/packages/ui-settings/common/src/dark_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,7 +79,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+            "path": "src/core/packages/ui-settings/common/src/dark_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -114,9 +96,9 @@
         "label": "parseThemeNameValue",
         "description": [],
         "signature": [
-          "(value: unknown) => string"
+          "(value: unknown) => \"amsterdam\" | \"borealis\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,7 +112,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+            "path": "src/core/packages/ui-settings/common/src/theme.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,15 +130,9 @@
         "description": [],
         "signature": [
           "(input: unknown) => ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.ThemeTags",
-            "text": "ThemeTags"
-          }
+          "ThemeTags"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -170,7 +146,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+            "path": "src/core/packages/ui-settings/common/src/theme.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -190,7 +166,7 @@
         "description": [
           "\nUiSettings deprecation field options."
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -203,7 +179,7 @@
             "description": [
               "Deprecation message"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -216,7 +192,7 @@
             "description": [
               "Key to documentation links"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -230,7 +206,7 @@
         "tags": [],
         "label": "GetUiSettingsContext",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -242,16 +218,10 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any> | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -268,16 +238,10 @@
           "\nUiSettings parameters defined by the plugins."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsParams",
-            "text": "UiSettingsParams"
-          },
+          "UiSettingsParams",
           "<T>"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -293,7 +257,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -309,7 +273,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -324,16 +288,10 @@
             ],
             "signature": [
               "((context?: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.GetUiSettingsContext",
-                "text": "GetUiSettingsContext"
-              },
+              "GetUiSettingsContext",
               " | undefined) => Promise<T>) | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -345,16 +303,10 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-ui-settings-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                    "section": "def-common.GetUiSettingsContext",
-                    "text": "GetUiSettingsContext"
-                  },
+                  "GetUiSettingsContext",
                   " | undefined"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+                "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -374,7 +326,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -390,7 +342,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,7 +358,7 @@
             "signature": [
               "string[] | number[] | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -422,7 +374,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -438,7 +390,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -454,7 +406,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,16 +420,10 @@
               "a flag indicating the level of restriction of the readonly settings {@link ReadonlyModeType}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.ReadonlyModeType",
-                "text": "ReadonlyModeType"
-              },
+              "ReadonlyModeType",
               " | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,7 +439,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,16 +453,10 @@
               "defines a type of UI element {@link UiSettingsType}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsType",
-                "text": "UiSettingsType"
-              },
+              "UiSettingsType",
               " | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,16 +470,10 @@
               "optional deprecation information. Used to generate a deprecation warning."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.DeprecationSettings",
-                "text": "DeprecationSettings"
-              },
+              "DeprecationSettings",
               " | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -555,7 +489,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -566,7 +500,7 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\nValue validation schema.\nUsed to validate value on write and read.\n\nThis schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.\nUse schema options to specify limits on the value. For example:\n`schema.number({ min: 0, max: 100 })`\n\nMore information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md"
+              "\nValue validation schema.\nUsed to validate value on write and read.\n\nThis schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.\nUse schema options to specify limits on the value. For example:\n`schema.number({ min: 0, max: 100 })`\n\nMore information about schema in https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-config-schema/README.md"
             ],
             "signature": [
               {
@@ -578,7 +512,7 @@
               },
               "<T>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -596,21 +530,21 @@
             "signature": [
               "{ type: string; name: string; } | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/server/ui_settings.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/server/ui_settings.ts"
-              },
-              {
                 "plugin": "@kbn/management-settings-field-definition",
-                "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
+                "path": "src/platform/packages/shared/kbn-management/settings/field_definition/get_definition.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/server/ui_settings.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/server/ui_settings.ts"
               }
             ]
           },
@@ -624,16 +558,27 @@
               "\nScope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting\nscoped to a namespace. The default value is 'namespace'"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.UiSettingsScope",
-                "text": "UiSettingsScope"
-              },
+              "UiSettingsScope",
               " | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [
+              "The solution where this setting is applicable.\nThis field is used to determine whether the setting should be displayed in the Advanced settings app.\nIf undefined, the setting must be displayed in all solutions."
+            ],
+            "signature": [
+              "UiSettingsSolution",
+              " | undefined"
+            ],
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -650,16 +595,10 @@
           "\nDescribes the values explicitly set by user."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UserProvidedValues",
-            "text": "UserProvidedValues"
-          },
+          "UserProvidedValues",
           "<T>"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -673,7 +612,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -687,7 +626,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -709,7 +648,7 @@
         "signature": [
           "boolean | \"system\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+        "path": "src/core/packages/ui-settings/common/src/dark_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -722,9 +661,9 @@
         "label": "DEFAULT_THEME_NAME",
         "description": [],
         "signature": [
-          "\"amsterdam\""
+          "\"borealis\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -739,7 +678,7 @@
         "signature": [
           "\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -756,22 +695,7 @@
         "signature": [
           "\"strict\" | \"ui\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-ui-settings-common",
-        "id": "def-common.SUPPORTED_THEME_NAMES",
-        "type": "Array",
-        "tags": [],
-        "label": "SUPPORTED_THEME_NAMES",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -784,9 +708,9 @@
         "label": "ThemeName",
         "description": [],
         "signature": [
-          "string"
+          "\"amsterdam\" | \"borealis\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -801,7 +725,7 @@
         "signature": [
           "\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -816,7 +740,7 @@
         "signature": [
           "readonly (\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\")[]"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -831,7 +755,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/timezones.ts",
+        "path": "src/core/packages/ui-settings/common/src/timezones.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -848,7 +772,22 @@
         "signature": [
           "\"namespace\" | \"global\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.UiSettingsSolution",
+        "type": "Type",
+        "tags": [],
+        "label": "UiSettingsSolution",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -865,7 +804,7 @@
         "signature": [
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"select\" | \"image\" | \"array\" | \"json\" | \"markdown\""
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -884,7 +823,22 @@
         "signature": [
           "readonly (\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\")[]"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.SUPPORTED_THEME_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "SUPPORTED_THEME_NAMES",
+        "description": [],
+        "signature": [
+          "readonly [\"amsterdam\", \"borealis\"]"
+        ],
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -901,7 +855,7 @@
         "signature": [
           "readonly [\"v8light\", \"v8dark\", \"borealislight\", \"borealisdark\"]"
         ],
-        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "path": "src/core/packages/ui-settings/common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

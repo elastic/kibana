@@ -43,7 +43,10 @@ import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps
-  extends Pick<CoreStart, 'notifications' | 'http' | 'analytics' | 'i18n' | 'theme'> {
+  extends Pick<
+    CoreStart,
+    'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+  > {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -178,13 +181,15 @@ export const SearchExamplesApp = ({
     const aggs = [{ type: metricAggType, params: { field: selectedNumericField!.name } }];
     const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
+    const body = {
+      aggs: aggsDsl,
+      query,
+    };
+
     const req = {
       params: {
         index: dataView.title,
-        body: {
-          aggs: aggsDsl,
-          query,
-        },
+        ...body,
       },
       // Add a custom request parameter to be consumed by `MyStrategy`.
       ...(strategy ? { get_cool: getCool } : {}),
@@ -194,7 +199,7 @@ export const SearchExamplesApp = ({
     setAbortController(abortController);
 
     // Submit the search request using the `data.search` service.
-    setRequest(req.params.body);
+    setRequest(body);
     setRawResponse({});
     setWarningContents([]);
     setIsLoading(true);
@@ -230,13 +235,8 @@ export const SearchExamplesApp = ({
               </EuiText>
             );
             notifications.toasts.addSuccess(
-              {
-                title: 'Query result',
-                text: toMountPoint(message, startServices),
-              },
-              {
-                toastLifeTimeMs: 300000,
-              }
+              { title: 'Query result', text: toMountPoint(message, startServices) },
+              { toastLifeTimeMs: 300000 }
             );
             if (res.warning) {
               notifications.toasts.addWarning({

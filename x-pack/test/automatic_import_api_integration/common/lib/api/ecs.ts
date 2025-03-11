@@ -9,9 +9,10 @@ import {
   EcsMappingRequestBody,
   ECS_GRAPH_PATH,
   EcsMappingResponse,
-} from '@kbn/integration-assistant-plugin/common';
+} from '@kbn/automatic-import-plugin/common';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
+import { BadRequestError } from '../error/error';
 
 export const postEcsMapping = async ({
   supertest,
@@ -23,7 +24,7 @@ export const postEcsMapping = async ({
   req: EcsMappingRequestBody;
   expectedHttpCode?: number;
   auth: { user: User };
-}): Promise<EcsMappingResponse> => {
+}): Promise<EcsMappingResponse | BadRequestError> => {
   const { body: response } = await supertest
     .post(`${ECS_GRAPH_PATH}`)
     .send(req)
@@ -31,6 +32,10 @@ export const postEcsMapping = async ({
     .set('elastic-api-version', '1')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
+
+  if (response.statusCode === 400) {
+    return new BadRequestError(response.message);
+  }
 
   return response;
 };

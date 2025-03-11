@@ -84,7 +84,7 @@ export function renderApp(context, { sectionBasePath, element }) {
 
 We can also create a utility in `kibana_react` to make it easy for folks to `mount` a React app:
 ```ts
-// src/plugins/kibana_react/public/mount_with_react.tsx
+// src/platform/plugins/shared/kibana_react/public/mount_with_react.tsx
 import { KibanaContextProvider } from './context';
 
 export const mountWithReact = (
@@ -105,7 +105,7 @@ export const mountWithReact = (
 }
 
 // my_plugin/public/plugin.ts
-import { mountWithReact } from 'src/plugins/kibana_react/public';
+import { mountWithReact } from 'src/platform/plugins/shared/kibana_react/public';
 
 export class MyPlugin {
   setup(core, { management }) {

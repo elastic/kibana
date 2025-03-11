@@ -6,7 +6,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
-      diskSizeGb: 125
+      diskSizeGb: 150
     timeout_in_minutes: 120
     retry:
       automatic:
@@ -58,19 +58,6 @@ steps:
           limit: 1
 
   - command: KIBANA_DOCKER_CONTEXT=default .buildkite/scripts/steps/artifacts/docker_context.sh
-    label: 'Docker Context Verification'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    timeout_in_minutes: 30
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2004

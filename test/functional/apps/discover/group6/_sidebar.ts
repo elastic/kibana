@@ -300,47 +300,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
       });
 
-      it('should show field list groups excluding subfields when searched from source', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
-        await browser.refresh();
-
-        await unifiedFieldList.waitUntilSidebarHasLoaded();
-        expect(await unifiedFieldList.doesSidebarShowFields()).to.be(true);
-
-        // Initial Available fields
-        const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
-        expect(availableFields.length).to.be(48);
-        expect(
-          availableFields
-            .join(', ')
-            .startsWith(
-              '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates'
-            )
-        ).to.be(true);
-
-        // Available fields after scrolling down
-        const metaSectionButton = await find.byCssSelector(
-          unifiedFieldList.getSidebarSectionSelector('meta', true)
-        );
-        await metaSectionButton.scrollIntoViewIfNecessary();
-
-        // Expand Meta section
-        await unifiedFieldList.toggleSidebarSection('meta');
-        expect((await unifiedFieldList.getSidebarSectionFieldNames('meta')).join(', ')).to.be(
-          '_id, _ignored, _index, _score'
-        );
-
-        // Expand Unmapped section
-        await unifiedFieldList.toggleSidebarSection('unmapped');
-        expect((await unifiedFieldList.getSidebarSectionFieldNames('unmapped')).join(', ')).to.be(
-          'relatedContent'
-        );
-
-        await expectFieldListDescription(
-          '48 available fields. 1 unmapped field. 5 empty fields. 4 meta fields.'
-        );
-      });
-
       it('should show selected and popular fields', async function () {
         await unifiedFieldList.clickFieldListItemAdd('extension');
         await discover.waitUntilSearchingHasFinished();
@@ -383,6 +342,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await expectFieldListDescription(
           '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
+        );
+
+        await unifiedFieldList.clickFieldListItemRemove('@message');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemRemove('extension');
+        await discover.waitUntilSearchingHasFinished();
+        await discover.addRuntimeField('test', `emit('test')`, undefined, 30);
+        await discover.waitUntilSearchingHasFinished();
+
+        expect((await unifiedFieldList.getSidebarSectionFieldNames('popular')).join(', ')).to.be(
+          'test, @message, extension, _id'
+        );
+
+        await expectFieldListDescription(
+          '1 selected field. 4 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
+        );
+
+        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        await discover.waitUntilSearchingHasFinished();
+
+        expect((await unifiedFieldList.getSidebarSectionFieldNames('popular')).join(', ')).to.be(
+          'test, @message, extension, _id, bytes'
+        );
+
+        await expectFieldListDescription(
+          '2 selected fields. 5 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
         );
       });
 

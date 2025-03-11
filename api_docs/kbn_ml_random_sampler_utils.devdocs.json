@@ -27,7 +27,7 @@
         "description": [
           "\nClass that helps manage random sampling settings\nAutomatically calculates the probability if only total doc count is provided\nElse, use the probability that was explicitly set"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -66,7 +66,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -91,7 +91,7 @@
                   },
                   ") => void) | undefined"
                 ],
-                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -115,7 +115,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -140,7 +140,7 @@
                   },
                   ") => void) | undefined"
                 ],
-                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -160,7 +160,7 @@
             "signature": [
               "(docCount: number) => void"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -176,7 +176,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -196,7 +196,7 @@
             "signature": [
               "() => number"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -222,7 +222,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -244,7 +244,7 @@
                     "text": "RandomSamplerOption"
                   }
                 ],
-                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -274,7 +274,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -299,7 +299,7 @@
                 "text": "RandomSamplerOption"
               }
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -325,7 +325,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -347,7 +347,7 @@
                     "text": "RandomSamplerProbability"
                   }
                 ],
-                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -377,7 +377,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -402,7 +402,7 @@
                 "text": "RandomSamplerProbability"
               }
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -426,7 +426,7 @@
               "AggregationsAggregate",
               ">>(responseAggs: T) => T | T[string]; probability: number; }"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -455,7 +455,7 @@
           "AggregationsAggregate",
           ">>(responseAggs: T) => T | T[string]; probability: number; }"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -471,7 +471,7 @@
             "signature": [
               "RandomSamplerOptions"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -494,7 +494,7 @@
         "signature": [
           "(totalDocCount: number) => number"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/get_sample_probability.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/get_sample_probability.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -510,7 +510,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/random_sampler_utils/src/get_sample_probability.ts",
+            "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/get_sample_probability.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -537,7 +537,7 @@
         "signature": [
           "0.001"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -554,7 +554,7 @@
         "signature": [
           "0.00001"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -571,7 +571,7 @@
         "signature": [
           "number[]"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -585,7 +585,7 @@
         "description": [
           "\nDefault step minimum probability for default sampling"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -602,7 +602,7 @@
         "signature": [
           "\"off\" | \"on_automatic\" | \"on_manual\""
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -619,7 +619,7 @@
         "signature": [
           "number | null"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -642,7 +642,7 @@
           "AggregationsAggregate",
           ">>(responseAggs: T) => T | T[string]; probability: number; }"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_wrapper.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -661,7 +661,7 @@
         "signature": [
           "{ readonly ON_AUTOMATIC: \"on_automatic\"; readonly ON_MANUAL: \"on_manual\"; readonly OFF: \"off\"; }"
         ],
-        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "path": "x-pack/platform/packages/shared/ml/random_sampler_utils/src/random_sampler_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

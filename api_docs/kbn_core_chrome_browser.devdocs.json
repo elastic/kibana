@@ -11,7 +11,7 @@
         "tags": [],
         "label": "ChromeBadge",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+        "path": "src/core/packages/chrome/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,7 +22,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+            "path": "src/core/packages/chrome/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -33,7 +33,7 @@
             "tags": [],
             "label": "tooltip",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+            "path": "src/core/packages/chrome/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,7 +48,7 @@
               "IconType",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+            "path": "src/core/packages/chrome/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -63,17 +63,11 @@
         "label": "ChromeBreadcrumb",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeBreadcrumb",
-            "text": "ChromeBreadcrumb"
-          },
+          "ChromeBreadcrumb",
           " extends ",
           "EuiBreadcrumbProps"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+        "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,16 +81,10 @@
               "\nThe deepLinkId can be used to merge the navigational breadcrumbs set via project navigation\nwith the deeper context breadcrumbs set via the `chrome.setBreadcrumbs` API."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.AppDeepLinkId",
-                "text": "AppDeepLinkId"
-              },
+              "AppDeepLinkId",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -110,7 +98,7 @@
         "tags": [],
         "label": "ChromeBreadcrumbsAppendExtension",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+        "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -123,15 +111,9 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -146,11 +128,27 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeBreadcrumbsAppendExtension.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "The order in which the extension should be appended to the breadcrumbs. Default is 50"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -164,7 +162,7 @@
         "description": [
           "\nAPIs for accessing and updating the document title.\n"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
+        "path": "src/core/packages/chrome/browser/src/doc_title.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -180,7 +178,7 @@
             "signature": [
               "(newTitle: string | string[]) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
+            "path": "src/core/packages/chrome/browser/src/doc_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,7 +194,7 @@
                 "signature": [
                   "string | string[]"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
+                "path": "src/core/packages/chrome/browser/src/doc_title.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -216,7 +214,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/doc_title.ts",
+            "path": "src/core/packages/chrome/browser/src/doc_title.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -233,23 +231,11 @@
         "label": "ChromeGlobalHelpExtensionMenuLink",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeGlobalHelpExtensionMenuLink",
-            "text": "ChromeGlobalHelpExtensionMenuLink"
-          },
+          "ChromeGlobalHelpExtensionMenuLink",
           " extends ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuCustomLink",
-            "text": "ChromeHelpExtensionMenuCustomLink"
-          }
+          "ChromeHelpExtensionMenuCustomLink"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -262,7 +248,7 @@
             "description": [
               "\nHighest priority items are listed at the top of the list of links."
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -276,7 +262,7 @@
         "tags": [],
         "label": "ChromeHelpExtension",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -289,7 +275,7 @@
             "description": [
               "\nProvide your plugin's name to create a header for separation"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -303,16 +289,10 @@
               "\nCreates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeHelpExtensionMenuLink",
-                "text": "ChromeHelpExtensionMenuLink"
-              },
+              "ChromeHelpExtensionMenuLink",
               "[] | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,16 +307,10 @@
             ],
             "signature": [
               "((element: HTMLDivElement, menuActions: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeHelpMenuActions",
-                "text": "ChromeHelpMenuActions"
-              },
+              "ChromeHelpMenuActions",
               ") => () => void) | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -350,7 +324,7 @@
                 "signature": [
                   "HTMLDivElement"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+                "path": "src/core/packages/chrome/browser/src/help_extension.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -363,15 +337,9 @@
                 "label": "menuActions",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeHelpMenuActions",
-                    "text": "ChromeHelpMenuActions"
-                  }
+                  "ChromeHelpMenuActions"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+                "path": "src/core/packages/chrome/browser/src/help_extension.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -390,23 +358,11 @@
         "label": "ChromeHelpExtensionMenuCustomLink",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuCustomLink",
-            "text": "ChromeHelpExtensionMenuCustomLink"
-          },
+          "ChromeHelpExtensionMenuCustomLink",
           " extends ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionLinkBase",
-            "text": "ChromeHelpExtensionLinkBase"
-          }
+          "ChromeHelpExtensionLinkBase"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -422,7 +378,7 @@
             "signature": [
               "\"custom\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -435,7 +391,7 @@
             "description": [
               "\nURL of the link"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -451,7 +407,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -467,7 +423,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -482,23 +438,11 @@
         "label": "ChromeHelpExtensionMenuDiscussLink",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuDiscussLink",
-            "text": "ChromeHelpExtensionMenuDiscussLink"
-          },
+          "ChromeHelpExtensionMenuDiscussLink",
           " extends ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionLinkBase",
-            "text": "ChromeHelpExtensionLinkBase"
-          }
+          "ChromeHelpExtensionLinkBase"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -514,7 +458,7 @@
             "signature": [
               "\"discuss\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -527,7 +471,7 @@
             "description": [
               "\nURL to discuss page.\ni.e. `https://discuss.elastic.co/c/${appName}`"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -542,23 +486,11 @@
         "label": "ChromeHelpExtensionMenuDocumentationLink",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuDocumentationLink",
-            "text": "ChromeHelpExtensionMenuDocumentationLink"
-          },
+          "ChromeHelpExtensionMenuDocumentationLink",
           " extends ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionLinkBase",
-            "text": "ChromeHelpExtensionLinkBase"
-          }
+          "ChromeHelpExtensionLinkBase"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -574,7 +506,7 @@
             "signature": [
               "\"documentation\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,7 +519,7 @@
             "description": [
               "\nURL to documentation page.\ni.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -602,23 +534,11 @@
         "label": "ChromeHelpExtensionMenuGitHubLink",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuGitHubLink",
-            "text": "ChromeHelpExtensionMenuGitHubLink"
-          },
+          "ChromeHelpExtensionMenuGitHubLink",
           " extends ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionLinkBase",
-            "text": "ChromeHelpExtensionLinkBase"
-          }
+          "ChromeHelpExtensionLinkBase"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -634,7 +554,7 @@
             "signature": [
               "\"github\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -650,7 +570,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -666,7 +586,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -680,7 +600,7 @@
         "tags": [],
         "label": "ChromeHelpMenuActions",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -694,7 +614,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -710,7 +630,7 @@
         "tags": [],
         "label": "ChromeHelpMenuLink",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+        "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -721,7 +641,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -735,21 +655,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpMenuLink.iconType",
-            "type": "string",
-            "tags": [],
-            "label": "iconType",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -763,7 +669,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -779,7 +685,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -793,7 +699,7 @@
         "tags": [],
         "label": "ChromeNavControl",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+        "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -807,7 +713,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -820,15 +726,9 @@
             "description": [],
             "signature": [
               "(element: HTMLElement) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -843,7 +743,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -861,7 +761,7 @@
         "description": [
           "\n{@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.\n"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+        "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -876,16 +776,10 @@
             ],
             "signature": [
               "(navControl: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavControl",
-                "text": "ChromeNavControl"
-              },
+              "ChromeNavControl",
               ") => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -897,15 +791,9 @@
                 "label": "navControl",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeNavControl",
-                    "text": "ChromeNavControl"
-                  }
+                  "ChromeNavControl"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+                "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -924,16 +812,10 @@
             ],
             "signature": [
               "(navControl: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavControl",
-                "text": "ChromeNavControl"
-              },
+              "ChromeNavControl",
               ") => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -945,15 +827,9 @@
                 "label": "navControl",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeNavControl",
-                    "text": "ChromeNavControl"
-                  }
+                  "ChromeNavControl"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+                "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -972,16 +848,10 @@
             ],
             "signature": [
               "(navControl: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavControl",
-                "text": "ChromeNavControl"
-              },
+              "ChromeNavControl",
               ") => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -993,15 +863,9 @@
                 "label": "navControl",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeNavControl",
-                    "text": "ChromeNavControl"
-                  }
+                  "ChromeNavControl"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+                "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1020,16 +884,10 @@
             ],
             "signature": [
               "(navControl: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavControl",
-                "text": "ChromeNavControl"
-              },
+              "ChromeNavControl",
               ") => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1041,15 +899,9 @@
                 "label": "navControl",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeNavControl",
-                    "text": "ChromeNavControl"
-                  }
+                  "ChromeNavControl"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+                "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1068,16 +920,10 @@
             ],
             "signature": [
               "(links: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeHelpMenuLink",
-                "text": "ChromeHelpMenuLink"
-              },
+              "ChromeHelpMenuLink",
               "[]) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1089,16 +935,10 @@
                 "label": "links",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeHelpMenuLink",
-                    "text": "ChromeHelpMenuLink"
-                  },
+                  "ChromeHelpMenuLink",
                   "[]"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+                "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1116,7 +956,7 @@
         "tags": [],
         "label": "ChromeNavLink",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+        "path": "src/core/packages/chrome/browser/src/nav_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1129,7 +969,7 @@
             "description": [
               "\nA unique identifier for looking up links."
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1142,7 +982,7 @@
             "description": [
               "\nThe title of the application."
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1156,16 +996,10 @@
               "\nThe category the app lives in"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-common",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationCommonPluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              },
+              "AppCategory",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1178,7 +1012,7 @@
             "description": [
               "\nThe base route used to open the root of an application."
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1191,7 +1025,7 @@
             "description": [
               "\nThe route used to open the default path and the deep links of an application."
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1207,7 +1041,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1223,7 +1057,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1239,7 +1073,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1255,7 +1089,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1268,7 +1102,7 @@
             "description": [
               "\nSettled state between `url`, `baseUrl`, and `active`"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1284,16 +1118,10 @@
               "\nList of locations where the nav link should be visible.\n\nAccepts the following values:\n- \"globalSearch\": the link will appear in the global search bar\n- \"home\": the link will appear on the Kibana home page\n- \"kibanaOverview\": the link will appear in the Kibana overview page\n- \"sideNav\": the link will appear in the side navigation.\n  Note: \"sideNav\" will be deprecated when we change the navigation to \"solutions\" style.\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.AppDeepLinkLocations",
-                "text": "AppDeepLinkLocations"
-              },
+              "AppDeepLinkLocations",
               "[]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1309,7 +1137,7 @@
         "description": [
           "\n{@link ChromeNavLinks | APIs} for manipulating nav links.\n"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+        "path": "src/core/packages/chrome/browser/src/nav_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1326,16 +1154,10 @@
               "() => ",
               "Observable",
               "<Readonly<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
+              "ChromeNavLink",
               ">[]>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1352,16 +1174,10 @@
             ],
             "signature": [
               "(id: string) => ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
+              "ChromeNavLink",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1375,7 +1191,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+                "path": "src/core/packages/chrome/browser/src/nav_links.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1394,16 +1210,10 @@
             ],
             "signature": [
               "() => Readonly<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
+              "ChromeNavLink",
               ">[]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1421,7 +1231,7 @@
             "signature": [
               "(id: string) => boolean"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1435,7 +1245,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+                "path": "src/core/packages/chrome/browser/src/nav_links.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1455,7 +1265,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1475,7 +1285,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
+            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1494,16 +1304,10 @@
           "\n\nChrome project navigation node. This is the tree definition stored in the Chrome service\nthat is generated based on the NodeDefinition below.\nSome of the process that occurs between the 2 are:\n- \"link\" prop get converted to existing ChromNavLink\n- \"path\" is added to each node based on where it is located in the tree\n- \"isActive\" state is set for each node if its URL matches the current location"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeProjectNavigationNode",
-            "text": "ChromeProjectNavigationNode"
-          },
+          "ChromeProjectNavigationNode",
           " extends NodeDefinitionBase"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1516,7 +1320,7 @@
             "description": [
               "Optional id, if not passed a \"link\" must be provided."
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1529,7 +1333,7 @@
             "description": [
               "Optional title. If not provided and a \"link\" is provided the title will be the Deep link title"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1542,7 +1346,7 @@
             "description": [
               "Path in the tree of the node"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1556,16 +1360,10 @@
               "App id or deeplink id"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
+              "ChromeNavLink",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1579,16 +1377,10 @@
               "\nOptional children of the navigation node. Once a node has \"children\" defined it is\nconsidered a \"group\" node."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               "[] | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1604,7 +1396,7 @@
             "signature": [
               "(() => React.ReactNode) | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1622,7 +1414,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1638,7 +1430,7 @@
         "description": [
           "\n{@link ChromeRecentlyAccessed | APIs} for recently accessed history."
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+        "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1654,7 +1446,7 @@
             "signature": [
               "(link: string, label: string, id: string) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+            "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1670,7 +1462,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+                "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1687,7 +1479,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+                "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1704,7 +1496,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+                "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1723,16 +1515,10 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
-                "text": "ChromeRecentlyAccessedHistoryItem"
-              },
+              "ChromeRecentlyAccessedHistoryItem",
               "[]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+            "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1751,16 +1537,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
-                "text": "ChromeRecentlyAccessedHistoryItem"
-              },
+              "ChromeRecentlyAccessedHistoryItem",
               "[]>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+            "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1776,7 +1556,7 @@
         "tags": [],
         "label": "ChromeRecentlyAccessedHistoryItem",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+        "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1787,7 +1567,7 @@
             "tags": [],
             "label": "link",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+            "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1798,7 +1578,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+            "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1809,7 +1589,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/recently_accessed.ts",
+            "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1823,7 +1603,7 @@
         "tags": [],
         "label": "ChromeSetBreadcrumbsParams",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+        "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1838,24 +1618,12 @@
             ],
             "signature": [
               "{ value: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               " | ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[]; absolute?: boolean | undefined; } | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1869,7 +1637,7 @@
         "tags": [],
         "label": "ChromeSetProjectBreadcrumbsParams",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1880,7 +1648,7 @@
             "tags": [],
             "label": "absolute",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1896,7 +1664,7 @@
         "description": [
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+        "path": "src/core/packages/chrome/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1910,15 +1678,9 @@
               "{@inheritdoc ChromeNavLinks}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLinks",
-                "text": "ChromeNavLinks"
-              }
+              "ChromeNavLinks"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1932,15 +1694,9 @@
               "{@inheritdoc ChromeNavControls}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavControls",
-                "text": "ChromeNavControls"
-              }
+              "ChromeNavControls"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1954,15 +1710,9 @@
               "{@inheritdoc ChromeRecentlyAccessed}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeRecentlyAccessed",
-                "text": "ChromeRecentlyAccessed"
-              }
+              "ChromeRecentlyAccessed"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1976,15 +1726,9 @@
               "{@inheritdoc ChromeDocTitle}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeDocTitle",
-                "text": "ChromeDocTitle"
-              }
+              "ChromeDocTitle"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2002,7 +1746,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2020,7 +1764,7 @@
             "signature": [
               "(isVisible: boolean) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2034,7 +1778,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2055,16 +1799,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBadge",
-                "text": "ChromeBadge"
-              },
+              "ChromeBadge",
               " | undefined>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2081,16 +1819,10 @@
             ],
             "signature": [
               "(badge?: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBadge",
-                "text": "ChromeBadge"
-              },
+              "ChromeBadge",
               " | undefined) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2102,16 +1834,10 @@
                 "label": "badge",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBadge",
-                    "text": "ChromeBadge"
-                  },
+                  "ChromeBadge",
                   " | undefined"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2132,16 +1858,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[]>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2158,24 +1878,12 @@
             ],
             "signature": [
               "(newBreadcrumbs: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[], params?: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeSetBreadcrumbsParams",
-                "text": "ChromeSetBreadcrumbsParams"
-              },
+              "ChromeSetBreadcrumbsParams",
               " | undefined) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2187,16 +1895,10 @@
                 "label": "newBreadcrumbs",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBreadcrumb",
-                    "text": "ChromeBreadcrumb"
-                  },
+                  "ChromeBreadcrumb",
                   "[]"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2209,16 +1911,10 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeSetBreadcrumbsParams",
-                    "text": "ChromeSetBreadcrumbsParams"
-                  },
+                  "ChromeSetBreadcrumbsParams",
                   " | undefined"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2228,27 +1924,21 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeStart.getBreadcrumbsAppendExtension$",
+            "id": "def-public.ChromeStart.getBreadcrumbsAppendExtensions$",
             "type": "Function",
             "tags": [],
-            "label": "getBreadcrumbsAppendExtension$",
+            "label": "getBreadcrumbsAppendExtensions$",
             "description": [
-              "\nGet an observable of the current extension appended to breadcrumbs"
+              "\nGet an observable of the current extensions appended to breadcrumbs"
             ],
             "signature": [
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                "text": "ChromeBreadcrumbsAppendExtension"
-              },
-              " | undefined>"
+              "ChromeBreadcrumbsAppendExtension",
+              "[]>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2264,17 +1954,11 @@
               "\nMount an element next to the last breadcrumb"
             ],
             "signature": [
-              "(breadcrumbsAppendExtension?: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                "text": "ChromeBreadcrumbsAppendExtension"
-              },
-              " | undefined) => void"
+              "(breadcrumbsAppendExtension: ",
+              "ChromeBreadcrumbsAppendExtension",
+              ") => () => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2286,19 +1970,12 @@
                 "label": "breadcrumbsAppendExtension",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBreadcrumbsAppendExtension",
-                    "text": "ChromeBreadcrumbsAppendExtension"
-                  },
-                  " | undefined"
+                  "ChromeBreadcrumbsAppendExtension"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -2316,16 +1993,10 @@
               "() => ",
               "Observable",
               "<Partial<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
+              "ChromeNavLink",
               "> | undefined>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2342,16 +2013,10 @@
             ],
             "signature": [
               "(newCustomNavLink?: Partial<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
+              "ChromeNavLink",
               "> | undefined) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2364,16 +2029,10 @@
                 "description": [],
                 "signature": [
                   "Partial<",
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeNavLink",
-                    "text": "ChromeNavLink"
-                  },
+                  "ChromeNavLink",
                   "> | undefined"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2392,16 +2051,10 @@
             ],
             "signature": [
               "(links: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeHelpMenuLink",
-                "text": "ChromeHelpMenuLink"
-              },
+              "ChromeHelpMenuLink",
               "[]) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2413,16 +2066,10 @@
                 "label": "links",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeHelpMenuLink",
-                    "text": "ChromeHelpMenuLink"
-                  },
+                  "ChromeHelpMenuLink",
                   "[]"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2443,16 +2090,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeGlobalHelpExtensionMenuLink",
-                "text": "ChromeGlobalHelpExtensionMenuLink"
-              },
+              "ChromeGlobalHelpExtensionMenuLink",
               "[]>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2469,16 +2110,10 @@
             ],
             "signature": [
               "(globalHelpExtensionMenuLink: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeGlobalHelpExtensionMenuLink",
-                "text": "ChromeGlobalHelpExtensionMenuLink"
-              },
+              "ChromeGlobalHelpExtensionMenuLink",
               ") => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2490,15 +2125,9 @@
                 "label": "globalHelpExtensionMenuLink",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeGlobalHelpExtensionMenuLink",
-                    "text": "ChromeGlobalHelpExtensionMenuLink"
-                  }
+                  "ChromeGlobalHelpExtensionMenuLink"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2519,16 +2148,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeHelpExtension",
-                "text": "ChromeHelpExtension"
-              },
+              "ChromeHelpExtension",
               " | undefined>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2545,16 +2168,10 @@
             ],
             "signature": [
               "(helpExtension?: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeHelpExtension",
-                "text": "ChromeHelpExtension"
-              },
+              "ChromeHelpExtension",
               " | undefined) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2566,16 +2183,10 @@
                 "label": "helpExtension",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeHelpExtension",
-                    "text": "ChromeHelpExtension"
-                  },
+                  "ChromeHelpExtension",
                   " | undefined"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2595,7 +2206,7 @@
             "signature": [
               "(url: string) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2611,7 +2222,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2633,7 +2244,7 @@
               "Observable",
               "<string>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2653,7 +2264,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2670,16 +2281,10 @@
             ],
             "signature": [
               "(headerBanner?: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeUserBanner",
-                "text": "ChromeUserBanner"
-              },
+              "ChromeUserBanner",
               " | undefined) => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2691,16 +2296,10 @@
                 "label": "headerBanner",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeUserBanner",
-                    "text": "ChromeUserBanner"
-                  },
+                  "ChromeUserBanner",
                   " | undefined"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2722,7 +2321,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2739,16 +2338,10 @@
             ],
             "signature": [
               "(style: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStyle",
-                "text": "ChromeStyle"
-              },
+              "ChromeStyle",
               ") => void"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2762,15 +2355,9 @@
                   "The style type to apply to the chrome."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeStyle",
-                    "text": "ChromeStyle"
-                  }
+                  "ChromeStyle"
                 ],
-                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2791,16 +2378,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStyle",
-                "text": "ChromeStyle"
-              },
+              "ChromeStyle",
               ">"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2819,26 +2400,14 @@
               "<boolean>; setIsCollapsed(isCollapsed: boolean): void; getPanelSelectedNode$: () => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.PanelSelectedNode",
-                "text": "PanelSelectedNode"
-              },
+              "PanelSelectedNode",
               " | null>; setPanelSelectedNode(node: string | ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.PanelSelectedNode",
-                "text": "PanelSelectedNode"
-              },
+              "PanelSelectedNode",
               " | null): void; getIsFeedbackBtnVisible$: () => ",
               "Observable",
               "<boolean>; setIsFeedbackBtnVisible: (isVisible: boolean) => void; }"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2856,7 +2425,7 @@
               "Observable",
               "<string | null>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2872,7 +2441,7 @@
         "tags": [],
         "label": "ChromeUserBanner",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+        "path": "src/core/packages/chrome/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2885,15 +2454,9 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.UnmountCallback",
-                "text": "UnmountCallback"
-              }
+              "UnmountCallback"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+            "path": "src/core/packages/chrome/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2908,7 +2471,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2924,7 +2487,7 @@
         "tags": [],
         "label": "CloudLink",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2935,7 +2498,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2946,7 +2509,7 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2960,7 +2523,7 @@
         "tags": [],
         "label": "CloudURLs",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2974,7 +2537,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2988,7 +2551,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3002,7 +2565,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3016,7 +2579,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3030,7 +2593,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3044,7 +2607,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3058,7 +2621,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3073,24 +2636,12 @@
         "label": "GroupDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.GroupDefinition",
-            "text": "GroupDefinition"
-          },
+          "GroupDefinition",
           "<LinkId, Id, ChildrenId> extends Omit<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<LinkId, Id, ChildrenId>, \"children\">"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3104,7 +2655,7 @@
             "signature": [
               "\"navGroup\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3116,16 +2667,10 @@
             "label": "children",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.NodeDefinition",
-                "text": "NodeDefinition"
-              },
+              "NodeDefinition",
               "<LinkId, Id, ChildrenId>[]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3140,24 +2685,12 @@
         "label": "ItemDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ItemDefinition",
-            "text": "ItemDefinition"
-          },
+          "ItemDefinition",
           "<LinkId, Id, ChildrenId> extends Omit<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<LinkId, Id, ChildrenId>, \"children\">"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3171,7 +2704,7 @@
             "signature": [
               "\"navItem\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3186,16 +2719,10 @@
         "label": "NavigationTreeDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NavigationTreeDefinition",
-            "text": "NavigationTreeDefinition"
-          },
+          "NavigationTreeDefinition",
           "<LinkId, Id, ChildrenId>"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3209,16 +2736,10 @@
               "\nMain content of the navigation. Can contain any number of \"cloudLink\", \"recentlyAccessed\"\nor \"group\" items."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.RootNavigationItemDefinition",
-                "text": "RootNavigationItemDefinition"
-              },
+              "RootNavigationItemDefinition",
               "<LinkId, Id, ChildrenId>[]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3232,16 +2753,10 @@
               "\nFooter content of the navigation. Can contain any number of \"cloudLink\", \"recentlyAccessed\"\nor \"group\" items."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.RootNavigationItemDefinition",
-                "text": "RootNavigationItemDefinition"
-              },
+              "RootNavigationItemDefinition",
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3255,7 +2770,7 @@
         "tags": [],
         "label": "NavigationTreeDefinitionUI",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3269,7 +2784,7 @@
             "signature": [
               "\"security\" | \"es\" | \"oblt\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3282,24 +2797,12 @@
             "description": [],
             "signature": [
               "(",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               " | ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.RecentlyAccessedDefinition",
-                "text": "RecentlyAccessedDefinition"
-              },
+              "RecentlyAccessedDefinition",
               ")[]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3312,24 +2815,12 @@
             "description": [],
             "signature": [
               "(",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               " | ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.RecentlyAccessedDefinition",
-                "text": "RecentlyAccessedDefinition"
-              },
+              "RecentlyAccessedDefinition",
               ")[] | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3344,16 +2835,10 @@
         "label": "NodeDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<LinkId, Id, ChildrenId> extends NodeDefinitionBase"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3369,7 +2854,7 @@
             "signature": [
               "Id | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3385,7 +2870,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3401,7 +2886,7 @@
             "signature": [
               "LinkId | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3415,16 +2900,10 @@
               "Cloud link id"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.CloudLinkId",
-                "text": "CloudLinkId"
-              },
+              "CloudLinkId",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3438,16 +2917,10 @@
               "Optional children of the navigation node. Can not be used with `isGroupTitle`"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.NodeDefinition",
-                "text": "NodeDefinition"
-              },
+              "NodeDefinition",
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3462,24 +2935,12 @@
         "label": "PresetDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.PresetDefinition",
-            "text": "PresetDefinition"
-          },
+          "PresetDefinition",
           "<LinkId, Id, ChildrenId> extends Omit<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.GroupDefinition",
-            "text": "GroupDefinition"
-          },
+          "GroupDefinition",
           "<LinkId, Id, ChildrenId>, \"type\" | \"children\">"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3493,7 +2954,7 @@
             "signature": [
               "\"preset\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3507,7 +2968,7 @@
             "signature": [
               "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3521,7 +2982,7 @@
         "tags": [],
         "label": "RecentlyAccessedDefinition",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3535,7 +2996,7 @@
             "signature": [
               "\"recentlyAccessed\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3551,16 +3012,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
-                "text": "ChromeRecentlyAccessedHistoryItem"
-              },
+              "ChromeRecentlyAccessedHistoryItem",
               "[]> | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3578,7 +3033,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3592,7 +3047,7 @@
         "tags": [],
         "label": "SideNavCompProps",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3604,16 +3059,10 @@
             "label": "activeNodes",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               "[][]"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3628,16 +3077,10 @@
         "label": "SolutionNavigationDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.SolutionNavigationDefinition",
-            "text": "SolutionNavigationDefinition"
-          },
+          "SolutionNavigationDefinition",
           "<LinkId>"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3653,7 +3096,7 @@
             "signature": [
               "\"security\" | \"es\" | \"oblt\""
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3666,7 +3109,7 @@
             "description": [
               "Title for the solution navigation."
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3682,16 +3125,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.NavigationTreeDefinition",
-                "text": "NavigationTreeDefinition"
-              },
+              "NavigationTreeDefinition",
               "<LinkId, string, string>>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3708,7 +3145,7 @@
               "IconType",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3722,16 +3159,10 @@
               "React component to render in the side nav for the navigation"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.SideNavComponent",
-                "text": "SideNavComponent"
-              },
+              "SideNavComponent",
               " | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3747,7 +3178,7 @@
             "signature": [
               "LinkId | undefined"
             ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3765,9 +3196,9 @@
         "label": "AppDeepLinkId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"metrics\" | \"management\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"dashboards\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"discover\" | \"observability-overview\" | \"streams\" | \"appSearch\" | \"dev_tools\" | \"maps\" | \"visualize\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"management:transform\" | \"management:watcher\" | \"management:cases\" | \"management:tags\" | \"management:maintenanceWindows\" | \"management:cross_cluster_replication\" | \"management:dataViews\" | \"management:spaces\" | \"management:settings\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:filesManagement\" | \"management:roles\" | \"management:reporting\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:pipelines\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:triggersActions\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"searchInferenceEndpoints\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:searchIndices\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"enterpriseSearchApplications:playground\" | \"appSearch:engines\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:assets\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:investigations\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:machine_learning-landing\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-asset-classification\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\""
+          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"metrics\" | \"management\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"dashboards\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"streams\" | \"inventory\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:maintenanceWindows\" | \"management:cross_cluster_replication\" | \"management:dataViews\" | \"management:spaces\" | \"management:settings\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:pipelines\" | \"management:roles\" | \"management:reporting\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:triggersActions\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:assets\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:investigations\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:machine_learning-landing\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-asset-classification\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3780,7 +3211,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"ml\" | \"home\" | \"appSearch\" | \"dev_tools\" | ",
+          "\"fleet\" | \"ml\" | \"home\" | \"dev_tools\" | ",
           {
             "pluginId": "@kbn/deeplinks-analytics",
             "scope": "common",
@@ -3796,7 +3227,7 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | ",
+          " | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessElasticsearch\" | ",
           {
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
@@ -3806,7 +3237,7 @@
           },
           " | \"securitySolutionUI\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3823,7 +3254,7 @@
           "IconType",
           " | undefined; target?: string | (string & {}) | undefined; }"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3836,39 +3267,15 @@
         "label": "ChromeHelpExtensionMenuLink",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuCustomLink",
-            "text": "ChromeHelpExtensionMenuCustomLink"
-          },
+          "ChromeHelpExtensionMenuCustomLink",
           " | ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuGitHubLink",
-            "text": "ChromeHelpExtensionMenuGitHubLink"
-          },
+          "ChromeHelpExtensionMenuGitHubLink",
           " | ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuDiscussLink",
-            "text": "ChromeHelpExtensionMenuDiscussLink"
-          },
+          "ChromeHelpExtensionMenuDiscussLink",
           " | ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeHelpExtensionMenuDocumentationLink",
-            "text": "ChromeHelpExtensionMenuDocumentationLink"
-          }
+          "ChromeHelpExtensionMenuDocumentationLink"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3883,7 +3290,7 @@
         "signature": [
           "\"classic\" | \"project\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+        "path": "src/core/packages/chrome/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3898,7 +3305,7 @@
         "signature": [
           "\"projects\" | \"deployment\" | \"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployments\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3912,56 +3319,20 @@
         "description": [],
         "signature": [
           "{ projects?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.CloudLink",
-            "text": "CloudLink"
-          },
+          "CloudLink",
           " | undefined; deployment?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.CloudLink",
-            "text": "CloudLink"
-          },
+          "CloudLink",
           " | undefined; userAndRoles?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.CloudLink",
-            "text": "CloudLink"
-          },
+          "CloudLink",
           " | undefined; performance?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.CloudLink",
-            "text": "CloudLink"
-          },
+          "CloudLink",
           " | undefined; billingAndSub?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.CloudLink",
-            "text": "CloudLink"
-          },
+          "CloudLink",
           " | undefined; deployments?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.CloudLink",
-            "text": "CloudLink"
-          },
+          "CloudLink",
           " | undefined; }"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3979,16 +3350,10 @@
           "Omit<",
           "EuiSideNavItemType",
           "<T>, \"items\"> & { items?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.EuiSideNavItemTypeEnhanced",
-            "text": "EuiSideNavItemTypeEnhanced"
-          },
+          "EuiSideNavItemTypeEnhanced",
           "<unknown>[] | undefined; iconToString?: string | undefined; nameToString?: string | undefined; }"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4003,7 +3368,7 @@
         "signature": [
           "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4020,7 +3385,7 @@
         "signature": [
           "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4033,24 +3398,12 @@
         "label": "NodeDefinitionWithChildren",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<LinkId, Id, ChildrenID> & { children: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<LinkId, Id, ChildrenID>[]; }"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4064,16 +3417,10 @@
         "description": [],
         "signature": [
           "Pick<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeProjectNavigationNode",
-            "text": "ChromeProjectNavigationNode"
-          },
+          "ChromeProjectNavigationNode",
           ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4088,7 +3435,7 @@
         "signature": [
           "\"block\" | \"item\" | \"accordion\" | \"panelOpener\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4103,7 +3450,7 @@
         "signature": [
           "\"block\" | \"item\" | \"accordion\" | \"panelOpener\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4116,40 +3463,16 @@
         "label": "RootNavigationItemDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.RecentlyAccessedDefinition",
-            "text": "RecentlyAccessedDefinition"
-          },
+          "RecentlyAccessedDefinition",
           " | ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.GroupDefinition",
-            "text": "GroupDefinition"
-          },
+          "GroupDefinition",
           "<LinkId, Id, ChildrenId> | ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.PresetDefinition",
-            "text": "PresetDefinition"
-          },
+          "PresetDefinition",
           "<LinkId, Id, ChildrenId> | ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ItemDefinition",
-            "text": "ItemDefinition"
-          },
+          "ItemDefinition",
           "<LinkId, Id, ChildrenId>"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4163,24 +3486,12 @@
         "description": [],
         "signature": [
           "React.ComponentClass<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.SideNavCompProps",
-            "text": "SideNavCompProps"
-          },
+          "SideNavCompProps",
           ", any> | React.FunctionComponent<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.SideNavCompProps",
-            "text": "SideNavCompProps"
-          },
+          "SideNavCompProps",
           ">"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4195,7 +3506,7 @@
         "signature": [
           "\"hidden\" | \"visible\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4210,7 +3521,7 @@
         "signature": [
           "\"security\" | \"es\" | \"oblt\""
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4224,56 +3535,20 @@
         "description": [],
         "signature": [
           "{ security?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.SolutionNavigationDefinition",
-            "text": "SolutionNavigationDefinition"
-          },
+          "SolutionNavigationDefinition",
           "<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.AppDeepLinkId",
-            "text": "AppDeepLinkId"
-          },
+          "AppDeepLinkId",
           "> | undefined; es?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.SolutionNavigationDefinition",
-            "text": "SolutionNavigationDefinition"
-          },
+          "SolutionNavigationDefinition",
           "<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.AppDeepLinkId",
-            "text": "AppDeepLinkId"
-          },
+          "AppDeepLinkId",
           "> | undefined; oblt?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.SolutionNavigationDefinition",
-            "text": "SolutionNavigationDefinition"
-          },
+          "SolutionNavigationDefinition",
           "<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.AppDeepLinkId",
-            "text": "AppDeepLinkId"
-          },
+          "AppDeepLinkId",
           "> | undefined; }"
         ],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

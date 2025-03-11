@@ -21,13 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
         try {
           // Configure a remote cluster
           await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  remote: {
-                    test_cluster: {
-                      seeds: ['127.0.0.1:9400'],
-                    },
+            persistent: {
+              cluster: {
+                remote: {
+                  test_cluster: {
+                    seeds: ['127.0.0.1:9400'],
                   },
                 },
               },
@@ -43,13 +41,11 @@ export default function ({ getService }: FtrProviderContext) {
         try {
           // Delete remote cluster
           await es.cluster.putSettings({
-            body: {
-              persistent: {
-                cluster: {
-                  remote: {
-                    test_cluster: {
-                      seeds: null,
-                    },
+            persistent: {
+              cluster: {
+                remote: {
+                  test_cluster: {
+                    seeds: null,
                   },
                 },
               },

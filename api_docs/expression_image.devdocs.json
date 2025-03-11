@@ -11,17 +11,9 @@
         "label": "getImageRenderer",
         "description": [],
         "signature": [
-          "(theme$: ",
-          "Observable",
-          "<",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
-          ">) => () => ",
+          "(core: ",
+          "CoreStart",
+          ") => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -39,7 +31,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_image/public/expression_renderers/image_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,21 +40,12 @@
             "id": "def-public.getImageRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "theme$",
+            "label": "core",
             "description": [],
             "signature": [
-              "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">"
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_image/public/expression_renderers/image_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,14 +63,8 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
-          },
-          "<object, unknown>) => () => ",
+          "CoreStart",
+          ") => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -105,7 +82,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_image/public/expression_renderers/image_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,16 +94,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>"
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_image/public/expression_renderers/image_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,7 +120,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_image/public/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_image/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -174,7 +144,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_image/server/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_image/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -192,7 +162,7 @@
         "tags": [],
         "label": "ImageRendererConfig",
         "description": [],
-        "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -206,7 +176,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -227,7 +197,7 @@
               },
               " | null"
             ],
-            "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -241,7 +211,7 @@
         "tags": [],
         "label": "NodeDimensions",
         "description": [],
-        "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,7 +222,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -263,7 +233,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_image/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -277,7 +247,7 @@
         "tags": [],
         "label": "Return",
         "description": [],
-        "path": "src/plugins/expression_image/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,7 +261,7 @@
             "signature": [
               "\"image\""
             ],
-            "path": "src/plugins/expression_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -302,7 +272,7 @@
             "tags": [],
             "label": "mode",
             "description": [],
-            "path": "src/plugins/expression_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -313,7 +283,7 @@
             "tags": [],
             "label": "dataurl",
             "description": [],
-            "path": "src/plugins/expression_image/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_image/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -329,7 +299,7 @@
         "tags": [],
         "label": "ImageMode",
         "description": [],
-        "path": "src/plugins/expression_image/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -346,7 +316,7 @@
         "signature": [
           "\"`base64`\""
         ],
-        "path": "src/plugins/expression_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -361,7 +331,7 @@
         "signature": [
           "\"_context_\""
         ],
-        "path": "src/plugins/expression_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -408,7 +378,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/expression_image/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -425,7 +395,7 @@
         "signature": [
           "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
-        "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -440,7 +410,7 @@
         "signature": [
           "\"expressionImage\""
         ],
-        "path": "src/plugins/expression_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -455,7 +425,7 @@
         "signature": [
           "\"expressionImage\""
         ],
-        "path": "src/plugins/expression_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -470,7 +440,7 @@
         "signature": [
           "\"URL\""
         ],
-        "path": "src/plugins/expression_image/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -134,6 +134,7 @@ import {
   PREVIEW_LOGGED_REQUESTS_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
   ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  THREAT_MATCH_QUERY_REQUIRED,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -146,6 +147,7 @@ import {
   ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
   ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
   ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
+  CASES_SYSTEM_ACTION_BTN,
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
@@ -539,6 +541,10 @@ export const fillRuleAction = (actions: Actions) => {
   });
 };
 
+export const createCasesAction = () => {
+  cy.get(CASES_SYSTEM_ACTION_BTN).click();
+};
+
 export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
   cy.get(ACTIONS_ALERTS_QUERY_FILTER_BUTTON).click();
   cy.get(ACTIONS_ALERTS_QUERY_FILTER_INPUT()).type(alertsFilter.query.kql);
@@ -783,6 +789,9 @@ export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPU
 
 /** Returns custom query required content */
 export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);
+
+/** Returns threat match query required content */
+export const getThreatMatchQueryInvalidationText = () => cy.contains(THREAT_MATCH_QUERY_REQUIRED);
 
 /**
  * Fills in the define indicator match rules and then presses the continue button

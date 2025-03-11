@@ -17,7 +17,7 @@
           "KibanaNoDataPageProps",
           ") => React.JSX.Element | null"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
             "signature": [
               "KibanaNoDataPageProps"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -54,7 +54,7 @@
           "KibanaNoDataPageKibanaDependencies",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,7 +70,7 @@
               "KibanaNoDataPageKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,7 +93,7 @@
           "KibanaNoDataPageServices",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,7 +109,7 @@
               "KibanaNoDataPageServices",
               ">"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -140,7 +140,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -163,7 +163,7 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -27,7 +27,7 @@
         "tags": [],
         "label": "UserContentCommonSchema",
         "description": [],
-        "path": "packages/content-management/table_list_view_common/index.ts",
+        "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +49,7 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +63,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,7 +77,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -91,7 +91,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +105,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -126,7 +126,7 @@
               },
               "[]"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -137,7 +137,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -151,7 +151,7 @@
             "signature": [
               "{ title: string; description?: string | undefined; }"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

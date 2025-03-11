@@ -19,10 +19,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 function getConfigPath() {
   return Path.resolve(
     REPO_ROOT,
-    'packages',
-    'kbn-esql-validation-autocomplete',
-    'src',
-    'validation'
+    'src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation'
   );
 }
 
@@ -65,7 +62,7 @@ function createIndexRequest(
           if (type === 'cartesian_shape') {
             esType = 'shape';
           }
-          if (type === 'unsupported') {
+          if (type === 'unsupported' || type === 'function_named_parameters') {
             esType = 'integer_range';
           }
           memo[name] = { type: esType } as MappingProperty;
@@ -232,12 +229,10 @@ export default function ({ getService }: FtrProviderContext) {
               await es.enrich.putPolicy(
                 {
                   name,
-                  body: {
-                    match: {
-                      indices: sourceIndices,
-                      match_field: matchField,
-                      enrich_fields: enrichFields,
-                    },
+                  match: {
+                    indices: sourceIndices,
+                    match_field: matchField,
+                    enrich_fields: enrichFields,
                   },
                 },
                 { ignore: [409] }

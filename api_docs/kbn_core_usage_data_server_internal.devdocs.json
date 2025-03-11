@@ -18,28 +18,16 @@
         "label": "CoreUsageDataService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-usage-data-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreUsageDataServerInternalPluginApi",
-            "section": "def-server.CoreUsageDataService",
-            "text": "CoreUsageDataService"
-          },
+          "CoreUsageDataService",
           " implements ",
           "CoreService",
           "<",
           "InternalCoreUsageDataSetup",
           ", ",
-          {
-            "pluginId": "@kbn/core-usage-data-server",
-            "scope": "server",
-            "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-server.CoreUsageDataStart",
-            "text": "CoreUsageDataStart"
-          },
+          "CoreUsageDataStart",
           ">"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+        "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,7 +41,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -67,7 +55,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -88,7 +76,7 @@
               ") => ",
               "InternalCoreUsageDataSetup"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,7 +90,7 @@
                 "signature": [
                   "SetupDeps"
                 ],
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -121,24 +109,12 @@
               "({ savedObjects, elasticsearch, exposedConfigsToUsage }: ",
               "StartDeps",
               ") => { getCoreUsageData: () => Promise<",
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreUsageData",
-                "text": "CoreUsageData"
-              },
+              "CoreUsageData",
               ">; getConfigsUsageData: () => Promise<",
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.ConfigUsageData",
-                "text": "ConfigUsageData"
-              },
+              "ConfigUsageData",
               ">; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -152,7 +128,7 @@
                 "signature": [
                   "StartDeps"
                 ],
-                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -170,7 +146,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

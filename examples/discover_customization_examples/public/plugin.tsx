@@ -52,11 +52,11 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
       title: PLUGIN_NAME,
       visibleIn: [],
       mount: async (appMountParams) => {
-        const [_, { discover, data }] = await core.getStartServices();
+        const [coreStart, { discover, data }] = await core.getStartServices();
 
         ReactDOM.render(
           <I18nProvider>
-            <KibanaThemeProvider theme={core.theme}>
+            <KibanaThemeProvider {...coreStart}>
               <Router history={appMountParams.history}>
                 <Routes>
                   <Route>
@@ -241,9 +241,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           >();
           const stateStorage = stateContainer.stateStorage;
           const dataView = useObservable(
-            stateContainer.internalState.state$,
-            stateContainer.internalState.getState()
-          ).dataView;
+            stateContainer.runtimeStateManager.currentDataView$,
+            stateContainer.runtimeStateManager.currentDataView$.getValue()
+          );
 
           useEffect(() => {
             if (!controlGroupAPI) {
@@ -262,7 +262,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
 
             const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.internalState.transitions.setCustomFilters(newFilters);
               stateContainer.actions.fetchData();
             });
 

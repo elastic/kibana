@@ -14,7 +14,7 @@
       "tags": [],
       "label": "InfraClientStartExports",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -28,7 +28,7 @@
           "signature": [
             "InventoryViewsServiceStart"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -43,7 +43,7 @@
             "MetricsExplorerViewsServiceStart",
             " | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -57,7 +57,7 @@
           "signature": [
             "ITelemetryClient"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -77,7 +77,7 @@
         "tags": [],
         "label": "InfraConfig",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+        "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,7 +91,7 @@
             "signature": [
               "{ inventory_threshold: { group_by_page_size: number; }; metric_threshold: { group_by_page_size: number; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -102,7 +102,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -116,7 +116,7 @@
             "signature": [
               "{ compositeSize: number; }"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -130,7 +130,7 @@
             "signature": [
               "{ default?: { fields?: { message?: string[] | undefined; } | undefined; } | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,7 +144,7 @@
             "signature": [
               "{ customThresholdAlertsEnabled: boolean; logsUIEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; ruleFormV2Enabled: boolean; }"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -158,7 +158,7 @@
         "tags": [],
         "label": "InfraRequestHandlerContext",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+        "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -180,7 +180,7 @@
               "MlDatafeedStats",
               "[]; }>; } | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,7 +202,7 @@
               "AggregationsAggregate",
               ">>>; } | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -213,7 +213,7 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -225,15 +225,9 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,15 +239,9 @@
             "label": "uiSettingsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -267,7 +255,7 @@
             "signature": [
               "() => Promise<string>"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -289,7 +277,7 @@
                 "text": "EntityManagerServerPluginStart"
               }
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -307,7 +295,7 @@
       "tags": [],
       "label": "InfraPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -321,7 +309,7 @@
           "signature": [
             "void"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -335,7 +323,7 @@
           "signature": [
             "void | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -350,7 +338,7 @@
       "tags": [],
       "label": "InfraPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -364,7 +352,7 @@
           "signature": [
             "InventoryViewsServiceStart"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -379,7 +367,7 @@
             "MetricsExplorerViewsServiceStart",
             " | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }

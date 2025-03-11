@@ -15,7 +15,7 @@
           "NoDataConfigPageProps",
           ") => React.JSX.Element | null"
         ],
-        "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "NoDataConfigPageProps"
             ],
-            "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,7 +52,7 @@
           "NoDataCardKibanaDependencies",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,7 +68,7 @@
               "NoDataCardKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
           "NoDataCardServices",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,7 +107,7 @@
               "NoDataCardServices",
               ">"
             ],
-            "path": "packages/shared-ux/page/no_data_config/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -128,7 +128,7 @@
           "NoDataConfigPageProps",
           ">): React.JSX.Element; displayName: string; }"
         ],
-        "path": "packages/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/impl/src/no_data_config_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -146,14 +146,14 @@
               " & { solutionNav: ",
               {
                 "pluginId": "@kbn/shared-ux-page-solution-nav",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
-                "section": "def-common.SolutionNavProps",
+                "section": "def-public.SolutionNavProps",
                 "text": "SolutionNavProps"
               },
               "; }"
             ],
-            "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -176,7 +176,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -208,7 +208,7 @@
           "EuiPageSidebarProps",
           " | undefined; }"
         ],
-        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -225,7 +225,7 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -27,7 +27,7 @@
         "tags": [],
         "label": "EmptyListContent",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
             "signature": [
               "(args: { createIndexButton: React.ReactElement<any, any> | null; }) => React.ReactElement<any, any> | null"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -52,7 +52,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -66,7 +66,7 @@
                     "signature": [
                       "React.ReactElement<any, any> | null"
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -85,7 +85,7 @@
         "tags": [],
         "label": "ExtensionsSetup",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,7 +99,7 @@
             "signature": [
               "(action: any) => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -113,7 +113,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -131,7 +131,7 @@
             "signature": [
               "(banner: any) => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -145,7 +145,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -163,7 +163,7 @@
             "signature": [
               "(filter: any) => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -177,7 +177,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -203,7 +203,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -223,7 +223,7 @@
                     "text": "IndexBadge"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -249,7 +249,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -269,7 +269,7 @@
                     "text": "IndexToggle"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -295,7 +295,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -315,7 +315,7 @@
                     "text": "IndicesListColumn"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -341,7 +341,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -361,7 +361,7 @@
                     "text": "EmptyListContent"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -387,7 +387,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -407,7 +407,7 @@
                     "text": "IndexDetailsTab"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -433,7 +433,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -453,7 +453,7 @@
                     "text": "IndexContent"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -479,7 +479,7 @@
               },
               ") => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -499,7 +499,7 @@
                     "text": "IndexContent"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -525,7 +525,7 @@
               },
               ", detailsTabId?: string | undefined) => void"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -545,7 +545,7 @@
                     "text": "IndexDetailsPageRoute"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -560,7 +560,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -578,7 +578,7 @@
         "tags": [],
         "label": "Index",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -589,7 +589,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -603,7 +603,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -617,7 +617,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -628,7 +628,7 @@
             "tags": [],
             "label": "isFrozen",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -639,7 +639,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -653,7 +653,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -667,7 +667,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -681,7 +681,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -696,7 +696,7 @@
               "IlmExplainLifecycleLifecycleExplain",
               " | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -710,7 +710,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -725,7 +725,7 @@
               "HealthStatus",
               " | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -740,7 +740,7 @@
               "IndicesStatsIndexMetadataState",
               " | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -754,7 +754,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -768,7 +768,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -782,7 +782,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -796,7 +796,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -810,7 +810,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -824,7 +824,7 @@
         "tags": [],
         "label": "IndexBadge",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -846,7 +846,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -866,7 +866,7 @@
                     "text": "Index"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -881,7 +881,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -895,7 +895,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -909,7 +909,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -923,7 +923,7 @@
         "tags": [],
         "label": "IndexContent",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -945,7 +945,7 @@
               },
               "; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; }) => React.ReactElement<any, any> | null"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -956,7 +956,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -976,7 +976,7 @@
                         "text": "Index"
                       }
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -990,7 +990,7 @@
                     "signature": [
                       "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string"
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "returnComment": [],
@@ -1002,7 +1002,7 @@
                         "tags": [],
                         "label": "appId",
                         "description": [],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -1016,7 +1016,7 @@
                         "signature": [
                           "{ path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined"
                         ],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -1037,7 +1037,7 @@
         "tags": [],
         "label": "IndexDetailsPageRoute",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1051,7 +1051,7 @@
             "signature": [
               "(indexName: string, detailsTabId?: string | undefined) => string"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1065,7 +1065,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1080,7 +1080,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1098,7 +1098,7 @@
         "tags": [],
         "label": "IndexDetailsTab",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1109,7 +1109,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1123,7 +1123,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1143,9 +1143,11 @@
                 "section": "def-common.Index",
                 "text": "Index"
               },
-              "; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; }) => React.ReactElement<any, any> | null"
+              "; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; euiTheme: ",
+              "EuiThemeComputed",
+              "<{}>; }) => React.ReactElement<any, any> | null"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1156,7 +1158,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1176,7 +1178,7 @@
                         "text": "Index"
                       }
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1190,7 +1192,7 @@
                     "signature": [
                       "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string"
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "returnComment": [],
@@ -1202,7 +1204,7 @@
                         "tags": [],
                         "label": "appId",
                         "description": [],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -1216,11 +1218,87 @@
                         "signature": [
                           "{ path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined"
                         ],
-                        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                        "path": "src/core/packages/application/browser/src/contracts.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
                     ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexDetailsTab.renderTabContent.$1.euiTheme",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "euiTheme",
+                    "description": [],
+                    "signature": [
+                      "{ colors: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textSuccess: string; textWarning: string; textDanger: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseDanger: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightDanger: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseDanger: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderBaseFormsControl: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongDanger: string; LIGHT: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textSuccess: string; textWarning: string; textDanger: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseDanger: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightDanger: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseDanger: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderBaseFormsControl: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongDanger: string; }; DARK: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textSuccess: string; textWarning: string; textDanger: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseDanger: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightDanger: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseDanger: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderBaseFormsControl: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongDanger: string; }; ghost: string; ink: string; plainLight: string; plainDark: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisAsTextLight0: string; euiColorVisAsTextLight1: string; euiColorVisAsTextLight2: string; euiColorVisAsTextLight3: string; euiColorVisAsTextLight4: string; euiColorVisAsTextLight5: string; euiColorVisAsTextLight6: string; euiColorVisAsTextDark0: string; euiColorVisAsTextDark1: string; euiColorVisAsTextDark2: string; euiColorVisAsTextDark3: string; euiColorVisAsTextDark4: string; euiColorVisAsTextDark5: string; euiColorVisAsTextDark6: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisNeutral0: string; euiColorSeverity0: string; euiColorSeverity1: string; euiColorSeverity2: string; euiColorSeverity3: string; euiColorSeverity4: string; euiColorSeverity5: string; euiColorSeverity6: string; euiColorSeverity7: string; euiColorSeverity8: string; euiColorSeverity9: string; euiColorSeverity10: string; euiColorSeverity11: string; euiColorSeverity12: string; euiColorSeverity13: string; euiColorSeverity14: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; }; base: number; size: { xxs: string; xs: string; s: string; m: string; base: string; l: string; xl: string; xxl: string; xxxl: string; xxxxl: string; }; font: { family: string; familyCode?: string | undefined; familySerif?: string | undefined; featureSettings?: string | undefined; defaultUnits: \"em\" | \"px\" | \"rem\"; baseline: number; lineHeightMultiplier: number; scale: { m: number; s: number; l: number; xs: number; xl: number; xxl: number; xxs: number; xxxs: number; }; weight: { light: ",
+                      "Property",
+                      ".FontWeight | undefined; regular: ",
+                      "Property",
+                      ".FontWeight | undefined; medium: ",
+                      "Property",
+                      ".FontWeight | undefined; semiBold: ",
+                      "Property",
+                      ".FontWeight | undefined; bold: ",
+                      "Property",
+                      ".FontWeight | undefined; }; body: { scale: \"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\" | \"xxs\" | \"xxxs\"; weight: keyof ",
+                      "_EuiThemeFontWeights",
+                      "; }; title: { weight: keyof ",
+                      "_EuiThemeFontWeights",
+                      "; }; }; border: { width: { thin: ",
+                      "Property",
+                      ".BorderWidth<string | number> | undefined; thick: ",
+                      "Property",
+                      ".BorderWidth<string | number> | undefined; }; radius: { medium: ",
+                      "Property",
+                      ".BorderRadius<string | number> | undefined; small: ",
+                      "Property",
+                      ".BorderRadius<string | number> | undefined; }; color: string; thin: ",
+                      "Property",
+                      ".Border<string | number> | undefined; thick: ",
+                      "Property",
+                      ".Border<string | number> | undefined; editable: ",
+                      "Property",
+                      ".Border<string | number> | undefined; }; focus: { color: string; width: ",
+                      "Property",
+                      ".BorderWidth<string | number> | undefined; transparency: number; backgroundColor: string; }; animation: { bounce: ",
+                      "Property",
+                      ".AnimationTimingFunction | undefined; resistance: ",
+                      "Property",
+                      ".AnimationTimingFunction | undefined; extraFast: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; fast: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; normal: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; slow: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; extraSlow: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; }; breakpoint: { [x: string]: number; xs: number; s: number; m: number; l: number; xl: number; }; levels: { toast: ",
+                      "Property",
+                      ".ZIndex; modal: ",
+                      "Property",
+                      ".ZIndex; mask: ",
+                      "Property",
+                      ".ZIndex; navigation: ",
+                      "Property",
+                      ".ZIndex; menu: ",
+                      "Property",
+                      ".ZIndex; header: ",
+                      "Property",
+                      ".ZIndex; flyout: ",
+                      "Property",
+                      ".ZIndex; maskBelowHeader: ",
+                      "Property",
+                      ".ZIndex; content: ",
+                      "Property",
+                      ".ZIndex; }; components: { buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackgroundStriped: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; keyPadMenuItemBackgroundDisabledSelect: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; superDatePickerBackgroundSuccees: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableCellSortableIconColor: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; treeViewItemBackgroundHover: string; buttons: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundSuccess: string; backgroundWarning: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorSuccess: string; textColorWarning: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; LIGHT: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundSuccess: string; backgroundWarning: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorSuccess: string; textColorWarning: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; DARK: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundSuccess: string; backgroundWarning: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorSuccess: string; textColorWarning: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; }; forms: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; prependBackground: string; border: string; borderAutofilled: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; maxWidth: string; LIGHT: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; prependBackground: string; border: string; borderAutofilled: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; DARK: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; prependBackground: string; border: string; borderAutofilled: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; }; LIGHT: { buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackgroundStriped: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; keyPadMenuItemBackgroundDisabledSelect: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; superDatePickerBackgroundSuccees: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableCellSortableIconColor: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; treeViewItemBackgroundHover: string; }; DARK: { buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackgroundStriped: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; keyPadMenuItemBackgroundDisabledSelect: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; superDatePickerBackgroundSuccees: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableCellSortableIconColor: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; treeViewItemBackgroundHover: string; }; }; flags: { hasGlobalFocusColor: boolean; hasVisColorAdjustment: boolean; }; } & { themeName: string; }"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1234,7 +1312,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1256,7 +1334,7 @@
               },
               "; }) => boolean) | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1267,7 +1345,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1287,7 +1365,7 @@
                         "text": "Index"
                       }
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1307,7 +1385,7 @@
               "EuiBreadcrumbProps",
               " | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1321,7 +1399,7 @@
         "tags": [],
         "label": "IndexManagementPluginSetup",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1341,7 +1419,7 @@
                 "text": "PublicApiServiceSetup"
               }
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1361,7 +1439,7 @@
                 "text": "ExtensionsSetup"
               }
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1382,7 +1460,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1396,7 +1474,7 @@
         "tags": [],
         "label": "IndexManagementPluginStart",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1416,7 +1494,7 @@
                 "text": "ExtensionsSetup"
               }
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1429,13 +1507,7 @@
             "description": [],
             "signature": [
               "(deps: { history: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>; }) => React.FC<",
               {
                 "pluginId": "@kbn/index-management-shared-types",
@@ -1446,7 +1518,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1457,7 +1529,7 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1469,16 +1541,10 @@
                     "label": "history",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-application-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                        "section": "def-public.ScopedHistory",
-                        "text": "ScopedHistory"
-                      },
+                      "ScopedHistory",
                       "<unknown>"
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1496,13 +1562,7 @@
             "description": [],
             "signature": [
               "(deps: { history: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>; }) => React.FC<",
               {
                 "pluginId": "@kbn/index-management-shared-types",
@@ -1513,7 +1573,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1524,7 +1584,7 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1536,16 +1596,10 @@
                     "label": "history",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "@kbn/core-application-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                        "section": "def-public.ScopedHistory",
-                        "text": "ScopedHistory"
-                      },
+                      "ScopedHistory",
                       "<unknown>"
                     ],
-                    "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1564,7 +1618,7 @@
         "tags": [],
         "label": "IndexMappingProps",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1585,7 +1639,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1599,7 +1653,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1613,7 +1667,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1627,7 +1681,7 @@
         "tags": [],
         "label": "IndexSettingProps",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1638,7 +1692,7 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1652,7 +1706,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1666,7 +1720,7 @@
         "tags": [],
         "label": "IndexToggle",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1688,7 +1742,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1708,7 +1762,7 @@
                     "text": "Index"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1723,7 +1777,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1734,7 +1788,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1748,7 +1802,7 @@
         "tags": [],
         "label": "IndicesListColumn",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1759,7 +1813,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1770,7 +1824,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1781,7 +1835,7 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1803,7 +1857,7 @@
               },
               ") => React.ReactNode) | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1823,7 +1877,7 @@
                     "text": "Index"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1849,7 +1903,7 @@
               },
               ") => any) | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1869,7 +1923,7 @@
                     "text": "Index"
                   }
                 ],
-                "path": "x-pack/packages/index-management/index_management_shared_types/src/services/extensions_service.ts",
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1887,7 +1941,7 @@
         "tags": [],
         "label": "PublicApiServiceSetup",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1917,7 +1971,7 @@
               },
               "[], any>>"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1943,7 +1997,7 @@
           },
           "<D, E>"
         ],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1957,7 +2011,7 @@
             "signature": [
               "D | null"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1971,7 +2025,7 @@
             "signature": [
               "E | null"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1985,7 +2039,7 @@
         "tags": [],
         "label": "SerializedEnrichPolicy",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1999,7 +2053,7 @@
             "signature": [
               "\"match\" | \"range\" | \"geo_match\""
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2010,7 +2064,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,7 +2078,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2035,7 +2089,7 @@
             "tags": [],
             "label": "matchField",
             "description": [],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2049,7 +2103,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2063,7 +2117,7 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "path": "x-pack/packages/index-management/index_management_shared_types/src/services/public_api_service.ts",
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2079,7 +2133,7 @@
         "tags": [],
         "label": "IndexDetailsSection",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2091,7 +2145,7 @@
         "tags": [],
         "label": "Section",
         "description": [],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2108,7 +2162,7 @@
         "signature": [
           "string"
         ],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/home_sections.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2138,7 +2192,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2160,7 +2214,7 @@
           },
           " & ({ page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; })"
         ],
-        "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,931 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Alerting",
+    "description": "OpenAPI schema for alerting endpoints",
+    "version": "0.1",
+    "contact": {
+      "name": "Alerting Team"
+    },
+    "license": {
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/alerting/_health": {
+      "get": {
+        "summary": "Get the alerting framework health",
+        "operationId": "getAlertingHealth",
+        "description": "You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.\n",
+        "tags": [
+          "alerting"
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "alerting_framework_health": {
+                      "type": "object",
+                      "description": "Three substates identify the health of the alerting framework: `decryption_health`, `execution_health`, and `read_health`.\n",
+                      "properties": {
+                        "decryption_health": {
+                          "type": "object",
+                          "description": "The timestamp and status of the rule decryption.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "execution_health": {
+                          "type": "object",
+                          "description": "The timestamp and status of the rule run.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "read_health": {
+                          "type": "object",
+                          "description": "The timestamp and status of the rule reading events.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "has_permanent_encryption_key": {
+                      "type": "boolean",
+                      "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
+                      "example": true
+                    },
+                    "is_sufficiently_secure": {
+                      "type": "boolean",
+                      "description": "If `false`, security is enabled but TLS is not.",
+                      "example": true
+                    }
+                  }
+                },
+                "examples": {
+                  "getAlertingHealthResponse": {
+                    "$ref": "#/components/examples/get_health_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerting/rule_types": {
+      "get": {
+        "summary": "Get the rule types",
+        "operationId": "getRuleTypes",
+        "description": "If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
+        "tags": [
+          "alerting"
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action_groups": {
+                        "description": "An explicit list of groups for which the rule type can schedule actions, each with the action group's unique ID and human readable name. Rule actions validation uses this configuration to ensure that groups are valid.\n",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "action_variables": {
+                        "description": "A list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description. When you create a rule in Kibana, it uses this information to prompt you for these variables in action parameter editors.\n",
+                        "type": "object",
+                        "properties": {
+                          "context": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string"
+                                },
+                                "useWithTripleBracesInTemplates": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          },
+                          "params": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "state": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "alerts": {
+                        "type": "object",
+                        "description": "Details for writing alerts as data documents for this rule type.\n",
+                        "properties": {
+                          "context": {
+                            "type": "string",
+                            "description": "The namespace for this rule type.\n",
+                            "enum": [
+                              "ml.anomaly-detection",
+                              "observability.apm",
+                              "observability.logs",
+                              "observability.metrics",
+                              "observability.slo",
+                              "observability.threshold",
+                              "observability.uptime",
+                              "security",
+                              "stack"
+                            ]
+                          },
+                          "dynamic": {
+                            "type": "string",
+                            "description": "Indicates whether new fields are added dynamically.",
+                            "enum": [
+                              "false",
+                              "runtime",
+                              "strict",
+                              "true"
+                            ]
+                          },
+                          "isSpaceAware": {
+                            "type": "boolean",
+                            "description": "Indicates whether the alerts are space-aware. If true, space-specific alert indices are used.\n"
+                          },
+                          "mappings": {
+                            "type": "object",
+                            "properties": {
+                              "fieldMap": {
+                                "type": "object",
+                                "description": "Mapping information for each field supported in alerts as data documents for this rule type. For more information about mapping parameters, refer to the Elasticsearch documentation.\n",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/fieldmap_properties"
+                                }
+                              }
+                            }
+                          },
+                          "secondaryAlias": {
+                            "type": "string",
+                            "description": "A secondary alias. It is typically used to support the signals alias for detection rules.\n"
+                          },
+                          "shouldWrite": {
+                            "type": "boolean",
+                            "description": "Indicates whether the rule should write out alerts as data.\n"
+                          },
+                          "useEcs": {
+                            "type": "boolean",
+                            "description": "Indicates whether to include the ECS component template for the alerts.\n"
+                          },
+                          "useLegacyAlerts": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Indicates whether to include the legacy component template for the alerts.\n"
+                          }
+                        }
+                      },
+                      "authorized_consumers": {
+                        "description": "The list of the plugins IDs that have access to the rule type.",
+                        "type": "object",
+                        "properties": {
+                          "alerts": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "apm": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "discover": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "infrastructure": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "logs": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "ml": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "monitoring": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "siem": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "slo": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "stackAlerts": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "uptime": {
+                            "type": "object",
+                            "properties": {
+                              "all": {
+                                "type": "boolean"
+                              },
+                              "read": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "category": {
+                        "type": "string",
+                        "description": "The rule category, which is used by features such as category-specific maintenance windows.",
+                        "enum": [
+                          "management",
+                          "observability",
+                          "securitySolution"
+                        ]
+                      },
+                      "default_action_group_id": {
+                        "description": "The default identifier for the rule type group.",
+                        "type": "string"
+                      },
+                      "does_set_recovery_context": {
+                        "description": "Indicates whether the rule passes context variables to its recovery action.",
+                        "type": "boolean"
+                      },
+                      "enabled_in_license": {
+                        "description": "Indicates whether the rule type is enabled or disabled based on the subscription.",
+                        "type": "boolean"
+                      },
+                      "has_alerts_mappings": {
+                        "type": "boolean",
+                        "description": "Indicates whether the rule type has custom mappings for the alert data."
+                      },
+                      "has_fields_for_a_a_d": {
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "description": "The unique identifier for the rule type.",
+                        "type": "string"
+                      },
+                      "is_exportable": {
+                        "description": "Indicates whether the rule type is exportable in **Stack Management > Saved Objects**.",
+                        "type": "boolean"
+                      },
+                      "minimum_license_required": {
+                        "description": "The subscriptions required to use the rule type.",
+                        "type": "string",
+                        "example": "basic"
+                      },
+                      "name": {
+                        "description": "The descriptive name of the rule type.",
+                        "type": "string"
+                      },
+                      "producer": {
+                        "description": "An identifier for the application that produces this rule type.",
+                        "type": "string",
+                        "example": "stackAlerts"
+                      },
+                      "recovery_action_group": {
+                        "description": "An action group to use when an alert goes from an active state to an inactive one.",
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "rule_task_timeout": {
+                        "type": "string",
+                        "example": "5m"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "getRuleTypesResponse": {
+                    "$ref": "#/components/examples/get_rule_types_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "examples": {
+      "get_health_response": {
+        "summary": "Retrieve information about the health of the alerting framework.",
+        "value": {
+          "is_sufficiently_secure": true,
+          "has_permanent_encryption_key": true,
+          "alerting_framework_health": {
+            "decryption_health": {
+              "status": "ok",
+              "timestamp": "2023-01-13T01:28:00.280Z"
+            },
+            "execution_health": {
+              "status": "ok",
+              "timestamp": "2023-01-13T01:28:00.280Z"
+            },
+            "read_health": {
+              "status": "ok",
+              "timestamp": "2023-01-13T01:28:00.280Z"
+            }
+          }
+        }
+      },
+      "get_rule_types_response": {
+        "summary": "Retrieve rule types associated with Kibana machine learning features",
+        "value": [
+          {
+            "id": "xpack.ml.anomaly_detection_alert",
+            "name": "Anomaly detection alert",
+            "category": "management",
+            "producer": "ml",
+            "alerts": {
+              "context": "ml.anomaly-detection",
+              "mappings": {
+                "fieldMap": {
+                  "kibana.alert.job_id": {
+                    "type": "keyword",
+                    "array": false,
+                    "required": true
+                  },
+                  "kibana.alert.anomaly_score": {
+                    "type": "double",
+                    "array": false,
+                    "required": false
+                  },
+                  "kibana.alert.is_interim": {
+                    "type": "boolean",
+                    "array": false,
+                    "required": false
+                  },
+                  "kibana.alert.anomaly_timestamp": {
+                    "type": "date",
+                    "array": false,
+                    "required": false
+                  },
+                  "kibana.alert.top_records": {
+                    "type": "object",
+                    "array": true,
+                    "required": false,
+                    "dynamic": false,
+                    "properties": {
+                      "job_id": {
+                        "type": "keyword"
+                      },
+                      "record_score": {
+                        "type": "double"
+                      },
+                      "initial_record_score": {
+                        "type": "double"
+                      },
+                      "detector_index": {
+                        "type": "integer"
+                      },
+                      "is_interim": {
+                        "type": "boolean"
+                      },
+                      "timestamp": {
+                        "type": "date"
+                      },
+                      "partition_field_name": {
+                        "type": "keyword"
+                      },
+                      "partition_field_value": {
+                        "type": "keyword"
+                      },
+                      "over_field_name": {
+                        "type": "keyword"
+                      },
+                      "over_field_value": {
+                        "type": "keyword"
+                      },
+                      "by_field_name": {
+                        "type": "keyword"
+                      },
+                      "by_field_value": {
+                        "type": "keyword"
+                      },
+                      "function": {
+                        "type": "keyword"
+                      },
+                      "typical": {
+                        "type": "double"
+                      },
+                      "actual": {
+                        "type": "double"
+                      },
+                      "field_name": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "kibana.alert.top_influencers": {
+                    "type": "object",
+                    "array": true,
+                    "required": false,
+                    "dynamic": false,
+                    "properties": {
+                      "job_id": {
+                        "type": "keyword"
+                      },
+                      "influencer_field_name": {
+                        "type": "keyword"
+                      },
+                      "influencer_field_value": {
+                        "type": "keyword"
+                      },
+                      "influencer_score": {
+                        "type": "double"
+                      },
+                      "initial_influencer_score": {
+                        "type": "double"
+                      },
+                      "is_interim": {
+                        "type": "boolean"
+                      },
+                      "timestamp": {
+                        "type": "date"
+                      }
+                    }
+                  }
+                }
+              },
+              "shouldWrite": true
+            },
+            "enabled_in_license": true,
+            "recovery_action_group": {
+              "id": "recovered",
+              "name": "Recovered"
+            },
+            "action_groups": [
+              {
+                "id": "anomaly_score_match",
+                "name": "Anomaly score matched the condition"
+              },
+              {
+                "id": "recovered",
+                "name": "Recovered"
+              }
+            ],
+            "default_action_group_id": "anomaly_score_match",
+            "minimum_license_required": "platinum",
+            "is_exportable": true,
+            "rule_task_timeout": "5m",
+            "action_variables": {
+              "context": [
+                {
+                  "name": "timestamp",
+                  "description": "The bucket timestamp of the anomaly"
+                },
+                {
+                  "name": "timestampIso8601",
+                  "description": "The bucket time of the anomaly in ISO8601 format"
+                },
+                {
+                  "name": "jobIds",
+                  "description": "List of job IDs that triggered the alert"
+                },
+                {
+                  "name": "message",
+                  "description": "Alert info message"
+                },
+                {
+                  "name": "isInterim",
+                  "description": "Indicate if top hits contain interim results"
+                },
+                {
+                  "name": "score",
+                  "description": "Anomaly score at the time of the notification action"
+                },
+                {
+                  "name": "topRecords",
+                  "description": "Top records"
+                },
+                {
+                  "name": "topInfluencers",
+                  "description": "Top influencers"
+                },
+                {
+                  "name": "anomalyExplorerUrl",
+                  "description": "URL to open in the Anomaly Explorer",
+                  "useWithTripleBracesInTemplates": true
+                }
+              ],
+              "state": [],
+              "params": []
+            },
+            "authorized_consumers": {
+              "alerts": {
+                "read": true,
+                "all": true
+              },
+              "stackAlerts": {
+                "read": true,
+                "all": true
+              },
+              "slo": {
+                "read": true,
+                "all": true
+              },
+              "ml": {
+                "read": true,
+                "all": true
+              },
+              "uptime": {
+                "read": true,
+                "all": true
+              },
+              "infrastructure": {
+                "read": true,
+                "all": true
+              },
+              "logs": {
+                "read": true,
+                "all": true
+              },
+              "monitoring": {
+                "read": true,
+                "all": true
+              },
+              "siem": {
+                "read": true,
+                "all": true
+              },
+              "apm": {
+                "read": true,
+                "all": true
+              },
+              "discover": {
+                "read": true,
+                "all": true
+              }
+            },
+            "does_set_recovery_context": true,
+            "has_alerts_mappings": true,
+            "has_fields_for_a_a_d": false
+          },
+          {
+            "id": "xpack.ml.anomaly_detection_jobs_health",
+            "name": "Anomaly detection jobs health",
+            "category": "management",
+            "producer": "ml",
+            "enabled_in_license": true,
+            "recovery_action_group": {
+              "id": "recovered",
+              "name": "Recovered"
+            },
+            "action_groups": [
+              {
+                "id": "anomaly_detection_realtime_issue",
+                "name": "Issue detected"
+              },
+              {
+                "id": "recovered",
+                "name": "Recovered"
+              }
+            ],
+            "default_action_group_id": "anomaly_detection_realtime_issue",
+            "minimum_license_required": "platinum",
+            "is_exportable": true,
+            "rule_task_timeout": "5m",
+            "action_variables": {
+              "context": [
+                {
+                  "name": "results",
+                  "description": "Results of the rule execution"
+                },
+                {
+                  "name": "message",
+                  "description": "Alert info message"
+                }
+              ],
+              "state": [],
+              "params": []
+            },
+            "authorized_consumers": {
+              "alerts": {
+                "read": true,
+                "all": true
+              },
+              "stackAlerts": {
+                "read": true,
+                "all": true
+              },
+              "slo": {
+                "read": true,
+                "all": true
+              },
+              "ml": {
+                "read": true,
+                "all": true
+              },
+              "uptime": {
+                "read": true,
+                "all": true
+              },
+              "infrastructure": {
+                "read": true,
+                "all": true
+              },
+              "logs": {
+                "read": true,
+                "all": true
+              },
+              "monitoring": {
+                "read": true,
+                "all": true
+              },
+              "siem": {
+                "read": true,
+                "all": true
+              },
+              "apm": {
+                "read": true,
+                "all": true
+              },
+              "discover": {
+                "read": true,
+                "all": true
+              }
+            },
+            "does_set_recovery_context": true,
+            "has_alerts_mappings": false,
+            "has_fields_for_a_a_d": false
+          }
+        ]
+      }
+    },
+    "schemas": {
+      "401_response": {
+        "type": "object",
+        "title": "Unsuccessful rule API response",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Unauthorized",
+            "enum": [
+              "Unauthorized"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 401,
+            "enum": [
+              401
+            ]
+          }
+        }
+      },
+      "fieldmap_properties": {
+        "title": "Field map objects in the get rule types response",
+        "type": "object",
+        "properties": {
+          "array": {
+            "type": "boolean",
+            "description": "Indicates whether the field is an array."
+          },
+          "dynamic": {
+            "type": "boolean",
+            "description": "Indicates whether it is a dynamic field mapping."
+          },
+          "format": {
+            "type": "string",
+            "description": "Indicates the format of the field. For example, if the `type` is `date_range`, the `format` can be `epoch_millis||strict_date_optional_time`.\n"
+          },
+          "ignore_above": {
+            "type": "integer",
+            "description": "Specifies the maximum length of a string field. Longer strings are not indexed or stored."
+          },
+          "index": {
+            "type": "boolean",
+            "description": "Indicates whether field values are indexed."
+          },
+          "path": {
+            "type": "string",
+            "description": "TBD"
+          },
+          "properties": {
+            "type": "object",
+            "description": "Details about the object properties. This property is applicable when `type` is `object`.\n",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "The data type for each object property."
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Indicates whether the field is required."
+          },
+          "scaling_factor": {
+            "type": "integer",
+            "description": "The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. \n"
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the data type for the field.",
+            "example": "scaled_float"
+          }
+        }
+      }
+    }
+  }
+}

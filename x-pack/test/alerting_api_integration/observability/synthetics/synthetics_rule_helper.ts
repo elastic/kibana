@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
@@ -43,12 +43,10 @@ export class SyntheticsRuleHelper {
   async createIndexAction() {
     await this.esClient.indices.create({
       index: this.alertActionIndex,
-      body: {
-        mappings: {
-          properties: {
-            'monitor.id': {
-              type: 'keyword',
-            },
+      mappings: {
+        properties: {
+          'monitor.id': {
+            type: 'keyword',
           },
         },
       },

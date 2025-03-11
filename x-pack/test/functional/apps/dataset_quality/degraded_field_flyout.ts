@@ -15,6 +15,7 @@ import {
   getInitialTestLogs,
   ANOTHER_1024_CHARS,
   MORE_THAN_1024_CHARS,
+  CONSISTENT_TAGS,
 } from './data';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 import { logsNginxMappings } from './custom_mappings/custom_integration_mappings';
@@ -105,10 +106,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     describe('detecting root cause for ignored fields', () => {
       before(async () => {
         // Create custom component template
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateName,
-          logsSynthMappings(degradedDatasetWithLimitsName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateName,
+          mappings: logsSynthMappings(degradedDatasetWithLimitsName),
+        });
 
         // Create custom index template
         await esClient.indices.putIndexTemplate({
@@ -135,10 +136,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.observabilityLogsExplorer.installPackage(nginxPkg);
 
         // Create custom component template for Nginx to avoid issues with LogsDB
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateNameNginx,
-          logsNginxMappings(nginxAccessDatasetName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateNameNginx,
+          mappings: logsNginxMappings(nginxAccessDatasetName),
+        });
 
         await synthtrace.index([
           // Ingest Degraded Logs with 25 fields in degraded DataSet
@@ -187,7 +188,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
                     .timestamp(timestamp)
                 );
             }),
-          // Ingest Degraded Logs with 26 fields in Apm DataSet
+          // Ingest Degraded Logs with 27 fields in Apm DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -205,7 +206,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
                     .defaults({
                       'service.name': serviceName,
                       'trace.id': generateShortId(),
+                      'event.ingested': new Date().toISOString(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      tags: CONSISTENT_TAGS, // To account for ES inserted error tags
                     })
                     .timestamp(timestamp)
                 );
@@ -227,7 +230,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Set Limit of 26
         await PageObjects.datasetQuality.setDataStreamSettings(apmAppDataStreamName, {
-          'mapping.total_fields.limit': 25,
+          'mapping.total_fields.limit': 26,
         });
 
         await synthtrace.index([
@@ -279,7 +282,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
                     .timestamp(timestamp)
                 );
             }),
-          // Ingest Degraded Logs with 27 fields in Apm APP DataSet
+          // Ingest Degraded Logs with 29 fields in Apm APP DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -299,6 +302,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                      'event.ingested': new Date().toISOString(),
+                      tags: CONSISTENT_TAGS, // To account for ES inserted error tags
                     })
                     .timestamp(timestamp)
                 );
@@ -330,13 +335,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           }
         );
 
-        // Set Limit of 27
+        // Set Limit of 28
         await PageObjects.datasetQuality.setDataStreamSettings(
           PageObjects.datasetQuality.generateBackingIndexNameWithoutVersion({
             dataset: apmAppDatasetName,
           }) + '-000002',
           {
-            'mapping.total_fields.limit': 27,
+            'mapping.total_fields.limit': 28,
           }
         );
 
@@ -389,7 +394,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
                     .timestamp(timestamp)
                 );
             }),
-          // Ingest Degraded Logs with 27 fields in Apm APP DataSet
+          // Ingest Degraded Logs with 29 fields in Apm APP DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -409,6 +414,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                      'event.ingested': new Date().toISOString(),
+                      tags: CONSISTENT_TAGS, // To account for ES inserted error tags
                     })
                     .timestamp(timestamp)
                 );
@@ -470,7 +477,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           // Check value in Table
           const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const countColumn = table['Docs count'];
+          const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await countColumn.getCellTexts()).to.eql(['5', '5', '5']);
 
           // Check value in Flyout
@@ -490,7 +497,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           // Check value in Table
           const newTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const newCountColumn = newTable['Docs count'];
+          const newCountColumn = newTable[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await newCountColumn.getCellTexts()).to.eql(['15', '15', '5', '5']);
 
           // Check value in Flyout

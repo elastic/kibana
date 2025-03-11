@@ -97,7 +97,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 10
     retry:
       automatic:
         - exit_status: '-1'
@@ -153,7 +153,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -181,7 +181,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 4
     retry:
       automatic:
         - exit_status: '-1'
@@ -209,7 +209,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -265,7 +265,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -279,7 +279,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'

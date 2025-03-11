@@ -10,8 +10,8 @@
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
-!/packages/kbn-import-resolver/src/__fixtures__/node_modules
-!/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
+!/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules
+!/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
 trash
 /optimize
 /built_assets
@@ -92,20 +92,20 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
-/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
-/x-pack/plugins/observability_solution/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
+/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
+/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
 
 # transpiled cypress config
-x-pack/plugins/fleet/cypress.config.d.ts
-x-pack/plugins/fleet/cypress.config.js
-x-pack/plugins/osquery/cypress.config.d.ts
-x-pack/plugins/osquery/cypress.config.js
-x-pack/plugins/enterprise_search/cypress.config.d.ts
-x-pack/plugins/enterprise_search/cypress.config.js
-x-pack/plugins/security_solution/public/management/cypress.config.d.ts
-x-pack/plugins/security_solution/public/management/cypress.config.js
-x-pack/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
-x-pack/plugins/security_solution/public/management/cypress_endpoint.config.js
+x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
+x-pack/platform/plugins/shared/fleet/cypress.config.js
+x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
+x-pack/platform/plugins/shared/osquery/cypress.config.js
+x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
+x-pack/solutions/search/plugins/enterprise_search/cypress.config.js
+x-pack/solutions/security/plugins/security_solution/public/management/cypress.config.d.ts
+x-pack/solutions/security/plugins/security_solution/public/management/cypress.config.js
+x-pack/solutions/security/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
+x-pack/solutions/security/plugins/security_solution/public/management/cypress_endpoint.config.js
 
 # release notes script output
 report.csv
@@ -132,11 +132,12 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-/packages/*/package-map.json
-/packages/*/config-paths.json
+src/platform/packages/**/package-map.json
+/packages/**/config-paths.json
 /packages/kbn-synthetic-package-map/
 **/.synthetics/
 **/.journeys/
+**/.rca/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
 
 # ignore FTR temp directory

@@ -13,7 +13,7 @@
         "description": [
           "\nService types"
         ],
-        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -56,7 +56,7 @@
         "tags": [],
         "label": "DiscoverFeaturesServiceStart",
         "description": [],
-        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,7 +85,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -99,7 +99,7 @@
         "tags": [],
         "label": "ObservabilityLogsAIAssistantFeature",
         "description": [],
-        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,7 +113,7 @@
             "signature": [
               "\"observability-logs-ai-assistant\""
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -135,7 +135,7 @@
               },
               ") => JSX.Element"
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -155,7 +155,7 @@
                     "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
                   }
                 ],
-                "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+                "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -175,7 +175,7 @@
         "description": [
           "\nFeatures types\nHere goes the contract definition for the client features that can be registered\nand that will be consumed by Discover.\n\nAllow to register an AIAssistant scoped to investigate log entries.\nIt will be opinionatedly used as an additional tool to investigate a log document and\nwill be shown on the logs-overview preset tab of the UnifiedDocViewer."
         ],
-        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -195,7 +195,7 @@
                 "text": "DataTableRecord"
               }
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -209,7 +209,7 @@
         "tags": [],
         "label": "SecuritySolutionAppWrapperFeature",
         "description": [],
-        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +223,7 @@
             "signature": [
               "\"security-solution-app-wrapper\""
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,7 +237,7 @@
             "signature": [
               "() => Promise<() => React.FunctionComponent<{ children?: React.ReactNode; }>>"
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -255,7 +255,7 @@
         "description": [
           "*************** Security Solution"
         ],
-        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -269,7 +269,7 @@
             "signature": [
               "\"security-solution-cell-renderer\""
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -291,7 +291,7 @@
               },
               "> | undefined>"
             ],
-            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -323,7 +323,7 @@
           " | ",
           "SecuritySolutionFeature"
         ],
-        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -337,7 +337,7 @@
       "tags": [],
       "label": "DiscoverSharedPublicSetup",
       "description": [],
-      "path": "src/plugins/discover_shared/public/types.ts",
+      "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -357,7 +357,7 @@
               "text": "DiscoverFeaturesServiceSetup"
             }
           ],
-          "path": "src/plugins/discover_shared/public/types.ts",
+          "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -372,7 +372,7 @@
       "tags": [],
       "label": "DiscoverSharedPublicStart",
       "description": [],
-      "path": "src/plugins/discover_shared/public/types.ts",
+      "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -392,7 +392,7 @@
               "text": "DiscoverFeaturesServiceStart"
             }
           ],
-          "path": "src/plugins/discover_shared/public/types.ts",
+          "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -428,7 +428,7 @@
           },
           "<Feature>"
         ],
-        "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
+        "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -442,7 +442,7 @@
             "signature": [
               "(feature: Feature) => void"
             ],
-            "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
+            "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -456,7 +456,7 @@
                 "signature": [
                   "Feature"
                 ],
-                "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
+                "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -474,7 +474,7 @@
             "signature": [
               "<Id extends Feature[\"id\"]>(id: Id) => Extract<Feature, { id: Id; }> | undefined"
             ],
-            "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
+            "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -488,7 +488,7 @@
                 "signature": [
                   "Id"
                 ],
-                "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
+                "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

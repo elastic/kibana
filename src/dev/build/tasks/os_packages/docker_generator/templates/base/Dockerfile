@@ -14,9 +14,6 @@ FROM {{{baseImageName}}} AS builder
 {{#ubi}}
 RUN microdnf install -y findutils tar gzip{{#fips}} perl make gcc{{/fips}}
 {{/ubi}}
-{{#ubuntu}}
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
-{{/ubuntu}}
 {{#wolfi}}
 RUN apk --no-cache add curl
 {{/wolfi}}
@@ -114,27 +111,14 @@ EXPOSE 5601
 RUN for iter in {1..10}; do \
       microdnf update --setopt=tsflags=nodocs -y && \
       microdnf install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss findutils && \
+      fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
       microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)
 {{/ubi}}
-{{#ubuntu}}
-RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      apt-get update  && \
-      apt-get upgrade -y  && \
-      apt-get install -y --no-install-recommends \
-       fontconfig libnss3 curl ca-certificates && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
-{{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig libstdc++ libnss findutils shadow
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
@@ -171,9 +155,6 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
-{{^opensslLegacyProvider}}
-RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
-{{/opensslLegacyProvider}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.

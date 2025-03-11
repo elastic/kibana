@@ -41,14 +41,19 @@ export class DashboardAddPanelService extends FtrService {
     });
   }
 
-  async clickMarkdownQuickButton() {
+  async clickAddMarkdownPanel() {
     await this.clickEditorMenuButton();
-    await this.clickVisType('markdown');
+    await this.clickAddNewPanelFromUIActionLink('Markdown text');
   }
 
-  async clickMapQuickButton() {
+  async clickAddMapPanel() {
     await this.clickEditorMenuButton();
-    await this.clickVisType('map');
+    await this.clickAddNewPanelFromUIActionLink('Maps');
+  }
+
+  async clickAddLensPanel() {
+    await this.clickEditorMenuButton();
+    await this.clickAddNewPanelFromUIActionLink('Lens');
   }
 
   async clickEditorMenuButton() {
@@ -62,16 +67,6 @@ export class DashboardAddPanelService extends FtrService {
 
   async expectEditorMenuClosed() {
     await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
-  }
-
-  async clickAggBasedVisualizations() {
-    this.log.debug('DashboardAddPanel.clickEditorMenuAggBasedMenuItem');
-    await this.clickAddNewPanelFromUIActionLink('Aggregation based');
-  }
-
-  async clickVisType(visType: string) {
-    this.log.debug('DashboardAddPanel.clickVisType');
-    await this.testSubjects.click(`visType-${visType}`);
   }
 
   async verifyEmbeddableFactoryGroupExists(groupId: string, expectExist: boolean = true) {
@@ -89,6 +84,7 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async clickAddNewPanelFromUIActionLink(type: string) {
+    await this.testSubjects.setValue('dashboardPanelSelectionFlyout__searchInput', type);
     await this.testSubjects.click(`create-action-${type}`);
   }
 

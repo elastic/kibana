@@ -49,7 +49,7 @@ export const plugin: PluginInitializer<
         ]);
 
         ReactDOM.render(
-          <KibanaThemeProvider theme={coreStart.theme}>
+          <KibanaThemeProvider {...coreStart}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
                 <LoginPage />
@@ -69,7 +69,7 @@ export const plugin: PluginInitializer<
       order: 4000 + 1, // Make sure it comes after the user menu
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <KibanaThemeProvider theme={coreStart.theme}>
+          <KibanaThemeProvider {...coreStart}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
                 <RoleSwitcher />

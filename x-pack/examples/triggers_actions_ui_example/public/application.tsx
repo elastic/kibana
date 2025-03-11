@@ -22,6 +22,9 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -45,6 +48,7 @@ export interface TriggersActionsUiExampleComponentParams {
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
   settings: CoreStart['settings'];
   history: ScopedHistory;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -53,6 +57,9 @@ export interface TriggersActionsUiExampleComponentParams {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -63,12 +70,13 @@ const TriggersActionsUiExampleApp = ({
   notifications,
   settings,
   docLinks,
-  i18n,
-  theme,
   data,
   charts,
   dataViews,
   unifiedSearch,
+  fieldFormats,
+  licensing,
+  ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
     <Router history={history}>
@@ -169,7 +177,17 @@ const TriggersActionsUiExampleApp = ({
             path="/alerts_table"
             render={() => (
               <Page title="Alerts Table">
-                <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+                <AlertsTableSandbox
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    settings,
+                  }}
+                />
               </Page>
             )}
           />
@@ -193,8 +211,6 @@ const TriggersActionsUiExampleApp = ({
                     application,
                     notifications,
                     docLinks,
-                    i18n,
-                    theme,
                     charts,
                     data,
                     dataViews,
@@ -202,6 +218,7 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
                 />
               </Page>
@@ -218,8 +235,6 @@ const TriggersActionsUiExampleApp = ({
                     application,
                     notifications,
                     docLinks,
-                    theme,
-                    i18n,
                     charts,
                     data,
                     dataViews,
@@ -227,6 +242,7 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
                 />
               </Page>
@@ -245,7 +261,6 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element, history }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application, i18n, theme, settings } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
@@ -263,19 +278,16 @@ export const renderApp = (
           <IntlProvider locale="en">
             <TriggersActionsUiExampleApp
               history={history}
-              http={http}
-              notifications={notifications}
-              application={application}
-              docLinks={docLinks}
-              i18n={i18n}
-              theme={theme}
-              settings={settings}
               triggersActionsUi={deps.triggersActionsUi}
               data={deps.data}
               charts={deps.charts}
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              fieldFormats={deps.fieldFormats}
+              licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
+              {...core}
             />
           </IntlProvider>
         </QueryClientProvider>

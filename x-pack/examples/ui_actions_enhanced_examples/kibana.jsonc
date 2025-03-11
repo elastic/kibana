@@ -21,7 +21,8 @@
       "dashboard",
       "dashboardEnhanced",
       "developerExamples",
-      "unifiedSearch"
+      "unifiedSearch",
+      "embeddable",
     ],
     "requiredBundles": [
       "dashboardEnhanced",

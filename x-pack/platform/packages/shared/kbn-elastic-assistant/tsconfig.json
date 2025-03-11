@@ -1,0 +1,47 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@emotion/react/types/css-prop"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../../../../typings/emotion.d.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/elastic-assistant-common",
+    "@kbn/core-http-browser",
+    "@kbn/i18n",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/cases-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core",
+    "@kbn/zod",
+    "@kbn/data-views-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-chrome-browser",
+    "@kbn/ai-assistant-icon",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/datemath",
+  ]
+}

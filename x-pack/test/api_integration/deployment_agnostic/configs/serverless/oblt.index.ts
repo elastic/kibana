@@ -20,5 +20,9 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/painless_lab'));
     loadTestFile(require.resolve('../../apis/saved_objects_management'));
     loadTestFile(require.resolve('../../apis/observability/slo'));
+    loadTestFile(require.resolve('../../apis/observability/synthetics'));
+    loadTestFile(require.resolve('../../apis/observability/ai_assistant'));
+    loadTestFile(require.resolve('../../apis/observability/streams'));
+    loadTestFile(require.resolve('../../apis/observability/onboarding'));
   });
 }

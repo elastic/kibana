@@ -1,0 +1,1571 @@
+openapi: 3.0.3
+info:
+  description: ''
+  title: Security Entity Analytics API (Elastic Cloud and self-hosted)
+  version: '2023-10-31'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/asset_criticality:
+    delete:
+      description: Delete the asset criticality record for a specific entity.
+      operationId: DeleteAssetCriticalityRecord
+      parameters:
+        - description: The ID value of the asset.
+          example: my_host
+          in: query
+          name: id_value
+          required: true
+          schema:
+            type: string
+        - description: The field representing the ID.
+          example: host.name
+          in: query
+          name: id_field
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdField'
+        - description: If 'wait_for' the request will wait for the index refresh.
+          in: query
+          name: refresh
+          required: false
+          schema:
+            enum:
+              - wait_for
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    description: >-
+                      True if the record was deleted or false if the record did
+                      not exist.
+                    type: boolean
+                  record:
+                    $ref: '#/components/schemas/AssetCriticalityRecord'
+                    description: The deleted record if it existed.
+                required:
+                  - deleted
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Delete an asset criticality record
+      tags:
+        - Security Entity Analytics API
+    get:
+      description: Get the asset criticality record for a specific entity.
+      operationId: GetAssetCriticalityRecord
+      parameters:
+        - description: The ID value of the asset.
+          example: my_host
+          in: query
+          name: id_value
+          required: true
+          schema:
+            type: string
+        - description: The field representing the ID.
+          example: host.name
+          in: query
+          name: id_field
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdField'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCriticalityRecord'
+          description: Successful response
+        '400':
+          description: Invalid request
+        '404':
+          description: Criticality record not found
+      summary: Get an asset criticality record
+      tags:
+        - Security Entity Analytics API
+    post:
+      description: >
+        Create or update an asset criticality record for a specific entity.
+
+
+        If a record already exists for the specified entity, that record is
+        overwritten with the specified value. If a record doesn't exist for the
+        specified entity, a new record is created.
+      operationId: CreateAssetCriticalityRecord
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+                - type: object
+                  properties:
+                    refresh:
+                      description: >-
+                        If 'wait_for' the request will wait for the index
+                        refresh.
+                      enum:
+                        - wait_for
+                      type: string
+              example:
+                criticality_level: high_impact
+                id_field: host.name
+                id_value: my_host
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCriticalityRecord'
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Upsert an asset criticality record
+      tags:
+        - Security Entity Analytics API
+  /api/asset_criticality/bulk:
+    post:
+      description: >
+        Bulk upsert up to 1000 asset criticality records.
+
+
+        If asset criticality records already exist for the specified entities,
+        those records are overwritten with the specified values. If asset
+        criticality records don't exist for the specified entities, new records
+        are created.
+      operationId: BulkUpsertAssetCriticalityRecords
+      requestBody:
+        content:
+          application/json:
+            schema:
+              example:
+                records:
+                  - criticality_level: low_impact
+                    id_field: host.name
+                    id_value: host-1
+                  - criticality_level: medium_impact
+                    id_field: host.name
+                    id_value: host-2
+              type: object
+              properties:
+                records:
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+                      - type: object
+                        properties:
+                          criticality_level:
+                            $ref: >-
+                              #/components/schemas/AssetCriticalityLevelsForBulkUpload
+                        required:
+                          - criticality_level
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - records
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                example:
+                  errors:
+                    - index: 0
+                      message: Invalid ID field
+                  stats:
+                    failed: 1
+                    successful: 1
+                    total: 2
+                type: object
+                properties:
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/AssetCriticalityBulkUploadErrorItem'
+                    type: array
+                  stats:
+                    $ref: '#/components/schemas/AssetCriticalityBulkUploadStats'
+                required:
+                  - errors
+                  - stats
+          description: Bulk upload successful
+        '413':
+          description: File too large
+      summary: Bulk upsert asset criticality records
+      tags:
+        - Security Entity Analytics API
+  /api/asset_criticality/list:
+    get:
+      description: List asset criticality records, paging, sorting and filtering as needed.
+      operationId: FindAssetCriticalityRecords
+      parameters:
+        - description: The field to sort by.
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            enum:
+              - id_value
+              - id_field
+              - criticality_level
+              - \@timestamp
+            type: string
+        - description: The order to sort by.
+          in: query
+          name: sort_direction
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: The page number to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - description: The number of records to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            maximum: 1000
+            minimum: 1
+            type: integer
+        - description: The kuery to filter by.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                example:
+                  page: 1
+                  per_page: 10
+                  records:
+                    - '@timestamp': '2024-08-02T14:40:35.705Z'
+                      asset:
+                        criticality: medium_impact
+                      criticality_level: medium_impact
+                      host:
+                        asset:
+                          criticality: medium_impact
+                        name: my_other_host
+                      id_field: host.name
+                      id_value: my_other_host
+                    - '@timestamp': '2024-08-02T11:15:34.290Z'
+                      asset:
+                        criticality: high_impact
+                      criticality_level: high_impact
+                      host:
+                        asset:
+                          criticality: high_impact
+                        name: my_host
+                      id_field: host.name
+                      id_value: my_host
+                  total: 2
+                type: object
+                properties:
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+                  records:
+                    items:
+                      $ref: '#/components/schemas/AssetCriticalityRecord'
+                    type: array
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total
+          description: Successfully retrieved asset criticality records
+      summary: List asset criticality records
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
+                entityTypes:
+                  items:
+                    $ref: '#/components/schemas/EntityType'
+                  type: array
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp.
+                  type: string
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines:
+    get:
+      operationId: ListEntityEngines
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/EngineDescriptor'
+                    type: array
+          description: Successful response
+      summary: List the Entity Engines
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines/{entityType}:
+    delete:
+      operationId: DeleteEntityEngine
+      parameters:
+        - description: The entity type of the engine (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response
+      summary: Delete the Entity Engine
+      tags:
+        - Security Entity Analytics API
+    get:
+      operationId: GetEntityEngine
+      parameters:
+        - description: The entity type of the engine (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineDescriptor'
+          description: Successful response
+      summary: Get an Entity Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines/{entityType}/init:
+    post:
+      operationId: InitEntityEngine
+      parameters:
+        - description: The entity type of the engine (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp for the entity type.
+                  type: string
+        description: Schema for the engine initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineDescriptor'
+          description: Successful response
+      summary: Initialize an Entity Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines/{entityType}/start:
+    post:
+      operationId: StartEntityEngine
+      parameters:
+        - description: The entity type of the engine
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  started:
+                    type: boolean
+          description: Successful response
+      summary: Start an Entity Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines/{entityType}/stop:
+    post:
+      operationId: StopEntityEngine
+      parameters:
+        - description: The entity type of the engine (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stopped:
+                    type: boolean
+          description: Successful response
+      summary: Stop an Entity Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      operationId: ApplyEntityEngineDataviewIndices
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Successful response
+        '207':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Partial successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Error response
+      summary: Apply DataView indices to all installed engines
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/entities/list:
+    get:
+      description: List entities records, paging, sorting and filtering as needed.
+      operationId: ListEntities
+      parameters:
+        - in: query
+          name: sort_field
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            maximum: 10000
+            minimum: 1
+            type: integer
+        - description: An ES query to filter by.
+          in: query
+          name: filterQuery
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: entity_types
+          required: true
+          schema:
+            items:
+              $ref: '#/components/schemas/EntityType'
+            type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inspect:
+                    $ref: '#/components/schemas/InspectQuery'
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+                  records:
+                    items:
+                      $ref: '#/components/schemas/Entity'
+                    type: array
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total
+          description: Entities returned successfully
+      summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      parameters:
+        - description: >-
+            If true returns a detailed status of the engine including all it's
+            components
+          in: query
+          name: include_components
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/EngineDescriptor'
+                        - type: object
+                          properties:
+                            components:
+                              items:
+                                $ref: '#/components/schemas/EngineComponentStatus'
+                              type: array
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/StoreStatus'
+                required:
+                  - status
+                  - engines
+          description: Successful response
+      summary: Get the status of the Entity Store
+      tags:
+        - Security Entity Analytics API
+  /api/risk_score/engine/dangerously_delete_data:
+    delete:
+      description: >-
+        Cleaning up the the Risk Engine by removing the indices, mapping and
+        transforms
+      operationId: CleanUpRiskEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cleanup_successful:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
+          description: Unexpected error
+      summary: Cleanup the Risk Engine
+      tags:
+        - Security Entity Analytics API
+  /api/risk_score/engine/saved_object/configure:
+    patch:
+      description: Configuring the Risk Engine Saved Object
+      operationId: ConfigureRiskEngineSavedObject
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                exclude_alert_statuses:
+                  items:
+                    type: string
+                  type: array
+                exclude_alert_tags:
+                  items:
+                    type: string
+                  type: array
+                range:
+                  type: object
+                  properties:
+                    end:
+                      type: string
+                    start:
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risk_engine_saved_object_configured:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse
+          description: Unexpected error
+      summary: Configure the Risk Engine Saved Object
+      tags:
+        - Security Entity Analytics API
+  /api/risk_score/engine/schedule_now:
+    post:
+      description: >-
+        Schedule the risk scoring engine to run as soon as possible. You can use
+        this to recalculate entity risk scores after updating their asset
+        criticality.
+      operationId: ScheduleRiskEngineNow
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
+          description: Unexpected error
+      summary: Run the risk scoring engine
+      tags:
+        - Security Entity Analytics API
+components:
+  schemas:
+    AssetCriticalityBulkUploadErrorItem:
+      type: object
+      properties:
+        index:
+          type: integer
+        message:
+          type: string
+      required:
+        - message
+        - index
+    AssetCriticalityBulkUploadStats:
+      type: object
+      properties:
+        failed:
+          type: integer
+        successful:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
+    AssetCriticalityLevel:
+      description: The criticality level of the asset.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+      type: string
+    AssetCriticalityLevelsForBulkUpload:
+      description: >-
+        The criticality level of the asset for bulk upload. The value
+        `unassigned` is used to indicate that the criticality level is not
+        assigned and is only used for bulk upload.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+        - unassigned
+      type: string
+    AssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
+        - type: object
+          properties:
+            '@timestamp':
+              description: The time the record was created or updated.
+              example: '2017-07-21T17:32:28Z'
+              format: date-time
+              type: string
+          required:
+            - '@timestamp'
+      example:
+        '@timestamp': '2024-08-02T11:15:34.290Z'
+        asset:
+          criticality: high_impact
+        criticality_level: high_impact
+        host:
+          asset:
+            criticality: high_impact
+          name: my_host
+        id_field: host.name
+        id_value: my_host
+    AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - asset
+        host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        service:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        user:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - asset
+    AssetCriticalityRecordIdParts:
+      type: object
+      properties:
+        id_field:
+          $ref: '#/components/schemas/IdField'
+          description: The field representing the ID.
+          example: host.name
+        id_value:
+          description: The ID value of the asset.
+          type: string
+      required:
+        - id_value
+        - id_field
+    CleanUpRiskEngineErrorResponse:
+      type: object
+      properties:
+        cleanup_successful:
+          example: false
+          type: boolean
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+      required:
+        - cleanup_successful
+        - errors
+    ConfigureRiskEngineSavedObjectErrorResponse:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+        risk_engine_saved_object_configured:
+          example: false
+          type: boolean
+      required:
+        - risk_engine_saved_object_configured
+        - errors
+    CreateAssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+        - type: object
+          properties:
+            criticality_level:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality_level
+    EngineComponentResource:
+      enum:
+        - entity_engine
+        - entity_definition
+        - index
+        - component_template
+        - index_template
+        - ingest_pipeline
+        - enrich_policy
+        - task
+        - transform
+      type: string
+    EngineComponentStatus:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              title:
+                type: string
+          type: array
+        health:
+          enum:
+            - green
+            - yellow
+            - red
+            - unknown
+          type: string
+        id:
+          type: string
+        installed:
+          type: boolean
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        resource:
+          $ref: '#/components/schemas/EngineComponentResource'
+      required:
+        - id
+        - installed
+        - resource
+    EngineDataviewUpdateResult:
+      type: object
+      properties:
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              items:
+                type: string
+              type: array
+        type:
+          type: string
+      required:
+        - type
+    EngineDescriptor:
+      type: object
+      properties:
+        delay:
+          default: 1m
+          pattern: '[smdh]$'
+          type: string
+        docsPerSecond:
+          type: integer
+        error:
+          type: object
+        fieldHistoryLength:
+          type: integer
+        filter:
+          type: string
+        frequency:
+          default: 1m
+          pattern: '[smdh]$'
+          type: string
+        indexPattern:
+          $ref: '#/components/schemas/IndexPattern'
+        lookbackPeriod:
+          default: 24h
+          pattern: '[smdh]$'
+          type: string
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+        timeout:
+          default: 180s
+          pattern: '[smdh]$'
+          type: string
+        timestampField:
+          type: string
+        type:
+          $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
+    EngineStatus:
+      enum:
+        - installing
+        - started
+        - stopped
+        - updating
+        - error
+      type: string
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'
+        - $ref: '#/components/schemas/ServiceEntity'
+    EntityRiskLevels:
+      enum:
+        - Unknown
+        - Low
+        - Moderate
+        - High
+        - Critical
+      type: string
+    EntityRiskScoreRecord:
+      type: object
+      properties:
+        '@timestamp':
+          description: The time at which the risk score was calculated.
+          example: '2017-07-21T17:32:28Z'
+          format: date-time
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/EntityRiskLevels'
+          description: Lexical description of the entity's risk.
+          example: Critical
+        calculated_score:
+          description: The raw numeric value of the given entity's risk score.
+          format: double
+          type: number
+        calculated_score_norm:
+          description: >-
+            The normalized numeric value of the given entity's risk score.
+            Useful for comparing with other entities.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          description: >-
+            The number of risk input documents that contributed to the Category
+            1 score (`category_1_score`).
+          format: integer
+          type: number
+        category_1_score:
+          description: >-
+            The contribution of Category 1 to the overall risk score
+            (`calculated_score`). Category 1 contains Detection Engine Alerts.
+          format: double
+          type: number
+        category_2_count:
+          format: integer
+          type: number
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        criticality_modifier:
+          format: double
+          type: number
+        id_field:
+          description: >-
+            The identifier field defining this risk score. Coupled with
+            `id_value`, uniquely identifies the entity being scored.
+          example: host.name
+          type: string
+        id_value:
+          description: >-
+            The identifier value defining this risk score. Coupled with
+            `id_field`, uniquely identifies the entity being scored.
+          example: example.host
+          type: string
+        inputs:
+          description: >-
+            A list of the highest-risk documents contributing to this risk
+            score. Useful for investigative purposes.
+          items:
+            $ref: '#/components/schemas/RiskScoreInput'
+          type: array
+        notes:
+          items:
+            type: string
+          type: array
+      required:
+        - '@timestamp'
+        - id_field
+        - id_value
+        - calculated_level
+        - calculated_score
+        - calculated_score_norm
+        - category_1_score
+        - category_1_count
+        - inputs
+        - notes
+    EntityType:
+      enum:
+        - user
+        - host
+        - service
+      type: string
+    HostEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
+        host:
+          type: object
+          properties:
+            architecture:
+              items:
+                type: string
+              type: array
+            domain:
+              items:
+                type: string
+              type: array
+            hostname:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            ip:
+              items:
+                type: string
+              type: array
+            mac:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
+            type:
+              items:
+                type: string
+              type: array
+          required:
+            - name
+      required:
+        - host
+        - entity
+    IdField:
+      enum:
+        - host.name
+        - user.name
+        - service.name
+      type: string
+    IndexPattern:
+      type: string
+    InspectQuery:
+      type: object
+      properties:
+        dsl:
+          items:
+            type: string
+          type: array
+        response:
+          items:
+            type: string
+          type: array
+      required:
+        - dsl
+        - response
+    Interval:
+      description: >-
+        Interval in which enrich policy runs. For example, `"1h"` means the rule
+        runs every hour.
+      example: 1h
+      pattern: ^[1-9]\d*[smh]$
+      type: string
+    Metadata:
+      $ref: '#/components/schemas/TransformStatsMetadata'
+    RiskEngineScheduleNowErrorResponse:
+      type: object
+      properties:
+        full_error:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+        - full_error
+    RiskEngineScheduleNowResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+    RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
+      type: object
+      properties:
+        category:
+          description: The risk category of the risk input document.
+          example: category_1
+          type: string
+        contribution_score:
+          format: double
+          type: number
+        description:
+          description: A human-readable description of the risk input document.
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        id:
+          description: The unique identifier (`_id`) of the original source document
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          type: string
+        index:
+          description: The unique index (`_index`) of the original source document
+          example: .internal.alerts-security.alerts-default-000001
+          type: string
+        risk_score:
+          description: The weighted risk score of the risk input document.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        timestamp:
+          description: The @timestamp of the risk input document.
+          example: '2017-07-21T17:32:28Z'
+          type: string
+      required:
+        - id
+        - index
+        - description
+        - category
+    ServiceEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
+          required:
+            - name
+      required:
+        - service
+        - entity
+    StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
+    TaskManagerUnavailableResponse:
+      description: Task manager is unavailable
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          minimum: 400
+          type: integer
+      required:
+        - status_code
+        - message
+    TransformStatsMetadata:
+      type: object
+      properties:
+        delete_time_in_ms:
+          type: integer
+        documents_deleted:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_processed:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+        index_failures:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        pages_processed:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        search_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        trigger_count:
+          type: integer
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
+    UserEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+          required:
+            - name
+            - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
+        user:
+          type: object
+          properties:
+            domain:
+              items:
+                type: string
+              type: array
+            email:
+              items:
+                type: string
+              type: array
+            full_name:
+              items:
+                type: string
+              type: array
+            hash:
+              items:
+                type: string
+              type: array
+            id:
+              items:
+                type: string
+              type: array
+            name:
+              type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskScoreRecord'
+            roles:
+              items:
+                type: string
+              type: array
+          required:
+            - name
+      required:
+        - user
+        - entity
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: ''
+    name: Security Entity Analytics API
+    x-displayName: Security entity analytics

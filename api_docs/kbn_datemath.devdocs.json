@@ -29,7 +29,7 @@
         "signature": [
           "(input: string, options: { roundUp?: boolean | undefined; momentInstance?: typeof moment | undefined; forceNow?: Date | undefined; }) => moment.Moment | undefined"
         ],
-        "path": "packages/kbn-datemath/index.ts",
+        "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,7 +55,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -69,7 +69,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -83,7 +83,7 @@
                 "signature": [
                   "typeof moment | undefined"
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -97,7 +97,7 @@
                 "signature": [
                   "Date | undefined"
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -121,7 +121,7 @@
         "signature": [
           "\"m\" | \"s\" | \"y\" | \"M\" | \"w\" | \"d\" | \"h\" | \"ms\""
         ],
-        "path": "packages/kbn-datemath/index.ts",
+        "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -143,7 +143,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-datemath/index.ts",
+        "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -165,7 +165,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-datemath/index.ts",
+        "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -187,7 +187,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-datemath/index.ts",
+        "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -202,7 +202,7 @@
         "signature": [
           "{ m: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; s: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; y: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; M: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; w: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; d: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; h: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; ms: { weight: number; type: \"fixed\" | \"mixed\" | \"calendar\"; base: number; }; }"
         ],
-        "path": "packages/kbn-datemath/index.ts",
+        "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -216,7 +216,7 @@
         "tags": [],
         "label": "unitsMap",
         "description": [],
-        "path": "packages/kbn-datemath/index.ts",
+        "path": "src/platform/packages/shared/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,7 +227,7 @@
             "tags": [],
             "label": "ms",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -238,7 +238,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -252,7 +252,7 @@
                 "signature": [
                   "\"fixed\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -263,7 +263,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -276,7 +276,7 @@
             "tags": [],
             "label": "s",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -287,7 +287,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -301,7 +301,7 @@
                 "signature": [
                   "\"fixed\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -312,7 +312,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -325,7 +325,7 @@
             "tags": [],
             "label": "m",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -336,7 +336,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -350,7 +350,7 @@
                 "signature": [
                   "\"mixed\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -361,7 +361,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -374,7 +374,7 @@
             "tags": [],
             "label": "h",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -385,7 +385,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -399,7 +399,7 @@
                 "signature": [
                   "\"mixed\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -410,7 +410,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -423,7 +423,7 @@
             "tags": [],
             "label": "d",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -434,7 +434,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -448,7 +448,7 @@
                 "signature": [
                   "\"mixed\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -459,7 +459,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -472,7 +472,7 @@
             "tags": [],
             "label": "w",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -483,7 +483,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -497,7 +497,7 @@
                 "signature": [
                   "\"calendar\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -508,7 +508,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -521,7 +521,7 @@
             "tags": [],
             "label": "M",
             "description": [],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -532,7 +532,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -546,7 +546,7 @@
                 "signature": [
                   "\"calendar\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -557,7 +557,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -572,7 +572,7 @@
             "description": [
               "// q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter"
             ],
-            "path": "packages/kbn-datemath/index.ts",
+            "path": "src/platform/packages/shared/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -583,7 +583,7 @@
                 "tags": [],
                 "label": "weight",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -597,7 +597,7 @@
                 "signature": [
                   "\"calendar\""
                 ],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -608,7 +608,7 @@
                 "tags": [],
                 "label": "base",
                 "description": [],
-                "path": "packages/kbn-datemath/index.ts",
+                "path": "src/platform/packages/shared/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -72,11 +72,12 @@ EOT
 
 cat << EOF | buildkite-agent pipeline upload
 steps:
-  - label: "Builds Kibana VM images for cache update"
+  - label: "Update cache for ES serverless image"
     trigger: kibana-vm-images
     async: true
     build:
       env:
-        IMAGES_CONFIG: "kibana/images.yml"
+        IMAGES_CONFIG: 'kibana/image_cache.yml'
+        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
         RETRY: "1"
 EOF

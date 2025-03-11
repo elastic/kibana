@@ -18,23 +18,11 @@
         "label": "CoreSecurityRouteHandlerContext",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerInternalPluginApi",
-            "section": "def-server.CoreSecurityRouteHandlerContext",
-            "text": "CoreSecurityRouteHandlerContext"
-          },
+          "CoreSecurityRouteHandlerContext",
           " implements ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.SecurityRequestHandlerContext",
-            "text": "SecurityRequestHandlerContext"
-          }
+          "SecurityRequestHandlerContext"
         ],
-        "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+        "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,16 +34,10 @@
             "label": "#authc",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.AuthcRequestHandlerContext",
-                "text": "AuthcRequestHandlerContext"
-              },
+              "AuthcRequestHandlerContext",
               " | undefined"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,16 +49,10 @@
             "label": "#audit",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.AuditRequestHandlerContext",
-                "text": "AuditRequestHandlerContext"
-              },
+              "AuditRequestHandlerContext",
               " | undefined"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -90,7 +66,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,15 +78,9 @@
                 "label": "securityStart",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-server.SecurityServiceStart",
-                    "text": "SecurityServiceStart"
-                  }
+                  "SecurityServiceStart"
                 ],
-                "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+                "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -123,16 +93,10 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+                "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -148,15 +112,9 @@
             "label": "authc",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.AuthcRequestHandlerContext",
-                "text": "AuthcRequestHandlerContext"
-              }
+              "AuthcRequestHandlerContext"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -168,15 +126,9 @@
             "label": "audit",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.AuditRequestHandlerContext",
-                "text": "AuditRequestHandlerContext"
-              }
+              "AuditRequestHandlerContext"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "path": "src/core/packages/security/server-internal/src/security_route_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -191,34 +143,16 @@
         "label": "SecurityService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerInternalPluginApi",
-            "section": "def-server.SecurityService",
-            "text": "SecurityService"
-          },
+          "SecurityService",
           " implements ",
           "CoreService",
           "<",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.SecurityServiceSetup",
-            "text": "SecurityServiceSetup"
-          },
+          "SecurityServiceSetup",
           ", ",
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.SecurityServiceStart",
-            "text": "SecurityServiceStart"
-          },
+          "SecurityServiceStart",
           ">"
         ],
-        "path": "packages/core/security/core-security-server-internal/src/security_service.ts",
+        "path": "src/core/packages/security/server-internal/src/security_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,7 +166,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_service.ts",
+            "path": "src/core/packages/security/server-internal/src/security_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -246,7 +180,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/security/core-security-server-internal/src/security_service.ts",
+                "path": "src/core/packages/security/server-internal/src/security_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -263,15 +197,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.SecurityServiceSetup",
-                "text": "SecurityServiceSetup"
-              }
+              "SecurityServiceSetup"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_service.ts",
+            "path": "src/core/packages/security/server-internal/src/security_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -286,15 +214,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-security-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-server.SecurityServiceStart",
-                "text": "SecurityServiceStart"
-              }
+              "SecurityServiceStart"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_service.ts",
+            "path": "src/core/packages/security/server-internal/src/security_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -310,7 +232,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/security/core-security-server-internal/src/security_service.ts",
+            "path": "src/core/packages/security/server-internal/src/security_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -332,15 +254,9 @@
         "label": "InternalSecurityServiceSetup",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.SecurityServiceSetup",
-            "text": "SecurityServiceSetup"
-          }
+          "SecurityServiceSetup"
         ],
-        "path": "packages/core/security/core-security-server-internal/src/internal_contracts.ts",
+        "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -353,15 +269,9 @@
         "label": "InternalSecurityServiceStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-server.SecurityServiceStart",
-            "text": "SecurityServiceStart"
-          }
+          "SecurityServiceStart"
         ],
-        "path": "packages/core/security/core-security-server-internal/src/internal_contracts.ts",
+        "path": "src/core/packages/security/server-internal/src/internal_contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

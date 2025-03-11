@@ -20,7 +20,7 @@
             "text": "PublishesSavedSearch"
           }
         ],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,7 +34,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,62 +52,14 @@
         "description": [],
         "signature": [
           "() => Promise<typeof ",
-          "src/plugins/discover/public/utils/get_sharing_data",
+          "src/platform/plugins/shared/discover/public/utils/get_sharing_data",
           ">"
         ],
-        "path": "src/plugins/discover/public/utils/index.ts",
+        "path": "src/platform/plugins/shared/discover/public/utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-public.LogsExplorerTabs",
-        "type": "Function",
-        "tags": [],
-        "label": "LogsExplorerTabs",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.LogsExplorerTabsProps",
-            "text": "LogsExplorerTabsProps"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/shared-ux-utility",
-            "scope": "common",
-            "docId": "kibKbnSharedUxUtilityPluginApi",
-            "section": "def-common.WithSuspenseExtendedDeps",
-            "text": "WithSuspenseExtendedDeps"
-          },
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "src/plugins/discover/public/components/logs_explorer_tabs/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.LogsExplorerTabs.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],
@@ -130,7 +82,7 @@
           " extends ",
           "DataMsg"
         ],
-        "path": "src/plugins/discover/public/application/main/state_management/discover_data_state_container.ts",
+        "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -151,7 +103,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -172,7 +124,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,7 +138,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -201,7 +153,7 @@
               "SearchResponseIncompleteWarning",
               "[] | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -215,7 +167,7 @@
         "tags": [],
         "label": "DiscoverAppState",
         "description": [],
-        "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+        "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -231,7 +183,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,7 +206,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -277,7 +229,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,7 +245,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -310,7 +262,7 @@
               "DiscoverDataSource",
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,7 +278,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -357,7 +309,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -373,7 +325,7 @@
             "signature": [
               "string[][] | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,7 +341,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -412,7 +364,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,7 +380,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -444,7 +396,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -460,7 +412,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -476,7 +428,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -492,7 +444,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,7 +460,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -531,7 +483,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -545,7 +497,7 @@
         "tags": [],
         "label": "DiscoverCustomizationService",
         "description": [],
-        "path": "src/plugins/discover/public/customizations/customization_service.ts",
+        "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -567,7 +519,7 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -587,7 +539,7 @@
                     "text": "DiscoverCustomization"
                   }
                 ],
-                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -641,7 +593,7 @@
               "FieldListCustomization",
               ", { id: TCustomizationId; }> | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -655,7 +607,7 @@
                 "signature": [
                   "TCustomizationId"
                 ],
-                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -711,7 +663,7 @@
               "FieldListCustomization",
               ", { id: TCustomizationId; }> | undefined>"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -725,7 +677,7 @@
                 "signature": [
                   "TCustomizationId"
                 ],
-                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -743,7 +695,7 @@
             "signature": [
               "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\") => void"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -757,7 +709,7 @@
                 "signature": [
                   "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\""
                 ],
-                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -775,7 +727,7 @@
             "signature": [
               "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\") => void"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_service.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -789,7 +741,7 @@
                 "signature": [
                   "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\""
                 ],
-                "path": "src/plugins/discover/public/customizations/customization_service.ts",
+                "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -807,7 +759,7 @@
         "tags": [],
         "label": "DiscoverServices",
         "description": [],
-        "path": "src/plugins/discover/public/build_services.ts",
+        "path": "src/platform/plugins/shared/discover/public/build_services.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -828,7 +780,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -840,15 +792,9 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -862,7 +808,7 @@
             "signature": [
               "(path: string) => string"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -876,7 +822,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/discover/public/build_services.ts",
+                "path": "src/platform/plugins/shared/discover/public/build_services.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -900,7 +846,7 @@
               "TelemetryCounter",
               ">; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,35 +858,23 @@
             "label": "i18n",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverServices.capabilities",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "capabilities",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -952,15 +886,9 @@
             "label": "chrome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -972,15 +900,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1000,7 +922,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1020,7 +942,7 @@
                 "text": "DiscoverSharedPublicStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1032,15 +954,9 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1060,7 +976,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1077,7 +993,7 @@
               "HistoryLocationState",
               ">"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1090,16 +1006,10 @@
             "description": [],
             "signature": [
               "<T>() => ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<T | undefined> | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1114,16 +1024,10 @@
             "description": [],
             "signature": [
               "(menuMount: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1136,16 +1040,10 @@
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-public.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+                "path": "src/core/packages/application/browser/src/app_mount.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1159,15 +1057,23 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1187,7 +1093,7 @@
                 "text": "FilterManager"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1217,7 +1123,7 @@
               },
               "; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1237,7 +1143,7 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1257,7 +1163,7 @@
                 "text": "Start"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1271,7 +1177,7 @@
             "signature": [
               "{ branch: string; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1291,7 +1197,7 @@
                 "text": "NavigationPublicStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1312,7 +1218,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1240,7 @@
               },
               "[]; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1348,7 +1254,7 @@
             "signature": [
               "UrlTracker"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1360,7 +1266,9 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              "TimefilterHook",
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -1530,7 +1438,7 @@
               },
               "; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1542,15 +1450,9 @@
             "label": "toastNotifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1562,15 +1464,9 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              }
+              "NotificationsStart"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1582,15 +1478,9 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1602,15 +1492,9 @@
             "label": "settings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.SettingsStart",
-                "text": "SettingsStart"
-              }
+              "SettingsStart"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1624,7 +1508,7 @@
             "signature": [
               "((metricType: string, eventName: string | string[]) => void) | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1638,7 +1522,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/discover/public/build_services.ts",
+                "path": "src/platform/plugins/shared/discover/public/build_services.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1653,7 +1537,7 @@
                 "signature": [
                   "string | string[]"
                 ],
-                "path": "src/plugins/discover/public/build_services.ts",
+                "path": "src/platform/plugins/shared/discover/public/build_services.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1677,7 +1561,7 @@
                 "text": "PluginStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1697,7 +1581,7 @@
                 "text": "PluginStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1721,7 +1605,7 @@
               "FieldStatisticTableEmbeddableProps",
               " & React.RefAttributes<{}>>; } | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1733,15 +1617,9 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1761,7 +1639,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,7 +1660,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1802,7 +1680,7 @@
                 "text": "TriggersAndActionsUIPublicPluginStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1831,7 +1709,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,7 +1732,7 @@
               "DiscoverContextAppLocatorParams",
               ">"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1877,7 +1755,7 @@
               "DiscoverSingleDocLocatorParams",
               ">"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1897,7 +1775,7 @@
                 "text": "ExpressionsStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1920,7 +1798,7 @@
               "ActiveCursor",
               "; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1940,7 +1818,7 @@
                 "text": "SavedObjectsManagementPluginStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1961,7 +1839,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1981,7 +1859,7 @@
                 "text": "SavedSearchPublicPluginStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2001,7 +1879,7 @@
                 "text": "UnifiedSearchPublicPluginStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2021,7 +1899,7 @@
                 "text": "LensPublicStart"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2059,7 +1937,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2067,7 +1945,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly getAction: (id: string) => ",
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2075,7 +1969,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2083,7 +1977,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2091,7 +1985,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2099,7 +1993,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2109,7 +2003,7 @@
               },
               "; }"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2129,7 +2023,7 @@
                 "text": "ContentClient"
               }
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2150,7 +2044,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2171,7 +2065,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2185,7 +2079,7 @@
             "signature": [
               "ProfilesManager"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2199,7 +2093,7 @@
             "signature": [
               "DiscoverEBTManager"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2220,7 +2114,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2236,7 +2130,28 @@
               "LogSourcesService",
               "; }; } | undefined"
             ],
-            "path": "src/plugins/discover/public/build_services.ts",
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.embeddableEnhanced",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableEnhanced",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddableEnhanced",
+                "scope": "public",
+                "docId": "kibEmbeddableEnhancedPluginApi",
+                "section": "def-public.StartContract",
+                "text": "StartContract"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2250,7 +2165,7 @@
         "tags": [],
         "label": "DiscoverStateContainer",
         "description": [],
-        "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+        "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2266,7 +2181,7 @@
             "signature": [
               "DiscoverGlobalStateContainer"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2282,7 +2197,7 @@
             "signature": [
               "DiscoverAppStateContainer"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2298,7 +2213,7 @@
             "signature": [
               "DiscoverDataStateContainer"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2312,20 +2227,58 @@
               "\nInternal shared state that's used at several places in the UI"
             ],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.ReduxLikeStateContainer",
-                "text": "ReduxLikeStateContainer"
-              },
+              "ToolkitStore",
               "<",
-              "InternalState",
+              "DiscoverInternalState",
               ", ",
-              "InternalStateTransitions",
-              ", {}>"
+              "AnyAction",
+              ", ",
+              "MiddlewareArray",
+              "<[",
+              "ThunkMiddleware",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "AnyAction",
+              ", InternalStateThunkDependencies>]>>"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.runtimeStateManager",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeStateManager",
+            "description": [
+              "\nState manager for runtime state that can't be stored in Redux"
+            ],
+            "signature": [
+              "{ currentDataView$: ",
+              "BehaviorSubject",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined>; adHocDataViews$: ",
+              "BehaviorSubject",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]>; }"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2341,7 +2294,7 @@
             "signature": [
               "DiscoverSavedSearchContainer"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2363,7 +2316,7 @@
                 "text": "IKbnUrlStateStorage"
               }
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2379,7 +2332,7 @@
             "signature": [
               "DiscoverSearchSessionManager"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2395,7 +2348,7 @@
             "signature": [
               "DiscoverCustomizationContext"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2517,7 +2470,7 @@
               },
               " | undefined>; updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void; }"
             ],
-            "path": "src/plugins/discover/public/application/main/state_management/discover_state.ts",
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2531,7 +2484,7 @@
         "tags": [],
         "label": "FlyoutCustomization",
         "description": [],
-        "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+        "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2545,7 +2498,7 @@
             "signature": [
               "\"flyout\""
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2560,7 +2513,7 @@
               "Property",
               ".Width<string | number> | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2574,7 +2527,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2592,7 +2545,7 @@
               "FlyoutActionItem",
               "[]) | undefined; }"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2608,7 +2561,7 @@
               "FlyoutContentProps",
               "> | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2645,7 +2598,7 @@
               },
               ") | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/flyout_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2659,7 +2612,7 @@
         "tags": [],
         "label": "HasTimeRange",
         "description": [],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2673,61 +2626,11 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discover",
-        "id": "def-public.LogsExplorerTabsProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogsExplorerTabsProps",
-        "description": [],
-        "path": "src/plugins/discover/public/components/logs_explorer_tabs/logs_explorer_tabs.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.LogsExplorerTabsProps.services",
-            "type": "Object",
-            "tags": [],
-            "label": "services",
-            "description": [],
-            "signature": [
-              "{ share?: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.SharePublicStart",
-                "text": "SharePublicStart"
-              },
-              " | undefined; }"
-            ],
-            "path": "src/plugins/discover/public/components/logs_explorer_tabs/logs_explorer_tabs.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.LogsExplorerTabsProps.selectedTab",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "selectedTab",
-            "description": [],
-            "signature": [
-              "\"discover\" | \"logs-explorer\""
-            ],
-            "path": "src/plugins/discover/public/components/logs_explorer_tabs/logs_explorer_tabs.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2739,10 +2642,24 @@
         "tags": [],
         "label": "NonPersistedDisplayOptions",
         "description": [],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.NonPersistedDisplayOptions.solutionNavIdOverride",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solutionNavIdOverride",
+            "description": [],
+            "signature": [
+              "\"search\" | \"security\" | \"oblt\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "discover",
             "id": "def-public.NonPersistedDisplayOptions.enableDocumentViewer",
@@ -2753,7 +2670,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2767,7 +2684,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2781,7 +2698,7 @@
         "tags": [],
         "label": "PublishesSavedSearch",
         "description": [],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3145,7 +3062,7 @@
               },
               ">; }"
             ],
-            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3159,7 +3076,7 @@
         "tags": [],
         "label": "SearchBarCustomization",
         "description": [],
-        "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+        "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3173,7 +3090,7 @@
             "signature": [
               "\"search_bar\""
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3187,7 +3104,7 @@
             "signature": [
               "React.ComponentType<{}> | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3201,7 +3118,7 @@
             "signature": [
               "React.ComponentType<{}> | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3231,7 +3148,7 @@
               },
               ">> | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3245,7 +3162,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3259,7 +3176,7 @@
         "tags": [],
         "label": "TopNavCustomization",
         "description": [],
-        "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+        "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3273,7 +3190,7 @@
             "signature": [
               "\"top_nav\""
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3288,7 +3205,7 @@
               "TopNavDefaultMenu",
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3303,7 +3220,7 @@
               "TopNavDefaultBadges",
               " | undefined"
             ],
-            "path": "src/plugins/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3325,7 +3242,7 @@
           "CustomizationCallbackContext",
           ") => void | (() => void) | Promise<void | (() => void)>"
         ],
-        "path": "src/plugins/discover/public/customizations/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3340,7 +3257,7 @@
             "signature": [
               "CustomizationCallbackContext"
             ],
-            "path": "src/plugins/discover/public/customizations/types.ts",
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3364,13 +3281,7 @@
             "text": "DiscoverServices"
           },
           ">; scopedHistory: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<unknown>; customizationCallbacks: ",
           {
             "pluginId": "discover",
@@ -3389,7 +3300,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/discover/public/components/discover_container/index.ts",
+        "path": "src/platform/plugins/shared/discover/public/components/discover_container/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3438,7 +3349,7 @@
           " | ",
           "FieldListCustomization"
         ],
-        "path": "src/plugins/discover/public/customizations/customization_service.ts",
+        "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3453,7 +3364,7 @@
         "signature": [
           "\"SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID\""
         ],
-        "path": "src/plugins/discover/public/embeddable/constants.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3468,7 +3379,7 @@
         "signature": [
           "\"search\""
         ],
-        "path": "packages/kbn-discover-utils/src/constants.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3533,10 +3444,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; } & ",
+          " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; } & ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -3629,16 +3540,24 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasInPlaceLibraryTransforms",
-            "text": "HasInPlaceLibraryTransforms"
+            "section": "def-public.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
           },
-          "<object> & ",
+          "<object, object> & ",
           {
             "pluginId": "discover",
             "scope": "public",
             "docId": "kibDiscoverPluginApi",
             "section": "def-public.HasTimeRange",
             "text": "HasTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.HasInspectorAdapters",
+            "text": "HasInspectorAdapters"
           },
           " & Partial<",
           {
@@ -3656,9 +3575,48 @@
             "section": "def-public.PublishesSavedObjectId",
             "text": "PublishesSavedObjectId"
           },
-          ">"
+          "> & Partial<{ enhancements: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "public",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.DynamicActionManager",
+            "text": "DynamicActionManager"
+          },
+          "; }; setDynamicActions: (newState: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined) => void; dynamicActionsState$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined>; }> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSupportedTriggers",
+            "text": "HasSupportedTriggers"
+          }
         ],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3673,7 +3631,7 @@
         "signature": [
           "Omit<",
           "SearchEmbeddableState",
-          ", \"rows\" | \"searchSource\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
+          ", \"rows\" | \"searchSource\" | \"inspectorAdapters\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
           "SerializableSavedSearch",
           ", \"serializedSearchSource\"> & ",
           {
@@ -3691,7 +3649,13 @@
             "section": "def-public.SerializedTimeRange",
             "text": "SerializedTimeRange"
           },
-          " & { savedObjectTitle?: string | undefined; savedObjectId?: string | undefined; savedObjectDescription?: string | undefined; nonPersistedDisplayOptions?: ",
+          " & Partial<",
+          "DynamicActionsSerializedState",
+          "> & { rawSavedObjectAttributes?: Partial<Pick<",
+          "SavedSearchAttributes",
+          ", keyof ",
+          "SavedSearchAttributes",
+          ">> | undefined; savedObjectTitle?: string | undefined; savedObjectId?: string | undefined; savedObjectDescription?: string | undefined; nonPersistedDisplayOptions?: ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -3701,7 +3665,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3729,20 +3693,16 @@
             "section": "def-public.SerializedTimeRange",
             "text": "SerializedTimeRange"
           },
-          " & Partial<Pick<",
+          " & Partial<",
+          "DynamicActionsSerializedState",
+          "> & Partial<Pick<",
           "SavedSearchAttributes",
           ", keyof ",
           "SavedSearchAttributes",
           ">> & { attributes?: (",
           "SavedSearchAttributes",
           " & { references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[] | undefined; }) | undefined; savedObjectId?: string | undefined; nonPersistedDisplayOptions?: ",
           {
             "pluginId": "discover",
@@ -3753,7 +3713,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/discover/public/embeddable/types.ts",
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3774,9 +3734,9 @@
             "section": "def-public.UnifiedHistogramContainerProps",
             "text": "UnifiedHistogramContainerProps"
           },
-          ", \"onBrushEnd\" | \"disabledActions\" | \"onFilter\" | \"withDefaultActions\">"
+          ", \"onBrushEnd\" | \"withDefaultActions\" | \"disabledActions\" | \"onFilter\">"
         ],
-        "path": "src/plugins/discover/public/customizations/customization_types/histogram_customization.tsx",
+        "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/histogram_customization.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3790,7 +3750,7 @@
       "tags": [],
       "label": "DiscoverSetup",
       "description": [],
-      "path": "src/plugins/discover/public/types.ts",
+      "path": "src/platform/plugins/shared/discover/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3813,72 +3773,9 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/discover/public/types.ts",
+          "path": "src/platform/plugins/shared/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "discover",
-          "id": "def-public.DiscoverSetup.showInlineTopNav",
-          "type": "Function",
-          "tags": [],
-          "label": "showInlineTopNav",
-          "description": [],
-          "signature": [
-            "() => void"
-          ],
-          "path": "src/plugins/discover/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "discover",
-          "id": "def-public.DiscoverSetup.configureInlineTopNav",
-          "type": "Function",
-          "tags": [],
-          "label": "configureInlineTopNav",
-          "description": [],
-          "signature": [
-            "(projectNavId: string, options: { enabled: boolean; showLogsExplorerTabs: boolean; }) => void"
-          ],
-          "path": "src/plugins/discover/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "discover",
-              "id": "def-public.DiscoverSetup.configureInlineTopNav.$1",
-              "type": "string",
-              "tags": [],
-              "label": "projectNavId",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/plugins/discover/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            },
-            {
-              "parentPluginId": "discover",
-              "id": "def-public.DiscoverSetup.configureInlineTopNav.$2",
-              "type": "Object",
-              "tags": [],
-              "label": "options",
-              "description": [],
-              "signature": [
-                "{ enabled: boolean; showLogsExplorerTabs: boolean; }"
-              ],
-              "path": "src/plugins/discover/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -3891,7 +3788,7 @@
       "tags": [],
       "label": "DiscoverStart",
       "description": [],
-      "path": "src/plugins/discover/public/types.ts",
+      "path": "src/platform/plugins/shared/discover/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3914,7 +3811,7 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/discover/public/types.ts",
+          "path": "src/platform/plugins/shared/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3944,7 +3841,7 @@
             },
             ">"
           ],
-          "path": "src/plugins/discover/public/types.ts",
+          "path": "src/platform/plugins/shared/discover/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3964,7 +3861,7 @@
         "tags": [],
         "label": "DiscoverServerPluginLocatorService",
         "description": [],
-        "path": "src/plugins/discover/server/index.ts",
+        "path": "src/platform/plugins/shared/discover/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3977,13 +3874,7 @@
             "description": [],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "discover",
@@ -3994,7 +3885,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/discover/server/index.ts",
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4006,16 +3897,10 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "src/plugins/discover/server/index.ts",
+                "path": "src/platform/plugins/shared/discover/server/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4033,7 +3918,7 @@
         "tags": [],
         "label": "DiscoverServerPluginStartDeps",
         "description": [],
-        "path": "src/plugins/discover/server/index.ts",
+        "path": "src/platform/plugins/shared/discover/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4053,7 +3938,7 @@
                 "text": "DataPluginStart"
               }
             ],
-            "path": "src/plugins/discover/server/index.ts",
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4067,7 +3952,7 @@
         "tags": [],
         "label": "LocatorServiceScopedClient",
         "description": [],
-        "path": "src/plugins/discover/server/index.ts",
+        "path": "src/platform/plugins/shared/discover/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4089,7 +3974,7 @@
               },
               ") => Promise<string[] | undefined>"
             ],
-            "path": "src/plugins/discover/server/index.ts",
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4110,7 +3995,7 @@
                     "text": "DiscoverAppLocatorParams"
                   }
                 ],
-                "path": "src/plugins/discover/server/locator/columns_from_locator.ts",
+                "path": "src/platform/plugins/shared/discover/server/locator/columns_from_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4142,7 +4027,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/discover/server/index.ts",
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4163,7 +4048,7 @@
                     "text": "DiscoverAppLocatorParams"
                   }
                 ],
-                "path": "src/plugins/discover/server/locator/searchsource_from_locator.ts",
+                "path": "src/platform/plugins/shared/discover/server/locator/searchsource_from_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4187,7 +4072,7 @@
               },
               ") => Promise<string>"
             ],
-            "path": "src/plugins/discover/server/index.ts",
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4208,7 +4093,7 @@
                     "text": "DiscoverAppLocatorParams"
                   }
                 ],
-                "path": "src/plugins/discover/server/locator/title_from_locator.ts",
+                "path": "src/platform/plugins/shared/discover/server/locator/title_from_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4248,7 +4133,7 @@
               },
               " | undefined>"
             ],
-            "path": "src/plugins/discover/server/index.ts",
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4269,7 +4154,7 @@
                     "text": "DiscoverAppLocatorParams"
                   }
                 ],
-                "path": "src/plugins/discover/server/locator/query_from_locator.ts",
+                "path": "src/platform/plugins/shared/discover/server/locator/query_from_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4301,7 +4186,7 @@
               },
               "[]>"
             ],
-            "path": "src/plugins/discover/server/index.ts",
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4322,7 +4207,7 @@
                     "text": "DiscoverAppLocatorParams"
                   }
                 ],
-                "path": "src/plugins/discover/server/locator/filters_from_locator.ts",
+                "path": "src/platform/plugins/shared/discover/server/locator/filters_from_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4342,7 +4227,7 @@
       "tags": [],
       "label": "DiscoverServerPluginStart",
       "description": [],
-      "path": "src/plugins/discover/server/index.ts",
+      "path": "src/platform/plugins/shared/discover/server/index.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4362,7 +4247,7 @@
               "text": "DiscoverServerPluginLocatorService"
             }
           ],
-          "path": "src/plugins/discover/server/index.ts",
+          "path": "src/platform/plugins/shared/discover/server/index.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -4406,7 +4291,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/discover/common/app_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4420,7 +4305,7 @@
             "signature": [
               "\"DISCOVER_APP_LOCATOR\""
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4434,7 +4319,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4448,7 +4333,7 @@
                 "signature": [
                   "DiscoverAppLocatorDependencies"
                 ],
-                "path": "src/plugins/discover/common/app_locator.ts",
+                "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4482,7 +4367,7 @@
               },
               "; }>"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4502,7 +4387,7 @@
                     "text": "DiscoverAppLocatorParams"
                   }
                 ],
-                "path": "src/plugins/discover/common/app_locator.ts",
+                "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4546,7 +4431,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/discover/common/esql_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4560,7 +4445,7 @@
             "signature": [
               "\"DISCOVER_ESQL_LOCATOR\""
             ],
-            "path": "src/plugins/discover/common/esql_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4574,7 +4459,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/discover/common/esql_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4588,7 +4473,7 @@
                 "signature": [
                   "DiscoverESQLLocatorDependencies"
                 ],
-                "path": "src/plugins/discover/common/esql_locator.ts",
+                "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4608,7 +4493,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "path": "src/plugins/discover/common/esql_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4644,7 +4529,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "src/plugins/discover/common/app_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4660,7 +4545,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4676,7 +4561,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4694,33 +4579,33 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/packs/pack_queries_status_table.tsx"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/discover/view_results_in_discover.tsx"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/common/hooks/use_discover_link.tsx"
               },
               {
                 "plugin": "exploratoryView",
-                "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/packs/pack_queries_status_table.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/discover/view_results_in_discover.tsx"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/common/hooks/use_discover_link.tsx"
+                "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/common/components/stderr_logs.tsx"
+                "path": "x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/common/components/stderr_logs.tsx"
               }
             ]
           },
@@ -4741,7 +4626,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4764,7 +4649,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4796,7 +4681,7 @@
               },
               ") | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4819,7 +4704,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4850,7 +4735,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4866,7 +4751,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4882,7 +4767,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4898,7 +4783,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4921,7 +4806,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4937,7 +4822,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4953,7 +4838,7 @@
             "signature": [
               "string[][] | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4969,7 +4854,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4986,7 +4871,7 @@
               "VIEW_MODE",
               " | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5002,7 +4887,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5018,7 +4903,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5034,7 +4919,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5050,7 +4935,7 @@
         "description": [
           "\nLocation state of scoped history (history instance of Kibana Platform application service)"
         ],
-        "path": "src/plugins/discover/common/app_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5071,7 +4956,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5085,7 +4970,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/discover/common/app_locator.ts",
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5105,7 +4990,7 @@
         "signature": [
           "\"discoverApp\""
         ],
-        "path": "src/plugins/discover/common/index.ts",
+        "path": "src/platform/plugins/shared/discover/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5120,7 +5005,7 @@
         "signature": [
           "\"DISCOVER_APP_LOCATOR\""
         ],
-        "path": "src/plugins/discover/common/app_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5150,7 +5035,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/discover/common/app_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5180,7 +5065,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/discover/common/esql_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5201,7 +5086,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "src/plugins/discover/common/esql_locator.ts",
+        "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5216,7 +5101,7 @@
         "signature": [
           "\"discover\""
         ],
-        "path": "src/plugins/discover/common/index.ts",
+        "path": "src/platform/plugins/shared/discover/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

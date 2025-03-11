@@ -115,7 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const getRuleIdByName = async (name: string) => {
         const response = await supertest
-          .get(`/api/alerts/_find?search=${name}&search_fields=name`)
+          .get(`/api/alerting/rules/_find?search=${name}&search_fields=name`)
           .expect(200);
         return response.body.data[0].id;
       };

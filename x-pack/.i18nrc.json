@@ -1,181 +1,183 @@
 {
   "prefix": "xpack",
   "paths": {
-    "xpack.actions": "plugins/actions",
+    "xpack.actions": "platform/plugins/shared/actions",
     "xpack.aiops": [
-      "packages/ml/aiops_common",
-      "packages/ml/aiops_components",
-      "packages/ml/aiops_log_pattern_analysis",
-      "packages/ml/aiops_log_rate_analysis",
-      "plugins/aiops"
+      "platform/packages/shared/ml/aiops_common",
+      "platform/packages/private/ml/aiops_components",
+      "platform/packages/shared/ml/aiops_log_pattern_analysis",
+      "platform/packages/shared/ml/aiops_log_rate_analysis",
+      "platform/plugins/shared/aiops"
     ],
-    "xpack.aiAssistant": "packages/kbn-ai-assistant",
-    "xpack.alerting": "plugins/alerting",
-    "xpack.eventLog": "plugins/event_log",
-    "xpack.stackAlerts": "plugins/stack_alerts",
-    "xpack.stackConnectors": "plugins/stack_connectors",
-    "xpack.apm": "plugins/observability_solution/apm",
-    "xpack.apmDataAccess": "plugins/observability_solution/apm_data_access",
-    "xpack.banners": "plugins/banners",
-    "xpack.canvas": "plugins/canvas",
-    "xpack.cases": "plugins/cases",
-    "xpack.cloud": "plugins/cloud",
-    "xpack.cloudDefend": "plugins/cloud_defend",
-    "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
-    "xpack.cloudDataMigration": "plugins/cloud_integrations/cloud_data_migration",
+    "xpack.aiAssistant": "platform/packages/shared/kbn-ai-assistant",
+    "xpack.alerting": "platform/plugins/shared/alerting",
+    "xpack.eventLog": "platform/plugins/shared/event_log",
+    "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
+    "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
+    "xpack.apm": "solutions/observability/plugins/apm",
+    "xpack.apmDataAccess": "solutions/observability/plugins/apm_data_access",
+    "xpack.banners": "platform/plugins/private/banners",
+    "xpack.canvas": "platform/plugins/private/canvas",
+    "xpack.cases": "platform/plugins/shared/cases",
+    "xpack.cloud": "platform/plugins/shared/cloud",
+    "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
+    "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
+    "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.csp": [
-      "plugins/cloud_security_posture",
+      "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
       "packages/kbn-cloud-security-posture"
     ],
-    "xpack.customBranding": "plugins/custom_branding",
-    "xpack.dashboard": "plugins/dashboard_enhanced",
-    "xpack.dataQuality": "plugins/data_quality",
-    "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
-    "xpack.dataUsage": "plugins/data_usage",
-    "xpack.discover": "plugins/discover_enhanced",
-    "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
-    "xpack.elasticAssistant": "packages/kbn-elastic-assistant",
-    "xpack.elasticAssistantCommon": "packages/kbn-elastic-assistant-common",
-    "xpack.elasticAssistantPlugin": "plugins/elastic_assistant",
-    "xpack.ecsDataQualityDashboard": "plugins/ecs_data_quality_dashboard",
-    "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
+    "xpack.customBranding": "platform/plugins/private/custom_branding",
+    "xpack.dashboard": "platform/plugins/shared/dashboard_enhanced",
+    "xpack.dataQuality": "platform/plugins/shared/data_quality",
+    "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
+    "xpack.dataUsage": "platform/plugins/private/data_usage",
+    "xpack.discover": "platform/plugins/private/discover_enhanced",
+    "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
+    "xpack.elasticAssistant": "platform/packages/shared/kbn-elastic-assistant",
+    "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
+    "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
+    "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
+    "xpack.embeddableEnhanced": "platform/plugins/shared/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
-    "xpack.enterpriseSearch": "plugins/enterprise_search",
-    "xpack.features": "plugins/features",
-    "xpack.dataVisualizer": "plugins/data_visualizer",
-    "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",
-    "xpack.fileUpload": "plugins/file_upload",
+    "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
+    "xpack.features": "platform/plugins/shared/features",
+    "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
+    "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
+    "xpack.fileUpload": "platform/plugins/private/file_upload",
     "xpack.globalSearch": [
-      "plugins/global_search"
+      "platform/plugins/shared/global_search"
     ],
     "xpack.globalSearchBar": [
-      "plugins/global_search_bar"
+      "platform/plugins/private/global_search_bar"
     ],
     "xpack.graph": [
-      "plugins/graph"
+      "platform/plugins/private/graph"
     ],
-    "xpack.grokDebugger": "plugins/grokdebugger",
-    "xpack.idxMgmt": "plugins/index_management",
+    "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
+    "xpack.idxMgmt": "platform/plugins/shared/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
-    "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
-    "xpack.infra": "plugins/observability_solution/infra",
-    "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
-    "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
-    "xpack.logsShared": "plugins/observability_solution/logs_shared",
-    "xpack.fleet": "plugins/fleet",
-    "xpack.ingestPipelines": "plugins/ingest_pipelines",
-    "xpack.integrationAssistant": "plugins/integration_assistant",
-    "xpack.inference": "plugins/inference",
-    "xpack.inventory": "plugins/observability_solution/inventory",
-    "xpack.investigate": "plugins/observability_solution/investigate",
-    "xpack.investigateApp": "plugins/observability_solution/investigate_app",
-    "xpack.kubernetesSecurity": "plugins/kubernetes_security",
-    "xpack.lens": "plugins/lens",
-    "xpack.licenseApiGuard": "plugins/license_api_guard",
-    "xpack.licenseMgmt": "plugins/license_management",
-    "xpack.licensing": "plugins/licensing",
-    "xpack.lists": "plugins/lists",
+    "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
+    "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
+    "xpack.infra": "solutions/observability/plugins/infra",
+    "xpack.logsDataAccess": "platform/plugins/shared/logs_data_access",
+    "xpack.logsShared": "platform/plugins/shared/logs_shared",
+    "xpack.fleet": "platform/plugins/shared/fleet",
+    "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
+    "xpack.automaticImport": "platform/plugins/shared/automatic_import",
+    "xpack.inference": "platform/plugins/shared/inference",
+    "xpack.inventory": "solutions/observability/plugins/inventory",
+    "xpack.investigate": "solutions/observability/plugins/investigate",
+    "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
+    "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
+    "xpack.lens": "platform/plugins/shared/lens",
+    "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
+    "xpack.licenseMgmt": "platform/plugins/shared/license_management",
+    "xpack.licensing": "platform/plugins/shared/licensing",
+    "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
-      "plugins/logstash"
+      "platform/plugins/private/logstash"
     ],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": [
-      "plugins/maps"
+      "platform/plugins/shared/maps"
     ],
-    "xpack.metricsData": "plugins/observability_solution/metrics_data_access",
+    "xpack.metricsData": "solutions/observability/plugins/metrics_data_access",
     "xpack.ml": [
-      "packages/ml/anomaly_utils",
-      "packages/ml/creation_wizard_utils",
-      "packages/ml/data_grid",
-      "packages/ml/data_view_utils",
-      "packages/ml/date_picker",
-      "packages/ml/field_stats_flyout",
-      "packages/ml/inference_integration_flyout",
-      "packages/ml/trained_models_utils",
-      "packages/ml/category_validator",
-      "packages/ml/ui_actions",
-      "plugins/ml"
+      "platform/packages/shared/ml/anomaly_utils",
+      "platform/packages/private/ml/creation_wizard_utils",
+      "platform/packages/private/ml/data_grid",
+      "platform/packages/private/ml/data_view_utils",
+      "platform/packages/private/ml/date_picker",
+      "platform/packages/private/ml/field_stats_flyout",
+      "platform/packages/shared/ml/trained_models_utils",
+      "platform/packages/private/ml/category_validator",
+      "platform/packages/private/ml/ui_actions",
+      "platform/plugins/shared/ml"
     ],
     "xpack.monitoring": [
-      "plugins/monitoring"
+      "platform/plugins/private/monitoring"
     ],
-    "xpack.observability": "plugins/observability_solution/observability",
+    "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
-      "plugins/observability_solution/observability_ai_assistant",
-      "plugins/observability_solution/observability_ai_assistant_app"
+      "platform/plugins/shared/observability_ai_assistant",
+      "solutions/observability/plugins/observability_ai_assistant_app"
     ],
-    "xpack.observabilityAiAssistantManagement": "plugins/observability_solution/observability_ai_assistant_management",
-    "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
-    "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
-    "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
+    "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
+    "xpack.observabilityLogsExplorer": "solutions/observability/plugins/observability_logs_explorer",
+    "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
+    "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
-      "packages/observability/logs_overview/src/components"
+      "platform/packages/shared/logs-overview/src/components"
     ],
     "xpack.osquery": [
-      "plugins/osquery"
+      "platform/plugins/shared/osquery"
     ],
-    "xpack.painlessLab": "plugins/painless_lab",
+    "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": [
-      "plugins/observability_solution/profiling"
+      "solutions/observability/plugins/profiling"
     ],
-    "xpack.remoteClusters": "plugins/remote_clusters",
+    "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [
-      "plugins/reporting"
+      "platform/plugins/private/reporting"
     ],
     "xpack.rollupJobs": [
-      "packages/rollup",
-      "plugins/rollup"
+      "platform/packages/private/rollup",
+      "platform/plugins/private/rollup"
     ],
-    "xpack.runtimeFields": "plugins/runtime_fields",
-    "xpack.screenshotting": "plugins/screenshotting",
-    "xpack.searchSharedUI": "packages/search/shared_ui",
-    "xpack.searchHomepage": "plugins/search_homepage",
-    "xpack.searchIndices": "plugins/search_indices",
-    "xpack.searchNavigation": "plugins/search_solution/search_navigation",
-    "xpack.searchNotebooks": "plugins/search_notebooks",
-    "xpack.searchPlayground": "plugins/search_playground",
-    "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
-    "xpack.searchAssistant": "plugins/search_assistant",
-    "xpack.searchProfiler": "plugins/searchprofiler",
+    "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
+    "xpack.screenshotting": "platform/plugins/shared/screenshotting",
+    "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
+    "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
+    "xpack.searchIndices": "solutions/search/plugins/search_indices",
+    "xpack.searchNavigation": "solutions/search/plugins/search_solution/search_navigation",
+    "xpack.searchNotebooks": "solutions/search/plugins/search_notebooks",
+    "xpack.searchPlayground": "solutions/search/plugins/search_playground",
+    "xpack.searchInferenceEndpoints": "solutions/search/plugins/search_inference_endpoints",
+    "xpack.searchAssistant": "solutions/search/plugins/search_assistant",
+    "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
-      "plugins/security",
-      "packages/security"
+      "platform/plugins/shared/security",
+      "platform/packages/shared/security",
+      "platform/packages/private/security"
     ],
     "xpack.server": "legacy/server",
-    "xpack.serverless": "plugins/serverless",
-    "xpack.serverlessSearch": "plugins/serverless_search",
-    "xpack.serverlessObservability": "plugins/serverless_observability",
-    "xpack.securitySolution": "plugins/security_solution",
-    "xpack.securitySolutionEss": "plugins/security_solution_ess",
-    "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
-    "xpack.sessionView": "plugins/session_view",
+    "xpack.serverless": "platform/plugins/shared/serverless",
+    "xpack.serverlessSearch": "solutions/search/plugins/serverless_search",
+    "xpack.serverlessObservability": "solutions/observability/plugins/serverless_observability",
+    "xpack.securitySolution": "solutions/security/plugins/security_solution",
+    "xpack.securitySolutionEss": "solutions/security/plugins/security_solution_ess",
+    "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
+    "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
-      "plugins/streams_app"
+      "solutions/observability/plugins/observability_streams_wrapper",
+      "platform/plugins/shared/streams_app"
     ],
-    "xpack.slo": "plugins/observability_solution/slo",
-    "xpack.snapshotRestore": "plugins/snapshot_restore",
-    "xpack.spaces": "plugins/spaces",
+    "xpack.slo": "solutions/observability/plugins/slo",
+    "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
+    "xpack.spaces": "platform/plugins/shared/spaces",
     "xpack.savedObjectsTagging": [
-      "plugins/saved_objects_tagging"
+      "platform/plugins/shared/saved_objects_tagging"
     ],
-    "xpack.taskManager": "legacy/plugins/task_manager",
-    "xpack.threatIntelligence": "plugins/threat_intelligence",
-    "xpack.timelines": "plugins/timelines",
-    "xpack.transform": "plugins/transform",
-    "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
-    "xpack.upgradeAssistant": "plugins/upgrade_assistant",
+    "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
+    "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
+    "xpack.timelines": "platform/plugins/shared/timelines",
+    "xpack.transform": "platform/plugins/private/transform",
+    "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
+    "xpack.upgradeAssistant": "platform/plugins/private/upgrade_assistant",
     "xpack.uptime": [
-      "plugins/observability_solution/uptime"
+      "solutions/observability/plugins/uptime"
     ],
     "xpack.synthetics": [
-      "plugins/observability_solution/synthetics"
+      "solutions/observability/plugins/synthetics"
     ],
     "xpack.ux": [
-      "plugins/observability_solution/ux"
+      "solutions/observability/plugins/ux"
     ],
-    "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
-    "xpack.watcher": "plugins/watcher"
+    "xpack.urlDrilldown": "platform/plugins/private/drilldowns/url_drilldown",
+    "xpack.watcher": "platform/plugins/private/watcher",
+    "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace"
   },
   "exclude": [
     "examples"

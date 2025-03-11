@@ -1,13 +1,6 @@
 /.gradle
 /build
 /target
-/test/functional/failure_debug
-/test/functional/screenshots
-/test/functional/apps/**/reports/session
-/test/reporting/configs/failure_debug/
-/plugins/reporting/.chromium/
-/plugins/screenshotting/chromium/
-/plugins/reporting/.phantom/
 /.aws-config.json
 /.env
 /.kibana-plugin-helpers.dev.*

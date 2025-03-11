@@ -14,6 +14,7 @@ import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scop
 import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ApmApiProvider } from './apm_api';
+import { ObservabilityAIAssistantApiProvider } from './observability_ai_assistant_api';
 
 export type {
   InternalRequestHeader,
@@ -33,6 +34,7 @@ export const services = {
   // create a new deployment-agnostic service and load here
   synthtrace: SynthtraceProvider,
   apmApi: ApmApiProvider,
+  observabilityAIAssistantApi: ObservabilityAIAssistantApiProvider,
 };
 
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;

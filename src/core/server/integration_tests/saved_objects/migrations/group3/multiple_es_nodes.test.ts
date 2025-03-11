@@ -38,15 +38,13 @@ async function fetchDocs(esClient: ElasticsearchClient, index: string, type: str
   const body = await esClient.search<any>({
     index,
     size: 10000,
-    body: {
-      query: {
-        bool: {
-          should: [
-            {
-              term: { type },
-            },
-          ],
-        },
+    query: {
+      bool: {
+        should: [
+          {
+            term: { type },
+          },
+        ],
       },
     },
   });
@@ -96,8 +94,7 @@ function createRoot({ logFileName, hosts }: RootConfig) {
   });
 }
 
-// Failing ES promotion: https://github.com/elastic/kibana/issues/167676
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   const migratedIndexAlias = `.kibana_${pkg.version}`;

@@ -121,6 +121,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Failing: See https://github.com/elastic/kibana/issues/196153
   // Failing: See https://github.com/elastic/kibana/issues/196153
+  // Failing: See https://github.com/elastic/kibana/issues/202328
   describe.skip('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
@@ -489,15 +490,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('rulePageFooterSaveButton');
-      await testSubjects.existOrFail('rulePageConfirmCreateRule');
-      await testSubjects.click('rulePageConfirmCreateRule > confirmModalCancelButton');
+      await testSubjects.existOrFail('confirmCreateRuleModal');
+      await testSubjects.click('confirmCreateRuleModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
       await find.existsByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
 
       await testSubjects.click('rulePageFooterSaveButton');
-      await testSubjects.existOrFail('rulePageConfirmCreateRule');
-      await testSubjects.click('rulePageConfirmCreateRule > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('rulePageConfirmCreateRule');
+      await testSubjects.existOrFail('confirmCreateRuleModal');
+      await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('confirmCreateRuleModal');
 
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
@@ -608,9 +609,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineAlwaysFiringAlert(ruleName);
 
       await testSubjects.click('rulePageFooterSaveButton');
-      await testSubjects.existOrFail('rulePageConfirmCreateRule');
-      await testSubjects.click('rulePageConfirmCreateRule > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('rulePageConfirmCreateRule');
+      await testSubjects.existOrFail('confirmCreateRuleModal');
+      await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('confirmCreateRuleModal');
 
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${ruleName}"`);

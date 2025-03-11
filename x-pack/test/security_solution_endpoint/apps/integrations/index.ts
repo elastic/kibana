@@ -12,7 +12,9 @@ import { FtrProviderContext } from '../../configs/ftr_provider_context';
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService, getPageObjects } = providerContext;
 
-  describe('integrations', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/203916
+  // FLAKY: https://github.com/elastic/kibana/issues/180401
+  describe.skip('integrations', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');

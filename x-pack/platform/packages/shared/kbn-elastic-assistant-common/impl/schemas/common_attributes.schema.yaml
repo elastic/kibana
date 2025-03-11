@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: Common Elastic AI Assistant Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    NonEmptyString:
+      type: string
+      format: nonempty
+      minLength: 1
+      description: A string that does not contain only whitespace characters
+
+    UUID:
+      type: string
+      format: uuid
+      description: A universally unique identifier
+
+    User:
+      type: object
+      description: Could be any string, not necessarily a UUID
+      properties:
+        id:
+          type: string
+          description: User id
+        name:
+          type: string
+          description: User name
+
+    SortOrder:
+      type: string
+      enum:
+        - 'asc'
+        - 'desc'
+
+    ScreenContext:
+      description: User screen context
+      type: object
+      properties:
+        timeZone:
+          description: The local timezone of the user
+          type: string
