@@ -16,7 +16,6 @@ export default function searchSolutionNavigation({
     'searchClassicNavigation',
     'indexManagement',
   ]);
-  const testSubjects = getService('testSubjects');
   const spaces = getService('spaces');
   const browser = getService('browser');
 
