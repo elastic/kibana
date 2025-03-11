@@ -36,6 +36,7 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
+import { truncateMiddle } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -192,6 +193,8 @@ export function FieldBadgeWithActions({
   rawValue,
   color = 'hollow',
 }: FieldBadgeWithActionsPropsAndDependencies) {
+  const MAX_LENGTH = 20;
+
   return (
     <CellActionsPopover
       onFilter={onFilter}
@@ -201,19 +204,12 @@ export function FieldBadgeWithActions({
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color={color} iconType={icon} iconSide="left">
-          {truncateMiddle(value)}
+          <span
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: truncateMiddle(value, MAX_LENGTH) }}
+          />
         </EuiBadge>
       )}
     />
   );
-}
-
-const MAX_LENGTH = 20;
-
-function truncateMiddle(value: string): string {
-  if (value.length < MAX_LENGTH) {
-    return value;
-  }
-  const halfLength = MAX_LENGTH / 2;
-  return `${value.slice(0, halfLength)}...${value.slice(-halfLength)}`;
 }
