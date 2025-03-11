@@ -52,10 +52,12 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/actions-plugin",
-    "@kbn/datemath",
     "@kbn/dataset-quality-plugin",
     "@kbn/search-types",
     "@kbn/object-utils",
     "@kbn/traced-es-client",
+    "@kbn/licensing-plugin",
+    "@kbn/datemath",
+    "@kbn/xstate-utils",
   ]
 }

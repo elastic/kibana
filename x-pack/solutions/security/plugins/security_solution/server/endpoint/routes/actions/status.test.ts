@@ -99,7 +99,6 @@ describe('Endpoint Pending Action Summary API', () => {
       endpointResponses: LogsEndpointActionResponse[]
     ) => {
       esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
-        // @ts-expect-error size not defined as top level property when using typesWithBodyKey
         const size = req.size ? req.size : 10;
         const items: any[] = [];
         let index = Array.isArray(req.index) ? req.index.join() : req.index;

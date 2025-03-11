@@ -46,7 +46,7 @@ import {
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  type AdHocInstruction,
+  type Instruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -134,6 +134,17 @@ export class ObservabilityAIAssistantClient {
     };
   };
 
+  private isConversationOwnedByUser = (conversation: Conversation): boolean => {
+    const user = this.dependencies.user;
+    if (!conversation.user || !user) {
+      return false;
+    }
+
+    return conversation.user.id
+      ? conversation.user.id === user.id
+      : conversation.user.name === user.name;
+  };
+
   get = async (conversationId: string): Promise<Conversation> => {
     const conversation = await this.getConversationWithMetaFields(conversationId);
 
@@ -161,7 +172,7 @@ export class ObservabilityAIAssistantClient {
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
-    instructions: adHocInstructions = [],
+    userInstructions: apiUserInstructions = [],
     messages: initialMessages,
     signal,
     persist,
@@ -180,7 +191,7 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: AdHocInstruction[];
+    userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -196,18 +207,16 @@ export class ObservabilityAIAssistantClient {
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `This conversation will be persisted in Kibana and available at this url: ${
+          functionClient.registerInstruction(
+            `This conversation will be persisted in Kibana and available at this url: ${
               kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`,
-          });
+            }.`
+          );
         }
 
-        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
-
-        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+        const kbUserInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(
+          shareReplay()
+        );
 
         // if it is:
         // - a new conversation
@@ -232,12 +241,12 @@ export class ObservabilityAIAssistantClient {
                 tracer: completeTracer,
               }).pipe(shareReplay());
 
-        const systemMessage$ = userInstructions$.pipe(
-          map((userInstructions) => {
+        const systemMessage$ = kbUserInstructions$.pipe(
+          map((kbUserInstructions) => {
             return getSystemMessageFromInstructions({
               applicationInstructions: functionClient.getInstructions(),
-              userInstructions,
-              adHocInstructions: allAdHocInstructions,
+              kbUserInstructions,
+              apiUserInstructions,
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
             });
           }),
@@ -246,8 +255,8 @@ export class ObservabilityAIAssistantClient {
 
         // we continue the conversation here, after resolving both the materialized
         // messages and the knowledge base instructions
-        const nextEvents$ = forkJoin([systemMessage$, userInstructions$]).pipe(
-          switchMap(([systemMessage, userInstructions]) => {
+        const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
+          switchMap(([systemMessage, kbUserInstructions]) => {
             // if needed, inject a context function request here
             const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(initialMessages)
@@ -263,8 +272,8 @@ export class ObservabilityAIAssistantClient {
                 chat: (name, chatParams) => {
                   // inject a chat function with predefined parameters
                   return this.chat(name, {
-                    ...chatParams,
                     systemMessage,
+                    ...chatParams,
                     signal,
                     simulateFunctionCalling,
                     connectorId,
@@ -274,8 +283,8 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                userInstructions,
-                adHocInstructions,
+                kbUserInstructions,
+                apiUserInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,
@@ -288,96 +297,108 @@ export class ObservabilityAIAssistantClient {
           shareReplay()
         );
 
-        const output$ = mergeOperator(
-          // get all the events from continuing the conversation
-          nextEvents$,
-          // wait until all dependencies have completed
-          forkJoin([
-            // get just the new messages
-            nextEvents$.pipe(extractMessages()),
-            // get just the title, and drop the token count events
-            title$.pipe(filter((value): value is string => typeof value === 'string')),
-            systemMessage$,
-          ]).pipe(
-            switchMap(([addedMessages, title, systemMessage]) => {
-              const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
+        const conversationWithMetaFields$ = from(
+          this.getConversationWithMetaFields(conversationId)
+        ).pipe(
+          switchMap((conversation) => {
+            if (isConversationUpdate && !conversation) {
+              return throwError(() => createConversationNotFoundError());
+            }
 
-              const lastMessage = last(initialMessagesWithAddedMessages);
+            if (conversation?._source && !this.isConversationOwnedByUser(conversation._source)) {
+              return throwError(
+                () => new Error('Cannot update conversation that is not owned by the user')
+              );
+            }
 
-              // if a function request is at the very end, close the stream to consumer
-              // without persisting or updating the conversation. we need to wait
-              // on the function response to have a valid conversation
-              const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+            return of(conversation);
+          })
+        );
 
-              if (!persist || isFunctionRequest) {
-                return of();
-              }
+        const output$ = conversationWithMetaFields$.pipe(
+          switchMap((conversation) => {
+            return mergeOperator(
+              // get all the events from continuing the conversation
+              nextEvents$,
+              // wait until all dependencies have completed
+              forkJoin([
+                // get just the new messages
+                nextEvents$.pipe(extractMessages()),
+                // get just the title, and drop the token count events
+                title$.pipe(filter((value): value is string => typeof value === 'string')),
+                systemMessage$,
+              ]).pipe(
+                switchMap(([addedMessages, title, systemMessage]) => {
+                  const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
 
-              if (isConversationUpdate) {
-                return from(this.getConversationWithMetaFields(conversationId))
-                  .pipe(
-                    switchMap((conversation) => {
-                      if (!conversation) {
-                        return throwError(() => createConversationNotFoundError());
-                      }
+                  const lastMessage = last(initialMessagesWithAddedMessages);
 
-                      return from(
-                        this.update(
-                          conversationId,
+                  // if a function request is at the very end, close the stream to consumer
+                  // without persisting or updating the conversation. we need to wait
+                  // on the function response to have a valid conversation
+                  const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                          merge(
-                            {},
+                  if (!persist || isFunctionRequest) {
+                    return of();
+                  }
 
-                            // base conversation without messages
-                            omit(conversation._source, 'messages'),
+                  if (isConversationUpdate && conversation) {
+                    return from(
+                      this.update(
+                        conversationId,
 
-                            // update messages and system message
-                            { messages: initialMessagesWithAddedMessages, systemMessage },
+                        merge(
+                          {},
 
-                            // update title
-                            {
-                              conversation: {
-                                title: title || conversation._source?.conversation.title,
-                              },
-                            }
-                          )
+                          // base conversation without messages
+                          omit(conversation._source, 'messages'),
+
+                          // update messages and system message
+                          { messages: initialMessagesWithAddedMessages, systemMessage },
+
+                          // update title
+                          {
+                            conversation: {
+                              title: title || conversation._source?.conversation.title,
+                            },
+                          }
                         )
-                      );
+                      )
+                    ).pipe(
+                      map((conversationUpdated): ConversationUpdateEvent => {
+                        return {
+                          conversation: conversationUpdated.conversation,
+                          type: StreamingChatResponseEventType.ConversationUpdate,
+                        };
+                      })
+                    );
+                  }
+
+                  return from(
+                    this.create({
+                      '@timestamp': new Date().toISOString(),
+                      conversation: {
+                        title,
+                        id: conversationId,
+                      },
+                      public: !!isPublic,
+                      labels: {},
+                      numeric_labels: {},
+                      systemMessage,
+                      messages: initialMessagesWithAddedMessages,
                     })
-                  )
-                  .pipe(
-                    map((conversation): ConversationUpdateEvent => {
+                  ).pipe(
+                    map((conversationCreated): ConversationCreateEvent => {
                       return {
-                        conversation: conversation.conversation,
-                        type: StreamingChatResponseEventType.ConversationUpdate,
+                        conversation: conversationCreated.conversation,
+                        type: StreamingChatResponseEventType.ConversationCreate,
                       };
                     })
                   );
-              }
-
-              return from(
-                this.create({
-                  '@timestamp': new Date().toISOString(),
-                  conversation: {
-                    title,
-                    id: conversationId,
-                  },
-                  public: !!isPublic,
-                  labels: {},
-                  numeric_labels: {},
-                  systemMessage,
-                  messages: initialMessagesWithAddedMessages,
                 })
-              ).pipe(
-                map((conversation): ConversationCreateEvent => {
-                  return {
-                    conversation: conversation.conversation,
-                    type: StreamingChatResponseEventType.ConversationCreate,
-                  };
-                })
-              );
-            })
-          )
+              )
+            );
+          })
         );
 
         return output$.pipe(
@@ -463,15 +484,14 @@ export class ObservabilityAIAssistantClient {
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages),
+      messages: convertMessagesForInference(messages, this.dependencies.logger),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
     };
 
     this.dependencies.logger.debug(
-      () =>
-        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+      () => `Calling inference client for name: "${name}" with options: ${JSON.stringify(options)}`
     );
 
     if (stream) {
@@ -535,6 +555,10 @@ export class ObservabilityAIAssistantClient {
 
     if (!persistedConversation) {
       throw notFound();
+    }
+
+    if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
+      throw new Error('Cannot update conversation that is not owned by the user');
     }
 
     const updatedConversation: Conversation = merge(
@@ -602,6 +626,23 @@ export class ObservabilityAIAssistantClient {
     });
 
     return createdConversation;
+  };
+
+  duplicateConversation = async (conversationId: string): Promise<Conversation> => {
+    const conversation = await this.getConversationWithMetaFields(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+    const _source = conversation._source!;
+    return this.create({
+      ..._source,
+      conversation: {
+        ..._source.conversation,
+        id: v4(),
+      },
+      public: false,
+    });
   };
 
   recall = async ({

@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2025-02-22
+date: 2025-03-11
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -23,7 +23,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | ml, securitySolution | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authz" text="authz"/> | actions, ml, savedObjectsTagging | - |
 | <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.registerAction" text="registerAction"/> | unifiedSearch, uiActionsEnhanced, ml, discover, imageEmbeddable, securitySolution | - |
-| <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.addTriggerAction" text="addTriggerAction"/> | data, esql, lens, cases, ml, aiops, discover, reporting, discoverEnhanced, dashboardEnhanced, securitySolution, inputControlVis | - |
+| <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.addTriggerAction" text="addTriggerAction"/> | data, lens, cases, ml, aiops, discover, reporting, discoverEnhanced, dashboardEnhanced, securitySolution, inputControlVis | - |
 | <DocLink id="kibKbnCoreHttpServerPluginApi" section="def-server.RouteConfigOptions.authRequired" text="authRequired"/> | @kbn/core, usageCollection, taskManager, security, monitoringCollection, files, banners, telemetry, securitySolution, @kbn/test-suites-xpack, cloudFullStory, customBranding, enterpriseSearch, interactiveSetup, mockIdpPlugin, spaces, ml | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-public.SimpleSavedObject" text="SimpleSavedObject"/> | @kbn/core, visualizations, dataVisualizer, ml, aiops, graph, dashboardEnhanced, lens, securitySolution, eventAnnotation | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributes" text="SavedObjectAttributes"/> | @kbn/core, savedObjects, visualizations, canvas, graph, ml | - |
@@ -34,7 +34,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
 | <DocLink id="kibAlertingPluginApi" section="def-common.MaintenanceWindow" text="MaintenanceWindow"/> | @kbn/response-ops-alerts-table, triggersActionsUi | - |
 | <DocLink id="kibManagementPluginApi" section="def-public.ManagementAppMountParams.theme$" text="theme$"/> | triggersActionsUi | - |
-| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttribute" text="SavedObjectAttribute"/> | @kbn/core, visualizations, triggersActionsUi, @kbn/response-ops-rule-form | - |
 | <DocLink id="kibAlertingPluginApi" section="def-server.RuleExecutorServices.alertFactory" text="alertFactory"/> | ruleRegistry, securitySolution, slo | - |
 | <DocLink id="kibKbnSecurityPluginTypesServerPluginApi" section="def-server.SecurityPluginSetup.audit" text="audit"/> | security, actions, alerting, ruleRegistry, files, cases, fleet, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.create" text="create"/> | alerting, securitySolution | - |
@@ -120,6 +119,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCoreSavedObjectsBrowserMocksPluginApi" section="def-public.simpleSavedObjectMock" text="simpleSavedObjectMock"/> | @kbn/core, lens | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObject" text="SavedObject"/> | @kbn/core, home, savedObjectsTagging, canvas, savedObjectsTaggingOss, upgradeAssistant, lists, savedObjectsManagement | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttributeSingle" text="SavedObjectAttributeSingle"/> | @kbn/core | - |
+| <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObjectAttribute" text="SavedObjectAttribute"/> | @kbn/core, visualizations, @kbn/response-ops-rule-form | - |
 | <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.schemas" text="schemas"/> | @kbn/core, spaces, data, dashboard, savedSearch, visualizations, cloudSecurityPosture | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | graph, visTypeTimeseries, dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | graph, visTypeTimeseries, dataViewManagement, dataViews | - |
@@ -158,9 +158,9 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.truncate" text="truncate"/> | visTypePie | - |
 | <DocLink id="kibExpressionPartitionVisPluginApi" section="def-common.LabelsParams.last_level" text="last_level"/> | visTypePie | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginSetup.authc" text="authc"/> | security | - |
-| <DocLink id="kibKbnIndexLifecycleManagementCommonSharedPluginApi" section="def-common.RolloverAction.max_size" text="max_size"/> | indexLifecycleManagement, streamsApp | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.wrapWithTheme" text="wrapWithTheme"/> | aiAssistantManagementSelection, observabilityAiAssistantManagement | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-common.KibanaStyledComponentsThemeProviderDecorator" text="KibanaStyledComponentsThemeProviderDecorator"/> | @kbn/react-kibana-context-styled, kibanaReact | - |
+| <DocLink id="kibKbnIndexLifecycleManagementCommonSharedPluginApi" section="def-common.RolloverAction.max_size" text="max_size"/> | indexLifecycleManagement | - |
 | <DocLink id="kibKbnPresentationContainersPluginApi" section="def-public.HasRuntimeChildState" text="HasRuntimeChildState"/> | dashboard | - |
 | <DocLink id="kibSharePluginApi" section="def-public.ShareContext.shareableUrlForSavedObject" text="shareableUrlForSavedObject"/> | discover, @kbn/reporting-public | - |
 | <DocLink id="kibKbnCoreUiSettingsCommonPluginApi" section="def-common.UiSettingsParams.metric" text="metric"/> | @kbn/management-settings-field-definition, discover | - |
@@ -173,8 +173,9 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.ESQLColumn.quoted" text="quoted"/> | @kbn/esql-validation-autocomplete | - |
 | <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.ParseResult.ast" text="ast"/> | @kbn/esql-utils | - |
 | <DocLink id="kibKbnEsqlValidationAutocompletePluginApi" section="def-common.CommandDefinition.modes" text="modes"/> | @kbn/monaco | - |
+| <DocLink id="kibKbnEsqlValidationAutocompletePluginApi" section="def-common.isSettingItem" text="isSettingItem"/> | @kbn/monaco | - |
 | <DocLink id="kibKbnReportingExportTypesPdfCommonPluginApi" section="def-common.JobParamsPDFDeprecated" text="JobParamsPDFDeprecated"/> | @kbn/reporting-export-types-pdf | - |
-| <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | security, licenseManagement, aiops, ml, crossClusterReplication, logstash, painlessLab, watcher, searchprofiler, slo | 8.8.0 |
+| <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | security, licenseManagement, aiops, ml, crossClusterReplication, logstash, painlessLab, watcher, securitySolution, searchprofiler, slo | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.license$" text="license$"/> | spaces, security, actions, alerting, remoteClusters, graph, indexLifecycleManagement, painlessLab, rollup, snapshotRestore, transform, upgradeAssistant, aiops, ml, osquery, securitySolution, apm, searchprofiler | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-public.PublicLicense.mode" text="mode"/> | fleet, security, apm, securitySolution | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.PublicLicense.mode" text="mode"/> | fleet, security, apm, securitySolution | 8.8.0 |

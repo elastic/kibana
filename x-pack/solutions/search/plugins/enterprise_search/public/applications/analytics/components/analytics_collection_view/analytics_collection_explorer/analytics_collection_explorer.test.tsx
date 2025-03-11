@@ -54,10 +54,11 @@ describe('AnalyticsCollectionExplorer', () => {
 
     expect(wrapper.prop('pageChrome')).toEqual([mockValues.analyticsCollection.name]);
     expect(wrapper.prop('analyticsName')).toEqual(mockValues.analyticsCollection.name);
-    expect(wrapper.prop('pageHeader')).toEqual({
-      bottomBorder: false,
-      pageTitle: 'Explorer',
-      rightSideItems: [<AnalyticsCollectionToolbar />],
-    });
+    expect(wrapper.prop('pageHeader')).toEqual(
+      expect.objectContaining({
+        bottomBorder: false,
+        rightSideItems: [<AnalyticsCollectionToolbar />],
+      })
+    );
   });
 });

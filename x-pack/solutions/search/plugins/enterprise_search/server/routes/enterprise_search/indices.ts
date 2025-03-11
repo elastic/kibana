@@ -19,6 +19,7 @@ import {
   deleteConnectorSecret,
   deleteConnectorById,
   updateConnectorIndexName,
+  Connector,
 } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
@@ -119,7 +120,13 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
         from,
         size
       );
-      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+      let connectors: Connector[] = [];
+      // If the user doesn't have permissions, fetchConnectors will error out. We still want to return indices in that case.
+      try {
+        connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+      } catch {
+        connectors = [];
+      }
       const enrichedIndices = indices.map((index) => ({
         ...index,
         connector: connectors.find((connector) => connector.index_name === index.name),
@@ -155,7 +162,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const index = await fetchIndex(client, indexName);
+        const index = await fetchIndex(client, indexName, log);
         return response.ok({
           body: index,
           headers: { 'content-type': 'application/json' },
@@ -189,7 +196,13 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+        let connector: Connector | undefined;
+        // users without permissions to fetch connectors should still see a result
+        try {
+          connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+        } catch (error) {
+          log.error(`Error fetching connector for index ${indexName}: ${error}`);
+        }
 
         if (connector) {
           if (connector.service_type === CRAWLER_SERVICE_TYPE) {
@@ -567,11 +580,13 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           statusCode: 409,
         });
       }
-
-      const connector = await fetchConnectorByIndexName(
-        client.asCurrentUser,
-        request.body.index_name
-      );
+      let connector: Connector | undefined;
+      // users without permissions to fetch connectors should still be able to create an index
+      try {
+        connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+      } catch (error) {
+        log.error(`Error fetching connector for index ${indexName}: ${error}`);
+      }
 
       if (connector) {
         return createError({
