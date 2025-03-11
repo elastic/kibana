@@ -11,6 +11,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { useWatch } from 'react-hook-form';
 import { PLUGIN_ID } from '../../common';
 import { QueryMode } from './query_mode/query_mode';
+import { EditabledQueryMode } from './query_mode/editable_query_mode';
 import { ChatSetupPage } from './setup_page/chat_setup_page';
 import { Header } from './header';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
@@ -81,7 +82,7 @@ export const App: React.FC<AppProps> = ({ showDocs = false }) => {
             {isSearchModeEnabled && (
               <>
                 <Route exact path={SEARCH_PLAYGROUND_SEARCH_PATH} component={SearchMode} />
-                <Route exact path={PLAYGROUND_SEARCH_QUERY_PATH} component={QueryMode} />
+                <Route exact path={PLAYGROUND_SEARCH_QUERY_PATH} component={EditabledQueryMode} />
               </>
             )}
           </>
