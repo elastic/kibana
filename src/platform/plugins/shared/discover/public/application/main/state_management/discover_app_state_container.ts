@@ -213,7 +213,7 @@ export const getDiscoverAppStateContainer = ({
 
       // When updating to an ES|QL query, sync the data source
       if (isOfAggregateQueryType(value.query)) {
-        value.dataSource = createEsqlDataSource();
+        value = { ...value, dataSource: createEsqlDataSource() };
       }
 
       appStateContainer.set(value);

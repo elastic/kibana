@@ -14,10 +14,10 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
-import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
+import { DiscoverMainRoute2 } from '../../application/main/discover_main_route_2';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -87,7 +87,7 @@ export const DiscoverContainerInternal = ({
         `}
       >
         <KibanaContextProvider services={services}>
-          <DiscoverMainRoute
+          <DiscoverMainRoute2
             customizationCallbacks={customizationCallbacks}
             customizationContext={customizationContext}
             stateStorageContainer={stateStorageContainer}
