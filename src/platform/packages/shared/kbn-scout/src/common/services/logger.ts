@@ -10,8 +10,8 @@
 import { ToolingLog } from '@kbn/tooling-log';
 
 export class ScoutLogger extends ToolingLog {
-  constructor() {
-    super({ level: 'verbose', writeTo: process.stdout }, { context: 'scout' });
+  constructor(workerContext: string) {
+    super({ level: 'verbose', writeTo: process.stdout }, { context: workerContext });
     this.serviceLoaded('logger');
   }
 
@@ -20,20 +20,28 @@ export class ScoutLogger extends ToolingLog {
    * @param name unique name of the service
    */
   public serviceLoaded(name: string) {
-    this.debug(`[service] ${name}`);
+    this.debug(`[${name}] loaded`);
+  }
+
+  /**
+   * Used to log a message for a service/fixture
+   */
+  public serviceMessage(name: string, message: string) {
+    this.debug(`[${name}] ${message}`);
   }
 }
 
-let loggerInstance: ScoutLogger | null = null;
+const loggerInstances = new Map<string, ScoutLogger>();
 
 /**
- * Singleton logger instance to share across the Scout components
- * @returns {ScoutLogger}
+ * Singleton logger instance for specific worker to share across the Scout components
+ * @param workerContext logger context, e.g. `scout-worker-1`; default is `scout`
+ * @returns {ScoutLogger} logger instance
  */
-export function getLogger(): ScoutLogger {
-  if (!loggerInstance) {
-    loggerInstance = new ScoutLogger();
+export function getLogger(workerContext: string = 'scout'): ScoutLogger {
+  if (!loggerInstances.has(workerContext)) {
+    loggerInstances.set(workerContext, new ScoutLogger(workerContext));
   }
 
-  return loggerInstance;
+  return loggerInstances.get(workerContext)!;
 }
