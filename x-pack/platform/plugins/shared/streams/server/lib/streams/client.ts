@@ -45,7 +45,11 @@ import {
   syncUnwiredStreamDefinitionObjects,
   syncWiredStreamDefinitionObjects,
 } from './helpers/sync';
-import { validateAncestorFields, validateDescendantFields } from './helpers/validate_fields';
+import {
+  validateAncestorFields,
+  validateDescendantFields,
+  validateSystemFields,
+} from './helpers/validate_fields';
 import {
   validateRootStreamChanges,
   validateStreamChildrenChanges,
@@ -461,6 +465,8 @@ export class StreamsClient {
       ancestors,
       fields: definition.ingest.wired.fields,
     });
+
+    validateSystemFields(definition);
 
     validateDescendantFields({
       descendants,
