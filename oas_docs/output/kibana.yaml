@@ -238,6 +238,11 @@ tags:
   - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
     name: upgrade
     x-displayName: Upgrade assistant
+  - description: Uptime
+    externalDocs:
+      description: Uptime monitoring
+      url: https://www.elastic.co/guide/en/observability/current/uptime-intro.html
+    name: uptime
   - name: user session
     x-displayName: User session management
 paths:
@@ -44237,6 +44242,139 @@ paths:
       tags:
         - upgrade
       x-state: Technical Preview
+  /api/uptime/settings:
+    get:
+      description: |
+        You must have `read` privileges for the uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: get-uptime-settings
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getUptimeSettingsResponseExample1:
+                  value: |-
+                    {
+                      "heartbeatIndices": "heartbeat-8*",
+                      "certExpirationThreshold": 30,
+                      "certAgeThreshold": 730,
+                      "defaultConnectors": [
+                          "08990f40-09c5-11ee-97ae-912b222b13d4",
+                          "db25f830-2318-11ee-9391-6b0c030836d6"
+                      ],
+                      "defaultEmail": {
+                          "to": [],
+                          "cc": [],
+                          "bcc": []
+                      }
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get uptime settings
+      tags:
+        - uptime
+    put:
+      description: |
+        Update uptime setting attributes like `heartbeatIndices`, `certExpirationThreshold`, `certAgeThreshold`, `defaultConnectors`, or `defaultEmail`. You must have `all` privileges for the uptime feature in the Observability section of the Kibana feature privileges. A partial update is supported, provided settings keys will be merged with existing settings.
+      operationId: put-uptime-settings
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putUptimeSettingsRequestExample1:
+                description: Run `PUT api/uptime/settings` to update multiple Uptime settings.
+                summary: Update multiple settings
+                value: |-
+                  {
+                      "heartbeatIndices": "heartbeat-8*",
+                      "certExpirationThreshold": 30,
+                      "certAgeThreshold": 730,
+                      "defaultConnectors": [
+                          "08990f40-09c5-11ee-97ae-912b222b13d4",
+                          "db25f830-2318-11ee-9391-6b0c030836d6"
+                      ],
+                      "defaultEmail": {
+                          "to": [],
+                          "cc": [],
+                          "bcc": []
+                      }
+                  }
+              putUptimeSettingsRequestExample2:
+                description: Run `PUT api/uptime/settings` to update a single Uptime setting.
+                summary: Update a setting
+                value: |-
+                  {
+                      "heartbeatIndices": "heartbeat-8*",
+                  }
+            schema:
+              type: object
+              properties:
+                certAgeThreshold:
+                  default: 730
+                  description: The number of days after a certificate is created to trigger an alert.
+                  type: number
+                certExpirationThreshold:
+                  default: 30
+                  description: The number of days before a certificate expires to trigger an alert.
+                  type: number
+                defaultConnectors:
+                  default: []
+                  description: A list of connector IDs to be used as default connectors for new alerts.
+                  type: array
+                defaultEmail:
+                  description: |
+                    The default email configuration for new alerts.
+                  type: object
+                  properties:
+                    bcc:
+                      default: []
+                      items:
+                        - type: string
+                      type: array
+                    cc:
+                      default: []
+                      items:
+                        - type: string
+                      type: array
+                    to:
+                      default: []
+                      items:
+                        - type: string
+                      type: array
+                heartbeatIndices:
+                  default: heartbeat-*
+                  description: |
+                    An index pattern string to be used within the Uptime app and alerts to query Heartbeat data. 
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putUptimeSettingsResponseExample1:
+                  description: A successful response from `PUT api/uptime/settings`.
+                  value: |-
+                    {
+                        "heartbeatIndices": "heartbeat-8*",
+                        "certExpirationThreshold": 30,
+                        "certAgeThreshold": 730,
+                        "defaultConnectors": [
+                            "08990f40-09c5-11ee-97ae-912b222b13d4",
+                            "db25f830-2318-11ee-9391-6b0c030836d6"
+                        ],
+                        "defaultEmail": {
+                            "to": [],
+                            "cc": [],
+                            "bcc": []
+                        }
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Update uptime settings
+      tags:
+        - uptime
   /s/{spaceId}/api/observability/slos:
     get:
       description: |
