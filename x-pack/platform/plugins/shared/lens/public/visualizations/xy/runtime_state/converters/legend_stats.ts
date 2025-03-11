@@ -24,7 +24,7 @@ export function convertToLegendStats(state: OldState): XYState {
         legendStats: [
           ...new Set([
             ...(valuesInLegend ? [LegendValue.CurrentAndLastValue] : []),
-            ...(state.legend.legendStats || []),
+            ...(state.legend.legendStats ?? []),
           ]),
         ],
       },
