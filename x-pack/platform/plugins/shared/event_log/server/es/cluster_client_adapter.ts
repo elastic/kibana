@@ -723,7 +723,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.findOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest = {
+    const body: estypes.SearchRequest['body'] = {
       size: perPage,
       query,
       pit: {
@@ -740,7 +740,7 @@ export class ClusterClientAdapter<
       const {
         hits: { hits, total },
       } = await esClient.search<IValidatedEventInternalDocInfo>({
-        ...body,
+        body,
         track_total_hits: true,
         seq_no_primary_term: true,
       });
