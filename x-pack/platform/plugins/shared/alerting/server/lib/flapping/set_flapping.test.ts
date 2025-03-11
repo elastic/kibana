@@ -6,10 +6,13 @@
  */
 
 import { pick } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { Alert } from '../../alert';
+import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../../common';
 import { setFlapping, isAlertFlapping } from './set_flapping';
-import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  DISABLE_FLAPPING_SETTINGS,
+} from '../../../common/rules_settings';
 
 describe('setFlapping', () => {
   const flapping = new Array(16).fill(false).concat([true, true, true, true]);
