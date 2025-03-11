@@ -10,7 +10,7 @@ import { maintenanceWindowCategoryIdTypes } from '../../application/maintenance_
 import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
 import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
 import { MaintenanceWindowStatus } from '../../types';
-import { MaintenanceWindow } from '../../application/maintenance_window/types';
+import type { MaintenanceWindow } from '../../application/maintenance_window/types';
 import { mockedRawRuleSO, mockedRule } from '../fixtures';
 import {
   filterMaintenanceWindows,
@@ -18,9 +18,9 @@ import {
   getMaintenanceWindows,
 } from './get_maintenance_windows';
 import { getFakeKibanaRequest } from '../rule_loader';
-import { TaskRunnerContext } from '../types';
+import type { TaskRunnerContext } from '../types';
 import { FilterStateStore } from '@kbn/es-query';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 const logger = loggingSystemMock.create().get();
 const mockBasePathService = { set: jest.fn() };

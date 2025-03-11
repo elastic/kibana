@@ -98,7 +98,7 @@ async function getKibanaUrl({
       );
     }
 
-    logger.info(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}`);
+    logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}`);
 
     return discoveredKibanaUrlWithAuth.replace(/\/$/, '');
   } catch (error) {
@@ -183,7 +183,7 @@ function logCertificateWarningsIfNeeded(parsedTarget: Url, parsedKibanaUrl: Url,
     (parsedTarget.protocol === 'https:' || parsedKibanaUrl.protocol === 'https:') &&
     (parsedTarget.hostname === '127.0.0.1' || parsedKibanaUrl.hostname === '127.0.0.1')
   ) {
-    logger.warn(
+    logger.warning(
       `WARNING: Self-signed certificate may not work with hostname: '127.0.0.1'. Consider using 'localhost' instead.`
     );
   }
@@ -193,7 +193,7 @@ export async function getServiceUrls({ logger, target, kibana }: RunOptions & { 
   if (!target) {
     if (!kibana) {
       kibana = 'http://localhost:5601';
-      logger.info(`No target provided, defaulting Kibana to ${kibana}`);
+      logger.debug(`No target provided, defaulting Kibana to ${kibana}`);
     }
     target = await discoverTargetFromKibanaUrl(kibana);
   }

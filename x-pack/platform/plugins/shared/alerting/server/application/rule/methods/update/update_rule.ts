@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
-import { SavedObject } from '@kbn/core/server';
-import { SanitizedRule, RawRule } from '../../../../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -17,7 +17,7 @@ import { getMappedParams } from '../../../../rules_client/common/mapped_params_u
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import {
+import type {
   RulesClientContext,
   NormalizedAlertActionWithGeneratedValues,
 } from '../../../../rules_client/types';
@@ -30,11 +30,12 @@ import {
   migrateLegacyActions,
   updateMetaAttributes,
 } from '../../../../rules_client/lib';
-import { RuleParams } from '../../types';
+import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
 import { createRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 
-import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
