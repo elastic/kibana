@@ -54,7 +54,7 @@ export const getDefaultBody = (config?: Config) => {
   return DEFAULT_BODY;
 };
 
-export const getOpenAiConfig = (enabledAdditionalHeaders: boolean): ConfigFieldSchema[] => [
+export const openAiConfig: ConfigFieldSchema[] = [
   {
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
@@ -89,51 +89,47 @@ export const getOpenAiConfig = (enabledAdditionalHeaders: boolean): ConfigFieldS
     ),
     defaultValue: DEFAULT_OPENAI_MODEL,
   },
-  ...(enabledAdditionalHeaders
-    ? [
-        {
-          id: 'organizationId',
-          label: i18n.ORG_ID_LABEL,
-          isRequired: false,
-          helpText: (
-            <FormattedMessage
-              defaultMessage="For users who belong to multiple organizations. Organization IDs can be found on your Organization settings page."
-              id="xpack.stackConnectors.components.genAi.openAiOrgId"
-            />
-          ),
-          euiFieldProps: {
-            append: (
-              <EuiText size="xs" color="subdued">
-                {i18n.OPTIONAL_LABEL}
-              </EuiText>
-            ),
-          },
-        },
-        {
-          id: 'projectId',
-          label: i18n.PROJECT_ID_LABEL,
-          isRequired: false,
-          helpText: (
-            <FormattedMessage
-              defaultMessage="For users who are accessing their projects through their legacy user API key. Project IDs can be found on your General settings page by selecting the specific project."
-              id="xpack.stackConnectors.components.genAi.openAiProjectId"
-            />
-          ),
-          euiFieldProps: {
-            autocomplete: 'new-password',
-            autoComplete: 'new-password',
-            onFocus: (event: React.FocusEvent<HTMLInputElement>) => {
-              event.target.setAttribute('autocomplete', 'new-password');
-            },
-            append: (
-              <EuiText size="xs" color="subdued">
-                {i18n.OPTIONAL_LABEL}
-              </EuiText>
-            ),
-          },
-        },
-      ]
-    : []),
+  {
+    id: 'organizationId',
+    label: i18n.ORG_ID_LABEL,
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="For users who belong to multiple organizations. Organization IDs can be found on your Organization settings page."
+        id="xpack.stackConnectors.components.genAi.openAiOrgId"
+      />
+    ),
+    euiFieldProps: {
+      append: (
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
+  },
+  {
+    id: 'projectId',
+    label: i18n.PROJECT_ID_LABEL,
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="For users who are accessing their projects through their legacy user API key. Project IDs can be found on your General settings page by selecting the specific project."
+        id="xpack.stackConnectors.components.genAi.openAiProjectId"
+      />
+    ),
+    euiFieldProps: {
+      autocomplete: 'new-password',
+      autoComplete: 'new-password',
+      onFocus: (event: React.FocusEvent<HTMLInputElement>) => {
+        event.target.setAttribute('autocomplete', 'new-password');
+      },
+      append: (
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
+  },
 ];
 
 export const azureAiConfig: ConfigFieldSchema[] = [
