@@ -100,11 +100,10 @@ export const getLastSuccessfulCheck = async ({
     return null;
   }
 
-  const check = result.hits.hits[0]._source as Ping & { '@timestamp': string };
+  const check = result.hits.hits[0]._source as Ping;
 
   return {
     ...check,
-    timestamp: check['@timestamp'],
     docId: result.hits.hits[0]._id!,
   };
 };
