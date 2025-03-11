@@ -221,8 +221,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       itemsPerPage * pageIndex,
       itemsPerPage * (pageIndex + 1)
     );
-
-    loadNotesOnEventsLoad(eventsOnCurrentPage);
+    if (eventsOnCurrentPage.length > 0) {
+      loadNotesOnEventsLoad(eventsOnCurrentPage);
+    }
   }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
 
   /**
