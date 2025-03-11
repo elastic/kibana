@@ -119,7 +119,7 @@ export function RelatedAlertsView({ alert }: Props) {
           intersection(alert.fields[ALERT_INSTANCE_ID].split(','), instanceId.split(',')).length >
           0;
         const hasSomeRelationWithTags =
-          intersection(alert.fields[ALERT_RULE_TAGS], tags).length > 0;
+          intersection(alert.fields[ALERT_RULE_TAGS], tags.split(',')).length > 0;
         const hasRelationWithRule = ruleUuid === alert.fields[ALERT_RULE_UUID];
         return (
           <>
