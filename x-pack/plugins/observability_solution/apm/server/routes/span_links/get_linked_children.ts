@@ -87,7 +87,7 @@ async function fetchLinkedChildrenOfSpan({
               : []),
           ],
         },
-      },  
+      },
     },
   });
 
