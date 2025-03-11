@@ -25,7 +25,6 @@ export const createQueryAlertType = (
   const {
     eventsTelemetry,
     experimentalFeatures,
-    version,
     scheduleNotificationResponseActionsService,
     licensing,
     id,
@@ -71,14 +70,12 @@ export const createQueryAlertType = (
     producer: SERVER_APP_ID,
     solution: 'security',
     async executor(execOptions) {
-      const { runOpts, services, spaceId, state } = execOptions;
+      const { sharedParams, services, state } = execOptions;
       return queryExecutor({
-        runOpts,
+        sharedParams,
         experimentalFeatures,
         eventsTelemetry,
         services,
-        version,
-        spaceId,
         bucketHistory: state.suppressionGroupHistory,
         licensing,
         scheduleNotificationResponseActionsService,

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { SavedObject } from '@kbn/core/server';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import {
+import type {
   Rule,
   RuleTypeParams,
-  RecoveredActionGroup,
   RuleMonitoring,
-  RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
   SanitizedRule,
   SanitizedRuleAction,
 } from '../../common';
+import { RecoveredActionGroup, RuleLastRunOutcomeOrderMap } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertHit, RawRule } from '../types';
+import type { AlertHit, RawRule } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 interface GeneratorParams {
@@ -328,7 +328,7 @@ export const generateAlertOpts = ({
   maintenanceWindowIds,
 }: GeneratorParams = {}) => {
   id = id ?? '1';
-  let message: string = '';
+  let message = '';
   switch (action) {
     case EVENT_LOG_ACTIONS.newInstance:
       message = `test:1: 'rule-name' created new alert: '${id}'`;

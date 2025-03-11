@@ -22,7 +22,6 @@ export const createIndicatorMatchAlertType = (
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
   const {
     eventsTelemetry,
-    version,
     licensing,
     experimentalFeatures,
     scheduleNotificationResponseActionsService,
@@ -68,28 +67,7 @@ export const createIndicatorMatchAlertType = (
     producer: SERVER_APP_ID,
     solution: 'security',
     async executor(execOptions) {
-      const {
-        runOpts: {
-          inputIndex,
-          runtimeMappings,
-          completeRule,
-          tuple,
-          listClient,
-          ruleExecutionLogger,
-          searchAfterSize,
-          bulkCreate,
-          wrapHits,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
-          intendedTimestamp,
-        },
-        services,
-        spaceId,
-        state,
-      } = execOptions;
-      const runOpts = execOptions.runOpts;
+      const { sharedParams, services, state } = execOptions;
 
       const wrapSuppressedHits = (
         events: SignalSourceHit[],
@@ -97,38 +75,15 @@ export const createIndicatorMatchAlertType = (
       ) =>
         wrapSuppressedAlerts({
           events,
-          spaceId,
-          completeRule,
-          mergeStrategy: runOpts.mergeStrategy,
-          indicesToQuery: runOpts.inputIndex,
           buildReasonMessage,
-          alertTimestampOverride: runOpts.alertTimestampOverride,
-          ruleExecutionLogger,
-          publicBaseUrl: runOpts.publicBaseUrl,
-          primaryTimestamp,
-          secondaryTimestamp,
-          intendedTimestamp,
+          sharedParams,
         });
 
       const result = await indicatorMatchExecutor({
-        inputIndex,
-        runtimeMappings,
-        completeRule,
-        tuple,
-        listClient,
+        sharedParams,
         services,
-        version,
-        searchAfterSize,
-        ruleExecutionLogger,
         eventsTelemetry,
-        bulkCreate,
-        wrapHits,
-        primaryTimestamp,
-        secondaryTimestamp,
-        exceptionFilter,
-        unprocessedExceptions,
         wrapSuppressedHits,
-        runOpts,
         licensing,
         experimentalFeatures,
         scheduleNotificationResponseActionsService,
