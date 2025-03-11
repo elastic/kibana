@@ -16,6 +16,21 @@ import { getPromptSuffixForOssModel } from './common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 
+jest.mock('./esqlSelfHealingGraph', () => {
+  return (
+  {
+    getEsqlSelfHealingGraph: jest.fn().mockReturnValue({
+      invoke: jest.fn().mockResolvedValue({
+        messages: [
+          {
+            content: 'Self healing graph response',
+          },
+        ],
+      }),
+    })
+  }
+)})
+
 describe('NaturalLanguageESQLTool', () => {
   const chain = {} as RetrievalQAChain;
   const esClient = {
@@ -103,6 +118,19 @@ describe('NaturalLanguageESQLTool', () => {
       }) as DynamicTool;
 
       expect(tool.description).not.toContain(getPromptSuffixForOssModel('NaturalLanguageESQLTool'));
+    });
+
+    it('invokes self healing graph', () => {
+
+      const tool = NL_TO_ESQL_TOOL.getTool({
+        isOssModel: false,
+        ...rest,
+      }) as DynamicTool;
+
+
+      const result = tool.invoke({ question: "Generate ESQL to get 100 documents from the .logs index" })
+
+      expect(result).resolves.toEqual('Self healing graph response');
     });
   });
 });

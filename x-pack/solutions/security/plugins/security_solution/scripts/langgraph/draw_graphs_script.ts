@@ -16,7 +16,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { getEsqlSelfHealingGraph } from '../../server/assistant/tools/esql/graph';
+import { getEsqlSelfHealingGraph } from '../../server/assistant/tools/esql/esqlSelfHealingGraph';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';

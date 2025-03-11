@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { HumanMessage } from '@langchain/core/messages';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './common';
-import { getEsqlSelfHealingGraph } from './graph';
+import { getEsqlSelfHealingGraph } from './esqlSelfHealingGraph';
 
 // select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;

@@ -70,6 +70,9 @@ export const getValidatorNode = ({ esClient }: { esClient: ElasticsearchClient }
   };
 };
 
+/**
+ * Returns the last message with the error report for each query.
+ */
 const lastMessageWithErrorReport = (
   message: string,
   validateEsqlResults: ValidateEsqlResult[]

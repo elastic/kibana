@@ -6,11 +6,6 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import {
-  langchainMessageToInferenceMessage,
-  langchainToolsToInferenceTools,
-  nlToEsqlTaskEventToLangchainMessage,
-} from '@kbn/elastic-assistant-common';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -18,6 +13,8 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ChatCompletionMessageEvent } from '@kbn/inference-common';
 import { Command } from '@langchain/langgraph';
 import type { EsqlSelfHealingAnnotation } from './state';
+import { responseToLangchainMessage } from '@kbn/inference-langchain/src/chat_model/from_inference';
+import { messagesToInference, toolDefinitionToInference } from '@kbn/inference-langchain/src/chat_model/to_inference';
 
 export const getNlToEsqlAgent = ({
   connectorId,
@@ -35,7 +32,7 @@ export const getNlToEsqlAgent = ({
   return async (state: typeof EsqlSelfHealingAnnotation.State) => {
     const { messages: stateMessages } = state;
 
-    const inferenceMessages = stateMessages.map(langchainMessageToInferenceMessage);
+    const inferenceMessages = messagesToInference(stateMessages);
 
     const result = (await lastValueFrom(
       naturalLanguageToEsql({
@@ -43,15 +40,15 @@ export const getNlToEsqlAgent = ({
         connectorId,
         functionCalling: 'auto',
         logger,
-        tools: langchainToolsToInferenceTools(tools),
-        messages: inferenceMessages,
+        tools: toolDefinitionToInference(tools),
+        messages: inferenceMessages.messages,
         system: 'It is very important to use tools to answer the question.',
       })
     )) as ChatCompletionMessageEvent;
 
     return new Command({
       update: {
-        messages: [nlToEsqlTaskEventToLangchainMessage(result)],
+        messages: [responseToLangchainMessage(result)],
         maximumLLMCalls: state.maximumLLMCalls - 1,
       },
     });
