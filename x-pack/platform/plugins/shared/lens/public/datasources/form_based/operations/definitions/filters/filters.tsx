@@ -26,7 +26,7 @@ import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
-import {draggablePopoverButtonStyles} from '../styles';
+import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';

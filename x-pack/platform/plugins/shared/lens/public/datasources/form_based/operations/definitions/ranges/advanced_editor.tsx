@@ -33,7 +33,7 @@ import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';
-import {draggablePopoverButtonStyles} from '../styles';
+import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
 
@@ -103,7 +103,7 @@ export const RangePopover = ({
           <EuiFlexItem>
             <EuiFieldNumber
               css={css`
-                width: 14ch;  // Roughly 10 characters plus extra for the padding
+                width: 14ch; // Roughly 10 characters plus extra for the padding
               `}
               value={isValidNumber(from) ? Number(from) : ''}
               onChange={({ target }) => {
@@ -136,7 +136,7 @@ export const RangePopover = ({
           <EuiFlexItem>
             <EuiFieldNumber
               css={css`
-                width: 14ch;  // Roughly 10 characters plus extra for the padding
+                width: 14ch; // Roughly 10 characters plus extra for the padding
               `}
               value={isValidNumber(to) ? Number(to) : ''}
               inputRef={(node) => {

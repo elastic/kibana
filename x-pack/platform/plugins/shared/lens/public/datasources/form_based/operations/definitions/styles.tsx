@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { euiFontSize, euiTextBreakWord, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -17,4 +16,3 @@ export const draggablePopoverButtonStyles = (euiThemeContext: UseEuiTheme) => {
     width: 100%;
   `;
 };
-
