@@ -11,7 +11,7 @@ export class ServiceInventoryPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async gotoDetailedServiceInventoryWithDateSelected(start: string, end: string) {
-    this.page.goto(`${this.kbnUrl.app('apm')}/services?&rangeFrom=${start}&rangeTo=${end}`);
+    await this.page.goto(`${this.kbnUrl.app('apm')}/services?&rangeFrom=${start}&rangeTo=${end}`);
     return this.page.waitForLoadingIndicatorHidden();
   }
 }
