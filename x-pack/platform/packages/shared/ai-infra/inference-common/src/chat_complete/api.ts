@@ -114,7 +114,45 @@ export type ChatCompleteOptions<
    * Optional metadata related to call execution.
    */
   metadata?: ChatCompleteMetadata;
+  /**
+   * The maximum amount of times to retry in case of error returned from the provider.
+   *
+   * Defaults to 3.
+   */
+  maxRetries?: number;
+  /**
+   * Optional configuration for the retry mechanism.
+   *
+   * Note that defaults are very fine, so only use this if you really have a reason to do so.
+   */
+  retryConfiguration?: ChatCompleteRetryConfiguration;
 } & TToolOptions;
+
+export interface ChatCompleteRetryConfiguration {
+  /**
+   * Defines the strategy for error retry
+   *
+   * Either one of
+   * - all: will retry all errors
+   * - auto: will only retry errors that could be recoverable (e.g rate limit, connectivity)
+   * Of a custom function to manually handle filtering
+   *
+   * Defaults to "auto"
+   */
+  retryOn?: 'all' | 'auto' | ((err: Error) => boolean);
+  /**
+   * The initial delay for incremental backoff, in ms.
+   *
+   * Defaults to 1000.
+   */
+  initialDelay?: number;
+  /**
+   * The backoff exponential multiplier.
+   *
+   * Defaults to 2.
+   */
+  backoffMultiplier?: number;
+}
 
 /**
  * Composite response type from the {@link ChatCompleteAPI},
