@@ -242,6 +242,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/security-ai-prompts",
     "@kbn/inference-common",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/inference-langchain"
   ]
 }
