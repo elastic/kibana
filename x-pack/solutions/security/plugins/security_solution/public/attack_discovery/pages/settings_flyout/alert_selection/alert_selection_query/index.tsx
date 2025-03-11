@@ -165,7 +165,6 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           showDatePicker={false}
           showFilterBar={true}
           showQueryInput={true}
-          showSavedQueryControls={false}
           showSubmitButton={false}
           isLoading={isLoadingIndexPattern}
           onFiltersUpdated={onFiltersUpdated}
