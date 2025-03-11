@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { act, within, render, screen, waitFor } from '@testing-library/react';
 
 import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -23,6 +23,13 @@ jest.mock('./api');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getAppInfoMock = getAppInfo as jest.Mock;
 const updateActionConnectorMock = updateActionConnector as jest.Mock;
+
+type PreSubmitValidatorRes =
+  | {
+      message: ReactNode;
+    }
+  | undefined
+  | void;
 
 describe('ServiceNowActionConnectorFields renders', () => {
   const usesTableApiConnector = {
@@ -302,7 +309,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      const res = await act(async () => preSubmitValidator());
+      let res: PreSubmitValidatorRes;
+
+      await act(async () => {
+        res = await preSubmitValidator();
+      });
 
       expect(getAppInfoMock).toHaveBeenCalledTimes(1);
 
@@ -326,13 +337,17 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      const res = await act(async () => preSubmitValidator());
+      let res: PreSubmitValidatorRes;
+
+      await act(async () => {
+        res = await preSubmitValidator();
+      });
 
       expect(getAppInfoMock).toHaveBeenCalledTimes(1);
 
       render(<>{res?.message}</>);
 
-      expect(screen.getByTestId('errorCallout')).toBeInTheDocument();
+      expect(await screen.findByTestId('errorCallout')).toBeInTheDocument();
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
 
@@ -352,7 +367,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      const res = await act(async () => preSubmitValidator());
+      let res: PreSubmitValidatorRes;
+
+      await act(async () => {
+        res = await preSubmitValidator();
+      });
 
       expect(getAppInfoMock).toHaveBeenCalledTimes(1);
 
