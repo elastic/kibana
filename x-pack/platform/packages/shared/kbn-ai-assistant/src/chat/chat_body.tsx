@@ -12,17 +12,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiPanel,
   euiScrollBarStyles,
   EuiSpacer,
-  EuiText,
   useEuiTheme,
   UseEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import type { Conversation, Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
+  Conversation,
+  ConversationAccess,
+  Message,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ChatActionClickType,
   ChatState,
@@ -50,7 +52,7 @@ import { WelcomeMessage } from './welcome_message';
 import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
-import { deserializeMessage } from '../utils/deserialize_message';
+import { ChatBanner } from './chat_banner';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -75,6 +77,7 @@ const incorrectLicenseContainer = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
 const chatBodyContainerClassNameWithError = css`
   align-self: center;
+  margin: 12px;
 `;
 
 const promptEditorContainerClassName = css`
@@ -121,6 +124,9 @@ export function ChatBody({
   onConversationUpdate,
   onToggleFlyoutPositionMode,
   navigateToConversation,
+  setIsUpdatingConversationList,
+  refreshConversations,
+  updateDisplayedConversation,
   onConversationDuplicate,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
@@ -135,6 +141,9 @@ export function ChatBody({
   onConversationDuplicate: (conversation: Conversation) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (conversationId?: string) => void;
+  setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
+  updateDisplayedConversation: (id?: string) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -164,6 +173,7 @@ export function ChatBody({
     duplicateConversation,
     isConversationOwnedByCurrentUser,
     user: conversationUser,
+    updateConversationAccess,
   } = useConversation({
     currentUser,
     initialConversationId,
@@ -177,8 +187,6 @@ export function ChatBody({
 
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
 
-  let footer: React.ReactNode;
-
   const isLoading = Boolean(
     connectors.loading ||
       knowledgeBase.status.loading ||
@@ -187,7 +195,6 @@ export function ChatBody({
   );
 
   let title = conversation.value?.conversation.title || initialTitle;
-
   if (!title) {
     if (!connectors.selectedConnector) {
       title = ASSISTANT_SETUP_TITLE;
@@ -269,18 +276,6 @@ export function ChatBody({
     }
   });
 
-  const handleCopyConversation = () => {
-    const deserializedMessages = (conversation.value?.messages ?? messages).map(deserializeMessage);
-
-    const content = JSON.stringify({
-      title: conversation.value?.conversation.title || initialTitle,
-      systemMessage: conversation.value?.systemMessage,
-      messages: deserializedMessages,
-    });
-
-    navigator.clipboard?.writeText(content || '');
-  };
-
   const handleActionClick = ({
     message,
     payload,
@@ -351,6 +346,50 @@ export function ChatBody({
     }
   };
 
+  const handleConversationAccessUpdate = async (access: ConversationAccess) => {
+    await updateConversationAccess(access);
+    conversation.refresh();
+    refreshConversations();
+  };
+
+  const isPublic = conversation.value?.public;
+  const showPromptEditor = !isPublic || isConversationOwnedByCurrentUser;
+  const bannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
+    defaultMessage: 'This conversation is shared with your team.',
+  });
+
+  let sharedBanner = null;
+
+  if (isPublic && !isConversationOwnedByCurrentUser) {
+    sharedBanner = (
+      <ChatBanner
+        title={bannerTitle}
+        description={i18n.translate('xpack.aiAssistant.shareBanner.viewerDescription', {
+          defaultMessage:
+            "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
+        })}
+        button={
+          <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
+            {i18n.translate('xpack.aiAssistant.duplicateButton', {
+              defaultMessage: 'Duplicate',
+            })}
+          </EuiButton>
+        }
+      />
+    );
+  } else if (isConversationOwnedByCurrentUser && isPublic) {
+    sharedBanner = (
+      <ChatBanner
+        title={bannerTitle}
+        description={i18n.translate('xpack.aiAssistant.shareBanner.ownerDescription', {
+          defaultMessage:
+            'Any further edits you do to this conversation will be shared with the rest of the team.',
+        })}
+      />
+    );
+  }
+
+  let footer: React.ReactNode;
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
@@ -409,65 +448,30 @@ export function ChatBody({
                   }
                 />
               ) : (
-                <>
-                  <ChatTimeline
-                    conversationId={conversationId}
-                    messages={messages}
-                    knowledgeBase={knowledgeBase}
-                    chatService={chatService}
-                    currentUser={conversationUser}
-                    isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
-                    chatState={state}
-                    hasConnector={!!connectors.connectors?.length}
-                    onEdit={(editedMessage, newMessage) => {
-                      setStickToBottom(true);
-                      const indexOf = messages.indexOf(editedMessage);
-                      next(messages.slice(0, indexOf).concat(newMessage));
-                    }}
-                    onFeedback={handleFeedback}
-                    onRegenerate={(message) => {
-                      next(reverseToLastUserMessage(messages, message));
-                    }}
-                    onSendTelemetry={(eventWithPayload) =>
-                      chatService.sendAnalyticsEvent(eventWithPayload)
-                    }
-                    onStopGenerating={stop}
-                    onActionClick={handleActionClick}
-                  />
-                  {conversationId && !isConversationOwnedByCurrentUser ? (
-                    <>
-                      <EuiPanel paddingSize="m" hasShadow={false} color="subdued">
-                        <EuiFlexGroup>
-                          <EuiFlexItem grow={false}>
-                            <EuiIcon size="l" type="users" />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow>
-                            <EuiText size="xs">
-                              <h3>
-                                {i18n.translate('xpack.aiAssistant.sharedBanner.title', {
-                                  defaultMessage: 'This conversation is shared with your team.',
-                                })}
-                              </h3>
-                              <p>
-                                {i18n.translate('xpack.aiAssistant.sharedBanner.description', {
-                                  defaultMessage: `You can’t edit or continue this conversation, but you can duplicate
-                                it into a new private conversation. The original conversation will
-                                remain unchanged.`,
-                                })}
-                              </p>
-                              <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
-                                {i18n.translate('xpack.aiAssistant.duplicateButton', {
-                                  defaultMessage: 'Duplicate',
-                                })}
-                              </EuiButton>
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                      <EuiSpacer size="m" />
-                    </>
-                  ) : null}
-                </>
+                <ChatTimeline
+                  conversationId={conversationId}
+                  messages={messages}
+                  knowledgeBase={knowledgeBase}
+                  chatService={chatService}
+                  currentUser={conversationUser}
+                  isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
+                  chatState={state}
+                  hasConnector={!!connectors.connectors?.length}
+                  onEdit={(editedMessage, newMessage) => {
+                    setStickToBottom(true);
+                    const indexOf = messages.indexOf(editedMessage);
+                    next(messages.slice(0, indexOf).concat(newMessage));
+                  }}
+                  onFeedback={handleFeedback}
+                  onRegenerate={(message) => {
+                    next(reverseToLastUserMessage(messages, message));
+                  }}
+                  onSendTelemetry={(eventWithPayload) =>
+                    chatService.sendAnalyticsEvent(eventWithPayload)
+                  }
+                  onStopGenerating={stop}
+                  onActionClick={handleActionClick}
+                />
               )}
             </EuiPanel>
           </div>
@@ -479,39 +483,40 @@ export function ChatBody({
           </EuiFlexItem>
         ) : null}
 
-        <EuiFlexItem
-          grow={false}
-          className={promptEditorClassname(euiTheme)}
-          style={{ height: promptEditorHeight }}
-        >
-          <EuiHorizontalRule margin="none" />
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            paddingSize="m"
-            color="subdued"
-            className={promptEditorContainerClassName}
-          >
-            <PromptEditor
-              disabled={
-                !connectors.selectedConnector ||
-                !hasCorrectLicense ||
-                (!!conversationId && !isConversationOwnedByCurrentUser)
-              }
-              hidden={connectors.loading || connectors.connectors?.length === 0}
-              loading={isLoading}
-              onChangeHeight={handleChangeHeight}
-              onSendTelemetry={(eventWithPayload) =>
-                chatService.sendAnalyticsEvent(eventWithPayload)
-              }
-              onSubmit={(message) => {
-                setStickToBottom(true);
-                return next(messages.concat(message));
-              }}
-            />
-            <EuiSpacer size="s" />
-          </EuiPanel>
-        </EuiFlexItem>
+        <>
+          {conversationId ? sharedBanner : null}
+          {showPromptEditor ? (
+            <EuiFlexItem
+              grow={false}
+              className={promptEditorClassname(euiTheme)}
+              style={{ height: promptEditorHeight }}
+            >
+              <EuiHorizontalRule margin="none" />
+              <EuiPanel
+                hasBorder={false}
+                hasShadow={false}
+                paddingSize="m"
+                color="subdued"
+                className={promptEditorContainerClassName}
+              >
+                <PromptEditor
+                  disabled={!connectors.selectedConnector || !hasCorrectLicense}
+                  hidden={connectors.loading || connectors.connectors?.length === 0}
+                  loading={isLoading}
+                  onChangeHeight={handleChangeHeight}
+                  onSendTelemetry={(eventWithPayload) =>
+                    chatService.sendAnalyticsEvent(eventWithPayload)
+                  }
+                  onSubmit={(message) => {
+                    setStickToBottom(true);
+                    return next(messages.concat(message));
+                  }}
+                />
+                <EuiSpacer size="s" />
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+        </>
       </>
     );
   }
@@ -575,11 +580,11 @@ export function ChatBody({
         <ChatHeader
           connectors={connectors}
           conversationId={conversationId}
+          conversation={conversation.value as Conversation}
           flyoutPositionMode={flyoutPositionMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
           title={title}
-          onCopyConversation={handleCopyConversation}
           onDuplicateConversation={duplicateConversation}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
@@ -588,6 +593,10 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
+          setIsUpdatingConversationList={setIsUpdatingConversationList}
+          refreshConversations={refreshConversations}
+          updateDisplayedConversation={updateDisplayedConversation}
+          handleConversationAccessUpdate={handleConversationAccessUpdate}
           isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
         />
       </EuiFlexItem>

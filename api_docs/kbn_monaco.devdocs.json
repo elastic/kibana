@@ -530,21 +530,13 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLCallbacks.getVariablesByType",
+            "id": "def-common.ESQLCallbacks.getVariables",
             "type": "Function",
             "tags": [],
-            "label": "getVariablesByType",
+            "label": "getVariables",
             "description": [],
             "signature": [
-              "((type: ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLVariableType",
-                "text": "ESQLVariableType"
-              },
-              ") => ",
+              "(() => ",
               {
                 "pluginId": "@kbn/esql-types",
                 "scope": "common",
@@ -557,29 +549,7 @@
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/monaco",
-                "id": "def-common.ESQLCallbacks.getVariablesByType.$1",
-                "type": "Enum",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/esql-types",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlTypesPluginApi",
-                    "section": "def-common.ESQLVariableType",
-                    "text": "ESQLVariableType"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
+            "children": [],
             "returnComment": []
           },
           {
