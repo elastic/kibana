@@ -105,7 +105,7 @@ describe('updateLatestExecutedState', () => {
       id: 'test-integration',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
-    expect(mockedPackagePolicyService.upgrade).not.toBeCalled();
+    expect(mockedPackagePolicyService.bulkUpgrade).not.toBeCalled();
   });
 
   it('Should call packagePolicy upgrade if keep_policies_up_to_date = true', async () => {
@@ -171,7 +171,7 @@ describe('updateLatestExecutedState', () => {
       id: 'test-integration',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
-    expect(packagePolicyService.upgrade).toHaveBeenCalledWith(
+    expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
       expect.any(Object),
       expect.any(Object),
       ['packagePolicy1', 'packagePolicy2']

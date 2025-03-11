@@ -5773,6 +5773,13 @@ describe('getUpgradeDryRunDiff', () => {
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
   });
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
   it('should return no errors if there is no conflict to upgrade', async () => {
     const res = await packagePolicyService.getUpgradeDryRunDiff(
       savedObjectsClient,
@@ -5829,18 +5836,42 @@ describe('getUpgradeDryRunDiff', () => {
     expect(res.hasErrors).toBeTruthy();
   });
 
-  it('should return no errors if upgrading 2 package policies', async () => {
+  it('should return no errors if bulk upgrading 2 package policies', async () => {
     savedObjectsClient.get.mockImplementation((type, id) =>
       Promise.resolve({
         id,
         type: 'abcd',
         references: [],
         version: '0.9.0',
-        attributes: { ...createPackagePolicyMock(), name: id },
+        attributes: { ...createPackagePolicyMock(), id },
       })
     );
+
+    savedObjectsClient.bulkGet.mockImplementation((objects) =>
+      Promise.resolve({
+        saved_objects: objects.map(({ id }) => ({
+          id,
+          type: 'abcd',
+          references: [],
+          version: '0.9.0',
+          attributes: { ...createPackagePolicyMock(), id, name: id },
+        })),
+      })
+    );
+    savedObjectsClient.bulkUpdate.mockImplementation((objects) =>
+      Promise.resolve({
+        saved_objects: objects.map(({ id }) => ({
+          id,
+          type: 'abcd',
+          references: [],
+          version: '0.9.0',
+          attributes: { ...createPackagePolicyMock(), id, name: id },
+        })),
+      })
+    );
+
     const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
+    const res = await packagePolicyService.bulkUpgrade(savedObjectsClient, elasticsearchClient, [
       'package-policy-id',
       'package-policy-id-2',
     ]);
@@ -5870,9 +5901,11 @@ describe('getUpgradeDryRunDiff', () => {
       })
     );
     const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
-      'package-policy-id-test-spaceId',
-    ]);
+    const res = await packagePolicyService.upgrade(
+      savedObjectsClient,
+      elasticsearchClient,
+      'package-policy-id-test-spaceId'
+    );
 
     expect(res).toEqual([
       {

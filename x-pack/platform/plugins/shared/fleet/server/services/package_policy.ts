@@ -1828,7 +1828,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           try {
             const packagePolicy = packagePoliciesById[id];
             if (!packagePolicy) {
-              throw new FleetNotFoundError(`Package policy ${packagePolicy} not found`);
+              throw new FleetNotFoundError(`Package policy ${id} not found`);
             }
 
             const upgradePkgVersion = pkgVersion
@@ -1900,7 +1900,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async upgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    ids: string[],
+    id: string,
     options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
@@ -1908,41 +1908,39 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     return runWithCache(async () => {
       const result: UpgradePackagePolicyResponse = [];
 
-      for (const id of ids) {
-        try {
-          const { packagePolicy: currentPackagePolicy, packageInfo } =
-            await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
+      try {
+        const { packagePolicy: currentPackagePolicy, packageInfo } =
+          await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
 
-          if (currentPackagePolicy.is_managed && !options?.force) {
-            throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
-          }
-
-          const updatePackagePolicy = await this.doUpgrade(
-            soClient,
-            esClient,
-            currentPackagePolicy,
-            packageInfo
-          );
-
-          const updateOptions = {
-            skipUniqueNameVerification: true,
-            ...options,
-          };
-
-          await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
-
-          result.push({
-            id,
-            name: updatePackagePolicy.name,
-            success: true,
-          });
-        } catch (error) {
-          result.push({
-            id,
-            success: false,
-            ...fleetErrorToResponseOptions(error),
-          });
+        if (currentPackagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
         }
+
+        const updatePackagePolicy = await this.doUpgrade(
+          soClient,
+          esClient,
+          currentPackagePolicy,
+          packageInfo
+        );
+
+        const updateOptions = {
+          skipUniqueNameVerification: true,
+          ...options,
+        };
+
+        await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
+
+        result.push({
+          id,
+          name: updatePackagePolicy.name,
+          success: true,
+        });
+      } catch (error) {
+        result.push({
+          id,
+          success: false,
+          ...fleetErrorToResponseOptions(error),
+        });
       }
 
       return result;
