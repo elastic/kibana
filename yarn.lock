@@ -7587,6 +7587,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sse-example-plugin@link:examples/sse_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/sse-utils-client@link:src/platform/packages/shared/kbn-sse-utils-client":
   version "0.0.0"
   uid ""
