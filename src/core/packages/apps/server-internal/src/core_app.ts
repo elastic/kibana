@@ -174,14 +174,14 @@ export class CoreAppsService {
       {
         path: '/app/{id}/{any*}',
         validate: false,
-        options: {
-          authRequired: true,
-        },
         security: {
           authz: {
             enabled: false,
             reason:
               'The route is opted out of the authorization since it is a wrapper around core app view',
+          },
+          authc: {
+            enabled: true,
           },
         },
       },
@@ -201,9 +201,11 @@ export class CoreAppsService {
             reason:
               'The route is opted out of the authorization since it is a wrapper around core app view',
           },
-        },
-        options: {
-          authRequired: !anonymousStatusPage,
+          authc: {
+            enabled: !anonymousStatusPage,
+            reason:
+              'The route is opted out of the authentication since it since it is a wrapper around core app anonymous view',
+          },
         },
       },
       async (context, request, response) => {
