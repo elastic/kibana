@@ -583,7 +583,7 @@ describe('bulk action hooks', () => {
           items,
         },
       ];
-      const useBulkActionsConfig = () => customBulkActionConfig;
+      const useBulkActionsConfig = customBulkActionConfig;
       const { result, rerender } = renderHook(
         () =>
           useBulkActions({
@@ -591,7 +591,7 @@ describe('bulk action hooks', () => {
             query: {},
             casesConfig,
             refresh,
-            getBulkActions: useBulkActionsConfig,
+            externalBulkActions: useBulkActionsConfig,
             http,
             notifications,
             application,
