@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DEFAULT_PAGINATION_MODE, MAX_LOADED_GRID_ROWS } from '../constants';
+import { MAX_LOADED_GRID_ROWS } from '../constants';
 import { DataGridPaginationMode } from '../..';
 
 export interface UnifiedDataTableFooterProps {
@@ -49,7 +49,6 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
   } = props;
   const timefilter = data.query.timefilter.timefilter;
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
-  const [isFetchingOrScrolled, setIsFetchingOrScrolled] = useState(false);
 
   useEffect(() => {
     const subscriber = timefilter.getRefreshIntervalUpdate$().subscribe(() => {
@@ -59,23 +58,6 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
     return () => subscriber.unsubscribe();
   }, [timefilter, setRefreshInterval]);
 
-  /**
-   * After clicking Load More, on singlePage mode, hasScrolledToBottom is not reset until the user scrolls again.
-   * Hence, we need to track both the parameters i.e., hasScrolledToBottom and isLoadingMore to show the footer message.
-   * So, we need to reset isFetchingOrScrolled to false when user starts scrolling again.
-   */
-  useEffect(() => {
-    if (paginationMode === 'singlePage' && !hasScrolledToBottom) {
-      setIsFetchingOrScrolled(false);
-    }
-  }, [hasScrolledToBottom, paginationMode]);
-
-  useEffect(() => {
-    if (isLoadingMore) {
-      setIsFetchingOrScrolled(true);
-    }
-  }, [isLoadingMore]);
-
   const isRefreshIntervalOn = Boolean(
     refreshInterval && refreshInterval.pause === false && refreshInterval.value > 0
   );
@@ -84,13 +66,9 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
   if (
-    (paginationMode === DEFAULT_PAGINATION_MODE && !isOnLastPage) ||
-    (paginationMode === 'singlePage' && !hasScrolledToBottom)
+    (paginationMode === 'multiPage' && !isOnLastPage) ||
+    (paginationMode === 'singlePage' && !hasScrolledToBottom && !isLoadingMore)
   ) {
-    return null;
-  }
-
-  if (paginationMode === 'singlePage' && isFetchingOrScrolled && !isLoadingMore) {
     return null;
   }
 
