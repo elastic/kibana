@@ -11,7 +11,7 @@ import {
   EuiButton,
   EuiToolTip,
   euiBreakpoint,
-  UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,7 @@ import {
 } from '@kbn/unified-search-plugin/public/types';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
+import { css } from '@emotion/react';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -104,6 +105,8 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     fetchPattern();
   }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
+  const euiThemeContext = useEuiTheme();
+
   const kibana = useKibana<
     IUnifiedSearchPluginServices & {
       contentManagement: ContentManagementPublicStart;
@@ -139,7 +142,13 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
           >
             <EuiButton
               data-test-subj="graphDatasourceButton"
-              css={styles}
+              css={css`
+                max-width: 320px;
+                ${euiBreakpoint(euiThemeContext, ['xs', 's'])} {
+                  width: 100%;
+                  max-width: none;
+                }
+              `}
               onClick={() => {
                 confirmWipeWorkspace(
                   () =>
@@ -216,15 +225,6 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     </form>
   );
 }
-
-const styles = (euiThemeContext: UseEuiTheme) => `
-  max-width: 320px;
-  
-  ${euiBreakpoint(euiThemeContext, ['xs', 's'])} {
-    width: 100%;
-    max-width: none;
-  }
-`;
 
 export const SearchBar = connect(
   (state: GraphState) => {

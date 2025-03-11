@@ -12,17 +12,20 @@ exports[`graph_visualization should render to svg elements 1`] = `
   <g>
     <g>
       <g
-        className="gphEdge--wrapper"
+        css={
+          Object {
+            "map": undefined,
+            "name": "qqu03v",
+            "next": undefined,
+            "styles": "&:hover{.gphEdge{stroke-opacity:0.95;cursor:pointer;}}",
+            "toString": [Function],
+          }
+        }
         key="A..1-B..2"
       >
         <line
-          className="gphEdge gphEdge--selected"
+          className="gphEdge"
           strokeLinecap="round"
-          style={
-            Object {
-              "strokeWidth": 2,
-            }
-          }
           x1={5}
           x2={7}
           y1={5}
@@ -31,11 +34,6 @@ exports[`graph_visualization should render to svg elements 1`] = `
         <line
           className="gphEdge gphEdge--clickable"
           onClick={[Function]}
-          style={
-            Object {
-              "strokeWidth": 15,
-            }
-          }
           x1={5}
           x2={7}
           y1={5}
@@ -43,17 +41,20 @@ exports[`graph_visualization should render to svg elements 1`] = `
         />
       </g>
       <g
-        className="gphEdge--wrapper"
+        css={
+          Object {
+            "map": undefined,
+            "name": "qqu03v",
+            "next": undefined,
+            "styles": "&:hover{.gphEdge{stroke-opacity:0.95;cursor:pointer;}}",
+            "toString": [Function],
+          }
+        }
         key="B..2-C..3"
       >
         <line
-          className="gphEdge gphEdge--selected"
+          className="gphEdge"
           strokeLinecap="round"
-          style={
-            Object {
-              "strokeWidth": 2.2,
-            }
-          }
           x1={7}
           x2={12}
           y1={9}
@@ -62,11 +63,6 @@ exports[`graph_visualization should render to svg elements 1`] = `
         <line
           className="gphEdge gphEdge--clickable"
           onClick={[Function]}
-          style={
-            Object {
-              "strokeWidth": 15,
-            }
-          }
           x1={7}
           x2={12}
           y1={9}
@@ -81,15 +77,32 @@ exports[`graph_visualization should render to svg elements 1`] = `
       onMouseDown={[Function]}
     >
       <circle
-        className="gphNode__circle gphNode__circle--selected"
+        css={
+          Array [
+            Object {
+              "map": undefined,
+              "name": "8r5wwo",
+              "next": undefined,
+              "styles": "
+                        fill: black;
+                      ",
+              "toString": [Function],
+            },
+            Object {
+              "map": undefined,
+              "name": "1e54f3",
+              "next": undefined,
+              "styles": "
+                          stroke-width: 4px;
+                          stroke: rgba(11,100,221,0.25);
+                        ",
+              "toString": [Function],
+            },
+          ]
+        }
         cx={5}
         cy={5}
         r={10}
-        style={
-          Object {
-            "fill": "black",
-          }
-        }
       />
       <IconRenderer
         color="black"
@@ -115,14 +128,28 @@ exports[`graph_visualization should render to svg elements 1`] = `
       </text>
       <g>
         <circle
-          className="gphNode__markerCircle"
+          css={[Function]}
           cx={5}
           cy={5}
           r="5"
           transform="translate(10,10)"
         />
         <text
-          className="gphNode__markerText"
+          css={
+            Array [
+              [Function],
+              Object {
+                "map": undefined,
+                "name": "u1rg7h",
+                "next": undefined,
+                "styles": "
+                            font-size: calc(8px - 2px);
+                            fill: #FFFFFF;
+                          ",
+                "toString": [Function],
+              },
+            ]
+          }
           textAnchor="middle"
           transform="translate(10,12)"
           x={5}
@@ -139,15 +166,23 @@ exports[`graph_visualization should render to svg elements 1`] = `
       onMouseDown={[Function]}
     >
       <circle
-        className="gphNode__circle"
+        css={
+          Array [
+            Object {
+              "map": undefined,
+              "name": "1cbm3l8",
+              "next": undefined,
+              "styles": "
+                        fill: red;
+                      ",
+              "toString": [Function],
+            },
+            false,
+          ]
+        }
         cx={7}
         cy={9}
         r={10}
-        style={
-          Object {
-            "fill": "red",
-          }
-        }
       />
       <IconRenderer
         color="red"
@@ -179,15 +214,23 @@ exports[`graph_visualization should render to svg elements 1`] = `
       onMouseDown={[Function]}
     >
       <circle
-        className="gphNode__circle"
+        css={
+          Array [
+            Object {
+              "map": undefined,
+              "name": "1yit9pb",
+              "next": undefined,
+              "styles": "
+                        fill: yellow;
+                      ",
+              "toString": [Function],
+            },
+            false,
+          ]
+        }
         cx={12}
         cy={2}
         r={10}
-        style={
-          Object {
-            "fill": "yellow",
-          }
-        }
       />
       <IconRenderer
         color="yellow"

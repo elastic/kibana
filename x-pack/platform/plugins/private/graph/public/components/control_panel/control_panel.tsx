@@ -81,7 +81,15 @@ const ControlPanelComponent = ({
   };
 
   return (
-    <div id="sidebar" css={[css(useEuiShadow('m')), styles.gphSidebar]}>
+    <div
+      id="sidebar"
+      css={[
+        css`
+          ${useEuiShadow('m')};
+        `,
+        styles.gphSidebar,
+      ]}
+    >
       <ControlPanelToolBar
         workspace={workspace}
         liveResponseFields={liveResponseFields}

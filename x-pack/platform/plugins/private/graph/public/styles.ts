@@ -36,6 +36,6 @@ export const gphSidebarPanelStyles = ({ euiTheme }: UseEuiTheme) =>
 
 export const noUserSelectStyles = css({
   userSelect: 'none',
-  WebkitTouchCallout: 'none', // invalid property value: https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-touch-callout
+  WebkitTouchCallout: 'none', // Invalid property value: https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-touch-callout
   WebkitTapHighlightColor: 'transparent',
 });
