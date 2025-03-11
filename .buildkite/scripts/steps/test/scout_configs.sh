@@ -99,7 +99,7 @@ done <<< "$configs"
 
 echo "--- Scout Test Run Complete: Summary"
 echo "✅ Passed: ${#results[@]}"
-echo "⚠️ No tests found: ${#configWithoutTests[@]}"
+echo "⚠️ Configs without tests: ${#configWithoutTests[@]}"
 echo "❌ Failed: ${#failedConfigs[@]}"
 
 if [[ ${#results[@]} -gt 0 ]]; then
