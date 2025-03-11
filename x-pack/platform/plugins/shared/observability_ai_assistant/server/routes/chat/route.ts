@@ -9,6 +9,7 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
+import { v4 } from 'uuid';
 import { Readable } from 'stream';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
@@ -20,6 +21,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import { Instruction } from '../../../common/types';
 import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
@@ -40,14 +42,11 @@ const chatCompleteBaseRt = t.type({
         }),
       ]),
       instructions: t.array(
-        t.intersection([
-          t.partial({ id: t.string }),
+        t.union([
+          t.string,
           t.type({
+            id: t.string,
             text: t.string,
-            instruction_type: t.union([
-              t.literal('user_instruction'),
-              t.literal('application_instruction'),
-            ]),
           }),
         ])
       ),
@@ -260,7 +259,7 @@ async function chatComplete(
       title,
       persist,
       screenContexts,
-      instructions,
+      instructions: userInstructionsOrStrings,
       disableFunctions,
       scopes,
     },
@@ -278,6 +277,16 @@ async function chatComplete(
     scopes,
   });
 
+  const userInstructions: Instruction[] | undefined = userInstructionsOrStrings?.map(
+    (userInstructionOrString) =>
+      typeof userInstructionOrString === 'string'
+        ? {
+            text: userInstructionOrString,
+            id: v4(),
+          }
+        : userInstructionOrString
+  );
+
   const response$ = client.complete({
     messages,
     connectorId,
@@ -286,7 +295,7 @@ async function chatComplete(
     persist,
     signal,
     functionClient,
-    instructions,
+    userInstructions,
     simulateFunctionCalling,
     disableFunctions,
   });

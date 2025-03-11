@@ -6,6 +6,7 @@
  */
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
+import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { v4 } from 'uuid';
 import { FunctionDefinition } from '../../../common/functions/types';
@@ -17,6 +18,8 @@ import {
   KnowledgeBaseHit,
   KnowledgeBaseQueryContainer,
 } from '../../service/knowledge_base_service/types';
+import { getDatasetInfo } from '../../functions/get_dataset_info';
+import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/functions',
@@ -53,7 +56,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const client = await service.getClient({ request });
 
-    const [functionClient, userInstructions] = await Promise.all([
+    const [functionClient, kbUserInstructions] = await Promise.all([
       service.getFunctionClient({
         signal: controller.signal,
         resources,
@@ -73,11 +76,52 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
         applicationInstructions: functionClient.getInstructions(),
-        userInstructions,
-        adHocInstructions: functionClient.getAdhocInstructions(),
+        kbUserInstructions,
+        apiUserInstructions: [],
         availableFunctionNames,
       }),
     };
+  },
+});
+
+const functionDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/functions/get_dataset_info',
+  params: t.type({
+    query: t.type({ index: t.string, connectorId: t.string }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources) => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    const {
+      query: { index, connectorId },
+    } = resources.params;
+
+    const controller = new AbortController();
+    resources.request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
+
+    const resp = await getDatasetInfo({
+      resources,
+      indexPattern: index,
+      signal: controller.signal,
+      messages: [],
+      chat: (operationName, params) => {
+        return client.chat(operationName, {
+          ...params,
+          stream: true,
+          tracer: new LangTracer(otelContext.active()),
+          connectorId,
+        });
+      },
+    });
+
+    return resp;
   },
 });
 
@@ -189,4 +233,5 @@ export const functionRoutes = {
   ...getFunctionsRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
+  ...functionDatasetInfoRoute,
 };
