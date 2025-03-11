@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -21,6 +21,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useFetchCurrentUserConversations } from '../assistant/api';
+import { useAssistantContext } from '../assistant_context';
 import * as i18n from './translations';
 
 interface Props {
@@ -30,9 +32,25 @@ interface Props {
 const conversations = ['Conversation 1', 'Conversation 2', 'Conversation 3'];
 export const Conversations: React.FC<Props> = ({ id }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    http,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
+  const {
+    data: conversations2,
+    isFetched: conversationsLoaded,
+    refetch: refetchConversations,
+  } = useFetchCurrentUserConversations({
+    http,
+    isAssistantEnabled,
+    filter: `messages.content : "*${id}*"`,
+  });
+  useEffect(() => {
+    console.log('conversations2', conversations2);
+  }, [conversations2]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   return (
     <>
