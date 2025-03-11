@@ -82,74 +82,77 @@ jest.mock('@kbn/esql-utils', () => {
   };
 });
 
-describe('getSuggestions', () => {
-  const query = {
-    esql: 'from index1 | limit 10 | stats average = avg(bytes)',
-  };
-  const mockStartDependencies =
-    createMockStartDependencies() as unknown as LensPluginStartDependencies;
-  const dataViews = dataViewPluginMocks.createStartContract();
-  dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
-  const dataviewSpecArr = [
-    {
-      id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
-      title: 'index1',
-      timeFieldName: '@timestamp',
-      sourceFilters: [],
-      fieldFormats: {},
-      runtimeFieldMap: {},
-      fieldAttrs: {},
-      allowNoIndex: false,
-      name: 'index1',
-    },
-  ];
-  const startDependencies = {
-    ...mockStartDependencies,
-    dataViews,
-  };
+describe('Lens inline editing helpers', () => {
+  describe('getSuggestions', () => {
+    const query = {
+      esql: 'from index1 | limit 10 | stats average = avg(bytes)',
+    };
+    const mockStartDependencies =
+      createMockStartDependencies() as unknown as LensPluginStartDependencies;
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
+    mockStartDependencies.data.dataViews = dataViews;
+    const dataviewSpecArr = [
+      {
+        id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
+        title: 'index1',
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        fieldAttrs: {},
+        allowNoIndex: false,
+        name: 'index1',
+      },
+    ];
+    const startDependencies = {
+      ...mockStartDependencies,
+      dataViews,
+    };
 
-  it('returns the suggestions attributes correctly', async () => {
-    const suggestionsAttributes = await getSuggestions(
-      query,
-      startDependencies,
-      mockDatasourceMap(),
-      mockVisualizationMap(),
-      dataviewSpecArr,
-      jest.fn()
-    );
-    expect(suggestionsAttributes?.visualizationType).toBe(mockAllSuggestions[0].visualizationId);
-    expect(suggestionsAttributes?.state.visualization).toStrictEqual(
-      mockAllSuggestions[0].visualizationState
-    );
-  });
-
-  it('returns undefined if no suggestions are computed', async () => {
-    mockSuggestionApi.mockResolvedValueOnce([]);
-    const suggestionsAttributes = await getSuggestions(
-      query,
-      startDependencies,
-      mockDatasourceMap(),
-      mockVisualizationMap(),
-      dataviewSpecArr,
-      jest.fn()
-    );
-    expect(suggestionsAttributes).toBeUndefined();
-  });
-
-  it('returns an error if fetching the data fails', async () => {
-    mockFetchData.mockImplementation(() => {
-      throw new Error('sorry!');
+    it('returns the suggestions attributes correctly', async () => {
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        jest.fn()
+      );
+      expect(suggestionsAttributes?.visualizationType).toBe(mockAllSuggestions[0].visualizationId);
+      expect(suggestionsAttributes?.state.visualization).toStrictEqual(
+        mockAllSuggestions[0].visualizationState
+      );
     });
-    const setErrorsSpy = jest.fn();
-    const suggestionsAttributes = await getSuggestions(
-      query,
-      startDependencies,
-      mockDatasourceMap(),
-      mockVisualizationMap(),
-      dataviewSpecArr,
-      setErrorsSpy
-    );
-    expect(suggestionsAttributes).toBeUndefined();
-    expect(setErrorsSpy).toHaveBeenCalled();
+
+    it('returns undefined if no suggestions are computed', async () => {
+      mockSuggestionApi.mockResolvedValueOnce([]);
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        jest.fn()
+      );
+      expect(suggestionsAttributes).toBeUndefined();
+    });
+
+    it('returns an error if fetching the data fails', async () => {
+      mockFetchData.mockImplementation(() => {
+        throw new Error('sorry!');
+      });
+      const setErrorsSpy = jest.fn();
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        setErrorsSpy
+      );
+      expect(suggestionsAttributes).toBeUndefined();
+      expect(setErrorsSpy).toHaveBeenCalled();
+    });
   });
 });
