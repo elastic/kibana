@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getConnections } from './get_service_map_from_trace_ids';
-import type { Connection, ConnectionNode } from '../../../common/service_map';
+import { getConnections } from './utils';
+import type { Connection, ConnectionNode } from './types';
 
 function getConnectionsPairs(connections: Connection[]) {
   return connections
@@ -73,9 +73,7 @@ describe('getConnections', () => {
   ] as ConnectionNode[][];
 
   it('includes all connections', () => {
-    const connections = getConnections({
-      paths,
-    });
+    const connections = getConnections(paths);
 
     const connectionsPairs = getConnectionsPairs(connections);
     expect(connectionsPairs).toEqual([
