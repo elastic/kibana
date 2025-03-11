@@ -15,9 +15,11 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConvertConnectorLogic } from '@kbn/search-connectors-plugin/public';
-
-import { SyncJobs } from '@kbn/search-connectors-plugin/public';
+import {
+  ConvertConnectorLogic,
+  SyncJobs,
+  IndexViewLogic,
+} from '@kbn/search-connectors-plugin/public';
 
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -28,7 +30,6 @@ import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert
 import { ApiTotalStats } from './api_total_stats';
 import { ConnectorTotalStats } from './connector_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
-import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 
 export const SearchIndexOverview: React.FC = () => {

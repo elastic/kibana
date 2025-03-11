@@ -41,7 +41,13 @@ export {
   ConnectorOverviewPanels,
 } from './components/search_index/connector';
 
-export { SyncJobs, SearchIndexDocuments } from './components/search_index';
+export {
+  SyncJobs,
+  SearchIndexDocuments,
+  IndexViewLogic,
+  IndexNameLogic,
+  SearchIndexIndexMappings,
+} from './components/search_index';
 export {
   ConnectorConfiguration,
   ConnectorNameAndDescriptionLogic,

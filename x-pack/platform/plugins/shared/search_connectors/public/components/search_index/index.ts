@@ -7,3 +7,6 @@
 
 export { SyncJobs } from './sync_jobs/sync_jobs';
 export { SearchIndexDocuments } from './documents';
+export { IndexViewLogic } from './index_view_logic';
+export { IndexNameLogic } from './index_name_logic';
+export { SearchIndexIndexMappings } from './index_mappings';

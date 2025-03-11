@@ -19,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   ConnectorNameAndDescriptionFlyout,
@@ -37,11 +38,7 @@ const EditDescription: React.FC<{
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty data-test-subj="enterpriseSearchEditDescriptionEditButton" onClick={onClick}>
-        {i18n.translate('xpack.enterpriseSearch.editDescription.editButtonEmptyLabel', {
-          defaultMessage: 'Edit',
-        })}
-      </EuiButtonEmpty>
+      <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

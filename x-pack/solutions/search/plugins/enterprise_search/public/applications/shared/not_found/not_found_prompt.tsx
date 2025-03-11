@@ -59,11 +59,7 @@ export const NotFoundPrompt: React.FC<Props> = ({
             </EuiButtonTo>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButton
-              data-test-subj="enterpriseSearchNotFoundPromptContactSupportButton"
-              href={supportUrl}
-              target="_blank"
-            >
+            <EuiButton href={supportUrl} target="_blank">
               {i18n.translate('xpack.enterpriseSearch.notFound.action2', {
                 defaultMessage: 'Contact support',
               })}

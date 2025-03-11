@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ManageCustomPipelineActions } from '@kbn/search-connectors-plugin/public';
+import { IndexNameLogic } from '@kbn/search-connectors-plugin/public';
 
 import { Status } from '../../../../../../common/types/api';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
@@ -33,13 +33,13 @@ import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
-import { IndexNameLogic } from '../index_name_logic';
 import { SearchIndexTabId } from '../search_index';
 
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
 import { CopyAndCustomizePipelinePanel } from './ingest_pipelines/customize_pipeline_item';
 import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
+import { ManageCustomPipelineActions } from './ingest_pipelines/manage_custom_pipeline_actions';
 import { AddInferencePipelineFlyout } from './ml_inference/add_inference_pipeline_flyout';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
@@ -150,7 +150,12 @@ export const SearchIndexPipelines: React.FC = () => {
                 }
               )}
             </p>
-            <EuiButton color="danger" fill onClick={() => revertPipeline({ indexName })}>
+            <EuiButton
+              data-test-subj="enterpriseSearchSearchIndexPipelinesRevertPipelineToDefaultButton"
+              color="danger"
+              fill
+              onClick={() => revertPipeline({ indexName })}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
                 {
@@ -168,7 +173,12 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
+              <EuiLink
+                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutUsingPipelinesInSearchLink"
+                href={docLinks.ingestPipelines}
+                target="_blank"
+                color="subdued"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
                   {
@@ -236,7 +246,12 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href={docLinks.deployTrainedModels} target="_blank" color="subdued">
+              <EuiLink
+                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutDeployingMachineLearningModelsInElasticLink"
+                href={docLinks.deployTrainedModels}
+                target="_blank"
+                color="subdued"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {

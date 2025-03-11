@@ -22,6 +22,9 @@ import {
   ConnectorScheduling,
   ConnectorConfiguration,
   SearchIndexDocuments,
+  IndexViewLogic,
+  IndexNameLogic,
+  SearchIndexIndexMappings,
 } from '@kbn/search-connectors-plugin/public';
 
 import { ClientConfigType } from '../../../../../common/types';
@@ -38,9 +41,6 @@ import { baseBreadcrumbs } from '../search_indices';
 import { getHeaderActions } from '../shared/header_actions/header_actions';
 
 import { IndexError } from './index_error';
-import { SearchIndexIndexMappings } from './index_mappings';
-import { IndexNameLogic } from './index_name_logic';
-import { IndexViewLogic } from './index_view_logic';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
