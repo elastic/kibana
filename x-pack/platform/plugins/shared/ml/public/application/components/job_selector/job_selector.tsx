@@ -15,26 +15,26 @@ import {
   EuiFlyout,
   EuiHorizontalRule,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './_index.scss';
 
-import { useStorage } from '@kbn/ml-local-storage';
 import { ML_PAGES } from '../../../locator';
 import type { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
-import type { JobSelectorFlyoutProps } from './job_selector_flyout';
-import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
+
+import { BADGE_LIMIT } from './job_selector_flyout';
 import type {
   MlJobWithTimeRange,
   MlSummaryJob,
 } from '../../../../common/types/anomaly_detection_jobs';
-import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
+import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 
 export interface GroupObj {
   groupId: string;
@@ -111,17 +111,13 @@ export function JobSelector({
   selectedJobs = [],
   onSelectionChange,
 }: JobSelectorProps) {
-  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
-    ML_APPLY_TIME_RANGE_CONFIG,
-    true
-  );
-
   const [selectedIds, setSelectedIds] = useState(
     mergeSelection(selectedJobIds, selectedGroups, singleSelection)
   );
 
   const [showAllBarBadges, setShowAllBarBadges] = useState(false);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  const openJobSelectionFlyout = useJobSelectionFlyout();
 
   // Ensure JobSelectionBar gets updated when selection via globalState changes.
   useEffect(() => {
@@ -129,27 +125,24 @@ export function JobSelector({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([selectedJobIds, selectedGroups])]);
 
-  function closeFlyout() {
-    setIsFlyoutVisible(false);
-  }
+  const handleJobSelectionClick = useCallback(async () => {
+    try {
+      const result = await openJobSelectionFlyout({
+        singleSelection,
+        withTimeRangeSelector: true,
+        timeseriesOnly,
+        selectedIds,
+      });
 
-  function showFlyout() {
-    setIsFlyoutVisible(true);
-  }
-
-  function handleJobSelectionClick() {
-    showFlyout();
-  }
-
-  const applySelection: JobSelectorFlyoutProps['onSelectionConfirmed'] = useCallback(
-    ({ newSelection, jobIds, time }) => {
-      setSelectedIds(newSelection);
-
-      onSelectionChange?.({ jobIds, time });
-      closeFlyout();
-    },
-    [onSelectionChange]
-  );
+      if (result) {
+        const { newSelection, jobIds, time } = result;
+        setSelectedIds(newSelection);
+        onSelectionChange?.({ jobIds, time });
+      }
+    } catch {
+      // Flyout closed without selection
+    }
+  }, [onSelectionChange, openJobSelectionFlyout, selectedIds, singleSelection, timeseriesOnly]);
 
   const page = useMemo(() => {
     return singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER;
@@ -157,7 +150,8 @@ export function JobSelector({
 
   const removeJobId = (jobOrGroupId: string[]) => {
     const newSelection = selectedIds.filter((id) => !jobOrGroupId.includes(id));
-    applySelection({ newSelection, jobIds: newSelection, time: undefined });
+    setSelectedIds(newSelection);
+    onSelectionChange?.({ jobIds: newSelection, time: undefined });
   };
 
   const [canCreateJob] = usePermissionCheck(['canCreateJob']);
@@ -239,34 +233,10 @@ export function JobSelector({
     );
   }
 
-  function renderFlyout() {
-    if (isFlyoutVisible) {
-      return (
-        <EuiFlyout
-          onClose={closeFlyout}
-          data-test-subj="mlFlyoutJobSelector"
-          aria-labelledby="jobSelectorFlyout"
-        >
-          <JobSelectorFlyoutContent
-            dateFormatTz={dateFormatTz}
-            timeseriesOnly={timeseriesOnly}
-            singleSelection={singleSelection}
-            selectedIds={selectedIds}
-            onSelectionConfirmed={applySelection}
-            onFlyoutClose={closeFlyout}
-            applyTimeRangeConfig={applyTimeRangeConfig}
-            onTimeRangeConfigChange={setApplyTimeRangeConfig}
-          />
-        </EuiFlyout>
-      );
-    }
-  }
-
   return (
     <div>
       <JobInfoFlyoutsProvider>
         {renderJobSelectionBar()}
-        {renderFlyout()}
         <JobInfoFlyoutsManager />
       </JobInfoFlyoutsProvider>
     </div>
