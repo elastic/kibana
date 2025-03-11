@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiCallOut,
+  EuiRadioGroup,
   EuiSpacer,
   EuiSelect,
   type EuiComboBoxOptionOption,
@@ -355,6 +356,71 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
+
+                  {/* Input type */}
+                  {packageInfo.type === 'input' ? (
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeInputLabel"
+                            defaultMessage="Data Stream Type"
+                          />
+                        }
+                        helpText={
+                          isEditPage ? (
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditDataStreamTypeHelpLabel"
+                              defaultMessage="The data stream type cannot be changed for this integration. Create a new integration policy to use a different input type."
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeHelpLabel"
+                              defaultMessage="Select a data stream type for this policy. This setting changes the name of the integration's data stream. {learnMore}."
+                              values={{
+                                learnMore: (
+                                  <EuiLink
+                                    href={docLinks.links.fleet.datastreamsNamingScheme}
+                                    target="_blank"
+                                  >
+                                    {i18n.translate(
+                                      'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                      { defaultMessage: 'Learn more' }
+                                    )}
+                                  </EuiLink>
+                                ),
+                              }}
+                            />
+                          )
+                        }
+                      >
+
+                        <EuiRadioGroup
+                          data-test-subj="packagePolicyDataStreamType"
+                          disabled={isEditPage}
+                          idSelected={packagePolicy.dataStreamType || 'logs'}
+                          options={
+                            [
+                              {
+                                id: 'logs',
+                                label: 'Logs',
+                              },
+                              {
+                                id: 'metrics',
+                                label: 'Metrics',
+                              },
+                            ]
+                          }
+                          onChange={(newDataStreamType: string) => {
+                            updatePackagePolicy({
+                              dataStreamType: newDataStreamType,
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  ): null }
+
 
                   {/* Output */}
                   {canUseOutputPerIntegration && (
