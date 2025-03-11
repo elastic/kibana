@@ -155,8 +155,6 @@ RenderAdditionalToolbarControls.displayName = 'RenderAdditionalToolbarControls';
 
 export const ActionsCellComponent = memo(({ rowIndex, ecsAlert, leadingControlColumn }) => {
   const Action = leadingControlColumn.rowCellRender;
-  debugger;
-
   return <>{'hello'}</>;
 });
 ActionsCellComponent.displayName = 'ActionsCellComponent';
@@ -300,14 +298,14 @@ export const Table = memo(({ dataView, groupingFilters, showUnifiedComponents }:
       {
         id: '1',
         headerAriaLabel: '',
-        renderControl: (Control: RowControlComponent, props: RowControlRowProps) => (
+        renderControl: (_: RowControlComponent, props: RowControlRowProps) => (
           <AssistantRowControlColumn />
         ),
       },
       {
         id: '2',
         headerAriaLabel: '',
-        renderControl: (Control: RowControlComponent, props: RowControlRowProps) => (
+        renderControl: (_: RowControlComponent, props: RowControlRowProps) => (
           <MoreActionsRowControlColumn ecs={props.record.ecs} />
         ),
       },
@@ -367,7 +365,7 @@ export const Table = memo(({ dataView, groupingFilters, showUnifiedComponents }:
         ),
       },
     ],
-    []
+    [onOpenFlyout]
   );
 
   const renderCellValue = (cellData) => {

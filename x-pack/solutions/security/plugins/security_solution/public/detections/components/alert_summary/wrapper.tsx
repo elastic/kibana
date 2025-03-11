@@ -28,6 +28,10 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export interface WrapperProps {
   /**
+   *
+   */
+  dataView: DataView;
+  /**
    * TEMP: for demo purposes ONLY, toggles between old and unified components
    */
   showUnifiedComponents: boolean;

@@ -64,7 +64,7 @@ export const GroupedTable = memo(({ dataView, showUnifiedComponents }: TableProp
         showUnifiedComponents={showUnifiedComponents}
       />
     ),
-    [dataView]
+    [dataView, showUnifiedComponents]
   );
   const renderChildDetectionEngineComponent = useCallback((groupingFilters: Filter[]) => {
     return (
@@ -83,7 +83,7 @@ export const GroupedTable = memo(({ dataView, showUnifiedComponents }: TableProp
         showUnifiedComponents={showUnifiedComponents}
       />
     ),
-    [dataView]
+    [dataView, showUnifiedComponents]
   );
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);

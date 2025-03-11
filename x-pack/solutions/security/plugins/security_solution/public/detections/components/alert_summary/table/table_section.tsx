@@ -9,13 +9,8 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiResizableContainer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { FieldList } from './field_list';
 import { GroupedTable } from './grouped_table';
-
-const hasIndexMaintenance = true;
-const hasIndexWrite = true;
-const runtimeMappings: RunTimeMappings = {};
 
 const FIELD_LIST_PANEL_ID = 'fieldList';
 const TABLE_PANEL_ID = 'table';
