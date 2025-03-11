@@ -182,18 +182,18 @@ export interface StartTrainedModelDeploymentResponse {
 export interface AllocatedModel {
   key: string;
   deployment_id: string;
-  allocation_status: {
+  allocation_status?: {
     target_allocation_count: number;
-    state: string;
+    state?: string;
     allocation_count: number;
   };
-  number_of_allocations: number;
-  threads_per_allocation: number;
+  number_of_allocations?: number;
+  threads_per_allocation?: number;
   /**
    * Not required for rendering in the Model stats
    */
   model_id?: string;
-  state: string;
+  state?: string;
   reason?: string;
   model_size_bytes: number;
   required_native_memory_bytes: number;
@@ -205,7 +205,7 @@ export interface AllocatedModel {
     average_inference_time_ms: number;
     inference_count: number;
     routing_state: {
-      routing_state: string;
+      routing_state?: string;
       reason?: string;
     };
     last_access?: number;

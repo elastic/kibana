@@ -180,8 +180,10 @@ describe('ReindexDetailsFlyoutStep', () => {
                   grow={false}
                 >
                   <EuiButton
+                    color="accent"
                     data-test-subj="startIndexReadonlyButton"
                     disabled={false}
+                    fill={false}
                     onClick={[MockFunction]}
                   >
                     <MemoizedFormattedMessage
@@ -441,8 +443,10 @@ describe('ReindexDetailsFlyoutStep', () => {
                   grow={false}
                 >
                   <EuiButton
+                    color="accent"
                     data-test-subj="startIndexReadonlyButton"
                     disabled={false}
+                    fill={false}
                     onClick={[MockFunction]}
                   >
                     <MemoizedFormattedMessage

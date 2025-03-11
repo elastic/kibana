@@ -24,6 +24,7 @@ import {
 } from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
 import { getAdditionalChargesMessage } from './components/additional_charges_message';
+import { getProductProductFeatures } from '../common/pli/pli_features';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -47,11 +48,14 @@ export class SecuritySolutionServerlessPlugin
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
+    const { productTypes } = this.config;
 
     this.experimentalFeatures = parseExperimentalConfigValue(
       this.config.enableExperimental,
       securitySolution.experimentalFeatures
     ).features;
+
+    securitySolution.setProductFeatureKeys(getProductProductFeatures(productTypes));
 
     setupDeps.discover.showInlineTopNav();
 

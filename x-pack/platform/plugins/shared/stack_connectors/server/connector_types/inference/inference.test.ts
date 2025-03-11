@@ -109,12 +109,12 @@ describe('InferenceConnector', () => {
       rerank: [
         {
           index: 2,
-          score: 0.011597361,
+          relevance_score: 0.011597361,
           text: 'leia',
         },
         {
           index: 0,
-          score: 0.006338922,
+          relevance_score: 0.006338922,
           text: 'luke',
         },
       ],
@@ -158,7 +158,9 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponseRerank.rerank);
+      expect(response).toEqual(
+        mockResponseRerank.rerank.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }))
+      );
     });
   });
 
