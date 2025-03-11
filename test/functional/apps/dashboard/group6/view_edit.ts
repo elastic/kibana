@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('when a panel is added', async function () {
           const originalPanelCount = await dashboard.getPanelCount();
 
-          await dashboardAddPanel.addVisualization('new viz panel');
+          await dashboardAddPanel.addVisualization('Rendering Test: guage');
           await dashboard.clickCancelOutOfEditMode();
 
           const panelCount = await dashboard.getPanelCount();
