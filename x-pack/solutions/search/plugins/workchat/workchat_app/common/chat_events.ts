@@ -16,16 +16,8 @@ export interface ChatEventBase {
  */
 export interface ChunkEvent extends ChatEventBase {
   type: 'message_chunk';
-  text_chunk: string;
-}
-
-export interface ToolCallEvent extends ChatEventBase {
-  type: 'tool_call';
-  toolCall: {
-    callId: string;
-    toolName: string;
-    args: Record<string, unknown>;
-  };
+  content_chunk: string;
+  message_id: string;
 }
 
 export interface ToolResultEvent extends ChatEventBase {
@@ -56,6 +48,9 @@ export interface ConversationUpdatedEvent extends ChatEventBase {
   conversation: ConversationEventChanges;
 }
 
+/**
+ * Emitted when a full message was generated.
+ */
 export interface MessageEvent extends ChatEventBase {
   type: 'message';
   message: UserMessage | AssistantMessage;
@@ -71,5 +66,4 @@ export type ChatEvent =
   | MessageEvent
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
-  | ToolCallEvent
   | ToolResultEvent;

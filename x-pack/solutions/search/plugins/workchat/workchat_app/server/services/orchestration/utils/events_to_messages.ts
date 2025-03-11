@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { BaseMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
+import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import {
   type ConversationEvent,
   type UserMessage,
   type AssistantMessage,
+  type ToolResult,
   isUserMessage,
   isAssistantMessage,
+  isToolResult,
 } from '../../../../common/conversation_events';
 
 export const conversationEventsToMessages = (events: ConversationEvent[]): BaseMessage[] => {
@@ -22,6 +24,9 @@ export const conversationEventsToMessages = (events: ConversationEvent[]): BaseM
       }
       if (isAssistantMessage(event)) {
         return [assistantMessageToLangchain(event)];
+      }
+      if (isToolResult(event)) {
+        return [toolResultToLangchain(event)];
       } else {
         // not handling other types for now.
         return [];
@@ -35,5 +40,19 @@ export const userMessageToLangchain = (message: UserMessage): BaseMessage => {
 };
 
 export const assistantMessageToLangchain = (message: AssistantMessage): BaseMessage => {
-  return new AIMessage({ content: message.content });
+  return new AIMessage({
+    content: message.content,
+    tool_calls: message.toolCalls.map((toolCall) => {
+      return {
+        id: toolCall.toolCallId,
+        name: toolCall.toolName,
+        args: toolCall.args,
+        type: 'tool_call',
+      };
+    }),
+  });
+};
+
+export const toolResultToLangchain = (message: ToolResult): BaseMessage => {
+  return new ToolMessage({ tool_call_id: message.toolCallId, content: message.toolResult });
 };

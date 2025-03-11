@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 export enum ConversationEventType {
   userMessage = 'user_message',
   assistantMessage = 'assistant_message',
-  toolInvocation = 'tool_invocation',
+  toolResult = 'tool_result',
 }
 
 /**
@@ -61,16 +61,15 @@ export interface AssistantMessage
 /**
  * Represents a tool being executed
  */
-export interface ToolInvocation
-  extends ConversationEventBase<ConversationEventType.toolInvocation> {
-  toolCall: ToolCall;
-  toolResponse: ToolResponse;
+export interface ToolResult extends ConversationEventBase<ConversationEventType.toolResult> {
+  toolCallId: string;
+  toolResult: string;
 }
 
 /**
  * Composite of all possible conversation event types
  */
-export type ConversationEvent = UserMessage | AssistantMessage | ToolInvocation;
+export type ConversationEvent = UserMessage | AssistantMessage | ToolResult;
 
 /**
  * Represents a tool call that was requested by the assistant
@@ -81,18 +80,13 @@ export interface ToolCall {
   args: Record<string, any>;
 }
 
-/**
- * Represents the response for a tool call
- */
-export interface ToolResponse {
-  result: string;
-}
-
-export const createUserMessage = (parts: Partial<Omit<UserMessage, 'type'>>): UserMessage => {
+export const createUserMessage = (
+  parts: Partial<Omit<UserMessage, 'type'>> & Pick<UserMessage, 'content'>
+): UserMessage => {
   return {
     type: ConversationEventType.userMessage,
     id: parts.id ?? uuidv4(),
-    content: parts.content ?? '',
+    content: parts.content,
     createdAt: parts.createdAt ?? new Date().toISOString(),
   };
 };
@@ -109,6 +103,18 @@ export const createAssistantMessage = (
   };
 };
 
+export const createToolResult = (
+  parts: Partial<Omit<ToolResult, 'type'>> & Pick<ToolResult, 'toolCallId' | 'toolResult'>
+): ToolResult => {
+  return {
+    type: ConversationEventType.toolResult,
+    id: parts.id ?? uuidv4(),
+    toolCallId: parts.toolCallId,
+    toolResult: parts.toolResult,
+    createdAt: parts.createdAt ?? new Date().toISOString(),
+  };
+};
+
 export const isUserMessage = (event: ConversationEvent): event is UserMessage => {
   return event.type === ConversationEventType.userMessage;
 };
@@ -117,6 +123,6 @@ export const isAssistantMessage = (event: ConversationEvent): event is Assistant
   return event.type === ConversationEventType.assistantMessage;
 };
 
-export const isToolInvocation = (event: ConversationEvent): event is ToolInvocation => {
-  return event.type === ConversationEventType.toolInvocation;
+export const isToolResult = (event: ConversationEvent): event is ToolResult => {
+  return event.type === ConversationEventType.toolResult;
 };

@@ -11,6 +11,8 @@ import { z } from '@kbn/zod';
 
 interface SearchResult {}
 
+const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export function getMcpServer(
   configuration: Record<string, any>,
   services: InternalIntegrationServices
@@ -22,6 +24,9 @@ export function getMcpServer(
 
   server.tool('search', 'search on HR docs', { query: z.string() }, async ({ query }) => {
     services.logger.info(`Searching for ${query}`);
+
+    // use advanced technology to simulate long running tools for demo
+    await delay(4000);
 
     const result = await services.elasticsearchClient.search<SearchResult>({
       index: 'semantic_text_docs_dense3',

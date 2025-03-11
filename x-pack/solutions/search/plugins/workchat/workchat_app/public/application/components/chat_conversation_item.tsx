@@ -5,65 +5,31 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiComment, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { AuthenticatedUser } from '@kbn/core/public';
-import { isUserMessage, isAssistantMessage } from '../../../common/conversation_events';
-import { ChatMessageText } from './chat_message_text';
-import { ChatMessageAvatar } from './chat_message_avatar';
-import type { ConversationItem } from '../utils/get_chart_conversation_items';
+import {
+  type ConversationItem,
+  isUserMessageItem,
+  isAssistantMessageItem,
+  isToolCallItem,
+} from '../utils/conversation_items';
+import { ChatConversationMessage } from './chat_conversation_message';
+import { ChatConversationToolCall } from './chat_conversation_tool_call';
 
 interface ChatConversationItemProps {
   item: ConversationItem;
   currentUser: AuthenticatedUser | undefined;
 }
 
-const getUserLabel = (item: ConversationItem) => {
-  if (isUserMessage(item)) {
-    return i18n.translate('xpack.workchatApp.chat.messages.userLabel', {
-      defaultMessage: 'You',
-    });
-  }
-  if (isAssistantMessage(item)) {
-    return i18n.translate('xpack.workchatApp.chat.messages.assistantLabel', {
-      defaultMessage: 'WorkChat',
-    });
-  }
-  return i18n.translate('xpack.workchatApp.chat.messages.unknownLabel', {
-    defaultMessage: 'Unknown',
-  });
-};
-
 export const ChatConversationItem: React.FC<ChatConversationItemProps> = ({
   item,
   currentUser,
 }) => {
-  const userMessage = useMemo(() => {
-    return isUserMessage(item);
-  }, [item]);
-
-  const messageContent = useMemo(() => {
-    return isUserMessage(item) || isAssistantMessage(item) ? item.content : '';
-  }, [item]);
-
-  return (
-    <EuiComment
-      username={getUserLabel(item)}
-      timelineAvatar={
-        <ChatMessageAvatar
-          role={userMessage ? 'user' : 'assistant'}
-          loading={item.loading}
-          currentUser={currentUser}
-        />
-      }
-      event=""
-      eventColor={userMessage ? 'primary' : 'subdued'}
-      actions={<></>}
-    >
-      <EuiPanel hasShadow={false} paddingSize="s">
-        <ChatMessageText content={messageContent} loading={item.loading} />
-      </EuiPanel>
-    </EuiComment>
-  );
+  if (isUserMessageItem(item) || isAssistantMessageItem(item)) {
+    return <ChatConversationMessage message={item} currentUser={currentUser} />;
+  }
+  if (isToolCallItem(item)) {
+    return <ChatConversationToolCall toolCall={item} />;
+  }
+  return undefined;
 };

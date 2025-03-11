@@ -13,6 +13,7 @@ import {
   type ConversationEvent,
   createUserMessage,
   createAssistantMessage,
+  createToolResult,
 } from '../../../common/conversation_events';
 import { useWorkChatServices } from './use_workchat_service';
 import { useKibana } from './use_kibana';
@@ -39,7 +40,7 @@ export const useChat = ({
     services: { notifications },
   } = useKibana();
   const [conversationEvents, setConversationEvents] = useState<ConversationEvent[]>([]);
-  const [pendingMessage, setPendingMessage] = useState<string>('');
+  const [pendingMessages, setPendingMessages] = useState<ConversationEvent[]>([]);
   const [status, setStatus] = useState<ChatStatus>('ready');
 
   const sendMessage = useCallback(
@@ -47,6 +48,7 @@ export const useChat = ({
       if (status === 'loading') {
         return;
       }
+
       setStatus('loading');
       setConversationEvents((prevEvents) => [
         ...prevEvents,
@@ -60,18 +62,46 @@ export const useChat = ({
         connectorId,
       });
 
+      const streamMessages: ConversationEvent[] = [];
+
       let concatenatedChunks = '';
+
+      const getAllStreamMessages = () => {
+        return streamMessages.concat(
+          concatenatedChunks.length ? [createAssistantMessage({ content: concatenatedChunks })] : []
+        );
+      };
 
       events$.subscribe({
         next: (event) => {
-          // TODO: remove
+
           // if (event.type !== 'message_chunk') {
           //   console.log('*** event', event);
           // }
 
+          // chunk received, we append it to the chunk buffer
           if (event.type === 'message_chunk') {
-            concatenatedChunks += event.text_chunk;
-            setPendingMessage(concatenatedChunks);
+            concatenatedChunks += event.content_chunk;
+            setPendingMessages(getAllStreamMessages());
+          }
+
+          // full message received - we purge the chunk buffer
+          // and insert the received message into the temporary list
+          if (event.type === 'message') {
+            concatenatedChunks = '';
+            streamMessages.push(event.message);
+            setPendingMessages(getAllStreamMessages());
+          }
+
+          if (event.type === 'tool_result') {
+            concatenatedChunks = '';
+            streamMessages.push(
+              createToolResult({
+                toolCallId: event.toolResult.callId,
+                toolResult: event.toolResult.result,
+              })
+            );
+            setPendingMessages(getAllStreamMessages());
           }
 
           if (event.type === 'conversation_created') {
@@ -79,15 +109,13 @@ export const useChat = ({
           }
         },
         complete: () => {
-          setConversationEvents((prevEvents) => [
-            ...prevEvents,
-            createAssistantMessage({ content: concatenatedChunks }),
-          ]);
-          setPendingMessage('');
+          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
+          setPendingMessages([]);
           setStatus('ready');
         },
         error: (err) => {
-          setPendingMessage('');
+          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
+          setPendingMessages([]);
           setStatus('error');
           onError?.(err);
 
@@ -114,14 +142,12 @@ export const useChat = ({
 
   const setConversationEventsExternal = useCallback((newEvents: ConversationEvent[]) => {
     setConversationEvents(newEvents);
-    setPendingMessage('');
+    setPendingMessages([]);
   }, []);
 
   const allEvents = useMemo(() => {
-    return [...conversationEvents].concat(
-      pendingMessage ? [createAssistantMessage({ content: pendingMessage })] : []
-    );
-  }, [conversationEvents, pendingMessage]);
+    return [...conversationEvents, ...pendingMessages];
+  }, [conversationEvents, pendingMessages]);
 
   return {
     status,

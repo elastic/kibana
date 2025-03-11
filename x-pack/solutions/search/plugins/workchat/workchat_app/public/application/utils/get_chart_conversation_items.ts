@@ -9,14 +9,19 @@ import {
   type ConversationEvent,
   isAssistantMessage,
   isUserMessage,
+  isToolResult,
   createAssistantMessage,
 } from '../../../common/conversation_events';
 import type { ChatStatus } from '../hooks/use_chat';
-
-// TODO: maybe composition from ConversationEvent?
-export type ConversationItem = ConversationEvent & {
-  loading: boolean;
-};
+import {
+  type ConversationItem,
+  type ToolCallConversationItem,
+  createUserMessageItem,
+  createAssistantMessageItem,
+  createToolCallItem,
+  isAssistantMessageItem,
+  isToolCallItem,
+} from './conversation_items';
 
 /**
  * Utility function preparing the data to display the chat conversation
@@ -28,25 +33,48 @@ export const getChartConversationItems = ({
   conversationEvents: ConversationEvent[];
   chatStatus: ChatStatus;
 }): ConversationItem[] => {
-  const items = conversationEvents
-    .filter((event) => isUserMessage(event) || isAssistantMessage(event))
-    .map<ConversationItem>((event, index) => {
-      return {
-        ...event,
-        loading: false,
-      };
-    });
+  const toolCallMap = new Map<string, ToolCallConversationItem>();
+
+  const items = conversationEvents.reduce<ConversationItem[]>((list, item) => {
+    if (isUserMessage(item)) {
+      list.push(createUserMessageItem({ message: item }));
+    }
+
+    if (isAssistantMessage(item)) {
+      if (item.content) {
+        list.push(createAssistantMessageItem({ message: item }));
+      }
+      for (const toolCall of item.toolCalls) {
+        const toolCallItem = createToolCallItem({ messageId: item.id, toolCall });
+        toolCallMap.set(toolCallItem.toolCall.toolCallId, toolCallItem);
+        list.push(toolCallItem);
+      }
+    }
+
+    if (isToolResult(item)) {
+      const toolCallItem = toolCallMap.get(item.toolCallId);
+      if (toolCallItem) {
+        toolCallItem.toolResult = item.toolResult;
+      }
+    }
+
+    return list;
+  }, []);
 
   if (chatStatus === 'loading') {
     const lastItem = items[items.length - 1];
-    if (isAssistantMessage(lastItem)) {
+    if (isAssistantMessageItem(lastItem)) {
+      lastItem.loading = true;
+    } else if (isToolCallItem(lastItem) && !lastItem.toolResult) {
       lastItem.loading = true;
     } else {
       // need to insert loading placeholder
-      items.push({
-        ...createAssistantMessage({ content: '' }),
-        loading: true,
-      });
+      items.push(
+        createAssistantMessageItem({
+          message: createAssistantMessage({ content: '' }),
+          loading: true,
+        })
+      );
     }
   }
 

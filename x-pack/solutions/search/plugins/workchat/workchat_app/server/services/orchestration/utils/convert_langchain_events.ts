@@ -6,10 +6,9 @@
  */
 
 import { mergeMap, OperatorFunction, of } from 'rxjs';
-import { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
-import type { ToolCall } from '@langchain/core/messages/tool';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import type { ToolCallEvent } from '../../../../common/chat_events';
+import type { ToolResultEvent } from '../../../../common/chat_events';
 import { AgentRunEvents } from '../types';
 import { extractTextContent, messageFromLangchain } from './from_langchain_messages';
 
@@ -36,28 +35,24 @@ export const langchainToChatEvents = ({
           const chunk: AIMessageChunk = event.data.chunk;
           const content = extractTextContent(chunk);
           if (content) {
-            return [{ type: 'message_chunk', text_chunk: content }];
+            return [
+              {
+                type: 'message_chunk',
+                content_chunk: content,
+                message_id: chunk.id ?? event.run_id,
+              },
+            ];
           }
         }
 
-        // we need to listen the tool chain to get tool ids..
-        if (event.event === 'on_chain_start' && event.name === 'tools') {
-          const addedMessages = event.data.input.addedMessages;
+        // emit full message on each agent step
+        if (event.event === 'on_chain_end' && event.name === 'agent') {
+          const addedMessages = event.data.output.addedMessages;
           const lastMessage = addedMessages[addedMessages.length - 1];
-          const toolCalls = lastMessage.tool_calls as ToolCall[];
-
-          return toolCalls.map<ToolCallEvent>((toolCall, index) => {
-            return {
-              type: 'tool_call',
-              toolCall: {
-                toolName: toolCall.name,
-                callId: toolCall.id ?? `${lastMessage.id}_tool_call_${index}`,
-                args: toolCall.args,
-              },
-            };
-          });
+          return [{ type: 'message', message: messageFromLangchain(lastMessage) }];
         }
 
+        // emit tool result events
         if (event.event === 'on_tool_end' && event.metadata?.langgraph_node === 'tools') {
           return [
             {
@@ -66,17 +61,8 @@ export const langchainToChatEvents = ({
                 callId: event.data.output.tool_call_id,
                 result: event.data.output.content,
               },
-            },
+            } as ToolResultEvent,
           ];
-        }
-
-        // stream messages
-        // TODO: send all new messages
-        if (event.event === 'on_chain_end' && event.name === runName) {
-          const output = event.data.output;
-          const addedMessages = output.addedMessages as BaseMessage[];
-          const lastMessage = addedMessages[addedMessages.length - 1];
-          return [{ type: 'message', message: messageFromLangchain(lastMessage) }];
         }
 
         return [];

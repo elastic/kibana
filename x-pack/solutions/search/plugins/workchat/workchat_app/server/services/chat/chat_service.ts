@@ -28,10 +28,15 @@ import {
   conversationCreatedEvent,
   conversationUpdatedEvent,
   isMessageEvent,
+  isToolResultEvent,
 } from '../../../common/utils/chat_events';
 import { createChatError, isChatError } from '../../../common/errors';
-import { type ConversationEvent, createUserMessage } from '../../../common/conversation_events';
-import type { ChatEvent } from '../../../common/chat_events';
+import {
+  type ConversationEvent,
+  createUserMessage,
+  createToolResult,
+} from '../../../common/conversation_events';
+import type { ChatEvent, ToolResultEvent, MessageEvent } from '../../../common/chat_events';
 import type { Conversation } from '../../../common/conversations';
 import { AgentFactory } from '../orchestration';
 import { ConversationService, ConversationClient } from '../conversations';
@@ -117,7 +122,7 @@ export class ChatService {
           ? generatedTitle$({ chatModel, conversationEvents$ })
           : conversation$.pipe(
               switchMap((conversation) => {
-                return conversation.title;
+                return of(conversation.title);
               })
             );
 
@@ -217,12 +222,23 @@ const extractNewConversationEvents$ = ({
   agentEvents$: Observable<ChatEvent>;
 }): Observable<ConversationEvent[]> => {
   return agentEvents$.pipe(
-    filter(isMessageEvent),
-    map((event) => event.message),
+    filter((event): event is MessageEvent | ToolResultEvent => {
+      return isMessageEvent(event) || isToolResultEvent(event);
+    }),
     toArray(),
     mergeMap((newMessages) => {
-      const newEvents = newMessages.map((message) => message);
-      return of(newEvents);
+      return of(
+        newMessages.map((message) => {
+          if (isMessageEvent(message)) {
+            return message.message;
+          } else {
+            return createToolResult({
+              toolCallId: message.toolResult.callId,
+              toolResult: message.toolResult.result,
+            });
+          }
+        })
+      );
     }),
     shareReplay()
   );
