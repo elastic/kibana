@@ -88,7 +88,7 @@ async function fetchLinkedChildrenOfSpan({
           ],
         },
       },
-    }
+    },
   });
 
   const linkedChildren = response.hits.hits.map((hit) => {

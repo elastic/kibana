@@ -69,7 +69,7 @@ export async function getLinkedParentsOfSpan({
           ],
         },
       },
-    }
+    },
   });
 
   const source = response.hits.hits?.[0]?._source as Pick<TransactionRaw | SpanRaw, 'span'>;
