@@ -21,6 +21,5 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/zod",
-    "@kbn/inference-common",
   ]
 }
