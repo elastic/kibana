@@ -99,12 +99,12 @@ describe('get color', () => {
     const buckets = createMockBucketColumns();
     const visParams = createMockPieParams();
     const colors = ['color1', 'color2', 'color3', 'color4'];
-    const categories = (chartType?: ChartTypes) =>
+    const getCategories = (chartType?: ChartTypes) =>
       chartType === ChartTypes.MOSAIC && visData.columns.length === 2
         ? getColorCategories(visData.rows, visData.columns[1]?.id)
         : getColorCategories(visData.rows, visData.columns[0]?.id);
-    const colorIndexMap = (chartType?: ChartTypes) =>
-      new Map(categories(chartType).map((d, i) => [d[0], i]));
+    const getColorIndexMap = (chartType?: ChartTypes) =>
+      new Map(getCategories(chartType).map((d, i) => [d, i]));
     const dataMock = dataPluginMock.createStartContract();
     interface RangeProps {
       gte: number;
@@ -177,7 +177,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
       );
       expect(color).toEqual(colors[0]);
     });
@@ -212,7 +212,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
       );
       expect(color).toEqual('color3');
     });
@@ -246,7 +246,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
       );
       expect(color).toEqual('#000028');
     });
@@ -310,7 +310,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         column,
-        colorIndexMap(ChartTypes.PIE)
+        getColorIndexMap(ChartTypes.PIE)
       );
       expect(color).toEqual('#3F6833');
     });
@@ -351,7 +351,7 @@ describe('get color', () => {
         false,
         dataMock.fieldFormats,
         visData.columns[0],
-        colorIndexMap(ChartTypes.MOSAIC)
+        getColorIndexMap(ChartTypes.MOSAIC)
       );
       expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
         [expect.objectContaining({ name: 'Second level 1' })],
