@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { CiStats } from '#pipeline-utils';
 
 (async () => {
   try {
-    await CiStats.pickScoutTestGroupRunOrder(SCOUT_PLAYWRIGHT_CONFIGS_PATH);
+    const scoutConfigsPath = path.resolve(process.cwd(), '.scout', 'test_configs', 'scout_playwright_configs.json');
+    await CiStats.pickScoutTestGroupRunOrder(scoutConfigsPath);
   } catch (ex) {
     console.error('CI Stats Error', ex.message);
     if (ex.response) {
