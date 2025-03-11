@@ -186,7 +186,7 @@ export function continueConversation({
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
-  apiUserInstructions: InstructionOrPlainText[];
+  apiUserInstructions: Instruction[];
   kbUserInstructions: Instruction[];
   logger: Logger;
   disableFunctions:

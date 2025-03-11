@@ -268,14 +268,14 @@ async function chatComplete(
     scopes,
   });
 
-  const userInstructionsWithId: Instruction[] | undefined = userInstructions?.map(
-    (userInstruction) =>
-      typeof userInstruction === 'string'
+  const userInstructions: Instruction[] | undefined = userInstructionsOrStrings?.map(
+    (userInstructionOrString) =>
+      typeof userInstructionOrString === 'string'
         ? {
-            text: userInstruction,
+            text: userInstructionOrString,
             id: v4(),
           }
-        : userInstruction
+        : userInstructionOrString
   );
 
   const response$ = client.complete({
