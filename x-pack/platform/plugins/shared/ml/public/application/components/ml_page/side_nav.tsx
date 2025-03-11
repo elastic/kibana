@@ -195,7 +195,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     });
 
     return mlTabs;
-  }, [mlFeaturesDisabled, canViewMlNodes]);
+  }, [mlFeaturesDisabled]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {
