@@ -13,6 +13,12 @@ import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
 import { STORYBOOK_TITLE } from './storybook_constants';
 
+const asyncAction =
+  (name: string) =>
+  async (...params: any[]) => {
+    action(name)(...params);
+  };
+
 export default {
   title: `${STORYBOOK_TITLE}/Tab`,
   parameters: {
@@ -24,7 +30,12 @@ export default {
 };
 
 const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (
-  <Tab {...args} onSelect={action('onSelect')} onClose={action('onClose')} />
+  <Tab
+    {...args}
+    onLabelEdited={asyncAction('onLabelEdited')}
+    onSelect={asyncAction('onSelect')}
+    onClose={asyncAction('onClose')}
+  />
 );
 
 export const Default = TabTemplate.bind({});
