@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { css } from '@emotion/react';
 import { SecuritySolutionLinkButton } from '../../../common/components/links';
-import { useNavigation } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { OnboardingCardId, OnboardingTopicId } from '../../../onboarding/constants';
 
 export const EmptyMigrationRulesPage = () => {
-  const { navigateTo } = useNavigation();
-
-  const navigateToStartMigrationCallback = useCallback(() => {
-    navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations#start' });
-  }, [navigateTo]);
-
   return (
     <KibanaPageTemplate.Section color="plain" paddingSize="none">
       <EuiFlexGroup
