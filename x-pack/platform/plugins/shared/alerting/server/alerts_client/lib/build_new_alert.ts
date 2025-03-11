@@ -32,9 +32,9 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
-import { Alert as LegacyAlert } from '../../alert/alert';
-import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
+import type { DeepPartial } from '@kbn/utility-types';
+import type { Alert as LegacyAlert } from '../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
