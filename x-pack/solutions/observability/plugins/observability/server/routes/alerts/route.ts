@@ -44,12 +44,12 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
     const investigateAlertsClient = new InvestigateAlertsClient(alertsClient);
 
-    const dashboardParser = new SuggestedDashboardsClient({
+    const dashboardParser = new SuggestedDashboardsClient(
       logger,
       dashboardClient,
-      alertId,
-      alertsClient: investigateAlertsClient,
-    });
+      investigateAlertsClient,
+      alertId
+    );
     try {
       const { suggestedDashboards } = await dashboardParser.fetchSuggestedDashboards();
       return {

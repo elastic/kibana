@@ -64,6 +64,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      await alertingApi.waitForDocumentInIndex({
+        indexName: dataForgeIndices.join(','),
+        docCountTarget: 500,
+      });
 
       const { body } = await supertestWithAuth
         .post('/api/saved_objects/_import')
@@ -167,6 +171,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       ruleId = createdRule.id;
       expect(ruleId).not.to.be(undefined);
+      const executionStatus = await alertingApi.waitForRuleStatus({
+        roleAuthc: editorUser,
+        ruleId,
+        expectedStatus: 'active',
+      });
+      expect(executionStatus).to.be('active');
 
       const alertResponse = await alertingApi.waitForDocumentInIndex({
         indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
