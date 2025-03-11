@@ -36,7 +36,7 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-import { truncateMiddle } from './utils';
+import { truncateAndPreserveHighlightTags } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -206,7 +206,9 @@ export function FieldBadgeWithActions({
         <EuiBadge {...popoverTriggerProps} color={color} iconType={icon} iconSide="left">
           <span
             // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: truncateMiddle(value, MAX_LENGTH) }}
+            dangerouslySetInnerHTML={{
+              __html: truncateAndPreserveHighlightTags(value, MAX_LENGTH),
+            }}
           />
         </EuiBadge>
       )}

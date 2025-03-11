@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './truncate_middle';
+export * from './truncate_preserve_highlight_tags';

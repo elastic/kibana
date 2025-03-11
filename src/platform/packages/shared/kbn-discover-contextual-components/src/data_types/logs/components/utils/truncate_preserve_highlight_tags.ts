@@ -16,7 +16,7 @@ function extractTextAndMarkTags(html: string) {
 
   return { cleanText, markTags };
 }
-export function truncateMiddle(value: string, maxLength: number): string {
+export function truncateAndPreserveHighlightTags(value: string, maxLength: number): string {
   const { cleanText, markTags } = extractTextAndMarkTags(value);
 
   if (cleanText.length < maxLength) {
