@@ -69,7 +69,9 @@ tags:
     name: APM annotations
   - description: Create APM fleet server schema.
     name: APM server schema
-  - description: Configure APM source maps.
+  - description: |
+      Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
+      For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
   - description: |
       Cases are used to open and track issues. You can add assignees and tags to your cases, set their severity and status, and add alerts, comments, and visualizations. You can also send cases to external incident management systems by configuring connectors.
@@ -229,6 +231,9 @@ tags:
     x-displayName: System
     description: |
       Get information about the system status, resource usage, and installed plugins.
+  - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
+    name: upgrade
+    x-displayName: Upgrade assistant
 paths:
   /api/actions/connector_types:
     get:
@@ -5086,7 +5091,8 @@ paths:
         - APM agent configuration
   /api/apm/sourcemaps:
     get:
-      description: Returns an array of Fleet artifacts, including source map uploads.
+      description: |
+        Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
       operationId: getSourceMaps
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5104,6 +5110,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getSourceMapsResponse1:
+                  $ref: '#/components/examples/APM_UI_source_maps_get_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_source_maps_response'
           description: Successful response
@@ -5134,8 +5143,17 @@ paths:
       summary: Get source maps
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
     post:
-      description: Upload a source map for a specific service and version.
+      description: |
+        Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.
+        The maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
       operationId: uploadSourceMap
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5150,6 +5168,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                uploadSourceMapResponse1:
+                  $ref: '#/components/examples/APM_UI_source_maps_upload_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_upload_source_maps_response'
           description: Successful response
@@ -5183,12 +5204,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/APM_UI_501_response'
           description: Not Implemented response
-      summary: Upload source map
+      summary: Upload a source map
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: multipart/form-data' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+            -F 'service_name="foo"' \
+            -F 'service_version="1.0.0"' \
+            -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
   /api/apm/sourcemaps/{id}:
     delete:
-      description: Delete a previously uploaded source map.
+      description: |
+        Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.
       operationId: deleteSourceMap
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5240,6 +5273,13 @@ paths:
       summary: Delete source map
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
   /api/asset_criticality:
     delete:
       description: Delete the asset criticality record for a specific entity.
@@ -20842,7 +20882,6 @@ paths:
           name: page
           required: false
           schema:
-            default: 1
             type: number
         - in: query
           name: perPage
@@ -20891,6 +20930,26 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+        - in: query
+          name: searchAfter
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: openPit
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: pitId
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pitKeepAlive
+          required: false
+          schema:
             type: string
       responses:
         '200':
@@ -21069,12 +21128,7 @@ paths:
                           nullable: true
                           type: number
                         sort:
-                          items:
-                            anyOf:
-                              - type: number
-                              - type: string
-                              - enum: []
-                                nullable: true
+                          items: {}
                           type: array
                         status:
                           enum:
@@ -21110,6 +21164,11 @@ paths:
                               - input
                               - output
                               - other
+                            type: string
+                          nullable: true
+                          type: array
+                        upgrade_attempts:
+                          items:
                             type: string
                           nullable: true
                           type: array
@@ -21183,10 +21242,14 @@ paths:
                         - enrolled_at
                         - local_metadata
                     type: array
+                  nextSearchAfter:
+                    type: string
                   page:
                     type: number
                   perPage:
                     type: number
+                  pit:
+                    type: string
                   statusSummary:
                     additionalProperties:
                       type: number
@@ -21521,12 +21584,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
@@ -21562,6 +21620,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -21863,12 +21926,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
@@ -21904,6 +21962,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -24226,6 +24289,11 @@ paths:
           required: false
           schema:
             type: boolean
+        - in: query
+          name: withPackagePoliciesCount
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -24454,9 +24522,6 @@ paths:
                                   type: string
                                 started_at:
                                   type: string
-                              required:
-                                - name
-                                - started_at
                             latest_install_failed_attempts:
                               items:
                                 additionalProperties: true
@@ -25318,9 +25383,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
@@ -25945,9 +26007,6 @@ paths:
                                 type: string
                               started_at:
                                 type: string
-                            required:
-                              - name
-                              - started_at
                           latest_install_failed_attempts:
                             items:
                               additionalProperties: true
@@ -26675,10 +26734,65 @@ paths:
                         proxy_id:
                           nullable: true
                           type: string
+                        secrets:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ssl:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                es_key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                                key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                        ssl:
+                          additionalProperties: false
+                          nullable: true
+                          type: object
+                          properties:
+                            certificate:
+                              type: string
+                            certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            client_auth:
+                              enum:
+                                - optional
+                                - required
+                                - none
+                              type: string
+                            es_certificate:
+                              type: string
+                            es_certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            es_key:
+                              type: string
+                            key:
+                              type: string
                       required:
-                        - id
                         - name
                         - host_urls
+                        - id
                     type: array
                   page:
                     type: number
@@ -26750,6 +26864,61 @@ paths:
                 proxy_id:
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        es_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    client_auth:
+                      enum:
+                        - optional
+                        - required
+                        - none
+                      type: string
+                    es_certificate:
+                      type: string
+                    es_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_key:
+                      type: string
+                    key:
+                      type: string
               required:
                 - name
                 - host_urls
@@ -26785,10 +26954,65 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          client_auth:
+                            enum:
+                              - optional
+                              - required
+                              - none
+                            type: string
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -26903,10 +27127,65 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          client_auth:
+                            enum:
+                              - optional
+                              - required
+                              - none
+                            type: string
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -26967,6 +27246,61 @@ paths:
                 proxy_id:
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        es_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  nullable: true
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    client_auth:
+                      enum:
+                        - optional
+                        - required
+                        - none
+                      type: string
+                    es_certificate:
+                      type: string
+                    es_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    es_key:
+                      type: string
+                    key:
+                      type: string
               required:
                 - proxy_id
       responses:
@@ -27001,10 +27335,65 @@ paths:
                       proxy_id:
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              es_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        nullable: true
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          client_auth:
+                            enum:
+                              - optional
+                              - required
+                              - none
+                            type: string
+                          es_certificate:
+                            type: string
+                          es_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          es_key:
+                            type: string
+                          key:
+                            type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -41085,14 +41474,12 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
                     type: boolean
-                  pipeline_exists:
-                    type: boolean
+                  product_documentation_status:
+                    type: string
                   security_labs_exists:
                     type: boolean
                   user_data_exists:
@@ -43258,6 +43645,402 @@ paths:
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
+  /api/upgrade_assistant/add_query_default_field/{index}:
+    get:
+      description: |
+        In Elasticsearch 7.0 and later, some query types, such as simple query string, have a limit to the number of fields they can query against. To configure the cap in Elasticsearch, set the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
+        For indices with more fields than the cap, add the `index.query.default_field` index setting to inform Elasticsearch which fields to use by default when no field is specified for a query. Use the add default field API to add the `index.query.default_field` setting to an Elasticsearch index.
+        To add the `index.query.default_field` index setting to the specified index, Kibana generates an array of all fields from the index mapping. The fields contain the types specified in `fieldTypes`. Kibana appends any other fields specified in `otherFields` to the array of default fields.
+      operationId: get-upgrade-default
+      requestBody:
+        content:
+          application/json:
+            examples:
+              addQueryDefaultFieldExampleRequest1:
+                description: Run `GET /api/upgrade_assistant/add_query_default_field/myIndex` to add the `index.query.default_field` setting to an Elasticsearch index.
+                value: |-
+                  {
+                    "fieldTypes": ["text", "keyword"], 
+                    "otherFields": ["myField.*"] 
+                  }
+            schema:
+              type: object
+              properties:
+                fieldTypes:
+                  description: |
+                    An array of Elasticsearch field types that generate the list of fields.
+                  type: array
+                otherFields:
+                  description: |
+                    An optional array of additional field names, dot-delimited.
+                  type: array
+              required:
+                - fieldTypes
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+          description: Indicates a successful call.
+        '400':
+          description: Indicates that the index already has the `index.query.default_field` setting. No changes are made to the index.
+      summary: Add a default field
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/{index}:
+    get:
+      description: |
+        Check the status of the reindex task.
+      operationId: get-upgrade-reindex
+      parameters:
+        - description: The name of the index that is reindexing.
+          in: path
+          name: index
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "reindexOp": {
+                        "indexName": ".ml-state",
+                        "newIndexName": ".reindexed-v7-ml-state", 
+                        "status": 0, 
+                        "lastCompletedStep": 40, 
+                        "reindexTaskId": "QprwvTMzRQ2MLWOW22oQ4Q:11819", 
+                        "reindexTaskPercComplete": 0.3, 
+                        "errorMessage": null 
+                      },
+                      "warnings": [], 
+                      "hasRequiredPrivileges": true 
+                    }
+              schema:
+                type: object
+                properties:
+                  hasRequiredPrivileges:
+                    description: |
+                      Specifies whether the user has sufficient privileges to reindex this index. When security is unavailable or disabled, it is `true`.
+                    type: boolean
+                  reindexOp:
+                    type: object
+                    properties:
+                      errorMessage:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                      indexName:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                      lastCompletedStep:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                      newIndexName:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_newIndexName'
+                      reindexTaskId:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                      reindexTaskPercComplete:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                      status:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_status'
+                  warnings:
+                    description: |
+                      An array of any warning codes that explain what changes are required for this reindex. For example:
+                      - `0` specifies to remove the `_all` meta field. - `1` specifies to convert any coerced boolean values in the source document. For example, `yes`, `1`, and `off`. - `2` specifies to convert documents to support Elastic Common Schema. Applies only to APM indices created in 6.x.
+                    type: array
+          description: Indicates a successful call.
+      summary: Get the reindex status
+      tags:
+        - upgrade
+      x-state: Technical Preview
+    post:
+      description: |
+        Start a new reindex or resume a paused reindex.
+        The following steps are performed during a reindex task:
+
+        1. Set the index to read-only.
+        1. Create a new index.
+        1. Reindex documents into the new index.
+        1. Create an index alias for the new index.
+        1. Delete the old index.
+      operationId: start-upgrade-reindex
+      parameters:
+        - description: The name of the index to reindex.
+          in: path
+          name: index
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                startUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "indexName": ".ml-state",
+                      "newIndexName": ".reindexed-v7-ml-state", 
+                      "status": 0, 
+                      "lastCompletedStep": 0, 
+                      "reindexTaskId": null, 
+                      "reindexTaskPercComplete": null, 
+                      "errorMessage": null 
+                    }
+              schema:
+                type: object
+                properties:
+                  errorMessage:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                  indexName:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                  lastCompletedStep:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                  newIndexName:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_newIndexName'
+                  reindexTaskId:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                  reindexTaskPercComplete:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                  status:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_status'
+          description: Indicates a successful call.
+      summary: Start or resume reindexing
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/{index}/cancel:
+    post:
+      description: |
+        Cancel reindexes that are waiting for the Elasticsearch reindex task to complete. For example, cancel reindexing if the `lastCompletedStep` has the value `40`.
+      operationId: cancel-upgrade-reindex
+      parameters:
+        - description: The name of the index that was reindexing.
+          in: path
+          name: index
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                cancelUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "acknowledged": true
+                    }
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+          description: Indicates a successful call.
+      summary: Cancel reindexing
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/batch:
+    post:
+      description: |
+        Start or resume multiple reindexing tasks in one request. Additionally, reindexing tasks started or resumed via the batch endpoint will be placed on a queue and run one-by-one, which ensures that minimal cluster resources are consumed over time.
+      operationId: batch-start-upgrade-reindex
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                indexNames:
+                  description: |
+                    The list of index names to be reindexed. The order of the indices determines the order that the reindex tasks are run.
+                  items:
+                    type: string
+                  type: array
+              required:
+                - indexNames
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                batchStartUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "enqueued": [ 
+                        {
+                          "indexName": "index1",
+                          "newIndexName": "reindexed-v8-index1",
+                          "status": 3,
+                          "lastCompletedStep": 0,
+                          "locked": null,
+                          "reindexTaskId": null,
+                          "reindexTaskPercComplete": null,
+                          "errorMessage": null,
+                          "runningReindexCount": null,
+                          "reindexOptions": { 
+                            "queueSettings": {
+                              "queuedAt": 1583406985489 
+                            }
+                          }
+                        }
+                      ],
+                      "errors": [ 
+                        {
+                          "indexName": "index2",
+                          "message": "Something went wrong!"
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  enqueued:
+                    description: |
+                      A list of reindex tasks created. The order in the array indicates the order in which tasks will be run.
+                    items:
+                      type: object
+                      properties:
+                        errorMessage:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                        indexName:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                        lastCompletedStep:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                        locked:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_locked'
+                        reindexOptions:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexOptions'
+                        reindexTaskId:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                        reindexTaskPercComplete:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                        runningReindexCount:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_runningReindexCount'
+                    type: array
+                  errors:
+                    description: |
+                      A list of errors that may have occurred preventing the reindex task from being created.
+                    items:
+                      - type: object
+                    type: array
+          description: Indicates a successful call.
+      summary: Batch start or resume reindexing
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/batch/queue:
+    get:
+      description: |
+        Check the current reindex batch queue.
+      operationId: get-batch-upgrade-reindex
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getBatchUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "queue": [ 
+                        {
+                          "indexName": "index1",
+                          "newIndexName": "reindexed-v8-index2",
+                          "status": 3,
+                          "lastCompletedStep": 0,
+                          "locked": null,
+                          "reindexTaskId": null,
+                          "reindexTaskPercComplete": null,
+                          "errorMessage": null,
+                          "runningReindexCount": null,
+                          "reindexOptions": {
+                            "queueSettings": {
+                              "queuedAt": 1583406985489
+                            }
+                          }
+                        },
+                        {
+                          "indexName": "index2",
+                          "newIndexName": "reindexed-v8-index2",
+                          "status": 3,
+                          "lastCompletedStep": 0,
+                          "locked": null,
+                          "reindexTaskId": null,
+                          "reindexTaskPercComplete": null,
+                          "errorMessage": null,
+                          "runningReindexCount": null,
+                          "reindexOptions": {
+                            "queueSettings": {
+                              "queuedAt": 1583406987334
+                            }
+                          }
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  queue:
+                    description: |
+                      Items in this array indicate reindex tasks at a given point in time and the order in which they will be run.
+                    items:
+                      type: object
+                      properties:
+                        errorMessage:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                        indexName:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                        lastCompletedStep:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                        locked:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_locked'
+                        reindexOptions:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexOptions'
+                        reindexTaskId:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                        reindexTaskPercComplete:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                        runningReindexCount:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_runningReindexCount'
+                    type: array
+          description: Indicates a successful call.
+      summary: Get the batch reindex queue
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/status:
+    get:
+      description: Check the status of your cluster.
+      operationId: get-upgrade-status
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getUpgradeStatusResponseExample1:
+                  value: |-
+                    {
+                      "readyForUpgrade": false,
+                      "cluster": [
+                        {
+                          "message": "Cluster deprecated issue",
+                          "details":"You have 2 system indices that must be migrated and 5 Elasticsearch deprecation issues and 0 Kibana deprecation issues that must be resolved before upgrading."
+                        }
+                      ]
+                    }
+          description: Indicates a successful call.
+      summary: Get the upgrade readiness status
+      tags:
+        - upgrade
+      x-state: Technical Preview
   /s/{spaceId}/api/observability/slos:
     get:
       description: |
@@ -43927,6 +44710,64 @@ components:
             id: recovered
             name: Recovered
           rule_task_timeout: 5m
+    APM_UI_source_maps_get_200_response1:
+      description: A successful response from `GET /api/apm/sourcemaps`.
+      value: |
+        {
+          "artifacts": [
+            {
+              "type": "sourcemap",
+              "identifier": "foo-1.0.0",
+              "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "body": {
+                "serviceName": "foo",
+                "serviceVersion": "1.0.0",
+                "bundleFilepath": "/test/e2e/general-usecase/bundle.js",
+                "sourceMap": {
+                  "version": 3,
+                  "file": "static/js/main.chunk.js",
+                  "sources": [
+                    "fleet-source-map-client/src/index.css",
+                    "fleet-source-map-client/src/App.js",
+                    "webpack:///./src/index.css?bb0a",
+                    "fleet-source-map-client/src/index.js",
+                    "fleet-source-map-client/src/reportWebVitals.js"
+                  ],
+                  "sourcesContent": [
+                    "content"
+                  ],
+                  "mappings": "mapping",
+                  "sourceRoot": ""
+                }
+              },
+              "created": "2021-07-09T20:47:44.812Z",
+              "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "compressionAlgorithm": "zlib",
+              "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "decodedSize": 441,
+              "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+              "encodedSize": 237,
+              "encryptionAlgorithm": "none",
+              "packageName": "apm"
+            }
+          ]
+        }
+    APM_UI_source_maps_upload_200_response1:
+      description: A successful response from `POST /api/apm/sourcemaps`.
+      value:
+        body: eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI
+        compressionAlgorithm: zlib
+        created: '2021-07-09T20:47:44.812Z'
+        decodedSha256: 644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        decodedSize: 441
+        encodedSha256: 024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24
+        encodedSize: 237
+        encryptionAlgorithm: none
+        id: apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        identifier: foo-1.0.0
+        packageName: apm
+        relative_url: /api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        type: sourcemap
     Cases_add_comment_request:
       summary: Adds a comment to a case.
       value:
@@ -48861,8 +49702,8 @@ components:
           type: string
         sourcemap:
           description: |
-            The source map. String or file upload. It must follow the
-            [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
+            The source map. It can be a string or file upload. It must follow the
+            [source map format specification](https://tc39.es/ecma426/).
           format: binary
           type: string
       required:
@@ -51510,7 +52351,7 @@ components:
         connectorId:
           type: string
         conversationId:
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         isStream:
           type: boolean
         langSmithApiKey:
@@ -51598,9 +52439,6 @@ components:
         id:
           description: The conversation id.
           type: string
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -51623,16 +52461,13 @@ components:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCategory'
           description: The conversation category.
         createdAt:
-          description: The last time conversation was updated.
+          description: The time conversation was created.
           type: string
         excludeFromLastConversationStorage:
           description: excludeFromLastConversationStorage.
           type: boolean
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
-        isDefault:
-          description: Is default conversation.
-          type: boolean
         messages:
           description: The conversation messages.
           items:
@@ -51859,7 +52694,6 @@ components:
     Security_AI_Assistant_API_FindConversationsSortField:
       enum:
         - created_at
-        - is_default
         - title
         - updated_at
       type: string
@@ -63831,6 +64665,47 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Upgrade_assistant_APIs_errorMessage:
+      description: The error that caused the reindex to fail, if it failed.
+      type: string
+    Upgrade_assistant_APIs_indexName:
+      description: The name of the old index.
+      type: string
+    Upgrade_assistant_APIs_lastCompletedStep:
+      description: |
+        The last successfully completed step of the reindex. For example:
+        - `0`: The reindex task has been created in Kibana. - `10`: The index group services stopped. Only applies to some system indices. - `20`: The index is set to readonly. - `30`: The new destination index has been created. - `40`: The reindex task in Elasticsearch has started. - `50`: The reindex task in Elasticsearch has completed. - `60`: Aliases were created to point to the new index, and the old index has been deleted. - `70`: The index group services have resumed. Only applies to some system indices.
+      type: integer
+    Upgrade_assistant_APIs_locked:
+      type: string
+    Upgrade_assistant_APIs_newIndexName:
+      description: The name of the new index.
+      type: string
+    Upgrade_assistant_APIs_reindexOptions:
+      description: The presence of this key indicates that the reindex job will occur in the batch.
+      type: object
+      properties:
+        queueSettings:
+          type: object
+          properties:
+            queuedAt:
+              description: A Unix timestamp of when the reindex task was placed in the queue.
+              type: number
+    Upgrade_assistant_APIs_reindexTaskId:
+      description: |
+        The task ID of the reindex task in Elasticsearch. This value appears when the reindexing starts.
+      type: string
+    Upgrade_assistant_APIs_reindexTaskPercComplete:
+      description: |
+        The progress of the reindexing task in Elasticsearch. It appears in decimal form, from 0 to 1.
+      type: number
+    Upgrade_assistant_APIs_runningReindexCount:
+      type: number
+    Upgrade_assistant_APIs_status:
+      description: |
+        The reindex status. For example:
+        - `0`: In progress - `1`: Completed - `2`: Failed - `3`: Paused
+      type: integer
     bedrock_config:
       title: Connector request properties for an Amazon Bedrock connector
       description: Defines properties for connectors when type is `.bedrock`.
