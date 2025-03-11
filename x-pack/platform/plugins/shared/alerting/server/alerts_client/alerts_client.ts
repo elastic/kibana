@@ -14,6 +14,8 @@ import {
   ALERT_UUID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -180,12 +182,12 @@ export class AlertsClient<
             },
             must_not: {
               term: {
-                [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
+                [ALERT_PREVIOUS_ACTION_GROUP]: ALERT_STATUS_RECOVERED,
               },
             },
             should: [
-              { term: { [ALERT_STATUS]: 'active' } },
-              { term: { [ALERT_STATUS]: 'recovered' } },
+              { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
+              { term: { [ALERT_STATUS]: ALERT_STATUS_RECOVERED } },
             ],
           },
         },
@@ -202,10 +204,10 @@ export class AlertsClient<
         const alertUuid = get(alertHit, ALERT_UUID);
         const alertId = get(alertHit, ALERT_INSTANCE_ID);
 
-        if (get(alertHit, ALERT_STATUS) === 'active') {
+        if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
           this.trackedAlerts.active[alertId] = alertHit;
         }
-        if (get(alertHit, ALERT_STATUS) === 'recovered') {
+        if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
           this.trackedAlerts.recovered[alertId] = alertHit;
         }
         this.trackedAlerts.indices[alertUuid] = hit._index;
@@ -416,8 +418,8 @@ export class AlertsClient<
 
     const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
-    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
+    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_ACTIVE);
+    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -429,7 +431,7 @@ export class AlertsClient<
       if (!!activeAlerts[id]) {
         if (
           Object.hasOwn(this.trackedAlerts.active, id) &&
-          get(this.trackedAlerts.active[id], ALERT_STATUS) === 'active'
+          get(this.trackedAlerts.active[id], ALERT_STATUS) === ALERT_STATUS_ACTIVE
         ) {
           const isImproving = isAlertImproving<
             AlertData,
