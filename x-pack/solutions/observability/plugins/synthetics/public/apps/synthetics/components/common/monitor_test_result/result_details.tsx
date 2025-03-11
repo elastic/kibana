@@ -31,7 +31,7 @@ export const ResultDetails = ({
 }) => {
   return (
     <div>
-      <EuiText className="eui-textNoWrap" size="s">
+      <EuiText size="s">
         <StatusBadge status={parseBadgeStatus(pingStatus)} />{' '}
         {!testNowMode
           ? i18n.translate('xpack.synthetics.step.duration.label', {

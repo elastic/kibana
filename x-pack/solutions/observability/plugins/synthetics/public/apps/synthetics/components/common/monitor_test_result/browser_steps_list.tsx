@@ -25,7 +25,6 @@ import {
   EuiTextProps,
   EuiTitle,
   useEuiTheme,
-  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
@@ -105,7 +104,6 @@ export const BrowserStepsList = ({
   const { euiTheme } = useEuiTheme();
   const [expandedMap, setExpandedMap] = useState<Record<string, ReactElement>>(defaultExpanded);
   const [stepIds, setStepIds] = useState<string>(mapStepIds(stepEnds));
-  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   useEffect(() => {
     /**
@@ -284,35 +282,32 @@ export const BrowserStepsList = ({
   ];
 
   return (
-    <>
-      <EuiBasicTable
-        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
-        cellProps={(row) => {
-          if (expandedMap[row._id]) {
-            return {
-              style: { verticalAlign: 'top' },
-            };
-          }
-        }}
-        compressed={compressed}
-        loading={loading}
-        columns={columns}
-        error={error?.message}
-        items={stepEnds}
-        noItemsMessage={
-          loading
-            ? i18n.translate('xpack.synthetics.monitor.step.loading', {
-                defaultMessage: 'Loading steps...',
-              })
-            : i18n.translate('xpack.synthetics.monitor.step.noDataFound', {
-                defaultMessage: 'No data found',
-              })
+    <EuiBasicTable
+      cellProps={(row) => {
+        if (expandedMap[row._id]) {
+          return {
+            style: { verticalAlign: 'top' },
+          };
         }
-        tableLayout="auto"
-        itemId="_id"
-        itemIdToExpandedRowMap={testNowMode || showExpand ? expandedMap : undefined}
-      />
-    </>
+      }}
+      compressed={compressed}
+      loading={loading}
+      columns={columns}
+      error={error?.message}
+      items={stepEnds}
+      noItemsMessage={
+        loading
+          ? i18n.translate('xpack.synthetics.monitor.step.loading', {
+              defaultMessage: 'Loading steps...',
+            })
+          : i18n.translate('xpack.synthetics.monitor.step.noDataFound', {
+              defaultMessage: 'No data found',
+            })
+      }
+      tableLayout="auto"
+      itemId="_id"
+      itemIdToExpandedRowMap={testNowMode || showExpand ? expandedMap : undefined}
+    />
   );
 };
 
