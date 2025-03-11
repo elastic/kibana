@@ -8,8 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
-import type { GetEntriesAtKeyMapping } from './utils/inspect_index_utils';
-import { formatEntriesAtKey, getEntriesAtKey } from './utils/inspect_index_utils';
+import type { InspectIndexMapping } from './utils/inspect_index_utils';
+import { shallowObjectViewTruncated, getEntriesAtKey } from './utils/inspect_index_utils';
 
 const toolDetails = {
   name: 'inspect_index_mapping',
@@ -71,10 +71,10 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
       });
 
       const entriesAtKey = getEntriesAtKey(
-        indexMapping[indexName] as unknown as GetEntriesAtKeyMapping,
+        indexMapping[indexName] as unknown as InspectIndexMapping,
         propertyKey.split('.')
       );
-      const result = formatEntriesAtKey(entriesAtKey, 4);
+      const result = shallowObjectViewTruncated(entriesAtKey, 20000);
 
       return `Object at ${propertyKey} \n${JSON.stringify(result, null, 2)}`;
     },

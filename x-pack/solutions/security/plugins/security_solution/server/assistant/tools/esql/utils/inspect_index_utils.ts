@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-export type GetEntriesAtKeyMapping =
-  | { [key: string]: GetEntriesAtKeyMapping | undefined | string }
+export type InspectIndexMapping =
+  | { [key: string]: InspectIndexMapping | undefined | string }
   | undefined
   | string;
 
+  /**
+   * Recursively gets the entries at a given key in an index mapping
+   */
 export const getEntriesAtKey = (
-  mapping: GetEntriesAtKeyMapping,
+  mapping: InspectIndexMapping,
   keys: string[]
-): GetEntriesAtKeyMapping => {
+): InspectIndexMapping => {
   if (mapping === undefined) {
     return undefined;
   }
@@ -33,9 +36,13 @@ export const getEntriesAtKey = (
   return getEntriesAtKey(mapping[key], keys);
 };
 
-
-
-export const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping, maxDepth = 1): string | Record<string, string> => {
+/**
+ * Inspects an index mapping and returns a shallow view of the mapping
+ * @param mapping The mapping to inspect
+ * @param maxDepth The maximum depth to recurse into the object
+ * @returns A shallow view of the mapping
+ */
+export const shallowObjectView = (mapping: InspectIndexMapping, maxDepth = 1): string | Record<string, string> => {
   if (mapping === undefined) {
     return 'undefined';
   }
@@ -48,11 +55,23 @@ export const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping, maxDepth = 1
     return 'Object';
   }
 
-  const formatted: Record<string, string> = {};
-  // recursivly call
-  Object.keys(mapping).forEach((key) => {
-    formatted[key] = formatEntriesAtKey(mapping[key], maxDepth - 1) as string;
-  });
-
-  return formatted;
+  return Object.keys(mapping).reduce((acc, key) => {
+    acc[key] = shallowObjectView(mapping[key], maxDepth - 1) as string;
+    return acc;
+  }, {} as Record<string, string>);
 };
+
+/**
+ * Same as shallowObjectView but reduces the maxDepth if the stringified view is longer than maxCharacters
+ * @param mapping The index mapping
+ * @param maxCharacters The maximum number of characters to return
+ * @param maxDepth The maximum depth to recurse into the object
+ * @returns A shallow view of the mapping 
+ */
+export const shallowObjectViewTruncated = (mapping: InspectIndexMapping, maxCharacters: number, maxDepth = 4): string | Record<string, string> => {
+  const view = shallowObjectView(mapping, maxDepth);
+  if (JSON.stringify(view).length > maxCharacters) {
+    return shallowObjectView(view, 1);
+  }
+  return view;
+}

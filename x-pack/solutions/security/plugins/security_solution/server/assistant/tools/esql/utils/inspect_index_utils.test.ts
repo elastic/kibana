@@ -5,127 +5,160 @@
  * 2.0.
  */
 
-import type { GetEntriesAtKeyMapping } from './inspect_index_utils';
-import { formatEntriesAtKey, getEntriesAtKey } from './inspect_index_utils';
+import type { InspectIndexMapping } from './inspect_index_utils';
+import { shallowObjectView, getEntriesAtKey, shallowObjectViewTruncated } from './inspect_index_utils';
 
 const sampleMapping1 = {
-  mappings: {
-    properties: {
-      field1: {
-        type: 'keyword',
-      },
-      field2: {
+    mappings: {
         properties: {
-          nested_field: {
-            type: 'keyword',
-          },
+            field1: {
+                type: 'keyword',
+            },
+            field2: {
+                properties: {
+                    nested_field: {
+                        type: 'keyword',
+                    },
+                },
+            },
         },
-      },
     },
-  },
 };
 
 describe('inspect index', () => {
-  it.each([
-    [
-      sampleMapping1,
-      ['mappings', 'properties'],
-      {
-        field1: {
-          type: 'keyword',
-        },
-        field2: {
-          properties: {
-            nested_field: {
-              type: 'keyword',
+    it.each([
+        [
+            sampleMapping1,
+            ['mappings', 'properties'],
+            {
+                field1: {
+                    type: 'keyword',
+                },
+                field2: {
+                    properties: {
+                        nested_field: {
+                            type: 'keyword',
+                        },
+                    },
+                },
             },
-          },
-        },
-      },
-    ],
-    [
-      sampleMapping1,
-      ['mappings', 'properties', 'field1'],
-      {
-        type: 'keyword',
-      },
-    ],
-  ])(
-    'getEntriesAtKey input %s returns %s',
-    (mapping: GetEntriesAtKeyMapping, key: string[], expectedResult: GetEntriesAtKeyMapping) => {
-      expect(getEntriesAtKey(mapping, key)).toEqual(expectedResult);
-    }
-  );
-
-  it.each([
-    [
-      {
-        type: 'keyword',
-      },1,
-      {
-        type: 'keyword',
-      },
-    ],
-    [
-        {
-          field1: {
-            type: 'keyword',
-          },
-          field2: {
-            properties: {
-              nested_field: {
+        ],
+        [
+            sampleMapping1,
+            ['mappings', 'properties', 'field1'],
+            {
                 type: 'keyword',
-              },
             },
-          },
-        },2,
-        {
-          field1: {
-            type: 'keyword',
-          },
-          field2: {
-            properties: 'Object',
-          },
-        },
-      ],
-    [
-      {
-        field1: {
-          type: 'keyword',
-        },
-        field2: {
-          properties: {
-            nested_field: {
-              type: 'keyword',
+        ],
+    ])(
+        'getEntriesAtKey input %s returns %s',
+        (mapping: InspectIndexMapping, key: string[], expectedResult: InspectIndexMapping) => {
+            expect(getEntriesAtKey(mapping, key)).toEqual(expectedResult);
+        }
+    );
+
+    it.each([
+        [
+            {
+                type: 'keyword',
+            }, 1,
+            {
+                type: 'keyword',
             },
-          },
-        },
-      },1,
-      {
-        field1: 'Object',
-        field2: 'Object',
-      },
-    ],
-    [
-      {
-        field1: 'keyword',
-        field2: {
-          properties: {
-            nested_field: {
-              type: 'keyword',
+        ],
+        [
+            {
+                field1: {
+                    type: 'keyword',
+                },
+                field2: {
+                    properties: {
+                        nested_field: {
+                            type: 'keyword',
+                        },
+                    },
+                },
+            }, 2,
+            {
+                field1: {
+                    type: 'keyword',
+                },
+                field2: {
+                    properties: 'Object',
+                },
             },
-          },
-        },
-      },1,
-      {
-        field1: 'keyword',
-        field2: 'Object',
-      },
-    ],
-  ])(
-    'formatEntriesAtKey input %s returns %s',
-    (mapping: GetEntriesAtKeyMapping, maxDepth: number, expectedResult: Object) => {
-      expect(formatEntriesAtKey(mapping, maxDepth)).toEqual(expectedResult);
-    }
-  );
+        ],
+        [
+            {
+                field1: {
+                    type: 'keyword',
+                },
+                field2: {
+                    properties: {
+                        nested_field: {
+                            type: 'keyword',
+                        },
+                    },
+                },
+            }, 1,
+            {
+                field1: 'Object',
+                field2: 'Object',
+            },
+        ],
+        [
+            {
+                field1: 'keyword',
+                field2: {
+                    properties: {
+                        nested_field: {
+                            type: 'keyword',
+                        },
+                    },
+                },
+            }, 1,
+            {
+                field1: 'keyword',
+                field2: 'Object',
+            },
+        ],
+    ])(
+        'shallowObjectView input %s returns %s',
+        (mapping: InspectIndexMapping, maxDepth: number, expectedResult: unknown) => {
+            expect(shallowObjectView(mapping, maxDepth)).toEqual(expectedResult);
+        }
+    );
+
+    it('shallowObjectView returns undefined for undefined mapping', () => {
+        expect(shallowObjectView(undefined)).toEqual('undefined');
+    });
+
+    it('shallowObjectView returns mapping for string mapping', () => {
+        expect(shallowObjectView('string')).toEqual('string');
+    });
+
+    it('shallowObjectView returns Object for maxDepth 0', () => {
+        expect(shallowObjectView(sampleMapping1, 0)).toEqual('Object');
+    });
+
+    it('shallowObjectViewTruncated returns truncated view', () => {
+        expect(shallowObjectViewTruncated(sampleMapping1, 10)).toEqual({
+            mappings: 'Object',
+        });
+    });
+
+    it('shallowObjectViewTruncated does not reduce depth if maxCharacters is not exceeded', () => {
+        expect(shallowObjectViewTruncated(sampleMapping1, 200)).toEqual({
+            mappings: {
+                properties: {
+                    field1: {
+                        type: 'keyword',
+                    },
+                    field2: {
+                        properties: "Object",
+                    },
+                },
+            },
+        });
+    });
 });
