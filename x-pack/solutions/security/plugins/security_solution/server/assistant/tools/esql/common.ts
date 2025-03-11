@@ -26,7 +26,7 @@ export const getEsqlFromContent = (content: string): string[] => {
     if (end === -1) {
       break;
     }
-    extractedEsql.push(content.slice(start + 7, end));
+    extractedEsql.push(content.slice(start + 7, end).trim());
     index = end + 3;
   }
   return extractedEsql;
