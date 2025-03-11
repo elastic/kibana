@@ -52,11 +52,6 @@ export function defineInvalidateSessionsRoutes({
         access: buildFlavor === 'serverless' ? 'internal' : 'public',
 
         summary: `Invalidate user sessions`,
-        description: `Invalidate user sessions that match a query.`,
-        tags: ['oas-tag:user session'],
-        availability: {
-          stability: 'experimental',
-        },
       },
     },
     async (_context, request, response) => {

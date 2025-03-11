@@ -8,7 +8,7 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 tags:
   - name: user session
-    description: User session management
+    x-displayName: User session management
 servers:
   - url: /
 paths:
@@ -71,6 +71,45 @@ paths:
                     username:
                       type: string
                       description: The username that will have its sessions invalidated.
+            examples:
+              invalidateRequestExample1:
+                summary:  Invalidate all sessions
+                description: Run `POST api/security/session/_invalidate` to invalidate all existing sessions.
+                value: |-
+                  {
+                    "match" : "all"
+                  }
+              invalidateRequestExample2:
+                summary: Invalidate all SAML sessions
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any SAML authentication provider.
+                value: |-              
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "saml" }
+                    }
+                  }
+              invalidateRequestExample3:
+                summary: Invalidate sessions for a provider
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by the SAML authentication provider named `saml1`.
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "saml", "name": "saml1" }
+                    }
+                  }
+              invalidateRequestExample4:
+                summary: Invalidate sessions for a user
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any OpenID Connect authentication provider for the user with the username `user@my-oidc-sso.com`.
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "oidc" },
+                      "username": "user@my-oidc-sso.com"
+                    }
+                  }
       responses:
         '200':
           description: Indicates a successful call
@@ -82,44 +121,5 @@ paths:
                   total:
                     type: integer
                     description: The number of sessions that were successfully invalidated.
-              examples:
-                invalidateRequestExample1:
-                  summary:  Invalidate all sessions
-                  description: Run `POST api/security/session/_invalidate` to invalidate all existing sessions.
-                  value: |-
-                    {
-                      "match" : "all"
-                    }
-                invalidateRequestExample2:
-                  summary: Invalidate all SAML sessions
-                  description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any SAML authentication provider.
-                  value: |-              
-                    {
-                      "match" : "query",
-                      "query": {
-                        "provider" : { "type": "saml" }
-                      }
-                    }
-                invalidateRequestExample3:
-                  summary: Invalidate sessions for a provider
-                  description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by the SAML authentication provider named `saml1`.
-                  value: |-
-                    {
-                      "match" : "query",
-                      "query": {
-                        "provider" : { "type": "saml", "name": "saml1" }
-                      }
-                    }
-                invalidateRequestExample4:
-                  summary: Invalidate sessions for a user
-                  description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any OpenID Connect authentication provider for the user with the username `user@my-oidc-sso.com`.
-                  value: |-
-                    {
-                      "match" : "query",
-                      "query": {
-                        "provider" : { "type": "oidc" },
-                        "username": "user@my-oidc-sso.com"
-                      }
-                    }
         '403':
           description: Indicates that the user may not be authorized to invalidate sessions for other users.
