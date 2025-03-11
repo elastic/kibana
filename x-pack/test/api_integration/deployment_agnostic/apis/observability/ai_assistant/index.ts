@@ -18,6 +18,7 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./complete/functions/alerts.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/get_alerts_dataset_info.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/get_dataset_info.spec.ts'));
+    loadTestFile(require.resolve('./complete/functions/execute_query.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/elasticsearch.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/summarize.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/recall.spec.ts'));
