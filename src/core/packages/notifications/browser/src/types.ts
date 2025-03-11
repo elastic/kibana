@@ -78,8 +78,9 @@ export interface IToasts {
   addError: (error: Error, options: ErrorToastOptions) => Toast;
 }
 
-interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'content' | 'subtitle'> {
-  onNextClick?: () => void;
+interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'content'> {
+  id: string;
+  onNextClick?: (step: number) => void;
 }
 
 export interface ProductIntercept {

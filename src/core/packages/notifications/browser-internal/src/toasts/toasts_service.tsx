@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -19,9 +19,10 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
-import { EventReporter } from './telemetry';
+import { ToastsTelemetry } from './telemetry';
 
 interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
   uiSettings: IUiSettingsClient;
 }
 
@@ -31,29 +32,32 @@ interface StartDeps {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
-  eventReporter: EventReporter;
   targetDomElement: HTMLElement;
 }
 
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
+  private readonly telemetry = new ToastsTelemetry();
 
-  public setup({ uiSettings }: SetupDeps) {
+  public setup({ uiSettings, analytics }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
+    this.telemetry.setup({ analytics });
     return this.api!;
   }
 
-  public start({ eventReporter, overlays, targetDomElement, ...startDeps }: StartDeps) {
+  public start({ overlays, targetDomElement, ...startDeps }: StartDeps) {
     this.api!.start({ overlays, ...startDeps });
     this.targetDomElement = targetDomElement;
+
+    const reportEvent = this.telemetry.start({ analytics: startDeps.analytics });
 
     render(
       <KibanaRenderContextProvider {...startDeps}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
-          reportEvent={eventReporter}
+          reportEvent={reportEvent}
         />
       </KibanaRenderContextProvider>,
       targetDomElement

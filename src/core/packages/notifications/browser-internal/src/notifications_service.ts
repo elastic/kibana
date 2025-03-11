@@ -20,7 +20,6 @@ import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notificat
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { showErrorDialog, ToastsService } from './toasts';
 import { ProductInterceptService } from './product_intercept_dialog';
-import { EventReporter, eventTypes } from './toasts/telemetry';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -49,12 +48,8 @@ export class NotificationsService {
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
-    eventTypes.forEach((eventType) => {
-      analytics.registerEventType(eventType);
-    });
-
     const notificationSetup = {
-      toasts: this.toasts.setup({ uiSettings }),
+      toasts: this.toasts.setup({ uiSettings, analytics }),
       productIntercepts: this.productIntercepts.setup({ analytics }),
     };
 
@@ -75,11 +70,8 @@ export class NotificationsService {
     const toastsContainer = document.createElement('div');
     targetDomElement.appendChild(toastsContainer);
 
-    const eventReporter = new EventReporter({ analytics: startDeps.analytics });
-
     return {
       toasts: this.toasts.start({
-        eventReporter,
         overlays,
         targetDomElement: toastsContainer,
         ...startDeps,
