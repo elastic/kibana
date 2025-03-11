@@ -123,7 +123,7 @@ export async function suggestForExpression({
     case 'after_not':
       if (expressionRoot && isFunctionItem(expressionRoot) && expressionRoot.name === 'not') {
         suggestions.push(
-          ...getFunctionSuggestions({ command: 'where', returnTypes: ['boolean'] }),
+          ...getFunctionSuggestions({ command: commandName, returnTypes: ['boolean'] }),
           ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
         );
       } else {

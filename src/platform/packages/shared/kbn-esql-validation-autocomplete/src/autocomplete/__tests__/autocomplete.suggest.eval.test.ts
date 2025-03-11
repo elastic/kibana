@@ -135,6 +135,7 @@ describe('autocomplete.suggest', () => {
         'RLIKE $0',
         'IN $0',
       ]);
+
       await assertSuggestions('from index | EVAL keywordField NOT /', [
         'LIKE $0',
         'RLIKE $0',
@@ -142,7 +143,7 @@ describe('autocomplete.suggest', () => {
       ]);
 
       await assertSuggestions('from index | EVAL not /', [
-        ...getFieldNamesByType('boolean'),
+        ...getFieldNamesByType('boolean').map((v) => `${v} `),
         ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
       ]);
     });
