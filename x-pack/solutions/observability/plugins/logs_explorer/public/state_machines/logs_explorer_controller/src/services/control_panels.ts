@@ -9,7 +9,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { mapValues, pick } from 'lodash';
 import { InvokeCreator } from 'xstate';
-import { internalStateActions } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import {
   availableControlPanelFields,
   controlPanelConfigs,
@@ -36,9 +35,7 @@ export const subscribeControlGroup =
     const { discoverStateContainer } = context;
 
     const filtersSubscription = context.controlGroupAPI.filters$.subscribe((newFilters = []) => {
-      discoverStateContainer.internalState.dispatch(
-        internalStateActions.setCustomFilters(newFilters)
-      );
+      discoverStateContainer.actions.setCustomFilters(newFilters);
       discoverStateContainer.actions.fetchData();
     });
 

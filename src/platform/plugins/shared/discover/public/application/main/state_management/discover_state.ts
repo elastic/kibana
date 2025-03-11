@@ -27,6 +27,7 @@ import { merge } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import {
   AggregateQuery,
+  Filter,
   isOfAggregateQueryType,
   isOfQueryType,
   Query,
@@ -240,6 +241,11 @@ export interface DiscoverStateContainer {
      * Updates the ES|QL query string
      */
     updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+    /**
+     * @deprecated DO NOT USE
+     * Workaround for setting custom filters in Logs Explorer in 8.19 to avoid exporting the Redux actions from Discover
+     */
+    setCustomFilters: (filters: Filter[]) => void;
   };
 }
 
@@ -647,6 +653,9 @@ export function getDiscoverStateContainer({
       undoSavedSearchChanges,
       updateAdHocDataViewId,
       updateESQLQuery,
+      setCustomFilters: (filters: Filter[]) => {
+        internalState.dispatch(internalStateActions.setCustomFilters(filters));
+      },
     },
   };
 }
