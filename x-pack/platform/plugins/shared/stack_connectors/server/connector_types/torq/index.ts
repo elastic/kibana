@@ -21,6 +21,7 @@ import {
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionTypeExecutorResult, ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { isValidTorqHostName } from '../../../common/torq';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { promiseResult, isOk, Result } from '../lib/result_type';
 
@@ -127,11 +128,11 @@ function validateActionTypeConfig(
     );
   }
 
-  if (configureUrlObj.hostname !== 'hooks.torq.io' && configureUrlObj.hostname !== 'localhost') {
+  if (!isValidTorqHostName(configureUrlObj.hostname) && configureUrlObj.hostname !== 'localhost') {
     throw new Error(
       i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorInvalidHostname', {
         defaultMessage:
-          'error configuring send to Torq action: url must begin with https://hooks.torq.io',
+          'error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io',
       })
     );
   }
