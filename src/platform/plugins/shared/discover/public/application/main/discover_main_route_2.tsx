@@ -8,8 +8,8 @@
  */
 
 import { useHistory, useParams } from 'react-router-dom';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
-  IKbnUrlStateStorage,
   SavedObjectNotFound,
   createKbnUrlStateStorage,
   redirectWhenMissing,
@@ -18,14 +18,15 @@ import {
 import { lazy, useEffect, useMemo, useState } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import {
+import type {
   AnalyticsNoDataPageKibanaDependencies,
   AnalyticsNoDataPageProps,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import useAsyncFn, { AsyncState } from 'react-use/lib/useAsyncFn';
+import type { AsyncState } from 'react-use/lib/useAsyncFn';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useMount from 'react-use/lib/useMount';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -34,16 +35,14 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual } from 'lodash';
 import { createDataViewDataSource, isDataViewSource } from '../../../common/data_sources';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
-  CustomizationCallback,
-  DiscoverCustomizationContext,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
+import type { InternalStateStore, RuntimeStateManager } from './state_management/redux';
 import {
   InternalStateProvider,
-  InternalStateStore,
-  RuntimeStateManager,
   RuntimeStateProvider,
   createInternalStateStore,
   createRuntimeStateManager,
@@ -53,28 +52,25 @@ import {
   useRuntimeState,
 } from './state_management/redux';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import {
-  RootProfileState,
-  useRootProfile,
-  useDefaultAdHocDataViews,
-} from '../../context_awareness';
+import type { RootProfileState } from '../../context_awareness';
+import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
 import { DiscoverError } from '../../components/common/error_alert';
-import { MainHistoryLocationState } from '../../../common';
+import type { MainHistoryLocationState } from '../../../common';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
-import {
-  APP_STATE_URL_KEY,
+import type {
   AppStateUrl,
   DiscoverAppState,
+} from './state_management/discover_app_state_container';
+import {
+  APP_STATE_URL_KEY,
   getInitialState,
 } from './state_management/discover_app_state_container';
 import { cleanupUrlState } from './state_management/utils/cleanup_url_state';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUrl } from './hooks/use_url';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../utils/validate_time';
-import {
-  DiscoverStateContainer,
-  getDiscoverStateContainer,
-} from './state_management/discover_state';
+import type { DiscoverStateContainer } from './state_management/discover_state';
+import { getDiscoverStateContainer } from './state_management/discover_state';
 import { getEsqlDataView } from './state_management/utils/get_esql_data_view';
 import { loadAndResolveDataView } from './state_management/utils/resolve_data_view';
 import { updateSavedSearch } from './state_management/utils/update_saved_search';
