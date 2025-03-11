@@ -178,6 +178,10 @@ exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
 
+exports[`Error LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Error LINKS_TRACE_ID 1`] = `undefined`;
+
 exports[`Error LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
@@ -538,6 +542,10 @@ exports[`Span LABEL_NAME 1`] = `undefined`;
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span LABEL_TYPE 1`] = `undefined`;
+
+exports[`Span LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Span LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Span LOG_LEVEL 1`] = `undefined`;
 
@@ -909,6 +917,10 @@ exports[`Transaction LABEL_NAME 1`] = `undefined`;
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction LABEL_TYPE 1`] = `undefined`;
+
+exports[`Transaction LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Transaction LOG_LEVEL 1`] = `undefined`;
 
