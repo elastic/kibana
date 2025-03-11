@@ -29,6 +29,7 @@ export const getComponentTemplateName = ({ context, name }: GetComponentTemplate
 
 export interface IIndexPatternString {
   template: string;
+  componentTemplate: string;
   pattern: string;
   reindexedPattern?: string;
   alias: string;
@@ -52,12 +53,15 @@ export const getIndexTemplateAndPattern = ({
   const concreteNamespace = namespace ? namespace : 'default';
   const pattern = `${context}.alerts`;
   const patternWithNamespace = `${pattern}-${concreteNamespace}`;
+  const name = `.internal.alerts-${patternWithNamespace}-000001`;
+
   return {
     template: `.alerts-${patternWithNamespace}-index-template`,
+    componentTemplate: getComponentTemplateName({ context, name }),
     pattern: `.internal.alerts-${patternWithNamespace}-*`,
     reindexedPattern: `.reindexed-v8-internal.alerts-${patternWithNamespace}-*`,
     basePattern: `.alerts-${pattern}-*`,
-    name: `.internal.alerts-${patternWithNamespace}-000001`,
+    name,
     alias: `.alerts-${patternWithNamespace}`,
     validPrefixes: VALID_ALERT_INDEX_PREFIXES,
     ...(secondaryAlias ? { secondaryAlias: `${secondaryAlias}-${concreteNamespace}` } : {}),
