@@ -12,7 +12,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { ProductFeaturesService } from '../../../../product_features_service';
@@ -72,13 +71,8 @@ export const createDetectionRulesClient = ({
         license.hasAtLeast(MINIMUM_RULE_CUSTOMIZATION_LICENSE) &&
         productFeaturesService.isEnabled(ProductFeatureKey.prebuiltRuleCustomization);
 
-      const customizationDisabledReason = isRulesCustomizationEnabled
-        ? undefined
-        : PrebuiltRulesCustomizationDisabledReason.License;
-
       return {
         isRulesCustomizationEnabled,
-        customizationDisabledReason,
       };
     },
     async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {

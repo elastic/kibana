@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export enum PrebuiltRulesCustomizationDisabledReason {
-  License = 'License',
-}
-
 export interface PrebuiltRulesCustomizationStatus {
   isRulesCustomizationEnabled: boolean;
-  customizationDisabledReason?: PrebuiltRulesCustomizationDisabledReason;
 }

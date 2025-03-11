@@ -6,7 +6,6 @@
  */
 
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from './use_prebuilt_rule_customization_upselling_message';
 
 /**
@@ -22,13 +21,7 @@ export const usePrebuiltRulesCustomizationStatus = (): PrebuiltRulesCustomizatio
     'prebuilt_rule_customization'
   );
 
-  const isRulesCustomizationEnabled = !upsellingMessage;
-  const customizationDisabledReason = isRulesCustomizationEnabled
-    ? undefined
-    : PrebuiltRulesCustomizationDisabledReason.License;
-
   return {
-    isRulesCustomizationEnabled,
-    customizationDisabledReason,
+    isRulesCustomizationEnabled: !upsellingMessage,
   };
 };
