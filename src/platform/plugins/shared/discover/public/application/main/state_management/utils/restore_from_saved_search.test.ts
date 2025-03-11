@@ -9,7 +9,7 @@
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRange, RefreshInterval } from '@kbn/data-plugin/common';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import { restoreStateFromSavedSearch } from './restore_from_saved_search';
 
 describe('discover restore state from saved search', () => {

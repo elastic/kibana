@@ -8,19 +8,21 @@
  */
 
 import { NEVER, lastValueFrom } from 'rxjs';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ApplicationStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { getESQLSearchProvider } from './search_provider';
 import { createDiscoverDataViewsMock } from '../__mocks__/data_views';
 import type { DiscoverAppLocator } from '../../common';
+import type { DiscoverStartPlugins } from '../types';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 describe('ES|QL search provider', () => {
-  const uiCapabilitiesMock = new Promise<ApplicationStart['capabilities']>((resolve) => {
-    resolve({ navLinks: { discover: true } } as unknown as ApplicationStart['capabilities']);
-  });
-  const dataMock = new Promise<DataPublicPluginStart>((resolve) => {
-    resolve({ dataViews: createDiscoverDataViewsMock() } as unknown as DataPublicPluginStart);
-  });
+  const getServices = (): Promise<[CoreStart, DiscoverStartPlugins]> =>
+    Promise.resolve([
+      {
+        application: { capabilities: { navLinks: { discover: true } } },
+      } as unknown as CoreStart,
+      { dataViews: createDiscoverDataViewsMock() } as unknown as DiscoverStartPlugins,
+    ]);
   const locator = {
     useUrl: jest.fn(() => ''),
     navigate: jest.fn(),
@@ -33,7 +35,11 @@ describe('ES|QL search provider', () => {
     getRedirectUrl: jest.fn(() => ''),
   } as unknown as DiscoverAppLocator;
   test('returns score 100 if term is esql', async () => {
-    const esqlSearchProvider = getESQLSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider({
+      isESQLEnabled: true,
+      locator,
+      getServices,
+    });
     const observable = esqlSearchProvider.find(
       { term: 'esql' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -53,7 +59,11 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns score 90 if user tries to write es|ql', async () => {
-    const esqlSearchProvider = getESQLSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider({
+      isESQLEnabled: true,
+      locator,
+      getServices,
+    });
     const observable = esqlSearchProvider.find(
       { term: 'es|' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -73,7 +83,11 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns empty results if user tries to write something irrelevant', async () => {
-    const esqlSearchProvider = getESQLSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider({
+      isESQLEnabled: true,
+      locator,
+      getServices,
+    });
     const observable = esqlSearchProvider.find(
       { term: 'woof' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -83,7 +97,11 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns empty results if ESQL is disabled', async () => {
-    const esqlSearchProvider = getESQLSearchProvider(false, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider({
+      isESQLEnabled: false,
+      locator,
+      getServices,
+    });
     const observable = esqlSearchProvider.find(
       { term: 'esql' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -94,17 +112,18 @@ describe('ES|QL search provider', () => {
 
   test('returns empty results if no default dataview', async () => {
     const dataViewMock = createDiscoverDataViewsMock();
-    const updatedDataMock = new Promise<DataPublicPluginStart>((resolve) => {
-      resolve({
-        dataViews: { ...dataViewMock, getDefaultDataView: jest.fn(() => undefined) },
-      } as unknown as DataPublicPluginStart);
+    const esqlSearchProvider = getESQLSearchProvider({
+      isESQLEnabled: true,
+      locator,
+      getServices: async () => {
+        const [core, start] = await getServices();
+        start.dataViews = {
+          ...dataViewMock,
+          getDefaultDataView: jest.fn(() => undefined),
+        } as unknown as DataViewsServicePublic;
+        return [core, start];
+      },
     });
-    const esqlSearchProvider = getESQLSearchProvider(
-      true,
-      uiCapabilitiesMock,
-      updatedDataMock,
-      locator
-    );
     const observable = esqlSearchProvider.find(
       { term: 'woof' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
