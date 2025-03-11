@@ -17,11 +17,9 @@ export function registerContextRenderFunction({
   registerRenderFunction: RegisterRenderFunctionDefinition;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
-  const connectorIcons = new Map(
-    pluginsStart.searchConnectors
-      .getConnectorTypes()
-      .map((type) => [type.serviceType, type.iconPath])
-  );
+  // should get the connector icons from the searchConnectors plugin,
+  // but that isn't shared
+  const connectorIcons = new Map<string, string>();
 
   registerRenderFunction('context', ({ response }: { response: ContextToolResponse }) => {
     return <RenderContext response={response} connectorIcons={connectorIcons} />;
