@@ -119,17 +119,17 @@ describe('NaturalLanguageESQLTool', () => {
       expect(tool.description).not.toContain(getPromptSuffixForOssModel('NaturalLanguageESQLTool'));
     });
 
-    it('invokes self healing graph', () => {
+    it('invokes self healing graph', async () => {
       const tool = NL_TO_ESQL_TOOL.getTool({
         isOssModel: false,
         ...rest,
       }) as DynamicTool;
 
-      const result = tool.invoke({
+      const result = await tool.invoke({
         question: 'Generate ESQL to get 100 documents from the .logs index',
       });
 
-      expect(result).resolves.toEqual('Self healing graph response');
+      expect(result).toEqual('Self healing graph response');
     });
   });
 });
