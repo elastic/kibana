@@ -22,6 +22,7 @@ import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems } from '../../types';
+import { useTabGlueStyles } from './use_tab_glue_styles';
 
 export interface TabProps {
   item: TabItem;
@@ -34,16 +35,17 @@ export interface TabProps {
   onClose: ((item: TabItem) => Promise<void>) | undefined;
 }
 
-export const Tab: React.FC<TabProps> = ({
-  item,
-  isSelected,
-  tabContentId,
-  tabsSizeConfig,
-  getTabMenuItems,
-  onLabelEdited,
-  onSelect,
-  onClose,
-}) => {
+export const Tab: React.FC<TabProps> = (props) => {
+  const {
+    item,
+    isSelected,
+    tabContentId,
+    tabsSizeConfig,
+    getTabMenuItems,
+    onLabelEdited,
+    onSelect,
+    onClose,
+  } = props;
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>();
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
@@ -86,6 +88,8 @@ export const Tab: React.FC<TabProps> = ({
     [onSelectEvent]
   );
 
+  const { selectedTabBackgroundColor, tabGlueElement } = useTabGlueStyles(props);
+
   return (
     <EuiFlexGroup
       ref={containerRef}
@@ -94,7 +98,7 @@ export const Tab: React.FC<TabProps> = ({
       aria-selected={isSelected}
       alignItems="center"
       direction="row"
-      css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
+      css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, selectedTabBackgroundColor)}
       data-test-subj={tabContainerDataTestSubj}
       responsive={false}
       gutterSize="none"
@@ -147,6 +151,7 @@ export const Tab: React.FC<TabProps> = ({
           </>
         )}
       </div>
+      {tabGlueElement}
     </EuiFlexGroup>
   );
 };
@@ -154,11 +159,13 @@ export const Tab: React.FC<TabProps> = ({
 function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
-  isSelected: boolean
+  isSelected: boolean,
+  selectedTabBackgroundColor: string
 ) {
   // TODO: remove the usage of deprecated colors
 
   return css`
+    position: relative;
     display: inline-flex;
     border-right: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.lightShade};
@@ -167,7 +174,7 @@ function getTabContainerCss(
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 
-    background-color: ${isSelected ? euiTheme.colors.emptyShade : euiTheme.colors.lightestShade};
+    background-color: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
     color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
     transition: background-color ${euiTheme.animation.fast};
 

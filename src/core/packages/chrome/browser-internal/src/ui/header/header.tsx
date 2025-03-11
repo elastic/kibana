@@ -167,7 +167,7 @@ export function Header({
             ]}
           />
 
-          <EuiHeader position="fixed" className="header__secondBar">
+          <EuiHeader position="fixed" className="header__secondBar" id="kbnHeaderSecondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
                 <CollapsibleNav
