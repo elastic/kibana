@@ -35,7 +35,7 @@ export const analyticsJobsListRouteFactory = (navigateToApp: NavigateToApp): MlR
     },
   ],
   'data-test-subj': 'mlPageDataFrameAnalytics',
-  enableDatePicker: true,
+  enableDatePicker: false,
 });
 
 const PageWrapper: FC = () => {

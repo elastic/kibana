@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
 import { DataFrameAnalyticsList } from './components/analytics_list';
@@ -21,6 +21,7 @@ import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
+import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
@@ -53,10 +54,17 @@ export const Page: FC = () => {
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.dataframe.analyticsList.title"
-          defaultMessage="Data Frame Analytics Jobs"
-        />
+        <EuiFlexGroup grow={false} direction="row" gutterSize="s">
+          <EuiFlexItem grow={true}>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsList.title"
+              defaultMessage="Data Frame Analytics Jobs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} justifyContent="flexEnd">
+            <CreateAnalyticsButton size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </MlPageHeader>
 
       <NodeAvailableWarning />

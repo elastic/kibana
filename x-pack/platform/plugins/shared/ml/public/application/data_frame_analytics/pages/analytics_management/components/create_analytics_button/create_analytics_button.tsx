@@ -16,7 +16,11 @@ interface Props {
   navigateToSourceSelection: () => void;
 }
 
-export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, navigateToSourceSelection }) => {
+export const CreateAnalyticsButton: FC<Props> = ({
+  isDisabled,
+  navigateToSourceSelection,
+  size = 's',
+}) => {
   const handleClick = () => {
     navigateToSourceSelection();
   };
@@ -27,7 +31,7 @@ export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, navigateToSourceS
       fill
       onClick={handleClick}
       iconType="plusInCircle"
-      size="s"
+      size={size}
       data-test-subj="mlAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {

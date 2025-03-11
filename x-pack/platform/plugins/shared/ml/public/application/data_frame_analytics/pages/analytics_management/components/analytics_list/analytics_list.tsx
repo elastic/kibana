@@ -36,7 +36,6 @@ import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 import { StatsBar } from '../../../../../components/stats_bar';
-import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
@@ -44,6 +43,7 @@ import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting
 import { useRefresh } from '../../../../../routing/use_refresh';
 import { SpaceManagementContextWrapper } from '../../../../../components/space_management_context_wrapper';
 import { ExportJobsFlyout } from '../../../../../components/import_export_jobs';
+import { DatePicker } from '../../../../../components/ml_page/date_picker';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -283,10 +283,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <CreateAnalyticsButton
-                  isDisabled={disabled}
-                  navigateToSourceSelection={navigateToSourceSelection}
-                />
+                <DatePicker />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
