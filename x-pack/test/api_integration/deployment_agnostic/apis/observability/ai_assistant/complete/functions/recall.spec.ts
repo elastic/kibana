@@ -64,6 +64,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(uniqueScores.length).to.be(6);
       });
 
+      it('returns results from both search connectors and internal kb', async () => {
+        const entries = await recall('What happened during the database outage?');
+        const docTypes = uniq(entries.map(({ id }) => id.split('_')[0]));
+        expect(docTypes).to.eql(['animal', 'technical']);
+      });
+
       it('returns different result order for different queries', async () => {
         const databasePromptEntries = await recall('What happened during the database outage?');
         const animalPromptEntries = await recall('Do you have knowledge about animals?');
