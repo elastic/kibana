@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Walker, type WalkerOptions, walk } from './walker';
+export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './walker';
