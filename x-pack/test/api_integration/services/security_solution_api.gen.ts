@@ -255,7 +255,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .send(props.body as object);
     },
     /**
-      * Deletes multiple rules.
+      * Delete detection rules in bulk.
 > warn
 > This API is deprecated and will be removed in Kibana v9.0.
 
