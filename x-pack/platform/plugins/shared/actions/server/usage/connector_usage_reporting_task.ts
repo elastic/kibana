@@ -20,7 +20,7 @@ import { ActionsConfig } from '../config';
 import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
-export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
+export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '5m' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
 export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
@@ -57,8 +57,10 @@ export class ConnectorUsageReportingTask {
     const caCertificatePath = config.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
+      this.logger.info(`caCertificatePath: ${caCertificatePath}`);
       try {
         this.caCertificate = fs.readFileSync(caCertificatePath, 'utf8');
+        this.logger.info(`CA Certificate for the project "${projectId}" read successfully`);
       } catch (e) {
         this.caCertificate = undefined;
         this.logger.error(
@@ -181,7 +183,8 @@ export class ConnectorUsageReportingTask {
     } catch (e) {
       if (attempts < MAX_PUSH_ATTEMPTS) {
         this.logger.error(
-          `Usage data could not be pushed to usage-api. It will be retried (${attempts}). Error:${e.message}`
+          `Usage data could not be pushed to usage-api. It will be retried (${attempts}). Error:${e.message}`,
+          { error: { stack_trace: e.stack } }
         );
 
         return {
