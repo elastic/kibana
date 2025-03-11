@@ -28,7 +28,6 @@ import type { AgentsPerOutputType } from './agents_per_output';
 import { getAgentsPerOutput } from './agents_per_output';
 import type { IntegrationsDetails } from './integrations_collector';
 import { getIntegrationsDetails } from './integrations_collector';
-import { getAgenlessUsage } from './agentless_collectors';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -77,7 +76,7 @@ export const fetchFleetUsage = async (
     license_issued_to: (await esClient.license.get()).license.issued_to,
     deployment_id: appContextService.getCloud()?.deploymentId,
     integrations_details: await getIntegrationsDetails(soClient),
-    agentless_agents: await getAgenlessUsage(soClient, esClient),
+    agentless_agents: await getAgentUsage(soClient, esClient, true),
   };
   return usage;
 };
@@ -90,7 +89,7 @@ const fetchUsage = async (core: CoreSetup, config: FleetConfigType): Promise<Usa
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
-    agentless_agents: await getAgenlessUsage(soClient, esClient),
+    agentless_agents: await getAgentUsage(soClient, esClient, true),
   };
   return usage;
 };
