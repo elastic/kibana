@@ -17,8 +17,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 
 jest.mock('./esqlSelfHealingGraph', () => {
-  return (
-  {
+  return {
     getEsqlSelfHealingGraph: jest.fn().mockReturnValue({
       invoke: jest.fn().mockResolvedValue({
         messages: [
@@ -27,9 +26,9 @@ jest.mock('./esqlSelfHealingGraph', () => {
           },
         ],
       }),
-    })
-  }
-)})
+    }),
+  };
+});
 
 describe('NaturalLanguageESQLTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -121,14 +120,14 @@ describe('NaturalLanguageESQLTool', () => {
     });
 
     it('invokes self healing graph', () => {
-
       const tool = NL_TO_ESQL_TOOL.getTool({
         isOssModel: false,
         ...rest,
       }) as DynamicTool;
 
-
-      const result = tool.invoke({ question: "Generate ESQL to get 100 documents from the .logs index" })
+      const result = tool.invoke({
+        question: 'Generate ESQL to get 100 documents from the .logs index',
+      });
 
       expect(result).resolves.toEqual('Self healing graph response');
     });

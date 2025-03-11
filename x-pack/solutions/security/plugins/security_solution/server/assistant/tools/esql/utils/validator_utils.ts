@@ -1,8 +1,16 @@
-import { ElasticsearchClient } from "@kbn/core/server";
-import { EditorError, parse } from "@kbn/esql-ast";
-import { BaseMessage, HumanMessage } from "@langchain/core/messages";
-import { isEmpty } from "lodash";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EditorError } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
+import { isEmpty } from 'lodash';
 
 export interface ValidateEsqlResult {
   isValid: boolean;
@@ -53,12 +61,17 @@ const formatValidateEsqlResultToHumanReadable = (validateEsqlResult: ValidateEsq
 };
 
 const extractErrorMessage = (error: unknown): string => {
-    if(error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
-      return error.message;
-    }
-  
-    return `Unknown error`;
-  };
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+
+  return `Unknown error`;
+};
 
 export const validateEsql = async (
   esClient: ElasticsearchClient,

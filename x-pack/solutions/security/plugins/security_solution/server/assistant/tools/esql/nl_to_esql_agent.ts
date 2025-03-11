@@ -12,9 +12,12 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ChatCompletionMessageEvent } from '@kbn/inference-common';
 import { Command } from '@langchain/langgraph';
-import type { EsqlSelfHealingAnnotation } from './state';
 import { responseToLangchainMessage } from '@kbn/inference-langchain/src/chat_model/from_inference';
-import { messagesToInference, toolDefinitionToInference } from '@kbn/inference-langchain/src/chat_model/to_inference';
+import {
+  messagesToInference,
+  toolDefinitionToInference,
+} from '@kbn/inference-langchain/src/chat_model/to_inference';
+import type { EsqlSelfHealingAnnotation } from './state';
 
 export const getNlToEsqlAgent = ({
   connectorId,

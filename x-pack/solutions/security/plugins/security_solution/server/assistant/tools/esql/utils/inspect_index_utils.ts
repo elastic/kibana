@@ -1,35 +1,44 @@
-export type GetEntriesAtKeyMapping = { [key: string]: GetEntriesAtKeyMapping | undefined | string } | undefined | string ;
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
+export type GetEntriesAtKeyMapping =
+  | { [key: string]: GetEntriesAtKeyMapping | undefined | string }
+  | undefined
+  | string;
 
 export const getEntriesAtKey = (
-    mapping: GetEntriesAtKeyMapping,
-    keys: string[]
-  ): GetEntriesAtKeyMapping => {
-    if (mapping === undefined) {
-      return undefined;
-    }
-    if (keys.length === 0) {
-      return mapping;
-    }
-  
-    if (typeof mapping !== 'object') {
-      return mapping;
-    }
-  
-    const key = keys.shift();
-    if (key === undefined) {
-      return mapping;
-    }
-  
-    return getEntriesAtKey(mapping[key], keys);
-  };
-  
-  export const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping): Record<string, string> => {
-    if (mapping === undefined) {
-      return {};
-    }
-    return Object.entries(mapping).reduce((acc, [key, value]) => {
-      acc[key] = typeof value === 'string' ? value : 'Object';
-      return acc;
-    }, {} as Record<string, string>);
-  };
+  mapping: GetEntriesAtKeyMapping,
+  keys: string[]
+): GetEntriesAtKeyMapping => {
+  if (mapping === undefined) {
+    return undefined;
+  }
+  if (keys.length === 0) {
+    return mapping;
+  }
+
+  if (typeof mapping !== 'object') {
+    return mapping;
+  }
+
+  const key = keys.shift();
+  if (key === undefined) {
+    return mapping;
+  }
+
+  return getEntriesAtKey(mapping[key], keys);
+};
+
+export const formatEntriesAtKey = (mapping: GetEntriesAtKeyMapping): Record<string, string> => {
+  if (mapping === undefined) {
+    return {};
+  }
+  return Object.entries(mapping).reduce((acc, [key, value]) => {
+    acc[key] = typeof value === 'string' ? value : 'Object';
+    return acc;
+  }, {} as Record<string, string>);
+};
