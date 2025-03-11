@@ -1447,6 +1447,7 @@ module.exports = {
         'src/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
+        'x-pack/solutions/observability/plugins/apm/ui_tests/fixtures/page_objects/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
