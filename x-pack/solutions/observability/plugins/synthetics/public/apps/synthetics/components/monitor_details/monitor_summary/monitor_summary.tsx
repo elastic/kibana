@@ -67,13 +67,13 @@ export const MonitorSummary = () => {
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" wrap={true}>
-        <EuiFlexItem css={{ minWidth: 500, maxWidth: 500 }}>
+        <EuiFlexItem css={{ minWidth: 430 }}>
           <LastTestRun />
         </EuiFlexItem>
         <EuiFlexItem css={{ minWidth: 260 }}>
           <MonitorAlerts dateLabel={dateLabel} from={from} to={to} />
           <EuiSpacer size="m" />
-          <StepDurationPanel />
+          <StepDurationPanel legendPosition="bottom" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
