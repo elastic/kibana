@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Command, END } from '@langchain/langgraph';
-import type { BaseMessage } from '@langchain/core/messages';
 import { getEsqlFromContent } from './common';
 import type { EsqlSelfHealingAnnotation } from './state';
 import { NL_TO_ESQL_AGENT_NODE } from './constants';
@@ -53,7 +52,7 @@ export const getValidatorNode = ({ esClient }: { esClient: ElasticsearchClient }
     return new Command({
       goto: END,
       update: {
-        messages: `${lastMessage.content} \nAll of the queries have been validated and do not need to modified futher.`,
+        messages: `${lastMessage.content} \nAll of the queries have been validated.`,
         maximumValidationAttempts: state.maximumValidationAttempts - 1,
       },
     });
