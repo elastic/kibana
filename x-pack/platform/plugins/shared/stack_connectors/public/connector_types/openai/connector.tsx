@@ -31,7 +31,6 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
 import { OpenAiProviderType } from '../../../common/openai/constants';
@@ -43,7 +42,7 @@ import {
   otherOpenAiSecrets,
   openAiSecrets,
   providerOptions,
-  getOpenAiConfig,
+  openAiConfig,
 } from './constants';
 
 const { emptyField } = fieldValidators;
@@ -53,7 +52,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const [{ config, __internal__, id, name }] = useFormData({
     watch: ['config.apiProvider', '__internal__.hasHeaders'],
   });
-  const enabledAdditionalHeaders = ExperimentalFeaturesService.get().openAIAdditionalHeadersOn;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
@@ -93,7 +91,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         <SimpleConnectorForm
           isEdit={isEdit}
           readOnly={readOnly}
-          configFormSchema={getOpenAiConfig(enabledAdditionalHeaders)}
+          configFormSchema={openAiConfig}
           secretsFormSchema={openAiSecrets}
         />
       )}
