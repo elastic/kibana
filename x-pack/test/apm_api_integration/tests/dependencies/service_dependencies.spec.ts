@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const currentStatsLatencyValues =
           body.serviceDependencies[0].currentStats.latency.timeseries;
-        expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
+        expect(currentStatsLatencyValues?.every(({ y }) => y === 1000000)).to.be(true);
       });
     });
   });
@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const currentStatsLatencyValues =
           body.serviceDependencies[0].currentStats.latency.timeseries;
-        expect(currentStatsLatencyValues.every(({ y }) => y === 1000000)).to.be(true);
+        expect(currentStatsLatencyValues?.every(({ y }) => y === 1000000)).to.be(true);
       });
     });
   });

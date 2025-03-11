@@ -263,7 +263,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           impact: 100,
         });
 
-        const firstValue = roundNumber(opbeansNode?.currentStats.latency.timeseries[0].y);
+        const firstValue = roundNumber(opbeansNode?.currentStats.latency.timeseries?.[0].y);
         const lastValue = roundNumber(last(opbeansNode?.currentStats.latency.timeseries)?.y);
 
         expect(firstValue).to.be(roundNumber(20 / 3));
