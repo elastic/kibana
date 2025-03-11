@@ -44,6 +44,18 @@ export function isNumericField(meta?: DatatableColumnMeta): boolean {
   );
 }
 
+export function getDatatableColumn(table: Datatable | undefined, accessor: string) {
+  return table?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor);
+}
+
+export function getFieldMetaFromDatatable(table: Datatable | undefined, accessor: string) {
+  return getDatatableColumn(table, accessor)?.meta;
+}
+
+export function getFieldTypeFromDatatable(table: Datatable | undefined, accessor: string) {
+  return getFieldMetaFromDatatable(table, accessor)?.type;
+}
+
 /**
  * Returns true for numerical fields, excluding ranges
  *
@@ -53,17 +65,4 @@ export function isNumericField(meta?: DatatableColumnMeta): boolean {
 export function isNumericFieldForDatatable(table: Datatable | undefined, accessor: string) {
   const meta = getFieldMetaFromDatatable(table, accessor);
   return isNumericField(meta);
-}
-
-export function getFieldMetaFromDatatable(table: Datatable | undefined, accessor: string) {
-  return table?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
-    ?.meta;
-}
-
-export function getFieldTypeFromDatatable(table: Datatable | undefined, accessor: string) {
-  return getDatatableColumn(table, accessor)?.meta.type;
-}
-
-export function getDatatableColumn(table: Datatable | undefined, accessor: string) {
-  return table?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor);
 }
