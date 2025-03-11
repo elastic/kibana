@@ -10,6 +10,7 @@ import type {
   ServiceMapSpan,
   ExitSpanDestination,
   ServiceMapRawResponse,
+  ServiceMapTelemetry,
 } from '../../../../common/service_map/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
@@ -24,6 +25,12 @@ import {
 import type { ConnectionNode, GroupResourceNodesResponse } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
+type SeriviceMapState = GroupResourceNodesResponse & Pick<ServiceMapTelemetry, 'tracesCount'>;
+const INITIAL_SERVICE_MAP_STATE: SeriviceMapState = {
+  elements: [],
+  nodesCount: 0,
+  tracesCount: 0,
+};
 export const useServiceMap = ({
   start,
   end,
@@ -43,14 +50,11 @@ export const useServiceMap = ({
   const { config } = useApmPluginContext();
 
   const [serviceMapNodes, setServiceMapNodes] = useState<{
-    data: GroupResourceNodesResponse;
+    data: SeriviceMapState;
     error?: Error | IHttpFetchError<ResponseErrorBody>;
     status: FETCH_STATUS;
   }>({
-    data: {
-      elements: [],
-      nodesCount: 0,
-    },
+    data: INITIAL_SERVICE_MAP_STATE,
     status: FETCH_STATUS.LOADING,
   });
 
@@ -97,7 +101,7 @@ export const useServiceMap = ({
 
     if (status === FETCH_STATUS.FAILURE || error) {
       setServiceMapNodes({
-        data: { elements: [], nodesCount: 0 },
+        data: INITIAL_SERVICE_MAP_STATE,
         status: FETCH_STATUS.FAILURE,
         error,
       });
@@ -108,10 +112,17 @@ export const useServiceMap = ({
       if ('spans' in data) {
         try {
           const transformedData = processServiceMapData(data);
-          setServiceMapNodes({ data: transformedData, status: FETCH_STATUS.SUCCESS });
+          setServiceMapNodes({
+            data: {
+              elements: transformedData.elements,
+              nodesCount: transformedData.nodesCount,
+              tracesCount: data.tracesCount,
+            },
+            status: FETCH_STATUS.SUCCESS,
+          });
         } catch (err) {
           setServiceMapNodes({
-            data: { elements: [], nodesCount: 0 },
+            data: INITIAL_SERVICE_MAP_STATE,
             status: FETCH_STATUS.FAILURE,
             error: err,
           });

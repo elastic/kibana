@@ -172,6 +172,8 @@ export function ServiceMap({
       customMetrics: {
         key1: 'num_of_nodes',
         value1: data.nodesCount,
+        key2: 'num_of_traces',
+        value2: data.tracesCount,
       },
       meta: { rangeFrom: start, rangeTo: end },
     });

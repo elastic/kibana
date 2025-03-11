@@ -15,7 +15,7 @@ import type { ServiceAnomalyStats } from '../anomaly_detection';
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
-  nodesCount?: number;
+  nodesCount: number;
 }
 
 export type GroupedConnection = { label: string } & (ConnectionNode | ConnectionEdge);
@@ -37,9 +37,8 @@ export interface GroupedEdge {
   };
 }
 
-export interface GroupResourceNodesResponse {
+export interface GroupResourceNodesResponse extends Pick<ServiceMapTelemetry, 'nodesCount'> {
   elements: Array<GroupedNode | GroupedEdge | ConnectionElement>;
-  nodesCount: number;
 }
 
 export type ConnectionType = Connection | ConnectionLegacy;
@@ -57,8 +56,9 @@ export interface ServiceMapRawResponse {
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
 }
-export type ServiceMapResponse = ServiceMapTelemetry &
-  (ServiceMapRawResponse | GroupResourceNodesResponse);
+
+export type ServiceMapResponse =
+  | Pick<ServiceMapTelemetry, 'tracesCount'> & (ServiceMapRawResponse | GroupResourceNodesResponse);
 
 export interface ServicesResponse {
   [SERVICE_NAME]: string;
