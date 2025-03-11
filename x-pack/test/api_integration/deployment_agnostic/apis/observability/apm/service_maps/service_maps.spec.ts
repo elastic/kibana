@@ -9,9 +9,15 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from 'expect';
 import { serviceMap, timerange } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'node:stream';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { SupertestReturnType } from '../../../../../../apm_api_integration/common/apm_api_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import {
+  extractExitSpansConnections,
+  getElements,
+  getIds,
+  getSpans,
+  partitionElements,
+} from './utils';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =
@@ -39,7 +45,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).toBe(200);
-        expect(response.body.elements.length).toBe(0);
+        expect(getElements(response).length).toBe(0);
+      });
+
+      it('returns an empty list (api v2)', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: `GET /internal/apm/service-map`,
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              environment: 'ENVIRONMENT_ALL',
+              useV2: true,
+            },
+          },
+        });
+
+        expect(response.status).toBe(200);
+        expect(getSpans(response).length).toBe(0);
       });
 
       describe('/internal/apm/service-map/service/{serviceName} without data', () => {
@@ -150,7 +173,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).toBe(200);
-        expect(response.body.elements.length).toBeGreaterThan(0);
+        expect(getElements(response).length).toBeGreaterThan(0);
+      });
+
+      it('returns service map spans (api v2)', async () => {
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/service-map',
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              environment: 'ENVIRONMENT_ALL',
+              useV2: true,
+            },
+          },
+        });
+
+        const spans = getSpans(response);
+        const exitSpansConnections = extractExitSpansConnections(spans);
+
+        expect(response.status).toBe(200);
+        expect(exitSpansConnections).toEqual([
+          {
+            serviceName: 'advertService',
+            spanDestinationServiceResource: 'elasticsearch',
+          },
+          {
+            destinationService: {
+              serviceName: 'advertService',
+            },
+            serviceName: 'frontend-node',
+            spanDestinationServiceResource: 'advertService',
+          },
+          {
+            destinationService: {
+              serviceName: 'frontend-node',
+            },
+            serviceName: 'frontend-rum',
+            spanDestinationServiceResource: 'frontend-node',
+          },
+        ]);
       });
     });
 
@@ -205,7 +267,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(status).toBe(200);
 
-        const { nodes, edges } = partitionElements(body.elements);
+        const { nodes, edges } = partitionElements(getElements({ body }));
 
         expect(getIds(nodes)).toEqual([
           '>elasticsearch',
@@ -221,16 +283,4 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
   });
-}
-
-type ConnectionElements = APIReturnType<'GET /internal/apm/service-map'>['elements'];
-
-function partitionElements(elements: ConnectionElements) {
-  const edges = elements.filter(({ data }) => 'source' in data && 'target' in data);
-  const nodes = elements.filter((element) => !edges.includes(element));
-  return { edges, nodes };
-}
-
-function getIds(elements: ConnectionElements) {
-  return elements.map(({ data }) => data.id).sort();
 }
