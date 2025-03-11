@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DiscoverEBTManager } from './discover_ebt_manager';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 
 describe('DiscoverEBTManager', () => {
