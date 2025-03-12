@@ -14,7 +14,7 @@ Then you can run the parallel tests in another terminal:
 
 ```bash
 // ESS
-npx playwright test --project local --config x-pack/solutions/observability/plugins/apm/ui_tests/parallel.playwright.config.ts --grep @ess
+npx playwright test --config x-pack/solutions/observability/plugins/apm/ui_tests/parallel.playwright.config.ts --project=local --grep @ess
 
 // Serverless
 npx playwright test --project local --config x-pack/solutions/observability/plugins/apm/ui_tests/parallel.playwright.config.ts --grep @svlOblt
