@@ -6,7 +6,17 @@
  */
 
 import React from 'react';
-import { EuiTextArea, EuiFormRow, EuiSpacer, EuiCallOut, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiTextArea,
+  EuiFormRow,
+  EuiSpacer,
+  EuiCallOut,
+  EuiPanel,
+  EuiTitle,
+  EuiAccordion,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -33,127 +43,148 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
 
   return (
     <>
-      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-        <EuiTitle size="s">
-          <h3 id="FleetEditOutputFlyoutKafkaAuthenticationTitle">
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.sslAuthenticationTitle"
-              defaultMessage="Authentication"
-            />
-          </h3>
-        </EuiTitle>
+      <EuiAccordion
+        id="advancedSSLOptions"
+        data-test-subj="advancedSSLOptionsButton"
+        buttonClassName="ingest-active-button"
+        buttonContent={
+          <div>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.fleet.editOutputFlyout.SSLOptionsToggleLabel"
+                  defaultMessage="Authentication"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiText size="s">
+              <p>
+                <EuiTextColor color="subdued">
+                  {showmTLSText ? (
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.SSLOptionsDescription"
+                      defaultMessage="Add these settings only when setting up an mTLS connection"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.fleetServerHosts.SSLOptionsToggleLabel"
+                      defaultMessage="Set up a TLS secure connection"
+                    />
+                  )}
+                </EuiTextColor>
+              </p>
+            </EuiText>
+          </div>
+        }
+      >
         <EuiSpacer size="s" />
-        <p>
-          {showmTLSText && (
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
-              defaultMessage="Add these settings only when setting up an mTLS connection."
-            />
-          )}
-        </p>
-        <EuiSpacer size="s" />
-        <EuiCallOut
-          title={i18n.translate('xpack.fleet.editDownloadSourcesFlyout.sslWarningCallout', {
-            defaultMessage:
-              'Invalid settings can break the connection between Elastic Agent and the configured output. If this happens, you will need to provide valid credentials.',
-          })}
-          color="warning"
-          iconType="warning"
-        />
-        <EuiSpacer size="m" />
-        <MultiRowInput
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
-            {
-              defaultMessage: 'Specify certificate authority',
-            }
-          )}
-          label={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
-            {
-              defaultMessage: 'Server SSL certificate authorities (optional)',
-            }
-          )}
-          multiline={true}
-          sortable={false}
-          {...inputs.sslCertificateAuthoritiesInput.props}
-        />
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.sslCertificateInputLabel"
-              defaultMessage="Client SSL certificate"
-            />
-          }
-          {...inputs.sslCertificateInput.formRowProps}
-        >
-          <EuiTextArea
-            fullWidth
-            rows={5}
-            {...inputs.sslCertificateInput.props}
+        <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+          <EuiCallOut
+            title={i18n.translate('xpack.fleet.editDownloadSourcesFlyout.sslWarningCallout', {
+              defaultMessage:
+                'Invalid settings can break the connection between Elastic Agent and the configured output. If this happens, you will need to provide valid credentials.',
+            })}
+            color="warning"
+            iconType="warning"
+          />
+          <EuiSpacer size="m" />
+          <MultiRowInput
             placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
+              'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
               {
-                defaultMessage: 'Specify SSL certificate',
+                defaultMessage: 'Specify certificate authority',
               }
             )}
+            label={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+              {
+                defaultMessage: 'Server SSL certificate authorities',
+              }
+            )}
+            multiline={true}
+            sortable={false}
+            {...inputs.sslCertificateAuthoritiesInput.props}
           />
-        </EuiFormRow>
-        {!useSecretsStorage ? (
-          <SecretFormRow
+          <EuiFormRow
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-                defaultMessage="Client SSL certificate key"
+                id="xpack.fleet.settings.editOutputFlyout.sslCertificateInputLabel"
+                defaultMessage="Client SSL certificate"
               />
             }
-            {...inputs.sslKeyInput.formRowProps}
-            useSecretsStorage={useSecretsStorage}
-            onToggleSecretStorage={onToggleSecretAndClearValue}
-            disabled={!useSecretsStorage}
+            {...inputs.sslCertificateInput.formRowProps}
           >
             <EuiTextArea
               fullWidth
               rows={5}
-              {...inputs.sslKeyInput.props}
+              {...inputs.sslCertificateInput.props}
               placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
                 {
-                  defaultMessage: 'Specify certificate key',
+                  defaultMessage: 'Specify SSL certificate',
                 }
               )}
             />
-          </SecretFormRow>
-        ) : (
-          <SecretFormRow
-            fullWidth
-            title={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle', {
-              defaultMessage: 'Client SSL certificate key',
-            })}
-            {...inputs.sslKeySecretInput.formRowProps}
-            useSecretsStorage={useSecretsStorage}
-            isConvertedToSecret={isConvertedToSecret}
-            onToggleSecretStorage={onToggleSecretAndClearValue}
-            cancelEdit={inputs.sslKeySecretInput.cancelEdit}
-          >
-            <EuiTextArea
+          </EuiFormRow>
+          {!useSecretsStorage ? (
+            <SecretFormRow
               fullWidth
-              rows={5}
-              {...inputs.sslKeySecretInput.props}
-              data-test-subj="sslKeySecretInput"
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+                  defaultMessage="Client SSL certificate key"
+                />
+              }
+              {...inputs.sslKeyInput.formRowProps}
+              useSecretsStorage={useSecretsStorage}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
+              disabled={!useSecretsStorage}
+            >
+              <EuiTextArea
+                fullWidth
+                rows={5}
+                {...inputs.sslKeyInput.props}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                  {
+                    defaultMessage: 'Specify certificate key',
+                  }
+                )}
+              />
+            </SecretFormRow>
+          ) : (
+            <SecretFormRow
+              fullWidth
+              title={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle',
                 {
-                  defaultMessage: 'Specify certificate key',
+                  defaultMessage: 'Client SSL certificate key',
                 }
               )}
-            />
-          </SecretFormRow>
-        )}
-      </EuiPanel>
-      <EuiSpacer size="s" />
+              {...inputs.sslKeySecretInput.formRowProps}
+              useSecretsStorage={useSecretsStorage}
+              isConvertedToSecret={isConvertedToSecret}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
+              cancelEdit={inputs.sslKeySecretInput.cancelEdit}
+            >
+              <EuiTextArea
+                fullWidth
+                rows={5}
+                {...inputs.sslKeySecretInput.props}
+                data-test-subj="sslKeySecretInput"
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
+                  {
+                    defaultMessage: 'Specify certificate key',
+                  }
+                )}
+              />
+            </SecretFormRow>
+          )}
+        </EuiPanel>
+      </EuiAccordion>
+      <EuiSpacer size="m" />
     </>
   );
 };

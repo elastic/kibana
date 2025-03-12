@@ -107,6 +107,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         })}
         {...inputs.logstashHostsInput.props}
       />
+      <EuiSpacer size="m" />
       <SSLFormSection
         inputs={inputs}
         useSecretsStorage={useSecretsStorage}
