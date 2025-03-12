@@ -346,25 +346,7 @@ const DraggableImpl = memo(function DraggableImpl({
 
   return (
     <>
-      <div
-        className={classNames(className, 'domDraggable', {
-          'domDraggable_active--move': draggedItemProps && dragType === 'move' && !keyboardMode,
-          'domDraggable_dragover_keyboard--move': shouldShowGhostImageInstead,
-          'domDraggable_active--copy': draggedItemProps && dragType === 'copy' && !keyboardMode,
-          'domDraggable_dragover_keyboard--copy':
-            keyboardMode && draggedItemProps && hoveredDropTarget,
-        })}
-        data-test-subj={
-          dataTestSubj || `${dataTestSubjPrefix}_domDraggable_${value.humanData.label}`
-        }
-        draggable
-        onDragEnd={dragEnd}
-        onDragStart={dragStart}
-        onMouseDown={removeSelection}
-      >
-        {children}
-      </div>
-      <EuiScreenReaderOnly showOnFocus>
+     <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={value.humanData.label}
           aria-describedby={ariaDescribedBy || `${dataTestSubjPrefix}-keyboardInstructions`}
@@ -407,6 +389,25 @@ const DraggableImpl = memo(function DraggableImpl({
           onKeyUp={modifierHandlers.onKeyUp}
         />
       </EuiScreenReaderOnly>
+      <div
+        className={classNames(className, 'domDraggable', {
+          'domDraggable_active--move': draggedItemProps && dragType === 'move' && !keyboardMode,
+          'domDraggable_dragover_keyboard--move': shouldShowGhostImageInstead,
+          'domDraggable_active--copy': draggedItemProps && dragType === 'copy' && !keyboardMode,
+          'domDraggable_dragover_keyboard--copy':
+            keyboardMode && draggedItemProps && hoveredDropTarget,
+        })}
+        data-test-subj={
+          dataTestSubj || `${dataTestSubjPrefix}_domDraggable_${value.humanData.label}`
+        }
+        draggable
+        onDragEnd={dragEnd}
+        onDragStart={dragStart}
+        onMouseDown={removeSelection}
+      >
+        {children}
+      </div>
+     
     </>
   );
 });
