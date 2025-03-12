@@ -45031,28 +45031,48 @@
                                                       "type": "object"
                                                     },
                                                     {
-                                                      "properties": {
-                                                        "format": {
-                                                          "minLength": 1,
-                                                          "type": "string"
-                                                        },
-                                                        "type": {
-                                                          "enum": [
-                                                            "keyword",
-                                                            "match_only_text",
-                                                            "long",
-                                                            "double",
-                                                            "date",
-                                                            "boolean",
-                                                            "ip"
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "format": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "type": {
+                                                              "enum": [
+                                                                "keyword",
+                                                                "match_only_text",
+                                                                "long",
+                                                                "double",
+                                                                "date",
+                                                                "boolean",
+                                                                "ip"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "type"
                                                           ],
-                                                          "type": "string"
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "type": {
+                                                              "enum": [
+                                                                "system"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "type"
+                                                          ],
+                                                          "type": "object"
                                                         }
-                                                      },
-                                                      "required": [
-                                                        "type"
-                                                      ],
-                                                      "type": "object"
+                                                      ]
                                                     }
                                                   ]
                                                 },
@@ -46016,6 +46036,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
+        "description": "Upserts the group settings of a group stream definition",
         "operationId": "put-streams-name-group",
         "parameters": [
           {
@@ -46072,7 +46093,7 @@
           }
         },
         "responses": {},
-        "summary": "Upserts the group settings of a group stream definition",
+        "summary": "Upsert group stream settings",
         "tags": [
           "streams"
         ],
@@ -46654,28 +46675,48 @@
                                           "type": "object"
                                         },
                                         {
-                                          "properties": {
-                                            "format": {
-                                              "minLength": 1,
-                                              "type": "string"
-                                            },
-                                            "type": {
-                                              "enum": [
-                                                "keyword",
-                                                "match_only_text",
-                                                "long",
-                                                "double",
-                                                "date",
-                                                "boolean",
-                                                "ip"
+                                          "anyOf": [
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "type": {
+                                                  "enum": [
+                                                    "keyword",
+                                                    "match_only_text",
+                                                    "long",
+                                                    "double",
+                                                    "date",
+                                                    "boolean",
+                                                    "ip"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
                                               ],
-                                              "type": "string"
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "enum": [
+                                                    "system"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
+                                              ],
+                                              "type": "object"
                                             }
-                                          },
-                                          "required": [
-                                            "type"
-                                          ],
-                                          "type": "object"
+                                          ]
                                         }
                                       ]
                                     },
