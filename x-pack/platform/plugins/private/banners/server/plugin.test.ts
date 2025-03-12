@@ -23,6 +23,7 @@ describe('BannersPlugin', () => {
       textContent: 'foo',
       backgroundColor: '#000000',
       textColor: '#FFFFFF',
+      linkColor: '#61A2FF',
       disableSpaceBanners: false,
     };
     pluginInitContext = coreMock.createPluginInitializerContext();
