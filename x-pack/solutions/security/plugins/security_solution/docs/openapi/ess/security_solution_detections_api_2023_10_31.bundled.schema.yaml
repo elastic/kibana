@@ -654,8 +654,6 @@ paths:
                           - id: T1193
                             name: Spearphishing Attachment
                             reference: 'https://attack.mitre.org/techniques/T1193'
-                  - id: 56b22b65-173e-4a5b-b27a-82599cb1433e
-                    name: New name
             schema:
               items:
                 $ref: '#/components/schemas/RuleUpdateProps'
