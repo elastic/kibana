@@ -45,6 +45,7 @@ journey(`AnnotationsList`, async ({ page, params }) => {
     await page.getByTestId('sloSelector').getByTestId('comboBoxSearchInput').click();
     await page.click('text="All SLOs"');
 
+    await page.getByTestId('annotationTitle').click();
     await page.click('text=Save');
     await page.getByTestId('toastCloseButton').click();
   });
