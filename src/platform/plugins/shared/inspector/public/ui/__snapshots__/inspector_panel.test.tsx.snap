@@ -20,55 +20,67 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFlexItem insInspectorViewChooserContainer emotion-euiFlexItem-grow-1"
+    class="insInspectorViewChooserContainer"
   >
     <div
       class="euiTabs emotion-euiTabs-s-bottomBorder"
       data-test-subj="inspectorViewChooser"
       role="tablist"
     >
-      <button
-        aria-selected="true"
-        class="euiTab euiTab-isSelected emotion-euiTab-selected"
-        data-test-subj="inspectorViewChooserView 1"
-        role="tab"
-        tabindex="0"
-        type="button"
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
-        <span
-          class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+        <button
+          aria-selected="true"
+          class="euiTab euiTab-isSelected emotion-euiTab-selected"
+          data-test-subj="inspectorViewChooserView 1"
+          role="tab"
+          tabindex="0"
+          type="button"
         >
-          View 1
-        </span>
-      </button>
-      <button
-        aria-selected="false"
-        class="euiTab emotion-euiTab"
-        data-test-subj="inspectorViewChooserFoo View"
-        role="tab"
-        tabindex="-1"
-        type="button"
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            View 1
+          </span>
+        </button>
+      </span>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
-        <span
-          class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+        <button
+          aria-selected="false"
+          class="euiTab emotion-euiTab"
+          data-test-subj="inspectorViewChooserFoo View"
+          role="tab"
+          tabindex="-1"
+          type="button"
         >
-          Foo View
-        </span>
-      </button>
-      <button
-        aria-selected="false"
-        class="euiTab emotion-euiTab"
-        data-test-subj="inspectorViewChooserNever"
-        role="tab"
-        tabindex="-1"
-        type="button"
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            Foo View
+          </span>
+        </button>
+      </span>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
-        <span
-          class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+        <button
+          aria-selected="false"
+          class="euiTab emotion-euiTab"
+          data-test-subj="inspectorViewChooserNever"
+          role="tab"
+          tabindex="-1"
+          type="button"
         >
-          Never
-        </span>
-      </button>
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            Never
+          </span>
+        </button>
+      </span>
     </div>
   </div>,
   <div
