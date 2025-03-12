@@ -10,16 +10,10 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 import { useKibana } from './hooks/use_kibana';
-import { PlaygroundPageMode } from './types';
 import { App } from './components/app';
 import { usePlaygroundBreadcrumbs } from './hooks/use_playground_breadcrumbs';
 
-interface PlaygroundOverviewProps {
-  pageMode?: PlaygroundPageMode;
-}
-export const PlaygroundOverview: React.FC<PlaygroundOverviewProps> = ({
-  pageMode = PlaygroundPageMode.chat,
-}) => {
+export const PlaygroundOverview = () => {
   const {
     services: { history, console: consolePlugin, searchNavigation },
   } = useKibana();
@@ -40,7 +34,7 @@ export const PlaygroundOverview: React.FC<PlaygroundOverviewProps> = ({
         panelled={false}
         solutionNav={searchNavigation?.useClassicNavigation(history)}
       >
-        <App showDocs pageMode={pageMode} />
+        <App showDocs />
         {embeddableConsole}
       </KibanaPageTemplate>
     </PlaygroundProvider>

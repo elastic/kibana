@@ -3060,7 +3060,7 @@
           "\nThe type of the anomaly result, such as bucket, influencer or record."
         ],
         "signature": [
-          "\"bucket\" | \"record\" | \"influencer\""
+          "\"record\" | \"bucket\" | \"influencer\""
         ],
         "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
