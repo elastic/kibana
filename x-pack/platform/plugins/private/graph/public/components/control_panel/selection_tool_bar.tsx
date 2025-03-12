@@ -71,7 +71,10 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
       gutterSize="s"
       alignItems="center"
       responsive={false}
-      css={vertexSelectionTypesBarStyles}
+      css={css`
+        margin-top: 0;
+        margin-bottom: 0;
+      `}
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={selectAllButtonMsg}>
@@ -136,8 +139,3 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
     </EuiFlexGroup>
   );
 };
-
-const vertexSelectionTypesBarStyles = css`
-  margin-top: 0;
-  margin-bottom: 0;
-`;
