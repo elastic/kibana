@@ -464,6 +464,19 @@ describe('Alerts Client', () => {
           spy.mockRestore();
         });
 
+        test('should not query for the alerts if the rule type is not a lifecycle rule', async () => {
+          const alertsClient = new AlertsClient({
+            ...alertsClientParams,
+            ruleType: {
+              ...alertsClientParams.ruleType,
+              autoRecoverAlerts: false, // not a lifecycle rule
+            },
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          expect(clusterClient.search).not.toHaveBeenCalled();
+        });
+
         test('should log an error and throw if query returns error', async () => {
           clusterClient.search.mockImplementation(() => {
             throw new Error('search failed!');

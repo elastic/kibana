@@ -168,56 +168,59 @@ export class AlertsClient<
     }
     await this.legacyAlertsClient.initializeExecution(opts);
 
-    const getTrackedAlerts = async () => {
-      const result = await this.search({
-        seq_no_primary_term: true,
-        query: {
-          bool: {
-            must: {
-              term: {
-                [ALERT_RULE_UUID]: this.options.rule.id,
+    // No need to fetch the tracked alerts for the non-lifecycle rules
+    if (this.ruleType.autoRecoverAlerts) {
+      const getTrackedAlerts = async () => {
+        const result = await this.search({
+          seq_no_primary_term: true,
+          query: {
+            bool: {
+              must: {
+                term: {
+                  [ALERT_RULE_UUID]: this.options.rule.id,
+                },
               },
-            },
-            must_not: {
-              term: {
-                [ALERT_PREVIOUS_ACTION_GROUP]: ALERT_STATUS_RECOVERED,
+              must_not: {
+                term: {
+                  [ALERT_PREVIOUS_ACTION_GROUP]: ALERT_STATUS_RECOVERED,
+                },
               },
+              should: [
+                { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
+                { term: { [ALERT_STATUS]: ALERT_STATUS_RECOVERED } },
+              ],
             },
-            should: [
-              { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
-              { term: { [ALERT_STATUS]: ALERT_STATUS_RECOVERED } },
-            ],
           },
-        },
-      });
-      return result.hits;
-    };
+        });
+        return result.hits;
+      };
 
-    try {
-      // get all AAD alerts
-      const results = await getTrackedAlerts();
+      try {
+        // get all AAD alerts
+        const results = await getTrackedAlerts();
 
-      for (const hit of results.flat()) {
-        const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
-        const alertUuid = get(alertHit, ALERT_UUID);
-        const alertId = get(alertHit, ALERT_INSTANCE_ID);
+        for (const hit of results.flat()) {
+          const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
+          const alertUuid = get(alertHit, ALERT_UUID);
+          const alertId = get(alertHit, ALERT_INSTANCE_ID);
 
-        if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
-          this.trackedAlerts.active[alertId] = alertHit;
+          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
+            this.trackedAlerts.active[alertId] = alertHit;
+          }
+          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
+            this.trackedAlerts.recovered[alertId] = alertHit;
+          }
+          this.trackedAlerts.indices[alertUuid] = hit._index;
+          this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
+          this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
         }
-        if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
-          this.trackedAlerts.recovered[alertId] = alertHit;
-        }
-        this.trackedAlerts.indices[alertUuid] = hit._index;
-        this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
-        this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
+      } catch (err) {
+        this.options.logger.error(
+          `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
+          this.logTags
+        );
+        throw err;
       }
-    } catch (err) {
-      this.options.logger.error(
-        `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
-        this.logTags
-      );
-      throw err;
     }
   }
 
