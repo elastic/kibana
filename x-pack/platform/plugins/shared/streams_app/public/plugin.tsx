@@ -47,14 +47,17 @@ export class StreamsAppPlugin
   start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = new StreamsAppLocatorDefinition();
     pluginsStart.share.url.locators.create(locator);
-    pluginsStart.discoverShared.features.registry.register({
-      id: 'streams',
-      renderStreamsField: createDiscoverStreamsLink({
-        streamStatus$: pluginsStart.streams.status$,
-        streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
-        locator: pluginsStart.share.url.locators.get(locator.id)!,
-        coreApplication: coreStart.application,
-      }),
+    pluginsStart.streams.status$.subscribe((status) => {
+      if (status.status !== 'enabled') return;
+      pluginsStart.discoverShared.features.registry.register({
+        id: 'streams',
+        renderStreamsField: createDiscoverStreamsLink({
+          streamStatus$: pluginsStart.streams.status$,
+          streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
+          locator: pluginsStart.share.url.locators.get(locator.id)!,
+          coreApplication: coreStart.application,
+        }),
+      });
     });
     return {
       createStreamsApplicationComponent: () => {

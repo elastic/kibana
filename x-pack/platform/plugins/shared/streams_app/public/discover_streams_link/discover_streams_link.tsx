@@ -6,11 +6,9 @@
  */
 
 import { DataTableRecord } from '@kbn/discover-utils';
-import { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiFlexGroup, EuiTitle, EuiBetaBadge, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -19,18 +17,12 @@ import { StreamsAppLocator } from '../app_locator';
 
 export interface DiscoverStreamsLinkProps {
   doc: DataTableRecord;
-  streamStatus$: StreamsPluginStart['status$'];
   streamsRepositoryClient: StreamsRepositoryClient;
   coreApplication: CoreStart['application'];
   locator: StreamsAppLocator;
 }
 
 function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
-  const { streamStatus$ } = props;
-  const streamStatus = useObservable(streamStatus$);
-  if (streamStatus?.status !== 'enabled') {
-    return null;
-  }
   return (
     <RedirectAppLinks coreStart={{ application: props.coreApplication }}>
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
