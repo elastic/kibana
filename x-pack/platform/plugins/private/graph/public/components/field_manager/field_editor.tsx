@@ -154,6 +154,7 @@ export function FieldEditor({
                     textDecoration: 'line-through',
                   },
 
+                  // Chrome fix for focus: duplicate or Safari will ignore completely the disabled rule
                   '&:hover:not(:focus-visible), &:focus:not(:focus-visible)': {
                     opacity: 0.7,
                     textDecoration: 'line-through',
@@ -414,6 +415,7 @@ const styles = {
       width: 'auto',
       marginRight: euiTheme.size.xs,
     }),
+
   displayFrom: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.s,

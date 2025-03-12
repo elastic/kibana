@@ -253,6 +253,7 @@ const styles = {
   bar: ({ euiTheme }: UseEuiTheme) => `
     margin: ${euiTheme.size.s};
   `,
+
   container: ({ euiTheme }: UseEuiTheme) => `
     display: flex;
     flex-direction: column;
@@ -260,6 +261,7 @@ const styles = {
     position: relative;
     background: ${euiTheme.colors.emptyShade};
   `,
+
   visualization: css({
     flex: 1,
     display: 'flex',

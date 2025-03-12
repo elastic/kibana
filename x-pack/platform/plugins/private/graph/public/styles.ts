@@ -11,7 +11,8 @@ import { css } from '@emotion/react';
 export const gphFieldBadgeSizeStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
     height: euiTheme.size.l,
-    lineHeight: `calc(${euiTheme.size.l} - 2px)`, // Subtract 2 for the border
+    // Subtract 2 for the border
+    lineHeight: `calc(${euiTheme.size.l} - 2px)`,
   });
 
 export const gphSidebarHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
@@ -31,11 +32,13 @@ export const gphSidebarHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
 export const gphSidebarPanelStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
     maxHeight: `calc(${euiTheme.size.l} * 10)`,
-    overflowY: 'hidden', // Invalid property hidden auto;
+    // Invalid property hidden auto;
+    overflowY: 'hidden',
   });
 
 export const noUserSelectStyles = css({
   userSelect: 'none',
-  WebkitTouchCallout: 'none', // Invalid property value: https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-touch-callout
+  // Invalid property value: https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-touch-callout
+  WebkitTouchCallout: 'none',
   WebkitTapHighlightColor: 'transparent',
 });
