@@ -8,8 +8,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo } from '@kbn/expression-utils';
 import { CustomElementModal } from '../custom_element_modal';
 
 storiesOf('components/Elements/CustomElementModal', module)
@@ -42,10 +41,10 @@ storiesOf('components/Elements/CustomElementModal', module)
     (_, props) => (
       <CustomElementModal
         title="Edit custom element"
-        image={props?.elasticLogo}
+        image={elasticLogo}
         onCancel={action('onCancel')}
         onSave={action('onSave')}
       />
     ),
-    { decorators: [waitFor(getElasticLogo())] }
+    { decorators: [] }
   );
