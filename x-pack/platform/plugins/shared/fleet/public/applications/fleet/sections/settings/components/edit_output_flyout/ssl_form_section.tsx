@@ -92,7 +92,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           {type === 'download_source' ? (
             <EuiCallOut
               title={i18n.translate(
-                'xpack.fleet.editOutputFlyout.fleetserverHost.sslWarningCallout',
+                'xpack.fleet.editOutputFlyout.downloadSource.sslWarningCallout',
                 {
                   defaultMessage:
                     'Invalid settings can prevent Elastic Agent from being able to upgrade. If this happens, you will need to provide valid credentials.',
