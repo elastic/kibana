@@ -31,7 +31,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
@@ -81,6 +81,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
   }) => {
+    const { docLinks } = useStartServices();
+
     const config = useConfig();
     const isExperimentalDataStreamSettingsEnabled =
       config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
@@ -350,7 +352,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                   values={{
                                     learnMore: (
                                       <EuiLink
-                                        //href={docLinks.links.fleet.datastreamsNamingScheme}
+                                        href={docLinks.links.fleet.datastreamsNamingScheme}
                                         target="_blank"
                                       >
                                         {i18n.translate(
@@ -387,7 +389,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               onChange={(type: string) => {
                                 updatePackagePolicyInputStream({
                                   data_stream: {
-                                    ...packageInputStream.data_stream,
+                                    ...packagePolicyInputStream.data_stream,
                                     type: type,
                                   }
                                 });
