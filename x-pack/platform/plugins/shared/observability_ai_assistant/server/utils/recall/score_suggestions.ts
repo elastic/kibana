@@ -33,6 +33,7 @@ export async function scoreSuggestions({
   suggestions,
   messages,
   userPrompt,
+  userMessageFunctionName,
   context,
   chat,
   signal,
@@ -41,6 +42,7 @@ export async function scoreSuggestions({
   suggestions: RecalledSuggestion[];
   messages: Message[];
   userPrompt: string;
+  userMessageFunctionName?: string;
   context: string;
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
@@ -49,6 +51,7 @@ export async function scoreSuggestions({
   relevantDocuments: RecalledSuggestion[];
   scores: Array<{ id: string; score: number }>;
 }> {
+  // console.log('******* scoreSuggestions - messages', messages);
   const shortIdTable = new ShortIdTable();
 
   const newUserMessageContent =
@@ -81,7 +84,10 @@ export async function scoreSuggestions({
     '@timestamp': new Date().toISOString(),
     message: {
       role: MessageRole.User,
-      content: newUserMessageContent,
+      content: userMessageFunctionName
+        ? JSON.stringify(newUserMessageContent)
+        : newUserMessageContent,
+      ...(userMessageFunctionName ? { name: userMessageFunctionName } : {}),
     },
   };
 
