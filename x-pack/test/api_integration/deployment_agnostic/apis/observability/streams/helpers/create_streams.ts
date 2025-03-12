@@ -23,9 +23,6 @@ const streams: StreamPutItem[] = [
             '@timestamp': {
               type: 'date',
             },
-            'stream.name': {
-              type: 'keyword',
-            },
             'scope.dropped_attributes_count': {
               type: 'long',
             },
@@ -67,6 +64,9 @@ const streams: StreamPutItem[] = [
             },
             'resource.attributes.host.name': {
               type: 'keyword',
+            },
+            'stream.name': {
+              type: 'system',
             },
           },
           routing: [

@@ -30,7 +30,7 @@ export const useMonitorAddEditBreadcrumbs = (isEdit?: boolean) => {
 export const ADD_MONITOR_CRUMB = i18n.translate(
   'xpack.synthetics.monitorManagement.addMonitorCrumb',
   {
-    defaultMessage: 'Add monitor',
+    defaultMessage: 'Create monitor',
   }
 );
 

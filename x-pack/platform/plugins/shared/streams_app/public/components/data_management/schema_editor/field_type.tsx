@@ -24,5 +24,10 @@ export const FieldType = ({
       values: { aliasFor },
     });
   }
-  return <FieldNameWithIcon name={FIELD_TYPE_MAP[type].label} type={type} />;
+  return (
+    <FieldNameWithIcon
+      name={FIELD_TYPE_MAP[type].label}
+      type={type !== 'system' ? type : undefined}
+    />
+  );
 };

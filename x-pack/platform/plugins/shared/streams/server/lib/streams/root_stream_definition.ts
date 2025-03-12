@@ -22,7 +22,7 @@ export const rootStreamDefinition: WiredStreamDefinition = {
           type: 'date',
         },
         'stream.name': {
-          type: 'keyword',
+          type: 'system',
         },
         ...baseFields,
       },

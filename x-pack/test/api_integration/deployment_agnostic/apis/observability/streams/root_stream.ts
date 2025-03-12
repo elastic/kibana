@@ -70,6 +70,9 @@ const rootStreamDefinition: WiredStreamDefinition = {
         'resource.attributes.host.name': {
           type: 'keyword',
         },
+        'stream.name': {
+          type: 'system',
+        },
       },
     },
   },

@@ -30,6 +30,9 @@ export function generateLayer(
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
+    if (props.type === 'system') {
+      return;
+    }
     const property: MappingProperty = {
       type: props.type,
     };
