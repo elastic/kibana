@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
-import { cloneDeep, pick } from 'lodash';
 import { useCallback, useRef } from 'react';
+
 import { GridLayoutStateManager, RowInteractionEvent } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { getRowKeysInOrder } from '../utils/resolve_grid_row';
+import { commitAction, moveAction, startAction } from './row_state_manager_actions';
 import {
   getPointerPosition,
   isMouseEvent,
@@ -39,89 +38,23 @@ export const useGridLayoutRowEvents = ({
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
 
-      const onStart = () => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        if (!headerRef) return;
-
-        const newStartingPosition = headerRef.getBoundingClientRect();
-        startingPosition.current = {
-          top: newStartingPosition.top,
-          right: newStartingPosition.x,
-        };
-        startingMouse.current = pick(getPointerPosition(e), ['clientX', 'clientY']);
-
-        gridLayoutStateManager.activeRow$.next({
-          id: rowId,
-          startingPosition: startingPosition.current,
-          translate: {
-            top: 0,
-            left: 0,
-          },
-        });
-      };
+      const onStart = () =>
+        startAction(e, gridLayoutStateManager, rowId, startingPosition, startingMouse);
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getPointerPosition(ev);
         }
-
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        if (!headerRef) return;
-
-        const currentLayout =
-          gridLayoutStateManager.proposedGridLayout$.getValue() ??
-          gridLayoutStateManager.gridLayout$.getValue();
-        const currentRowOrder = getRowKeysInOrder(currentLayout);
-        currentRowOrder.shift(); // drop first row since nothing can go above it
-        const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current).sort(
-          (idA, idB) => {
-            // if expanded, get dimensions of row; otherwise, use the header
-            const rowRefA = currentLayout[idA].isCollapsed
-              ? gridLayoutStateManager.headerRefs.current[idA]
-              : gridLayoutStateManager.rowRefs.current[idA];
-            const rowRefB = currentLayout[idB].isCollapsed
-              ? gridLayoutStateManager.headerRefs.current[idB]
-              : gridLayoutStateManager.rowRefs.current[idB];
-
-            if (!rowRefA || !rowRefB) return 0;
-            // switch the order when the dragged row goes beyond the mid point of the row it's compared against
-            const { top: topA, height: heightA } = rowRefA.getBoundingClientRect();
-            const { top: topB, height: heightB } = rowRefB.getBoundingClientRect();
-            const midA = topA + heightA / 2;
-            const midB = topB + heightB / 2;
-
-            return midA - midB;
-          }
+        moveAction(
+          gridLayoutStateManager,
+          rowId,
+          startingPosition.current,
+          startingMouse.current,
+          pointerPixel.current
         );
-        if (!deepEqual(currentRowOrder, updatedRowOrder)) {
-          const updatedLayout = cloneDeep(currentLayout);
-          updatedRowOrder.forEach((id, index) => {
-            updatedLayout[id].order = index + 1;
-          });
-          gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
-        }
-
-        gridLayoutStateManager.activeRow$.next({
-          id: rowId,
-          startingPosition: startingPosition.current,
-          translate: {
-            top: pointerPixel.current.clientY - startingMouse.current.clientY,
-            left: pointerPixel.current.clientX - startingMouse.current.clientX,
-          },
-        });
       };
 
-      const onEnd = () => {
-        gridLayoutStateManager.activeRow$.next(undefined);
-        const proposedGridLayoutValue = gridLayoutStateManager.proposedGridLayout$.getValue();
-        if (
-          proposedGridLayoutValue &&
-          !deepEqual(proposedGridLayoutValue, gridLayoutStateManager.gridLayout$.getValue())
-        ) {
-          gridLayoutStateManager.gridLayout$.next(cloneDeep(proposedGridLayoutValue));
-        }
-        gridLayoutStateManager.proposedGridLayout$.next(undefined);
-      };
+      const onEnd = () => commitAction(gridLayoutStateManager);
 
       if (isMouseEvent(e)) {
         e.stopPropagation();

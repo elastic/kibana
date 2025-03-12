@@ -156,7 +156,7 @@ export const GridRowHeader = React.memo(
              */
             !editTitleOpen && (
               <>
-                <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
+                <EuiFlexItem grow={false} css={styles.visibleOnlyWhenCollapsed}>
                   <EuiText
                     color="subdued"
                     size="s"
@@ -187,7 +187,10 @@ export const GridRowHeader = React.memo(
                         />
                       </EuiFlexItem>
                     )}
-                    <EuiFlexItem grow={false} css={styles.floatToRight}>
+                    <EuiFlexItem
+                      grow={false}
+                      css={[styles.floatToRight, styles.visibleOnlyWhenCollapsed]}
+                    >
                       <EuiButtonIcon
                         iconType="move"
                         color="text"
@@ -216,7 +219,7 @@ export const GridRowHeader = React.memo(
 );
 
 const styles = {
-  hiddenOnCollapsed: css({
+  visibleOnlyWhenCollapsed: css({
     display: 'none',
     '.kbnGridRowContainer--collapsed &': {
       display: 'block',

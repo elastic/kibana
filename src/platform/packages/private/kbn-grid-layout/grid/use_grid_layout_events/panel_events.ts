@@ -16,7 +16,7 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
-import { commitAction, moveAction, startAction } from './state_manager_actions';
+import { commitAction, moveAction, startAction } from './panel_state_manager_actions';
 import { UserInteractionEvent } from './types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
