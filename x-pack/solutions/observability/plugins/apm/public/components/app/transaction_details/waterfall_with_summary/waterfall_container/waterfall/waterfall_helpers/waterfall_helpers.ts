@@ -359,7 +359,7 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
 }
 
 const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
-  groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
+  groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : HIDDEN_ID));
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
@@ -396,7 +396,7 @@ function getWaterfallErrors(
     return errorItems;
   }
   const parentIdLookup = [...items, ...errorItems].reduce((map, { id, parentId }) => {
-    map.set(id, parentId ?? ROOT_ID);
+    map.set(id, parentId ?? HIDDEN_ID);
     return map;
   }, new Map<string, string>());
   return errorItems.filter((errorItem) =>
@@ -456,8 +456,9 @@ export function reparentOrphanItems(
         // as this means it's a parent of the entry transaction
         item.parentId = HIDDEN_ID;
       } else {
-        // if the orphan item is shorter than the entry transaction, it's a child of the entry transaction,
-        // but we will show it at top level as we don't have the parent in the waterfall
+        // if the orphan item is shorter than the entry transaction or has started after it,
+        // it's a child of the entry transaction, but we will show it at top level,
+        // as we don't have the parent in the waterfall
         item.parentId = ROOT_ID;
       }
       item.isOrphan = true;
