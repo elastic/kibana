@@ -305,7 +305,6 @@ export function newTermsFieldsField({ getService }: FtrProviderContext): void {
             ruleUpgradeAssets,
             diffableRuleFieldName: 'new_terms_fields',
             expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-            isMergableField: false,
             expectedFieldDiffValues: {
               current: ['fieldB'],
               target: ['fieldA', 'fieldC'],
