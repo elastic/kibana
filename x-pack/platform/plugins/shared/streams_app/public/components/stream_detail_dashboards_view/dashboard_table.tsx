@@ -62,7 +62,6 @@ export function DashboardsTable({
                 telemetryClient.trackAssetClick({
                   asset_id: id,
                   asset_type: 'dashboard',
-                  asset_label: label,
                   name: entityId,
                 });
               }

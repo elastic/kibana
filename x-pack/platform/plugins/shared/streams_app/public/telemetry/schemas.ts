@@ -61,12 +61,6 @@ const streamsAssetClickEventSchema: RootSchema<StreamsAssetClickEventProps> = {
       description: 'The id of the asset',
     },
   },
-  asset_label: {
-    type: 'keyword',
-    _meta: {
-      description: 'The label of the asset',
-    },
-  },
 };
 
 const matchRate: SchemaArray<number, number> = {

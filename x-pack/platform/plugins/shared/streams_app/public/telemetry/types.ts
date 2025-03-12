@@ -16,7 +16,6 @@ interface StreamsAssetClickEventProps {
   name: string;
   asset_type: 'dashboard' | 'slo' | 'rule';
   asset_id: string;
-  asset_label: string;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
