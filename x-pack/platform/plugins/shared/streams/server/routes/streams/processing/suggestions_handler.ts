@@ -192,10 +192,6 @@ async function processPattern(
           streamsClient,
         });
 
-        if (simulationResult.is_non_additive_simulation) {
-          return null;
-        }
-
         if (simulationResult.success_rate === 0) {
           return null;
         }
