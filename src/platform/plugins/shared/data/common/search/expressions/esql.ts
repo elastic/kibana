@@ -22,7 +22,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
@@ -181,8 +181,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         })
       ).pipe(
         switchMap(({ search, uiSettings }) => {
+          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const params: ESQLSearchParams = {
-            query,
+            query: fixedQuery,
             // time_zone: timezone,
             locale,
             include_ccs_metadata: true,
@@ -192,7 +193,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
 
-            const namedParams = getNamedParams(query, input.timeRange, input.esqlVariables);
+            const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables);
 
             if (namedParams.length) {
               params.params = namedParams;
@@ -362,6 +363,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 
+          // Pass this when parsing works correctly
+          // const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const updatedWithVariablesColumns = mapVariableToColumn(
             query,
             input?.esqlVariables ?? [],

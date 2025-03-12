@@ -15,7 +15,7 @@ import type {
   ESQLSingleAstItem,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const DEFAULT_ESQL_LIMIT = 1000;
@@ -199,4 +199,35 @@ export const getValuesFromQueryField = (queryString: string) => {
   if (column) {
     return `${column.name}`;
   }
+};
+
+// this is for backward compatibility, if the query is of fields or functions type
+// and the query is not set with ?? or ? in the query, we should set it
+// https://github.com/elastic/elasticsearch/pull/122459
+export const fixESQLQueryWithVariables = (
+  queryString: string,
+  esqlVariables?: ESQLControlVariable[]
+) => {
+  const currentVariables = getESQLQueryVariables(queryString);
+  if (!currentVariables.length) {
+    return queryString;
+  }
+  // filter out the variables that are not used in the query
+  // and that they are not of type FIELDS or FUNCTIONS
+  const identifierTypeVariables = esqlVariables?.filter(
+    (variable) =>
+      currentVariables.includes(variable.key) &&
+      (variable.type === ESQLVariableType.FIELDS || variable.type === ESQLVariableType.FUNCTIONS)
+  );
+
+  // check if they are set with ?? or ? in the query
+  if (identifierTypeVariables?.length) {
+    identifierTypeVariables.forEach((variable) => {
+      const pattern = new RegExp(`\\?${variable.key}\\b`, 'g');
+      queryString = queryString.replace(pattern, `??${variable.key}`);
+    });
+    return queryString;
+  }
+
+  return queryString;
 };
