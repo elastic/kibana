@@ -131,21 +131,16 @@ export async function getKbModelStatus({
   const modelStats = trainedModelStatsResponse.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
-  const deploymentState = modelStats?.deployment_stats?.state;
-  const allocationState = modelStats?.deployment_stats?.allocation_status?.state;
-  const allocationCount = modelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
   const ready =
-    deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
+    modelStats?.deployment_stats?.state === 'started' &&
+    modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+    modelStats?.deployment_stats?.allocation_status?.allocation_count > 0;
 
   return {
     endpoint,
     ready,
     enabled,
-    model_stats: {
-      allocation_count: allocationCount,
-      deployment_state: deploymentState,
-      allocation_state: allocationState,
-    },
+    model_stats: modelStats,
   };
 }
 
