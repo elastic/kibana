@@ -10,7 +10,7 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../../data/slo/slo';
-import { Definition as Component, Props } from './definition';
+import { Definition as Component, Props } from '../definition/definition';
 
 export default {
   component: Component,
