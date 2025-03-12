@@ -128,7 +128,11 @@ export const SearchSourceExpression = ({
   }
 
   if (!searchSource) {
-    return <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />;
+    return (
+      <EuiEmptyPrompt
+        title={<EuiLoadingSpinner data-test-subj="searchSourceLoadingSpinner" size="xl" />}
+      />
+    );
   }
 
   return (

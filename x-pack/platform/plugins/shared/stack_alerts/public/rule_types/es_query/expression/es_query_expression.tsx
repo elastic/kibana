@@ -203,6 +203,7 @@ export const EsQueryExpression: React.FC<
     <Fragment>
       <EuiFormRow
         fullWidth
+        data-test-subj="indexSelectPopover"
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
@@ -212,7 +213,6 @@ export const EsQueryExpression: React.FC<
       >
         <IndexSelectPopover
           index={index}
-          data-test-subj="indexSelectPopover"
           esFields={esFields}
           timeField={timeField}
           errors={errors}
