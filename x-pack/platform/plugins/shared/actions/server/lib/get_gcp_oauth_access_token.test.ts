@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
