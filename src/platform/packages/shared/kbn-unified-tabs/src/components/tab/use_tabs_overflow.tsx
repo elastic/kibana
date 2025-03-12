@@ -15,6 +15,13 @@ const KIBANA_HEADER_ID = 'kbnHeaderSecondBar';
 
 const globalCss = css`
   overscroll-behavior: none;
+
+  #kbnHeaderSecondBar,
+  [data-test-subj='kibanaProjectHeaderActionMenu'] {
+    box-shadow: none;
+    border-bottom: none;
+    border-block-end: none;
+  }
 `;
 
 interface UseTabGlueStylesProps {
@@ -28,7 +35,12 @@ interface UseTabGlueStylesReturn {
 
 export const useTabsOverflow = ({ isSelected }: UseTabGlueStylesProps): UseTabGlueStylesReturn => {
   const { euiTheme } = useEuiTheme();
-  const selectedTabBackgroundColor = euiTheme.colors.emptyShade;
+  const selectedTabBackgroundColor = document.querySelector(
+    // TODO: listen to chromeStyle changes instead
+    '.kbnBody--hasProjectActionMenu'
+  )
+    ? euiTheme.colors.body
+    : euiTheme.colors.emptyShade;
   const [hasClassicHeader] = useState<boolean>(() =>
     Boolean(document.getElementById(KIBANA_HEADER_ID))
   );
