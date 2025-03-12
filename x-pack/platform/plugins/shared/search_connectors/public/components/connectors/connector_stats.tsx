@@ -74,7 +74,8 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
 
   useEffect(() => {
     makeRequest({ isCrawler, http });
-  }, [http, isCrawler, makeRequest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <EuiFlexGroup>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NavigateToUrlOptions } from '@kbn/core/public';
 import { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import {
@@ -35,7 +34,12 @@ export const generateNavLink = ({
   ...rest
 }: GenerateNavLinkParameters): NavLinkProps<unknown> => {
   const linkProps = {
-    ...generateReactRouterProps({ ...rest }),
+    ...generateReactRouterProps({
+      ...rest,
+      history: KibanaLogic.values.history,
+      http: HttpLogic.values.http,
+      navigateToUrl: KibanaLogic.values.navigateToUrl,
+    }),
     isSelected: getNavLinkActive({ items, ...rest }),
   };
   return items ? { ...linkProps, items } : linkProps;
@@ -55,10 +59,7 @@ export const getNavLinkActive = ({
     to: currentPath,
     history: KibanaLogic.values.history,
     http: HttpLogic.values.http,
-    navigateToUrl: KibanaLogic.values.navigateToUrl as (
-      url: string,
-      options?: NavigateToUrlOptions
-    ) => Promise<void>,
+    navigateToUrl: KibanaLogic.values.navigateToUrl,
   });
 
   const { href: toHref } = generateReactRouterProps({
@@ -67,10 +68,7 @@ export const getNavLinkActive = ({
     to,
     history: KibanaLogic.values.history,
     http: HttpLogic.values.http,
-    navigateToUrl: KibanaLogic.values.navigateToUrl as (
-      url: string,
-      options?: NavigateToUrlOptions
-    ) => Promise<void>,
+    navigateToUrl: KibanaLogic.values.navigateToUrl,
   });
 
   if (currentPathHref === toHref) return true;

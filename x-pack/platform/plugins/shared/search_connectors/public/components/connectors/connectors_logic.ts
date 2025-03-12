@@ -37,16 +37,19 @@ export interface ConnectorsActions {
     from,
     size,
     searchQuery,
+    http,
   }: {
     fetchCrawlersOnly: boolean;
     from: number;
     searchQuery?: string;
     size: number;
+    http?: HttpSetup;
   }): {
     fetchCrawlersOnly: boolean;
     from: number;
     searchQuery?: string;
     size: number;
+    http?: HttpSetup;
   };
   makeRequest: FetchConnectorsApiLogicActions['makeRequest'];
   onPaginate(newPageIndex: number): { newPageIndex: number };
@@ -82,7 +85,7 @@ export interface ConnectorsValues {
     searchQuery?: string;
     size: number;
   };
-  http: HttpSetup;
+  http?: HttpSetup;
   status: typeof FetchConnectorsApiLogic.values.status;
 }
 
@@ -128,15 +131,15 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
   listeners: ({ actions, values }) => ({
     deleteSuccess: () => {
       actions.closeDeleteModal();
-      actions.makeRequest({ ...values.searchParams, http: values.http });
+      actions.makeRequest({ ...values.searchParams });
     },
     deleteIndexSuccess: () => {
       actions.closeDeleteModal();
-      actions.makeRequest({ ...values.searchParams, http: values.http });
+      actions.makeRequest({ ...values.searchParams });
     },
     fetchConnectors: async (input, breakpoint) => {
       await breakpoint(150);
-      actions.makeRequest({ ...input, http: values.http });
+      actions.makeRequest({ ...input });
     },
   }),
   path: ['enterprise_search', 'content', 'connectors_logic'],

@@ -6,15 +6,26 @@
  */
 
 import React, { useEffect, useState } from 'react';
-
+import classNames from 'classnames';
 import { useActions, useValues } from 'kea';
+import '../shared/page_template.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSearchBar,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { ConnectorStats } from './connector_stats';
@@ -25,6 +36,8 @@ import { DeleteConnectorModal } from './delete_connector_modal';
 import { ElasticManagedWebCrawlerEmptyPrompt } from './elastic_managed_web_crawler_empty_prompt';
 import { SelfManagedWebCrawlerEmptyPrompt } from './self_managed_web_crawler_empty_prompt';
 import { handlePageChange } from './utils';
+import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../routes';
+import { LEARN_MORE_LINK } from './translations';
 
 export const connectorsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
@@ -50,21 +63,106 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
   const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
 
   const {
-    services: { application },
+    services: { application, http },
   } = useKibana();
 
+  const navIcon = 'logoElasticsearch';
   useEffect(() => {
     setIsFirstRequest();
-  }, [isCrawler, setIsFirstRequest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCrawler]);
 
   useEffect(() => {
-    fetchConnectors({ ...searchParams, fetchCrawlersOnly: isCrawler, searchQuery });
-  }, [searchParams.from, searchParams.size, searchQuery, isCrawler, fetchConnectors, searchParams]);
+    fetchConnectors({ ...searchParams, fetchCrawlersOnly: isCrawler, searchQuery, http });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.from, searchParams.size, searchQuery, isCrawler]);
 
   return !isLoading && isEmpty && !isCrawler ? (
     <CreateConnector />
   ) : (
-    <>
+    <KibanaPageTemplate
+      // pageChrome={!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs}
+      // isLoading={isLoading}
+      pageHeader={{
+        pageTitle: !isCrawler
+          ? i18n.translate('xpack.enterpriseSearch.connectors.title', {
+              defaultMessage: 'Elasticsearch connectors',
+            })
+          : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
+              defaultMessage: 'Elastic Web Crawler',
+            }),
+        description: [
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.webcrawlers.headerContent"
+                defaultMessage="Discover extract and index searchable content from websites and knowledge bases {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      data-test-subj="entSearchContentConnectorsLearnMoreLink"
+                      external
+                      target="_blank"
+                      href={'https://github.com/elastic/crawler'}
+                    >
+                      {LEARN_MORE_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>,
+        ],
+
+        rightSideGroupProps: {
+          gutterSize: 's',
+          responsive: false,
+        },
+        rightSideItems: isLoading
+          ? []
+          : !isCrawler
+          ? [
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiButton
+                    data-test-subj="entSearchContent-connectors-newConnectorButton"
+                    data-telemetry-id="entSearchContent-connectors-newConnectorButton"
+                    key="newConnector"
+                    color="primary"
+                    iconType="plusInCircle"
+                    fill
+                    onClick={() => {
+                      application?.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
+                      defaultMessage="New Connector"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              ...[
+                <EuiButton
+                  color="primary"
+                  data-test-subj="entSearchContent-searchIndices-defaultSettings"
+                  onClick={() => setShowDefaultSettingsFlyout(true)}
+                >
+                  {i18n.translate('xpack.enterpriseSearch.content.searchIndices.defaultSettings', {
+                    defaultMessage: 'Default settings',
+                  })}
+                </EuiButton>,
+              ],
+            ]
+          : undefined,
+      }}
+      className={classNames('enterpriseSearchPageTemplate')}
+      mainProps={{
+        // ...pageTemplateProps.mainProps,
+        className: classNames('enterpriseSearchPageTemplate__content'),
+      }}
+      // solutionNav={solutionNav && solutionNav.items ? { icon: navIcon, ...solutionNav } : undefined}
+    >
       <DeleteConnectorModal isCrawler={isCrawler} />
       <>
         {application?.capabilities.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
@@ -143,6 +241,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
           )}
         </EuiFlexGroup>
       </>
-    </>
+    </KibanaPageTemplate>
   );
 };

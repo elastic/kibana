@@ -9,7 +9,8 @@ import React from 'react';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
-import { letBrowserHandleEvent, createHref, ReactRouterProps } from '.';
+import { HttpSetup, ScopedHistory } from '@kbn/core/public';
+import { letBrowserHandleEvent, createHref, ReactRouterProps, CreateHrefOptions } from '.';
 
 /**
  * Generates the `href` and `onClick` props for React-Router-friendly links
@@ -32,7 +33,11 @@ export const generateReactRouterProps = ({
   history,
   shouldNotCreateHref = false,
   shouldNotPrepend = false,
-}: ReactRouterProps): GeneratedReactRouterProps<unknown> => {
+}: ReactRouterProps & {
+  http?: HttpSetup;
+  navigateToUrl?: (path: string, options?: CreateHrefOptions) => Promise<void>;
+  history: ScopedHistory;
+}): GeneratedReactRouterProps<unknown> => {
   // Generate the correct link href (with basename etc. accounted for)
   const href = createHref(to, { history, http: http! }, { shouldNotCreateHref, shouldNotPrepend });
 
@@ -45,7 +50,7 @@ export const generateReactRouterProps = ({
 
     // Perform SPA navigation.
     if (navigateToUrl) {
-      navigateToUrl(to);
+      navigateToUrl(to, { shouldNotCreateHref, shouldNotPrepend });
     }
   };
 

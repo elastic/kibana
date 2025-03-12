@@ -29,6 +29,7 @@ interface FlashMessagesActions {
 
 interface FlashMessagesLogicProps {
   notifications: NotificationsStart;
+  history: ScopedHistory;
 }
 
 const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
@@ -60,6 +61,7 @@ export const FlashMessagesLogic = kea<
       },
     ],
     notifications: [props.notifications || {}, {}],
+    history: [props.history || {}, {}],
     queuedMessages: [
       [],
       {
@@ -70,13 +72,15 @@ export const FlashMessagesLogic = kea<
   }),
   events: ({ values, actions }) => ({
     afterMount: () => {
-      // On React Router navigation, clear previous flash messages and load any queued messages
-      const unlisten = values.history.listen(() => {
-        actions.clearFlashMessages();
-        actions.setFlashMessages(values.queuedMessages);
-        actions.clearQueuedMessages();
-      });
-      actions.setHistoryListener(unlisten);
+      if (values.history.listen) {
+        // On React Router navigation, clear previous flash messages and load any queued messages
+        const unlisten = values.history.listen(() => {
+          actions.clearFlashMessages();
+          actions.setFlashMessages(values.queuedMessages);
+          actions.clearQueuedMessages();
+        });
+        actions.setHistoryListener(unlisten);
+      }
     },
     beforeUnmount: () => {
       const { historyListener: removeHistoryListener } = values;

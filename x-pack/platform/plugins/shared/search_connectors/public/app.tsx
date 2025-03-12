@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { getContext, resetContext } from 'kea';
+import { Provider } from 'react-redux';
 
 import { Route, Routes, Router } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -21,6 +23,7 @@ import { SearchConnectorsPluginStart, SearchConnectorsPluginStartDependencies } 
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import { AppContextProvider } from './app_context';
 import { PLUGIN_ID } from '../common/constants';
+import { mountFlashMessagesLogic } from './components/shared/flash_messages';
 
 export const renderApp = (
   core: CoreStart,
@@ -29,6 +32,10 @@ export const renderApp = (
   params: ManagementAppMountParams,
   connectorTypes: ConnectorDefinition[]
 ) => {
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({
+    notifications: core.notifications,
+    history: params.history,
+  });
   ReactDOM.render(
     <App
       params={params}
@@ -42,6 +49,7 @@ export const renderApp = (
 
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
+    unmountFlashMessagesLogic();
   };
 };
 
@@ -93,10 +101,19 @@ const AppWithExecutionContext = ({
     kibanaVersion: 'main',
     indexMappingComponent,
   };
+
+  resetContext({
+    createStore: {
+      paths: ['enterprise_search'],
+    },
+  });
+  const store = getContext().store;
   return (
     <Router history={params.history}>
       <AppContextProvider value={appContext}>
-        <SearchConnectorsAppConfigured />
+        <Provider store={store}>
+          <SearchConnectorsAppConfigured />
+        </Provider>
       </AppContextProvider>
     </Router>
   );

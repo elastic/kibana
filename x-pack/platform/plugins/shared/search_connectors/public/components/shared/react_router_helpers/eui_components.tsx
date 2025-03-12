@@ -29,7 +29,7 @@ import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
-import { generateReactRouterProps, ReactRouterProps } from '.';
+import { CreateHrefOptions, generateReactRouterProps, ReactRouterProps } from '.';
 /**
  * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props
  */
@@ -51,7 +51,10 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl,
+        navigateToUrl: services.application?.navigateToUrl as (
+          path: string,
+          options?: CreateHrefOptions | undefined
+        ) => Promise<void>,
         history: history as ScopedHistory,
       })}
     />
@@ -75,7 +78,10 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl,
+        navigateToUrl: services.application?.navigateToUrl as (
+          path: string,
+          options?: CreateHrefOptions | undefined
+        ) => Promise<void>,
         history: history as ScopedHistory,
       })}
     />
@@ -99,7 +105,10 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl,
+        navigateToUrl: services.application?.navigateToUrl as (
+          path: string,
+          options?: CreateHrefOptions | undefined
+        ) => Promise<void>,
         history: history as ScopedHistory,
       })}
     />
@@ -122,7 +131,10 @@ export const EuiButtonIconTo: React.FC<ReactRouterEuiButtonIconProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl,
+        navigateToUrl: services.application?.navigateToUrl as (
+          path: string,
+          options?: CreateHrefOptions | undefined
+        ) => Promise<void>,
         history: history as ScopedHistory,
       })}
     />
@@ -146,7 +158,10 @@ export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl,
+        navigateToUrl: services.application?.navigateToUrl as (
+          path: string,
+          options?: CreateHrefOptions | undefined
+        ) => Promise<void>,
         history: history as ScopedHistory,
       })}
     />
@@ -170,7 +185,10 @@ export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl,
+        navigateToUrl: services.application?.navigateToUrl as (
+          path: string,
+          options?: CreateHrefOptions | undefined
+        ) => Promise<void>,
         history: history as ScopedHistory,
       })}
     />
@@ -194,7 +212,10 @@ export const EuiListGroupItemTo: React.FC<ReactRouterEuiListGroupItemProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl,
+        navigateToUrl: services.application?.navigateToUrl as (
+          path: string,
+          options?: CreateHrefOptions | undefined
+        ) => Promise<void>,
         history: history as ScopedHistory,
       })}
     />
@@ -218,7 +239,10 @@ export const EuiBadgeTo: React.FC<ReactRouterEuiBadgeProps> = ({
     shouldNotCreateHref,
     to,
     http: services.http,
-    navigateToUrl: services.application?.navigateToUrl,
+    navigateToUrl: services.application?.navigateToUrl as (
+      path: string,
+      options?: CreateHrefOptions | undefined
+    ) => Promise<void>,
     history: history as ScopedHistory,
   });
 
