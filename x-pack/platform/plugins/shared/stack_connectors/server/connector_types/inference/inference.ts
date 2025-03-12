@@ -186,6 +186,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @signal abort signal
    */
   public async performApiUnifiedCompletionStream(params: UnifiedChatCompleteParams) {
+    const productUseCase = params.telemetryMetadata?.pluginId
+      ? params.telemetryMetadata?.pluginId === 'siem_migrations'
+        ? 'security_migration'
+        : params.telemetryMetadata?.pluginId
+      : 'unknown';
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
@@ -196,6 +201,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         asStream: true,
         meta: true,
         signal: params.signal,
+        headers: {
+          'X-Elastic-Product-Use-Case': productUseCase,
+        },
       }
     );
     // errors should be thrown as it will not be a stream response

@@ -77,6 +77,9 @@ export function registerCelInputRoutes(router: IRouter<AutomaticImportRouteHandl
             maxTokens: 4096,
             signal: abortSignal,
             streaming: false,
+            telemetryMetadata: {
+              pluginId: 'security_automatic_import',
+            },
           });
 
           const parameters = {
