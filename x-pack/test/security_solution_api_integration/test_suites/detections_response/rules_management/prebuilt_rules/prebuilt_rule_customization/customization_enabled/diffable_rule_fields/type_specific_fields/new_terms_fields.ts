@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  ThreeWayDiffOutcome,
+  UpgradeConflictResolutionEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
@@ -302,12 +305,22 @@ export function newTermsFieldsField({ getService }: FtrProviderContext): void {
             ruleUpgradeAssets,
             diffableRuleFieldName: 'new_terms_fields',
             expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-            isMergableField: true,
+            isMergableField: false,
             expectedFieldDiffValues: {
               current: ['fieldB'],
               target: ['fieldA', 'fieldC'],
-              merged: ['fieldB', 'fieldA', 'fieldC'],
+              merged: ['fieldA', 'fieldC'],
             },
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+            diffableRuleFieldName: 'new_terms_fields',
+            expectedFieldsAfterUpgrade: { new_terms_fields: ['fieldA', 'fieldC'] },
           },
           getService
         );

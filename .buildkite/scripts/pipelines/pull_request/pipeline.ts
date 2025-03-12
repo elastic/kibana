@@ -156,7 +156,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution/,
+        /^x-pack\/solutions\/observability\/plugins/,
         /^package.json/,
         /^yarn.lock/,
       ])) ||
@@ -458,13 +458,18 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/platform\/plugins\/private\/discover_enhanced\/ui_tests/,
-        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
         /^src\/platform\/packages\/shared\/kbn-scout/,
+        /^src\/platform\/packages\/private\/kbn-scout-info/,
+        /^src\/platform\/packages\/private\/kbn-scout-reporting/,
+        /^x-pack\/platform\/plugins\/shared\/maps/,
+        /^x-pack\/platform\/plugins\/private\/discover_enhanced/,
+        /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
+        /^x-pack\/solutions\/observability\/plugins\/apm/,
+        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_ui_tests.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

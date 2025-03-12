@@ -222,34 +222,37 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
           });
         });
 
-        it('should return only tags matching rule type ids', async () => {
-          await createRule({
-            tags: ['rule1-tag1', 'rule1-tag2'],
-          });
+        describe('tags', function () {
+          this.tags('skipFIPS');
+          it('should return only tags matching rule type ids', async () => {
+            await createRule({
+              tags: ['rule1-tag1', 'rule1-tag2'],
+            });
 
-          await createRule({
-            tags: ['rule2-tag1', 'rule2-tag2'],
-            rule_type_id: 'test.restricted-noop',
-          });
+            await createRule({
+              tags: ['rule2-tag1', 'rule2-tag2'],
+              rule_type_id: 'test.restricted-noop',
+            });
 
-          await createRule({
-            tags: ['rule3-tag1', 'rule3-tag2'],
-            rule_type_id: 'test.unrestricted-noop',
-          });
+            await createRule({
+              tags: ['rule3-tag1', 'rule3-tag2'],
+              rule_type_id: 'test.unrestricted-noop',
+            });
 
-          const response = await supertest
-            .get(
-              `${getUrlPrefix(
-                Spaces.space1.id
-              )}/internal/alerting/rules/_tags?page=1&per_page=10&rule_type_ids=["test.noop","test.restricted-noop"]`
-            )
-            .expect(200);
+            const response = await supertest
+              .get(
+                `${getUrlPrefix(
+                  Spaces.space1.id
+                )}/internal/alerting/rules/_tags?page=1&per_page=10&rule_type_ids=["test.noop","test.restricted-noop"]`
+              )
+              .expect(200);
 
-          expect(response.body).to.eql({
-            data: ['rule1-tag1', 'rule1-tag2', 'rule2-tag1', 'rule2-tag2'],
-            per_page: 10,
-            page: 1,
-            total: 4,
+            expect(response.body).to.eql({
+              data: ['rule1-tag1', 'rule1-tag2', 'rule2-tag1', 'rule2-tag2'],
+              per_page: 10,
+              page: 1,
+              total: 4,
+            });
           });
         });
       });

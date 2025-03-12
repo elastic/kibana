@@ -29,11 +29,10 @@ export function normalizeSecrets(
   monitor: SavedObject<SyntheticsMonitorWithSecretsAttributes | SyntheticsMonitor880>
 ): SavedObject<SyntheticsMonitor> {
   const attributes = normalizeMonitorSecretAttributes(monitor.attributes);
-  const normalizedMonitor = {
+  return {
     ...monitor,
     attributes,
   };
-  return normalizedMonitor;
 }
 
 export function normalizeMonitorSecretAttributes(
