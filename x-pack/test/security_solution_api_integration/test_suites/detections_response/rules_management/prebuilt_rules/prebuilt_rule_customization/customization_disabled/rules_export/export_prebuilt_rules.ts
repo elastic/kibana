@@ -7,15 +7,16 @@
 
 import expect from 'expect';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   binaryToString,
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
-} from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+  parseNdJson,
+} from '../../../../../utils';
+import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -29,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    it("Export API - doesn't export prebuilt rules when the feature is disabled", async () => {
+    it('Export API - exports prebuilt rules', async () => {
       const ruleId = 'prebuilt-rule-1';
       const ruleAsset = createRuleAssetSavedObject({ rule_id: ruleId, version: 1 });
       await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
@@ -40,15 +41,17 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200)
         .parse(binaryToString);
 
-      const exportDetails = JSON.parse(body.toString());
+      const exportDetails = parseNdJson(body);
 
-      expect(exportDetails).toMatchObject({
-        exported_rules_count: 0,
-        missing_rules: [], // Prebuilt rules are not in missing rules, even though they are not exported
-      });
+      expect(exportDetails).toEqual([
+        expect.objectContaining({
+          rule_id: ruleId,
+        }),
+        expect.objectContaining({ exported_rules_count: 1, missing_rules_count: 0 }),
+      ]);
     });
 
-    it("Bulk actions export API - doesn't export prebuilt rules when the feature is disabled", async () => {
+    it("Bulk actions export API - doesn't export prebuilt rules", async () => {
       const ruleAsset = createRuleAssetSavedObject({ rule_id: 'prebuilt-rule-1', version: 1 });
       await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
       await installPrebuiltRules(es, supertest);
@@ -64,12 +67,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200)
         .parse(binaryToString);
 
-      const exportDetails = JSON.parse(body.toString());
+      const exportDetails = parseNdJson(body);
 
-      expect(exportDetails).toMatchObject({
-        exported_rules_count: 0,
-        missing_rules: [{ rule_id: 'prebuilt-rule-1' }],
-      });
+      expect(exportDetails).toEqual([
+        expect.objectContaining({
+          rule_id: 'prebuilt-rule-1',
+        }),
+        expect.objectContaining({ exported_rules_count: 1, missing_rules_count: 0 }),
+      ]);
     });
   });
 };
