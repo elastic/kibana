@@ -51,7 +51,6 @@ export async function scoreSuggestions({
   relevantDocuments: RecalledSuggestion[];
   scores: Array<{ id: string; score: number }>;
 }> {
-  // console.log('******* scoreSuggestions - messages', messages);
   const shortIdTable = new ShortIdTable();
 
   const newUserMessageContent =
