@@ -12,7 +12,13 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
+import type { Client } from '@elastic/elasticsearch';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Effect, pipe } from 'effect';
+import {
+  APM_ALERTS_INDEX,
+  ApmAlertFields,
+} from '../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { createApmRule } from './helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
@@ -104,7 +110,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('produces an alert with the correct reason', async () => {
-          const alerts = await waitForAlertsForRule({ es, ruleId: createdRule.id });
+          const alerts = await waitForAlertsForRule({
+            es,
+            ruleId: createdRule.id,
+          });
 
           const score = alerts[0]['kibana.alert.evaluation.value'];
           expect(alerts[0]['kibana.alert.reason']).to.be(
@@ -114,4 +123,72 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     }
   );
+}
+
+async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
+  const response = (await es.search({
+    index: APM_ALERTS_INDEX,
+    body: {
+      query: {
+        term: {
+          'kibana.alert.rule.uuid': ruleId,
+        },
+      },
+    },
+  })) as SearchResponse<ApmAlertFields, Record<string, AggregationsAggregate>>;
+
+  return response.hits.hits.map((hit) => hit._source) as ApmAlertFields[];
+}
+async function waitForAlertsForRule({
+  es,
+  ruleId,
+  minimumAlertCount = 1,
+}: {
+  es: Client;
+  ruleId: string;
+  minimumAlertCount?: number;
+}) {
+  // :: Effect.Effect<ApmAlertFields[], UnknownException, never>
+  const fetch = Effect.tryPromise(() => getAlertByRuleId({ es, ruleId }));
+  // :: (alerts: ApmAlertFields[]) => Effect.Effect<ApmAlertFields[], UnknownException, never>
+  const throwWhenLessThan = (alerts: ApmAlertFields[]) =>
+    Effect.try(() => {
+      const actualAlertCount = alerts.length;
+      if (actualAlertCount < minimumAlertCount)
+        throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
+      return alerts;
+    });
+
+  // This is the generator way of building the program, like async/await; imperative
+  // ****************************************************
+  const main = Effect.gen(function* () {
+    // Logging within the span below
+    yield* Effect.log(`Searching for rules`);
+    // flatMap the value from the first effect, and use it in the next effect.
+    return yield* Effect.flatMap(fetch, throwWhenLessThan);
+  }).pipe(Effect.timeout('30 seconds'), Effect.withLogSpan('waitForAlertsForRule'));
+
+  // This is the 'pipe' way of building the program.
+  // ****************************************************
+  // const main = pipe(
+  //   fetch,
+  //   Effect.flatMap(throwWhenLessThan),
+  //   Effect.timeout('30 seconds'),
+  //   Effect.withLogSpan('waitForAlertsForRule')
+  // );
+
+  // This is the 'pipe' way of building the program, but piping from an effect
+  // ****************************************************
+  // const main = fetch.pipe(
+  //   Effect.flatMap(throwWhenLessThan),
+  //   Effect.timeout('30 seconds'),
+  //   Effect.withLogSpan('waitForAlertsForRule')
+  // );
+
+  // Run the 'main' program, and unwrap the value out of effect
+  // Can't fail to mention this also is handling the error management
+  // to the perimeter of the main routine; in this case we are using
+  // retrying, but we could have more in depth error handling were it
+  // warranted.
+  return await Effect.runPromise(Effect.retry(main, { times: 50 }));
 }

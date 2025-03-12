@@ -11,14 +11,10 @@ import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { retryForSuccess } from '@kbn/ftr-common-functional-services';
-import { ToolingLog } from '@kbn/tooling-log';
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
 } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
-
-const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 
 export async function createApmRule<T extends ApmRuleType>({
   supertest,
@@ -52,41 +48,6 @@ export async function createApmRule<T extends ApmRuleType>({
   } catch (error: any) {
     throw new Error(`[Rule] Creating a rule failed: ${error}`);
   }
-}
-
-export async function runRuleSoon({
-  ruleId,
-  supertest,
-}: {
-  ruleId: string;
-  supertest: SuperTestAgent;
-}): Promise<Record<string, any>> {
-  return await retryForSuccess(new debugLog({ context: 'runRuleSoon' }), {
-    timeout: 20_000,
-    methodName: 'runRuleSoon',
-    block: async () => {
-      try {
-        const response = await supertest
-          .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
-        if (response.status !== 204) {
-          throw new Error(`runRuleSoon got ${response.status} status`);
-        }
-        return response;
-      } catch (error) {
-        throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
-      }
-    },
-    retryCount: 10,
-  });
-}
-
-export async function deleteAlertsByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
-  await es.deleteByQuery({
-    index: APM_ALERTS_INDEX,
-    query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-  });
 }
 
 export async function deleteRuleById({
