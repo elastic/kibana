@@ -542,7 +542,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
 
-      it.only('should trigger recovered alert', async () => {
+      it('should trigger recovered alert', async () => {
         const docs = await ruleHelper.makeSummaries({
           monitor,
           upChecks: 1,
