@@ -16,8 +16,6 @@ import {
 } from '../../../telemetry/event_based/events';
 import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
 import type { MigrateRuleState } from './agent/types';
-import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
-import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
 
 interface IntegrationMatchEvent {
   preFilterIntegrations: RuleMigrationIntegration[];
@@ -56,7 +54,6 @@ export class SiemMigrationTelemetryClient {
       preFilterIntegrationCount: preFilterIntegrations.length,
       postFilterIntegrationName: postFilterIntegration ? postFilterIntegration.id : '',
       postFilterIntegrationCount: postFilterIntegration ? 1 : 0,
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.IntegrationsMatch],
     });
   }
 
@@ -71,7 +68,6 @@ export class SiemMigrationTelemetryClient {
       preFilterRuleCount: preFilterRules.length,
       postFilterRuleName: postFilterRule ? postFilterRule.rule_id : '',
       postFilterRuleCount: postFilterRule ? 1 : 0,
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.PrebuiltRulesMatch],
     });
   }
 
@@ -91,7 +87,6 @@ export class SiemMigrationTelemetryClient {
               duration: Date.now() - ruleStartTime,
               model: this.modelName,
               prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
-              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSucess],
             });
           },
           failure: (error: Error) => {
@@ -100,7 +95,6 @@ export class SiemMigrationTelemetryClient {
               migrationId: this.migrationId,
               error: error.message,
               model: this.modelName,
-              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationFailure],
             });
           },
         };
@@ -114,7 +108,6 @@ export class SiemMigrationTelemetryClient {
           failed: stats.failed,
           total: stats.completed + stats.failed,
           duration,
-          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationSuccess],
         });
       },
       failure: (error: Error) => {
@@ -127,7 +120,6 @@ export class SiemMigrationTelemetryClient {
           total: stats.completed + stats.failed,
           duration,
           error: error.message,
-          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationFailure],
         });
       },
     };

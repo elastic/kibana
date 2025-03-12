@@ -12,7 +12,6 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
-import { SiemMigrationsEventTypes } from './types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -709,17 +708,9 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
   completed: number;
   failed: number;
   total: number;
-  eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.MigrationSuccess,
+  eventType: 'siem_migrations_migration_success',
   schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
     model: {
       type: 'keyword',
       _meta: {
@@ -765,17 +756,9 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   duration: number;
   translationResult: string;
   prebuiltMatch: boolean;
-  eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.TranslationSucess,
+  eventType: 'siem_migrations_rule_translation_success',
   schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
     translationResult: {
       type: 'keyword',
       _meta: {
@@ -816,17 +799,9 @@ export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
   preFilterRuleCount: number;
   postFilterRuleName: string;
   postFilterRuleCount: number;
-  eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.PrebuiltRulesMatch,
+  eventType: 'siem_migrations_prebuilt_rules_match',
   schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
     model: {
       type: 'keyword',
       _meta: {
@@ -876,17 +851,9 @@ export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
   preFilterIntegrationCount: number;
   postFilterIntegrationName: string;
   postFilterIntegrationCount: number;
-  eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.IntegrationsMatch,
+  eventType: 'siem_migrations_integration_match',
   schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
     model: {
       type: 'keyword',
       _meta: {
@@ -937,17 +904,9 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   completed: number;
   failed: number;
   total: number;
-  eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.MigrationFailure,
+  eventType: 'siem_migrations_migration_failure',
   schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
     error: {
       type: 'keyword',
       _meta: {
@@ -997,17 +956,9 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   model: string;
   error: string;
   migrationId: string;
-  eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.TranslationFailure,
+  eventType: 'siem_migrations_rule_translation_failure',
   schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
     error: {
       type: 'keyword',
       _meta: {

@@ -13,21 +13,6 @@ import type {
 } from './types';
 import { SiemMigrationsEventTypes } from './types';
 
-export const siemMigrationEventNames = {
-  [SiemMigrationsEventTypes.SetupConnectorSelected]: 'Connector Selected',
-  [SiemMigrationsEventTypes.SetupMigrationOpenNew]: 'Open new rules migration',
-  [SiemMigrationsEventTypes.SetupMigrationCreated]: 'Create new rules migration',
-  [SiemMigrationsEventTypes.SetupResourcesUploaded]: 'Upload rule resources',
-  [SiemMigrationsEventTypes.SetupMigrationOpenResources]: 'Rules Open Resources',
-  [SiemMigrationsEventTypes.SetupRulesQueryCopied]: 'Copy rules query',
-  [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: 'Copy macros query',
-  [SiemMigrationsEventTypes.SetupLookupNameCopied]: 'Copy lookup name',
-  [SiemMigrationsEventTypes.StartMigration]: 'Start rule migration',
-  [SiemMigrationsEventTypes.TranslatedRuleUpdate]: 'Update translated rule',
-  [SiemMigrationsEventTypes.TranslatedRuleInstall]: 'Install translated rule',
-  [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: 'Bulk install translated rules',
-};
-
 const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
   result: {
     type: 'keyword',
@@ -54,16 +39,6 @@ const migrationIdSchema: RootSchema<{ migrationId: string }> = {
   },
 };
 
-const eventNameSchema: RootSchema<{ eventName: string }> = {
-  eventName: {
-    type: 'keyword',
-    _meta: {
-      description: 'The event name/description',
-      optional: false,
-    },
-  },
-};
-
 // This type ensures that the event schemas are correctly typed according to the event type
 type SiemMigrationsTelemetryEventSchemas = {
   [T in SiemMigrationsEventTypes]: RootSchema<SiemMigrationsTelemetryEventsMap[T]>;
@@ -72,7 +47,6 @@ type SiemMigrationsTelemetryEventSchemas = {
 const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   // Setup Events
   [SiemMigrationsEventTypes.SetupConnectorSelected]: {
-    ...eventNameSchema,
     connectorType: {
       type: 'keyword',
       _meta: {
@@ -89,7 +63,6 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     },
   },
   [SiemMigrationsEventTypes.SetupMigrationOpenNew]: {
-    ...eventNameSchema,
     isFirstMigration: {
       type: 'boolean',
       _meta: {
@@ -100,7 +73,6 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   },
   [SiemMigrationsEventTypes.SetupMigrationOpenResources]: {
     ...migrationIdSchema,
-    ...eventNameSchema,
     missingResourcesCount: {
       type: 'integer',
       _meta: {
@@ -111,7 +83,6 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   },
   [SiemMigrationsEventTypes.SetupMigrationCreated]: {
     ...baseResultActionSchema,
-    ...eventNameSchema,
     migrationId: {
       ...migrationIdSchema.migrationId,
       _meta: {
@@ -128,7 +99,6 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     },
   },
   [SiemMigrationsEventTypes.SetupRulesQueryCopied]: {
-    ...eventNameSchema,
     migrationId: {
       ...migrationIdSchema.migrationId,
       _meta: {
@@ -139,16 +109,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   },
   [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: {
     ...migrationIdSchema,
-    ...eventNameSchema,
   },
   [SiemMigrationsEventTypes.SetupLookupNameCopied]: {
     ...migrationIdSchema,
-    ...eventNameSchema,
   },
   [SiemMigrationsEventTypes.SetupResourcesUploaded]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    ...eventNameSchema,
     type: {
       type: 'keyword',
       _meta: {
@@ -164,10 +131,9 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       },
     },
   },
-  [SiemMigrationsEventTypes.StartMigration]: {
+  [SiemMigrationsEventTypes.StartTranslation]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    ...eventNameSchema,
     connectorId: {
       type: 'keyword',
       _meta: {
@@ -196,7 +162,6 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   [SiemMigrationsEventTypes.TranslatedRuleUpdate]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    ...eventNameSchema,
     ruleMigrationId: {
       type: 'keyword',
       _meta: {
@@ -208,7 +173,6 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   [SiemMigrationsEventTypes.TranslatedRuleInstall]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    ...eventNameSchema,
     ruleMigrationId: {
       type: 'keyword',
       _meta: {
@@ -256,7 +220,6 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
   [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
-    ...eventNameSchema,
     enabled: {
       type: 'boolean',
       _meta: {

@@ -6,7 +6,6 @@
  */
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import type {
   RuleMigration,
@@ -31,27 +30,20 @@ export class SiemRulesMigrationsTelemetry {
 
   reportConnectorSelected = (params: { connector: ActionConnector }) => {
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupConnectorSelected, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupConnectorSelected],
       connectorId: params.connector.id,
       connectorType: params.connector.actionTypeId,
     });
   };
 
   reportSetupMigrationOpen = (params: { isFirstMigration: boolean }) => {
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationOpenNew, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationOpenNew],
-      ...params,
-    });
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationOpenNew, params);
   };
 
   reportSetupMigrationOpenResources = (params: {
     migrationId: string;
     missingResourcesCount: number;
   }) => {
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationOpenResources, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationOpenResources],
-      ...params,
-    });
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationOpenResources, params);
   };
 
   reportSetupMigrationCreated = (params: {
@@ -61,7 +53,6 @@ export class SiemRulesMigrationsTelemetry {
   }) => {
     const { migrationId, rulesCount, error } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMigrationCreated, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationCreated],
       migrationId,
       rulesCount,
       ...this.getBaseResultParams(error),
@@ -76,7 +67,6 @@ export class SiemRulesMigrationsTelemetry {
   }) => {
     const { migrationId, type, count, error } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupResourcesUploaded, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupResourcesUploaded],
       migrationId,
       count,
       type,
@@ -88,22 +78,15 @@ export class SiemRulesMigrationsTelemetry {
     const { migrationId } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupRulesQueryCopied, {
       migrationId,
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupRulesQueryCopied],
     });
   };
 
   reportSetupMacrosQueryCopied = (params: { migrationId: string }) => {
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMacrosQueryCopied, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMacrosQueryCopied],
-      ...params,
-    });
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupMacrosQueryCopied, params);
   };
 
   reportSetupLookupNameCopied = (params: { migrationId: string }) => {
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupLookupNameCopied, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupLookupNameCopied],
-      ...params,
-    });
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.SetupLookupNameCopied, params);
   };
 
   reportStartTranslation = (params: {
@@ -113,11 +96,10 @@ export class SiemRulesMigrationsTelemetry {
     error?: Error;
   }) => {
     const { migrationId, connectorId, retry, error } = params;
-    this.telemetryService.reportEvent(SiemMigrationsEventTypes.StartMigration, {
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.StartTranslation, {
       migrationId,
       connectorId,
       isRetry: !!retry,
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.StartMigration],
       ...(retry && { retryFilter: retry }),
       ...this.getBaseResultParams(error),
     });
@@ -128,7 +110,6 @@ export class SiemRulesMigrationsTelemetry {
   reportTranslatedRuleUpdate = (params: { ruleMigration: RuleMigration; error?: Error }) => {
     const { ruleMigration, error } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.TranslatedRuleUpdate, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleUpdate],
       migrationId: ruleMigration.migration_id,
       ruleMigrationId: ruleMigration.id,
       ...this.getBaseResultParams(error),
@@ -142,7 +123,6 @@ export class SiemRulesMigrationsTelemetry {
   }) => {
     const { ruleMigration, enabled, error } = params;
     const eventParams: ReportTranslatedRuleInstallActionParams = {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleInstall],
       migrationId: ruleMigration.migration_id,
       ruleMigrationId: ruleMigration.id,
       author: 'custom',
@@ -170,7 +150,6 @@ export class SiemRulesMigrationsTelemetry {
     const { migrationId, count, enabled, error } = params;
 
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.TranslatedRuleBulkInstall, {
-      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleBulkInstall],
       migrationId,
       count,
       enabled,
