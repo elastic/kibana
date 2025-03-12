@@ -18,6 +18,7 @@ import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 import { CreateIndex } from './create_index';
 import { usePageChrome } from '../../hooks/use_page_chrome';
 import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { css } from '@emotion/react';
 
 const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitle', {
   defaultMessage: 'Create Index',

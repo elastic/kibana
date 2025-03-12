@@ -19,6 +19,7 @@ import { ElasticsearchStart } from './elasticsearch_start';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 import { usePageChrome } from '../../hooks/use_page_chrome';
+import { css } from '@emotion/react';
 
 const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
   defaultMessage: 'Create your first index',
@@ -49,7 +50,7 @@ export const ElasticsearchStartPage = () => {
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
+      <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
