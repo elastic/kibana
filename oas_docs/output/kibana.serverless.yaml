@@ -13166,6 +13166,36 @@ paths:
                           description: The ID of the proxy to use for this download source. See the proxies API for more information.
                           nullable: true
                           type: string
+                        secrets:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ssl:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            certificate:
+                              type: string
+                            certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            key:
+                              type: string
                       required:
                         - id
                         - name
@@ -13236,6 +13266,36 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    key:
+                      type: string
               required:
                 - name
                 - host
@@ -13265,6 +13325,36 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -13379,6 +13469,36 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -13444,6 +13564,36 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    key:
+                      type: string
               required:
                 - name
                 - host
@@ -13473,6 +13623,36 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -18147,8 +18327,40 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  secrets:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      ssl:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          key:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                        required:
+                                          - key
                                   sourceURI:
                                     type: string
+                                  ssl:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      certificate:
+                                        type: string
+                                      certificate_authorities:
+                                        items:
+                                          type: string
+                                        type: array
+                                      key:
+                                        type: string
+                                      renegotiation:
+                                        type: string
+                                      verification_mode:
+                                        type: string
                                 required:
                                   - sourceURI
                               features:
@@ -59458,27 +59670,30 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the rule to apply to a specific service name.
         transactionType:
           type: string
-          description: The transaction type from APM
+          description: Filter the rule to apply to a specific transaction type.
         windowSize:
           type: number
           example: 6
-          description: The window size
+          description: |
+            The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
         windowUnit:
           type: string
-          description: The window size unit
+          description: |
+            The type of units for the time window. For example: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
-          description: The environment from APM
+          description: Filter the rule to apply to a specific environment.
         anomalySeverityType:
           type: string
-          description: The anomaly threshold value
+          description: |
+            The severity of anomalies that will generate alerts: critical, major, minor, or warning.
           enum:
             - critical
             - major
@@ -59493,24 +59708,26 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the errors coming from your application to apply the rule to a specific service.
         windowSize:
           type: number
-          description: The window size
+          description: |
+            The time frame in which the errors must occur (in `windowUnit` units). Generally it should be a value higher than the rule check interval to avoid gaps in detection.
           example: 6
         windowUnit:
           type: string
-          description: The window size unit
+          description: |
+            The type of units for the time window: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
-          description: The environment from APM
+          description: Filter the errors coming from your application to apply the rule to a specific environment.
         threshold:
           type: number
-          description: The error count threshold value
+          description: The error count threshold.
         groupBy:
           type: array
           default:
@@ -59524,8 +59741,12 @@ components:
               - service.environment
               - transaction.name
               - error.grouping_key
+          description: |
+            Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
         errorGroupingKey:
           type: string
+          description: |
+            Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.
     params_property_apm_transaction_duration:
       required:
         - windowSize
@@ -59536,29 +59757,32 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the rule to apply to a specific service.
         transactionType:
           type: string
-          description: The transaction type from APM
+          description: Filter the rule to apply to a specific transaction type.
         transactionName:
           type: string
-          description: The transaction name from APM
+          description: Filter the rule to apply to a specific transaction name.
         windowSize:
           type: number
-          description: The window size
+          description: |
+            The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
           example: 6
         windowUnit:
           type: string
-          description: ç
+          description: |
+            The type of units for the time window. For example: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
+          description: Filter the rule to apply to a specific environment.
         threshold:
           type: number
-          description: The latency threshold value
+          description: The latency threshold value.
         groupBy:
           type: array
           default:
@@ -59573,12 +59797,15 @@ components:
               - service.environment
               - transaction.type
               - transaction.name
+          description: |
+            Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
         aggregationType:
           type: string
           enum:
             - avg
             - 95th
             - 99th
+          description: The type of aggregation to perform.
     params_property_apm_transaction_error_rate:
       required:
         - windowSize

@@ -9,8 +9,8 @@
 
 import fs from 'fs';
 import { Command } from '@kbn/dev-cli-runner';
-import { SCOUT_OUTPUT_ROOT } from '@kbn/scout-info';
-import { resolve } from 'path';
+import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
+import path from 'path';
 import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
 import { measurePerformance } from '../common';
 
@@ -44,13 +44,19 @@ export const discoverPlaywrightConfigs: Command<void> = {
         ? 'No Playwright config files found'
         : `Found Playwright config files in '${pluginsMap.size}' plugins`;
 
-    if (pluginsMap.size > 0 && flagsReader.boolean('save')) {
-      const scoutConfigsFilePath = resolve(SCOUT_OUTPUT_ROOT, 'scout_playwright_configs.json');
+    if (flagsReader.boolean('save')) {
+      const dirPath = path.dirname(SCOUT_PLAYWRIGHT_CONFIGS_PATH);
+
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+
       fs.writeFileSync(
-        scoutConfigsFilePath,
+        SCOUT_PLAYWRIGHT_CONFIGS_PATH,
         JSON.stringify(Object.fromEntries(pluginsMap), null, 2)
       );
-      log.info(`${finalMessage}. Saved to '${scoutConfigsFilePath}'`);
+
+      log.info(`${finalMessage}. Saved to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`);
       return;
     }
 

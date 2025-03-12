@@ -41,7 +41,6 @@ import {
   dataSourceDiffAlgorithm,
   multiLineStringDiffAlgorithm,
   numberDiffAlgorithm,
-  scalarArrayDiffAlgorithm,
   simpleDiffAlgorithm,
   singleLineStringDiffAlgorithm,
   kqlQueryDiffAlgorithm,
@@ -50,6 +49,10 @@ import {
   ruleTypeDiffAlgorithm,
   forceTargetVersionDiffAlgorithm,
 } from './algorithms';
+import {
+  ScalarArrayDiffMissingBaseVersionStrategy,
+  createScalarArrayDiffAlgorithm,
+} from './algorithms/scalar_array_diff_algorithm';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;
 const TARGET_TYPE_ERROR = `Target version can't be of different rule type`;
@@ -215,13 +218,17 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
    */
   version: forceTargetVersionDiffAlgorithm,
   name: singleLineStringDiffAlgorithm,
-  tags: scalarArrayDiffAlgorithm,
+  tags: createScalarArrayDiffAlgorithm({
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.Merge,
+  }),
   description: multiLineStringDiffAlgorithm,
   severity: singleLineStringDiffAlgorithm,
   severity_mapping: simpleDiffAlgorithm,
   risk_score: numberDiffAlgorithm,
   risk_score_mapping: simpleDiffAlgorithm,
-  references: scalarArrayDiffAlgorithm,
+  references: createScalarArrayDiffAlgorithm({
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.Merge,
+  }),
   false_positives: simpleDiffAlgorithm,
   threat: simpleDiffAlgorithm,
   note: multiLineStringDiffAlgorithm,
@@ -304,7 +311,9 @@ const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMat
   kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
   threat_query: kqlQueryDiffAlgorithm,
-  threat_index: scalarArrayDiffAlgorithm,
+  threat_index: createScalarArrayDiffAlgorithm({
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
+  }),
   threat_mapping: simpleDiffAlgorithm,
   threat_indicator_path: singleLineStringDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
@@ -355,7 +364,9 @@ const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFiel
   type: ruleTypeDiffAlgorithm,
   kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
-  new_terms_fields: scalarArrayDiffAlgorithm,
+  new_terms_fields: createScalarArrayDiffAlgorithm({
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
+  }),
   history_window_start: singleLineStringDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };

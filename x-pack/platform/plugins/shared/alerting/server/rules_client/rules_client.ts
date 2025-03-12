@@ -5,55 +5,57 @@
  * 2.0.
  */
 
-import { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
-import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
-import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
-import { SanitizedRule, RuleTypeParams } from '../types';
+import type { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
+import type { RuleTagsParams } from '../application/rule/methods/tags';
+import { getRuleTags } from '../application/rule/methods/tags';
+import type { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
+import type { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
-import { RulesClientContext } from './types';
-import { cloneRule, CloneRuleParams } from '../application/rule/methods/clone';
-import { createRule, CreateRuleParams } from '../application/rule/methods/create';
-import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
-import { snoozeRule, type SnoozeRuleOptions } from '../application/rule/methods/snooze';
-import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
-import { getRule, GetRuleParams } from '../application/rule/methods/get';
-import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
-import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
-import { getAlertSummary, GetAlertSummaryParams } from './methods/get_alert_summary';
-import {
+import type { RulesClientContext } from './types';
+import type { CloneRuleParams } from '../application/rule/methods/clone';
+import { cloneRule } from '../application/rule/methods/clone';
+import type { CreateRuleParams } from '../application/rule/methods/create';
+import { createRule } from '../application/rule/methods/create';
+import type { UpdateRuleParams } from '../application/rule/methods/update';
+import { updateRule } from '../application/rule/methods/update';
+import type { SnoozeRuleOptions } from '../application/rule/methods/snooze';
+import { snoozeRule } from '../application/rule/methods/snooze';
+import type { UnsnoozeParams } from '../application/rule/methods/unsnooze';
+import { unsnoozeRule } from '../application/rule/methods/unsnooze';
+import type { GetRuleParams } from '../application/rule/methods/get';
+import { getRule } from '../application/rule/methods/get';
+import type { ResolveParams } from '../application/rule/methods/resolve';
+import { resolveRule } from '../application/rule/methods/resolve';
+import type { GetAlertStateParams } from './methods/get_alert_state';
+import { getAlertState } from './methods/get_alert_state';
+import type { GetAlertSummaryParams } from './methods/get_alert_summary';
+import { getAlertSummary } from './methods/get_alert_summary';
+import type {
   GetExecutionLogByIdParams,
-  getExecutionLogForRule,
   GetGlobalExecutionLogParams,
-  getGlobalExecutionLogWithAuth,
 } from './methods/get_execution_log';
-import {
-  getActionErrorLog,
-  GetActionErrorLogByIdParams,
-  getActionErrorLogWithAuth,
-} from './methods/get_action_error_log';
-import {
+import { getExecutionLogForRule, getGlobalExecutionLogWithAuth } from './methods/get_execution_log';
+import type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
+import { getActionErrorLog, getActionErrorLogWithAuth } from './methods/get_action_error_log';
+import type {
   GetGlobalExecutionKPIParams,
-  getGlobalExecutionKpiWithAuth,
-  getRuleExecutionKPI,
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
-import { findRules, FindRulesParams } from '../application/rule/methods/find';
-import { AggregateParams } from '../application/rule/methods/aggregate/types';
+import { getGlobalExecutionKpiWithAuth, getRuleExecutionKPI } from './methods/get_execution_kpi';
+import type { FindRulesParams } from '../application/rule/methods/find';
+import { findRules } from '../application/rule/methods/find';
+import type { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
-import { deleteRule, DeleteRuleParams } from '../application/rule/methods/delete';
-import {
-  bulkDeleteRules,
-  BulkDeleteRulesRequestBody,
-} from '../application/rule/methods/bulk_delete';
-import {
-  bulkDisableRules,
-  BulkDisableRulesRequestBody,
-} from '../application/rule/methods/bulk_disable';
-import {
-  bulkEditRules,
-  BulkEditOptions,
-} from '../application/rule/methods/bulk_edit/bulk_edit_rules';
-import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
+import type { DeleteRuleParams } from '../application/rule/methods/delete';
+import { deleteRule } from '../application/rule/methods/delete';
+import type { BulkDeleteRulesRequestBody } from '../application/rule/methods/bulk_delete';
+import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
+import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bulk_disable';
+import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
+import type { BulkEditOptions } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
+import { bulkEditRules } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
+import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
+import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
 import { disableRule } from '../application/rule/methods/disable/disable_rule';
@@ -64,27 +66,25 @@ import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
-import {
-  bulkUntrackAlerts,
-  BulkUntrackBody,
-} from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
-import { ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
+import type { BulkUntrackBody } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import { bulkUntrackAlerts } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import type { ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
 import { scheduleBackfill } from '../application/backfill/methods/schedule';
 import { getBackfill } from '../application/backfill/methods/get';
 import { findBackfill } from '../application/backfill/methods/find';
 import { deleteBackfill } from '../application/backfill/methods/delete';
-import { FindBackfillParams } from '../application/backfill/methods/find/types';
-import { DisableRuleParams } from '../application/rule/methods/disable';
-import { EnableRuleParams } from '../application/rule/methods/enable_rule';
+import type { FindBackfillParams } from '../application/backfill/methods/find/types';
+import type { DisableRuleParams } from '../application/rule/methods/disable';
+import type { EnableRuleParams } from '../application/rule/methods/enable_rule';
 import { findGaps } from '../application/rule/methods/find_gaps';
 import { fillGapById } from '../application/rule/methods/fill_gap_by_id';
-import { FillGapByIdParams } from '../application/rule/methods/fill_gap_by_id/types';
-import { GetRuleIdsWithGapsParams } from '../application/rule/methods/get_rule_ids_with_gaps/types';
+import type { FillGapByIdParams } from '../application/rule/methods/fill_gap_by_id/types';
+import type { GetRuleIdsWithGapsParams } from '../application/rule/methods/get_rule_ids_with_gaps/types';
 
 import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_with_gaps';
 import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
-import { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import { FindGapsParams } from '../lib/rule_gaps/types';
+import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
+import type { FindGapsParams } from '../lib/rule_gaps/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,

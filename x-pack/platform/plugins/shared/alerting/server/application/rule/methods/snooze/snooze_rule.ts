@@ -15,7 +15,7 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../../../author
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { validateSnoozeStartDate } from '../../../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../../../lib/errors/rule_muted';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { RawRule, SanitizedRule } from '../../../../types';
 import {
   getSnoozeAttributes,
