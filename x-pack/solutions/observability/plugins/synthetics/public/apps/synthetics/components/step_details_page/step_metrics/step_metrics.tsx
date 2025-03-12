@@ -8,23 +8,24 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiFlexGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import { ThresholdIndicator } from '../../common/components/thershold_indicator';
 import { DefinitionsPopover } from './definitions_popover';
 import { useStepMetrics } from '../hooks/use_step_metrics';
 import { useStepPrevMetrics } from '../hooks/use_step_prev_metrics';
 
-export const formatMillisecond = (ms: number) => {
+export const formatMillisecond = (ms: number, precision = 0) => {
   if (ms < 0) {
     return '- ms';
   }
 
   if (ms < 1000) {
-    return `${ms.toFixed(0)} ms`;
+    return `${ms.toFixed(precision)} ms`;
   }
-  return `${(ms / 1000).toFixed(1)} s`;
+  return `${(ms / 1000).toFixed(2)} s`;
 };
 
-export const StepMetrics = () => {
+export const StepMetrics = ({ currentStep }: { currentStep?: JourneyStep }) => {
   const { metrics: stepMetrics } = useStepMetrics();
   const { metrics: prevMetrics, loading } = useStepPrevMetrics();
 
@@ -42,7 +43,7 @@ export const StepMetrics = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="l" columns={2}>
         {stepMetrics.map(({ label, value, helpText, formatted }) => {
           const prevVal = prevMetrics.find((prev) => prev.label === label);
 
