@@ -187,6 +187,49 @@
             "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.autoCreateDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoCreateDataView",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.initialIndexName",
+            "type": "string",
+            "tags": [],
+            "label": "initialIndexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.flyoutContent",
+            "type": "Object",
+            "tags": [],
+            "label": "flyoutContent",
+            "description": [],
+            "signature": [
+              "FlyoutContent",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -10,6 +10,7 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -98,16 +99,7 @@ export function mapVerticalToHorizontalPlacement(placement: Position) {
   }
 }
 
-export function MarkerBody({
-  label,
-  isHorizontal,
-}: {
-  label: string | undefined;
-  isHorizontal: boolean;
-}) {
-  if (!label) {
-    return null;
-  }
+export function MarkerBody({ label, isHorizontal }: { label: string; isHorizontal: boolean }) {
   if (isHorizontal) {
     return (
       <div
@@ -123,9 +115,12 @@ export function MarkerBody({
     <div
       className="xyDecorationRotatedWrapper"
       data-test-subj="xyVisAnnotationText"
-      css={{
-        width: LINES_MARKER_SIZE,
-      }}
+      css={[
+        xyDecorationRotatedWrapperStyles,
+        {
+          maxWidth: LINES_MARKER_SIZE,
+        },
+      ]}
     >
       <div
         className="eui-textTruncate xyDecorationRotatedWrapper__label"
@@ -214,10 +209,29 @@ export function Marker({
 
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
   if (config.textVisibility) {
-    if (hasReducedPadding) {
+    if (hasReducedPadding && label) {
       return <MarkerBody label={label} isHorizontal={isHorizontal} />;
     }
     return <EuiIcon type="empty" />;
   }
   return null;
 }
+
+const xyDecorationRotatedWrapperStyles = css({
+  display: 'inline-block',
+  overflow: 'hidden',
+  lineHeight: 1.5,
+
+  '& .xyDecorationRotatedWrapper__label': {
+    display: 'inline-block',
+    whiteSpace: 'nowrap',
+    transform: 'translate(0, 100%) rotate(-90deg)',
+    transformOrigin: '0 0',
+
+    '&::after': {
+      content: '""',
+      float: 'left',
+      marginTop: '100%',
+    },
+  },
+});

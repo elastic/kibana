@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { termQuery } from '@kbn/observability-plugin/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';

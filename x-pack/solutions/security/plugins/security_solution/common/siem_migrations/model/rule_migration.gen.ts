@@ -71,6 +71,10 @@ export const OriginalRule = z.object({
    * The original rule annotations containing additional information.
    */
   annotations: OriginalRuleAnnotations.optional(),
+  /**
+   * The original rule's severity or some representation of it.
+   */
+  severity: z.string().optional(),
 });
 
 /**
@@ -292,6 +296,10 @@ export const RuleMigrationTaskStats = z.object({
    * The moment of the last update.
    */
   last_updated_at: z.string(),
+  /**
+   * The last error message if the migration task execution failed.
+   */
+  last_error: z.string().optional(),
 });
 
 /**

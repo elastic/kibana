@@ -20,7 +20,6 @@ import {
   EuiTextTruncate,
   EuiBadgeGroup,
 } from '@elastic/eui';
-import { EuiIconPlugs } from '@kbn/search-shared-ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
@@ -233,7 +232,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
               connector.service_type
                 ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
                     ?.iconPath ?? ''
-                : EuiIconPlugs
+                : 'plugs'
             }
             size="l"
           />

@@ -20,12 +20,6 @@ $previewShowMoreHeight: 40px; /* [2] */
     align-items: center;
     overflow: hidden;
 
-    &--highlighted {
-      $backgroundColor: tintOrShade($euiColorPrimary, 90%, 70%);
-      background: $backgroundColor;
-      font-weight: 600;
-    }
-
     &__key, &__value {
       overflow: hidden;
     }

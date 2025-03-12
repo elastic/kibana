@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 
@@ -18,13 +19,13 @@ interface Props {
   alertsPreviewStackBy0: string;
   alertSummaryStackBy0: string;
   end: string;
+  filterManager: FilterManager;
   filters: Filter[];
   maxAlerts: number;
   query: Query;
   setAlertsPreviewStackBy0: React.Dispatch<React.SetStateAction<string>>;
   setAlertSummaryStackBy0: React.Dispatch<React.SetStateAction<string>>;
   setEnd: React.Dispatch<React.SetStateAction<string>>;
-  setFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   setMaxAlerts: React.Dispatch<React.SetStateAction<string>>;
   setQuery: React.Dispatch<React.SetStateAction<Query>>;
   setStart: React.Dispatch<React.SetStateAction<string>>;
@@ -35,13 +36,13 @@ const AlertSelectionComponent: React.FC<Props> = ({
   alertsPreviewStackBy0,
   alertSummaryStackBy0,
   end,
+  filterManager,
   filters,
   maxAlerts,
   query,
   setAlertsPreviewStackBy0,
   setAlertSummaryStackBy0,
   setEnd,
-  setFilters,
   setMaxAlerts,
   setQuery,
   setStart,
@@ -95,10 +96,10 @@ const AlertSelectionComponent: React.FC<Props> = ({
       <EuiFlexItem grow={false}>
         <AlertSelectionQuery
           end={end}
+          filterManager={filterManager}
           filters={filters}
           query={query}
           setEnd={setEnd}
-          setFilters={setFilters}
           setQuery={setQuery}
           setStart={setStart}
           start={start}

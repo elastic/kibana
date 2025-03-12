@@ -16,11 +16,18 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./chat/chat.spec.ts'));
     loadTestFile(require.resolve('./complete/complete.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/alerts.spec.ts'));
+    loadTestFile(require.resolve('./complete/functions/get_alerts_dataset_info.spec.ts'));
+    loadTestFile(require.resolve('./complete/functions/get_dataset_info.spec.ts'));
+    loadTestFile(require.resolve('./complete/functions/execute_query.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/elasticsearch.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/summarize.spec.ts'));
+    loadTestFile(require.resolve('./complete/functions/recall.spec.ts'));
     loadTestFile(require.resolve('./public_complete/public_complete.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
-    loadTestFile(require.resolve('./knowledge_base/knowledge_base_migration.spec.ts'));
+    loadTestFile(
+      require.resolve('./knowledge_base/knowledge_base_add_semantic_text_field_migration.spec.ts')
+    );
+    loadTestFile(require.resolve('./knowledge_base/knowledge_base_reindex.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_status.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_user_instructions.spec.ts'));

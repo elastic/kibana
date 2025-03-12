@@ -7,6 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const TelemtryMetadataSchema = schema.object({
+  pluginId: schema.maybe(schema.string()),
+  aggregateBy: schema.maybe(schema.string()),
+});
+
 export const ConfigSchema = schema.object({
   provider: schema.string(),
   taskType: schema.string(),
@@ -137,6 +142,7 @@ export const UnifiedChatCompleteParamsSchema = schema.object({
   }),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const UnifiedChatCompleteResponseSchema = schema.object({

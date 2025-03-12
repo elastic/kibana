@@ -46,7 +46,7 @@ export const NO_SPACES_HELP = i18n.translate(
   'xpack.automaticImport.step.dataStream.noSpacesHelpText',
   {
     defaultMessage:
-      'Name must be at least 2 characters long and can only contain lowercase letters, numbers, and underscores (_)',
+      'Name must be at least 2 characters long, start with a letter, and can only contain lowercase letters, numbers, and underscores (_)',
   }
 );
 export const PACKAGE_NAMES_FETCH_ERROR = i18n.translate(
@@ -271,6 +271,12 @@ export const GENERATION_ERROR_TRANSLATION: Record<
     defaultMessage:
       'CEF format detected. Please decode the CEF logs into JSON format using filebeat decode_cef processor.',
   }),
+  [GenerationErrorCode.BUILD_INTEGRATION_ERROR]: i18n.translate(
+    'xpack.automaticImport.errors.buildIntegrationError',
+    {
+      defaultMessage: 'An error occurred while building the integration package. Please try again.',
+    }
+  ),
   [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) => {
     if (
       attributes.underlyingMessages !== undefined &&

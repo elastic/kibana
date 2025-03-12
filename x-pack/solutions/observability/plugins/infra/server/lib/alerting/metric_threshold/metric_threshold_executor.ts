@@ -25,7 +25,7 @@ import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
-import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups, type Group } from '@kbn/alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
@@ -472,7 +472,7 @@ export const createMetricThresholdExecutor =
           metricsExplorerLocator,
           additionalContext,
         }),
-
+        reason: alertHits?.[ALERT_REASON],
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS.id,

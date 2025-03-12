@@ -6,7 +6,6 @@
  */
 
 import { resetSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
@@ -70,6 +69,6 @@ export const resetSLORoute = createSloServerRoute({
       basePath
     );
 
-    return await executeWithErrorHandler(() => resetSLO.execute(params.path.id));
+    return await resetSLO.execute(params.path.id);
   },
 });
