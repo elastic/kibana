@@ -15,6 +15,7 @@ running in no time. If you have any problems, file an issue in the https://githu
 * <<kibana-architecture>>
 * <<advanced>>
 * <<plugin-list>>
+* <<dependencies-versions>>
 * <<development-telemetry>>
 
 --
