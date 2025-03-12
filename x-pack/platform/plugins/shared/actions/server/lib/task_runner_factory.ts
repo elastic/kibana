@@ -27,12 +27,12 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { ActionExecutorContract } from './action_executor';
+import { isPersistedActionTask } from '../types';
 import type {
   ActionTaskExecutorParams,
   ActionTaskParams,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
-  isPersistedActionTask,
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';

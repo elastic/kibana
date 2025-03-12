@@ -18,7 +18,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
-import { RunNowResult } from '@kbn/task-manager-plugin/server';
+import type { RunNowResult } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
@@ -35,8 +35,8 @@ import type {
   IExecutionLogResult,
 } from '../../common';
 import type { ActionTypeRegistry } from '../action_type_registry';
-import type { ActionExecutorContract } from '../lib';
-import { ActionExecutionSource, parseDate } from '../lib';
+import type { ActionExecutorContract, ActionExecutionSource } from '../lib';
+import { parseDate } from '../lib';
 import type {
   ActionResult,
   RawAction,

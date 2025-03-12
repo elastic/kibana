@@ -7,7 +7,7 @@
 
 import type { SubFeature } from '@kbn/actions-plugin/common';
 import type { RuleType } from '../../types';
-import { InitialRule } from '../sections/rule_form/rule_reducer';
+import type { InitialRule } from '../sections/rule_form/rule_reducer';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add

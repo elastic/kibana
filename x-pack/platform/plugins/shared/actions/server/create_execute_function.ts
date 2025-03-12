@@ -11,7 +11,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { RunNowResult } from '@kbn/task-manager-plugin/server';
+import type { RunNowResult } from '@kbn/task-manager-plugin/server';
 import type {
   RawAction,
   ActionTypeRegistryContract,
