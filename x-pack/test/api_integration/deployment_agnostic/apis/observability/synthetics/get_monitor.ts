@@ -18,6 +18,7 @@ import {
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import pMap from 'p-map';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 import { omitMonitorKeys } from './create_monitor';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -26,7 +27,7 @@ import { getFixtureJson } from './helpers/get_fixture_json';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/204069
-  describe.skip('getSyntheticsMonitors', function () {
+  describe('getSyntheticsMonitors', function () {
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
@@ -57,6 +58,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await privateLocationTestService.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
       await supertest
@@ -121,9 +123,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('with page params', async () => {
         const allMonitors = [...monitors, ...monitors];
-        for (const mon of allMonitors) {
-          await saveMonitor({ ...mon, name: mon.name + Date.now() });
-        }
+        await pMap(
+          allMonitors,
+          async (mon, i) => {
+            await saveMonitor({ ...mon, name: mon.name + Date.now() });
+          },
+          { concurrency: 5 }
+        );
 
         await retry.try(async () => {
           const firstPageResp = await supertest
@@ -230,12 +236,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const allMonitors = [...monitors, ...monitors];
-        for (const mon of allMonitors) {
-          await saveMonitor(
-            { ...mon, name: mon.name + Date.now(), locations: [spaceScopedPrivateLocation] },
-            SPACE_ID
-          );
-        }
+
+        await pMap(
+          allMonitors,
+          async (mon) => {
+            await saveMonitor(
+              { ...mon, name: mon.name + Date.now(), locations: [spaceScopedPrivateLocation] },
+              SPACE_ID
+            );
+          },
+          { concurrency: 5 }
+        );
 
         const firstPageResp = await supertest
           .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=1000`)
