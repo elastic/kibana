@@ -141,6 +141,7 @@
     "@kbn/response-ops-rule-form",
     "@kbn/unsaved-changes-prompt",
     "@kbn/fields-metadata-plugin",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/deeplinks-analytics",
   ]
 }

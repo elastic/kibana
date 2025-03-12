@@ -37,6 +37,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import {
@@ -86,6 +87,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  share?: SharePluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

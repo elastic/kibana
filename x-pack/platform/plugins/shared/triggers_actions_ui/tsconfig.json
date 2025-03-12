@@ -78,7 +78,8 @@
     "@kbn/rrule",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/response-ops-rule-params",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/share-plugin"
   ],
   "exclude": ["target/**/*"]
 }
