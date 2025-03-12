@@ -90,7 +90,7 @@ export const evaluateDefendInsights = async ({
 
       const graph = getDefaultDefendInsightsGraph({
         insightType: DefendInsightType.Enum.incompatible_antivirus, // TODO: parameterize
-        endpointIds: ['7577ea06-87c9-453e-ab3d-2a3a55603932'], // TODO: get from langsmith?
+        endpointIds: [], // Empty endpointIds, because we are seeding the graph with the dataset
         esClient,
         llm,
         logger,
