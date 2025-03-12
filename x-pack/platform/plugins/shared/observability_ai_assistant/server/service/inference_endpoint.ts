@@ -129,21 +129,15 @@ export async function getElserModelStatus({
   const elserModelStats = modelStats.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
-  const deploymentState = elserModelStats?.deployment_stats?.state;
-  const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
-  const allocationCount =
-    elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
   const ready =
-    deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
+    elserModelStats?.deployment_stats?.state === 'started' &&
+    elserModelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+    elserModelStats?.deployment_stats?.allocation_status?.allocation_count > 0;
 
   return {
     endpoint,
     ready,
     enabled,
-    model_stats: {
-      allocation_count: allocationCount,
-      deployment_state: deploymentState,
-      allocation_state: allocationState,
-    },
+    model_stats: elserModelStats,
   };
 }

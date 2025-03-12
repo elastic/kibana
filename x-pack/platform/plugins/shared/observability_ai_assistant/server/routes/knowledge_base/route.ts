@@ -11,9 +11,7 @@ import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
   InferenceInferenceEndpointInfo,
-  MlDeploymentAllocationState,
-  MlDeploymentAssignmentState,
-  MlTrainedModelDeploymentAllocationStatus,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
@@ -34,11 +32,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     ready: boolean;
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
-    model_stats?: {
-      deployment_state?: MlDeploymentAssignmentState;
-      allocation_state?: MlDeploymentAllocationState;
-      allocation_count?: MlTrainedModelDeploymentAllocationStatus['allocation_count'];
-    };
+    model_stats?: MlTrainedModelStats;
   }> => {
     const client = await service.getClient({ request });
 

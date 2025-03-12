@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -20,35 +20,113 @@ import {
 import usePrevious from 'react-use/lib/usePrevious';
 
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
-import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
+import { useKibana } from '../hooks/use_kibana';
+import { UseKnowledgeBaseResult } from '../hooks';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
 }) {
-  const prevIsInstalling = usePrevious(knowledgeBase.isInstalling);
+  const { notifications, ml } = useKibana().services;
+
+  const isInstalling = !!knowledgeBase.status.value?.endpoint && !knowledgeBase.status.value?.ready;
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isLoading && !!knowledgeBase.status.value?.endpoint) {
+      setIsLoading(false);
+    }
+  }, [isLoading, knowledgeBase]);
+
+  const install = useCallback(async () => {
+    setIsLoading(true);
+
+    let attempts = 0;
+    const MAX_ATTEMPTS = 5;
+
+    try {
+      // install
+      await retrySetupIfError();
+
+      if (ml.mlApi?.savedObjects.syncSavedObjects) {
+        await ml.mlApi.savedObjects.syncSavedObjects();
+      }
+    } catch (e) {
+      notifications!.toasts.addError(e, {
+        title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
+          defaultMessage: 'Could not create inference endpoint',
+        }),
+      });
+      setIsLoading(false);
+    } finally {
+      // do one refresh to get an initial status
+      await knowledgeBase.status.refresh();
+    }
+    async function retrySetupIfError() {
+      while (true) {
+        try {
+          await knowledgeBase.setupKb();
+          break;
+        } catch (error) {
+          if (
+            (error.body?.statusCode === 503 || error.body?.statusCode === 504) &&
+            attempts < MAX_ATTEMPTS
+          ) {
+            attempts++;
+            continue;
+          }
+          throw error;
+        }
+      }
+    }
+  }, [ml, notifications, knowledgeBase]);
+
+  // poll the status if isInstalling
+  // stop when ready === true or some error
+  useEffect(() => {
+    if (!isInstalling) {
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      // re-fetch /status
+      await knowledgeBase.status.refresh();
+      const { value: currentStatus } = knowledgeBase.status;
+
+      // check if the model is now ready
+      if (currentStatus?.ready) {
+        // done installing
+        clearInterval(interval);
+        return;
+      }
+    }, 5000);
+
+    // cleanup the interval if unmount
+    return () => {
+      clearInterval(interval);
+    };
+  }, [knowledgeBase, isInstalling]);
+
+  const prevIsInstalling = usePrevious(isInstalling || isLoading);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   // track whether the "inspect issues" popover is open
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
-    if (
-      prevIsInstalling === true &&
-      knowledgeBase.isInstalling === false &&
-      !knowledgeBase.installError
-    ) {
+    if (prevIsInstalling === true && isInstalling === false) {
       setShowSuccessBanner(true);
     }
-  }, [knowledgeBase.isInstalling, knowledgeBase.installError, prevIsInstalling]);
+  }, [isInstalling, prevIsInstalling]);
 
   const handleInstall = async () => {
     setIsPopoverOpen(false);
-    await knowledgeBase.install();
+    await install();
   };
 
   // If we are installing at any step (POST /setup + model deployment)
-  if (knowledgeBase.isInstalling) {
+  if (isInstalling || isLoading) {
     return (
       <>
         <EuiText color="subdued" size="s">
@@ -69,14 +147,32 @@ export function WelcomeMessageKnowledgeBase({
             defaultMessage: 'Setting up Knowledge base',
           })}
         </EuiButtonEmpty>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={
+              <EuiButtonEmpty
+                data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
+                iconType="inspect"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              >
+                {i18n.translate('xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel', {
+                  defaultMessage: 'Inspect',
+                })}
+              </EuiButtonEmpty>
+            }
+            isOpen={isPopoverOpen}
+            panelPaddingSize="none"
+            closePopover={() => setIsPopoverOpen(false)}
+          >
+            <WelcomeMessageKnowledgeBaseSetupErrorPanel
+              knowledgeBase={knowledgeBase}
+              onRetryInstall={handleInstall}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
       </>
     );
-    // not installing and install error or the endpoint doesn't exist or model not ready
-  } else if (
-    knowledgeBase.installError ||
-    knowledgeBase.status.value?.errorMessage ||
-    !knowledgeBase.status.value?.ready
-  ) {
+  } else if (!knowledgeBase.status.value?.endpoint) {
     return (
       <>
         <EuiText color="subdued" size="s">
@@ -105,48 +201,13 @@ export function WelcomeMessageKnowledgeBase({
               </EuiButton>
             </div>
           </EuiFlexItem>
-          {
-            // only show the "inspect issues" button if there is an install error
-            // or the model is not ready but endpoint exists
-            (knowledgeBase.installError ||
-              (!knowledgeBase.status.value?.ready && knowledgeBase.status.value?.endpoint)) && (
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  button={
-                    <EuiButtonEmpty
-                      data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
-                      iconType="inspect"
-                      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                    >
-                      {i18n.translate(
-                        'xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel',
-                        {
-                          defaultMessage: 'Inspect issues',
-                        }
-                      )}
-                    </EuiButtonEmpty>
-                  }
-                  isOpen={isPopoverOpen}
-                  panelPaddingSize="none"
-                  closePopover={() => setIsPopoverOpen(false)}
-                >
-                  <WelcomeMessageKnowledgeBaseSetupErrorPanel
-                    knowledgeBase={knowledgeBase}
-                    onRetryInstall={handleInstall}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
-            )
-          }
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
       </>
     );
-  }
-
-  // successfull installation
-  if (showSuccessBanner) {
+  } else if (showSuccessBanner) {
+    // successfull installation
     return (
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
