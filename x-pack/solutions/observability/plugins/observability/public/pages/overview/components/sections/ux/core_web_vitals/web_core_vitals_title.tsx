@@ -52,8 +52,8 @@ export function WebCoreVitalsTitle({
 
   return (
     <EuiFlexGroup gutterSize="none">
-      <EuiFlexGroup gutterSize="none" direction="row" alignItems="center">
-        <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+      <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>{CORE_WEB_VITALS}</h3>
           </EuiTitle>
