@@ -15,15 +15,17 @@ interface TabPreviewProps {
   children: React.ReactNode;
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
+  stopPreviewOnHover?: boolean;
 }
 export const TabPreview: React.FC<TabPreviewProps> = ({
   children,
   showPreview,
   setShowPreview,
+  stopPreviewOnHover,
 }) => {
   return (
     <div
-      onMouseEnter={() => setShowPreview(true)}
+      onMouseEnter={() => !stopPreviewOnHover && setShowPreview(true)}
       onMouseLeave={() => setShowPreview(false)}
       css={css`
         position: relative;
@@ -34,12 +36,12 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         <EuiSplitPanel.Outer grow css={getPreviewContainerCss()}>
           <EuiSplitPanel.Inner>
             <EuiText>
-              <p>Preview</p>
+              <p>Tab preview</p>
             </EuiText>
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner grow={false} color="subdued">
             <EuiText>
-              <EuiCode>Bottom panel</EuiCode>
+              <EuiCode>Preview bottom panel</EuiCode>
             </EuiText>
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>

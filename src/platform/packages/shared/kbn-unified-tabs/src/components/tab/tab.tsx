@@ -44,9 +44,10 @@ export const Tab: React.FC<TabProps> = ({
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
 
   const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -89,8 +90,17 @@ export const Tab: React.FC<TabProps> = ({
     [onSelectEvent]
   );
 
+  const handleDoubleClick = useCallback(() => {
+    setIsInlineEditActive(true);
+    hidePreview();
+  }, []);
+
   return (
-    <TabPreview showPreview={showPreview} setShowPreview={setShowPreview}>
+    <TabPreview
+      showPreview={showPreview}
+      setShowPreview={setShowPreview}
+      stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
+    >
       <EuiFlexGroup
         ref={containerRef}
         {...getTabAttributes(item, tabContentId)}
@@ -120,7 +130,7 @@ export const Tab: React.FC<TabProps> = ({
               data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
               type="button"
               onClick={onSelectEvent}
-              onDoubleClick={() => setIsInlineEditActive(true)}
+              onDoubleClick={handleDoubleClick}
             >
               <EuiText color="inherit" size="s" className="eui-textTruncate">
                 {item.label}
@@ -130,7 +140,12 @@ export const Tab: React.FC<TabProps> = ({
               <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
                 {!!getTabMenuItems && (
                   <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
-                    <TabMenu item={item} getTabMenuItems={getTabMenuItems} />
+                    <TabMenu
+                      item={item}
+                      getTabMenuItems={getTabMenuItems}
+                      isPopoverOpen={isActionPopoverOpen}
+                      setPopover={setActionPopover}
+                    />
                   </EuiFlexItem>
                 )}
                 {!!onClose && (
