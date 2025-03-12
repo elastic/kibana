@@ -12,11 +12,7 @@ import {
 } from './observability_annotation';
 
 export function ObservabilityAnnotations(props: ObservabilityAnnotationsProps) {
-  return (
-    <Suspense fallback={null}>
-      <ObservabilityAnnotationsComponent {...props} />
-    </Suspense>
-  );
+  return <ObservabilityAnnotationsComponent {...props} />;
 }
 
 import type { CreateAnnotationProps } from './create_annotation';
