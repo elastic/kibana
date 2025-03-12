@@ -55,7 +55,6 @@ import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
 import { RuleDashboards} from './rule_dashboards';
-import { dashboardServiceProvider, type DashboardItem } from './dashboard_service';
 
 export const RuleDefinition = () => {
   const {
@@ -92,8 +91,7 @@ export const RuleDefinition = () => {
 
   const { readFlappingSettingsUI, writeFlappingSettingsUI } = rulesSettings || {};
 
-  const { schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
-  const params = formData.params as RuleTypeParams & { dashboards?: DashboardItem[] };
+  const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 

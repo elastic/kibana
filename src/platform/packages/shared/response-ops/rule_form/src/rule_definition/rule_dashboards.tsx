@@ -37,7 +37,7 @@ export const RuleDashboards = ( { plugins }) => {
     const fetchDashboardTitles = async () => {
       const dashboardsWithTitles = await Promise.all(
         (params.dashboards ?? []).map(async (dashboard) => ({
-          label: (await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id)).attributes.title,
+          label: (await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id))?.attributes.title,
           value: dashboard.id,
         }))
       );
