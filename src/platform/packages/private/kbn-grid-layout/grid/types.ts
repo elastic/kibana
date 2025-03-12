@@ -62,10 +62,6 @@ export interface ActivePanel {
 
 export interface ActiveRow {
   id: string;
-  startingPosition: {
-    top: number;
-    right: number;
-  };
   translate: {
     top: number;
     left: number;
@@ -89,13 +85,6 @@ export interface GridLayoutStateManager {
   panelRefs: React.MutableRefObject<{
     [rowId: string]: { [panelId: string]: HTMLDivElement | null };
   }>;
-}
-
-export interface RowInteractionEvent {
-  type: 'drag';
-  id: string;
-  targetOrder: number;
-  rowDiv: HTMLDivElement;
 }
 
 /**

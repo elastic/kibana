@@ -14,34 +14,21 @@ import { MutableRefObject } from 'react';
 import { GridLayoutStateManager } from '../types';
 import { getRowKeysInOrder } from '../utils/resolve_grid_row';
 import { getPointerPosition } from './sensors';
-import { UserInteractionEvent } from './types';
+import { MousePosition, UserInteractionEvent } from './types';
 
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   rowId: string,
-  startingPosition: MutableRefObject<{
-    top: number;
-    right: number;
-  }>,
-  startingMouse: MutableRefObject<{
-    clientX: number;
-    clientY: number;
-  }>
+  startingMouse: MutableRefObject<MousePosition>
 ) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   if (!headerRef) return;
 
-  const newStartingPosition = headerRef.getBoundingClientRect();
-  startingPosition.current = {
-    top: newStartingPosition.top,
-    right: newStartingPosition.x,
-  };
   startingMouse.current = getPointerPosition(e);
 
   gridLayoutStateManager.activeRow$.next({
     id: rowId,
-    startingPosition: startingPosition.current,
     translate: {
       top: 0,
       left: 0,
@@ -65,15 +52,8 @@ export const commitAction = ({
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   rowId: string,
-  startingPosition: {
-    top: number;
-    right: number;
-  },
-  startingMouse: {
-    clientX: number;
-    clientY: number;
-  },
-  pointerPixel: { clientX: number; clientY: number }
+  startingMouse: MousePosition,
+  currentMouse: MousePosition
 ) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   if (!headerRef) return;
@@ -113,10 +93,9 @@ export const moveAction = (
 
   gridLayoutStateManager.activeRow$.next({
     id: rowId,
-    startingPosition,
     translate: {
-      top: pointerPixel.clientY - startingMouse.clientY,
-      left: pointerPixel.clientX - startingMouse.clientX,
+      top: currentMouse.clientY - startingMouse.clientY,
+      left: currentMouse.clientX - startingMouse.clientX,
     },
   });
 };

@@ -329,6 +329,7 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
       border: `1px solid ${euiTheme.border.color}`,
       borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
       paddingLeft: '8px',
+      // hide accordian arrow + panel count text when row is being dragged
       '& .kbnGridRowTitle--button svg, & .kbnGridLayout--panelCount': {
         display: 'none',
       },

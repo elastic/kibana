@@ -22,10 +22,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { useGridLayoutRowEvents } from '../use_grid_layout_events/row_events';
+import { useGridLayoutRowEvents } from '../use_grid_layout_events';
 import { deleteRow } from '../utils/row_management';
 import { DeleteGridRowModal } from './delete_grid_row_modal';
-import { DragPreview } from './drag_preview';
+import { DragPreview } from './grid_row_drag_preview';
 import { GridRowTitle } from './grid_row_title';
 
 export interface GridRowHeaderProps {
@@ -38,7 +38,6 @@ export const GridRowHeader = React.memo(
   ({ rowId, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
     const startInteraction = useGridLayoutRowEvents({
-      interactionType: 'drag',
       rowId,
     });
 
@@ -90,19 +89,10 @@ export const GridRowHeader = React.memo(
           if (!headerRef) return;
 
           if (activeRow?.id === rowId) {
-            const width = headerRef.getBoundingClientRect().width;
             setIsActive(true);
-            headerRef.style.position = 'fixed';
-            headerRef.style.width = `${width}px`;
-            headerRef.style.top = `${activeRow.startingPosition.top}px`;
-            headerRef.style.right = `${activeRow.startingPosition.right}px`;
             headerRef.style.transform = `translate(${activeRow.translate.left}px, ${activeRow.translate.top}px)`;
           } else {
             setIsActive(false);
-            headerRef.style.position = 'relative';
-            headerRef.style.width = ``;
-            headerRef.style.top = ``;
-            headerRef.style.right = ``;
             headerRef.style.transform = ``;
           }
         });
@@ -198,9 +188,7 @@ export const GridRowHeader = React.memo(
                         aria-label={i18n.translate('kbnGridLayout.row.moveRow', {
                           defaultMessage: 'Move section',
                         })}
-                        onMouseDown={(e) => {
-                          startInteraction(e);
-                        }}
+                        onMouseDown={startInteraction}
                       />
                     </EuiFlexItem>
                   </>

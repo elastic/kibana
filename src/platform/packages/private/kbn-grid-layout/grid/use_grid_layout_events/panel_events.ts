@@ -8,17 +8,18 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { GridPanelData, GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import { GridPanelData, PanelInteractionEvent } from '../types';
+import { useGridLayoutContext } from '../use_grid_layout_context';
+import { commitAction, moveAction, startAction } from './panel_state_manager_actions';
 import {
   getPointerPosition,
+  isLayoutInteractive,
   isMouseEvent,
   isTouchEvent,
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
-import { commitAction, moveAction, startAction } from './panel_state_manager_actions';
-import { UserInteractionEvent } from './types';
-import { useGridLayoutContext } from '../use_grid_layout_context';
+import { MousePosition, UserInteractionEvent } from './types';
 
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
@@ -39,7 +40,7 @@ export const useGridLayoutPanelEvents = ({
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
-  const pointerPixel = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
+  const pointerPixel = useRef<MousePosition>({ clientX: 0, clientY: 0 });
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
@@ -77,11 +78,4 @@ export const useGridLayoutPanelEvents = ({
   );
 
   return startInteraction;
-};
-
-const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
-  return (
-    gridLayoutStateManager.expandedPanelId$.value === undefined &&
-    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
-  );
 };

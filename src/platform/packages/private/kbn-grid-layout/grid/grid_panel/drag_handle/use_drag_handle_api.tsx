@@ -9,9 +9,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useGridLayoutPanelEvents } from '../../use_grid_layout_events/panel_events';
-import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
+import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
+import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
 export interface DragHandleApi {
   startDrag: (e: UserInteractionEvent) => void;

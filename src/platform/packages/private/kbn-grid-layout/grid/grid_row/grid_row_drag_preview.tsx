@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
@@ -30,11 +32,12 @@ export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
   return <div className={'kbnGridPanel--rowDragPreview'} css={styles} />;
 });
 
-const styles = css({
-  width: '100%',
-  height: '32px',
-  margin: '8px 0px',
-  position: 'relative',
-});
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: '100%',
+    height: euiTheme.size.xl,
+    margin: `${euiTheme.size.s} 0px`,
+    position: 'relative',
+  });
 
 DragPreview.displayName = 'KbnGridLayoutDragRowPreview';

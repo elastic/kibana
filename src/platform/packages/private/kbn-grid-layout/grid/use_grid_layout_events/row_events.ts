@@ -9,49 +9,35 @@
 
 import { useCallback, useRef } from 'react';
 
-import { GridLayoutStateManager, RowInteractionEvent } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { commitAction, moveAction, startAction } from './row_state_manager_actions';
 import {
   getPointerPosition,
+  isLayoutInteractive,
   isMouseEvent,
   isTouchEvent,
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
-import { UserInteractionEvent } from './types';
+import { MousePosition, UserInteractionEvent } from './types';
 
-export const useGridLayoutRowEvents = ({
-  interactionType,
-  rowId,
-}: {
-  interactionType: RowInteractionEvent['type'];
-  rowId: string;
-}) => {
+export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
-  const pointerPixel = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
-  const startingMouse = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
-  const startingPosition = useRef<{ top: number; right: number }>({ top: 0, right: 0 });
+  const pointerPixel = useRef<MousePosition>({ clientX: 0, clientY: 0 });
+  const startingMouse = useRef<MousePosition>({ clientX: 0, clientY: 0 });
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
 
-      const onStart = () =>
-        startAction(e, gridLayoutStateManager, rowId, startingPosition, startingMouse);
+      const onStart = () => startAction(e, gridLayoutStateManager, rowId, startingMouse);
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getPointerPosition(ev);
         }
-        moveAction(
-          gridLayoutStateManager,
-          rowId,
-          startingPosition.current,
-          startingMouse.current,
-          pointerPixel.current
-        );
+        moveAction(gridLayoutStateManager, rowId, startingMouse.current, pointerPixel.current);
       };
 
       const onEnd = () => commitAction(gridLayoutStateManager);
@@ -77,11 +63,4 @@ export const useGridLayoutRowEvents = ({
   );
 
   return startInteraction;
-};
-
-const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
-  return (
-    gridLayoutStateManager.expandedPanelId$.value === undefined &&
-    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
-  );
 };

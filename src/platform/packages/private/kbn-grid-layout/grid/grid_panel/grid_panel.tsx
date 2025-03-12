@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
-import { ResizeHandle } from './resize_handle';
+import { ResizeHandle } from './grid_panel_resize_handle';
 
 export interface GridPanelProps {
   panelId: string;

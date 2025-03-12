@@ -13,7 +13,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { useGridLayoutPanelEvents } from '../use_grid_layout_events/panel_events';
+import { useGridLayoutPanelEvents } from '../use_grid_layout_events';
 
 export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; panelId: string }) => {
   const startInteraction = useGridLayoutPanelEvents({

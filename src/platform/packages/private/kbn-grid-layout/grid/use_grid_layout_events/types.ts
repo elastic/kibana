@@ -8,3 +8,8 @@
  */
 
 export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;
+
+export interface MousePosition {
+  clientX: number;
+  clientY: number;
+}
