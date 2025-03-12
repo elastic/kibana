@@ -147,29 +147,35 @@ export function WelcomeMessageKnowledgeBase({
             defaultMessage: 'Setting up Knowledge base',
           })}
         </EuiButtonEmpty>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={
-              <EuiButtonEmpty
-                data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
-                iconType="inspect"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              >
-                {i18n.translate('xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel', {
-                  defaultMessage: 'Inspect',
-                })}
-              </EuiButtonEmpty>
-            }
-            isOpen={isPopoverOpen}
-            panelPaddingSize="none"
-            closePopover={() => setIsPopoverOpen(false)}
-          >
-            <WelcomeMessageKnowledgeBaseSetupErrorPanel
-              knowledgeBase={knowledgeBase}
-              onRetryInstall={handleInstall}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
+
+        {knowledgeBase.status.value?.endpoint && knowledgeBase.status.value?.model_stats ? (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonEmpty
+                  data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
+                  iconType="inspect"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                >
+                  {i18n.translate(
+                    'xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel',
+                    {
+                      defaultMessage: 'Inspect',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              }
+              isOpen={isPopoverOpen}
+              panelPaddingSize="none"
+              closePopover={() => setIsPopoverOpen(false)}
+            >
+              <WelcomeMessageKnowledgeBaseSetupErrorPanel
+                knowledgeBase={knowledgeBase}
+                onRetryInstall={handleInstall}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        ) : null}
       </>
     );
   } else if (!knowledgeBase.status.value?.endpoint) {

@@ -41,8 +41,10 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
           defaultMessage: 'Could not create inference endpoint',
         }),
       });
+    } finally {
+      statusRequest.refresh();
     }
-  }, [service, notifications]);
+  }, [service, notifications, statusRequest]);
 
   return {
     status: statusRequest,
