@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { getElasticOutline, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { RepeatImageRendererConfig } from '../../common/types';
 
 const strings = {
@@ -44,8 +43,10 @@ export const getRepeatImageRenderer =
       config: RepeatImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
-      const { RepeatImageComponent } = await import('../components/repeat_image_component');
-      const { elasticOutline } = await getElasticOutline();
+      const [{ elasticOutline, isValidUrl }, { RepeatImageComponent }] = await Promise.all([
+        import('@kbn/expression-utils'),
+        import('../components/repeat_image_component'),
+      ]);
       const settings = {
         ...config,
         image: isValidUrl(config.image) ? config.image : elasticOutline,

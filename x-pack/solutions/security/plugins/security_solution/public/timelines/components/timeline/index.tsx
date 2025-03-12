@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash/fp';
 import { EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -33,6 +33,7 @@ import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`
   height: 100%;
@@ -40,7 +41,6 @@ const TimelineBody = styled.div`
   flex-direction: column;
 `;
 
-export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
