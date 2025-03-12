@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/rule_upgrade_state';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
@@ -31,7 +32,6 @@ import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeState>;
 
@@ -109,7 +109,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
     return <IntegrationsPopover relatedIntegrations={integrations} />;
   },
-  width: '143px',
+  width: '70px',
   truncateText: true,
 };
 
@@ -142,6 +142,43 @@ const MODIFIED_COLUMN: TableColumn = {
   truncateText: true,
 };
 
+const CONFLICT_COLUMN: TableColumn = {
+  field: 'conflict',
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_CONFLICT} />,
+  align: 'center',
+  render: (conflict: ThreeWayDiffConflict) => {
+    switch (conflict) {
+      case ThreeWayDiffConflict.SOLVABLE:
+        return (
+          <EuiToolTip content={i18n.SOLVABLE_CONFLICT_TOOLTIP}>
+            <EuiBadge
+              color="warning"
+              data-test-subj="upgradeRulesTableSolvableConflictColumnBadge"
+              aria-label={i18n.SOLVABLE_CONFLICT_LABEL}
+            >
+              {i18n.SOLVABLE_CONFLICT_LABEL}
+            </EuiBadge>
+          </EuiToolTip>
+        );
+
+      case ThreeWayDiffConflict.NON_SOLVABLE:
+        return (
+          <EuiToolTip content={i18n.NON_SOLVABLE_CONFLICT_TOOLTIP}>
+            <EuiBadge
+              color="danger"
+              data-test-subj="upgradeRulesTableUnsolvableConflictColumnBadge"
+              aria-label={i18n.NON_SOLVABLE_CONFLICT_LABEL}
+            >
+              {i18n.NON_SOLVABLE_CONFLICT_LABEL}
+            </EuiBadge>
+          </EuiToolTip>
+        );
+    }
+  },
+  width: '170px',
+  truncateText: true,
+};
+
 const createUpgradeButtonColumn = (
   upgradeRules: UpgradePrebuiltRulesTableActions['upgradeRules'],
   openRulePreview: UpgradePrebuiltRulesTableActions['openRulePreview'],
@@ -167,6 +204,7 @@ const createUpgradeButtonColumn = (
       return (
         <EuiToolTip content={i18n.UPDATE_RULE_BUTTON_TOOLTIP_CONFLICTS}>
           <EuiButtonEmpty
+            color="warning"
             size="s"
             disabled={isUpgradeButtonDisabled}
             onClick={() => openRulePreview(ruleId)}
@@ -202,21 +240,13 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
     actions: { upgradeRules, openRulePreview },
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
-
-  const { isRulesCustomizationEnabled, customizationDisabledReason } =
-    usePrebuiltRulesCustomizationStatus();
-  const shouldShowModifiedColumn =
-    isRulesCustomizationEnabled ||
-    customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License;
-
-  if (shouldShowModifiedColumn) {
-    INTEGRATIONS_COLUMN.width = '70px';
-  }
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
 
   return useMemo(
     () => [
       RULE_NAME_COLUMN,
-      ...(shouldShowModifiedColumn ? [MODIFIED_COLUMN] : []),
+      MODIFIED_COLUMN,
+      CONFLICT_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -238,7 +268,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         sortable: ({ current_rule: { severity } }: RuleUpgradeState) =>
           getNormalizedSeverity(severity),
         truncateText: true,
-        width: '12%',
+        width: '10%',
       },
       ...(hasCRUDPermissions
         ? [
@@ -253,7 +283,6 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         : []),
     ],
     [
-      shouldShowModifiedColumn,
       showRelatedIntegrations,
       hasCRUDPermissions,
       upgradeRules,

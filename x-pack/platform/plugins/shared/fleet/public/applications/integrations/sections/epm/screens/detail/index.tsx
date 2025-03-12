@@ -21,6 +21,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -67,7 +68,7 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { PermissionsError } from '../../../../../fleet/layouts';
+import { PermissionsError } from '../../../../layouts';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
@@ -88,7 +89,6 @@ import { CustomViewPage } from './custom';
 import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
-import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 
@@ -130,6 +130,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 }
 
 export function Detail() {
+  const theme = useEuiTheme();
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
@@ -805,7 +806,10 @@ export function Detail() {
       rightColumnGrow={false}
       topContent={securityCallout}
       tabs={headerTabs}
-      tabsClassName="fleet__epm__shiftNavTabs"
+      tabsCss={`
+        margin-left: calc(${theme.euiTheme.size.base} * 6 + ${theme.euiTheme.size.xl} * 2 +
+          ${theme.euiTheme.size.l});
+      `}
     >
       {integrationInfo || packageInfo ? (
         <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
@@ -851,6 +855,7 @@ export function Detail() {
               <PermissionsError
                 error="MISSING_PRIVILEGES"
                 requiredFleetRole="Agent Policies Read and Integrations Read"
+                callingApplication="Integrations"
               />
             )}
           </Route>
