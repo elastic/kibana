@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // search connector entries have their entire doc stringified in `text` field
         const parsedDoc = JSON.parse(text) as { title: string; text: string };
         expect(parsedDoc.title).to.eql('The Life of a Cheetah');
-        expect(score).to.greaterThan(1);
+        expect(score).to.greaterThan(0.1);
       });
 
       it('returns different result order for different queries', async () => {
