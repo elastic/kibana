@@ -35,6 +35,7 @@ export const queryKeys = {
         refresh: refresh?.toISOString(),
       },
     ] as const,
+  internalRuleTypes: () => [queryKeys.root, 'internalRuleTypes'] as const,
 };
 
 export const mutationKeys = {

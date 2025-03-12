@@ -7,45 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getRuleTags } from './get_rule_tags';
+import { getInternalRuleTypes } from './get_internal_rule_types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 const http = httpServiceMock.createStartContract();
 
-describe('getRuleTags', () => {
-  it('should call the getTags API', async () => {
-    const resolvedValue = {
-      data: ['a', 'b', 'c'],
-      total: 3,
-      page: 2,
-      per_page: 30,
-    };
+describe('getInternalRuleTypes', () => {
+  it('should call the internal rule types API', async () => {
+    const resolvedValue = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
     http.get.mockResolvedValueOnce(resolvedValue);
 
-    const result = await getRuleTags({
+    const result = await getInternalRuleTypes({
       http,
-      search: 'test',
-      page: 2,
-      perPage: 30,
     });
 
-    expect(result).toEqual({
-      data: ['a', 'b', 'c'],
-      page: 2,
-      perPage: 30,
-      total: 3,
-    });
+    expect(result).toEqual(resolvedValue);
 
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/internal/alerting/rules/_tags",
-        Object {
-          "query": Object {
-            "page": 2,
-            "per_page": 30,
-            "search": "test",
-          },
-        },
+        "/internal/alerting/_rule_types",
       ]
     `);
   });
