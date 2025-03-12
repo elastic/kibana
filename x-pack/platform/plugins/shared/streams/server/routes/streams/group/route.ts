@@ -56,7 +56,8 @@ const upsertGroupRoute = createServerRoute({
   endpoint: 'PUT /api/streams/{name}/_group 2023-10-31',
   options: {
     access: 'public',
-    summary: 'Upserts the group settings of a group stream definition',
+    description: 'Upserts the group settings of a group stream definition',
+    summary: 'Upsert group stream settings',
     availability: {
       stability: 'experimental',
     },

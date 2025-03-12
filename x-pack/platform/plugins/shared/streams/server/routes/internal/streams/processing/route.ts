@@ -12,9 +12,9 @@ import {
   processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { checkAccess } from '../../../lib/streams/stream_crud';
-import { createServerRoute } from '../../create_server_route';
-import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
+import { checkAccess } from '../../../../lib/streams/stream_crud';
+import { createServerRoute } from '../../../create_server_route';
+import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
 import { handleProcessingSuggestion } from './suggestions_handler';
 
@@ -96,7 +96,7 @@ export const processingSuggestionRoute = createServerRoute({
   },
 });
 
-export const processingRoutes = {
+export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
   ...processingSuggestionRoute,
 };

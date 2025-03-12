@@ -7,10 +7,10 @@
 
 import { isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { createServerRoute } from '../../create_server_route';
-import { ilmPhases } from '../../../lib/streams/lifecycle/ilm_phases';
-import { getEffectiveLifecycle } from '../../../lib/streams/lifecycle/get_effective_lifecycle';
-import { StatusError } from '../../../lib/streams/errors/status_error';
+import { createServerRoute } from '../../../create_server_route';
+import { ilmPhases } from '../../../../lib/streams/lifecycle/ilm_phases';
+import { getEffectiveLifecycle } from '../../../../lib/streams/lifecycle/get_effective_lifecycle';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 
 const lifecycleStatsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/lifecycle/_stats',
@@ -83,7 +83,7 @@ const lifecycleIlmExplainRoute = createServerRoute({
   },
 });
 
-export const lifecycleRoutes = {
+export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
   ...lifecycleIlmExplainRoute,
 };

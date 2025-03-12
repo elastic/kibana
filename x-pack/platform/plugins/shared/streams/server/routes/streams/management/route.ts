@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import {
-  SampleDocument,
-  conditionSchema,
-  conditionToQueryDsl,
-  getFields,
-} from '@kbn/streams-schema';
+import { conditionSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
-import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
-import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 
 export const forkStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/_fork 2023-10-31',
@@ -99,91 +92,8 @@ export const getStreamsStatusRoute = createServerRoute({
   },
 });
 
-export const sampleStreamRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/_sample',
-  options: {
-    access: 'internal',
-  },
-  security: {
-    authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    body: z.object({
-      if: z.optional(conditionSchema),
-      start: z.optional(z.number()),
-      end: z.optional(z.number()),
-      size: z.optional(z.number()),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient } = await getScopedClients({ request });
-
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
-
-    if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found`);
-    }
-
-    const { if: condition, start, end, size } = params.body;
-    const searchBody = {
-      query: {
-        bool: {
-          must: [
-            condition ? conditionToQueryDsl(condition) : { match_all: {} },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
-        },
-      },
-      // Conditions could be using fields which are not indexed or they could use it with other types than they are eventually mapped as.
-      // Because of this we can't rely on mapped fields to draw a sample, instead we need to use runtime fields to simulate what happens during
-      // ingest in the painless condition checks.
-      // This is less efficient than it could be - in some cases, these fields _are_ indexed with the right type and we could use them directly.
-      // This can be optimized in the future.
-      runtime_mappings: condition
-        ? Object.fromEntries(
-            getFields(condition).map((field) => [
-              field.name,
-              { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
-            ])
-          )
-        : undefined,
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc' as const,
-          },
-        },
-      ],
-      terminate_after: size,
-      track_total_hits: false,
-      size,
-    };
-    const results = await scopedClusterClient.asCurrentUser.search({
-      index: params.path.name,
-      allow_no_indices: true,
-      ...searchBody,
-    });
-
-    return { documents: results.hits.hits.map((hit) => hit._source) as SampleDocument[] };
-  },
-});
-
 export const managementRoutes = {
   ...forkStreamsRoute,
   ...resyncStreamsRoute,
   ...getStreamsStatusRoute,
-  ...sampleStreamRoute,
 };
