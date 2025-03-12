@@ -17,6 +17,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
+import type { NotificationCoordinatorPublicImpl } from '../../notification_coordinator';
 import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
 import { ProductInterceptDialogManager } from './component/product_intercept_dialog_manager';
 
@@ -31,6 +32,7 @@ interface ProductInterceptServiceStartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   targetDomElement: HTMLElement;
+  notificationCoordinator: NotificationCoordinatorPublicImpl;
 }
 
 export class ProductInterceptDialogService {
@@ -45,17 +47,32 @@ export class ProductInterceptDialogService {
 
   public start({
     targetDomElement,
+    notificationCoordinator,
     ...startDeps
   }: ProductInterceptServiceStartDeps): IProductInterceptPublicApi {
     const { ack, add, get$ } = this.api.start({ ...startDeps });
     this.targetDomElement = targetDomElement;
 
+    const coordinator = notificationCoordinator(ProductInterceptDialogService.name);
+
+    const productIntercepts$ = coordinator.optInToCoordination(get$(), ({ locked }) => {
+      // only emits product intercept updates when there is no coordination lock
+      return !locked;
+    });
+
+    const ackProductIntercept = (...args: Parameters<typeof ack>) => {
+      ack(...args);
+      // we release the coordination lock on processing the user's acknowledgement of the product intercept,
+      // so that any other pending notification can be shown
+      coordinator.releaseLock();
+    };
+
     render(
       <KibanaRenderContextProvider {...startDeps}>
         <ProductInterceptDialogManager
           {...{
-            productIntercepts$: get$(),
-            ackProductIntercept: ack,
+            productIntercepts$,
+            ackProductIntercept,
           }}
         />
       </KibanaRenderContextProvider>,

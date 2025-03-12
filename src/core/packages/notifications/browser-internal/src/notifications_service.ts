@@ -20,6 +20,7 @@ import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notificat
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { showErrorDialog, ToastsService } from './toasts';
 import { ProductInterceptService } from './product_intercept_dialog';
+import { NotificationCoordinator, notificationCoordinator } from './notification_coordinator';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -41,42 +42,11 @@ export class NotificationsService {
   private readonly productIntercepts: ProductInterceptService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
-
-  // BehaviorSubject to control pausing and the controlling observable
-  private readonly controlSubject = new Rx.BehaviorSubject<{
-    controlled: boolean;
-    controller: string | null;
-  }>({
-    controlled: false,
-    controller: null,
-  });
+  private readonly coordinator = notificationCoordinator.bind(new NotificationCoordinator());
 
   constructor() {
     this.toasts = new ToastsService();
     this.productIntercepts = new ProductInterceptService();
-  }
-
-  /**
-   * @description This method is used to control the flow of notifications
-   * @param $ - Observable to be controlled
-   */
-  private acceptNotificationCoordination($: Rx.Observable<unknown>) {
-    return $.pipe(
-      Rx.bufferWhen(() => this.controlSubject.pipe(Rx.filter(({ controlled }) => controlled))),
-      Rx.switchMap((bufferedData) =>
-        this.controlSubject.pipe(
-          Rx.filter(({ controlled }) => !controlled),
-          Rx.map(() => bufferedData)
-        )
-      ),
-      Rx.switchMap((bufferedData) => {
-        // setControl('observable1', true);
-        return new Rx.Observable((subscriber) => {
-          bufferedData.forEach((data) => subscriber.next(data));
-          subscriber.complete();
-        });
-      })
-    );
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
@@ -106,10 +76,12 @@ export class NotificationsService {
       toasts: this.toasts.start({
         overlays,
         targetDomElement: toastsContainer,
+        notificationCoordinator: this.coordinator,
         ...startDeps,
       }),
       productIntercepts: this.productIntercepts.start({
         overlays,
+        notificationCoordinator: this.coordinator,
         targetDomElement: (() => {
           // create container to mount product intercept dialog into
           const productInterceptContainer = Object.assign(document.createElement('div'), {

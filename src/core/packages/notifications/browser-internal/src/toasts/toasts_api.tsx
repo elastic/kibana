@@ -65,7 +65,7 @@ export class ToastsApi implements IToasts {
     this.startDeps = startDeps;
   }
 
-  /** Observable of the toast messages to show to the user. */
+  /** Observable of the toast messages queued to be shown to the user. */
   public get$() {
     return this.toasts$.asObservable();
   }
@@ -94,11 +94,13 @@ export class ToastsApi implements IToasts {
    */
   public remove(toastOrId: Toast | string) {
     const toRemove = typeof toastOrId === 'string' ? toastOrId : toastOrId.id;
-    const list = this.toasts$.getValue();
-    const listWithoutToast = list.filter((t) => t.id !== toRemove);
-    if (listWithoutToast.length !== list.length) {
-      this.toasts$.next(listWithoutToast);
-    }
+
+    this.get$()
+      .pipe(Rx.map((toasts) => toasts.filter((t) => t.id !== toRemove)))
+      .pipe(Rx.take(1))
+      .subscribe({
+        next: (toasts) => this.toasts$.next(toasts),
+      });
   }
 
   /**

@@ -20,6 +20,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
 import { ToastsTelemetry } from './telemetry';
+import type { NotificationCoordinatorPublicImpl } from '../notification_coordinator';
 
 interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -33,6 +34,7 @@ interface StartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   targetDomElement: HTMLElement;
+  notificationCoordinator: NotificationCoordinatorPublicImpl;
 }
 
 export class ToastsService {
@@ -46,17 +48,24 @@ export class ToastsService {
     return this.api!;
   }
 
-  public start({ overlays, targetDomElement, ...startDeps }: StartDeps) {
+  public start({ overlays, targetDomElement, notificationCoordinator, ...startDeps }: StartDeps) {
     this.api!.start({ overlays, ...startDeps });
     this.targetDomElement = targetDomElement;
 
     const reportEvent = this.telemetry.start({ analytics: startDeps.analytics });
 
+    const coordinator = notificationCoordinator(ToastsService.name);
+
+    const toasts$ = coordinator.optInToCoordination(this.api!.get$(), ({ locked, controller }) => {
+      // new toasts will only be emitted when there are no locks, or when the current lock is owned by the toast service
+      return !locked || controller === ToastsService.name;
+    });
+
     render(
       <KibanaRenderContextProvider {...startDeps}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
-          toasts$={this.api!.get$()}
+          toasts$={toasts$}
           reportEvent={reportEvent}
         />
       </KibanaRenderContextProvider>,
