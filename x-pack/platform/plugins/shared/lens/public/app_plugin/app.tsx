@@ -176,9 +176,6 @@ export function App({
       setIndicateNoData(false);
     }
   }, [setIndicateNoData, indicateNoData, searchSessionId]);
-
-  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
-
   const getIsByValueMode = useCallback(
     () => Boolean(isLinkedToOriginatingApp && !savedObjectId),
     [isLinkedToOriginatingApp, savedObjectId]
@@ -193,19 +190,11 @@ export function App({
         lastKnownDoc,
         data.query.filterManager.inject.bind(data.query.filterManager),
         datasourceMap,
-        framePublicAPI.dataViews.indexPatterns,
         visualizationMap,
         annotationGroups
       );
     },
-    [
-      annotationGroups,
-      data.query.filterManager,
-      datasourceMap,
-      framePublicAPI.dataViews.indexPatterns,
-      lastKnownDoc,
-      visualizationMap,
-    ]
+    [annotationGroups, data.query.filterManager, datasourceMap, lastKnownDoc, visualizationMap]
   );
 
   useEffect(() => {
@@ -424,6 +413,8 @@ export function App({
       : undefined;
 
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
   const { getUserMessages, addUserMessages } = useApplicationUserMessages({
     coreStart,

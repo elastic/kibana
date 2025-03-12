@@ -8,11 +8,14 @@
 import { ColorMapping } from '@kbn/coloring';
 import { MultiFieldKey, RangeKey, SerializedValue } from '@kbn/data-plugin/common';
 import { XYDataLayerConfig, XYState } from '../../../types';
-import { DatasourceLayers, OperationDescriptor } from '../../../../../types';
 import { DeprecatedColorMappingConfig, DeprecatedColorMappingsState } from './types';
+import {
+  FormBasedPersistedState,
+  GenericIndexPatternColumn,
+} from '../../../../../datasources/form_based/types';
 
 export const convertToRawColorMappingsFn =
-  (datasourceLayers: DatasourceLayers) =>
+  (datasourceState?: FormBasedPersistedState) =>
   (state: DeprecatedColorMappingsState | XYState): XYState => {
     const hasLayersToConvert = state.layers.some((layer) => {
       return (
@@ -34,7 +37,7 @@ export const convertToRawColorMappingsFn =
       ) {
         const accessor = layer.splitAccessor;
         const column = accessor
-          ? datasourceLayers[layer.layerId]?.getOperationForColumnId(accessor)
+          ? datasourceState?.layers?.[layer.layerId]?.columns?.[accessor]
           : null;
 
         return {
@@ -68,7 +71,7 @@ export const convertToRawColorMappingsFn =
 
 export function convertColorMappingAssignment(
   oldAssignment: DeprecatedColorMappingConfig['assignments'][number],
-  column?: OperationDescriptor | null
+  column?: Partial<GenericIndexPatternColumn> | null
 ): ColorMapping.Assignment {
   return {
     color: oldAssignment.color,
@@ -81,7 +84,7 @@ const NO_VALUE = Symbol('no-value');
 
 export function convertColorMappingRule(
   rule: DeprecatedColorMappingConfig['assignments'][number]['rule'],
-  column?: OperationDescriptor | null
+  column?: Partial<GenericIndexPatternColumn> | null
 ): ColorMapping.ColorRule[] {
   switch (rule.type) {
     case 'auto':
@@ -128,7 +131,7 @@ export function convertColorMappingRule(
  */
 export function convertToRawValue(
   value: string | string[],
-  column?: OperationDescriptor | null
+  column?: Partial<GenericIndexPatternColumn> | null
 ): SerializedValue | symbol {
   if (!column) return NO_VALUE;
 

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { DatasourceLayers } from '../../../types';
+import { FormBasedPersistedState } from '../../../datasources/form_based/types';
 import { XYState } from '../types';
 import { getRuntimeConverters } from './converters';
 
-export function convertToRuntimeState(state: XYState, datasourceLayers: DatasourceLayers): XYState {
-  return getRuntimeConverters(datasourceLayers).reduce((newState, fn) => fn(newState), state);
+export function convertToRuntimeState(
+  state: XYState,
+  datasourceState?: FormBasedPersistedState
+): XYState {
+  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), state);
 }

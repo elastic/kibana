@@ -31,7 +31,6 @@ import type {
   VisualizationMap,
   VisualizeEditorContext,
   SuggestionRequest,
-  DatasourceLayers,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { LensDocument } from '../../persistence/saved_object_store';
@@ -40,6 +39,7 @@ import type { DatasourceState, DatasourceStates, VisualizationState } from '../.
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
+import { FormBasedPersistedState } from '../../datasources/form_based/types';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically
@@ -277,12 +277,6 @@ export async function initializeSources(
     references,
   });
 
-  const datasourceLayers = getDatasourceLayers(
-    initializedDatasourceStates,
-    datasourceMap,
-    indexPatterns
-  );
-
   return {
     indexPatterns,
     indexPatternRefs,
@@ -291,7 +285,7 @@ export async function initializeSources(
     visualizationState: initializeVisualization({
       visualizationMap,
       visualizationState,
-      datasourceLayers,
+      datasourceStates,
       references,
       initialContext,
       annotationGroups,
@@ -302,13 +296,13 @@ export async function initializeSources(
 export function initializeVisualization({
   visualizationMap,
   visualizationState,
-  datasourceLayers,
+  datasourceStates,
   references,
   annotationGroups,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
-  datasourceLayers: DatasourceLayers;
+  datasourceStates: DatasourceStates;
   references?: SavedObjectReference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   annotationGroups: Record<string, EventAnnotationGroupConfig>;
@@ -318,7 +312,9 @@ export function initializeVisualization({
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
         visualizationState.state,
-        datasourceLayers,
+        'formBased' in datasourceStates
+          ? (datasourceStates.formBased.state as FormBasedPersistedState)
+          : undefined,
         // initialize a new visualization with the color mapping off
         COLORING_METHOD,
         annotationGroups,
@@ -438,18 +434,18 @@ export async function persistedStateToExpression(
     indexPatternRefs,
   });
 
-  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
-
   const activeVisualizationState = initializeVisualization({
     visualizationMap: visualizations,
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
     },
-    datasourceLayers,
+    datasourceStates,
     annotationGroups,
     references: [...references, ...(internalReferences || [])],
   });
+
+  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {

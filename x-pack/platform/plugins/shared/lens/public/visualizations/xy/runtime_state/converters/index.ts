@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DatasourceLayers } from '../../../../types';
+import { FormBasedPersistedState } from '../../../../datasources/form_based/types';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
 
-export const getRuntimeConverters = (datasourceLayers: DatasourceLayers) => [
+export const getRuntimeConverters = (datasourceState?: FormBasedPersistedState) => [
   convertToLegendStats,
-  convertToRawColorMappingsFn(datasourceLayers),
+  convertToRawColorMappingsFn(datasourceState),
 ];

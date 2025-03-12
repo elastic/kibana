@@ -10,7 +10,7 @@ import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
 
 import { layerTypes } from '../../../common/layer_types';
-import { AnnotationGroups, DatasourceLayers } from '../../types';
+import { AnnotationGroups } from '../../types';
 import {
   XYLayerConfig,
   XYDataLayerConfig,
@@ -24,6 +24,7 @@ import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualizati
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
 import { convertToRuntimeState } from './runtime_state';
+import { FormBasedPersistedState } from '../../datasources/form_based/types';
 
 export const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
@@ -85,12 +86,12 @@ export type XYPersistedState = Omit<XYState, 'layers'> & {
 
 export function convertToRuntime(
   state: XYPersistedState,
-  datasourceLayers: DatasourceLayers,
+  datasourceState?: FormBasedPersistedState,
   annotationGroups?: AnnotationGroups,
   references?: SavedObjectReference[]
 ) {
   const newState = cloneDeep(injectReferences(state, annotationGroups, references));
-  return convertToRuntimeState(newState, datasourceLayers);
+  return convertToRuntimeState(newState, datasourceState);
 }
 
 export function convertToPersistable(state: XYState) {

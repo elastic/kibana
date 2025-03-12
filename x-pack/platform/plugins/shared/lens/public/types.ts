@@ -64,6 +64,7 @@ import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { LensDocument } from './persistence/saved_object_store';
 import { TableInspectorAdapter } from './editor_frame_service/types';
+import { FormBasedPersistedState } from './datasources/form_based/types';
 
 export type StartServices = Pick<
   CoreStart,
@@ -1072,14 +1073,14 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   initialize: {
     (
       addNewLayer: () => string,
-      nonPersistedState: T | undefined,
-      datasourceLayers: DatasourceLayers,
+      nonPersistedState: T,
+      datasourceState?: FormBasedPersistedState,
       mainPalette?: SuggestionRequest['mainPalette']
     ): T;
     (
       addNewLayer: () => string,
       persistedState: P,
-      datasourceLayers: DatasourceLayers,
+      datasourceState?: FormBasedPersistedState,
       mainPalette?: SuggestionRequest['mainPalette'],
       annotationGroups?: AnnotationGroups,
       references?: SavedObjectReference[]
@@ -1355,10 +1356,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   isEqual?: (
     state1: P,
     references1: SavedObjectReference[],
-    datasourceLayers1: DatasourceLayers,
+    datasourceState1: FormBasedPersistedState | undefined,
     state2: P,
     references2: SavedObjectReference[],
-    datasourceLayers2: DatasourceLayers,
+    datasourceState2: FormBasedPersistedState | undefined,
     annotationGroups: AnnotationGroups
   ) => boolean;
 
