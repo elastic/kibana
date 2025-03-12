@@ -18,14 +18,18 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { VIEW_MODE } from '../../../../common/constants';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createInternalStateStore, createRuntimeStateManager } from './redux';
+import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-  const globalStateContainer = getDiscoverGlobalStateContainer(createKbnUrlStateStorage());
+  const urlStateStorage = createKbnUrlStateStorage();
+  const globalStateContainer = getDiscoverGlobalStateContainer(urlStateStorage);
   const internalState = createInternalStateStore({
     services,
+    customizationContext: mockCustomizationContext,
     runtimeStateManager: createRuntimeStateManager(),
+    urlStateStorage,
   });
 
   describe('getTitle', () => {

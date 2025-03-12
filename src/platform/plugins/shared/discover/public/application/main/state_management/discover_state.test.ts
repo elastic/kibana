@@ -8,11 +8,8 @@
  */
 
 import type { DiscoverStateContainer } from './discover_state';
-import {
-  getDiscoverStateContainer,
-  createSearchSessionRestorationDataProvider,
-} from './discover_state';
-import { createInternalStateStore, internalStateActions } from './redux';
+import { createSearchSessionRestorationDataProvider } from './discover_state';
+import { internalStateActions } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -37,6 +34,7 @@ import { mockCustomizationContext } from '../../../customizations/__mocks__/cust
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 import { createRuntimeStateManager } from './redux';
 import type { HistoryLocationState } from '../../../build_services';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
@@ -61,13 +59,11 @@ async function getState(
       ...spec,
     });
   });
-  const services = { ...discoverServiceMock, history: nextHistory };
   const runtimeStateManager = createRuntimeStateManager();
-  const nextState = getDiscoverStateContainer({
-    services,
-    customizationContext: mockCustomizationContext,
-    internalState: createInternalStateStore({ services, runtimeStateManager }),
+  const nextState = getDiscoverStateMock({
+    savedSearch: false,
     runtimeStateManager,
+    history: nextHistory,
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
@@ -102,14 +98,7 @@ describe('Test discover state', () => {
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    const services = { ...discoverServiceMock, history };
-    const runtimeStateManager = createRuntimeStateManager();
-    state = getDiscoverStateContainer({
-      services,
-      customizationContext: mockCustomizationContext,
-      internalState: createInternalStateStore({ services, runtimeStateManager }),
-      runtimeStateManager,
-    });
+    state = getDiscoverStateMock({ history });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);
     stopSync = startSync(state.appState);
@@ -202,15 +191,7 @@ describe('Test discover state with overridden state storage', () => {
       useHash: false,
       useHashQuery: true,
     });
-    const services = { ...discoverServiceMock, history };
-    const runtimeStateManager = createRuntimeStateManager();
-    state = getDiscoverStateContainer({
-      services,
-      customizationContext: mockCustomizationContext,
-      stateStorageContainer: stateStorage,
-      internalState: createInternalStateStore({ services, runtimeStateManager }),
-      runtimeStateManager,
-    });
+    state = getDiscoverStateMock({ stateStorageContainer: stateStorage, history });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);
     stopSync = startSync(state.appState);
@@ -297,14 +278,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
   const history = createBrowserHistory<HistoryLocationState>();
   const mockDataPlugin = dataPluginMock.createStartContract();
-  const services = { ...discoverServiceMock, history };
-  const runtimeStateManager = createRuntimeStateManager();
-  const discoverStateContainer = getDiscoverStateContainer({
-    services,
-    customizationContext: mockCustomizationContext,
-    internalState: createInternalStateStore({ services, runtimeStateManager }),
-    runtimeStateManager,
-  });
+  const discoverStateContainer = getDiscoverStateMock({ history });
   discoverStateContainer.appState.update({
     dataSource: createDataViewDataSource({
       dataViewId: savedSearchMock.searchSource.getField('index')!.id!,
@@ -1009,16 +983,12 @@ describe('Test discover state with embedded mode', () => {
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    const services = { ...discoverServiceMock, history };
-    const runtimeStateManager = createRuntimeStateManager();
-    state = getDiscoverStateContainer({
-      services,
+    state = getDiscoverStateMock({
+      history,
       customizationContext: {
         ...mockCustomizationContext,
         displayMode: 'embedded',
       },
-      internalState: createInternalStateStore({ services, runtimeStateManager }),
-      runtimeStateManager,
     });
     state.savedSearchState.set(savedSearchMock);
     state.appState.update({}, true);

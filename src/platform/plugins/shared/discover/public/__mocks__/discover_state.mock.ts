@@ -19,29 +19,59 @@ import {
   createRuntimeStateManager,
 } from '../application/main/state_management/redux';
 import type { HistoryLocationState } from '../build_services';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import type { History } from 'history';
+import type { DiscoverCustomizationContext } from '../customizations';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
   savedSearch,
+  stateStorageContainer,
   runtimeStateManager,
+  history,
+  customizationContext = mockCustomizationContext,
 }: {
   isTimeBased?: boolean;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedSearch | false;
   runtimeStateManager?: RuntimeStateManager;
+  stateStorageContainer?: IKbnUrlStateStorage;
+  history?: History<HistoryLocationState>;
+  customizationContext?: DiscoverCustomizationContext;
 }) {
-  const history = createBrowserHistory<HistoryLocationState>();
-  history.push('/');
+  if (!history) {
+    history = createBrowserHistory<HistoryLocationState>();
+    history.push('/');
+  }
   const services = { ...discoverServiceMock, history };
+  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
+  const toasts = services.core.notifications.toasts;
+  stateStorageContainer =
+    stateStorageContainer ??
+    createKbnUrlStateStorage({
+      useHash: storeInSessionStorage,
+      history: services.history,
+      useHashQuery: customizationContext.displayMode !== 'embedded',
+      ...(toasts && withNotifyOnErrors(toasts)),
+    });
   runtimeStateManager = runtimeStateManager ?? createRuntimeStateManager();
   const container = getDiscoverStateContainer({
     services,
-    customizationContext: mockCustomizationContext,
-    internalState: createInternalStateStore({ services, runtimeStateManager }),
+    customizationContext,
+    stateStorageContainer,
+    internalState: createInternalStateStore({
+      services,
+      customizationContext,
+      runtimeStateManager,
+      urlStateStorage: stateStorageContainer,
+    }),
     runtimeStateManager,
   });
-  container.savedSearchState.set(
-    savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
-  );
+  if (savedSearch !== false) {
+    container.savedSearchState.set(
+      savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
+    );
+  }
 
   return container;
 }

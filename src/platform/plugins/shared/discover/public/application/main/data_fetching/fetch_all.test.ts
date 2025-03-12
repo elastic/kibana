@@ -27,7 +27,7 @@ import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
-import { createInternalStateStore, createRuntimeStateManager } from '../state_management/redux';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -69,10 +69,7 @@ describe('test fetchAll', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       getAppState: () => ({}),
-      internalState: createInternalStateStore({
-        services: discoverServiceMock,
-        runtimeStateManager: createRuntimeStateManager(),
-      }),
+      internalState: getDiscoverStateMock({}).internalState,
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       savedSearch: {
@@ -250,10 +247,7 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
-      internalState: createInternalStateStore({
-        services: discoverServiceMock,
-        runtimeStateManager: createRuntimeStateManager(),
-      }),
+      internalState: getDiscoverStateMock({}).internalState,
     };
     fetchAll(subjects, false, deps);
     await waitForNextTick();
@@ -362,10 +356,7 @@ describe('test fetchAll', () => {
         savedSearch: savedSearchMock,
         services: discoverServiceMock,
         getAppState: () => ({ query }),
-        internalState: createInternalStateStore({
-          services: discoverServiceMock,
-          runtimeStateManager: createRuntimeStateManager(),
-        }),
+        internalState: getDiscoverStateMock({}).internalState,
       };
       fetchAll(subjects, false, deps);
       deps.abortController.abort();

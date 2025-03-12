@@ -63,7 +63,12 @@ export const DiscoverMainRoute = ({
   );
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
   const [internalState] = useState(() =>
-    createInternalStateStore({ services, runtimeStateManager })
+    createInternalStateStore({
+      services,
+      customizationContext,
+      runtimeStateManager,
+      urlStateStorage,
+    })
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(

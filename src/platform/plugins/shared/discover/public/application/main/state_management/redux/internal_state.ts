@@ -17,6 +17,8 @@ import {
   type ThunkDispatch,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from './runtime_state';
 import {
@@ -135,7 +137,9 @@ export const internalStateSlice = createSlice({
 
 export interface InternalStateThunkDependencies {
   services: DiscoverServices;
+  customizationContext: DiscoverCustomizationContext;
   runtimeStateManager: RuntimeStateManager;
+  urlStateStorage: IKbnUrlStateStorage;
 }
 
 export const createInternalStateStore = (options: InternalStateThunkDependencies) =>
