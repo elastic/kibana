@@ -8,12 +8,13 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { uniq } from 'lodash';
 import { DashboardPanelMap } from '../../common';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { DashboardCreationOptions, DashboardState, UnsavedPanelState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, embeddableService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import {
   PANELS_CONTROL_GROUP_KEY,
@@ -103,13 +104,17 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   // get dashboard Api
   // --------------------------------------------------------------------------------------
+  const initialState = {
+    ...combinedSessionState,
+    ...overrideState,
+  };
+  await embeddableService.preloadEmbeddableChunks(
+    uniq(Object.values(initialState.panels).map((panel) => panel.type))
+  );
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
-    initialState: {
-      ...combinedSessionState,
-      ...overrideState,
-    },
+    initialState,
     initialPanelsRuntimeState,
     savedObjectResult,
     savedObjectId,
