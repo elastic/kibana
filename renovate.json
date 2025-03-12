@@ -684,8 +684,7 @@
     {
       "groupName": "lru-cache",
       "matchDepNames": [
-        "lru-cache",
-        "@types/lru-cache"
+        "lru-cache"
       ],
       "reviewers": [
         "team:kibana-core"
