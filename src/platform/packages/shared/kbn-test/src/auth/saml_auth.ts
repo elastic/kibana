@@ -300,19 +300,24 @@ export const finishSAMLHandshakeEffect = async ({
 
     const authResponse: AxiosResponse<any, any> = yield* fetch;
 
-    if (authResponse.status === 302)
+    if (authResponse.status === 302) {
+      yield* Effect.log(`authResponse.status: [302]`);
       return getCookieFromResponseHeaders(
         authResponse,
         'Failed to get cookie from SAML callback response'
       );
+    } else yield* Effect.log(`authResponse.status: [${authResponse.status}]`);
 
     yield* new SamlNot302Error({
       message: `SAML callback failed: expected 302, got some canned status`,
     });
   }).pipe(Effect.withLogSpan('saml_auth#finishSamlHandshake'));
 
-  // Exponential will double the base (first arg to fn), if no factor is provided
-  const policy = Schedule.compose(Schedule.exponential('10 millis'/* No factor */), Schedule.recurs(3));
+  const policy = Schedule.compose(
+    // Exponential will double the base if no factor is provided
+    Schedule.exponential('50 millis' /* No factor */),
+    Schedule.recurs(3)
+  );
 
   return await Effect.runPromise(Effect.retry(main, policy));
 };
