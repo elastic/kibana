@@ -52,7 +52,6 @@ export class StreamsAppPlugin
       pluginsStart.discoverShared.features.registry.register({
         id: 'streams',
         renderStreamsField: createDiscoverStreamsLink({
-          streamStatus$: pluginsStart.streams.status$,
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator: pluginsStart.share.url.locators.get(locator.id)!,
           coreApplication: coreStart.application,
