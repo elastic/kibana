@@ -25,7 +25,6 @@ import {
   EuiSpacer,
   UseEuiTheme,
   transparentize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';

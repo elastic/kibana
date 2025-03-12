@@ -7,13 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { css } from '@emotion/react';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
-  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-  return <div ref={dragPreviewRef} className={'kbnGridPanel--rowDragPreview'} css={styles} />;
+  const { gridLayoutStateManager } = useGridLayoutContext();
+
+  useEffect(
+    () => {
+      return () => {
+        // when drag preview unmounts, this means the header was dropped - so, scroll to it
+        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  return <div className={'kbnGridPanel--rowDragPreview'} css={styles} />;
 });
 
 const styles = css({

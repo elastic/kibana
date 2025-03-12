@@ -75,12 +75,22 @@ export const useGridLayoutRowEvents = ({
         currentRowOrder.shift(); // drop first row since nothing can go above it
         const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current).sort(
           (idA, idB) => {
-            const rowRefA = gridLayoutStateManager.headerRefs.current[idA];
-            const rowRefB = gridLayoutStateManager.headerRefs.current[idB];
+            // if expanded, get dimensions of row; otherwise, use the header
+            const rowRefA = currentLayout[idA].isCollapsed
+              ? gridLayoutStateManager.headerRefs.current[idA]
+              : gridLayoutStateManager.rowRefs.current[idA];
+            const rowRefB = currentLayout[idB].isCollapsed
+              ? gridLayoutStateManager.headerRefs.current[idB]
+              : gridLayoutStateManager.rowRefs.current[idB];
 
-            const rectA = rowRefA?.getBoundingClientRect();
-            const rectB = rowRefB?.getBoundingClientRect();
-            return (rectA?.top ?? 0) - (rectB?.top ?? 0);
+            if (!rowRefA || !rowRefB) return 0;
+            // switch the order when the dragged row goes beyond the mid point of the row it's compared against
+            const { top: topA, height: heightA } = rowRefA.getBoundingClientRect();
+            const { top: topB, height: heightB } = rowRefB.getBoundingClientRect();
+            const midA = topA + heightA / 2;
+            const midB = topB + heightB / 2;
+
+            return midA - midB;
           }
         );
         if (!deepEqual(currentRowOrder, updatedRowOrder)) {
@@ -111,10 +121,6 @@ export const useGridLayoutRowEvents = ({
           gridLayoutStateManager.gridLayout$.next(cloneDeep(proposedGridLayoutValue));
         }
         gridLayoutStateManager.proposedGridLayout$.next(undefined);
-
-        // TODO: move this
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
 
       if (isMouseEvent(e)) {
