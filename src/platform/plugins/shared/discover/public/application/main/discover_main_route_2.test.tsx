@@ -14,7 +14,7 @@ import { waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
-import { DiscoverMainRoute } from './discover_main_route';
+import { DiscoverMainRoute2 } from './discover_main_route_2';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './components/session_view/discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -165,7 +165,7 @@ const mountComponent = (
   return mountWithIntl(
     <MemoryRouter>
       <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
-        <DiscoverMainRoute {...props} />
+        <DiscoverMainRoute2 {...props} />
       </KibanaContextProvider>
     </MemoryRouter>
   );

@@ -30,7 +30,7 @@ import type {
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import type { MainHistoryLocationState } from '../../../common';
-import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverMainApp } from './components/session_view/discover_main_app';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
