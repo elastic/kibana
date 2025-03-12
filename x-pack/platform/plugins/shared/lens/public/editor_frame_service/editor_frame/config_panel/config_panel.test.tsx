@@ -30,6 +30,7 @@ import { ReactWrapper } from 'enzyme';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { AddLayerButton } from '../../../visualizations/xy/add_layer';
 import { LayerType } from '@kbn/visualizations-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('../../../id_generator');
 
@@ -155,6 +156,7 @@ describe('ConfigPanel', () => {
       toggleFullscreen: jest.fn(),
       uiActions,
       dataViews: {} as DataViewsPublicPluginStart,
+      data: dataPluginMock.createStartContract(),
       getUserMessages: () => [],
     };
   }
