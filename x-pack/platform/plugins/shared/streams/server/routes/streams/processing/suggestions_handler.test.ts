@@ -25,7 +25,6 @@ jest.mock('./simulation_handler', () => ({
 describe('handleProcessingSuggestion', () => {
   const dummyChatResponse = {
     output: {
-      // This rule will be sanitized from message -> message_derived.
       rules: [{ parsing_rule: '%{common:message}' }],
     },
   };
@@ -64,14 +63,14 @@ describe('handleProcessingSuggestion', () => {
     // The inferenceClient mock should be called once per unique group.
     expect(inferenceClientMock.output).toHaveBeenCalledTimes(1);
 
-    const expectedSanitized = '%{common:message_derived}';
+    const expectedPattern = '%{common:message}';
 
     result.simulations.forEach((sim: any) => {
-      expect(sim).toHaveProperty('pattern', expectedSanitized);
+      expect(sim).toHaveProperty('pattern', expectedPattern);
     });
 
     // Also, the patterns array should reflect the sanitized rule once.
-    expect(result.patterns).toEqual([expectedSanitized]);
+    expect(result.patterns).toEqual([expectedPattern]);
   });
 
   it('limits example values to 8 per group', async () => {
@@ -146,10 +145,10 @@ describe('handleProcessingSuggestion', () => {
     // Expect that the inferenceClientMock is called twice, once per group.
     expect(inferenceClientMock.output).toHaveBeenCalledTimes(2);
 
-    expect(result.patterns).toEqual(['%{common:message_derived}', '%{other:pattern}']);
+    expect(result.patterns).toEqual(['%{common:message}', '%{other:pattern}']);
 
     result.simulations.forEach((sim: any) => {
-      expect(['%{common:message_derived}', '%{other:pattern}']).toContain(sim.pattern);
+      expect(['%{common:message}', '%{other:pattern}']).toContain(sim.pattern);
     });
   });
 

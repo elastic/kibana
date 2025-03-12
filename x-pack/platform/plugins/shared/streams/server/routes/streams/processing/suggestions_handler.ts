@@ -163,9 +163,9 @@ async function processPattern(
             `,
   });
 
-  const patterns = (
-    chatResponse.output.rules?.map((rule) => rule.parsing_rule).filter(Boolean) as string[]
-  ).map(sanitizePattern);
+  const patterns = chatResponse.output.rules
+    ?.map((rule) => rule.parsing_rule)
+    .filter(Boolean) as string[];
 
   const simulations = (
     await Promise.all(
@@ -214,14 +214,4 @@ async function processPattern(
     chatResponse,
     simulations,
   };
-}
-
-/**
- * We need to keep parsing additive, but overwriting timestamp or message is super common.
- * This is a workaround for now until we found the proper solution for deal with this kind of cases.
- */
-function sanitizePattern(pattern: string): string {
-  return pattern
-    .replace(/%\{([^}]+):message\}/g, '%{$1:message_derived}')
-    .replace(/%\{([^}]+):@timestamp\}/g, '%{$1:@timestamp_derived}');
 }
