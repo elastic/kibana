@@ -3,7 +3,7 @@
   "info": {
     "title": "SLOs",
     "description": "OpenAPI schema for SLOs endpoints",
-    "version": "1.0",
+    "version": "1.1",
     "contact": {
       "name": "Actionable Observability Team"
     },
@@ -130,6 +130,27 @@
               "type": "string"
             },
             "example": "slo.name:latency* and slo.tags : \"prod\""
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The page size to use for cursor-based pagination, must be greater or equal than 1",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "searchAfter",
+            "in": "query",
+            "description": "The cursor to use for fetching the results from, when using a cursor-base pagination.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           },
           {
             "name": "page",
@@ -704,11 +725,10 @@
           {
             "name": "tags",
             "in": "query",
-            "description": "Specify which SLO tags to query by (comma-separated values)",
+            "description": "Filters the SLOs by tag",
             "schema": {
               "type": "string"
-            },
-            "example": true
+            }
           },
           {
             "name": "search",
@@ -2002,6 +2022,14 @@
         "description": "A paginated response of SLOs matching the query.\n",
         "type": "object",
         "properties": {
+          "size": {
+            "type": "number",
+            "example": 25,
+            "description": "Size provided for cursor based pagination"
+          },
+          "searchAfter": {
+            "type": "string"
+          },
           "page": {
             "type": "number",
             "example": 1
@@ -2398,6 +2426,76 @@
             "example": 2
           }
         }
+      },
+      "find_slo_definitions_response": {
+        "title": "Find SLO definitions response",
+        "description": "A paginated response of SLO definitions matching the query.\n",
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "example": 1
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "default": 1,
+                "description": "for backward compability"
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25,
+                "description": "for backward compability"
+              },
+              "size": {
+                "type": "number",
+                "example": 25
+              },
+              "searchAfter": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "some-slo-id",
+                  "other-cursor-id"
+                ],
+                "description": "the cursor to provide to get the next paged results"
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
+            }
+          }
+        ]
       },
       "delete_slo_instances_request": {
         "title": "Delete SLO instances request",
