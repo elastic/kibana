@@ -40,9 +40,41 @@ export class NotificationsService {
   private targetDomElement?: HTMLElement;
   private readonly coordinator = notificationCoordinator.bind(new Coordinator());
 
+  // BehaviorSubject to control pausing and the controlling observable
+  private readonly controlSubject = new Rx.BehaviorSubject<{
+    controlled: boolean;
+    controller: string | null;
+  }>({
+    controlled: false,
+    controller: null,
+  });
+
   constructor() {
     this.toasts = new ToastsService();
     this.productIntercepts = new ProductInterceptService();
+  }
+
+  /**
+   * @description This method is used to control the flow of notifications
+   * @param $ - Observable to be controlled
+   */
+  private acceptNotificationCoordination($: Rx.Observable<unknown>) {
+    return $.pipe(
+      Rx.bufferWhen(() => this.controlSubject.pipe(Rx.filter(({ controlled }) => controlled))),
+      Rx.switchMap((bufferedData) =>
+        this.controlSubject.pipe(
+          Rx.filter(({ controlled }) => !controlled),
+          Rx.map(() => bufferedData)
+        )
+      ),
+      Rx.switchMap((bufferedData) => {
+        // setControl('observable1', true);
+        return new Rx.Observable((subscriber) => {
+          bufferedData.forEach((data) => subscriber.next(data));
+          subscriber.complete();
+        });
+      })
+    );
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
@@ -76,6 +108,18 @@ export class NotificationsService {
         notificationCoordinator: this.coordinator,
         ...startDeps,
       }),
+      productIntercepts: this.productIntercepts.start({
+        targetDomElement: (() => {
+          // create container to mount product intercept dialog into
+          const productInterceptContainer = Object.assign(document.createElement('div'), {
+            id: 'productInterceptMountPoint',
+            style: { height: 0 },
+          });
+          targetDomElement.appendChild(productInterceptContainer);
+          return productInterceptContainer;
+        })(),
+        ...startDeps,
+      }),
       showErrorDialog: ({ title, error }) =>
         showErrorDialog({
           title,
@@ -83,17 +127,6 @@ export class NotificationsService {
           openModal: overlays.openModal,
           ...startDeps,
         }),
-      productIntercepts: this.productIntercepts.start({
-        targetDomElement: (() => {
-          // create container to mount product intercept dialog into
-          const productInterceptContainer = Object.assign(document.createElement('div'), {
-            id: 'productInterceptMountPoint',
-          });
-          targetDomElement.appendChild(productInterceptContainer);
-          return productInterceptContainer;
-        })(),
-        ...startDeps,
-      }),
     };
   }
 
