@@ -8,6 +8,8 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import Boom from '@hapi/boom';
+
 import type {
   GetOneDownloadSourcesRequestSchema,
   PutDownloadSourcesRequestSchema,
@@ -19,9 +21,16 @@ import type {
   DeleteDownloadSourceResponse,
   PutDownloadSourceResponse,
   GetDownloadSourceResponse,
+  DownloadSource,
 } from '../../../common/types';
 import { downloadSourceService } from '../../services/download_source';
 import { agentPolicyService } from '../../services';
+
+function ensureNoDuplicateSecrets(downloadSource: Partial<DownloadSource>) {
+  if (downloadSource.ssl?.key && downloadSource.secrets?.ssl?.key) {
+    throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
+  }
+}
 
 export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
@@ -52,7 +61,7 @@ export const getOneDownloadSourcesHandler: RequestHandler<
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Download source ${request.params.sourceId} not found` },
+        body: { message: `Agent binary source ${request.params.sourceId} not found` },
       });
     }
 
@@ -68,15 +77,16 @@ export const putDownloadSourcesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  ensureNoDuplicateSecrets(request.body);
+
   try {
-    await downloadSourceService.update(soClient, request.params.sourceId, request.body);
+    await downloadSourceService.update(soClient, esClient, request.params.sourceId, request.body);
     const downloadSource = await downloadSourceService.get(soClient, request.params.sourceId);
     if (downloadSource.is_default) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
       await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id);
     }
-
     const body: PutDownloadSourceResponse = {
       item: downloadSource,
     };
@@ -102,11 +112,13 @@ export const postDownloadSourcesHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { id, ...data } = request.body;
-  const downloadSource = await downloadSourceService.create(soClient, data, { id });
+
+  ensureNoDuplicateSecrets(data);
+
+  const downloadSource = await downloadSourceService.create(soClient, esClient, data, { id });
   if (downloadSource.is_default) {
     await agentPolicyService.bumpAllAgentPolicies(esClient);
   }
-
   const body: GetOneDownloadSourceResponse = {
     item: downloadSource,
   };
@@ -129,7 +141,7 @@ export const deleteDownloadSourcesHandler: RequestHandler<
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
-        body: { message: `Donwload source ${request.params.sourceId} not found` },
+        body: { message: `Agent binary source ${request.params.sourceId} not found` },
       });
     }
 

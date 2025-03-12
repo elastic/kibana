@@ -24,7 +24,6 @@ import {
   SECURITY_FEATURE_ID_V2,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
-  CLOUD_DEFEND_APP_ID,
   SERVER_APP_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
@@ -60,7 +59,7 @@ export const getSecurityV2BaseKibanaFeature = ({
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-  app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -75,7 +74,7 @@ export const getSecurityV2BaseKibanaFeature = ({
   ),
   privileges: {
     all: {
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
@@ -87,6 +86,7 @@ export const getSecurityV2BaseKibanaFeature = ({
         'cloud-security-posture-read',
         'cloud-defend-all',
         'cloud-defend-read',
+        'bulkGetUserProfiles',
       ],
       savedObject: {
         all: ['alert', ...savedObjects],
@@ -102,9 +102,16 @@ export const getSecurityV2BaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],
+      api: [
+        APP_ID,
+        'lists-read',
+        'rac',
+        'cloud-security-posture-read',
+        'cloud-defend-read',
+        'bulkGetUserProfiles',
+      ],
       savedObject: {
         all: [],
         read: [...savedObjects],
