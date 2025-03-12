@@ -309,40 +309,42 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   value={searchValue}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFilterGroup>
-                  <EuiPopover
-                    button={
-                      <EuiFilterButton
-                        iconType="arrowDown"
-                        data-test-subj="compatibilityFilterBtn"
-                        isSelected={selectedOptions.length > 0}
-                        hasActiveFilters={selectedOptions.length > 0}
-                        numActiveFilters={selectedOptions.length}
-                        onClick={onMultiFilterButtonClick}
-                      >
-                        {i18n.translate(
-                          'xpack.triggersActionsUI.sections.actionConnectorAdd.compatibilityFilter',
-                          {
-                            defaultMessage: 'Compatibility',
-                          }
-                        )}
-                      </EuiFilterButton>
-                    }
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                  >
-                    <EuiSelectable
-                      allowExclusions={false}
-                      options={categoryOptions}
-                      onChange={onSelectOptionChange}
-                      data-test-subj="selectCategory"
+              {featureId !== CasesConnectorFeatureId && (
+                <EuiFlexItem>
+                  <EuiFilterGroup>
+                    <EuiPopover
+                      button={
+                        <EuiFilterButton
+                          iconType="arrowDown"
+                          data-test-subj="compatibilityFilterBtn"
+                          isSelected={selectedOptions.length > 0}
+                          hasActiveFilters={selectedOptions.length > 0}
+                          numActiveFilters={selectedOptions.length}
+                          onClick={onMultiFilterButtonClick}
+                        >
+                          {i18n.translate(
+                            'xpack.triggersActionsUI.sections.actionConnectorAdd.compatibilityFilter',
+                            {
+                              defaultMessage: 'Compatibility',
+                            }
+                          )}
+                        </EuiFilterButton>
+                      }
+                      isOpen={isPopoverOpen}
+                      closePopover={closePopover}
                     >
-                      {(list) => <div style={{ width: 300 }}>{list}</div>}
-                    </EuiSelectable>
-                  </EuiPopover>
-                </EuiFilterGroup>
-              </EuiFlexItem>
+                      <EuiSelectable
+                        allowExclusions={false}
+                        options={categoryOptions}
+                        onChange={onSelectOptionChange}
+                        data-test-subj="selectCategory"
+                      >
+                        {(list) => <div style={{ width: 300 }}>{list}</div>}
+                      </EuiSelectable>
+                    </EuiPopover>
+                  </EuiFilterGroup>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
             <EuiSpacer size="m" />
           </>
