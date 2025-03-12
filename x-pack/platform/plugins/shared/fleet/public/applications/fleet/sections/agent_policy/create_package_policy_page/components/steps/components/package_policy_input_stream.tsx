@@ -297,7 +297,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
               })}
 
               {/* Advanced section */}
-              {(hasAdvancedOptions || packageInfo.type == 'input')  && (
+              {(hasAdvancedOptions || packageInfo.type === 'input')  && (
                 <Fragment>
                   <EuiFlexItem>
                     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
