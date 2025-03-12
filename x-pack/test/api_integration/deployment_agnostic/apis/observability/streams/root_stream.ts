@@ -25,9 +25,6 @@ const rootStreamDefinition: WiredStreamDefinition = {
         '@timestamp': {
           type: 'date',
         },
-        'stream.name': {
-          type: 'keyword',
-        },
         'scope.dropped_attributes_count': {
           type: 'long',
         },
