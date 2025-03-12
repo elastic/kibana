@@ -68,7 +68,7 @@ const getSha256Hash = async (filePath) => {
 };
 
 (async () => {
-  const root = process.cwd();
+  const buildRoot = process.cwd();
 
   // switch working dir to the screenshotting server directory
   process.chdir('src/platform/packages/private/kbn-screenshotting-server/src');
@@ -207,8 +207,7 @@ const getSha256Hash = async (filePath) => {
     'npm',
     [
       'exec',
-      '-y',
-      '--package=jscodeshift@17.1.2',
+      '--offline',
       '--',
       'jscodeshift',
       '--extensions=ts',
@@ -216,7 +215,7 @@ const getSha256Hash = async (filePath) => {
       '--fail-on-error',
       `--transform`,
       resolve(
-        root,
+        buildRoot,
         '.buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/transform_path_file.js'
       ),
       '../paths.ts',
@@ -236,7 +235,7 @@ const getSha256Hash = async (filePath) => {
   console.log('---Providing feedback to issue \n');
 
   await $('ts-node', [
-    `${resolve(root, '.buildkite/scripts/lifecycle/comment_on_pr.ts')}`,
+    `${resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts')}`,
     '--message',
     `Linux headless chromium build completed at: ${process.env.BUILDKITE_BUILD_URL} ✨💅🏾 \n\n #### How to update puppeteer \n - You'll want to run \`yarn add puppeteer@${process.env.PUPPETEER_VERSION}\` \n - Next we'll want to apply the following patch; \n\n\`\`\`diff\n${pathDiff}\n\`\`\` \n - After applying the patch, create a PR to update puppeteer`,
     '--context',
