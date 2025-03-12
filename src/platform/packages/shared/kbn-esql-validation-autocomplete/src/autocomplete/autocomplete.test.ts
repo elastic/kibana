@@ -112,22 +112,6 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | eval var0 = a | /', commands);
   });
 
-  describe('limit', () => {
-    testSuggestions('from a | limit /', ['10 ', '100 ', '1000 ']);
-    testSuggestions('from a | limit 4 /', ['| ']);
-  });
-
-  describe('mv_expand', () => {
-    testSuggestions('from a | mv_expand /', getFieldNamesByType('any'));
-    testSuggestions('from a | mv_expand a /', ['| ']);
-  });
-
-  describe('rename', () => {
-    testSuggestions('from a | rename /', getFieldNamesByType('any'));
-    testSuggestions('from a | rename keywordField /', ['AS $0'], ' ');
-    testSuggestions('from a | rename keywordField as /', ['var0']);
-  });
-
   for (const command of ['keep', 'drop']) {
     describe(command, () => {
       testSuggestions(`from a | ${command} /`, getFieldNamesByType('any'));
@@ -406,22 +390,22 @@ describe('autocomplete', () => {
     );
 
     // LIMIT argument
-    // Here we actually test that the invoke trigger kind does NOT work
-    // the assumption is that it isn't very useful to see literal suggestions when already typing a number
-    // I'm not sure if this is true or not, but it's the current behavior
-    testSuggestions('FROM a | LIMIT 1/', ['| ']);
+    testSuggestions('FROM a | LIMIT 1/', ['10 ', '100 ', '1000 ']);
 
     // MV_EXPAND field
-    testSuggestions('FROM index1 | MV_EXPAND f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | MV_EXPAND f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field
-    testSuggestions('FROM index1 | RENAME f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | RENAME f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A/', ['AS $0']);
-
-    // RENAME field AS var0
-    testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
+    testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [

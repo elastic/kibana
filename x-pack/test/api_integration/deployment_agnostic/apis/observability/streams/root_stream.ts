@@ -35,7 +35,7 @@ const rootStreamDefinition: WiredStreamDefinition = {
           type: 'keyword',
         },
         'stream.name': {
-          type: 'keyword',
+          type: 'system',
         },
       },
     },

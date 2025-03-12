@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { runSoon } from './rule_api/run_soon';
 
