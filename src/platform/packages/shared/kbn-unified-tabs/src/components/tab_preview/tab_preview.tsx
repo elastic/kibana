@@ -24,14 +24,16 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   stopPreviewOnHover,
 }) => {
   return (
-    <div
-      onMouseEnter={() => !stopPreviewOnHover && setShowPreview(true)}
-      onMouseLeave={() => setShowPreview(false)}
-      css={css`
-        position: relative;
-      `}
-    >
-      {children}
+    <div>
+      <span
+        onMouseEnter={() => !stopPreviewOnHover && setShowPreview(true)}
+        onMouseLeave={() => setShowPreview(false)}
+        css={css`
+          position: relative;
+        `}
+      >
+        {children}
+      </span>
       {showPreview && (
         <EuiSplitPanel.Outer grow css={getPreviewContainerCss()}>
           <EuiSplitPanel.Inner>
