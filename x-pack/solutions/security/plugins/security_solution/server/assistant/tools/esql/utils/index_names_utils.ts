@@ -4,8 +4,9 @@ export const generateIndexNamesWithWildcards = (fullIndexNames: string[]): strin
     const occurrences = new Map();
     
     for (const parts of partsList) {
-        for (let mask = 1; mask < (1 << parts.length); mask++) {
-            let wildcardVersion = parts.map((part, idx) => (mask & (1 << idx)) ? '*' : part);
+
+        for (let mask = 1; mask < (1 << parts.length); mask++) { // eslint-disable-line no-bitwise
+            let wildcardVersion = parts.map((part, idx) => (mask & (1 << idx)) ? '*' : part); // eslint-disable-line no-bitwise
             let wildcardStr = wildcardVersion.join('.');
             occurrences.set(wildcardStr, (occurrences.get(wildcardStr) || 0) + 1);
         }
