@@ -24,8 +24,6 @@ import {
 } from '../../../../../common/translations';
 import { ExpandableTruncatedText } from '../expandable_truncated_text';
 
-const MAX_CHAR_LENGTH = 150;
-
 export const DegradedFieldInfo = () => {
   const {
     degradedFieldValues,
@@ -117,8 +115,8 @@ export const DegradedFieldInfo = () => {
                 <EuiBadgeGroup gutterSize="s">
                   {degradedFieldValues?.values.map((value, idx) => {
                     return (
-                      <div key={idx} css={{ lineHeight: '1.6' }}>
-                        <ExpandableTruncatedText text={value} maxCharLength={MAX_CHAR_LENGTH} />
+                      <div key={idx} css={{ lineHeight: '1.6', width: '100%' }}>
+                        <ExpandableTruncatedText text={value} />
                       </div>
                     );
                   })}

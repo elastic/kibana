@@ -703,14 +703,14 @@ export const failedDocsErrorsColumnName = i18n.translate(
 );
 
 export const readMore = i18n.translate(
-  'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.message.readMore',
+  'xpack.datasetQuality.details.qualityIssue.flyout.message.readMore',
   {
     defaultMessage: 'Read more',
   }
 );
 
 export const readLess = i18n.translate(
-  'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.message.readLess',
+  'xpack.datasetQuality.details.qualityIssue.flyout.message.readLess',
   {
     defaultMessage: 'Read less',
   }

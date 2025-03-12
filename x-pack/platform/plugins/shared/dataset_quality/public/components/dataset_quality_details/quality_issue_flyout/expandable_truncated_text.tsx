@@ -19,7 +19,7 @@ interface TruncatedTextWithToggleProps {
 export const ExpandableTruncatedText = ({
   text,
   maxCharLength = 150,
-  truncatedTextLength = 33,
+  truncatedTextLength = 35,
   codeLanguage,
 }: TruncatedTextWithToggleProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -29,7 +29,7 @@ export const ExpandableTruncatedText = ({
     shouldTruncate && !isExpanded ? `${text.slice(0, truncatedTextLength)}...` : text;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" style={{ width: '100%' }}>
       <EuiCode language={codeLanguage} style={{ fontWeight: 'normal' }}>
         {displayText}
       </EuiCode>

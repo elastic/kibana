@@ -9,14 +9,13 @@ import React from 'react';
 import { ExpandableTruncatedText } from '../expandable_truncated_text';
 
 const MAX_CHAR_LENGTH = 200;
-const TRUNCATED_TEXT_LENGTH = 28;
 
 export const ErrorMessage = ({ errorMessage }: { errorMessage: string }) => {
   return (
     <ExpandableTruncatedText
       text={errorMessage}
       maxCharLength={MAX_CHAR_LENGTH}
-      truncatedTextLength={TRUNCATED_TEXT_LENGTH}
+      truncatedTextLength={MAX_CHAR_LENGTH}
       codeLanguage="js"
     />
   );
