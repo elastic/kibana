@@ -29,23 +29,17 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
-  PolicyData,
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
   getDuplicateFields,
 } from '../../../../../../common/endpoint/service/artifacts/validations';
 
-import {
-  isArtifactGlobal,
-  getPolicyIdsFromArtifact,
-  getArtifactTagsByPolicySelection,
-} from '../../../../../../common/endpoint/service/artifacts';
+import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import { isSignerFieldExcluded } from '../../state/type_guards';
 
 import {
@@ -64,7 +58,7 @@ import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
-import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
@@ -245,32 +239,16 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       }>
     >({});
 
-    const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
-    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
 
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
         setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
       }
     }, [item.tags, hasFormChanged]);
-
-    // select policies if editing
-    useEffect(() => {
-      if (hasFormChanged) {
-        return;
-      }
-      const policyIds = item.tags ? getPolicyIdsFromArtifact({ tags: item.tags }) : [];
-      if (!policyIds.length) {
-        return;
-      }
-      const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
-
-      setSelectedPolicies(policiesData);
-    }, [hasFormChanged, item, policies]);
 
     const showAssignmentSection = useMemo(() => {
       return (
@@ -302,19 +280,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [onChange]
     );
 
-    const handleOnPolicyChange = useCallback(
-      (change: EffectedPolicySelection) => {
-        const tags = getTagsUpdatedBy('policySelection', getArtifactTagsByPolicySelection(change));
-        const nextItem = { ...item, tags };
-
-        // Preserve old selected policies when switching to global
-        if (!change.isGlobal) {
-          setSelectedPolicies(change.selected);
-        }
-        processChanged(nextItem);
+    const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (updatedItem) => {
+        processChanged(updatedItem);
         setHasFormChanged(true);
       },
-      [getTagsUpdatedBy, item, processChanged]
+      [processChanged]
     );
 
     const handleOnNameOrDescriptionChange = useCallback<
@@ -589,14 +560,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiHorizontalRule />
             <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
-                isGlobal={isGlobal}
-                isPlatinumPlus={isPlatinumPlus}
-                selected={selectedPolicies}
+                item={item}
                 options={policies}
-                onChange={handleOnPolicyChange}
-                isLoading={policiesIsLoading}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
+                onChange={handleEffectedPolicyOnChange}
               />
             </EuiFormRow>
           </>
