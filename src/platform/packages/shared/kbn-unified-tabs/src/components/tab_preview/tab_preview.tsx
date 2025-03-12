@@ -7,29 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiSplitPanel, EuiText, EuiCode } from '@elastic/eui';
 
 interface TabPreviewProps {
   children: React.ReactNode;
+  showPreview: boolean;
+  setShowPreview: (show: boolean) => void;
 }
-
-export const TabPreview: React.FC<TabPreviewProps> = ({ children }) => {
-  const [showPreview, setShowPreview] = useState<boolean>(false);
-
-  const handleTabMouseEnter = () => {
-    setShowPreview(true);
-  };
-
-  const handleTabMouseLeave = () => {
-    setShowPreview(false);
-  };
-
+export const TabPreview: React.FC<TabPreviewProps> = ({
+  children,
+  showPreview,
+  setShowPreview,
+}) => {
   return (
     <div
-      onMouseEnter={handleTabMouseEnter}
-      onMouseLeave={handleTabMouseLeave}
+      onMouseEnter={() => setShowPreview(true)}
+      onMouseLeave={() => setShowPreview(false)}
       css={css`
         position: relative;
       `}
@@ -57,5 +52,7 @@ function getPreviewContainerCss() {
   return css`
     position: fixed;
     z-index: 10000;
+    width: 280px;
+    min-height: 112px;
   `;
 }

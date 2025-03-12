@@ -46,6 +46,7 @@ export const Tab: React.FC<TabProps> = ({
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
+  const [showPreview, setShowPreview] = useState<boolean>(false);
 
   const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -56,9 +57,12 @@ export const Tab: React.FC<TabProps> = ({
     defaultMessage: 'Click to select or double-click to edit session name',
   });
 
+  const hidePreview = () => setShowPreview(false);
+
   const onSelectEvent = useCallback(
     (event: MouseEvent<HTMLElement>) => {
       event.stopPropagation();
+      hidePreview();
 
       if (!isSelected) {
         onSelect(item);
@@ -86,7 +90,7 @@ export const Tab: React.FC<TabProps> = ({
   );
 
   return (
-    <TabPreview>
+    <TabPreview showPreview={showPreview} setShowPreview={setShowPreview}>
       <EuiFlexGroup
         ref={containerRef}
         {...getTabAttributes(item, tabContentId)}
