@@ -48,6 +48,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   setSearch: (search: string) => void;
   setSelectedStatus: (status: string[]) => void;
   openManageAutoUpgradeModal: (policyId: string) => void;
+  numAgents: number;
 }> = ({
   onClose,
   onAbortSuccess,
@@ -55,6 +56,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   setSearch,
   setSelectedStatus,
   openManageAutoUpgradeModal,
+  numAgents,
 }) => {
   const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
@@ -187,6 +189,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           onClickShowMore={onClickShowMore}
           dateFilter={dateFilter}
           onChangeDateFilter={onChangeDateFilter}
+          numAgents={numAgents}
         />
         <FlyoutFooterWPadding>
           <EuiFlexGroup justifyContent="flexStart">

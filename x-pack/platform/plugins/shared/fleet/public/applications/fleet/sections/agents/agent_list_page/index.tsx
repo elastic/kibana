@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
@@ -297,6 +297,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
+            numAgents={nAgentsInTable}
           />
         </EuiPortal>
       ) : null}

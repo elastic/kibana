@@ -32,7 +32,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
-  progress: number;
+  progress: { actionProgress: number; totalProgress: number };
 }> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents, progress }) => {
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
@@ -127,7 +127,10 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiText color="subdued">
-                  <p>Progress: {progress}</p>
+                  <p>
+                    Upgraded {progress.actionProgress * 100}% of {progress.totalProgress * 100}% of
+                    chosen total agents
+                  </p>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
