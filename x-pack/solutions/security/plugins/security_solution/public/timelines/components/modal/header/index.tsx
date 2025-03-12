@@ -77,15 +77,20 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
     const dispatch = useDispatch();
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    let { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    const { browserFields: sourcererBrowserFields, sourcererDataView } = useSourcererDataView(
+      SourcererScopeName.timeline
+    );
 
     const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.timeline);
     const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
 
-    if (newDataViewPickerEnabled) {
-      browserFields = experimentalBrowserFields;
-      sourcererDataView = experimentalDataView;
-    }
+    const browserFields = useMemo(() => {
+      return newDataViewPickerEnabled ? experimentalBrowserFields : sourcererBrowserFields;
+    }, [experimentalBrowserFields, newDataViewPickerEnabled, sourcererBrowserFields]);
+
+    const dataView = useMemo(() => {
+      return newDataViewPickerEnabled ? experimentalDataView : sourcererDataView;
+    }, [experimentalDataView, newDataViewPickerEnabled, sourcererDataView]);
 
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -104,21 +109,13 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
         combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern: sourcererDataView,
+          indexPattern: dataView,
           browserFields,
           filters: filters ? filters : [],
           kqlQuery: kqlQueryObj,
           kqlMode,
         }),
-      [
-        browserFields,
-        dataProviders,
-        esQueryConfig,
-        filters,
-        kqlMode,
-        kqlQueryObj,
-        sourcererDataView,
-      ]
+      [browserFields, dataProviders, esQueryConfig, filters, kqlMode, kqlQueryObj, dataView]
     );
     const isInspectDisabled = !isDataInTimeline || combinedQueries?.filterQuery === undefined;
 
