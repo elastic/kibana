@@ -25,7 +25,7 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutRowEvents } from '../use_grid_layout_events';
 import { deleteRow } from '../utils/row_management';
 import { DeleteGridRowModal } from './delete_grid_row_modal';
-import { DragPreview } from './grid_row_drag_preview';
+import { GridRowDragPreview } from './grid_row_drag_preview';
 import { GridRowTitle } from './grid_row_title';
 
 export interface GridRowHeaderProps {
@@ -218,7 +218,7 @@ export const GridRowHeader = React.memo(
             )
           }
         </EuiFlexGroup>
-        {isActive && <DragPreview rowId={rowId} />}
+        {isActive && <GridRowDragPreview rowId={rowId} />}
         {deleteModalVisible && (
           <DeleteGridRowModal rowId={rowId} setDeleteModalVisible={setDeleteModalVisible} />
         )}

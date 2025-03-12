@@ -13,7 +13,7 @@ import { combineLatest, skip } from 'rxjs';
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
+export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -54,4 +54,4 @@ export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
 
 const styles = css({ display: 'none', pointerEvents: 'none' });
 
-DragPreview.displayName = 'KbnGridLayoutDragPanelPreview';
+GridPanelDragPreview.displayName = 'KbnGridLayoutPanelDragPreview';
