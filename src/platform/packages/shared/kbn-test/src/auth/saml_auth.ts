@@ -16,7 +16,7 @@ import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { randomInt } from 'crypto';
-import { Console, Effect, Data } from 'effect';
+import { Effect, Data } from 'effect';
 import { isValidHostname, isValidUrl } from './helper';
 import {
   CloudSamlSessionParams,
@@ -285,6 +285,9 @@ Errors:
  throw new Error(`Failed to complete SAML handshake callback`);
 
 */
+class SamlNot302Error extends Data.TaggedError('SamlNot302Error')<{
+  message: string;
+}> {}
 export const finishSAMLHandshakeEffect = async ({
   kbnHost,
   samlResponse,
@@ -309,23 +312,21 @@ export const finishSAMLHandshakeEffect = async ({
   const main = Effect.gen(function* () {
     yield* Effect.log(`Attempting to finish the saml handshake`);
 
-    const throwWhenX = (authResponse: AxiosResponse<any, any>) =>
-      Effect.try(() => {
-        if (authResponse.status === 302)
-          return getCookieFromResponseHeaders(
-            authResponse,
-            'Failed to get cookie from SAML callback response'
-          );
+    const authResponse: AxiosResponse<any, any> = yield* fetch;
 
-        return yield* new SamlNot302Error(`SAML callback failed: expected 302, got some canned status`)
-      });
+    if (authResponse.status === 302)
+      return getCookieFromResponseHeaders(
+        authResponse,
+        'Failed to get cookie from SAML callback response'
+      );
 
-    return yield* Effect.flatMap(fetch, throwWhenX);
+    yield* new SamlNot302Error({
+      message: `SAML callback failed: expected 302, got some canned status`,
+    });
   }).pipe(Effect.withLogSpan('saml_auth#finishSamlHandshake'));
 
   return await Effect.runPromise(Effect.retry(main, { times: 3 }));
 };
-class SamlNot302Error extends Data.TaggedError('SamlNot302Error')<{}> {}
 
 export const finishSAMLHandshake = async ({
   kbnHost,
