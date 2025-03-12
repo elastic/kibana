@@ -52,7 +52,7 @@ export function WaterfallContextProvider({
   children,
   isOpen,
 }: PropsWithChildren<WaterfallContextProps>) {
-  const [tree, setTree] = useState<IWaterfallNode | null>(null);
+  const [trees, setTrees] = useState<IWaterfallNode[] | null>(null);
   const criticalPathSegmentsById = useMemo(() => {
     if (!showCriticalPath) {
       return {};
@@ -63,8 +63,8 @@ export function WaterfallContextProvider({
   }, [showCriticalPath, waterfall]);
 
   const traceList = useMemo(() => {
-    return convertTreeToList(tree);
-  }, [tree]);
+    return convertTreeToList(trees);
+  }, [trees]);
 
   const getErrorCount = useCallback(
     (waterfallItemId: string) => waterfall.getErrorCount(waterfallItemId),
@@ -73,10 +73,10 @@ export function WaterfallContextProvider({
 
   const updateTreeNode = useCallback(
     (updatedNode: IWaterfallNodeFlatten) => {
-      if (!tree) return;
+      if (!trees?.length) return;
 
-      const newTree = updateTraceTreeNode({
-        root: tree,
+      const newTrees = updateTraceTreeNode({
+        roots: trees,
         updatedNode,
         waterfall,
         path: {
@@ -85,15 +85,15 @@ export function WaterfallContextProvider({
         },
       });
 
-      if (newTree) {
-        setTree(newTree);
+      if (newTrees) {
+        setTrees(newTrees);
       }
     },
-    [criticalPathSegmentsById, showCriticalPath, tree, waterfall]
+    [criticalPathSegmentsById, showCriticalPath, trees, waterfall]
   );
 
   useEffect(() => {
-    const root = buildTraceTree({
+    const roots = buildTraceTree({
       waterfall,
       maxLevelOpen,
       isOpen,
@@ -102,8 +102,7 @@ export function WaterfallContextProvider({
         showCriticalPath,
       },
     });
-
-    setTree(root);
+    setTrees(roots);
   }, [criticalPathSegmentsById, isOpen, maxLevelOpen, showCriticalPath, waterfall]);
 
   return (

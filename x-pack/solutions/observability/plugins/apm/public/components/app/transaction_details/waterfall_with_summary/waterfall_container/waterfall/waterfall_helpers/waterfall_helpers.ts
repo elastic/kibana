@@ -21,6 +21,7 @@ import type {
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
 const ROOT_ID = 'root';
+const HIDDEN_ID = 'hidden';
 
 export interface SpanLinksCount {
   linkedChildren: number;
@@ -250,7 +251,25 @@ export function getOrderedWaterfallItems(
     return [item, ...deepChildren];
   }
 
-  return getSortedChildren(entryWaterfallTransaction);
+  const nonRelatedChildrenToEntryTransaction = Object.entries(childrenByParentId)
+    .filter(
+      ([id, item]) =>
+        id !== entryWaterfallTransaction.id && item[0].parentId !== entryWaterfallTransaction.id
+    )
+    .map(([_, item]) => item)
+    .flat();
+
+  if (nonRelatedChildrenToEntryTransaction.length) {
+    // filter out duplicated items
+    return [
+      ...new Set([
+        ...getSortedChildren(entryWaterfallTransaction),
+        ...nonRelatedChildrenToEntryTransaction,
+      ]),
+    ];
+  } else {
+    return getSortedChildren(entryWaterfallTransaction);
+  }
 }
 
 function getRootWaterfallTransaction(
@@ -425,6 +444,7 @@ export function reparentOrphanItems(
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {
   const orphanIdsMap = new Set(orphanItemsIds);
+
   return waterfallItems.map((item) => {
     if (orphanIdsMap.has(item.id)) {
       if (
@@ -434,10 +454,10 @@ export function reparentOrphanItems(
       ) {
         // we need to hide the orphan item if it's longer or if it has started before the entry transaction
         // as this means it's a parent of the entry transaction
-        item.parentId = undefined;
-
-        // item.parentId = entryWaterfallTransaction.id;
+        item.parentId = HIDDEN_ID;
       } else {
+        // if the orphan item is shorter than the entry transaction, it's a child of the entry transaction,
+        // but we will show it at top level as we don't have the parent in the waterfall
         item.parentId = ROOT_ID;
       }
       item.isOrphan = true;
@@ -525,12 +545,12 @@ function getChildren({
 }
 
 function buildTree({
-  root,
+  roots,
   waterfall,
   maxLevelOpen,
   path,
 }: {
-  root: IWaterfallNode;
+  roots: IWaterfallNode[];
   waterfall: IWaterfall;
   maxLevelOpen: number;
   path: {
@@ -538,41 +558,45 @@ function buildTree({
     showCriticalPath: boolean;
   };
 }) {
-  const tree = { ...root };
-  const queue: IWaterfallNode[] = [tree];
+  const trees = roots.map((root) => {
+    const tree = { ...root };
+    const queue: IWaterfallNode[] = [tree];
 
-  for (let queueIndex = 0; queueIndex < queue.length; queueIndex++) {
-    const node = queue[queueIndex];
+    for (let queueIndex = 0; queueIndex < queue.length; queueIndex++) {
+      const node = queue[queueIndex];
 
-    const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
+      const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
 
-    // Set childrenToLoad for all nodes enqueued.
-    // this allows lazy loading of child nodes
-    node.childrenToLoad = children.length;
+      // Set childrenToLoad for all nodes enqueued.
+      // this allows lazy loading of child nodes
+      node.childrenToLoad = children.length;
 
-    if (maxLevelOpen > node.level) {
-      children.forEach((child, index) => {
-        const level = node.level + 1;
+      if (maxLevelOpen > node.level) {
+        children.forEach((child, index) => {
+          const level = node.level + 1;
 
-        const currentNode: IWaterfallNode = {
-          id: `${level}-${child.id}-${index}`,
-          item: child,
-          children: [],
-          level,
-          expanded: level < maxLevelOpen,
-          childrenToLoad: 0,
-          hasInitializedChildren: false,
-        };
+          const currentNode: IWaterfallNode = {
+            id: `${level}-${child.id}-${index}`,
+            item: child,
+            children: [],
+            level,
+            expanded: level < maxLevelOpen,
+            childrenToLoad: 0,
+            hasInitializedChildren: false,
+          };
 
-        node.children.push(currentNode);
-        queue.push(currentNode);
-      });
+          node.children.push(currentNode);
+          queue.push(currentNode);
+        });
 
-      node.hasInitializedChildren = true;
+        node.hasInitializedChildren = true;
+      }
     }
-  }
 
-  return tree;
+    return tree;
+  });
+
+  return trees;
 }
 
 export function buildTraceTree({
@@ -588,13 +612,13 @@ export function buildTraceTree({
     criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
     showCriticalPath: boolean;
   };
-}): IWaterfallNode | null {
+}): IWaterfallNode[] | null {
   const entry = waterfall.entryWaterfallTransaction;
   if (!entry) {
     return null;
   }
 
-  const root: IWaterfallNode = {
+  const entryRoot: IWaterfallNode = {
     id: entry.id,
     item: entry,
     children: [],
@@ -604,40 +628,54 @@ export function buildTraceTree({
     hasInitializedChildren: false,
   };
 
-  return buildTree({ root, maxLevelOpen, waterfall, path });
+  const orphanRoots = waterfall.childrenByParentId[ROOT_ID]?.map((item) => ({
+    id: item.id,
+    item,
+    children: [],
+    level: 0,
+    expanded: isOpen,
+    childrenToLoad: 0,
+    hasInitializedChildren: false,
+  }));
+
+  const roots = [entryRoot, ...(orphanRoots ?? [])];
+
+  return buildTree({ roots, maxLevelOpen, waterfall, path });
 }
 
-export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFlatten[] => {
-  if (!root) {
+export const convertTreeToList = (roots: IWaterfallNode[] | null): IWaterfallNodeFlatten[] => {
+  if (!roots) {
     return [];
   }
 
   const result: IWaterfallNodeFlatten[] = [];
-  const stack: IWaterfallNode[] = [root];
+  roots.forEach((root) => {
+    const stack: IWaterfallNode[] = [root];
 
-  while (stack.length > 0) {
-    const node = stack.pop()!;
+    while (stack.length > 0) {
+      const node = stack.pop()!;
 
-    const { children, ...nodeWithoutChildren } = node;
-    result.push(nodeWithoutChildren);
+      const { children, ...nodeWithoutChildren } = node;
+      result.push(nodeWithoutChildren);
 
-    if (node.expanded) {
-      for (let i = node.children.length - 1; i >= 0; i--) {
-        stack.push(node.children[i]);
+      if (node.expanded) {
+        for (let i = node.children.length - 1; i >= 0; i--) {
+          stack.push(node.children[i]);
+        }
       }
     }
-  }
+  });
 
   return result;
 };
 
 export const updateTraceTreeNode = ({
-  root,
+  roots,
   updatedNode,
   waterfall,
   path,
 }: {
-  root: IWaterfallNode;
+  roots: IWaterfallNode[];
   updatedNode: IWaterfallNodeFlatten;
   waterfall: IWaterfall;
   path: {
@@ -645,46 +683,50 @@ export const updateTraceTreeNode = ({
     showCriticalPath: boolean;
   };
 }) => {
-  if (!root) {
+  if (!roots.length) {
     return;
   }
 
-  const tree = { ...root };
-  const stack: Array<{ parent: IWaterfallNode | null; index: number; node: IWaterfallNode }> = [
-    { parent: null, index: 0, node: root },
-  ];
+  const trees = roots.map((root) => {
+    const tree = { ...root };
+    const stack: Array<{ parent: IWaterfallNode | null; index: number; node: IWaterfallNode }> = [
+      { parent: null, index: 0, node: root },
+    ];
 
-  while (stack.length > 0) {
-    const { parent, index, node } = stack.pop()!;
+    while (stack.length > 0) {
+      const { parent, index, node } = stack.pop()!;
 
-    if (node.id === updatedNode.id) {
-      Object.assign(node, updatedNode);
+      if (node.id === updatedNode.id) {
+        Object.assign(node, updatedNode);
 
-      if (updatedNode.expanded && !updatedNode.hasInitializedChildren) {
-        Object.assign(
-          node,
-          buildTree({
-            root: node,
-            waterfall,
-            maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
-            path,
-          })
-        );
+        if (updatedNode.expanded && !updatedNode.hasInitializedChildren) {
+          Object.assign(
+            node,
+            buildTree({
+              roots: [node],
+              waterfall,
+              maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
+              path,
+            })
+          );
+        }
+
+        if (parent) {
+          parent.children[index] = node;
+        } else {
+          Object.assign(tree, node);
+        }
+
+        return tree;
       }
 
-      if (parent) {
-        parent.children[index] = node;
-      } else {
-        Object.assign(tree, node);
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        stack.push({ parent: node, index: i, node: node.children[i] });
       }
-
-      return tree;
     }
 
-    for (let i = node.children.length - 1; i >= 0; i--) {
-      stack.push({ parent: node, index: i, node: node.children[i] });
-    }
-  }
+    return tree;
+  });
 
-  return tree;
+  return trees;
 };
