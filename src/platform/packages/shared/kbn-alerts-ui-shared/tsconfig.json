@@ -20,7 +20,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/controls-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/kibana-utils-plugin",
@@ -34,6 +33,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/shared-ux-table-persist",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/presentation-publishing"
   ]
 }

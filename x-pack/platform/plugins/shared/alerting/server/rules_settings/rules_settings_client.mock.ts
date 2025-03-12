@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   RulesSettingsClientApi,
   RulesSettingsFlappingClientApi,
   RulesSettingsQueryDelayClientApi,
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
   RulesSettingsFlappingProperties,
   DEFAULT_ALERT_DELETION_SETTINGS,
   RulesSettingsAlertDeletionClientApi,
 } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
 
 export type RulesSettingsClientMock = jest.Mocked<RulesSettingsClientApi>;
 export type RulesSettingsFlappingClientMock = jest.Mocked<RulesSettingsFlappingClientApi>;
