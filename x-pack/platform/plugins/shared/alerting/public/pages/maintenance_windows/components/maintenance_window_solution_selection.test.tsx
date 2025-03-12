@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { MaintenanceWindowSolutionSelection } from './maintenance_window_category_selection';
+import { MaintenanceWindowSolutionSelection } from './maintenance_window_solution_selection';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 

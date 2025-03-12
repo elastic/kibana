@@ -47,7 +47,7 @@ import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
-import { MaintenanceWindowSolutionSelection } from './maintenance_window_category_selection';
+import { MaintenanceWindowSolutionSelection } from './maintenance_window_solution_selection';
 import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 
