@@ -139,14 +139,10 @@ describe('getServiceMapNodes', () => {
 
     const { edges, nodes } = partitionElements(elements);
 
-    expect(getIds(nodes)).toEqual([
-      '>opbeans-java|kafka/some-queue',
-      'opbeans-java',
-      'opbeans-node',
-    ]);
+    expect(getIds(nodes)).toEqual(['>kafka/some-queue', 'opbeans-java', 'opbeans-node']);
     expect(getIds(edges)).toEqual([
-      '>opbeans-java|kafka/some-queue~opbeans-node',
-      'opbeans-java~>opbeans-java|kafka/some-queue',
+      '>kafka/some-queue~opbeans-node',
+      'opbeans-java~>kafka/some-queue',
     ]);
   });
 
@@ -252,10 +248,10 @@ describe('getServiceMapNodes', () => {
 
     const { edges, nodes } = partitionElements(elements);
 
-    expect(getIds(nodes)).toEqual(['>opbeans-java|opbeans-node', 'opbeans-java']);
-    expect(getIds(edges)).toEqual(['opbeans-java~>opbeans-java|opbeans-node']);
+    expect(getIds(nodes)).toEqual(['>opbeans-node', 'opbeans-java']);
+    expect(getIds(edges)).toEqual(['opbeans-java~>opbeans-node']);
 
-    const nodejsNode = elements.find((node) => node.data.id === '>opbeans-java|opbeans-node');
+    const nodejsNode = elements.find((node) => node.data.id === '>opbeans-node');
     // @ts-expect-error
     expect(nodejsNode?.data[SPAN_TYPE]).toBe('external');
     // @ts-expect-error
