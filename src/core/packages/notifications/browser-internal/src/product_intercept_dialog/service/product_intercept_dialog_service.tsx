@@ -13,6 +13,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
+import type { NotificationCoordinatorPublicImpl } from '../../notification_coordinator';
 import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
 import { ProductInterceptDialogManager } from './component/product_intercept_dialog_manager';
 
@@ -24,6 +25,7 @@ interface ProductInterceptServiceStartDeps {
   analytics: AnalyticsServiceStart;
   rendering: RenderingService;
   targetDomElement: HTMLElement;
+  notificationCoordinator: NotificationCoordinatorPublicImpl;
 }
 
 export class ProductInterceptDialogService {
@@ -40,16 +42,31 @@ export class ProductInterceptDialogService {
     targetDomElement,
     rendering,
     analytics,
+    notificationCoordinator,
   }: ProductInterceptServiceStartDeps): IProductInterceptPublicApi {
     const { ack, add, get$ } = this.api.start({ analytics });
     this.targetDomElement = targetDomElement;
+
+    const coordinator = notificationCoordinator(ProductInterceptDialogService.name);
+
+    const productIntercepts$ = coordinator.optInToCoordination(get$(), ({ locked }) => {
+      // only emits product intercept updates when there is no coordination lock
+      return !locked;
+    });
+
+    const ackProductIntercept = (...args: Parameters<typeof ack>) => {
+      ack(...args);
+      // we release the coordination lock on processing the user's acknowledgement of the product intercept,
+      // so that any other pending notification can be shown
+      coordinator.releaseLock();
+    };
 
     render(
       rendering.addContext(
         <ProductInterceptDialogManager
           {...{
-            productIntercepts$: get$(),
-            ackProductIntercept: ack,
+            productIntercepts$,
+            ackProductIntercept,
           }}
         />
       ),
