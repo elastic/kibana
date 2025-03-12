@@ -52,6 +52,10 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
+import {
+  AttackDiscoverySchedulingDataClient,
+  GetAttackDiscoverySchedulingDataClientParams,
+} from '../lib/attack_discovery/schedules';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -604,6 +608,26 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
+    });
+  }
+
+  public async createAttackDiscoverySchedulingDataClient(
+    opts: CreateAIAssistantClientParams & GetAttackDiscoverySchedulingDataClientParams
+  ): Promise<AttackDiscoverySchedulingDataClient | null> {
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new AttackDiscoverySchedulingDataClient({
+      logger: this.options.logger.get('attackDiscoveryScheduling'),
+      currentUser: opts.currentUser,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
+      kibanaVersion: this.options.kibanaVersion,
+      spaceId: opts.spaceId,
+      rulesClient: opts.rulesClient,
     });
   }
 

@@ -63,6 +63,13 @@ export const findAttackDiscoveryByConnectorId = async ({
           ],
         },
       },
+      sort: [
+        {
+          updated_at: {
+            order: 'desc',
+          },
+        },
+      ],
       _source: true,
       ignore_unavailable: true,
       index: attackDiscoveryIndex,

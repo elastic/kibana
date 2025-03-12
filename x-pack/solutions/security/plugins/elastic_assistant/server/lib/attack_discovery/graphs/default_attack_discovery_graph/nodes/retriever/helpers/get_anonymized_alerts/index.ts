@@ -52,6 +52,8 @@ export const getAnonymizedAlerts = async ({
     start,
   });
 
+  // console.log(`[ATTACK DISCOVERY] query: ${JSON.stringify(query, null, 2)}`);
+
   const result = await esClient.search<SearchResponse>(query);
 
   // Accumulate replacements locally so we can, for example use the same
