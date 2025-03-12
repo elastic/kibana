@@ -7,10 +7,7 @@
 import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import type {
-  LoadRuleAggregationsProps,
-  AggregateRulesResponse,
-} from './aggregate_helpers';
+import type { LoadRuleAggregationsProps, AggregateRulesResponse } from './aggregate_helpers';
 import { rewriteBodyRes } from './aggregate_helpers';
 
 export async function loadRuleAggregations({
