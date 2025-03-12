@@ -48,7 +48,7 @@ export const timelineLocalStorageMiddleware: Middleware =
         },
         {}
       );
-      localStorage.setItem(TIMELINE_COLUMNS_CONFIG_KEY, JSON.stringify(timelineColumnsConfig));
+      setStoredTimelineColumnsConfig(timelineColumnsConfig);
     }
 
     return ret;
@@ -63,4 +63,8 @@ export function getStoredTimelineColumnsConfig() {
       /* empty */
     }
   }
+}
+
+export function setStoredTimelineColumnsConfig(config: LocalStorageColumnSettings) {
+  localStorage.setItem(TIMELINE_COLUMNS_CONFIG_KEY, JSON.stringify(config));
 }

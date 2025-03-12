@@ -53,6 +53,10 @@ import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import type { TimelineById } from './types';
 import { Direction } from '../../../common/search_strategy';
+import {
+  type LocalStorageColumnSettings,
+  setStoredTimelineColumnsConfig,
+} from './middlewares/timeline_localstorage';
 
 jest.mock('../../common/utils/normalize_time_range');
 jest.mock('../../common/utils/default_date_settings', () => {
@@ -172,6 +176,49 @@ describe('Timeline', () => {
           ...basicTimeline,
           show: true,
         },
+      });
+    });
+
+    test('should apply the locally stored column config', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        '@timestamp': {
+          id: '@timestamp',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          columns: [{ id: '@timestamp', columnHeaderType: 'not-filtered' }],
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
+        expect.objectContaining({
+          initialWidth,
+        })
+      );
+    });
+
+    test('should not apply changes to the columns when no previous config is stored in localStorage', () => {
+      // overwrite the localstorage with a nasty type cast
+      setStoredTimelineColumnsConfig(undefined as unknown as LocalStorageColumnSettings);
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          columns: [{ id: '@timestamp', columnHeaderType: 'not-filtered' }],
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual({
+        id: '@timestamp',
+        columnHeaderType: 'not-filtered',
       });
     });
 
