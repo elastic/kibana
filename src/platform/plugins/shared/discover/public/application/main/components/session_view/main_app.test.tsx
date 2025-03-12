@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverMainApp } from './main_app';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../../__mocks__/services';

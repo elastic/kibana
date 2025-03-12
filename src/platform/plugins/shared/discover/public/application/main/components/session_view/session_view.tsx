@@ -63,7 +63,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { updateSavedSearch } from '../../state_management/utils/update_saved_search';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
-import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverMainApp } from './main_app';
 import type { MainRouteInitializationState, NarrowAsyncState } from '../../types';
 
 interface DiscoverSessionViewProps {
