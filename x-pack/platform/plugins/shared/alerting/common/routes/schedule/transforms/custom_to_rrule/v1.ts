@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import { Frequency } from '@kbn/rrule';
 import type { RRule } from '../../../../../server/application/r_rule/types';
-import { ScheduleRequest } from '../../types/v1';
+import type { ScheduleRequest } from '../../types/v1';
 import { DEFAULT_TIMEZONE, DURATION_REGEX, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
 
 const transformEveryToFrequency = (frequency?: string) => {

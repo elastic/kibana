@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { isEmpty, isUndefined, omitBy } from 'lodash';
 import { Frequency } from '@kbn/rrule';
 import type { RRule } from '../../../../../server/application/r_rule/types';
-import { ScheduleRequest } from '../../types/v1';
+import type { ScheduleRequest } from '../../types/v1';
 
 const transformFrequencyToEvery = (frequency: Frequency) => {
   switch (frequency) {

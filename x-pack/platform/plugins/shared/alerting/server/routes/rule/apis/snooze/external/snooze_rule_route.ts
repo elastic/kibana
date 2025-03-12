@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { v4 } from 'uuid';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import {
   type SnoozeParams,
   type SnoozeResponse,
@@ -15,9 +15,11 @@ import {
   snoozeParamsSchema,
   snoozeResponseSchema,
 } from '../../../../../../common/routes/rule/apis/snooze';
-import { ILicenseState, RuleMutedError } from '../../../../../lib';
+import type { ILicenseState } from '../../../../../lib';
+import { RuleMutedError } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 import {
   transformCustomScheduleToRRule,

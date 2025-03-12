@@ -16,14 +16,14 @@ import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { validateSnoozeStartDate } from '../../../../lib/validate_snooze_date';
 import { RuleMutedError } from '../../../../lib/errors/rule_muted';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { RawRule, SanitizedRule } from '../../../../types';
+import type { RawRule, SanitizedRule } from '../../../../types';
 import {
   getSnoozeAttributes,
   verifySnoozeAttributeScheduleLimit,
 } from '../../../../rules_client/common';
 import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
-import { RuleParams } from '../../types';
+import type { RuleParams } from '../../types';
 import { transformRuleDomainToRule, transformRuleAttributesToRuleDomain } from '../../transforms';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
