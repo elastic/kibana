@@ -10,14 +10,14 @@
 import type { AsyncState } from 'react-use/lib/useAsyncFn';
 import type { RootProfileState } from '../../context_awareness';
 
-export interface MainInitializationState {
+export interface MainRouteInitializationState {
   hasESData: boolean;
   hasUserDataView: boolean;
 }
 
-export type InitializeMain = (
+export type InitializeMainRoute = (
   rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
-) => Promise<MainInitializationState>;
+) => Promise<MainRouteInitializationState>;
 
 export type NarrowAsyncState<TState extends AsyncState<unknown>> = Exclude<
   TState,

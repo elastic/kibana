@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DiscoverMainRoute2 } from './discover_main_route_2';
+export { DiscoverMainRoute } from './discover_main_route';

@@ -29,9 +29,9 @@ import {
   DiscoverSessionView,
   NoDataPage,
 } from './components/session_view';
-import type { InitializeMain, NarrowAsyncState } from './types';
+import type { InitializeMainRoute, NarrowAsyncState } from './types';
 
-export interface MainRoute2Props {
+export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
@@ -39,11 +39,11 @@ export interface MainRoute2Props {
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
-export const DiscoverMainRoute2 = ({
+export const DiscoverMainRoute = ({
   customizationContext,
   customizationCallbacks = defaultCustomizationCallbacks,
   stateStorageContainer,
-}: MainRoute2Props) => {
+}: MainRouteProps) => {
   const services = useDiscoverServices();
   const rootProfileState = useRootProfile();
   const history = useHistory();
@@ -62,7 +62,7 @@ export const DiscoverMainRoute2 = ({
     createInternalStateStore({ services, runtimeStateManager })
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
-  const initialize = useLatest<InitializeMain>(async (loadedRootProfileState) => {
+  const initialize = useLatest<InitializeMainRoute>(async (loadedRootProfileState) => {
     const { dataViews } = services;
     const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
       dataViews.hasData.hasESData().catch(() => false),
@@ -77,33 +77,36 @@ export const DiscoverMainRoute2 = ({
       hasUserDataView: hasUserDataView && defaultDataViewExists,
     };
   });
-  const [initializationState, initializeMain] = useAsyncFn<InitializeMain>(
+  const [initializationState, initializeMainRoute] = useAsyncFn<InitializeMainRoute>(
     (...params) => initialize.current(...params),
     [initialize],
     { loading: true }
   );
-  const mainInitializationState = initializationState as NarrowAsyncState<
+  const mainRouteInitializationState = initializationState as NarrowAsyncState<
     typeof initializationState
   >;
 
   useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {
-      initializeMain(rootProfileState);
+      initializeMainRoute(rootProfileState);
     }
-  }, [initializeMain, rootProfileState]);
+  }, [initializeMainRoute, rootProfileState]);
 
-  if (rootProfileState.rootProfileLoading || mainInitializationState.loading) {
+  if (rootProfileState.rootProfileLoading || mainRouteInitializationState.loading) {
     return <BrandedLoadingIndicator />;
   }
 
-  if (mainInitializationState.error) {
-    return <DiscoverError error={mainInitializationState.error} />;
+  if (mainRouteInitializationState.error) {
+    return <DiscoverError error={mainRouteInitializationState.error} />;
   }
 
-  if (!mainInitializationState.value.hasESData && !mainInitializationState.value.hasUserDataView) {
+  if (
+    !mainRouteInitializationState.value.hasESData &&
+    !mainRouteInitializationState.value.hasUserDataView
+  ) {
     return (
       <NoDataPage
-        {...mainInitializationState.value}
+        {...mainRouteInitializationState.value}
         onDataViewCreated={() => {
           // This is unused if there is no ES data
         }}
@@ -115,8 +118,7 @@ export const DiscoverMainRoute2 = ({
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
         <DiscoverSessionView
-          rootProfileState={rootProfileState}
-          mainInitializationState={mainInitializationState.value}
+          mainRouteInitializationState={mainRouteInitializationState.value}
           customizationContext={customizationContext}
           customizationCallbacks={customizationCallbacks}
           urlStateStorage={urlStateStorage}

@@ -18,7 +18,7 @@ import { NotFoundRoute } from './not_found';
 import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
-import { DiscoverMainRoute2 } from './main';
+import { DiscoverMainRoute } from './main';
 
 export interface DiscoverRouterProps {
   services: DiscoverServices;
@@ -59,10 +59,10 @@ export const DiscoverRoutes = ({
         <ViewAlertRoute />
       </Route>
       <Route path="/view/:id">
-        <DiscoverMainRoute2 {...routeProps} />
+        <DiscoverMainRoute {...routeProps} />
       </Route>
       <Route path="/" exact>
-        <DiscoverMainRoute2 {...routeProps} />
+        <DiscoverMainRoute {...routeProps} />
       </Route>
       <NotFoundRoute />
     </Routes>

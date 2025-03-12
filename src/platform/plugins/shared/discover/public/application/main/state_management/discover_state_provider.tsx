@@ -63,6 +63,10 @@ export const DiscoverMainProvider = ({
   return (
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>
+        {/**
+         * InternalStateProvider should only render in DiscoverMainRoute, and this be removed,
+         * but it's being duplicated during the refactoring to avoid breaking every Jest test
+         */}
         <InternalStateProvider store={value.internalState}>{children}</InternalStateProvider>
       </DiscoverAppStateProvider>
     </DiscoverStateProvider>

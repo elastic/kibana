@@ -14,7 +14,7 @@ import type {
   AnalyticsNoDataPageProps,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { MainInitializationState } from '../../types';
+import type { MainRouteInitializationState } from '../../types';
 
 const importNoData = () => import('@kbn/shared-ux-page-analytics-no-data');
 const AnalyticsNoDataPageKibanaProvider = withSuspense(
@@ -29,7 +29,7 @@ export const NoDataPage = ({
   hasUserDataView,
   onDataViewCreated,
   onESQLNavigationComplete,
-}: MainInitializationState & AnalyticsNoDataPageProps) => {
+}: MainRouteInitializationState & AnalyticsNoDataPageProps) => {
   const services = useDiscoverServices();
   const noDataDependencies = useMemo<AnalyticsNoDataPageKibanaDependencies>(
     () => ({

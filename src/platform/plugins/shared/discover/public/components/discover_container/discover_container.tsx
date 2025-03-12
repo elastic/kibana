@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
-import { DiscoverMainRoute2 } from '../../application/main';
+import { DiscoverMainRoute } from '../../application/main';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -87,7 +87,7 @@ export const DiscoverContainerInternal = ({
         `}
       >
         <KibanaContextProvider services={services}>
-          <DiscoverMainRoute2
+          <DiscoverMainRoute
             customizationCallbacks={customizationCallbacks}
             customizationContext={customizationContext}
             stateStorageContainer={stateStorageContainer}

@@ -52,7 +52,6 @@ import type {
   DiscoverCustomizationContext,
 } from '../../../../customizations';
 import type { InternalStateStore, RuntimeStateManager } from '../../state_management/redux';
-import type { RootProfileState } from '../../../../context_awareness';
 import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
@@ -65,11 +64,10 @@ import { updateSavedSearch } from '../../state_management/utils/update_saved_sea
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './discover_main_app';
-import type { MainInitializationState, NarrowAsyncState } from '../../types';
+import type { MainRouteInitializationState, NarrowAsyncState } from '../../types';
 
 interface DiscoverSessionViewProps {
-  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>;
-  mainInitializationState: MainInitializationState;
+  mainRouteInitializationState: MainRouteInitializationState;
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks: CustomizationCallback[];
   urlStateStorage: IKbnUrlStateStorage;
@@ -92,8 +90,7 @@ type InitializeSession = (
 ) => Promise<SessionInitializationState>;
 
 export const DiscoverSessionView = ({
-  rootProfileState,
-  mainInitializationState,
+  mainRouteInitializationState,
   customizationContext,
   customizationCallbacks,
   urlStateStorage,
@@ -148,7 +145,7 @@ export const DiscoverSessionView = ({
       profileDataViewsExist ||
       locationStateHasDataViewSpec;
 
-    if (!mainInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+    if (!mainRouteInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
       return { showNoDataPage: true };
     }
 
@@ -347,7 +344,7 @@ export const DiscoverSessionView = ({
   if (initializeSessionState.value.showNoDataPage) {
     return (
       <NoDataPage
-        {...mainInitializationState}
+        {...mainRouteInitializationState}
         onDataViewCreated={async (dataViewUnknown) => {
           await dispatch(internalStateActions.loadDataViewList());
           const dataView = dataViewUnknown as DataView;
@@ -372,9 +369,7 @@ export const DiscoverSessionView = ({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={initializeSessionState.value.stateContainer}>
         <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-          <rootProfileState.AppWrapper>
-            <DiscoverMainApp stateContainer={initializeSessionState.value.stateContainer} />
-          </rootProfileState.AppWrapper>
+          <DiscoverMainApp stateContainer={initializeSessionState.value.stateContainer} />
         </RuntimeStateProvider>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>

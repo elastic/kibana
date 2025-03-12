@@ -17,7 +17,7 @@ import { DiscoverRoutes } from './discover_router';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import { DiscoverMainRoute2, type MainRoute2Props } from './main/discover_main_route_2';
+import { DiscoverMainRoute, type MainRouteProps } from './main/discover_main_route';
 
 let pathMap: Record<string, never> = {};
 
@@ -33,7 +33,7 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
   });
 };
 
-const props: MainRoute2Props = {
+const props: MainRouteProps = {
   customizationContext: mockCustomizationContext,
 };
 
@@ -45,11 +45,11 @@ describe('DiscoverRouter', () => {
   });
 
   it('should show DiscoverMainRoute component for / route', () => {
-    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute2 {...props} />);
+    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
   });
 
   it('should show DiscoverMainRoute component for /view/:id route', () => {
-    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute2 {...props} />);
+    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
   });
 
   it('should show Redirect component for /doc/:dataView/:index/:type route', () => {
