@@ -62,14 +62,14 @@ export function getColor(
 /**
  * Returns a color given a raw value
  */
-export type ColoHandlingFn = (rawValue: RawValue) => string;
+export type ColorHandlingFn = (rawValue: RawValue) => string;
 
 export function getColorFactory(
   { assignments, specialAssignments, colorMode, paletteId }: ColorMapping.Config,
   palettes: KbnPalettes,
   isDarkMode: boolean,
   data: ColorMappingInputData
-): ColoHandlingFn {
+): ColorHandlingFn {
   const lastCategorical = assignments.findLast(({ color }) => color.type === 'categorical');
   const nextCategoricalIndex =
     lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;

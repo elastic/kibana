@@ -23,7 +23,7 @@ import {
   WordCloudElementEvent,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { PaletteRegistry, PaletteOutput, getColorFactory, ColoHandlingFn } from '@kbn/coloring';
+import { PaletteRegistry, PaletteOutput, getColorFactory, ColorHandlingFn } from '@kbn/coloring';
 import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
@@ -318,7 +318,7 @@ function getColorFromMappingFactory(
   palettes: KbnPalettes,
   isDarkMode: boolean,
   colorMapping?: string
-): undefined | ColoHandlingFn {
+): undefined | ColorHandlingFn {
   if (!colorMapping) {
     // return undefined, we will use the legacy color mapping instead
     return undefined;

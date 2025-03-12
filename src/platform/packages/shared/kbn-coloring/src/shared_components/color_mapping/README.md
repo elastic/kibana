@@ -45,7 +45,7 @@ const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
 };
 ```
 
-The function `getColorFactory` is a curry function where, given the model, a palette getter, the theme mode (dark/light) and a list of categories, returns a `ColoHandlingFn` that can be used to pick the right color based on a given category.
+The function `getColorFactory` is a curry function where, given the model, a palette getter, the theme mode (dark/light) and a list of categories, returns a `ColorHandlingFn` that can be used to pick the right color based on a given category.
 
 ```ts
 function getColorFactory(
@@ -56,7 +56,7 @@ function getColorFactory(
       type: 'categories';
       categories: Array<string | string[]>;
     }
-): ColoHandlingFn
+): ColorHandlingFn
 ```
 
 A `category` can be in the shape of a plain string or an array of strings. Numbers, MultiFieldKey, IP etc needs to be stringified.
