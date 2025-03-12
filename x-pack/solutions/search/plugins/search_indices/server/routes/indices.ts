@@ -18,6 +18,12 @@ export function registerIndicesRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: POST_CREATE_INDEX_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           indexName: schema.string(),
