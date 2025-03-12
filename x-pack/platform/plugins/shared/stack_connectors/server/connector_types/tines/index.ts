@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
 import { TinesConfigSchema, TinesSecretsSchema } from '../../../common/tines/schema';
-import { TinesConfig, TinesSecrets } from '../../../common/tines/types';
+import type { TinesConfig, TinesSecrets } from '../../../common/tines/types';
 import { TinesConnector } from './tines';
 import { renderParameterTemplates } from './render';
 
