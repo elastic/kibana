@@ -33,17 +33,22 @@ const assert = require('assert');
  */
 
 /**
+ * @typedef transformOptions
+ * @property {string} chromiumVersion
+ * @property {string} chromiumRevision
+ * @property {ChromiumUpdateConfigMap} updateConfig
+ */
+
+/**
  * @param {*} file
  * @param {import('jscodeshift').API} api
- * @param {object} options
- * @param {ChromiumUpdateConfigMap} options.updateConfig
- * @param {string} options.chromiumVersion
- * @param {string} options.chromiumRevision
+ * @param {transformOptions} options
  * @returns
  */
 module.exports = function transformer(file, api, options) {
   const j = api.jscodeshift;
 
+  assert.ok(Object.values(options).length, 'Expected options to be defined');
   assert.ok(options.chromiumVersion, 'Expected version to be defined');
   assert.ok(options.chromiumRevision, 'Expected revision to be defined');
   assert.ok(options.updateConfig, 'Expected updateConfig to be defined');
