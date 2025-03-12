@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { CoreStart, Plugin } from '@kbn/core/public';
+import { NPSScoreInput } from './components';
 
 export class ProductInterceptPublicPlugin implements Plugin {
   public setup() {
@@ -19,7 +21,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
       )
       .then((response) => {
         if (typeof response.runs !== 'undefined') {
-          core.userProfile.getCurrent().then((userProfile) => {
+          return core.userProfile.getCurrent().then((userProfile) => {
             // Ideally we should check if the user feedback prompt was engaged with at the last feedback
             // the approach will be to check if on user profile the trigger run counts matches the user's profile,
             // in the eventuality that it does, we trigger a feedback session and bump the user's profile run count.
@@ -32,14 +34,31 @@ export class ProductInterceptPublicPlugin implements Plugin {
                 // ideally this will come from a predefined place, so it's configurable
                 steps: [
                   {
-                    title: `hello (${String(response.runs + runCount)})`,
-                    subtitle: 'hello',
+                    id: 'hello',
+                    title: `Hello (${String(response.runs + runCount)})`,
                     content: 'hello',
                   },
                   {
-                    title: `world (${String(response.runs + runCount)})`,
-                    subtitle: 'World',
-                    content: 'World',
+                    id: 'satisfaction',
+                    title: `Overall, how satisfied or dissatisfied are you with Kibana?`,
+                    content: React.createElement(NPSScoreInput, {
+                      onSelectionChange: () => {
+                        // do something with the selection
+                      },
+                      lowerBoundHelpText: 'Very dissatisfied',
+                      upperBoundHelpText: 'Very satisfied',
+                    }),
+                  },
+                  {
+                    id: 'ease',
+                    title: `Overall, how difficult or easy is it to use Kibana?`,
+                    content: React.createElement(NPSScoreInput, {
+                      onSelectionChange: () => {
+                        // do something with the selection
+                      },
+                      lowerBoundHelpText: 'Very difficult',
+                      upperBoundHelpText: 'Very easy',
+                    }),
                   },
                 ],
                 onFinish() {
@@ -54,6 +73,8 @@ export class ProductInterceptPublicPlugin implements Plugin {
             }, response.triggerIntervalInMs);
           });
         }
+
+        return;
       })
       .catch((error) => {
         // log error

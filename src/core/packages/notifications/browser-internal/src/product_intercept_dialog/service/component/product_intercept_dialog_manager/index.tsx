@@ -24,11 +24,10 @@ export function ProductInterceptDialogManager({
   productIntercepts$,
 }: ProductInterceptDialogManagerProps) {
   const [productIntercepts, setProductIntercepts] = useState<ProductIntercept[]>([]);
+  // we start at 1, because eui tour steps are 1-indexed
   const [currentStepIndex, setCurrentStepIndex] = useState(1);
-  // const idleTaskId = useRef<ReturnType<typeof requestIdleCallback> | null>(null);
-  const currentProductIntercept = useMemo(() => {
-    // always use the last product intercept
-    return productIntercepts[productIntercepts.length - 1];
+  const currentProductIntercept = useMemo<ProductIntercept | null>(() => {
+    return productIntercepts[productIntercepts.length - 1] || null;
   }, [productIntercepts]);
 
   useEffect(() => {
@@ -42,32 +41,42 @@ export function ProductInterceptDialogManager({
   }, [productIntercepts$]);
 
   const nextStep = useCallback(() => {
-    setCurrentStepIndex((prevStepIndex) =>
-      Math.min(prevStepIndex + 1, currentProductIntercept.steps?.length)
-    );
-  }, [currentProductIntercept]);
+    setCurrentStepIndex((prevStepIndex) => {
+      if (prevStepIndex === currentProductIntercept!.steps.length) {
+        currentProductIntercept?.onFinish?.();
+        setCurrentStepIndex(1);
+        // this will cause the component to unmount
+        ackProductIntercept(currentProductIntercept!.id, 'completed');
+      }
+
+      return Math.min(prevStepIndex + 1, currentProductIntercept!.steps.length);
+    });
+  }, [ackProductIntercept, currentProductIntercept]);
 
   const dismissProductIntercept = useCallback(() => {
     currentProductIntercept?.onDismiss?.();
-    ackProductIntercept(currentProductIntercept.id, 'dismissed');
+    setCurrentStepIndex(1);
+    ackProductIntercept(currentProductIntercept!.id, 'dismissed');
   }, [ackProductIntercept, currentProductIntercept]);
 
-  return productIntercepts.length ? (
+  const currentProductInterceptStep = useMemo(() => {
+    return currentProductIntercept?.steps?.[currentStepIndex - 1];
+  }, [currentProductIntercept, currentStepIndex]);
+
+  return currentProductIntercept && currentProductInterceptStep ? (
     <EuiTourStep
       buffer={24}
-      title={currentProductIntercept.steps?.[currentStepIndex - 1].title}
-      content={currentProductIntercept.steps?.[currentStepIndex - 1].content}
       stepsTotal={currentProductIntercept.steps.length}
+      title={currentProductInterceptStep.title}
+      content={currentProductInterceptStep.content}
       step={currentStepIndex}
       minWidth={400}
       hasArrow={false}
       attachToAnchor={false}
       anchorPosition="rightCenter"
       decoration="none"
-      onFinish={() => {
-        currentProductIntercept?.onFinish?.();
-        ackProductIntercept(currentProductIntercept.id, 'completed');
-      }}
+      panelStyle={{ left: 'unset', transform: 'translateX(98vh) translateY(-15%)' }}
+      onFinish={() => {}}
       footerAction={[
         <EuiButtonEmpty onClick={dismissProductIntercept}>
           {i18n.translate('core.notifications.productIntercept.dismiss', {

@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Subscription } from 'rxjs';
+import * as Rx from 'rxjs';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
@@ -39,12 +39,44 @@ export interface StartDeps {
 export class NotificationsService {
   private readonly toasts: ToastsService;
   private readonly productIntercepts: ProductInterceptService;
-  private uiSettingsErrorSubscription?: Subscription;
+  private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
+
+  // BehaviorSubject to control pausing and the controlling observable
+  private readonly controlSubject = new Rx.BehaviorSubject<{
+    controlled: boolean;
+    controller: string | null;
+  }>({
+    controlled: false,
+    controller: null,
+  });
 
   constructor() {
     this.toasts = new ToastsService();
     this.productIntercepts = new ProductInterceptService();
+  }
+
+  /**
+   * @description This method is used to control the flow of notifications
+   * @param $ - Observable to be controlled
+   */
+  private acceptNotificationCoordination($: Rx.Observable<unknown>) {
+    return $.pipe(
+      Rx.bufferWhen(() => this.controlSubject.pipe(Rx.filter(({ controlled }) => controlled))),
+      Rx.switchMap((bufferedData) =>
+        this.controlSubject.pipe(
+          Rx.filter(({ controlled }) => !controlled),
+          Rx.map(() => bufferedData)
+        )
+      ),
+      Rx.switchMap((bufferedData) => {
+        // setControl('observable1', true);
+        return new Rx.Observable((subscriber) => {
+          bufferedData.forEach((data) => subscriber.next(data));
+          subscriber.complete();
+        });
+      })
+    );
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
@@ -76,6 +108,19 @@ export class NotificationsService {
         targetDomElement: toastsContainer,
         ...startDeps,
       }),
+      productIntercepts: this.productIntercepts.start({
+        overlays,
+        targetDomElement: (() => {
+          // create container to mount product intercept dialog into
+          const productInterceptContainer = Object.assign(document.createElement('div'), {
+            id: 'productInterceptMountPoint',
+            style: { height: 0 },
+          });
+          targetDomElement.appendChild(productInterceptContainer);
+          return productInterceptContainer;
+        })(),
+        ...startDeps,
+      }),
       showErrorDialog: ({ title, error }) =>
         showErrorDialog({
           title,
@@ -83,18 +128,6 @@ export class NotificationsService {
           openModal: overlays.openModal,
           ...startDeps,
         }),
-      productIntercepts: this.productIntercepts.start({
-        overlays,
-        targetDomElement: (() => {
-          // create container to mount product intercept dialog into
-          const productInterceptContainer = Object.assign(document.createElement('div'), {
-            id: 'productInterceptMountPoint',
-          });
-          targetDomElement.appendChild(productInterceptContainer);
-          return productInterceptContainer;
-        })(),
-        ...startDeps,
-      }),
     };
   }
 

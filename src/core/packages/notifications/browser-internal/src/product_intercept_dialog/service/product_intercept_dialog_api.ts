@@ -50,8 +50,8 @@ export class ProductInterceptDialogApi {
     productIntercept: Omit<ProductIntercept, 'id'> & Partial<Pick<ProductIntercept, 'id'>>
   ): string {
     const intercept = {
-      id: productIntercept?.id ?? crypto.randomUUID(),
       ...productIntercept,
+      id: productIntercept?.id ?? crypto.randomUUID(),
     };
 
     // order is important so we can operate on a FIFO basis
