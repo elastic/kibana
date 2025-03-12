@@ -16,7 +16,7 @@ import type { CreateRuleOptions, SecurityAlertType } from '../types';
 export const createEsqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EsqlRuleParams, {}, {}, 'default'> => {
-  const { version, experimentalFeatures, licensing, scheduleNotificationResponseActionsService } =
+  const { experimentalFeatures, licensing, scheduleNotificationResponseActionsService } =
     createOptions;
   return {
     id: ESQL_RULE_TYPE_ID,
@@ -45,11 +45,11 @@ export const createEsqlAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     executor: (params) =>
       esqlExecutor({
         ...params,
         experimentalFeatures,
-        version,
         licensing,
         scheduleNotificationResponseActionsService,
       }),

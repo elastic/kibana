@@ -24,10 +24,18 @@ import { appContextService } from './app_context';
 import {
   getPolicySecretPaths,
   diffSecretPaths,
-  diffOutputSecretPaths,
+  diffSOSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
   extractAndUpdateOutputSecrets,
+  extractAndWriteFleetServerHostsSecrets,
+  extractAndUpdateFleetServerHostsSecrets,
+  extractAndWriteDownloadSourcesSecrets,
+  extractAndUpdateDownloadSourceSecrets,
+  deleteDownloadSourceSecrets,
+  deleteFleetServerHostsSecrets,
+  extractAndWriteOutputSecrets,
+  deleteOutputSecrets,
 } from './secrets';
 
 describe('secrets', () => {
@@ -1362,138 +1370,7 @@ describe('secrets', () => {
     });
   });
 
-  describe('extractAndUpdateOutputSecrets', () => {
-    const esClientMock = elasticsearchServiceMock.createInternalClient();
-
-    esClientMock.transport.request.mockImplementation(async (req) => {
-      return {
-        id: uuidv4(),
-      };
-    });
-
-    beforeEach(() => {
-      esClientMock.transport.request.mockClear();
-    });
-
-    it('should delete secret if type changed from kafka to remote es', async () => {
-      const result = await extractAndUpdateOutputSecrets({
-        oldOutput: {
-          id: 'id1',
-          name: 'kafka to remote es',
-          is_default: false,
-          is_default_monitoring: false,
-          type: 'kafka',
-          secrets: {
-            password: {
-              id: 'pass',
-            },
-          },
-        },
-        outputUpdate: {
-          name: 'kafka to remote es',
-          type: 'remote_elasticsearch',
-          hosts: ['http://192.168.178.216:9200'],
-          is_default: false,
-          is_default_monitoring: false,
-          preset: 'balanced',
-          config_yaml: '',
-          secrets: {
-            service_token: 'token1',
-          },
-          proxy_id: null,
-        },
-        esClient: esClientMock,
-      });
-
-      expect(result.secretsToDelete).toEqual([{ id: 'pass' }]);
-    });
-
-    it('should delete secret if type changed from remote es to kafka', async () => {
-      const result = await extractAndUpdateOutputSecrets({
-        oldOutput: {
-          id: 'id2',
-          name: 'remote es to kafka',
-          is_default: false,
-          is_default_monitoring: false,
-          type: 'remote_elasticsearch',
-          secrets: {
-            service_token: {
-              id: 'token',
-            },
-          },
-        },
-        outputUpdate: {
-          name: 'remote es to kafka',
-          type: 'kafka',
-          is_default: false,
-          is_default_monitoring: false,
-          preset: 'balanced',
-          config_yaml: '',
-          secrets: {
-            password: 'pass',
-          },
-          proxy_id: null,
-        },
-        esClient: esClientMock,
-      });
-
-      expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
-    });
-  });
-});
-
-describe('diffOutputSecretPaths', () => {
-  it('should return empty array if no secrets', () => {
-    expect(diffOutputSecretPaths([], [])).toEqual({
-      toCreate: [],
-      toDelete: [],
-      noChange: [],
-    });
-  });
-  it('should return empty array if single secret not changed', () => {
-    const paths = [
-      {
-        path: 'somepath',
-        value: {
-          id: 'secret-1',
-        },
-      },
-    ];
-    expect(diffOutputSecretPaths(paths, paths)).toEqual({
-      toCreate: [],
-      toDelete: [],
-      noChange: paths,
-    });
-  });
-  it('should return empty array if multiple secrets not changed', () => {
-    const paths = [
-      {
-        path: 'somepath',
-        value: {
-          id: 'secret-1',
-        },
-      },
-      {
-        path: 'somepath2',
-        value: {
-          id: 'secret-2',
-        },
-      },
-      {
-        path: 'somepath3',
-        value: {
-          id: 'secret-3',
-        },
-      },
-    ];
-
-    expect(diffOutputSecretPaths(paths, paths.slice().reverse())).toEqual({
-      toCreate: [],
-      toDelete: [],
-      noChange: paths,
-    });
-  });
-  it('single secret modified', () => {
+  describe('diffSOSecretPaths', () => {
     const paths1 = [
       {
         path: 'somepath1',
@@ -1517,63 +1394,77 @@ describe('diffOutputSecretPaths', () => {
       },
     ];
 
-    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
-      toCreate: [
+    it('should return empty array if no secrets', () => {
+      expect(diffSOSecretPaths([], [])).toEqual({
+        toCreate: [],
+        toDelete: [],
+        noChange: [],
+      });
+    });
+    it('should return empty array if single secret not changed', () => {
+      const paths = [
         {
-          path: 'somepath2',
-          value: 'newvalue',
+          path: 'somepath',
+          value: {
+            id: 'secret-1',
+          },
         },
-      ],
-      toDelete: [
+      ];
+      expect(diffSOSecretPaths(paths, paths)).toEqual({
+        toCreate: [],
+        toDelete: [],
+        noChange: paths,
+      });
+    });
+    it('should return empty array if multiple secrets not changed', () => {
+      const paths = [
+        {
+          path: 'somepath',
+          value: {
+            id: 'secret-1',
+          },
+        },
         {
           path: 'somepath2',
           value: {
             id: 'secret-2',
           },
         },
-      ],
-      noChange: [paths1[0]],
+        {
+          path: 'somepath3',
+          value: {
+            id: 'secret-3',
+          },
+        },
+      ];
+
+      expect(diffSOSecretPaths(paths, paths.slice().reverse())).toEqual({
+        toCreate: [],
+        toDelete: [],
+        noChange: paths,
+      });
     });
-  });
-  it('double secret modified', () => {
-    const paths1 = [
-      {
-        path: 'somepath1',
-        value: {
-          id: 'secret-1',
-        },
-      },
-      {
-        path: 'somepath2',
-        value: {
-          id: 'secret-2',
-        },
-      },
-    ];
-
-    const paths2 = [
-      {
-        path: 'somepath1',
-        value: 'newvalue1',
-      },
-      {
-        path: 'somepath2',
-        value: 'newvalue2',
-      },
-    ];
-
-    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
-      toCreate: [
-        {
-          path: 'somepath1',
-          value: 'newvalue1',
-        },
-        {
-          path: 'somepath2',
-          value: 'newvalue2',
-        },
-      ],
-      toDelete: [
+    it('single secret modified', () => {
+      expect(diffSOSecretPaths(paths1, paths2)).toEqual({
+        toCreate: [
+          {
+            path: 'somepath2',
+            value: 'newvalue',
+          },
+        ],
+        toDelete: [
+          {
+            path: 'somepath2',
+            value: {
+              id: 'secret-2',
+            },
+          },
+        ],
+        noChange: [paths1[0]],
+      });
+    });
+    it('double secret modified', () => {
+      const pathsDouble1 = [
         {
           path: 'somepath1',
           value: {
@@ -1586,38 +1477,613 @@ describe('diffOutputSecretPaths', () => {
             id: 'secret-2',
           },
         },
-      ],
-      noChange: [],
-    });
-  });
+      ];
 
-  it('single secret added', () => {
-    const paths1 = [
-      {
-        path: 'somepath1',
-        value: {
-          id: 'secret-1',
+      const pathsDouble2 = [
+        {
+          path: 'somepath1',
+          value: 'newvalue1',
         },
-      },
-    ];
+        {
+          path: 'somepath2',
+          value: 'newvalue2',
+        },
+      ];
 
-    const paths2 = [
-      paths1[0],
-      {
-        path: 'somepath2',
-        value: 'newvalue',
-      },
-    ];
+      expect(diffSOSecretPaths(pathsDouble1, pathsDouble2)).toEqual({
+        toCreate: [
+          {
+            path: 'somepath1',
+            value: 'newvalue1',
+          },
+          {
+            path: 'somepath2',
+            value: 'newvalue2',
+          },
+        ],
+        toDelete: [
+          {
+            path: 'somepath1',
+            value: {
+              id: 'secret-1',
+            },
+          },
+          {
+            path: 'somepath2',
+            value: {
+              id: 'secret-2',
+            },
+          },
+        ],
+        noChange: [],
+      });
+    });
+    it('single secret added', () => {
+      const pathsSingle1 = [
+        {
+          path: 'somepath1',
+          value: {
+            id: 'secret-1',
+          },
+        },
+      ];
 
-    expect(diffOutputSecretPaths(paths1, paths2)).toEqual({
-      toCreate: [
+      const pathsSingle2 = [
+        paths1[0],
         {
           path: 'somepath2',
           value: 'newvalue',
         },
-      ],
-      toDelete: [],
-      noChange: [paths1[0]],
+      ];
+
+      expect(diffSOSecretPaths(pathsSingle1, pathsSingle2)).toEqual({
+        toCreate: [
+          {
+            path: 'somepath2',
+            value: 'newvalue',
+          },
+        ],
+        toDelete: [],
+        noChange: [paths1[0]],
+      });
+    });
+  });
+
+  describe('Outputs functions', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+    const remoteEsOutput = {
+      name: 'Remote es output',
+      type: 'remote_elasticsearch',
+      hosts: ['http://192.168.178.216:9200'],
+      is_default: false,
+      is_default_monitoring: false,
+      preset: 'balanced',
+      config_yaml: '',
+      secrets: {
+        service_token: 'token1',
+        ssl: {
+          key: 'key1',
+        },
+      },
+      proxy_id: null,
+    } as any;
+
+    describe('extractAndWriteOutputSecrets', () => {
+      it('should create secrets', async () => {
+        const result = await extractAndWriteOutputSecrets({
+          output: remoteEsOutput,
+          esClient: esClientMock,
+        });
+
+        expect(result.output).toEqual({
+          ...remoteEsOutput,
+          secrets: {
+            service_token: {
+              id: expect.any(String),
+            },
+            ssl: {
+              key: {
+                id: expect.any(String),
+              },
+            },
+          },
+        });
+        expect(result.secretReferences).toEqual([
+          { id: expect.anything() },
+          { id: expect.anything() },
+        ]);
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              body: {
+                value: 'token1',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+          [
+            {
+              body: {
+                value: 'key1',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+        ]);
+      });
+    });
+    describe('extractAndUpdateOutputSecrets', () => {
+      it('should delete secret if type changed from kafka to remote es', async () => {
+        const result = await extractAndUpdateOutputSecrets({
+          oldOutput: {
+            id: 'id1',
+            name: 'kafka to remote es',
+            is_default: false,
+            is_default_monitoring: false,
+            type: 'kafka',
+            secrets: {
+              password: {
+                id: 'pass',
+              },
+            },
+          },
+          outputUpdate: {
+            name: 'kafka to remote es',
+            type: 'remote_elasticsearch',
+            hosts: ['http://192.168.178.216:9200'],
+            is_default: false,
+            is_default_monitoring: false,
+            preset: 'balanced',
+            config_yaml: '',
+            secrets: {
+              service_token: 'token1',
+            },
+            proxy_id: null,
+          },
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'pass' }]);
+      });
+
+      it('should delete secret if type changed from remote es to kafka', async () => {
+        const result = await extractAndUpdateOutputSecrets({
+          oldOutput: {
+            id: 'id2',
+            name: 'remote es to kafka',
+            is_default: false,
+            is_default_monitoring: false,
+            type: 'remote_elasticsearch',
+            secrets: {
+              service_token: {
+                id: 'token',
+              },
+            },
+          },
+          outputUpdate: {
+            name: 'remote es to kafka',
+            type: 'kafka',
+            is_default: false,
+            is_default_monitoring: false,
+            preset: 'balanced',
+            config_yaml: '',
+            secrets: {
+              password: 'pass',
+            },
+            proxy_id: null,
+          },
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
+      });
+    });
+    describe('deleteOutputSecrets', () => {
+      it('should delete existing secrets', async () => {
+        const outputWithSecrets = {
+          ...remoteEsOutput,
+          secrets: {
+            ssl: {
+              key: {
+                id: '7jCKYZUBBY96FE7DX6L1',
+              },
+            },
+            service_token: {
+              id: 'WjCKYZ9BBY96FE7DH6P3',
+            },
+          },
+        } as any;
+
+        await deleteOutputSecrets({
+          output: outputWithSecrets,
+          esClient: esClientMock,
+        });
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              method: 'DELETE',
+              path: '/_fleet/secret/WjCKYZ9BBY96FE7DH6P3',
+            },
+          ],
+          [
+            {
+              method: 'DELETE',
+              path: '/_fleet/secret/7jCKYZUBBY96FE7DX6L1',
+            },
+          ],
+        ]);
+      });
+
+      it('should do nothing if there are no existing secrets', async () => {
+        const outputWithoutSecrets = {
+          id: 'id2',
+          name: 'ES',
+          is_default: false,
+          is_default_monitoring: false,
+          type: 'elasticsearch',
+        } as any;
+
+        await deleteOutputSecrets({
+          output: outputWithoutSecrets,
+          esClient: esClientMock,
+        });
+        expect(esClientMock.transport.request.mock.calls).toEqual([]);
+      });
+    });
+  });
+
+  describe('Fleet server hosts functions', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+    const fleetServerHost = {
+      id: 'id1',
+      name: 'fleet server 1',
+      host_urls: [],
+      is_default: false,
+      is_preconfigured: false,
+      ssl: {
+        certificate_authorities: ['cert authorities'],
+        es_certificate_authorities: ['es cert authorities'],
+        certificate: 'path/to/cert',
+        es_certificate: 'path/to/EScert',
+      },
+      secrets: {
+        ssl: {
+          key: 'key1',
+          es_key: 'key2',
+        },
+      },
+    };
+
+    describe('extractAndWriteFleetServerHostsSecrets', () => {
+      it('should create new secrets', async () => {
+        const res = await extractAndWriteFleetServerHostsSecrets({
+          fleetServerHost,
+          esClient: esClientMock,
+        });
+        expect(res.fleetServerHost).toEqual({
+          ...fleetServerHost,
+          secrets: {
+            ssl: {
+              es_key: {
+                id: expect.any(String),
+              },
+              key: {
+                id: expect.any(String),
+              },
+            },
+          },
+        });
+        expect(res.secretReferences).toEqual([
+          { id: expect.anything() },
+          { id: expect.anything() },
+        ]);
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              body: {
+                value: 'key1',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+          [
+            {
+              body: {
+                value: 'key2',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+        ]);
+      });
+    });
+
+    describe('extractAndUpdateFleetServerHostsSecrets', () => {
+      it('should update existing secrets', async () => {
+        const updatedFleetServerHost = {
+          ...fleetServerHost,
+          secrets: {
+            ssl: {
+              key: 'newkey1',
+              es_key: 'newkey2',
+            },
+          },
+        };
+        const res = await extractAndUpdateFleetServerHostsSecrets({
+          oldFleetServerHost: fleetServerHost,
+          fleetServerHostUpdate: updatedFleetServerHost,
+          esClient: esClientMock,
+        });
+        expect(res.fleetServerHostUpdate).toEqual({
+          ...fleetServerHost,
+          secrets: {
+            ssl: {
+              es_key: {
+                id: expect.any(String),
+              },
+              key: {
+                id: expect.any(String),
+              },
+            },
+          },
+        });
+        expect(res.secretReferences).toEqual([
+          { id: expect.anything() },
+          { id: expect.anything() },
+        ]);
+        expect(res.secretsToDelete).toEqual([{ id: undefined }, { id: undefined }]);
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              body: {
+                value: 'newkey1',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+          [
+            {
+              body: {
+                value: 'newkey2',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+        ]);
+      });
+    });
+    describe('deleteFleetServerHostsSecrets', () => {
+      it('should delete existing secrets', async () => {
+        const fleetServerHostWithSecrets = {
+          ...fleetServerHost,
+          secrets: {
+            ssl: {
+              key: {
+                id: '7jCKYZUBBY96FE7DX6L1',
+              },
+              es_key: {
+                id: 'WjCKYZ9BBY96FE7DH6P3',
+              },
+            },
+          },
+        } as any;
+
+        await deleteFleetServerHostsSecrets({
+          fleetServerHost: fleetServerHostWithSecrets,
+          esClient: esClientMock,
+        });
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              method: 'DELETE',
+              path: '/_fleet/secret/7jCKYZUBBY96FE7DX6L1',
+            },
+          ],
+          [
+            {
+              method: 'DELETE',
+              path: '/_fleet/secret/WjCKYZ9BBY96FE7DH6P3',
+            },
+          ],
+        ]);
+      });
+
+      it('should do nothing if there are no existing secrets', async () => {
+        const fleetServerHostWithoutSecrets = {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: [],
+          is_default: false,
+          is_preconfigured: false,
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            es_certificate_authorities: ['es cert authorities'],
+            certificate: 'path/to/cert',
+            es_certificate: 'path/to/EScert',
+            key: 'key1',
+          },
+        } as any;
+
+        await deleteFleetServerHostsSecrets({
+          fleetServerHost: fleetServerHostWithoutSecrets,
+          esClient: esClientMock,
+        });
+        expect(esClientMock.transport.request.mock.calls).toEqual([]);
+      });
+    });
+  });
+
+  describe('Download source functions', () => {
+    const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    esClientMock.transport.request.mockImplementation(async (req) => {
+      return {
+        id: uuidv4(),
+      };
+    });
+
+    beforeEach(() => {
+      esClientMock.transport.request.mockClear();
+    });
+
+    const downloadSource = {
+      id: 'id1',
+      name: 'Agent binary',
+      host: 'https://binary-source-test',
+      is_default: false,
+      ssl: {
+        certificate_authorities: ['cert authorities'],
+        certificate: 'path/to/cert',
+      },
+      secrets: {
+        ssl: {
+          key: 'key1',
+        },
+      },
+    };
+    describe('extractAndWriteDownloadSourcesSecrets', () => {
+      it('should create new secrets', async () => {
+        const res = await extractAndWriteDownloadSourcesSecrets({
+          downloadSource,
+          esClient: esClientMock,
+        });
+        expect(res.downloadSource).toEqual({
+          ...downloadSource,
+          secrets: {
+            ssl: {
+              key: {
+                id: expect.any(String),
+              },
+            },
+          },
+        });
+        expect(res.secretReferences).toEqual([{ id: expect.anything() }]);
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              body: {
+                value: 'key1',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+        ]);
+      });
+    });
+
+    describe('extractAndUpdateDownloadSourceSecrets', () => {
+      it('should update existing secrets', async () => {
+        const updatedDownloadSource = {
+          ...downloadSource,
+          secrets: {
+            ssl: {
+              key: 'newkey1',
+            },
+          },
+        };
+        const res = await extractAndUpdateDownloadSourceSecrets({
+          oldDownloadSource: downloadSource,
+          downloadSourceUpdate: updatedDownloadSource,
+          esClient: esClientMock,
+        });
+        expect(res.downloadSourceUpdate).toEqual({
+          ...downloadSource,
+          secrets: {
+            ssl: {
+              key: {
+                id: expect.any(String),
+              },
+            },
+          },
+        });
+        expect(res.secretReferences).toEqual([{ id: expect.anything() }]);
+        expect(res.secretsToDelete).toEqual([{ id: undefined }]);
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              body: {
+                value: 'newkey1',
+              },
+              method: 'POST',
+              path: '/_fleet/secret',
+            },
+          ],
+        ]);
+      });
+    });
+
+    describe('deleteDownloadSourceSecrets', () => {
+      it('should delete existing secrets', async () => {
+        const downloadSourceWithSecrets = {
+          ...downloadSource,
+          secrets: {
+            ssl: {
+              key: {
+                id: '7jCKYZUBBY96FE7DX6L1',
+              },
+            },
+          },
+        } as any;
+
+        await deleteDownloadSourceSecrets({
+          downloadSource: downloadSourceWithSecrets,
+          esClient: esClientMock,
+        });
+        expect(esClientMock.transport.request.mock.calls).toEqual([
+          [
+            {
+              method: 'DELETE',
+              path: '/_fleet/secret/7jCKYZUBBY96FE7DX6L1',
+            },
+          ],
+        ]);
+      });
+      it('should do nothing if there are no existing secrets', async () => {
+        const downloadSourceWithoutSecrets = {
+          id: 'id1',
+          name: 'Agent binary',
+          host: 'https://binary-source-test',
+          is_default: false,
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            certificate: 'path/to/cert',
+            key: 'key1',
+          },
+        } as any;
+
+        await deleteDownloadSourceSecrets({
+          downloadSource: downloadSourceWithoutSecrets,
+          esClient: esClientMock,
+        });
+        expect(esClientMock.transport.request.mock.calls).toEqual([]);
+      });
     });
   });
 });

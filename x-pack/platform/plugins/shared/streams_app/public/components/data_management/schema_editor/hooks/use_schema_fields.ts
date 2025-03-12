@@ -63,7 +63,7 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
+        format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
         status: 'inherited',
@@ -74,7 +74,7 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
+        format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: definition.stream.name,
         status: 'mapped',
@@ -120,6 +120,7 @@ export const useSchemaFields = ({
               ingest: {
                 ...definition.stream.ingest,
                 wired: {
+                  ...definition.stream.ingest.wired,
                   fields: {
                     ...definition.stream.ingest.wired.fields,
                     [field.name]: nextFieldDefinitionConfig,
@@ -171,6 +172,7 @@ export const useSchemaFields = ({
               ingest: {
                 ...definition.stream.ingest,
                 wired: {
+                  ...definition.stream.ingest.wired,
                   fields: omit(definition.stream.ingest.wired.fields, fieldName),
                 },
               },

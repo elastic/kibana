@@ -8,29 +8,29 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-import { COMPARE_ALL_OPTIONS, FilterCompareOptions, updateFilterReferences } from '@kbn/es-query';
+import type { FilterCompareOptions } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, updateFilterReferences } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import {
-  canImportVisContext,
-  UnifiedHistogramVisContext,
-} from '@kbn/unified-histogram-plugin/public';
-import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import { canImportVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '../../../../common/constants';
-import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
+import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { DiscoverAppState, isEqualFilters } from './discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverAppState } from './discover_app_state_container';
+import { isEqualFilters } from './discover_app_state_container';
+import type { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from './utils/get_state_defaults';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
-import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import type { InternalStateStore } from './redux';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -139,11 +139,11 @@ export interface DiscoverSavedSearchContainer {
 export function getSavedSearchContainer({
   services,
   globalStateContainer,
-  internalStateContainer,
+  internalState,
 }: {
   services: DiscoverServices;
   globalStateContainer: DiscoverGlobalStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -183,7 +183,7 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
 
     const dataView = nextSavedSearch.searchSource.getField('index');
-    const profileDataViewIds = internalStateContainer.getState().defaultProfileAdHocDataViewIds;
+    const profileDataViewIds = internalState.getState().defaultProfileAdHocDataViewIds;
     let replacementDataView: DataView | undefined;
 
     // If the Discover session is using a default profile ad hoc data view,
