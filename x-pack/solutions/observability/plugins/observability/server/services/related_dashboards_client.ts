@@ -14,14 +14,16 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { Logger } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { RelevantPanel, RecommendedDashboard } from '@kbn/observability-schema';
+import type { RelevantPanel, RelatedDashboard } from '@kbn/observability-schema';
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server/content_management/v3';
-import type { InvestigateAlertsClient, AlertData } from './investigate_alerts_client';
+import type { InvestigateAlertsClient } from './investigate_alerts_client';
+import type { AlertData } from './alert_data';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
-export class SuggestedDashboardsClient {
+export class RelatedDashboardsClient {
   private dashboardsById = new Map<string, Dashboard>();
+  private alert: AlertData | null = null;
 
   constructor(
     private logger: Logger,
@@ -30,19 +32,20 @@ export class SuggestedDashboardsClient {
     private alertId: string
   ) {}
 
-  async fetchSuggestedDashboards(): Promise<{ suggestedDashboards: RecommendedDashboard[] }> {
-    const allRelatedDashboards = new Set<RecommendedDashboard>();
-    const relevantDashboardsById = new Map<string, RecommendedDashboard>();
+  async fetchSuggestedDashboards(): Promise<{ suggestedDashboards: RelatedDashboard[] }> {
+    const allRelatedDashboards = new Set<RelatedDashboard>();
+    const relevantDashboardsById = new Map<string, RelatedDashboard>();
     const [alert] = await Promise.all([
       this.alertsClient.getAlertById(this.alertId),
       this.fetchDashboards(),
     ]);
-    if (!alert) {
+    this.alert = alert;
+    if (!this.alert) {
       return { suggestedDashboards: [] };
     }
-    const index = await this.getRuleQueryIndex(alert);
-    const relevantRuleFields = this.alertsClient.getRelevantRuleFields(alert);
-    const relevantAlertFields = this.alertsClient.getRelevantAADFields(alert);
+    const index = await this.getRuleQueryIndex();
+    const relevantRuleFields = this.alert.getRelevantRuleFields();
+    const relevantAlertFields = this.alert.getRelevantAADFields();
     const allRelevantFields = new Set([...relevantRuleFields, ...relevantAlertFields]);
 
     if (index) {
@@ -83,9 +86,9 @@ export class SuggestedDashboardsClient {
   }
 
   getDashboardsByIndex(index: string): {
-    dashboards: RecommendedDashboard[];
+    dashboards: RelatedDashboard[];
   } {
-    const relevantDashboards: RecommendedDashboard[] = [];
+    const relevantDashboards: RelatedDashboard[] = [];
     this.dashboardsById.forEach((d) => {
       const panels = d.attributes.panels;
       const matchingPanels = this.getPanelsByIndex(index, panels);
@@ -125,9 +128,9 @@ export class SuggestedDashboardsClient {
   }
 
   getDashboardsByField(fields: string[]): {
-    dashboards: RecommendedDashboard[];
+    dashboards: RelatedDashboard[];
   } {
-    const relevantDashboards: RecommendedDashboard[] = [];
+    const relevantDashboards: RelatedDashboard[] = [];
     this.dashboardsById.forEach((d) => {
       const panels = d.attributes.panels;
       const matchingPanels = this.getPanelsByField(fields, panels);
@@ -211,8 +214,11 @@ export class SuggestedDashboardsClient {
     }
   }
 
-  async getRuleQueryIndex(alert: AlertData): Promise<string> {
-    const index = this.alertsClient.getRuleQueryIndex(alert);
+  async getRuleQueryIndex(): Promise<string> {
+    if (!this.alert) {
+      throw new Error('Alert not found. Could not get the rule query index.');
+    }
+    const index = this.alert.getRuleQueryIndex();
     return typeof index === 'string' ? index : index.id || '';
   }
 

@@ -13,7 +13,7 @@ import { IKibanaResponse } from '@kbn/core-http-server';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server/content_management/v3';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
-import { SuggestedDashboardsClient } from '../../services/suggested_dashboards_client';
+import { RelatedDashboardsClient } from '../../services/related_dashboards_client';
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';
 import { AlertNotFoundError } from '../../common/errors/alert_not_found_error';
 
@@ -44,7 +44,7 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
     const investigateAlertsClient = new InvestigateAlertsClient(alertsClient);
 
-    const dashboardParser = new SuggestedDashboardsClient(
+    const dashboardParser = new RelatedDashboardsClient(
       logger,
       dashboardClient,
       investigateAlertsClient,

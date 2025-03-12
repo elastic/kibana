@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { relatedDashboardSchema } from '../../schema/recommended_dashboard/v1';
+import { relatedDashboardSchema } from '../../schema/related_dashboard/v1';
 
 export const getRelatedDashboardsParamsSchema = z.object({
   query: z.object({

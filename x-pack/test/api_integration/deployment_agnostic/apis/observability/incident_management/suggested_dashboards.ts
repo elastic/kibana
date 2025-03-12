@@ -86,7 +86,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           })),
           spacesToAdd: [SPACE_ID],
           spacesToRemove: [],
-        });
+        })
+        .expect(200);
+
+      const indexPatternsResponse = await supertestWithAuth
+        .post('/api/content_management/rpc/search')
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          contentTypeId: 'index-pattern',
+          query: {
+            limit: 10000,
+          },
+          options: {
+            fields: ['title', 'type', 'typeMeta', 'name'],
+          },
+          version: 1,
+        })
+        .expect(200);
+
+      indexPatternsResponse.body.result.result.hits.forEach((hit: any) => {
+        expect(hit.namespaces).to.eql(['default', SPACE_ID]);
+      });
 
       await supertestWithAuth
         .post(`/s/${SPACE_ID}/api/saved_objects/_import`)

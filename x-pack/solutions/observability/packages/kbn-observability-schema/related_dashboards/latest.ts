@@ -6,10 +6,7 @@
  */
 
 export { type RelevantPanel, relevantPanelSchema } from './schema/relevant_panel/v1';
-export {
-  type RecommendedDashboard,
-  relatedDashboardSchema,
-} from './schema/recommended_dashboard/v1';
+export { type RelatedDashboard, relatedDashboardSchema } from './schema/related_dashboard/v1';
 export {
   type GetRelatedDashboardsResponse,
   getRelatedDashboardsResponseSchema,

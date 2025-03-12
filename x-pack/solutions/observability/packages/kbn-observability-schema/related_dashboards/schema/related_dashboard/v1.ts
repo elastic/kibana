@@ -19,4 +19,4 @@ export const relatedDashboardSchema = z.object({
   relevantPanels: z.array(relevantPanelSchema),
 });
 
-export type RecommendedDashboard = z.output<typeof relatedDashboardSchema>;
+export type RelatedDashboard = z.output<typeof relatedDashboardSchema>;

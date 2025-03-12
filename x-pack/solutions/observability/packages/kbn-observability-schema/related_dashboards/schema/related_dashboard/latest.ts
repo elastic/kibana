@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { type RecommendedDashboard, relatedDashboardSchema } from './v1';
+export { type RelatedDashboard, relatedDashboardSchema } from './v1';
