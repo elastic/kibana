@@ -26,7 +26,7 @@ export function createIngestStatsTaskConfig() {
     type: taskType,
     title: 'Security Solution Telemetry Ingest Pipelines Stats task',
     interval: '24h',
-    timeout: '1m',
+    timeout: '5m',
     version: '1.0.0',
     getLastExecutionTime: getPreviousDailyTaskTimestamp,
     runTask: async (
