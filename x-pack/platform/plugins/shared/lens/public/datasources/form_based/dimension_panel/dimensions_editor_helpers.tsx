@@ -14,7 +14,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiButtonGroup, EuiFormRow, UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiButtonGroup,
+  EuiFormRow,
+  type UseEuiTheme,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { nonNullable } from '../../../utils';
 import {

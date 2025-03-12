@@ -16,7 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
-  UseEuiTheme,
+  type UseEuiTheme,
   euiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';

@@ -20,7 +20,7 @@ import {
   EuiAccordion,
   EuiText,
   EuiNotificationBadge,
-  UseEuiTheme,
+  type UseEuiTheme,
   useEuiTheme,
   euiFocusRing,
   useEuiFontSize,

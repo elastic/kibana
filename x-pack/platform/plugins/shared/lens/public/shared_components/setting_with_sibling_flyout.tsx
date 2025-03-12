@@ -18,7 +18,7 @@ import {
   EuiFocusTrap,
   EuiOutsideClickDetector,
   EuiPortal,
-  UseEuiTheme,
+  type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';

@@ -20,7 +20,7 @@ import {
   transparentize,
   useEuiTheme,
   EuiSpacer,
-  UseEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  UseEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, SerializedStyles } from '@emotion/react';

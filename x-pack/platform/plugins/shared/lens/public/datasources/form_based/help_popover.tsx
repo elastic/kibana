@@ -16,7 +16,7 @@ import {
   EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
-  UseEuiTheme,
+  type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

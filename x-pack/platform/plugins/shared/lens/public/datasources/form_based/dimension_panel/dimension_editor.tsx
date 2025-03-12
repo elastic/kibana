@@ -24,7 +24,7 @@ import {
   EuiPanel,
   EuiBasicTable,
   EuiButtonIcon,
-  UseEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';

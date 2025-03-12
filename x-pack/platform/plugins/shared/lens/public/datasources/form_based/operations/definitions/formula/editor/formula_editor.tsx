@@ -25,7 +25,7 @@ import {
   EuiToolTip,
   EuiSpacer,
   useEuiTheme,
-  UseEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';

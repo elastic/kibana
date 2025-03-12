@@ -11,7 +11,7 @@ import {
   EuiButton,
   PropsOf,
   EuiButtonProps,
-  UseEuiTheme,
+  type UseEuiTheme,
   euiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
