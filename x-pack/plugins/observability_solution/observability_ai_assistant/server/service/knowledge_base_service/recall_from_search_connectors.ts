@@ -92,7 +92,7 @@ async function recallFromSemanticTextConnectors({
       bool: {
         should: semanticTextFields.flatMap((field) => {
           return queries.map(({ text, boost = 1 }) => ({
-            bool: { filter: [{ semantic: { field, query: text, boost } }] },
+            semantic: { field, query: text, boost },
           }));
         }),
         minimum_should_match: 1,
