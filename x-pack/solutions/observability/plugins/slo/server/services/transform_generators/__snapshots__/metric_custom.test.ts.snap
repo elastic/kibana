@@ -97,14 +97,23 @@ Object {
       },
       Object {
         "bool": Object {
-          "minimum_should_match": 1,
-          "should": Array [
+          "filter": Array [
             Object {
-              "match": Object {
-                "labels.groupId": "group-4",
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match": Object {
+                      "labels.groupId": "group-4",
+                    },
+                  },
+                ],
               },
             },
           ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
     ],
@@ -227,14 +236,23 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
-                  "match": Object {
-                    "labels.groupId": "group-3",
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "labels.groupId": "group-3",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
             },
           },
         ],
@@ -358,14 +376,23 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
-                  "match": Object {
-                    "labels.groupId": "group-3",
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match": Object {
+                          "labels.groupId": "group-3",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
             },
           },
         ],
