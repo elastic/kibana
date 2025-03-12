@@ -8,7 +8,7 @@
  */
 
 import { JoinCommandContext, JoinTargetContext } from '../../antlr/esql_parser';
-import { ESQLAstItem, ESQLCommand, ESQLIdentifier, ESQLSource } from '../../types';
+import { ESQLAstItem, ESQLAstJoinCommand, ESQLIdentifier, ESQLSource } from '../../types';
 import { createCommand, createOption, createSource } from '../factories';
 import { visitValueExpression } from '../walkers';
 
@@ -16,11 +16,13 @@ const createNodeFromJoinTarget = (ctx: JoinTargetContext): ESQLSource | ESQLIden
   return createSource(ctx._index);
 };
 
-export const createJoinCommand = (ctx: JoinCommandContext): ESQLCommand => {
-  const command = createCommand('join', ctx);
+export const createJoinCommand = (ctx: JoinCommandContext): ESQLAstJoinCommand => {
+  const command = createCommand<'join', ESQLAstJoinCommand>('join', ctx);
 
   // Pick-up the <TYPE> of the command.
-  command.commandType = (ctx._type_?.text ?? 'lookup').toLocaleLowerCase();
+  command.commandType = (
+    ctx._type_?.text ?? 'lookup'
+  ).toLocaleLowerCase() as ESQLAstJoinCommand['commandType'];
 
   const joinTarget = createNodeFromJoinTarget(ctx.joinTarget());
   const joinCondition = ctx.joinCondition();

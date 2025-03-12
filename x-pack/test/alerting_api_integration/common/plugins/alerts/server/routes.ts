@@ -652,6 +652,7 @@ export function defineRoutes(
             executor: async () => ({ state: {} }),
             category: 'siem.queryRule',
             producer: 'alerts',
+            solution: 'security',
             cancelAlertsOnRuleTimeout: true,
             ruleTaskTimeout: '5m',
             recoveryActionGroup: {

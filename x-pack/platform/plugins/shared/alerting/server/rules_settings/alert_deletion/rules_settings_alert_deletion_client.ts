@@ -6,17 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObject,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import {
+import type { Logger, SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
   RulesSettings,
   RulesSettingsModificationMetadata,
   RulesSettingsAlertDeletion,
   RulesSettingsAlertDeletionProperties,
+} from '../../../common';
+import {
   DEFAULT_ALERT_DELETION_SETTINGS,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID,

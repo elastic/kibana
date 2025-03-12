@@ -116,6 +116,7 @@ export class RuleMigrationsDataService {
       currentUser,
       esScopedClient,
       this.logger,
+      spaceId,
       dependencies
     );
   }
