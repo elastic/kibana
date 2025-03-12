@@ -6,8 +6,8 @@
  */
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { StackAlertType } from '../types';
-import { RuleExecutorOptions } from '../../types';
+import type { StackAlertType } from '../types';
+import type { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
   executeEsQuery,
@@ -23,7 +23,8 @@ import type {
   GeoContainmentRuleState,
 } from './types';
 
-import { ActionGroupId, GEO_CONTAINMENT_ID } from './constants';
+import type { ActionGroupId } from './constants';
+import { GEO_CONTAINMENT_ID } from './constants';
 
 export async function executor({
   previousStartedAt,
