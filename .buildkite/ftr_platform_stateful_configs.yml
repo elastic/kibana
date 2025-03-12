@@ -82,6 +82,7 @@ enabled:
   - test/functional/apps/discover/group7/config.ts
   - test/functional/apps/discover/group8/config.ts
   - test/functional/apps/discover/context_awareness/config.ts
+  - test/functional/apps/discover/observability/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
