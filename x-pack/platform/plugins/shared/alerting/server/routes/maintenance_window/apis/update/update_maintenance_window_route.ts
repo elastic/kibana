@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import {
-  updateBodySchemaV1,
-  updateParamsSchemaV1,
+import type { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import type {
   UpdateMaintenanceWindowRequestBodyV1,
   UpdateMaintenanceWindowRequestParamsV1,
   UpdateMaintenanceWindowResponseV1,
+} from '../../../../../common/routes/maintenance_window/apis/update';
+import {
+  updateBodySchemaV1,
+  updateParamsSchemaV1,
 } from '../../../../../common/routes/maintenance_window/apis/update';
 import { transformUpdateBodyV1 } from './transforms';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';

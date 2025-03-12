@@ -8,7 +8,8 @@
  */
 
 import './discover_layout.scss';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -27,12 +28,13 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { UseColumnsProps } from '@kbn/unified-data-table';
+import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
-import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -42,15 +44,17 @@ import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg } from '../../state_management/discover_data_state_container';
-import { FetchStatus, SidebarToggleState } from '../../../types';
+import type { DataMainMsg } from '../../state_management/discover_data_state_container';
+import type { SidebarToggleState } from '../../../types';
+import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
-import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
+import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView, useInternalStateSelector } from '../../state_management/redux';

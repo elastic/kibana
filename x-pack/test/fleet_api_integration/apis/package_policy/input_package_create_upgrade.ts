@@ -204,6 +204,7 @@ export default function (providerContext: FtrProviderContext) {
         { id: 'logs-dataset1@package', type: 'component_template' },
         { id: 'logs-dataset1@custom', type: 'component_template' },
         { id: 'logs@custom', type: 'component_template' },
+        { id: 'input_package_upgrade@custom', type: 'component_template' },
       ]);
 
       // now check the package component template was created correctly
