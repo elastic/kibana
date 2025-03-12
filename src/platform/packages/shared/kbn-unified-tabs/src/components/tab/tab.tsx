@@ -22,7 +22,7 @@ import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems } from '../../types';
-import { useTabGlueStyles } from './use_tab_glue_styles';
+import { useTabsOverflow } from './use_tabs_overflow';
 
 export interface TabProps {
   item: TabItem;
@@ -88,7 +88,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onSelectEvent]
   );
 
-  const { selectedTabBackgroundColor, tabGlueElement } = useTabGlueStyles(props);
+  const { selectedTabBackgroundColor } = useTabsOverflow(props);
 
   return (
     <EuiFlexGroup
@@ -151,7 +151,6 @@ export const Tab: React.FC<TabProps> = (props) => {
           </>
         )}
       </div>
-      {tabGlueElement}
     </EuiFlexGroup>
   );
 };
