@@ -7,10 +7,10 @@
 
 import { encode } from 'gpt-tokenizer';
 import { isEmpty, omitBy } from 'lodash';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import type OpenAI from 'openai';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 export async function getTokenCountFromOpenAIStream({
   responseStream,
