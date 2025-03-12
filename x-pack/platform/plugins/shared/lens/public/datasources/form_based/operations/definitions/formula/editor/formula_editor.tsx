@@ -814,10 +814,7 @@ export function FormulaEditor({
             />
 
             {!text ? (
-              <div
-                className="lnsFormula__editorPlaceholder"
-                css={sharedEditorStyles.editorPlaceholder(euiThemeContext)}
-              >
+              <div css={sharedEditorStyles.editorPlaceholder(euiThemeContext)}>
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.lens.formulaPlaceholderText', {
                     defaultMessage: 'Type a formula by combining functions with math, like:',
