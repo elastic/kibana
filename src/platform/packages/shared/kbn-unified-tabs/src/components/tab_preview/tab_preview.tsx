@@ -7,38 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiSplitPanel, EuiText, EuiCode } from '@elastic/eui';
-import type { TabItem } from '../../types';
 
 interface TabPreviewProps {
-  position: { top: number; left: number };
-  item: TabItem;
+  children: React.ReactNode;
 }
 
-export const TabPreview: React.FC<TabPreviewProps> = ({ item, position }) => {
+export const TabPreview: React.FC<TabPreviewProps> = ({ children }) => {
+  const [showPreview, setShowPreview] = useState<boolean>(false);
+
+  const handleTabMouseEnter = () => {
+    setShowPreview(true);
+  };
+
+  const handleTabMouseLeave = () => {
+    setShowPreview(false);
+  };
+
   return (
-    <EuiSplitPanel.Outer grow css={getPreviewContainerCss(position)}>
-      <EuiSplitPanel.Inner>
-        <EuiText>
-          <p>Preview of {item.label}</p>
-        </EuiText>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
-        <EuiText>
-          <EuiCode>Bottom panel</EuiCode>
-        </EuiText>
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+    <div
+      onMouseEnter={handleTabMouseEnter}
+      onMouseLeave={handleTabMouseLeave}
+      css={css`
+        position: relative;
+      `}
+    >
+      {children}
+      {showPreview && (
+        <EuiSplitPanel.Outer grow css={getPreviewContainerCss()}>
+          <EuiSplitPanel.Inner>
+            <EuiText>
+              <p>Preview</p>
+            </EuiText>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner grow={false} color="subdued">
+            <EuiText>
+              <EuiCode>Bottom panel</EuiCode>
+            </EuiText>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+      )}
+    </div>
   );
 };
 
-function getPreviewContainerCss(position: { top: number; left: number }) {
+function getPreviewContainerCss() {
   return css`
     position: fixed;
-    z-index: 1000;
-    top: ${position.top}px;
-    left: ${position.left}px;
+    z-index: 10000;
   `;
 }

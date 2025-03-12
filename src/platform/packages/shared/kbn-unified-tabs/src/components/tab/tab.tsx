@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiThemeComputed,
   useEuiTheme,
-  EuiPortal,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -47,8 +46,6 @@ export const Tab: React.FC<TabProps> = ({
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
-  const [showPreview, setShowPreview] = useState<boolean>(false);
-  const [previewPosition, setPreviewPosition] = useState({ top: 0, left: 0 });
 
   const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -88,23 +85,8 @@ export const Tab: React.FC<TabProps> = ({
     [onSelectEvent]
   );
 
-  const handleTabMouseEnter = useCallback(() => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setPreviewPosition({
-        top: rect.bottom + 5,
-        left: rect.left,
-      });
-      setShowPreview(true);
-    }
-  }, []);
-
-  const handleTabMouseLeave = useCallback(() => {
-    setShowPreview(false);
-  }, []);
-
   return (
-    <>
+    <TabPreview>
       <EuiFlexGroup
         ref={containerRef}
         {...getTabAttributes(item, tabContentId)}
@@ -116,8 +98,6 @@ export const Tab: React.FC<TabProps> = ({
         responsive={false}
         gutterSize="none"
         onClick={onClickEvent}
-        onMouseEnter={handleTabMouseEnter}
-        onMouseLeave={handleTabMouseLeave}
       >
         {isInlineEditActive ? (
           <div css={getTabButtonCss(euiTheme)}>
@@ -166,12 +146,7 @@ export const Tab: React.FC<TabProps> = ({
           </>
         )}
       </EuiFlexGroup>
-      {showPreview && (
-        <EuiPortal>
-          <TabPreview item={item} position={previewPosition} />
-        </EuiPortal>
-      )}
-    </>
+    </TabPreview>
   );
 };
 
