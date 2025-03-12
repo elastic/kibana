@@ -8,3 +8,9 @@
 import { formatNumber } from '@elastic/eui';
 
 export const formatBytes = (value: number) => formatNumber(value, '0.0 b');
+
+export const formatIngestionRate = (bytesPerDay: number) => {
+  const perDay = formatBytes(bytesPerDay);
+  const perMonth = formatBytes(bytesPerDay * 30);
+  return `${perDay} / Day - ${perMonth} / Month`;
+};

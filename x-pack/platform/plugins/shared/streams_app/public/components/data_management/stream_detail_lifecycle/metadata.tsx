@@ -37,7 +37,7 @@ import { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
-import { formatBytes } from './helpers/format_bytes';
+import { formatIngestionRate } from './helpers/format_bytes';
 
 export function RetentionMetadata({
   definition,
@@ -242,9 +242,3 @@ function MetadataRow({
     </EuiFlexGroup>
   );
 }
-
-const formatIngestionRate = (bytesPerDay: number) => {
-  const perDay = formatBytes(bytesPerDay);
-  const perMonth = formatBytes(bytesPerDay * 30);
-  return `${perDay} / Day - ${perMonth} / Month`;
-};

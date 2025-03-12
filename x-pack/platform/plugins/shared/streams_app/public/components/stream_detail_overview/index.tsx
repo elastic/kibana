@@ -6,12 +6,15 @@
  */
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiTab,
   EuiTabs,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
@@ -20,11 +23,13 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import {
   IngestStreamGetResponse,
+  IngestStreamLifecycleILM,
   isDescendantOf,
   isUnwiredStreamGetResponse,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
@@ -37,6 +42,11 @@ import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_tabl
 import { AssetImage } from '../asset_image';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
 import { useDataStreamStats } from '../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
+import { IlmLink } from '../data_management/stream_detail_lifecycle/ilm_link';
+import {
+  formatBytes,
+  formatIngestionRate,
+} from '../data_management/stream_detail_lifecycle/helpers/format_bytes';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -154,6 +164,8 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
     [definition, dataViews, streamsRepositoryClient, start, end]
   );
 
+  const { euiTheme } = useEuiTheme();
+
   const dataStreamStats = useDataStreamStats({ definition });
 
   const [selectedTab, setSelectedTab] = React.useState<string | undefined>(undefined);
@@ -179,66 +191,168 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
     },
   ];
 
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
+
   return (
     <>
       <EuiFlexGroup direction="column">
-        <EuiFlexGroup direction="row" justifyContent="flexEnd">
-          <EuiFlexItem grow>
-            <StreamsAppSearchBar
-              onQuerySubmit={({ dateRange }, isUpdate) => {
-                if (!isUpdate) {
-                  histogramQueryFetch.refresh();
-                  docCountFetch.refresh();
-                  return;
-                }
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" justifyContent="flexEnd">
+            <EuiFlexItem grow>
+              <StreamsAppSearchBar
+                onQuerySubmit={({ dateRange }, isUpdate) => {
+                  if (!isUpdate) {
+                    histogramQueryFetch.refresh();
+                    docCountFetch.refresh();
+                    return;
+                  }
 
-                if (dateRange) {
-                  setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
-                }
-              }}
-              onRefresh={() => {
-                histogramQueryFetch.refresh();
-              }}
-              placeholder={i18n.translate(
-                'xpack.streams.entityDetailOverview.searchBarPlaceholder',
-                {
-                  defaultMessage: 'Filter data by using KQL',
-                }
-              )}
-              dateRangeFrom={timeRange.from}
-              dateRangeTo={timeRange.to}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow={3}>
-            <EuiPanel>{JSON.stringify(definition?.effective_lifecycle)}</EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={9}>
-            <EuiPanel>{JSON.stringify(dataStreamStats.stats, null, 2)}</EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                  if (dateRange) {
+                    setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
+                  }
+                }}
+                onRefresh={() => {
+                  histogramQueryFetch.refresh();
+                }}
+                placeholder={i18n.translate(
+                  'xpack.streams.entityDetailOverview.searchBarPlaceholder',
+                  {
+                    defaultMessage: 'Filter data by using KQL',
+                  }
+                )}
+                dateRangeFrom={timeRange.from}
+                dateRangeTo={timeRange.to}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem grow={3}>
+              <EuiPanel hasShadow={false} hasBorder>
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('xpack.streams.entityDetailOverview.retention', {
+                      defaultMessage: 'Data retention',
+                    })}
+                  </EuiText>
+                  <EuiText size="m">
+                    {definition ? (
+                      'dsl' in definition.effective_lifecycle ? (
+                        definition?.effective_lifecycle.dsl.data_retention ||
+                        i18n.translate('xpack.streams.entityDetailOverview.unlimited', {
+                          defaultMessage: 'Keep indefinitely',
+                        })
+                      ) : (
+                        <IlmLink
+                          lifecycle={definition.effective_lifecycle as IngestStreamLifecycleILM}
+                          ilmLocator={ilmLocator}
+                        />
+                      )
+                    ) : (
+                      '-'
+                    )}
+                  </EuiText>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={9}>
+              <EuiPanel hasShadow={false} hasBorder>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow>
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('xpack.streams.entityDetailOverview.count', {
+                          defaultMessage: 'Document count',
+                        })}
+                      </EuiText>
+                      <EuiText size="m">
+                        {dataStreamStats.stats
+                          ? formatNumber(dataStreamStats.stats.totalDocs || 0)
+                          : '-'}
+                      </EuiText>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow
+                    className={css`
+                      border-left: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                      padding-left: ${euiTheme.size.s};
+                    `}
+                  >
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('xpack.streams.entityDetailOverview.size', {
+                          defaultMessage: 'Storage size',
+                        })}
+                      </EuiText>
+                      <EuiText size="m">
+                        {dataStreamStats.stats
+                          ? formatBytes(dataStreamStats.stats.sizeBytes || 0)
+                          : '-'}
+                      </EuiText>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow
+                    className={css`
+                      border-left: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                      padding-left: ${euiTheme.size.s};
+                    `}
+                  >
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('xpack.streams.entityDetailOverview.ingestion', {
+                          defaultMessage: 'Ingestion',
+                        })}
+                      </EuiText>
+                      <EuiText size="m">
+                        {dataStreamStats.stats
+                          ? formatIngestionRate(dataStreamStats.stats.bytesPerDay || 0)
+                          : '-'}
+                      </EuiText>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem grow={4}>
               {definition && (
                 <EuiPanel hasShadow={false} hasBorder>
-                  <EuiTabs>
-                    {tabs.map((tab, index) => (
-                      <EuiTab
-                        isSelected={(!selectedTab && index === 0) || selectedTab === tab.id}
-                        onClick={() => setSelectedTab(tab.id)}
-                        key={tab.id}
-                      >
-                        {tab.name}
-                      </EuiTab>
-                    ))}
-                  </EuiTabs>
-                  {
-                    tabs.find(
-                      (tab, index) => (!selectedTab && index === 0) || selectedTab === tab.id
-                    )?.content
-                  }
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="s"
+                    className={css`
+                      height: 100%;
+                    `}
+                  >
+                    {tabs.length === 1 ? (
+                      tabs[0].content
+                    ) : (
+                      <>
+                        <EuiTabs>
+                          {tabs.map((tab, index) => (
+                            <EuiTab
+                              isSelected={(!selectedTab && index === 0) || selectedTab === tab.id}
+                              onClick={() => setSelectedTab(tab.id)}
+                              key={tab.id}
+                            >
+                              {tab.name}
+                            </EuiTab>
+                          ))}
+                        </EuiTabs>
+                        {
+                          tabs.find(
+                            (tab, index) => (!selectedTab && index === 0) || selectedTab === tab.id
+                          )?.content
+                        }
+                      </>
+                    )}
+                  </EuiFlexGroup>
                 </EuiPanel>
               )}
             </EuiFlexItem>
@@ -252,11 +366,10 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
                 >
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup justifyContent="flexEnd">
-                      <EuiButton
+                      <EuiButtonEmpty
                         data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
                         iconType="discoverApp"
                         href={discoverLink}
-                        color="text"
                       >
                         {i18n.translate(
                           'xpack.streams.streamDetailOverview.openInDiscoverButtonLabel',
@@ -264,7 +377,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
                             defaultMessage: 'Open in Discover',
                           }
                         )}
-                      </EuiButton>
+                      </EuiButtonEmpty>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow>
@@ -289,7 +402,51 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
 const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
 
 function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
+  const router = useStreamsAppRouter();
   const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
+
+  if (definition && !dashboardsFetch.loading && dashboardsFetch.value?.dashboards.length === 0) {
+    return (
+      <EuiFlexItem grow>
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem
+            grow={false}
+            className={css`
+              max-width: 200px;
+            `}
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <AssetImage type="welcome" />
+              <EuiText size="m" textAlign="center">
+                {i18n.translate('xpack.streams.entityDetailOverview.linkDashboards', {
+                  defaultMessage: 'Link dashboards',
+                })}
+              </EuiText>
+              <EuiText size="xs" textAlign="center" color="subdued">
+                {i18n.translate('xpack.streams.entityDetailOverview.linkDashboardsText', {
+                  defaultMessage: 'Link dashboards to this stream for quick access',
+                })}
+              </EuiText>
+              <EuiFlexGroup justifyContent="center">
+                <EuiLink
+                  href={router.link('/{key}/{tab}', {
+                    path: {
+                      key: definition?.stream.name,
+                      tab: 'dashboards',
+                    },
+                  })}
+                >
+                  {i18n.translate('xpack.streams.entityDetailOverview.createChildStream', {
+                    defaultMessage: 'Add dashboards',
+                  })}
+                </EuiLink>
+              </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <DashboardsTable

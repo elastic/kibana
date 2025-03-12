@@ -146,7 +146,7 @@ export function ControlledEsqlChart<T extends string>({
         }}
       />
       <Settings
-        showLegend
+        showLegend={false}
         legendPosition={Position.Bottom}
         xDomain={xDomain}
         locale={i18n.getLocale()}
@@ -173,6 +173,7 @@ export function ControlledEsqlChart<T extends string>({
           <Series
             timeZone={timeZone}
             key={serie.id}
+            color="#61A2FF"
             id={serie.id}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
