@@ -28,17 +28,17 @@ export interface SpanMetricGroup {
   impact: number | null;
   currentStats:
     | {
-        latency: Coordinate[];
-        throughput: Coordinate[];
-        failureRate: Coordinate[];
+        latency?: Coordinate[];
+        throughput?: Coordinate[];
+        failureRate?: Coordinate[];
       }
     | undefined;
   previousStats:
     | {
-        latency: Coordinate[];
-        throughput: Coordinate[];
-        failureRate: Coordinate[];
-        impact: number;
+        latency?: Coordinate[];
+        throughput?: Coordinate[];
+        failureRate?: Coordinate[];
+        impact?: number;
       }
     | undefined;
 }

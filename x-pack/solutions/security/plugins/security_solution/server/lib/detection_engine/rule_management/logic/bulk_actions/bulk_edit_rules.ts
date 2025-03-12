@@ -70,8 +70,8 @@ export const bulkEditRules = async ({
   const result = await rulesClient.bulkEdit<RuleParams>({
     ids: rules.map((rule) => rule.id),
     operations,
-    paramsModifier: async (rule) => {
-      const ruleParams = rule.params;
+    paramsModifier: async (currentRule) => {
+      const ruleParams = currentRule.params;
 
       await validateBulkEditRule({
         mlAuthz,
@@ -85,23 +85,22 @@ export const bulkEditRules = async ({
         paramsActions
       );
 
-      // Update rule source
-      const updatedRule = {
-        ...rule,
+      const nextRule = convertAlertingRuleToRuleResponse({
+        ...currentRule,
         params: modifiedParams,
-      };
-      const ruleResponse = convertAlertingRuleToRuleResponse(updatedRule);
+      });
+
       let isCustomized = false;
-      if (ruleResponse.immutable === true) {
+      if (nextRule.immutable === true) {
         isCustomized = calculateIsCustomized({
-          baseRule: baseVersionsMap.get(ruleResponse.rule_id),
-          nextRule: ruleResponse,
-          ruleCustomizationStatus,
+          baseRule: baseVersionsMap.get(nextRule.rule_id),
+          currentRule: convertAlertingRuleToRuleResponse(currentRule),
+          nextRule,
         });
       }
 
       const ruleSource =
-        ruleResponse.immutable === true
+        nextRule.immutable === true
           ? {
               type: 'external' as const,
               isCustomized,

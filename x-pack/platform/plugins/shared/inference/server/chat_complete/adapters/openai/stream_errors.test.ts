@@ -24,7 +24,7 @@ describe('convertStreamError', () => {
     expect(error.toJSON()).toEqual({
       type: 'error',
       error: {
-        code: 'internalError',
+        code: 'providerError',
         message: 'something bad happened',
         meta: {},
       },
@@ -43,7 +43,7 @@ describe('convertStreamError', () => {
     expect(error.toJSON()).toEqual({
       type: 'error',
       error: {
-        code: 'internalError',
+        code: 'providerError',
         message: 'some_error_type - something bad happened',
         meta: {},
       },
@@ -61,7 +61,7 @@ describe('convertStreamError', () => {
     expect(error.toJSON()).toEqual({
       type: 'error',
       error: {
-        code: 'internalError',
+        code: 'providerError',
         message: '{"anotherErrorField":"something bad happened"}',
         meta: {},
       },

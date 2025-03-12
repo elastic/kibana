@@ -62,7 +62,9 @@ tags:
     name: APM annotations
   - description: Create APM fleet server schema.
     name: APM server schema
-  - description: Configure APM source maps.
+  - description: |
+      Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
+      For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
   - name: connectors
     description: |
@@ -4755,7 +4757,8 @@ paths:
       x-beta: true
   /api/apm/sourcemaps:
     get:
-      description: Returns an array of Fleet artifacts, including source map uploads.
+      description: |
+        Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
       operationId: getSourceMaps
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -4773,6 +4776,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getSourceMapsResponse1:
+                  $ref: '#/components/examples/APM_UI_source_maps_get_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_source_maps_response'
           description: Successful response
@@ -4803,9 +4809,18 @@ paths:
       summary: Get source maps
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
       x-beta: true
     post:
-      description: Upload a source map for a specific service and version.
+      description: |
+        Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.
+        The maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
       operationId: uploadSourceMap
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -4820,6 +4835,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                uploadSourceMapResponse1:
+                  $ref: '#/components/examples/APM_UI_source_maps_upload_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_upload_source_maps_response'
           description: Successful response
@@ -4853,13 +4871,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/APM_UI_501_response'
           description: Not Implemented response
-      summary: Upload source map
+      summary: Upload a source map
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: multipart/form-data' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+            -F 'service_name="foo"' \
+            -F 'service_version="1.0.0"' \
+            -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
       x-beta: true
   /api/apm/sourcemaps/{id}:
     delete:
-      description: Delete a previously uploaded source map.
+      description: |
+        Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.
       operationId: deleteSourceMap
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -4911,6 +4941,13 @@ paths:
       summary: Delete source map
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
       x-beta: true
   /api/asset_criticality:
     delete:
@@ -18721,7 +18758,6 @@ paths:
           name: page
           required: false
           schema:
-            default: 1
             type: number
         - in: query
           name: perPage
@@ -18770,6 +18806,26 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+        - in: query
+          name: searchAfter
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: openPit
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: pitId
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pitKeepAlive
+          required: false
+          schema:
             type: string
       responses:
         '200':
@@ -18948,12 +19004,7 @@ paths:
                           nullable: true
                           type: number
                         sort:
-                          items:
-                            anyOf:
-                              - type: number
-                              - type: string
-                              - enum: []
-                                nullable: true
+                          items: {}
                           type: array
                         status:
                           enum:
@@ -18989,6 +19040,11 @@ paths:
                               - input
                               - output
                               - other
+                            type: string
+                          nullable: true
+                          type: array
+                        upgrade_attempts:
+                          items:
                             type: string
                           nullable: true
                           type: array
@@ -19062,10 +19118,14 @@ paths:
                         - enrolled_at
                         - local_metadata
                     type: array
+                  nextSearchAfter:
+                    type: string
                   page:
                     type: number
                   perPage:
                     type: number
+                  pit:
+                    type: string
                   statusSummary:
                     additionalProperties:
                       type: number
@@ -19403,12 +19463,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
@@ -19444,6 +19499,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -19746,12 +19806,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
@@ -19787,6 +19842,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -41160,6 +41220,64 @@ paths:
       x-beta: true
 components:
   examples:
+    APM_UI_source_maps_get_200_response1:
+      description: A successful response from `GET /api/apm/sourcemaps`.
+      value: |
+        {
+          "artifacts": [
+            {
+              "type": "sourcemap",
+              "identifier": "foo-1.0.0",
+              "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "body": {
+                "serviceName": "foo",
+                "serviceVersion": "1.0.0",
+                "bundleFilepath": "/test/e2e/general-usecase/bundle.js",
+                "sourceMap": {
+                  "version": 3,
+                  "file": "static/js/main.chunk.js",
+                  "sources": [
+                    "fleet-source-map-client/src/index.css",
+                    "fleet-source-map-client/src/App.js",
+                    "webpack:///./src/index.css?bb0a",
+                    "fleet-source-map-client/src/index.js",
+                    "fleet-source-map-client/src/reportWebVitals.js"
+                  ],
+                  "sourcesContent": [
+                    "content"
+                  ],
+                  "mappings": "mapping",
+                  "sourceRoot": ""
+                }
+              },
+              "created": "2021-07-09T20:47:44.812Z",
+              "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "compressionAlgorithm": "zlib",
+              "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "decodedSize": 441,
+              "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+              "encodedSize": 237,
+              "encryptionAlgorithm": "none",
+              "packageName": "apm"
+            }
+          ]
+        }
+    APM_UI_source_maps_upload_200_response1:
+      description: A successful response from `POST /api/apm/sourcemaps`.
+      value:
+        body: eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI
+        compressionAlgorithm: zlib
+        created: '2021-07-09T20:47:44.812Z'
+        decodedSha256: 644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        decodedSize: 441
+        encodedSha256: 024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24
+        encodedSize: 237
+        encryptionAlgorithm: none
+        id: apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        identifier: foo-1.0.0
+        packageName: apm
+        relative_url: /api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        type: sourcemap
     Data_views_create_data_view_request:
       summary: Create a data view with runtime fields.
       value:
@@ -44442,8 +44560,8 @@ components:
           type: string
         sourcemap:
           description: |
-            The source map. String or file upload. It must follow the
-            [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
+            The source map. It can be a string or file upload. It must follow the
+            [source map format specification](https://tc39.es/ecma426/).
           format: binary
           type: string
       required:
@@ -59169,27 +59287,30 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the rule to apply to a specific service name.
         transactionType:
           type: string
-          description: The transaction type from APM
+          description: Filter the rule to apply to a specific transaction type.
         windowSize:
           type: number
           example: 6
-          description: The window size
+          description: |
+            The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
         windowUnit:
           type: string
-          description: The window size unit
+          description: |
+            The type of units for the time window. For example: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
-          description: The environment from APM
+          description: Filter the rule to apply to a specific environment.
         anomalySeverityType:
           type: string
-          description: The anomaly threshold value
+          description: |
+            The severity of anomalies that will generate alerts: critical, major, minor, or warning.
           enum:
             - critical
             - major
@@ -59204,24 +59325,26 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the errors coming from your application to apply the rule to a specific service.
         windowSize:
           type: number
-          description: The window size
+          description: |
+            The time frame in which the errors must occur (in `windowUnit` units). Generally it should be a value higher than the rule check interval to avoid gaps in detection.
           example: 6
         windowUnit:
           type: string
-          description: The window size unit
+          description: |
+            The type of units for the time window: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
-          description: The environment from APM
+          description: Filter the errors coming from your application to apply the rule to a specific environment.
         threshold:
           type: number
-          description: The error count threshold value
+          description: The error count threshold.
         groupBy:
           type: array
           default:
@@ -59235,8 +59358,12 @@ components:
               - service.environment
               - transaction.name
               - error.grouping_key
+          description: |
+            Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
         errorGroupingKey:
           type: string
+          description: |
+            Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.
     params_property_apm_transaction_duration:
       required:
         - windowSize
@@ -59247,29 +59374,32 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the rule to apply to a specific service.
         transactionType:
           type: string
-          description: The transaction type from APM
+          description: Filter the rule to apply to a specific transaction type.
         transactionName:
           type: string
-          description: The transaction name from APM
+          description: Filter the rule to apply to a specific transaction name.
         windowSize:
           type: number
-          description: The window size
+          description: |
+            The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
           example: 6
         windowUnit:
           type: string
-          description: ç
+          description: |
+            The type of units for the time window. For example: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
+          description: Filter the rule to apply to a specific environment.
         threshold:
           type: number
-          description: The latency threshold value
+          description: The latency threshold value.
         groupBy:
           type: array
           default:
@@ -59284,12 +59414,15 @@ components:
               - service.environment
               - transaction.type
               - transaction.name
+          description: |
+            Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
         aggregationType:
           type: string
           enum:
             - avg
             - 95th
             - 99th
+          description: The type of aggregation to perform.
     params_property_apm_transaction_error_rate:
       required:
         - windowSize
