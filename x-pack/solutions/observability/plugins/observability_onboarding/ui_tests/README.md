@@ -16,22 +16,20 @@ Some tests are designed to run sequentially:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts --project=local --grep @ess
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts --grep @ess
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts --project=local --grep @svlOblt
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts --grep @svlOblt
 ```
 
 Some tests are designed to run concurrently (preferred option):
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel_playwright.config.ts
---project=local --grep @ess
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel_playwright.config.ts --grep @ess
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel_playwright.config.ts
---project=local --grep @svlOblt
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel_playwright.config.ts --grep @svlOblt
 ```
 
 Test results are available in `x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/output`
