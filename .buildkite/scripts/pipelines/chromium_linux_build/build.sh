@@ -15,14 +15,16 @@ BUILD_SCRIPT="$KIBANA_CHECKOUT_DIR/x-pack/build_chromium"
 # Create a dedicated working directory outside of the default buildkite working directory.
 mkdir "$BUILD_ROOT_DIR" && cd "$BUILD_ROOT_DIR"
 
-ARTIFACT_STORAGE_BUCKET="gs://headless_shell_staging"
+ARTIFACT_STAGING_STORAGE_BUCKET="gs://headless_shell_staging"
+ARTIFACT_PROD_STORAGE_BUCKET="gs://headless_shell"
+
 ARTIFACT_QUERY="chromium-${CHROMIUM_COMMIT_HASH:0:7}-.*_$PLATFORM_VARIANT"
 
 ## impersonate service account that has access to our storage bucket 
 "$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" "kibana-ci-access-chromium-blds"
 
 # Try to download build artifact from the storage bucket if it exists
-gsutil ls $ARTIFACT_STORAGE_BUCKET | grep "$ARTIFACT_QUERY" | while read -r file; do
+gsutil ls $ARTIFACT_STAGING_STORAGE_BUCKET | grep "$ARTIFACT_QUERY" | while read -r file; do
   gsutil cp "$file" .
 done
 
@@ -59,7 +61,11 @@ else
     # Run the build script with the path to the chromium src directory, the git commit hash
     python3 "$BUILD_SCRIPT_SYMLINK/build.py" "$CHROMIUM_COMMIT_HASH" "$PLATFORM_VARIANT"
 
-    echo "---Persisting build artefact to buildkite"
+    echo "---Upload build artefact to prod storage bucket"
+
+    gsutil cp "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*" "$ARTIFACT_PROD_STORAGE_BUCKET"
+
+    echo "---Persisting build artefact to buildkite for following steps"
 
     buildkite-agent artifact upload "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*"
 fi
