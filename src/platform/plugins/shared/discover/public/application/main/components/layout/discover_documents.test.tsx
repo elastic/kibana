@@ -29,11 +29,16 @@ import { DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import type { ProfilesManager } from '../../../../context_awareness';
 import { internalStateActions } from '../../state_management/redux';
 
 const customisationService = createCustomizationService();
 
-async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
+async function mountComponent(
+  fetchStatus: FetchStatus,
+  hits: EsHitRecord[],
+  profilesManager?: ProfilesManager
+) {
   const services = discoverServiceMock;
 
   services.data.query.timefilter.timefilter.getTime = () => {
@@ -72,7 +77,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   };
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider
+      services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
+    >
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
           <EuiProvider>

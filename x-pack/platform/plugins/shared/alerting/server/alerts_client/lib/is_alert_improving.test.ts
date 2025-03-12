@@ -11,7 +11,7 @@ import { ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
 import { Alert as LegacyAlert } from '../../alert';
 import { isAlertImproving } from './is_alert_improving';
 import { existingExpandedNewAlert, existingFlattenedNewAlert } from './test_fixtures';
-import { ActionGroup } from '../../types';
+import type { ActionGroup } from '../../types';
 
 const actionGroupsWithSeverity: Array<ActionGroup<string>> = [
   { id: 'info', name: 'Info', severity: { level: 0 } },
