@@ -45,6 +45,7 @@ import { activeTimeline } from '../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
 import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
+import { getStoredTimelineColumnsConfig } from './middlewares/timeline_localstorage';
 
 interface AddTimelineNoteParams {
   id: string;
@@ -127,10 +128,22 @@ export const addTimelineToStore = ({
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
   }
+
+  // Apply the locally stored column config
+  const storedColumnsConfig = getStoredTimelineColumnsConfig();
+  let columns = timeline.columns;
+  if (storedColumnsConfig) {
+    columns = timeline.columns.map((column) => ({
+      ...column,
+      initialWidth: storedColumnsConfig[column.id]?.initialWidth || column.initialWidth,
+    }));
+  }
+
   return {
     ...timelineById,
     [id]: {
       ...timeline,
+      columns,
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
