@@ -18,6 +18,7 @@ describe('UpdateIndexFlyoutStep', () => {
     isInDataStream: false,
     isFrozen: false,
     isReadonly: false,
+    isClosedIndex: false,
     reindexName: 'some_index-reindexed-for-9',
   };
 
