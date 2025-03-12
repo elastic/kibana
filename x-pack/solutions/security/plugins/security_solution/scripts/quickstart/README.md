@@ -71,6 +71,41 @@ const functions = ruleCopies.map((rule) => () => detectionsClient.createRule({ b
 const responses = await concurrentlyExec(functions);
 ```
 
+### Create 200 Rules and an Exception for each one
+
+```
+// Extra imports
+import { concurrentlyExec } from '@kbn/securitysolution-utils/src/client_concurrency';
+import { basicRule } from './modules/rules/new_terms/basic_rule';
+import { duplicateRuleParams } from './modules/rules';
+import { buildCreateRuleExceptionListItemsProps } from './modules/exceptions';
+
+// ... omitted client setup stuff
+
+// Core logic
+const ruleCopies = duplicateRuleParams(basicRule, 200);
+const { body } = await detectionsClient.
+                  .performRulesBulkAction({
+                    query: { dry_run: false },
+                    body: {
+                      ids: ruleCopies.map((rule) => rule.id),
+                      action: 'duplicate',
+                    },
+                  })
+const createdRules: RuleResponse[] = body.attributes.results.created;
+
+// This map looks a bit confusing, but the concept is simple: take the rules we just created and
+// create a *function* per rule to create an exception for that rule. We want a function to call later instead of just
+// calling the API immediately to limit the number of requests in flight (with `concurrentlyExec`)
+const exceptionsFunctions = createdRules.map(
+(r) => () =>
+    exceptionsClient.createRuleExceptionListItems(
+    buildCreateRuleExceptionListItemsProps({ id: r.id })
+    )
+);
+const exceptionsResponses = await concurrentlyExec(exceptionsFunctions);
+```
+
 ### Run 10 Rule Preview Requests Simultaneously
 
 ```
