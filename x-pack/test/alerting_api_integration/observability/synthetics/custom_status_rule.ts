@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/202337
   // Failing: See https://github.com/elastic/kibana/issues/196257
-  describe.skip('SyntheticsCustomStatusRule', () => {
+  describe('SyntheticsCustomStatusRule', () => {
     const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
 
     before(async () => {
@@ -542,7 +542,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
 
-      it('should trigger recovered alert', async () => {
+      it.only('should trigger recovered alert', async () => {
         const docs = await ruleHelper.makeSummaries({
           monitor,
           upChecks: 1,
