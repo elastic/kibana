@@ -26,6 +26,9 @@ import {
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { ScopedHistory } from '@kbn/core/public';
 import { generateReactRouterProps, ReactRouterProps } from '.';
 /**
  * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props
@@ -37,7 +40,23 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiLink {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => {
+  const { services } = useKibana();
+  const history = useHistory();
+  return (
+    <EuiLink
+      {...rest}
+      {...generateReactRouterProps({
+        to,
+        onClick,
+        shouldNotCreateHref,
+        http: services.http,
+        navigateToUrl: services.application?.navigateToUrl,
+        history: history as ScopedHistory,
+      })}
+    />
+  );
+};
 
 type ReactRouterEuiButtonProps = ReactRouterProps & EuiButtonProps;
 export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
@@ -45,7 +64,23 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiButton {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => {
+  const { services } = useKibana();
+  const history = useHistory();
+  return (
+    <EuiButton
+      {...rest}
+      {...generateReactRouterProps({
+        to,
+        onClick,
+        shouldNotCreateHref,
+        http: services.http,
+        navigateToUrl: services.application?.navigateToUrl,
+        history: history as ScopedHistory,
+      })}
+    />
+  );
+};
 
 type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
 export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
@@ -53,19 +88,46 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => (
-  <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
-);
-
+}) => {
+  const { services } = useKibana();
+  const history = useHistory();
+  return (
+    <EuiButtonEmpty
+      {...rest}
+      {...generateReactRouterProps({
+        to,
+        onClick,
+        shouldNotCreateHref,
+        http: services.http,
+        navigateToUrl: services.application?.navigateToUrl,
+        history: history as ScopedHistory,
+      })}
+    />
+  );
+};
 type ReactRouterEuiButtonIconProps = ReactRouterProps & EuiButtonIconProps;
 export const EuiButtonIconTo: React.FC<ReactRouterEuiButtonIconProps> = ({
   to,
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => (
-  <EuiButtonIcon {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
-);
+}) => {
+  const { services } = useKibana();
+  const history = useHistory();
+  return (
+    <EuiButtonIcon
+      {...rest}
+      {...generateReactRouterProps({
+        to,
+        onClick,
+        shouldNotCreateHref,
+        http: services.http,
+        navigateToUrl: services.application?.navigateToUrl,
+        history: history as ScopedHistory,
+      })}
+    />
+  );
+};
 
 type ReactRouterEuiPanelProps = ReactRouterProps & EuiPanelProps;
 export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
@@ -73,7 +135,23 @@ export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiPanel {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => {
+  const { services } = useKibana();
+  const history = useHistory();
+  return (
+    <EuiPanel
+      {...rest}
+      {...generateReactRouterProps({
+        to,
+        onClick,
+        shouldNotCreateHref,
+        http: services.http,
+        navigateToUrl: services.application?.navigateToUrl,
+        history: history as ScopedHistory,
+      })}
+    />
+  );
+};
 
 type ReactRouterEuiCardProps = ReactRouterProps & EuiCardProps;
 export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
@@ -81,7 +159,23 @@ export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiCard {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => {
+  const { services } = useKibana();
+  const history = useHistory();
+  return (
+    <EuiCard
+      {...rest}
+      {...generateReactRouterProps({
+        to,
+        onClick,
+        shouldNotCreateHref,
+        http: services.http,
+        navigateToUrl: services.application?.navigateToUrl,
+        history: history as ScopedHistory,
+      })}
+    />
+  );
+};
 
 type ReactRouterEuiListGroupItemProps = ReactRouterProps & EuiListGroupItemProps;
 export const EuiListGroupItemTo: React.FC<ReactRouterEuiListGroupItemProps> = ({
@@ -89,9 +183,23 @@ export const EuiListGroupItemTo: React.FC<ReactRouterEuiListGroupItemProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => (
-  <EuiListGroupItem {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
-);
+}) => {
+  const { services } = useKibana();
+  const history = useHistory();
+  return (
+    <EuiListGroupItem
+      {...rest}
+      {...generateReactRouterProps({
+        to,
+        onClick,
+        shouldNotCreateHref,
+        http: services.http,
+        navigateToUrl: services.application?.navigateToUrl,
+        history: history as ScopedHistory,
+      })}
+    />
+  );
+};
 
 // TODO Right now this only supports the `color` prop of EuiBadgeProps
 // Trying to use EuiBadgeProps in its entirety causes a succession of Typescript errors
@@ -103,7 +211,16 @@ export const EuiBadgeTo: React.FC<ReactRouterEuiBadgeProps> = ({
   to,
   ...rest
 }) => {
-  const routerProps = generateReactRouterProps({ onClick, shouldNotCreateHref, to });
+  const { services } = useKibana();
+  const history = useHistory();
+  const routerProps = generateReactRouterProps({
+    onClick,
+    shouldNotCreateHref,
+    to,
+    http: services.http,
+    navigateToUrl: services.application?.navigateToUrl,
+    history: history as ScopedHistory,
+  });
 
   const badgeProps: EuiBadgeProps = {
     ...rest,

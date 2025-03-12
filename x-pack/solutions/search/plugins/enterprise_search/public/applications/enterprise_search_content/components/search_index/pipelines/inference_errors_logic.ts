@@ -7,13 +7,14 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { IndexNameLogic } from '@kbn/search-connectors-plugin/public';
+
 import { Status } from '../../../../../../common/types/api';
 import { MlInferenceError } from '../../../../../../common/types/pipelines';
 import {
   FetchMlInferenceErrorsApiLogicResponse,
   FetchMlInferenceErrorsApiLogic,
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
-import { IndexNameLogic } from '../index_name_logic';
 
 interface InferenceErrorsValues {
   fetchIndexInferenceHistoryStatus: Status;

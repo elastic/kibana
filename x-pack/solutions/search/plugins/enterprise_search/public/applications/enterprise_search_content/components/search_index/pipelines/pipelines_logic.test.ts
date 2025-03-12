@@ -10,10 +10,12 @@ import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
 
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
+import {
+  CachedFetchIndexApiLogic,
+  UpdatePipelineApiLogic,
+} from '@kbn/search-connectors-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
-import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import { DetachMlInferencePipelineApiLogic } from '../../../api/pipelines/detach_ml_inference_pipeline';
 

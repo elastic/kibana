@@ -11,8 +11,9 @@ import { useActions, useValues } from 'kea';
 
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { FetchCustomPipelineApiLogic } from '../../../../api/index/fetch_custom_pipeline_api_logic';
-import { IndexViewLogic } from '../../index_view_logic';
 
 import { PipelinesLogic } from '../pipelines_logic';
 

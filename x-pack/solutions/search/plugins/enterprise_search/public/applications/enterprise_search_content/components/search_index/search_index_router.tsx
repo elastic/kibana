@@ -10,6 +10,11 @@ import { Redirect, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import {
+  ConnectorViewLogic,
+  IndexNameLogic,
+  IndexViewLogic,
+} from '@kbn/search-connectors-plugin/public';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -19,10 +24,6 @@ import {
   SEARCH_INDEX_TAB_PATH,
 } from '../../routes';
 
-import { ConnectorViewLogic } from '../connector_detail/connector_view_logic';
-
-import { IndexNameLogic } from './index_name_logic';
-import { IndexViewLogic } from './index_view_logic';
 import { SearchIndex } from './search_index';
 
 export const SearchIndexRouter: React.FC = () => {

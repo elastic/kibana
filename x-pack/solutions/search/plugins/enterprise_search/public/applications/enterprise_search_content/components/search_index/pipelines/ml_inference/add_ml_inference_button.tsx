@@ -12,8 +12,9 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { KibanaLogic } from '../../../../../shared/kibana/kibana_logic';
-import { IndexViewLogic } from '../../index_view_logic';
 import { PipelinesLogic } from '../pipelines_logic';
 
 export interface AddMLInferencePipelineButtonProps {
@@ -77,6 +78,7 @@ const AddButton: React.FC<{
   onClick?: () => void;
 }> = ({ disabled, ingestionMethod, onClick }) => (
   <EuiButton
+    data-test-subj="enterpriseSearchAddButtonAddInferencePipelineButton"
     fullWidth
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
     color={disabled ? undefined : 'primary'}

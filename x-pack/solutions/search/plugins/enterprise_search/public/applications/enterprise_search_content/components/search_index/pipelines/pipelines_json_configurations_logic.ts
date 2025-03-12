@@ -9,13 +9,14 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
+import { IndexNameLogic } from '@kbn/search-connectors-plugin/public';
+
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import {
   FetchCustomPipelineApiLogicArgs,
   FetchCustomPipelineApiLogicResponse,
   FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import { IndexNameLogic } from '../index_name_logic';
 
 interface IndexPipelinesConfigurationsActions {
   fetchIndexPipelinesDataSuccess: Actions<

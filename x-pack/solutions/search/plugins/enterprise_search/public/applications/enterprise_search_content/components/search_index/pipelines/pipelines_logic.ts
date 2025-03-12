@@ -13,6 +13,17 @@ import { i18n } from '@kbn/i18n';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
 
+import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
+  CachedFetchIndexApiLogicValues,
+  FetchDefaultPipelineApiLogic,
+  FetchDefaultPipelineResponse,
+  PostPipelineArgs,
+  PostPipelineResponse,
+  UpdatePipelineApiLogic,
+} from '@kbn/search-connectors-plugin/public';
+
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
 
 import { HttpError } from '../../../../../../common/types/api';
@@ -21,20 +32,6 @@ import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../../shared/flash_messages';
 
-import {
-  FetchDefaultPipelineApiLogic,
-  FetchDefaultPipelineResponse,
-} from '../../../api/connector/get_default_pipeline_api_logic';
-import {
-  PostPipelineArgs,
-  PostPipelineResponse,
-  UpdatePipelineApiLogic,
-} from '../../../api/connector/update_pipeline_api_logic';
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicValues,
-  CachedFetchIndexApiLogicActions,
-} from '../../../api/index/cached_fetch_index_api_logic';
 import {
   CreateCustomPipelineApiLogic,
   CreateCustomPipelineApiLogicArgs,

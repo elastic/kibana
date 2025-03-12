@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useValues } from 'kea';
 
-import { IndexViewLogic } from '../../../index_view_logic';
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
 
 import { TextExpansionCallOutProps, TextExpansionCallOutState } from './text_expansion_callout';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';

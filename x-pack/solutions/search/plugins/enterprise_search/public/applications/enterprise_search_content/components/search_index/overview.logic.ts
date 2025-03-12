@@ -9,15 +9,17 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
 
+import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
+} from '@kbn/search-connectors-plugin/public';
+
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
-} from '../../api/index/cached_fetch_index_api_logic';
+
 import {
   FetchIndexPipelineParametersApiLogic,
   FetchIndexPipelineParametersApiLogicActions,

@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
@@ -17,7 +19,6 @@ import {
   StartModelApiLogic,
   StartModelApiLogicActions,
 } from '../../../../api/ml_models/start_model_api_logic';
-import { IndexViewLogic } from '../../index_view_logic';
 
 import {
   MLInferenceLogic,

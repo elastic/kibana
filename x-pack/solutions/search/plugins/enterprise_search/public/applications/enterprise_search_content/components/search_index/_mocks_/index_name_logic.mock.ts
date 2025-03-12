@@ -9,7 +9,7 @@ export const mockIndexNameValues = {
   indexName: 'index-name',
 };
 
-jest.mock('../index_name_logic', () => ({
+jest.mock('@kbn/search-connectors-plugin/public', () => ({
   IndexNameLogic: {
     values: mockIndexNameValues,
   },

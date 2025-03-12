@@ -11,10 +11,11 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { IndexNameLogic } from '@kbn/search-connectors-plugin/public';
+
 import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 import { LicensingLogic } from '../../../../shared/licensing';
-import { IndexNameLogic } from '../index_name_logic';
 
 import { InferencePipelineCard } from './inference_pipeline_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';

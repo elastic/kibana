@@ -7,3 +7,4 @@
 
 export { ConnectorConfiguration } from './connector_configuration';
 export { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
+export { ConnectorViewLogic } from './connector_view_logic';

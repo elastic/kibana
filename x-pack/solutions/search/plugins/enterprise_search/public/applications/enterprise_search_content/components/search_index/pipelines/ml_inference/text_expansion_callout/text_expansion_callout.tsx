@@ -12,8 +12,9 @@ import { useValues } from 'kea';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { KibanaLogic } from '../../../../../../shared/kibana';
-import { IndexViewLogic } from '../../../index_view_logic';
 
 import { TRAINED_MODELS_PATH } from '../utils';
 
@@ -46,6 +47,7 @@ export const TextExpansionDismissButton = ({
 }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
   return (
     <EuiButtonIcon
+      data-test-subj="enterpriseSearchTextExpansionDismissButtonButton"
       aria-label={i18n.translate(
         'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.dismissButton',
         { defaultMessage: 'Dismiss ELSER call out' }
@@ -58,6 +60,7 @@ export const TextExpansionDismissButton = ({
 
 export const FineTuneModelsButton: React.FC = () => (
   <EuiButtonEmpty
+    data-test-subj="enterpriseSearchFineTuneModelsButtonFineTunePerformanceButton"
     iconSide="left"
     iconType="wrench"
     onClick={() =>

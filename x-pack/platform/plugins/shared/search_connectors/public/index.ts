@@ -57,6 +57,7 @@ export {
 export {
   ConnectorConfiguration,
   ConnectorNameAndDescriptionLogic,
+  ConnectorViewLogic,
 } from './components/connector_detail';
 
 export type {
@@ -65,10 +66,25 @@ export type {
   DeleteIndexApiLogicValues,
   FetchIndexActions,
   FetchIndexApiResponse,
+  CachedFetchIndexApiLogicActions,
+  GetMappingsArgs,
+  GetMappingsResponse,
+  FetchDefaultPipelineResponse,
+  PostPipelineArgs,
+  PostPipelineResponse,
+  CachedFetchIndexApiLogicValues,
 } from './api';
 export {
   mappingsWithPropsApiLogic,
   CancelSyncsApiLogic,
   DeleteIndexApiLogic,
   FetchIndexApiLogic,
+  GenerateConnectorApiKeyApiLogic,
+  UpdatePipelineApiLogic,
+  CachedFetchIndexApiLogic,
+  MappingsApiLogic,
+  FetchDefaultPipelineApiLogic,
 } from './api';
+
+export { ConnectorsRouter } from './components/connectors/connectors_router';
+export { CrawlersRouter } from './components/connectors/crawlers_router';

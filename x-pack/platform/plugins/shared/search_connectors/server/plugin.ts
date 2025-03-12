@@ -40,7 +40,11 @@ export class SearchConnectorsPlugin
     this.connectors = getConnectorTypes(http.staticAssets);
     // Enterprise Search Routes
     if (this.connectors.length > 0) {
-      registerConnectorRoutes(plugins);
+      /**
+       * Register routes
+       */
+      const router = http.createRouter();
+      registerConnectorRoutes({ ...plugins, router });
     }
     return {
       getConnectorTypes: () => this.connectors,

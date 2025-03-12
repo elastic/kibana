@@ -21,10 +21,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { icons } from '../../../../../../assets/client_libraries';
 import { docLinks } from '../../../../../shared/doc_links';
 
-import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 
 const libraries = [
@@ -122,6 +123,7 @@ export const ClientLibrariesPopover: React.FC = () => {
       closePopover={toggleClientsPopover}
       button={
         <EuiButton
+          data-test-subj="enterpriseSearchClientLibrariesPopoverClientLibrariesButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-clientLibraries-openClientLibraries`}
           iconType="arrowDown"
           iconSide="right"

@@ -8,8 +8,7 @@
 import moment from 'moment';
 
 import { ConnectorSyncJob, TriggerMethod, SyncStatus, SyncJobType } from '@kbn/search-connectors';
-
-import { SyncJobView } from '../components/search_index/sync_jobs/sync_jobs_view_logic';
+import { SyncJobView } from '@kbn/search-connectors-plugin/public/components/search_index/sync_jobs/sync_jobs_view_logic';
 
 export const syncJob: ConnectorSyncJob = {
   cancelation_requested_at: null,

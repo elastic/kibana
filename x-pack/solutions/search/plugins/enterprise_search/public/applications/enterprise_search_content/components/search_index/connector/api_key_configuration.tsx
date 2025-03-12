@@ -22,8 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { GenerateConnectorApiKeyApiLogic } from '@kbn/search-connectors-plugin/public';
+
 import { Status } from '../../../../../../common/types/api';
-import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { ApiKey } from '../../api_key/api_key';
 
 const ConfirmModal: React.FC<{

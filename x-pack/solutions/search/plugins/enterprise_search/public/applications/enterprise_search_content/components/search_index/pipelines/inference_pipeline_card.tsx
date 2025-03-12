@@ -23,14 +23,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { IndexNameLogic, IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HttpLogic } from '../../../../shared/http';
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';
 import { getMLType, getModelDisplayTitle } from '../../shared/ml_inference/utils';
-import { IndexNameLogic } from '../index_name_logic';
-
-import { IndexViewLogic } from '../index_view_logic';
 
 import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
 import { MODEL_REDACTED_VALUE } from './ml_inference/utils';

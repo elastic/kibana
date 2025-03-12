@@ -17,5 +17,5 @@ export interface ReactRouterProps {
   shouldNotPrepend?: boolean;
   http?: HttpSetup;
   navigateToUrl?: (url: string, options?: NavigateToUrlOptions) => Promise<void>;
-  history?: ScopedHistory;
+  history: ScopedHistory;
 }

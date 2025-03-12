@@ -23,7 +23,8 @@
       "share",
       "licensing",
       "taskManager",
-      "fleet"
+      "fleet",
+      "kibanaReact"
     ],
     "optionalPlugins": [
       "cloud"

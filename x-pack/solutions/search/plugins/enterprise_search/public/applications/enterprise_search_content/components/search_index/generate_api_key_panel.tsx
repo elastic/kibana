@@ -13,8 +13,9 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eu
 
 import { i18n } from '@kbn/i18n';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { APIGettingStarted } from './components/getting_started/getting_started';
-import { IndexViewLogic } from './index_view_logic';
 
 export const GenerateApiKeyPanel: React.FC = () => {
   const { isHiddenIndex } = useValues(IndexViewLogic);

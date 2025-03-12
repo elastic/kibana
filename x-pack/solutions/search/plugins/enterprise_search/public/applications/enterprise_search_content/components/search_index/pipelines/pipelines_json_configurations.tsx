@@ -23,12 +23,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { HttpLogic } from '../../../../shared/http';
 import { isManagedPipeline } from '../../../../shared/pipelines/is_managed';
-
-import { IndexViewLogic } from '../index_view_logic';
 
 import { PipelineJSONBadges } from './pipeline_json_badges';
 import { IndexPipelinesConfigurationsLogic } from './pipelines_json_configurations_logic';
@@ -58,7 +58,12 @@ export const PipelinesJSONConfigurations: React.FC = () => {
           { defaultMessage: 'View the JSON for your pipeline configurations on this index.' }
         )}
         footerDocLink={
-          <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
+          <EuiLink
+            data-test-subj="enterpriseSearchPipelinesJSONConfigurationsLearnMoreAboutHowSearchUsesIngestPipelinesLink"
+            href={docLinks.ingestPipelines}
+            target="_blank"
+            color="subdued"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.ingestionPipelines.docLink',
               {
@@ -82,6 +87,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
           )}
         >
           <EuiSelect
+            data-test-subj="enterpriseSearchPipelinesJSONConfigurationsSelect"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-selectPipeline`}
             fullWidth
             options={pipelineNames.map((name) => ({ text: name, value: name }))}
@@ -99,6 +105,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
               <EuiFlexItem grow={false}>
                 {isManagedPipeline(selectedPipeline) ? (
                   <EuiButtonEmpty
+                    data-test-subj="enterpriseSearchPipelinesJSONConfigurationsViewInStackManagementButton"
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-viewInStackManagement`}
                     size="s"
                     flush="both"
@@ -117,6 +124,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
                   </EuiButtonEmpty>
                 ) : (
                   <EuiButtonEmpty
+                    data-test-subj="enterpriseSearchPipelinesJSONConfigurationsEditInStackManagementButton"
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-editInStackManagement`}
                     size="s"
                     flush="both"

@@ -10,6 +10,14 @@ import { kea, MakeLogicType } from 'kea';
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicValues,
+  GetMappingsArgs,
+  GetMappingsResponse,
+  MappingsApiLogic,
+} from '@kbn/search-connectors-plugin/public';
+
+import {
   FieldMapping,
   formatPipelineName,
   generateMlInferencePipelineBody,
@@ -23,15 +31,6 @@ import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicValues,
-} from '../../../../api/index/cached_fetch_index_api_logic';
-import {
-  GetMappingsArgs,
-  GetMappingsResponse,
-  MappingsApiLogic,
-} from '../../../../api/mappings/mappings_logic';
 import {
   CachedFetchModelsApiLogic,
   CachedFetchModlesApiLogicActions,

@@ -13,7 +13,7 @@ import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexViewLogic } from '../../index_view_logic';
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 

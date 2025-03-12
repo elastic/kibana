@@ -55,7 +55,6 @@ import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
-import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
@@ -243,8 +242,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     registerConfigDataRoute(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
-    // Enterprise Search Routes
-    if (config.hasConnectors) registerConnectorRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)

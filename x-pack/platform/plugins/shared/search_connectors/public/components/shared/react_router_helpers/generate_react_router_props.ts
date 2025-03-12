@@ -34,11 +34,7 @@ export const generateReactRouterProps = ({
   shouldNotPrepend = false,
 }: ReactRouterProps): GeneratedReactRouterProps<unknown> => {
   // Generate the correct link href (with basename etc. accounted for)
-  const href = createHref(
-    to,
-    { history: history!, http: http! },
-    { shouldNotCreateHref, shouldNotPrepend }
-  );
+  const href = createHref(to, { history, http: http! }, { shouldNotCreateHref, shouldNotPrepend });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)

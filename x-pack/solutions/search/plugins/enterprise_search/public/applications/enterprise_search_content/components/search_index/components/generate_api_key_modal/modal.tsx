@@ -34,10 +34,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { GenerateApiKeyLogic } from '../../../../api/generate_api_key/generate_api_key_logic';
-import { IndexViewLogic } from '../../index_view_logic';
 
 import { GenerateApiKeyModalLogic } from './generate_api_key_modal.logic';
 

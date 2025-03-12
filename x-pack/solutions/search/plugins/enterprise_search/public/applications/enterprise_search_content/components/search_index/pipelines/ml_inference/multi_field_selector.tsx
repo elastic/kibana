@@ -23,9 +23,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
 
-import { IndexViewLogic } from '../../index_view_logic';
+import { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 
@@ -184,6 +184,7 @@ export const MultiFieldMapping: React.FC = () => {
             fullWidth
           >
             <EuiFieldText
+              data-test-subj="enterpriseSearchMultiFieldMappingFieldText"
               prepend="ml.inference."
               onChange={(e) => setTargetField(e.target.value)}
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-targetField`}
@@ -196,6 +197,7 @@ export const MultiFieldMapping: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem style={{ paddingTop: '20px' }}>
           <EuiButton
+            data-test-subj="enterpriseSearchMultiFieldMappingAddButton"
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
             disabled={selectedFields.length === 0}

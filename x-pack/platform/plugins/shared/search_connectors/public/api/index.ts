@@ -15,3 +15,16 @@ export type {
 } from './index/delete_index_api_logic';
 export { FetchIndexApiLogic } from './index/fetch_index_api_logic';
 export type { FetchIndexActions, FetchIndexApiResponse } from './index/fetch_index_api_logic';
+
+export { GenerateConnectorApiKeyApiLogic } from './connector/generate_connector_api_key_api_logic';
+export { UpdatePipelineApiLogic } from './connector/update_pipeline_api_logic';
+export { CachedFetchIndexApiLogic } from './index/cached_fetch_index_api_logic';
+export type { CachedFetchIndexApiLogicActions } from './index/cached_fetch_index_api_logic';
+
+export { MappingsApiLogic } from './mappings/mappings_logic';
+export type { GetMappingsArgs, GetMappingsResponse } from './mappings/mappings_logic';
+
+export { FetchDefaultPipelineApiLogic } from './connector/get_default_pipeline_api_logic';
+export type { FetchDefaultPipelineResponse } from './connector/get_default_pipeline_api_logic';
+export type { PostPipelineArgs, PostPipelineResponse } from './connector/update_pipeline_api_logic';
+export type { CachedFetchIndexApiLogicValues } from './index/cached_fetch_index_api_logic';

@@ -14,10 +14,11 @@ import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LanguageDefinitionSnippetArguments } from '@kbn/search-api-panels';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { useCloudDetails } from '../../../../../shared/cloud_details/cloud_details';
 
 import { GettingStarted } from '../../../../../shared/getting_started/getting_started';
-import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 import { GenerateApiKeyModal } from '../generate_api_key_modal/modal';
 

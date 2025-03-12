@@ -14,6 +14,8 @@ import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+
 import { Status } from '../../../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -23,8 +25,6 @@ import {
   LICENSING_FEATURE,
 } from '../../../../../shared/licensing_callout/licensing_callout';
 import { CreateCustomPipelineApiLogic } from '../../../../api/index/create_custom_pipeline_api_logic';
-
-import { IndexViewLogic } from '../../index_view_logic';
 
 import { PipelinesLogic } from '../pipelines_logic';
 
@@ -66,6 +66,7 @@ export const CopyAndCustomizePipelinePanel: React.FC = () => {
           />
         </p>
         <EuiButton
+          data-test-subj="enterpriseSearchCopyAndCustomizePipelinePanelCopyAndCustomizeButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
           isLoading={createStatus === Status.LOADING}
           iconType="lockOpen"

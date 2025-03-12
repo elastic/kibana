@@ -22,6 +22,7 @@
       "esUiShared",
       "navigation",
       "uiActions",
+      "searchConnectors",
     ],
     "optionalPlugins": [
       "customIntegrations",
@@ -34,7 +35,6 @@
       "usageCollection",
       "guidedOnboarding",
       "console",
-      "searchConnectors",
       "searchNavigation",
       "searchPlayground",
       "embeddable",

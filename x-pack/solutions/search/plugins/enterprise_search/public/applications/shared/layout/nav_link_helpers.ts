@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NavigateToUrlOptions } from '@kbn/core/public';
 import { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import {
@@ -15,6 +16,7 @@ import {
 
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
+import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 
 interface Params {
@@ -51,8 +53,25 @@ export const getNavLinkActive = ({
   const { href: currentPathHref } = generateReactRouterProps({
     shouldNotCreateHref: false,
     to: currentPath,
+    history: KibanaLogic.values.history,
+    http: HttpLogic.values.http,
+    navigateToUrl: KibanaLogic.values.navigateToUrl as (
+      url: string,
+      options?: NavigateToUrlOptions
+    ) => Promise<void>,
   });
-  const { href: toHref } = generateReactRouterProps({ shouldNotCreateHref, shouldNotPrepend, to });
+
+  const { href: toHref } = generateReactRouterProps({
+    shouldNotCreateHref,
+    shouldNotPrepend,
+    to,
+    history: KibanaLogic.values.history,
+    http: HttpLogic.values.http,
+    navigateToUrl: KibanaLogic.values.navigateToUrl as (
+      url: string,
+      options?: NavigateToUrlOptions
+    ) => Promise<void>,
+  });
 
   if (currentPathHref === toHref) return true;
 

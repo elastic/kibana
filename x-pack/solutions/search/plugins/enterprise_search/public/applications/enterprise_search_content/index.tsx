@@ -8,12 +8,11 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
+import { ConnectorsRouter, CrawlersRouter } from '@kbn/search-connectors-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { InitialAppData } from '../../../common/types';
 
-import { ConnectorsRouter } from './components/connectors/connectors_router';
-import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
 import { CONNECTORS_PATH, CRAWLERS_PATH, ROOT_PATH, SEARCH_INDICES_PATH } from './routes';
