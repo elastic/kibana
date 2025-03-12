@@ -22,6 +22,7 @@ import { Tab, type TabProps } from '../tab';
 import type { TabItem } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
+import { zLevels } from '../../constants';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -91,7 +92,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           position: absolute;
           width: 100%;
           height: 0;
-          z-index: 1;
+          z-index: ${zLevels.underHeaderShadow};
           ${logicalCSS('border-bottom', euiTheme.border.thin)}
           ${euiShadowXSmall(euiThemeContext)}
 

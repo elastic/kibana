@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-
-const KIBANA_HEADER_ID = 'kbnHeaderSecondBar';
+import { css as cssReact, SerializedStyles } from '@emotion/react';
+import { zLevels } from '../../constants';
 
 const globalCss = css`
   overscroll-behavior: none;
@@ -30,7 +30,8 @@ interface UseTabGlueStylesProps {
 
 interface UseTabGlueStylesReturn {
   selectedTabBackgroundColor: string;
-  shouldOverflow: boolean;
+  tabBackground: React.ReactNode;
+  tabBackgroundParentCss: SerializedStyles;
 }
 
 export const useTabsOverflow = ({ isSelected }: UseTabGlueStylesProps): UseTabGlueStylesReturn => {
@@ -41,9 +42,6 @@ export const useTabsOverflow = ({ isSelected }: UseTabGlueStylesProps): UseTabGl
   )
     ? euiTheme.colors.body
     : euiTheme.colors.emptyShade;
-  const [hasClassicHeader] = useState<boolean>(() =>
-    Boolean(document.getElementById(KIBANA_HEADER_ID))
-  );
 
   useEffect(() => {
     if (!isSelected) {
@@ -60,7 +58,32 @@ export const useTabsOverflow = ({ isSelected }: UseTabGlueStylesProps): UseTabGl
   return useMemo(() => {
     return {
       selectedTabBackgroundColor,
-      shouldOverflow: isSelected && hasClassicHeader,
+      tabBackground: (
+        <div
+          css={cssReact`
+            display: block;
+            position: absolute;
+            top: ${isSelected ? `-${euiTheme.size.xs}` : 0};
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background-color: ${
+              isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade
+            };
+            transition: background-color ${euiTheme.animation.fast};
+            z-index: ${
+              isSelected
+                ? zLevels.aboveHeaderShadowTabBackground
+                : zLevels.belowHeaderShadowTabBackground
+            };
+            border-right: ${euiTheme.border.thin};
+            border-color: ${euiTheme.colors.lightShade};
+          `}
+        />
+      ),
+      tabBackgroundParentCss: cssReact`
+        position: relative;
+      `,
     };
-  }, [selectedTabBackgroundColor, isSelected, hasClassicHeader]);
+  }, [selectedTabBackgroundColor, isSelected, euiTheme]);
 };

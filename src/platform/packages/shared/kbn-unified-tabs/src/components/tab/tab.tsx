@@ -23,6 +23,7 @@ import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems } from '../../types';
 import { useTabsOverflow } from './use_tabs_overflow';
+import { zLevels } from '../../constants';
 
 export interface TabProps {
   item: TabItem;
@@ -88,29 +89,11 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onSelectEvent]
   );
 
-  const { selectedTabBackgroundColor } = useTabsOverflow(props);
+  const { tabBackground, tabBackgroundParentCss } = useTabsOverflow(props);
 
   return (
-    <div
-      css={css`
-        position: relative;
-      `}
-    >
-      <div
-        css={css`
-          display: block;
-          position: absolute;
-          top: -${euiTheme.size.xs};
-          height: ${euiTheme.size.s};
-          right: 0;
-          left: 0;
-          background-color: ${isSelected ? selectedTabBackgroundColor : 'transparent'};
-          transition: background-color ${euiTheme.animation.fast};
-          z-index: 2;
-          border-right: ${euiTheme.border.thin};
-          border-color: ${euiTheme.colors.lightShade};
-        `}
-      />
+    <div css={tabBackgroundParentCss}>
+      {tabBackground}
       <EuiFlexGroup
         ref={containerRef}
         {...getTabAttributes(item, tabContentId)}
@@ -118,7 +101,7 @@ export const Tab: React.FC<TabProps> = (props) => {
         aria-selected={isSelected}
         alignItems="center"
         direction="row"
-        css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, selectedTabBackgroundColor)}
+        css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
         data-test-subj={tabContainerDataTestSubj}
         responsive={false}
         gutterSize="none"
@@ -179,24 +162,20 @@ export const Tab: React.FC<TabProps> = (props) => {
 function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
-  isSelected: boolean,
-  selectedTabBackgroundColor: string
+  isSelected: boolean
 ) {
   // TODO: remove the usage of deprecated colors
 
   return css`
+    z-index: ${zLevels.tabContent};
     position: relative;
     display: inline-flex;
-    border-right: ${euiTheme.border.thin};
-    border-color: ${euiTheme.colors.lightShade};
     height: ${euiTheme.size.xl};
     padding-inline: ${euiTheme.size.xs};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 
-    background-color: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
     color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
-    transition: background-color ${euiTheme.animation.fast};
 
     .unifiedTabs__tabActions {
       position: absolute;
