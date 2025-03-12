@@ -82,6 +82,10 @@ export const GridRowHeader = React.memo(
           setPanelCount(count);
         });
 
+      /**
+       * This subscription is responsible for handling the drag + drop styles for
+       * re-ordering grid rows
+       */
       const dragRowStyleSubscription = gridLayoutStateManager.activeRow$
         .pipe(
           pairwise(),
@@ -99,6 +103,7 @@ export const GridRowHeader = React.memo(
           const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
           if (!headerRef || activeRow?.id !== rowId) return;
 
+          console.log('update styles', type);
           if (type === 'init') {
             setIsActive(true);
             const width = headerRef.getBoundingClientRect().width;
@@ -251,12 +256,11 @@ const styles = {
       '.kbnGridLayout--panelCount': {
         textWrapMode: 'nowrap', // prevent panel count from wrapping
       },
-
       '.kbnGridLayout--moveRowIcon': {
+        cursor: 'move',
         '&:active, &:hover, &:focus': {
-          cursor: 'move',
+          transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
-          transform: 'none !important',
         },
       },
 
@@ -279,7 +283,9 @@ const styles = {
       '&.kbnGridRowHeader--active': {
         zIndex: euiTheme.levels.modal,
         '.kbnGridLayout--moveRowIcon': {
+          cursor: 'move',
           opacity: 1,
+          pointerEvents: 'auto',
         },
       },
     }),
