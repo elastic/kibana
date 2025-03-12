@@ -311,7 +311,8 @@ export const finishSAMLHandshakeEffect = async ({
     });
   }).pipe(Effect.withLogSpan('saml_auth#finishSamlHandshake'));
 
-  const policy = Schedule.compose(Schedule.exponential('10 millis'), Schedule.recurs(3));
+  // Exponential will double the base (first arg to fn), if no factor is provided
+  const policy = Schedule.compose(Schedule.exponential('10 millis'/* No factor */), Schedule.recurs(3));
 
   return await Effect.runPromise(Effect.retry(main, policy));
 };
