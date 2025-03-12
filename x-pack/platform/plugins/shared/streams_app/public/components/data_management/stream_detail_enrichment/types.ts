@@ -23,7 +23,7 @@ export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefi
 
 export interface DetectedField {
   name: string;
-  type?: FieldDefinitionType;
+  type?: FieldDefinitionType | 'system';
 }
 
 export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {

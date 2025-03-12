@@ -96,7 +96,6 @@ export const bulkEditRules = async ({
           baseRule: baseVersionsMap.get(nextRule.rule_id),
           currentRule: convertAlertingRuleToRuleResponse(currentRule),
           nextRule,
-          ruleCustomizationStatus,
         });
       }
 
