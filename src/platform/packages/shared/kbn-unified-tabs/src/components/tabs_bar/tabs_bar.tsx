@@ -10,19 +10,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  euiShadowXSmall,
-  logicalCSS,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
 import type { TabItem } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
-import { zLevels } from '../../constants';
+import { TabsBarWithTopShadow } from '../tabs_visual_glue_to_header/tabs_bar_with_top_shadow';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -81,89 +74,71 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     }
   }, [selectedItem]);
 
-  return (
-    <div
+  const mainTabsBarContent = (
+    <EuiFlexGroup
+      role="tablist"
+      data-test-subj="unifiedTabs_tabsBar"
+      responsive={false}
+      alignItems="center"
+      gutterSize="s"
       css={css`
-        position: relative;
+        background-color: ${euiTheme.colors.lightestShade};
+        padding-right: ${euiTheme.size.xs};
       `}
     >
-      <div
-        css={css`
-          position: absolute;
-          width: 100%;
-          height: 0;
-          z-index: ${zLevels.underHeaderShadow};
-          ${logicalCSS('border-bottom', euiTheme.border.thin)}
-          ${euiShadowXSmall(euiThemeContext)}
-
-          .kbnBody--hasProjectActionMenu & {
-            height: 2px;
-          }
-        `}
-      />
-      <EuiFlexGroup
-        role="tablist"
-        data-test-subj="unifiedTabs_tabsBar"
-        responsive={false}
-        alignItems="center"
-        gutterSize="s"
-        css={css`
-          background-color: ${euiTheme.colors.lightestShade};
-          padding-right: ${euiTheme.size.xs};
-        `}
-      >
-        <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} css={growingFlexItemCss}>
-              <EuiFlexGroup
-                ref={setTabsContainerElement}
-                direction="row"
-                gutterSize="none"
-                alignItems="center"
-                responsive={false}
-                css={tabsContainerCss}
-              >
-                {items.map((item) => (
-                  <Tab
-                    key={item.id}
-                    item={item}
-                    isSelected={selectedItem?.id === item.id}
-                    tabContentId={tabContentId}
-                    tabsSizeConfig={tabsSizeConfig}
-                    getTabMenuItems={getTabMenuItems}
-                    onLabelEdited={onLabelEdited}
-                    onSelect={onSelect}
-                    onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                  />
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {!!scrollLeftButton && <EuiFlexItem grow={false}>{scrollLeftButton}</EuiFlexItem>}
-            {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
-            {!hasReachedMaxItemsCount && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="unifiedTabs_tabsBar_newTabBtn"
-                  iconType="plus"
-                  color="text"
-                  aria-label={addButtonLabel}
-                  title={addButtonLabel}
-                  onClick={onAdd}
+      <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false} css={growingFlexItemCss}>
+            <EuiFlexGroup
+              ref={setTabsContainerElement}
+              direction="row"
+              gutterSize="none"
+              alignItems="center"
+              responsive={false}
+              css={tabsContainerCss}
+            >
+              {items.map((item) => (
+                <Tab
+                  key={item.id}
+                  item={item}
+                  isSelected={selectedItem?.id === item.id}
+                  tabContentId={tabContentId}
+                  tabsSizeConfig={tabsSizeConfig}
+                  getTabMenuItems={getTabMenuItems}
+                  onLabelEdited={onLabelEdited}
+                  onSelect={onSelect}
+                  onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
                 />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            color="text"
-            aria-label="Tabs menu placeholder"
-            title="Tabs menu placeholder"
-            onClick={() => alert('TODO: Implement tabs menu')}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {!!scrollLeftButton && <EuiFlexItem grow={false}>{scrollLeftButton}</EuiFlexItem>}
+          {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
+          {!hasReachedMaxItemsCount && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj="unifiedTabs_tabsBar_newTabBtn"
+                iconType="plus"
+                color="text"
+                aria-label={addButtonLabel}
+                title={addButtonLabel}
+                onClick={onAdd}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="boxesVertical"
+          color="text"
+          aria-label="Tabs menu placeholder"
+          title="Tabs menu placeholder"
+          onClick={() => alert('TODO: Implement tabs menu')}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
+
+  return <TabsBarWithTopShadow>{mainTabsBarContent}</TabsBarWithTopShadow>;
 };

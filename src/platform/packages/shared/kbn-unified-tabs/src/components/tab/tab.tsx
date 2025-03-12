@@ -22,8 +22,7 @@ import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems } from '../../types';
-import { useTabsOverflow } from './use_tabs_overflow';
-import { zLevels } from '../../constants';
+import { TabWithOverflowBackground } from '../tabs_visual_glue_to_header/tab_with_overflow_background';
 
 export interface TabProps {
   item: TabItem;
@@ -89,73 +88,72 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onSelectEvent]
   );
 
-  const { tabBackground, tabBackgroundParentCss } = useTabsOverflow(props);
+  const mainContent = (
+    <EuiFlexGroup
+      ref={containerRef}
+      {...getTabAttributes(item, tabContentId)}
+      role="tab"
+      aria-selected={isSelected}
+      alignItems="center"
+      direction="row"
+      css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
+      data-test-subj={tabContainerDataTestSubj}
+      responsive={false}
+      gutterSize="none"
+      onClick={onClickEvent}
+    >
+      <div css={getTabContentCss()}>
+        {isInlineEditActive ? (
+          <EditTabLabel
+            item={item}
+            onLabelEdited={onLabelEdited}
+            onExit={() => setIsInlineEditActive(false)}
+          />
+        ) : (
+          <>
+            <button
+              aria-label={tabButtonAriaLabel}
+              css={getTabButtonCss(euiTheme)}
+              className="unifiedTabs__tabBtn"
+              data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
+              title={item.label}
+              type="button"
+              onClick={onSelectEvent}
+              onDoubleClick={() => setIsInlineEditActive(true)}
+            >
+              <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
+                {item.label}
+              </EuiText>
+            </button>
+            <div className="unifiedTabs__tabActions">
+              <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
+                {!!getTabMenuItems && (
+                  <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
+                    <TabMenu item={item} getTabMenuItems={getTabMenuItems} />
+                  </EuiFlexItem>
+                )}
+                {!!onClose && (
+                  <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
+                    <EuiButtonIcon
+                      aria-label={closeButtonLabel}
+                      title={closeButtonLabel}
+                      color="text"
+                      data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
+                      iconType="cross"
+                      onClick={onCloseEvent}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </div>
+          </>
+        )}
+      </div>
+    </EuiFlexGroup>
+  );
 
   return (
-    <div css={tabBackgroundParentCss}>
-      {tabBackground}
-      <EuiFlexGroup
-        ref={containerRef}
-        {...getTabAttributes(item, tabContentId)}
-        role="tab"
-        aria-selected={isSelected}
-        alignItems="center"
-        direction="row"
-        css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
-        data-test-subj={tabContainerDataTestSubj}
-        responsive={false}
-        gutterSize="none"
-        onClick={onClickEvent}
-      >
-        <div css={getTabContentCss()}>
-          {isInlineEditActive ? (
-            <EditTabLabel
-              item={item}
-              onLabelEdited={onLabelEdited}
-              onExit={() => setIsInlineEditActive(false)}
-            />
-          ) : (
-            <>
-              <button
-                aria-label={tabButtonAriaLabel}
-                css={getTabButtonCss(euiTheme)}
-                className="unifiedTabs__tabBtn"
-                data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-                title={item.label}
-                type="button"
-                onClick={onSelectEvent}
-                onDoubleClick={() => setIsInlineEditActive(true)}
-              >
-                <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
-                  {item.label}
-                </EuiText>
-              </button>
-              <div className="unifiedTabs__tabActions">
-                <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
-                  {!!getTabMenuItems && (
-                    <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
-                      <TabMenu item={item} getTabMenuItems={getTabMenuItems} />
-                    </EuiFlexItem>
-                  )}
-                  {!!onClose && (
-                    <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                      <EuiButtonIcon
-                        aria-label={closeButtonLabel}
-                        title={closeButtonLabel}
-                        color="text"
-                        data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
-                        iconType="cross"
-                        onClick={onCloseEvent}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </div>
-            </>
-          )}
-        </div>
-      </EuiFlexGroup>
-    </div>
+    <TabWithOverflowBackground isSelected={isSelected}>{mainContent}</TabWithOverflowBackground>
   );
 };
 
@@ -167,7 +165,6 @@ function getTabContainerCss(
   // TODO: remove the usage of deprecated colors
 
   return css`
-    z-index: ${zLevels.tabContent};
     position: relative;
     display: inline-flex;
     height: ${euiTheme.size.xl};
