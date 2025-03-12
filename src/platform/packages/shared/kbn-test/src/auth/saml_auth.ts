@@ -309,7 +309,7 @@ export const finishSAMLHandshakeEffect = async ({
     } else yield* Effect.log(`authResponse.status: [${authResponse.status}]`);
 
     yield* new SamlNot302Error({
-      message: `SAML callback failed: expected 302, got some canned status`,
+      message: `SAML callback failed: expected 302, got: [${authResponse.status}]`,
     });
   }).pipe(Effect.withLogSpan('saml_auth#finishSamlHandshake'));
 
