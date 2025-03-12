@@ -11,3 +11,10 @@ export const MAX_TAB_LABEL_LENGTH = 500;
 
 export const MAX_TAB_WIDTH = 280;
 export const MIN_TAB_WIDTH = 96;
+
+export enum zLevels {
+  belowHeaderShadowTabBackground = 0,
+  underHeaderShadow = 1,
+  aboveHeaderShadowTabBackground = 2,
+  tabContent = 3,
+}
