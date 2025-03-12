@@ -61,7 +61,7 @@ export class AddEditMonitorAPI {
     id?: string;
     normalizedMonitor: SyntheticsMonitor;
   }) {
-    const { savedObjectsClient, server, syntheticsMonitorClient, spaceId } = this.routeContext;
+    const { server, syntheticsMonitorClient, spaceId } = this.routeContext;
     const newMonitorId = id ?? uuidV4();
 
     let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
@@ -74,7 +74,6 @@ export class AddEditMonitorAPI {
       const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
-        savedObjectsClient,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(

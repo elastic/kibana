@@ -45,16 +45,8 @@ export class MonitorConfigRepository {
     return normalizeSecrets(decryptedMonitor);
   }
 
-  async create({
-    id,
-    savedObjectsClient,
-    normalizedMonitor,
-  }: {
-    id: string;
-    savedObjectsClient: SavedObjectsClientContract;
-    normalizedMonitor: SyntheticsMonitor;
-  }) {
-    return await savedObjectsClient.create<EncryptedSyntheticsMonitorAttributes>(
+  async create({ id, normalizedMonitor }: { id: string; normalizedMonitor: SyntheticsMonitor }) {
+    return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
       syntheticsMonitorType,
       formatSecrets({
         ...normalizedMonitor,

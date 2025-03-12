@@ -103,7 +103,6 @@ describe('MonitorConfigRepository', () => {
   describe('create', () => {
     it('should create a monitor with an id', async () => {
       const id = 'test-id';
-      const savedObjectsClient = savedObjectsClientMock.create();
       const normalizedMonitor = {
         name: 'Test Monitor',
         [ConfigKey.CUSTOM_HEARTBEAT_ID]: 'custom-id',
@@ -115,11 +114,10 @@ describe('MonitorConfigRepository', () => {
         type: syntheticsMonitorType,
         references: [],
       };
-      savedObjectsClient.create.mockResolvedValue(mockCreatedMonitor);
+      soClient.create.mockResolvedValue(mockCreatedMonitor);
 
       const result = await repository.create({
         id,
-        savedObjectsClient,
         normalizedMonitor,
       });
 
@@ -130,7 +128,7 @@ describe('MonitorConfigRepository', () => {
         revision: 1,
       });
 
-      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      expect(soClient.create).toHaveBeenCalledWith(
         syntheticsMonitorType,
         {
           ...normalizedMonitor,
@@ -146,7 +144,6 @@ describe('MonitorConfigRepository', () => {
     });
 
     it('should create a monitor without an id', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
       const normalizedMonitor = {
         name: 'Test Monitor',
       } as unknown as SyntheticsMonitor;
@@ -157,11 +154,10 @@ describe('MonitorConfigRepository', () => {
         type: syntheticsMonitorType,
         references: [],
       };
-      savedObjectsClient.create.mockResolvedValue(mockCreatedMonitor);
+      soClient.create.mockResolvedValue(mockCreatedMonitor);
 
       const result = await repository.create({
         id: '',
-        savedObjectsClient,
         normalizedMonitor,
       });
 
@@ -172,7 +168,7 @@ describe('MonitorConfigRepository', () => {
         revision: 1,
       });
 
-      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      expect(soClient.create).toHaveBeenCalledWith(
         syntheticsMonitorType,
         {
           ...normalizedMonitor,
