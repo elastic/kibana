@@ -37,6 +37,7 @@ import {
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
+import { preloadEmbeddableChunks } from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -79,6 +80,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
 
     const embeddableStart: EmbeddableStart = {
+      preloadEmbeddableChunks,
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(

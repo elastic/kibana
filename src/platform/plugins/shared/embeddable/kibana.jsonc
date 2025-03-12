@@ -15,7 +15,7 @@
       "uiActions",
       "savedObjectsFinder",
       "savedObjectsManagement",
-      "contentManagement"
+      "contentManagement",
     ],
     "optionalPlugins": ["savedObjectsTaggingOss", "usageCollection"],
     "requiredBundles": ["kibanaUtils", "presentationPanel"],

@@ -29,7 +29,7 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { type EmbeddableSetup, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -80,6 +80,7 @@ import type { FindDashboardsService } from './services/dashboard_content_managem
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
+import { PresentationPanelStart } from '@kbn/presentation-panel-plugin/public';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -123,6 +124,7 @@ export interface DashboardStartDependencies {
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  presentationPanel: PresentationPanelStart;
 }
 
 export interface DashboardSetup {
@@ -256,11 +258,18 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        await untilPluginStartServicesReady();
-        const { mountApp } = await import('./dashboard_app/dashboard_router');
+        const [coreStart, { embeddable: embeddableStart, presentationPanel }] = await core.getStartServices();
+        const start = performance.now();
+        const [{ mountApp }] = await Promise.all([
+          import('./dashboard_app/dashboard_router'),
+          untilPluginStartServicesReady(),
+          presentationPanel.preloadPresentationPanelChunks(),
+          embeddableStart.preloadEmbeddableChunks(['control_group']),
+        ]);
+        const stop = performance.now();
+        const duration = stop - start;
+        console.log('mount Promise.all', duration);
         appMounted();
-
-        const [coreStart] = await core.getStartServices();
 
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
