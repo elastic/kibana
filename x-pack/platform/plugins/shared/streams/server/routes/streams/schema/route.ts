@@ -39,7 +39,7 @@ export const unmappedFieldsRoute = createServerRoute({
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],
@@ -121,8 +121,16 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
     }
 
+    const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
+      // filter out potential system fields since we can't simulate them anyway
+      if (field.type === 'system') {
+        return [];
+      }
+      return [field];
+    });
+
     const propertiesForSample = Object.fromEntries(
-      params.body.field_definitions.map((field) => [field.name, { type: 'keyword' }])
+      userFieldDefinitions.map((field) => [field.name, { type: 'keyword' as const }])
     );
 
     const documentSamplesSearchBody = {
@@ -138,7 +146,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],
@@ -163,7 +171,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     }
 
     const propertiesForSimulation = Object.fromEntries(
-      params.body.field_definitions.map((field) => [
+      userFieldDefinitions.map((field) => [
         field.name,
         {
           type: field.type,
@@ -230,7 +238,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     // Convert the field definitions to a format that can be used in runtime mappings (match_only_text -> keyword)
     const propertiesCompatibleWithRuntimeMappings = Object.fromEntries(
-      params.body.field_definitions.map((field) => [
+      userFieldDefinitions.map((field) => [
         field.name,
         {
           type: field.type === 'match_only_text' ? 'keyword' : field.type,
@@ -244,7 +252,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],

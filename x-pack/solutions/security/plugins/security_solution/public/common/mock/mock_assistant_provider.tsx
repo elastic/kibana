@@ -13,7 +13,6 @@ import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -59,13 +58,13 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       getComments={jest.fn(() => [])}
       http={mockHttp}
       navigateToApp={mockNavigateToApp}
-      baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'test'}
       productDocBase={{
         installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
       }}
       userProfileService={mockUserProfileService}
       chrome={chrome}
+      spaceId="default"
     >
       {children}
     </AssistantProvider>

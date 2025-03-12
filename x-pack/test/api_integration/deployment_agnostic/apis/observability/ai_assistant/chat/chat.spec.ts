@@ -16,6 +16,8 @@ import {
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
+const SYSTEM_MESSAGE = `this is a system message`;
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -57,7 +59,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         params: {
           body: {
             name: 'my_api_call',
-            systemMessage: 'You are a helpful assistant',
+            systemMessage: SYSTEM_MESSAGE,
             messages,
             connectorId: 'does not exist',
             functions: [],
@@ -66,6 +68,46 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
       expect(status).to.be(404);
+    });
+
+    it('returns a 200 if the connector exists', async () => {
+      void proxy.interceptConversation('Hello from LLM Proxy');
+      const { status } = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat',
+        params: {
+          body: {
+            name: 'my_api_call',
+            systemMessage: '',
+            messages,
+            connectorId,
+            functions: [],
+            scopes: ['all'],
+          },
+        },
+      });
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
+      expect(status).to.be(200);
+    });
+
+    it('should forward the system message to the LLM', async () => {
+      const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+      await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat',
+        params: {
+          body: {
+            name: 'my_api_call',
+            systemMessage: SYSTEM_MESSAGE,
+            messages,
+            connectorId,
+            functions: [],
+            scopes: ['all'],
+          },
+        },
+      });
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
+      const simulator = await simulatorPromise;
+      const requestData = simulator.requestBody; // This is the request sent to the LLM
+      expect(requestData.messages[0].content).to.eql(SYSTEM_MESSAGE);
     });
 
     it('returns a streaming response from the server', async () => {
@@ -96,7 +138,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .on('error', reject)
               .send({
                 name: 'my_api_call',
-                systemMessage: 'You are a helpful assistant',
+                systemMessage: SYSTEM_MESSAGE,
                 messages,
                 connectorId,
                 functions: [],
@@ -134,7 +176,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               name: 'my_api_call',
-              systemMessage: 'You are a helpful assistant',
+              systemMessage: SYSTEM_MESSAGE,
               messages,
               connectorId,
               functions: [],

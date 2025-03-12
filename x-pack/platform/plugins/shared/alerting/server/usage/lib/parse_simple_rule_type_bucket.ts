@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsBuckets,
   AggregationsStringTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 
 export function parseSimpleRuleTypeBucket(

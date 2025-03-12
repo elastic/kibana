@@ -635,14 +635,6 @@
                 "path": "src/platform/plugins/shared/data/public/plugin.ts"
               },
               {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/public/plugin.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/public/plugin.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
               },
@@ -741,10 +733,6 @@
               {
                 "plugin": "aiops",
                 "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
               },
               {
                 "plugin": "reporting",

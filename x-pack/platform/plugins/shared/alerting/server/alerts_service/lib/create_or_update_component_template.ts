@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateIndexTemplateItem,
-  type IndicesPutIndexTemplateRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -53,6 +52,7 @@ const getIndexTemplatesUsingComponentTemplate = async (
             name: template.name,
             body: {
               ...template.index_template,
+              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
               template: {
                 ...template.index_template.template,
                 settings: {
@@ -60,7 +60,7 @@ const getIndexTemplatesUsingComponentTemplate = async (
                   'index.mapping.total_fields.limit': totalFieldsLimit,
                 },
               },
-            } as IndicesPutIndexTemplateRequest['body'],
+            },
           }),
         { logger }
       );

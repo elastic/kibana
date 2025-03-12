@@ -16,6 +16,7 @@ import {
   RULES_UPDATES_TABLE,
   UPGRADE_ALL_RULES_BUTTON,
   UPGRADE_SELECTED_RULES_BUTTON,
+  getReviewSingleRuleButtonByRuleId,
   getUpgradeSingleRuleButtonByRuleId,
 } from '../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
@@ -44,15 +45,6 @@ describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow - With Rule Customization, Rule Updates Table',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'prebuiltRulesCustomizationEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
 
   () => {
@@ -102,21 +94,17 @@ describe(
         clickRuleUpdatesTab();
       });
 
-      it('should disable individual upgrade buttons for all prebuilt rules with conflicts', () => {
-        // All buttons should be disabled because of conflicts
+      it('should display individual review buttons for all prebuilt rules with conflicts', () => {
+        // All buttons should be review buttons because of conflicts
         for (const rule of [OUTDATED_RULE_1, OUTDATED_RULE_2]) {
           const { rule_id: ruleId } = rule['security-rule'];
-          expect(cy.get(getUpgradeSingleRuleButtonByRuleId(ruleId)).should('be.disabled'));
+          expect(cy.get(getReviewSingleRuleButtonByRuleId(ruleId)).should('exist'));
         }
       });
 
       it('should disable `Update selected rules` button when all selected rules have conflicts', () => {
         selectRulesByName(['Old rule 1', 'Old rule 2']);
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
-      });
-
-      it('should disable `Update all rules` button when all  rules have conflicts', () => {
-        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
       });
     });
 
@@ -207,24 +195,24 @@ describe(
         assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_3]);
       });
 
-      it('should disable the upgrade button for conflicting rules while allowing upgrades of no-conflict rules', () => {
-        // Verify the conflicting rule's upgrade button is disabled
+      it('should switch to a review button for conflicting rules while allowing upgrades of no-conflict rules', () => {
+        // Verify the conflicting rule's upgrade button has the review label
         expect(
           cy
-            .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id))
-            .should('be.disabled')
+            .get(getReviewSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id))
+            .should('exist')
         );
 
-        // Verify non-conflicting rules' upgrade buttons are enabled
+        // Verify non-conflicting rules' upgrade buttons do not have the review label
         expect(
           cy
             .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_2['security-rule'].rule_id))
-            .should('not.be.disabled')
+            .should('exist')
         );
         expect(
           cy
             .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_3['security-rule'].rule_id))
-            .should('not.be.disabled')
+            .should('exist')
         );
       });
 
@@ -309,10 +297,10 @@ describe(
       });
 
       it('should disable individual upgrade button for all rules', () => {
-        // All buttons should be disabled because rule type changes are considered conflicts
+        // All buttons should be displayed as review buttons because rule type changes are considered conflicts
         for (const rule of [OUTDATED_QUERY_RULE_1, OUTDATED_QUERY_RULE_2]) {
           const { rule_id: ruleId } = rule['security-rule'];
-          expect(cy.get(getUpgradeSingleRuleButtonByRuleId(ruleId)).should('be.disabled'));
+          expect(cy.get(getReviewSingleRuleButtonByRuleId(ruleId)).should('exist'));
         }
       });
 
@@ -322,10 +310,6 @@ describe(
           OUTDATED_QUERY_RULE_2['security-rule'].name,
         ]);
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
-      });
-
-      it('should disable `Update all rules` button', () => {
-        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
       });
     });
   }

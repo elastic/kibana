@@ -503,6 +503,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         : {}),
     };
 
+    this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
+
     try {
       const logsEndpointActionsResult = await this.options.esClient.index<LogsEndpointAction>(
         {
@@ -526,6 +528,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return doc;
     } catch (err) {
       this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+      this.log.debug(
+        () => `attempt to index document into ${ENDPOINT_ACTIONS_INDEX} failed:\n${stringify(err)}`
+      );
 
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(

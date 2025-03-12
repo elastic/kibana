@@ -11,23 +11,12 @@ import { i18n } from '@kbn/i18n';
 import {
   type ESQLColumn,
   type ESQLCommand,
-  type ESQLAstItem,
   type ESQLMessage,
   type ESQLFunction,
   isFunctionExpression,
   isWhereExpression,
-  isFieldExpression,
-  Walker,
 } from '@kbn/esql-ast';
-import {
-  getFunctionDefinition,
-  isAssignment,
-  isColumnItem,
-  isFunctionItem,
-  isFunctionOperatorParam,
-  isLiteralItem,
-} from '../shared/helpers';
-import { ENRICH_MODES } from './settings';
+import { isAssignment, isColumnItem, isFunctionItem } from '../shared/helpers';
 import {
   appendSeparatorOption,
   asOption,
@@ -36,7 +25,11 @@ import {
   onOption,
   withOption,
 } from './options';
-import { type CommandDefinition, FunctionDefinitionTypes } from './types';
+import { ENRICH_MODES } from './settings';
+
+import { type CommandDefinition } from './types';
+import { checkAggExistence, checkFunctionContent } from './commands_helpers';
+
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
@@ -48,6 +41,10 @@ import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
+import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
+import { suggest as suggestForRename } from '../autocomplete/commands/rename';
+import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
+import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -80,45 +77,6 @@ const statsValidator = (command: ESQLCommand) => {
     .filter(isFunctionItem);
 
   if (statsArg.length) {
-    function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return (
-        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG
-      );
-    }
-    function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return (
-        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== FunctionDefinitionTypes.AGG
-      );
-    }
-
-    function checkAggExistence(arg: ESQLFunction): boolean {
-      if (isWhereExpression(arg)) {
-        return checkAggExistence(arg.args[0] as ESQLFunction);
-      }
-
-      if (isFieldExpression(arg)) {
-        const agg = arg.args[1];
-        const firstFunction = Walker.match(agg, { type: 'function' });
-
-        if (!firstFunction) {
-          return false;
-        }
-
-        return checkAggExistence(firstFunction as ESQLFunction);
-      }
-
-      // TODO the grouping function check may not
-      // hold true for all future cases
-      if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
-        return true;
-      }
-
-      if (isOtherFunction(arg)) {
-        return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
-      }
-
-      return false;
-    }
     // first check: is there an agg function somewhere?
     const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
 
@@ -142,25 +100,6 @@ const statsValidator = (command: ESQLCommand) => {
         }))
       );
     } else {
-      function isConstantOrAggFn(arg: ESQLAstItem): boolean {
-        return isLiteralItem(arg) || isAggFunction(arg);
-      }
-      // now check that:
-      // * the agg function is at root level
-      // * or if it's a operators function, then all operands are agg functions or literals
-      // * or if it's a eval function then all arguments are agg functions or literals
-      function checkFunctionContent(arg: ESQLFunction) {
-        // TODO the grouping function check may not
-        // hold true for all future cases
-        if (isAggFunction(arg)) {
-          return true;
-        }
-        return (arg as ESQLFunction).args.every(
-          (subArg): boolean =>
-            isConstantOrAggFn(subArg) ||
-            (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
-        );
-      }
       // @TODO: improve here the check to get the last instance of the invalidExpression
       // to provide a better location for the error message
       // i.e. STATS round(round(round( a + sum(b) )))
@@ -337,6 +276,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [asOption],
     modes: [],
+    suggest: suggestForRename,
   },
   {
     name: 'limit',
@@ -351,6 +291,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForLimit,
   },
   {
     name: 'keep',
@@ -503,6 +444,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
+    suggest: suggestForMvExpand,
   },
   {
     name: 'enrich',
@@ -521,14 +463,15 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
     },
+    suggest: suggestForEnrich,
   },
   {
     name: 'hidden_command',
     description: 'A test fixture to test hidden-ness',
     hidden: true,
     examples: [],
-    modes: [],
     options: [],
+    modes: [],
     signature: {
       params: [],
       multipleParams: false,

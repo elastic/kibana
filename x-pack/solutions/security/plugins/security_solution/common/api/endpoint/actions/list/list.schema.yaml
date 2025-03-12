@@ -11,44 +11,121 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
-        - name: query
+        - name: page
           in: query
-          required: true
+          required: false
           schema:
-            $ref: '#/components/schemas/GetEndpointActionListRouteQuery'
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/Page'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/PageSize'
+        - name: commands
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/Commands'
+        - name: agentIds
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentIds'
+        - name: userIds
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/UserIds'
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/StartDate'
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/EndDate'
+        - name: agentTypes
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentTypes'
+        - name: withOutputs
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/WithOutputs'
+        - name: types
+          in: query
+          required: false
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/Types'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/GetEndpointActionListResponse'
 components:
   schemas:
-    GetEndpointActionListRouteQuery:
+    GetEndpointActionListResponse:
       type: object
-      properties:
-        agentIds:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentIds'
-        agentTypes:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentTypes'
-        commands:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/Commands'
-        page:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/Page'
-        pageSize:
-          type: integer
-          default: 10
-          minimum: 1
-          maximum: 10000
-          description: Number of items per page
-        startDate:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/StartDate'
-        endDate:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/EndDate'
-        userIds:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/UserIds'
-        types:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/Types'
-        withOutputs:
-          $ref: '../../model/schema/common.schema.yaml#/components/schemas/WithOutputs'
+      properties: { }
+      example:
+        page: 1
+        pageSize: 10
+        total: 4
+        startDate: "now-24h/h"
+        endDate: "now"
+        elasticAgentIds:
+          - "afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0"
+        data:
+          - id: "b3d6de74-36b0-4fa8-be46-c375bf1771bf"
+            agents:
+              - "afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0"
+            command: "running-processes"
+            agentType: "endpoint"
+            startedAt: "2022-08-08T15:24:57.402Z"
+            isCompleted: true
+            completedAt: "2022-08-08T09:50:47.672Z"
+            wasSuccessful: true
+            isExpired: false
+            createdBy: "elastic"
+          - id: "43b4098b-8752-4fbb-a7a7-6df7c74d0ee3"
+            agents:
+              - "afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0"
+            command: "isolate"
+            agentType: "endpoint"
+            startedAt: "2022-08-08T15:23:37.359Z"
+            isCompleted: true
+            completedAt: "2022-08-08T10:41:57.352Z"
+            wasSuccessful: true
+            isExpired: false
+            createdBy: "elastic"
+          - id: "5bc92c86-b8e6-42dd-837f-12ad29e09caa"
+            agents:
+              - "afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0"
+            command: "kill-process"
+            agentType: "endpoint"
+            startedAt: "2022-08-08T14:38:44.125Z"
+            isCompleted: true
+            completedAt: "2022-08-08T09:44:50.952Z"
+            wasSuccessful: true
+            isExpired: false
+            createdBy: "elastic"
+            comment: "bad process - taking up too much cpu"
+          - id: "790d54e0-3aa3-4e5b-8255-3ce9d851246a"
+            agents:
+              - "afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0"
+            command: "unisolate"
+            agentType: "endpoint"
+            startedAt: "2022-08-08T14:38:15.391Z"
+            isCompleted: true
+            completedAt: "2022-08-08T09:40:47.398Z"
+            wasSuccessful: true
+            isExpired: false
+            createdBy: "elastic"
+            comment: "Not a threat to the network"
+

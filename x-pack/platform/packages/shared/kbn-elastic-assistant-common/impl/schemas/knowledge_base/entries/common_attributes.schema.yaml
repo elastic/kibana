@@ -50,8 +50,7 @@ components:
         - "required"
       properties:
         kbResource:
-          type: string
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+          $ref: "#/components/schemas/KnowledgeBaseResource"
         source:
           type: string
           description: Source document name or filepath
@@ -95,6 +94,9 @@ components:
         namespace:
           type: string
           description: Kibana Space, defaults to 'default' space
+        global:
+          type: boolean
+          description: Whether this Knowledge Base Entry is global, defaults to false
         users:
           type: array
           description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -164,6 +166,13 @@ components:
         - $ref: "#/components/schemas/BaseResponseProps"
         - $ref: "#/components/schemas/ResponseFields"
 
+    KnowledgeBaseResource:
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
+      type: string
+      enum:
+        - security_labs
+        - user
+
     ###########
     # Document Knowledge Base Entry
     ###########
@@ -180,8 +189,7 @@ components:
           enum: [document]
           description: Entry type
         kbResource:
-          type: string
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+          $ref: "#/components/schemas/KnowledgeBaseResource"
         source:
           type: string
           description: Source document name or filepath
@@ -307,6 +315,14 @@ components:
       anyOf:
         - $ref: "#/components/schemas/DocumentEntryUpdateFields"
         - $ref: "#/components/schemas/IndexEntryUpdateFields"
+
+    # Don't allow passing id to the update route body
+    KnowledgeBaseEntryUpdateRouteProps:
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: "#/components/schemas/DocumentEntryCreateFields"
+        - $ref: "#/components/schemas/IndexEntryCreateFields"
 
     KnowledgeBaseEntryResponse:
       discriminator:
