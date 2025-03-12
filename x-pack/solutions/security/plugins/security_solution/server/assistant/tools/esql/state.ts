@@ -8,6 +8,7 @@
 import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 
+
 export const EsqlSelfHealingAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
@@ -20,5 +21,9 @@ export const EsqlSelfHealingAnnotation = Annotation.Root({
   maximumLLMCalls: Annotation<number>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => 5,
+  }),
+  shouldSelfHeal: Annotation<boolean>({
+    reducer: (currentValue, newValue) => newValue ?? currentValue,
+    default: () => true,
   }),
 });

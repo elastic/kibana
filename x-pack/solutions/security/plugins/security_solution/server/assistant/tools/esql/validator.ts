@@ -17,6 +17,12 @@ export const getValidatorNode = ({ esClient }: { esClient: ElasticsearchClient }
     const { messages } = state;
     const lastMessage = messages[messages.length - 1];
 
+    if(!state.shouldSelfHeal){
+      return new Command({
+        goto: END,
+      });
+    }
+
     const generatedQueries = extractEsqlFromContent(lastMessage.content as string);
 
     if (!generatedQueries.length) {

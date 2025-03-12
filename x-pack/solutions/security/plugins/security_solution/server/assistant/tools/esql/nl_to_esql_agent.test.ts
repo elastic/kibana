@@ -48,6 +48,7 @@ describe('nl to esql agent', () => {
     messages: [],
     maximumValidationAttempts: 3,
     maximumLLMCalls: 3,
+    shouldSelfHeal: true,
   };
 
   const sampleMessageLog = [
