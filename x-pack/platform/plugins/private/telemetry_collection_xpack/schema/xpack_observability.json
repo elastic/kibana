@@ -273,7 +273,7 @@
               "_meta": {
                 "description": "Total number of services utilizing the opentelemetry/python/elastic agent within the last day"
               }
-            },
+            }
           }
         },
         "agents": {
