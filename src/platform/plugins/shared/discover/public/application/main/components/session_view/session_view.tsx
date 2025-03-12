@@ -99,7 +99,7 @@ export const DiscoverSessionView = ({
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
   const { core, toastNotifications, history, getScopedHistory } = services;
-  const { id: discoverSessionId } = useParams<{ id: string }>();
+  const { id: discoverSessionId } = useParams<{ id?: string }>();
   const [historyLocationState] = useState(
     () => getScopedHistory<MainHistoryLocationState>()?.location.state
   );
@@ -389,7 +389,8 @@ const getInitializeSession =
       stateContainer.savedSearchState.set(discoverSession);
     }
 
-    stateContainer.appState.set(initialState);
+    stateContainer.appState.resetToState(initialState);
+    stateContainer.appState.resetInitialState();
     discoverSessionLoadTracker.reportEvent();
 
     return { showNoDataPage: false, stateContainer };
