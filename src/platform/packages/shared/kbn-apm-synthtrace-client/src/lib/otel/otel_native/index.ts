@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Fields } from '../entity';
-import { Serializable } from '../serializable';
+import type { Fields } from '../../entity';
+import { Serializable } from '../../serializable';
 import { OtelError } from './error';
 import { OtelMetric } from './metric';
 import { OtelTransaction } from './transaction';
@@ -91,7 +91,7 @@ class Otel extends Serializable<OtelDocument> {
         attributes: {
           'agent.name': 'opentelemetry/go',
           'agent.version': '1.28.0',
-          'service.name': 'sendotlp-synth',
+          'service.name': 'sendotlp-otel-native-synth',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
         },
         dropped_attributes_count: 0,
@@ -99,11 +99,11 @@ class Otel extends Serializable<OtelDocument> {
       },
       scope: {
         attributes: {
-          'service.framework.name': 'sendotlp-synth',
+          'service.framework.name': 'sendotlp-otel-native-synth',
           'service.framework.version': '',
         },
         dropped_attributes_count: 0,
-        name: 'sendotlp-synth',
+        name: 'sendotlp-otel-native-synth',
       },
       span_id: spanId,
     });
@@ -116,10 +116,10 @@ class Otel extends Serializable<OtelDocument> {
         'metricset.name': 'service_destination',
         'processor.event': 'metric',
         'event.outcome': 'success',
-        'service.target.name': 'foo_service',
+        'service.target.name': 'foo_service-otel-native-synth',
         'service.target.type': 'http',
         'span.name': 'child1',
-        'span.destination.service.resource': 'foo_service:8080',
+        'span.destination.service.resource': 'foo_service-otel-native-synth:8080',
       },
       data_stream: {
         dataset: 'service_destination.10m.otel',
@@ -134,7 +134,7 @@ class Otel extends Serializable<OtelDocument> {
           'agent.name': 'opentelemetry/nodejs',
           'agent.version': '1.28.0',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
-          'service.name': 'sendotlp-synth',
+          'service.name': 'sendotlp-otel-native-synth',
           'metricset.interval': '10m',
           'telemetry.sdk.name': 'opentelemetry',
           'telemetry.sdk.language': 'nodejs',
@@ -183,18 +183,18 @@ class Otel extends Serializable<OtelDocument> {
           'agent.name': 'otlp',
           'agent.version': '1.28.0',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
-          'service.name': 'sendotlp-synth',
+          'service.name': 'sendotlp-otel-native-synth',
         },
         dropped_attributes_count: 0,
         schema_url: 'https://opentelemetry.io/schemas/1.26.0',
       },
       scope: {
         attributes: {
-          'service.framework.name': 'sendotlp-synth',
+          'service.framework.name': 'sendotlp-otel-native-synth',
           'service.framework.version': '',
         },
         dropped_attributes_count: 0,
-        name: 'sendotlp-synth',
+        name: 'sendotlp-otel-native-synth',
       },
       span_id: id,
       status: {
