@@ -18,7 +18,7 @@ import { InvestigateAlertsClient } from '../../services/investigate_alerts_clien
 import { AlertNotFoundError } from '../../common/errors/alert_not_found_error';
 
 const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
-  endpoint: 'GET /internal/observability/alerts/suggested_dashboards',
+  endpoint: 'GET /internal/observability/alerts/related_dashboards',
   security: {
     authz: {
       enabled: false,

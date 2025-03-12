@@ -207,7 +207,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const alertId = firstHit._id;
 
       const { body } = await supertestWithoutAuth
-        .get(`/internal/observability/alerts/suggested_dashboards?alertId=${alertId}`)
+        .get(`/internal/observability/alerts/related_dashboards?alertId=${alertId}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
