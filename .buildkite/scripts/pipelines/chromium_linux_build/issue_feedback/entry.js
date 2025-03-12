@@ -204,10 +204,8 @@ const getSha256Hash = async (filePath) => {
   console.log('--Modifying paths.ts file\n');
 
   await $(
-    'npm',
+    'npx',
     [
-      'exec',
-      '--offline',
       '--',
       'jscodeshift',
       '--extensions=ts',
