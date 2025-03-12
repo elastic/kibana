@@ -126,7 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await pMap(
           allMonitors,
           async (mon, i) => {
-            await saveMonitor({ ...mon, name: mon.name + Date.now() });
+            await saveMonitor({ ...mon, name: mon.name + Date.now() + i });
           },
           { concurrency: 5 }
         );
@@ -239,9 +239,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await pMap(
           allMonitors,
-          async (mon) => {
+          async (mon, i) => {
             await saveMonitor(
-              { ...mon, name: mon.name + Date.now(), locations: [spaceScopedPrivateLocation] },
+              { ...mon, name: mon.name + Date.now() + i, locations: [spaceScopedPrivateLocation] },
               SPACE_ID
             );
           },
