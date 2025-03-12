@@ -7,8 +7,8 @@
 
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ValidationResult,
   builtInComparators,
   builtInAggregationTypes,
   builtInGroupByTypes,
@@ -21,7 +21,7 @@ import {
   ES_QUERY_MAX_HITS_PER_EXECUTION,
   MAX_HITS_FOR_GROUP_BY,
 } from '../../../common/constants';
-import { EsQueryRuleParams, SearchType } from './types';
+import type { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,

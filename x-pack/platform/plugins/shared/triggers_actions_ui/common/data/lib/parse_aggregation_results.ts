@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SearchResponse,
   SearchHit,
   SearchHitsMetadata,
@@ -86,7 +86,7 @@ export const parseAggregationResults = ({
   for (const groupBucket of groupBuckets) {
     if (resultLimit && results.results.length === resultLimit) break;
 
-    const groupName: string = `${groupBucket?.key}`;
+    const groupName = `${groupBucket?.key}`;
     const groups =
       termField && groupBucket?.key
         ? [termField].flat().reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {

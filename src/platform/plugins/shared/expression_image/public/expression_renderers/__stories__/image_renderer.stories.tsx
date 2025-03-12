@@ -10,12 +10,12 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { elasticLogo } from '@kbn/expression-utils';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
 
-const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
+const Renderer = () => {
   const config = {
     dataurl: elasticLogo,
     mode: ImageMode.COVER,
@@ -31,10 +31,6 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   );
 };
 
-storiesOf('renderers/image', module).add(
-  'default',
-  (_, props) => {
-    return <Renderer elasticLogo={props?.elasticLogo} />;
-  },
-  { decorators: [waitFor(getElasticLogo())] }
-);
+storiesOf('renderers/image', module).add('default', (_, props) => {
+  return <Renderer />;
+});
