@@ -31,6 +31,8 @@ import { SyntheticsMonitorTestService } from '../../../services/synthetics_monit
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
+    // see details: https://github.com/elastic/kibana/issues/214108
+    this.tags(['failsOnMKI']);
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
