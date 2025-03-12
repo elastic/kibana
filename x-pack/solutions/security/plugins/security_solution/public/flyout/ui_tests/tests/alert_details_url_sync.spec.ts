@@ -17,30 +17,28 @@ test.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }
     await browserAuth.loginAsPlatformEngineer();
   });
 
-  test('should test flyout url sync', async ({
-    pageObjects: { alertsTablePage, alertDetailsRightPanelPage },
-  }) => {
-    await alertsTablePage.navigate();
+  test('should test flyout url sync', async ({ pageObjects }) => {
+    await pageObjects.alertsTablePage.navigate();
 
-    const urlBeforeAlertDetails = await alertsTablePage.getCurrentUrl();
+    const urlBeforeAlertDetails = await pageObjects.alertsTablePage.getCurrentUrl();
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
-    await alertsTablePage.expandFirstAlertDetailsFlyout();
+    await pageObjects.alertsTablePage.expandFirstAlertDetailsFlyout();
 
-    const urlAfterAlertDetails = await alertsTablePage.getCurrentUrl();
+    const urlAfterAlertDetails = await pageObjects.alertsTablePage.getCurrentUrl();
     expect(urlAfterAlertDetails).toContain(RIGHT);
 
-    const headerTitle = alertDetailsRightPanelPage.detailsFlyoutHeaderTitle;
+    const headerTitle = pageObjects.alertDetailsRightPanelPage.detailsFlyoutHeaderTitle;
     await expect(headerTitle).toHaveText(CUSTOM_QUERY_RULE.name);
 
-    await alertsTablePage.reload();
+    await pageObjects.alertsTablePage.reload();
 
-    const urlAfterReload = await alertsTablePage.getCurrentUrl();
+    const urlAfterReload = await pageObjects.alertsTablePage.getCurrentUrl();
     expect(urlAfterReload).toContain(RIGHT);
 
-    await alertDetailsRightPanelPage.closeFlyout();
+    await pageObjects.alertDetailsRightPanelPage.closeFlyout();
 
-    const urlAfterClosingFlyout = await alertsTablePage.getCurrentUrl();
+    const urlAfterClosingFlyout = await pageObjects.alertsTablePage.getCurrentUrl();
     expect(urlAfterClosingFlyout).not.toContain(RIGHT);
   });
 });
