@@ -346,7 +346,7 @@ const DraggableImpl = memo(function DraggableImpl({
 
   return (
     <>
-     <EuiScreenReaderOnly showOnFocus>
+      <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={value.humanData.label}
           aria-describedby={ariaDescribedBy || `${dataTestSubjPrefix}-keyboardInstructions`}
@@ -407,7 +407,6 @@ const DraggableImpl = memo(function DraggableImpl({
       >
         {children}
       </div>
-     
     </>
   );
 });
