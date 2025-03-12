@@ -23,7 +23,7 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { CLUSTER_BLOCK_EXCEPTION, isClusterBlockError } from '../lib/error_with_type';
+import { CLUSTER_BLOCK_EXCEPTION } from '../lib/error_with_type';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type {
   SummarizedAlerts,
