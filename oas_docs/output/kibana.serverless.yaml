@@ -3407,7 +3407,7 @@ paths:
       x-beta: true
   /api/alerting/rule/{id}/snooze_schedule:
     post:
-      description: When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time or indefinitely and schedule single or recurring downtimes.
+      description: When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.
       operationId: post-alerting-rule-id-snooze-schedule
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3439,14 +3439,14 @@ paths:
                       type: object
                       properties:
                         duration:
-                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.'
+                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
                           type: string
                         recurring:
                           additionalProperties: false
                           type: object
                           properties:
                             end:
-                              description: The end date of a recurring schedule in ISO 8601 format.
+                              description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
                               type: string
                             every:
                               description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
@@ -3472,13 +3472,13 @@ paths:
                               minItems: 1
                               type: array
                             onWeekDay:
-                              description: The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.
+                              description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
                               items:
                                 type: string
                               minItems: 1
                               type: array
                         start:
-                          description: The start date and time of the schedule in ISO 8601 format.
+                          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
                           type: string
                         timezone:
                           description: The timezone of the schedule. The default timezone is UTC.
@@ -3509,14 +3509,14 @@ paths:
                             type: object
                             properties:
                               duration:
-                                description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.'
+                                description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
                                 type: string
                               recurring:
                                 additionalProperties: false
                                 type: object
                                 properties:
                                   end:
-                                    description: The end date of a recurring schedule in ISO 8601 format.
+                                    description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
                                     type: string
                                   every:
                                     description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
@@ -3542,13 +3542,13 @@ paths:
                                     minItems: 1
                                     type: array
                                   onWeekDay:
-                                    description: The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.
+                                    description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
                                     items:
                                       type: string
                                     minItems: 1
                                     type: array
                               start:
-                                description: The start date and time of the schedule in ISO 8601 format.
+                                description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
                                 type: string
                               timezone:
                                 description: The timezone of the schedule. The default timezone is UTC.
