@@ -120,17 +120,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         }
       }
 
-      if (selectedConnectorId != null) {
+      if (connector) {
         setSelectedConnectorId(connectorId);
       }
     },
-    [
-      currentConversation,
-      selectedConnectorId,
-      setApiConfig,
-      onConversationChange,
-      setSelectedConnectorId,
-    ]
+    [currentConversation, setApiConfig, onConversationChange, setSelectedConnectorId]
   );
 
   if (!checkCompleteMetadata) {

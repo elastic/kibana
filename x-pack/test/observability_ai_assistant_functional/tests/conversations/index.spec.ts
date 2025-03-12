@@ -11,6 +11,7 @@ import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/anal
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
+import { systemMessageSorted } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/complete/functions/helpers';
 import {
   createLlmProxy,
   LlmProxy,
@@ -282,8 +283,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   'You are a helpful assistant for Elastic Observability. Your goal is '
                 );
 
-                expect(sortSystemMessage(systemMessage!)).to.eql(
-                  sortSystemMessage(primarySystemMessage)
+                expect(systemMessageSorted(systemMessage!)).to.eql(
+                  systemMessageSorted(primarySystemMessage)
                 );
 
                 expect(firstUserMessage.content).to.eql('hello');
@@ -464,12 +465,4 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       proxy.close();
     });
   });
-}
-
-// order of instructions can vary, so we sort to compare them
-function sortSystemMessage(message: string) {
-  return message
-    .split('\n\n')
-    .map((line) => line.trim())
-    .sort();
 }
