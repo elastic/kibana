@@ -329,7 +329,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await discoverButton.click();
 
         // Confirm dataset selector text in observability logs explorer
-        retry.try(async () => {
+        await retry.try(async () => {
           const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
           originalExpect(datasetSelectorText).toMatch(regularDatasetName);
         });
@@ -345,7 +345,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         // Confirm dataset selector text in observability logs explorer
-        retry.try(async () => {
+        await retry.try(async () => {
           const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
           originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
         });
