@@ -47,6 +47,7 @@ import {
   waitForBackfillExecuted,
   setBrokenRuntimeField,
   unsetBrokenRuntimeField,
+  refreshIndex,
 } from '../../../../utils';
 import {
   createRule,
@@ -255,6 +256,7 @@ export default ({ getService }: FtrProviderContext) => {
         query: 'any where agent.type == "packetbeat" or broken == 1',
       };
       await setBrokenRuntimeField({ es, index: 'auditbeat-*' });
+      await refreshIndex(es, 'auditbeat-*');
       const createdRule = await createRule(supertest, log, rule);
       const createdRuleId = createdRule.id;
       await waitForRulePartialFailure({ supertest, log, id: createdRuleId });
