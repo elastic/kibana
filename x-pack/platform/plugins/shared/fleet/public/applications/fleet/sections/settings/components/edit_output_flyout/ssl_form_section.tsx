@@ -24,26 +24,36 @@ import { MultiRowInput } from '../multi_row_input';
 
 import { outputType } from '../../../../../../../common/constants';
 
+import type { DownloadSourceFormInputsType } from '../download_source_flyout/use_download_source_flyout_form';
+
 import { SecretFormRow } from './output_form_secret_form_row';
 
 import type { OutputFormInputsType } from './use_output_form';
 
+type FormType = 'elasticsearch' | 'remote_elasticsearch' | 'logstash' | 'download_source';
+
 interface Props {
-  inputs: OutputFormInputsType;
+  inputs: OutputFormInputsType | DownloadSourceFormInputsType;
   useSecretsStorage: boolean;
   isConvertedToSecret: boolean;
   onToggleSecretAndClearValue: (secretEnabled: boolean) => void;
-  type?: string;
+  type: FormType;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
   const { type, inputs, useSecretsStorage, isConvertedToSecret, onToggleSecretAndClearValue } =
     props;
   const showmTLSText = type === outputType.Elasticsearch || type === outputType.RemoteElasticsearch;
+  const showAccordionOpen =
+    !!inputs.sslKeySecretInput.value ||
+    inputs.sslCertificateAuthoritiesInput.value?.length > 0 ||
+    !!inputs.sslCertificateInput.value ||
+    !!inputs.sslKeySecretInput.value;
 
   return (
     <>
       <EuiAccordion
+        initialIsOpen={showAccordionOpen}
         id="advancedSSLOptions"
         data-test-subj="advancedSSLOptionsButton"
         buttonClassName="ingest-active-button"
@@ -79,14 +89,28 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
       >
         <EuiSpacer size="s" />
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-          <EuiCallOut
-            title={i18n.translate('xpack.fleet.editDownloadSourcesFlyout.sslWarningCallout', {
-              defaultMessage:
-                'Invalid settings can break the connection between Elastic Agent and the configured output. If this happens, you will need to provide valid credentials.',
-            })}
-            color="warning"
-            iconType="warning"
-          />
+          {type === 'download_source' ? (
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.fleet.editOutputFlyout.fleetserverHost.sslWarningCallout',
+                {
+                  defaultMessage:
+                    'Invalid settings can prevent Elastic Agent from being able to upgrade. If this happens, you will need to provide valid credentials.',
+                }
+              )}
+              color="warning"
+              iconType="warning"
+            />
+          ) : (
+            <EuiCallOut
+              title={i18n.translate('xpack.fleet.editOutputFlyout.sslWarningCallout', {
+                defaultMessage:
+                  'Invalid settings can break the connection between Elastic Agent and the configured output. If this happens, you will need to provide valid credentials.',
+              })}
+              color="warning"
+              iconType="warning"
+            />
+          )}
           <EuiSpacer size="m" />
           <MultiRowInput
             placeholder={i18n.translate(

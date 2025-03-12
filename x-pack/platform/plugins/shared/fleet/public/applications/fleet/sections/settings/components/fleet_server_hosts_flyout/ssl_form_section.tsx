@@ -36,7 +36,6 @@ interface Props {
     sslESKey: boolean;
   };
   onToggleSecretAndClearValue: (secretEnabled: boolean) => void;
-  hasTitle?: boolean;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
