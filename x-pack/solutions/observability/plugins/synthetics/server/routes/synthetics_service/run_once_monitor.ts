@@ -61,7 +61,6 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         id: monitorId,
         testRunId: monitorId,
       },
-      savedObjectsClient,
       privateLocations,
       spaceId,
       true
