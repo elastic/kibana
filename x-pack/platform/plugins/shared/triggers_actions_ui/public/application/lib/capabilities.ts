@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SubFeature } from '@kbn/actions-plugin/common';
-import { RuleType } from '../../types';
+import type { SubFeature } from '@kbn/actions-plugin/common';
+import type { RuleType } from '../../types';
 import { InitialRule } from '../sections/rule_form/rule_reducer';
 
 /**
