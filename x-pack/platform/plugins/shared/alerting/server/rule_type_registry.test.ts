@@ -6,18 +6,19 @@
  */
 
 import { TaskRunnerFactory } from './task_runner';
-import { RuleTypeRegistry, ConstructorOptions } from './rule_type_registry';
-import { ActionGroup, RuleType } from './types';
+import type { ConstructorOptions } from './rule_type_registry';
+import { RuleTypeRegistry } from './rule_type_registry';
+import type { ActionGroup, RuleType } from './types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ILicenseState } from './lib/license_state';
+import type { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
-import { RecoveredActionGroupId } from '../common';
-import { AlertingConfig } from './config';
+import type { RecoveredActionGroupId } from '../common';
+import type { AlertingConfig } from './config';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 const logger = loggingSystemMock.create().get();

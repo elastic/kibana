@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
 import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
 import { RulesSettingsAlertDeletionClient } from './alert_deletion/rules_settings_alert_deletion_client';
