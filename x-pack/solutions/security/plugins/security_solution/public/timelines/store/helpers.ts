@@ -116,6 +116,20 @@ export const shouldResetActiveTimelineContext = (
 };
 
 /**
+ * Merges a given timeline column config with locally stored timeline column config
+ */
+function mergeInLocalColumnConfig(columns: TimelineModel['columns']) {
+  const storedColumnsConfig = getStoredTimelineColumnsConfig();
+  if (storedColumnsConfig) {
+    return columns.map((column) => ({
+      ...column,
+      initialWidth: storedColumnsConfig[column.id]?.initialWidth || column.initialWidth,
+    }));
+  }
+  return columns;
+}
+
+/**
  * Add a saved object timeline to the store
  * and default the value to what need to be if values are null
  */
@@ -129,21 +143,11 @@ export const addTimelineToStore = ({
     activeTimeline.setActivePage(0);
   }
 
-  // Apply the locally stored column config
-  const storedColumnsConfig = getStoredTimelineColumnsConfig();
-  let columns = timeline.columns;
-  if (storedColumnsConfig) {
-    columns = timeline.columns.map((column) => ({
-      ...column,
-      initialWidth: storedColumnsConfig[column.id]?.initialWidth || column.initialWidth,
-    }));
-  }
-
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      columns,
+      columns: mergeInLocalColumnConfig(timeline.columns),
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
@@ -181,19 +185,23 @@ export const addNewTimeline = ({
           templateTimelineVersion: 1,
         }
       : {};
+  const newTimeline = {
+    id,
+    ...(timeline ? timeline : {}),
+    ...timelineDefaults,
+    ...timelineProps,
+    dateRange,
+    savedObjectId: null,
+    version: null,
+    isSaving: false,
+    timelineType,
+    ...templateTimelineInfo,
+  };
   return {
     ...timelineById,
     [id]: {
-      id,
-      ...(timeline ? timeline : {}),
-      ...timelineDefaults,
-      ...timelineProps,
-      dateRange,
-      savedObjectId: null,
-      version: null,
-      isSaving: false,
-      timelineType,
-      ...templateTimelineInfo,
+      ...newTimeline,
+      columns: mergeInLocalColumnConfig(newTimeline.columns),
     },
   };
 };
