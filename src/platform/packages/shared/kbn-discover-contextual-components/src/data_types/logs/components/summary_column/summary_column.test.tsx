@@ -130,7 +130,6 @@ describe('SummaryColumn', () => {
     it('should render a badge indicating the count of additional resources', () => {
       const record = getBaseRecord();
       renderSummary(record);
-      screen.debug();
       expect(screen.queryByText('+1')).toBeInTheDocument();
     });
 
