@@ -155,6 +155,7 @@ export const useResponsiveTabs = ({
 
     return css`
       overflow-x: auto;
+      overflow-y: visible;
       max-width: 100%;
       user-select: none;
       scrollbar-width: none; // hide the scrollbar
@@ -162,7 +163,7 @@ export const useResponsiveTabs = ({
       &:::-webkit-scrollbar {
         display: none;
       }
-      transform: translateZ(0);
+      transform: translateZ(1);
       ${overflowGradient}
     `;
   }, [scrollState, euiTheme.size.s]);
