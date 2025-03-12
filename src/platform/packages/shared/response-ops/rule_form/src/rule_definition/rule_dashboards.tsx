@@ -94,6 +94,7 @@ export const RuleDashboards = ( { plugins }) => {
             options={dashboardList}
             selectedOptions={selectedDashboards}
             onChange={onChange}
+            data-test-subj="ruleLinkedDashboards"
           />
         </EuiFlexItem>
       </EuiSplitPanel.Inner>

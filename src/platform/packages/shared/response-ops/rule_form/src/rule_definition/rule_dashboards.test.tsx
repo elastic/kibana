@@ -1,39 +1,49 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDashboards } from './rule_dashboards';
-import { dashboardServiceProvider } from './dashboard_service';
+
+const mockOnChange = jest.fn();
 
 // Mock hooks
 jest.mock('../hooks', () => ({
-    useRuleFormState: jest.fn(),
-    useRuleFormDispatch: jest.fn(),
+  useRuleFormState: jest.fn(),
+  useRuleFormDispatch: jest.fn(),
 }));
-jest.mock('./dashboard_service');
 
-const mockDashboardServiceProvider = dashboardServiceProvider as jest.Mock;
+jest.mock('./dashboard_service', () => ({
+  dashboardServiceProvider: jest.fn().mockReturnValue({ 
+    fetchDashboard: jest.fn().mockImplementation(async (id: string) => {
+      return {
+        attributes: { title: `Dashboard ${id}` },
+      };
+    }), 
+    fetchDashboards: jest.fn().mockResolvedValue([
+      {
+        id: '1',
+        attributes: { title: 'Dashboard 1' },
+      },
+      {
+        id: '2',
+        attributes: { title: 'Dashboard 2' },
+      }
+    ])
+  }),
+}));
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
-const mockOnChange = jest.fn();
 
 describe('RuleDashboards', () => {
-  const mockFetchDashboard = jest.fn();
-  const mockFetchDashboards = jest.fn();
 
   beforeEach(() => {
-      useRuleFormDispatch.mockReturnValue(mockOnChange);
-    
-      useRuleFormState.mockReturnValue({
-        formData: {
-          params: {
-            dashboards: [],
-          },
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+    useRuleFormState.mockReturnValue({
+      formData: {
+        params: {
+          dashboards: [],
         },
-      });
-      mockDashboardServiceProvider.mockReturnValue({
-        fetchDashboard: mockFetchDashboard,
-        fetchDashboards: mockFetchDashboards,
-      });
+      },
+    });
   });
 
   afterEach(() => {
@@ -44,26 +54,9 @@ describe('RuleDashboards', () => {
     const plugins = {
       featureFlags: {
         getBooleanValue: jest.fn().mockReturnValue(true),
-      },
-      dashboard: {
-        findDashboardsService: jest.fn().mockResolvedValue({
-          search: jest.fn().mockResolvedValue({
-            total: 2,
-            hits: [
-              {
-                id: '1',
-                attributes: { title: 'Dashboard 1' },
-              },
-              {
-                id: '2',
-                attributes: { title: 'Dashboard 2' },
-              }
-            ],
-          }),
-        }),
-      },
+      }
     };
-
+    
     render(
       <IntlProvider locale="en">
         <RuleDashboards plugins={plugins} />
@@ -77,16 +70,8 @@ describe('RuleDashboards', () => {
     const plugins = {
       featureFlags: {
         getBooleanValue: jest.fn().mockReturnValue(false),
-      },
-      dashboard: {
-        findDashboardsService: jest.fn().mockResolvedValue({
-          search: jest.fn().mockResolvedValue({
-            total: 0,
-            hits: []
-          })
-      }),
-    }
-  };
+      }
+    };
 
     render(<RuleDashboards plugins={plugins} />);
 
@@ -94,14 +79,12 @@ describe('RuleDashboards', () => {
   });
 
   it('fetches and displays dashboard titles', async () => {
-
     useRuleFormState.mockReturnValue({
       formData: {
         params: {
           dashboards: [
             {
               id: 1,
-             
             }
           ],
         },
@@ -112,28 +95,39 @@ describe('RuleDashboards', () => {
       featureFlags: {
         getBooleanValue: jest.fn().mockReturnValue(true),
       },
-      dashboard: {
-        findDashboardsService: jest.fn().mockResolvedValue({
-          search: jest.fn().mockResolvedValue({
-            total: 2,
-            hits: [
-              {
-                id: '1',
-                attributes: { title: 'Dashboard 1' },
-              },
-              {
-                id: '2',
-                attributes: { title: 'Dashboard 2' },
-              }
-            ],
-          }),
-        }),
-      }
+      dashboard: {}
     };
+    
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards plugins={plugins} />
+      </IntlProvider>
+    );
 
-    mockFetchDashboard.mockResolvedValueOnce({
-      attributes: { title: 'Dashboard 1' },
+    await waitFor(() => {
+      expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
     });
+  });
+
+  it('dispatches selected dashboards on change', async () => {
+    useRuleFormState.mockReturnValue({
+      formData: {
+        params: {
+          dashboards: [
+            {
+              id: '1',
+            }
+          ],
+        },
+      },
+    });
+
+    const plugins = {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockReturnValue(true),
+      },
+      dashboard: {},
+    };
 
     render(
       <IntlProvider locale="en">
@@ -143,6 +137,27 @@ describe('RuleDashboards', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+      expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
+    });
+
+    // Simulate selecting an option in the EuiComboBox
+    const inputWrap = screen.getByTestId('ruleLinkedDashboards').querySelector('.euiComboBox__inputWrap');
+    if (inputWrap) {
+      fireEvent.click(inputWrap);
+    }
+    fireEvent.click(screen.getByText('Dashboard 2'));
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setParamsProperty',
+      payload: {
+        property: 'dashboards',
+        value: [{ id: '1', title: 'Dashboard 1' }, { id: '2', title: 'Dashboard 2' }],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
     });
   });
 });
