@@ -93,13 +93,12 @@ export function FrameLayout(props: FrameLayoutProps) {
               aria-labelledby="dataPanelId"
               css={[
                 sidebarStyles(euiThemeContext),
-                css`
-                  ${isFullscreen &&
-                  `
-                // Hide the datapanel in fullscreen mode. Using display: none does trigger
-                // a rerender when the container becomes visible again, maybe pushing offscreen is better
-                display: none;`}
-                `,
+                isFullscreen &&
+                  css`
+                    // Hide the datapanel in fullscreen mode. Using display: none does trigger
+                    // a rerender when the container becomes visible again, maybe pushing offscreen is better
+                    display: none;
+                  `,
               ]}
             >
               <EuiScreenReaderOnly>

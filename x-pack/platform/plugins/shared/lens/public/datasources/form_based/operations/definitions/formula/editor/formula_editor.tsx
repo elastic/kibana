@@ -921,8 +921,7 @@ export function FormulaEditor({
                       {warnings.map(({ message, severity }, index) => (
                         <div
                           key={index}
-                          className="lnsFormula__warningText"
-                          css={sharedEditorStyles.warningText(euiThemeContext)}
+                          css={index !== 0 && sharedEditorStyles.warningText(euiThemeContext)}
                         >
                           <EuiText
                             size="s"
@@ -1014,11 +1013,9 @@ const sharedEditorStyles = {
     pointer-events: none;
   `,
   warningText: ({ euiTheme }: UseEuiTheme) => css`
-    + .lnsFormula__warningText {
-      margin-top: ${euiTheme.size.s};
-      border-top: ${euiTheme.border.thin};
-      padding-top: ${euiTheme.size.s};
-    }
+    margin-top: ${euiTheme.size.s};
+    border-top: ${euiTheme.border.thin};
+    padding-top: ${euiTheme.size.s};
   `,
   editorHelpLink: ({ euiTheme }: UseEuiTheme) => css`
     align-items: center;
