@@ -99,14 +99,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-fda26a1f-c096-44e4-a149-cb99e1038a34",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -135,14 +133,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-484d1552-e969-4ca9-ac44-dd90d2caac87",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -171,14 +167,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-e0fe193b-09e6-47b3-a203-787e753c2190",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -219,14 +213,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-29048213-c10c-462f-9561-cab399a96ef3",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -279,14 +271,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-4b542a89-8d05-486d-bc44-49e02fe476ab",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -351,14 +341,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-2d091d46-3954-4360-ad93-294612125616",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -399,14 +387,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-f742a1eb-cce7-4ffc-bb70-bbbec5760105",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -459,14 +445,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-c83b8a92-1aa8-4f3d-a926-a9211a329666",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -531,14 +515,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-28a0ce9c-da18-4562-8ec6-995857b3132f",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -615,14 +597,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-b5bf0272-9c8a-45f0-acfe-be528524dffa",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -639,14 +619,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-359be632-341a-4d54-a3dd-3c7ddc71dfa5",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -663,18 +641,15 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-c0ecd1ab-f6a8-430e-81f8-cdcb39c826c3",
               "style": {
                 "background": "#f5f5f5"
               },
-              "transition": {
-              }
+              "transition": {}
             }
           ],
-          "variables": [
-          ],
+          "variables": [],
           "width": 1080
         },
         "template_key": "light-theme"
@@ -683,8 +658,7 @@
       "migrationVersion": {
         "canvas-workpad-template": "8.2.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "canvas-workpad-template",
       "updated_at": "2022-07-04T13:45:12.079Z"
     }
@@ -785,14 +759,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-fda26a1f-c096-44e4-a149-cb99e1038a34",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -821,14 +793,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-484d1552-e969-4ca9-ac44-dd90d2caac87",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -857,14 +827,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-e0fe193b-09e6-47b3-a203-787e753c2190",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -905,14 +873,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-29048213-c10c-462f-9561-cab399a96ef3",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -965,14 +931,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-4b542a89-8d05-486d-bc44-49e02fe476ab",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -1037,14 +1001,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-2d091d46-3954-4360-ad93-294612125616",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -1085,14 +1047,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-f742a1eb-cce7-4ffc-bb70-bbbec5760105",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -1145,14 +1105,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-c83b8a92-1aa8-4f3d-a926-a9211a329666",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -1217,14 +1175,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-28a0ce9c-da18-4562-8ec6-995857b3132f",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -1301,14 +1257,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-b5bf0272-9c8a-45f0-acfe-be528524dffa",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -1325,14 +1279,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-359be632-341a-4d54-a3dd-3c7ddc71dfa5",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -1349,18 +1301,15 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-c0ecd1ab-f6a8-430e-81f8-cdcb39c826c3",
               "style": {
                 "background": "#000000"
               },
-              "transition": {
-              }
+              "transition": {}
             }
           ],
-          "variables": [
-          ],
+          "variables": [],
           "width": 1080
         },
         "template_key": "dark-theme"
@@ -1369,8 +1318,7 @@
       "migrationVersion": {
         "canvas-workpad-template": "8.2.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "canvas-workpad-template",
       "updated_at": "2022-07-04T13:45:12.078Z"
     }
@@ -1387,14 +1335,12 @@
       "migrationVersion": {
         "space": "6.6.0"
       },
-      "references": [
-      ],
+      "references": [],
       "space": {
         "_reserved": true,
         "color": "#00bfb3",
         "description": "This is your default space!",
-        "disabledFeatures": [
-        ],
+        "disabledFeatures": [],
         "name": "Default"
       },
       "type": "space",
@@ -1419,8 +1365,7 @@
         "template": {
           "@created": "2019-05-31T16:01:45.751Z",
           "@timestamp": "2019-05-31T16:02:40.420Z",
-          "assets": {
-          },
+          "assets": {},
           "colors": [
             "#37988d",
             "#c19628",
@@ -1858,18 +1803,15 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-28d2523e-aa4d-4134-8092-b849835b620f",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             }
           ],
-          "variables": [
-          ],
+          "variables": [],
           "width": 1100
         },
         "template_key": "summary-report"
@@ -1878,8 +1820,7 @@
       "migrationVersion": {
         "canvas-workpad-template": "8.2.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "canvas-workpad-template",
       "updated_at": "2022-07-04T13:45:12.077Z"
     }
@@ -2123,8 +2064,7 @@
               "style": {
                 "background": "#1785b0"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2189,14 +2129,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-bdbff922-7967-494a-863c-07137b4bc508",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2249,14 +2187,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-5b5de456-8c1a-4ac7-9a93-287942ebb534",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2297,14 +2233,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-dae771f2-00e9-4d44-b046-ca90c43a916a",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2357,14 +2291,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-c2926fdb-e7af-42ea-bba0-6b1d180f4ea5",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2429,14 +2361,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-114b970d-4400-4f87-9acf-cb6ae90f0f98",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2501,14 +2431,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-2dcbc2dc-46c5-469f-a5d9-2b2f25d3a529",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2561,14 +2489,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-40aa971a-d7f8-4db6-b8c5-03e0ab47909a",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2622,14 +2548,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-6e6feb2a-a453-4db4-8a1b-97c84ea26969",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -2718,18 +2642,15 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-643a73f9-efb8-4091-b9ef-a383ef6438ac",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             }
           ],
-          "variables": [
-          ],
+          "variables": [],
           "width": 612
         },
         "template_key": "status-report"
@@ -2738,8 +2659,7 @@
       "migrationVersion": {
         "canvas-workpad-template": "8.2.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "canvas-workpad-template",
       "updated_at": "2022-07-04T13:45:12.073Z"
     }
@@ -2761,10 +2681,8 @@
         "list_id": "endpoint_trusted_apps",
         "list_type": "list",
         "name": "Endpoint Security Trusted Apps List",
-        "os_types": [
-        ],
-        "tags": [
-        ],
+        "os_types": [],
+        "tags": [],
         "tie_breaker_id": "52bac5bf-7505-4297-b5cc-50da232d1e7c",
         "type": "endpoint",
         "updated_by": "kibana",
@@ -2773,8 +2691,7 @@
       "migrationVersion": {
         "exception-list-agnostic": "7.12.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "exception-list-agnostic",
       "updated_at": "2022-07-04T13:45:21.363Z"
     }
@@ -2796,10 +2713,8 @@
         "list_id": "endpoint_list",
         "list_type": "list",
         "name": "Endpoint Security Exception List",
-        "os_types": [
-        ],
-        "tags": [
-        ],
+        "os_types": [],
+        "tags": [],
         "tie_breaker_id": "50ffa97f-0e9d-47d6-a458-1048f5a98af8",
         "type": "endpoint",
         "updated_by": "kibana",
@@ -2808,8 +2723,7 @@
       "migrationVersion": {
         "exception-list-agnostic": "7.12.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "exception-list-agnostic",
       "updated_at": "2022-07-04T13:45:25.218Z"
     }
@@ -2836,8 +2750,7 @@
       "migrationVersion": {
         "ingest-outputs": "8.0.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "ingest-outputs",
       "updated_at": "2022-07-04T13:45:20.161Z"
     }
@@ -2861,8 +2774,7 @@
       "namespaces": [
         "*"
       ],
-      "references": [
-      ],
+      "references": [],
       "type": "ml-trained-model",
       "updated_at": "2022-07-04T13:45:19.265Z"
     }
@@ -2877,14 +2789,12 @@
     "source": {
       "coreMigrationVersion": "8.2.1",
       "ingest_manager_settings": {
-        "fleet_server_hosts": [
-        ]
+        "fleet_server_hosts": []
       },
       "migrationVersion": {
         "ingest_manager_settings": "7.13.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "ingest_manager_settings",
       "updated_at": "2022-07-04T13:45:12.100Z"
     }
@@ -2898,41 +2808,32 @@
     "index": ".kibana_1",
     "source": {
       "apm-telemetry": {
-        "agents": {
-        },
+        "agents": {},
         "cardinality": {
           "client": {
             "geo": {
               "country_iso_code": {
-                "rum": {
-                }
+                "rum": {}
               }
             }
           },
           "transaction": {
             "name": {
-              "all_agents": {
-              },
-              "rum": {
-              }
+              "all_agents": {},
+              "rum": {}
             }
           },
           "user_agent": {
             "original": {
-              "all_agents": {
-              },
-              "rum": {
-              }
+              "all_agents": {},
+              "rum": {}
             }
           }
         },
         "cloud": {
-          "availability_zone": [
-          ],
-          "provider": [
-          ],
-          "region": [
-          ]
+          "availability_zone": [],
+          "provider": [],
+          "region": []
         },
         "counts": {
           "agent_configuration": {
@@ -2978,14 +2879,12 @@
         "environments": {
           "services_with_multiple_environments": 0,
           "services_without_environment": 0,
-          "top_environments": [
-          ]
+          "top_environments": []
         },
         "has_any_services": false,
         "host": {
           "os": {
-            "platform": [
-            ]
+            "platform": []
           }
         },
         "indices": {
@@ -3027,6 +2926,11 @@
           "opentelemetry/ruby": 0,
           "opentelemetry/swift": 0,
           "opentelemetry/webjs": 0,
+          "opentelemetry/java/elastic": 0,
+          "opentelemetry/dotnet/elastic": 0,
+          "opentelemetry/nodejs/elastic": 0,
+          "opentelemetry/php/elastic": 0,
+          "opentelemetry/python/elastic": 0,
           "otlp": 0,
           "php": 0,
           "python": 0,
@@ -3102,8 +3006,7 @@
         }
       },
       "coreMigrationVersion": "8.2.1",
-      "references": [
-      ],
+      "references": [],
       "type": "apm-telemetry",
       "updated_at": "2022-07-04T13:45:21.571Z"
     }
@@ -3116,11 +3019,9 @@
     "id": "cases-telemetry:cases-telemetry",
     "index": ".kibana_1",
     "source": {
-      "cases-telemetry": {
-      },
+      "cases-telemetry": {},
       "coreMigrationVersion": "8.2.1",
-      "references": [
-      ],
+      "references": [],
       "type": "cases-telemetry",
       "updated_at": "2022-07-04T13:45:19.641Z"
     }
@@ -3138,8 +3039,7 @@
         "count": 0,
         "errors": 0
       },
-      "references": [
-      ],
+      "references": [],
       "type": "osquery-manager-usage-metric",
       "updated_at": "2022-07-04T13:46:13.067Z"
     }
@@ -3159,8 +3059,7 @@
       "migrationVersion": {
         "config": "8.1.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "config",
       "updated_at": "2022-07-04T13:45:52.730Z"
     }
@@ -3191,8 +3090,7 @@
         "processId": 14903,
         "stddev": 2.8212134434857816
       },
-      "references": [
-      ],
+      "references": [],
       "type": "event_loop_delays_daily",
       "updated_at": "2022-07-04T13:46:10.852Z"
     }
@@ -3237,8 +3135,7 @@
     "index": ".kibana_1",
     "source": {
       "coreMigrationVersion": "8.2.1",
-      "references": [
-      ],
+      "references": [],
       "telemetry": {
         "lastReported": 1656942374833,
         "userHasSeenNotice": true
@@ -3445,14 +3342,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-b4742225-d480-4180-9345-4b9b7f30bf92",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -3529,14 +3424,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-52ce32af-3201-4f95-bcbb-5b8687edda36",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -3673,14 +3566,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-4ca7c323-87b0-4747-a7c8-18c3c8db0ffc",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -3769,14 +3660,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-b031a6d5-e251-4653-8b89-7f356fc06ad2",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -3937,14 +3826,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-662ed551-0c1d-44f0-a49b-9531f65848cc",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4033,14 +3920,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-f6e4f8e7-dd66-4b1e-8200-0906d7c4a3b4",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4201,14 +4086,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-7383c0a8-935a-4848-83f0-e92b00628398",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4297,14 +4180,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-38816de0-d093-43e9-b40d-4e06d97af25c",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4369,14 +4250,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-9ca5730c-e863-4c8f-8916-79ee8bbf9f4d",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4429,14 +4308,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-00a81b50-27a9-47c0-9a54-ab57525cdff5",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4549,14 +4426,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-09231387-8f78-4439-94ad-0bb53562dc09",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4609,14 +4484,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-639d37b0-66a9-420b-b9fc-da18ce50bd67",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4753,14 +4626,12 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-d0941db8-1103-49be-975f-937f7cf471c1",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             },
             {
               "elements": [
@@ -4801,18 +4672,15 @@
                   }
                 }
               ],
-              "groups": [
-              ],
+              "groups": [],
               "id": "page-fd7a8984-0f73-4be8-9586-7a08e5f229d0",
               "style": {
                 "background": "#FFF"
               },
-              "transition": {
-              }
+              "transition": {}
             }
           ],
-          "variables": [
-          ],
+          "variables": [],
           "width": 1280
         },
         "template_key": "pitch-presentation"
@@ -4821,8 +4689,7 @@
       "migrationVersion": {
         "canvas-workpad-template": "8.2.0"
       },
-      "references": [
-      ],
+      "references": [],
       "type": "canvas-workpad-template",
       "updated_at": "2022-07-04T13:45:12.066Z"
     }
@@ -4853,8 +4720,7 @@
         "processId": 23118,
         "stddev": 1.243765167409836
       },
-      "references": [
-      ],
+      "references": [],
       "type": "event_loop_delays_daily",
       "updated_at": "2022-07-04T14:56:30.890Z"
     }
@@ -4872,8 +4738,7 @@
         "createdAt": "2022-07-04T16:41:55.239Z"
       },
       "coreMigrationVersion": "8.2.1",
-      "references": [
-      ],
+      "references": [],
       "type": "api_key_pending_invalidation",
       "updated_at": "2022-07-04T16:41:55.252Z"
     }
@@ -4904,8 +4769,7 @@
         "processId": 31567,
         "stddev": 1.3673453968609086
       },
-      "references": [
-      ],
+      "references": [],
       "type": "event_loop_delays_daily",
       "updated_at": "2022-07-04T16:40:51.746Z"
     }
@@ -4938,8 +4802,7 @@
     "index": ".kibana_1",
     "source": {
       "coreMigrationVersion": "8.2.1",
-      "references": [
-      ],
+      "references": [],
       "type": "ui-metric",
       "ui-metric": {
         "count": 1
@@ -5000,8 +4863,7 @@
         "createdAt": "2022-07-04T16:44:55.433Z"
       },
       "coreMigrationVersion": "8.2.1",
-      "references": [
-      ],
+      "references": [],
       "type": "api_key_pending_invalidation",
       "updated_at": "2022-07-04T16:44:55.439Z"
     }
@@ -5019,8 +4881,7 @@
         "createdAt": "2022-07-04T16:44:55.434Z"
       },
       "coreMigrationVersion": "8.2.1",
-      "references": [
-      ],
+      "references": [],
       "type": "api_key_pending_invalidation",
       "updated_at": "2022-07-04T16:44:55.439Z"
     }
@@ -5034,8 +4895,7 @@
     "index": ".kibana_1",
     "source": {
       "alert": {
-        "actions": [
-        ],
+        "actions": [],
         "alertTypeId": ".index-threshold",
         "apiKey": "IMCMhCBeKbiT3K1Ma2OOOc5TPdeI3D1/qxZSYPrOU8k1iPOCSU45jLYf6khT8CkAbU9JQrhIsHo9BLB+fUXS697LR3f3lZCptiKwou+Igf7BP1K2f0cqKLmxHwyS140h91Wzo6WX/Y7/UKPsPONU3XxDbpFi5bUPT0VNYoWu7s0oTybjYqf9P3eQShKjSF+9ZWD6jiB7GILWQA==",
         "apiKeyOwner": "elastic",
@@ -5162,8 +5022,7 @@
           }
         },
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "Test rule without snoozeEndTime",
         "notifyWhen": "onActiveAlert",
         "params": {
@@ -5186,8 +5045,7 @@
         },
         "scheduledTaskId": "bdfce750-fba0-11ec-9157-2f379249da99",
         "snoozeEndTime": null,
-        "tags": [
-        ],
+        "tags": [],
         "throttle": null,
         "updatedAt": "2022-07-04T16:44:57.941Z",
         "updatedBy": "elastic"
@@ -5199,8 +5057,7 @@
       "namespaces": [
         "default"
       ],
-      "references": [
-      ],
+      "references": [],
       "type": "alert",
       "updated_at": "2022-07-04T16:46:00.635Z"
     }
@@ -5214,8 +5071,7 @@
     "index": ".kibana_1",
     "source": {
       "alert": {
-        "actions": [
-        ],
+        "actions": [],
         "alertTypeId": ".index-threshold",
         "apiKey": "IWaGhcC+ymc9qQwENWpbBUlXznfVXCQ7hG6ljROhbCWPbUBZaSBm2jaRcPBZHJk0J4kxrbQ7a0VkChwZomLkwF7bbzIwOQ0oggwt3aO/+qoti/1bZCFtISaS5vcpSnot1jbfty/jSMsonvxXP/luVr6KRTxpKO3v5CuVnmyRwidKMvBXABEwrvgku9KbXXprGjHVCY6i8j7gbA==",
         "apiKeyOwner": "elastic",
@@ -5272,8 +5128,7 @@
           }
         },
         "muteAll": false,
-        "mutedInstanceIds": [
-        ],
+        "mutedInstanceIds": [],
         "name": "Test rule with snoozeEndTime",
         "notifyWhen": "onActiveAlert",
         "params": {
@@ -5296,8 +5151,7 @@
         },
         "scheduledTaskId": "402084f0-fbb8-11ec-856c-39466bd4c433",
         "snoozeEndTime": "2023-07-04T16:44:05.181Z",
-        "tags": [
-        ],
+        "tags": [],
         "throttle": null,
         "updatedAt": "2022-07-04T16:44:57.940Z",
         "updatedBy": "elastic"
@@ -5309,8 +5163,7 @@
       "namespaces": [
         "default"
       ],
-      "references": [
-      ],
+      "references": [],
       "type": "alert",
       "updated_at": "2022-07-04T16:46:00.634Z"
     }
@@ -5464,8 +5317,7 @@
       "migrationVersion": {
         "task": "8.2.0"
       },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 0,
         "ownerId": null,
@@ -5501,8 +5353,7 @@
       "migrationVersion": {
         "task": "8.2.0"
       },
-      "references": [
-      ],
+      "references": [],
       "task": {
         "attempts": 0,
         "ownerId": null,
@@ -7149,8 +7000,7 @@
         "ui:8.2.1:savedObjectsManagement/shareIntoSpace"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "space_all",
       "type": "application-privilege"
     }
@@ -7875,8 +7725,7 @@
         "ui:8.2.1:savedObjectsManagement/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "space_read",
       "type": "application-privilege"
     }
@@ -8602,8 +8451,7 @@
         "ui:8.2.1:savedObjectsManagement/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "read",
       "type": "application-privilege"
     }
@@ -8659,8 +8507,7 @@
         "ui:8.2.1:savedObjectsTagging/assign"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsTagging.all",
       "type": "application-privilege"
     }
@@ -8991,8 +8838,7 @@
         "alerting:8.2.1:siem.thresholdRule/siem/rule/unsnooze"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_siem.all",
       "type": "application-privilege"
     }
@@ -9228,8 +9074,7 @@
         "alerting:8.2.1:xpack.ml.anomaly_detection_jobs_health/ml/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_ml.all",
       "type": "application-privilege"
     }
@@ -9345,8 +9190,7 @@
         "alerting:8.2.1:xpack.ml.anomaly_detection_jobs_health/ml/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_ml.read",
       "type": "application-privilege"
     }
@@ -9458,8 +9302,7 @@
         "ui:8.2.1:fleetv2/all"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleetv2.all",
       "type": "application-privilege"
     }
@@ -9532,8 +9375,7 @@
         "ui:8.2.1:canvas/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_canvas.all",
       "type": "application-privilege"
     }
@@ -9596,8 +9438,7 @@
         "ui:8.2.1:graph/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_graph.minimal_all",
       "type": "application-privilege"
     }
@@ -9638,8 +9479,7 @@
         "cases:8.2.1:cases/findConfigurations"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_generalCases.minimal_read",
       "type": "application-privilege"
     }
@@ -9680,8 +9520,7 @@
         "ui:8.2.1:savedObjectsTagging/assign"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsTagging.minimal_read",
       "type": "application-privilege"
     }
@@ -9730,8 +9569,7 @@
         "ui:8.2.1:graph/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_graph.read",
       "type": "application-privilege"
     }
@@ -9874,8 +9712,7 @@
         "alerting:8.2.1:siem.thresholdRule/siem/rule/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_siem.read",
       "type": "application-privilege"
     }
@@ -9983,8 +9820,7 @@
         "alerting:8.2.1:metrics.alert.inventory.threshold/infrastructure/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_infrastructure.minimal_all",
       "type": "application-privilege"
     }
@@ -10070,8 +9906,7 @@
         "alerting:8.2.1:xpack.uptime.alerts.durationAnomaly/uptime/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_uptime.minimal_read",
       "type": "application-privilege"
     }
@@ -10157,8 +9992,7 @@
         "alerting:8.2.1:xpack.uptime.alerts.durationAnomaly/uptime/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_uptime.read",
       "type": "application-privilege"
     }
@@ -10219,8 +10053,7 @@
         "cases:8.2.1:securitySolution/updateConfiguration"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_securitySolutionCases.minimal_all",
       "type": "application-privilege"
     }
@@ -10281,8 +10114,7 @@
         "cases:8.2.1:securitySolution/updateConfiguration"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_securitySolutionCases.all",
       "type": "application-privilege"
     }
@@ -10343,8 +10175,7 @@
         "cases:8.2.1:observability/updateConfiguration"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_observabilityCases.all",
       "type": "application-privilege"
     }
@@ -10389,8 +10220,7 @@
         "cases:8.2.1:securitySolution/findConfigurations"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_securitySolutionCases.minimal_read",
       "type": "application-privilege"
     }
@@ -10435,8 +10265,7 @@
         "cases:8.2.1:securitySolution/findConfigurations"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_securitySolutionCases.read",
       "type": "application-privilege"
     }
@@ -10570,8 +10399,7 @@
         "alerting:8.2.1:apm.anomaly/apm/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_apm.minimal_all",
       "type": "application-privilege"
     }
@@ -10705,8 +10533,7 @@
         "alerting:8.2.1:apm.anomaly/apm/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_apm.all",
       "type": "application-privilege"
     }
@@ -10789,8 +10616,7 @@
         "alerting:8.2.1:logs.alert.document.count/logs/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_logs.minimal_all",
       "type": "application-privilege"
     }
@@ -10886,8 +10712,7 @@
         "ui:8.2.1:discover/storeSearchSession"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_discover.all",
       "type": "application-privilege"
     }
@@ -10943,8 +10768,7 @@
         "alerting:8.2.1:logs.alert.document.count/logs/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_logs.minimal_read",
       "type": "application-privilege"
     }
@@ -11017,8 +10841,7 @@
         "alerting:8.2.1:apm.anomaly/apm/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_apm.minimal_read",
       "type": "application-privilege"
     }
@@ -11074,8 +10897,7 @@
         "alerting:8.2.1:logs.alert.document.count/logs/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_logs.read",
       "type": "application-privilege"
     }
@@ -11148,8 +10970,7 @@
         "alerting:8.2.1:apm.anomaly/apm/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_apm.read",
       "type": "application-privilege"
     }
@@ -11203,8 +11024,7 @@
         "ui:8.2.1:discover/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_discover.read",
       "type": "application-privilege"
     }
@@ -11288,8 +11108,7 @@
         "ui:8.2.1:dashboard/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dashboard.minimal_read",
       "type": "application-privilege"
     }
@@ -11338,8 +11157,7 @@
         "ui:8.2.1:dev_tools/save"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dev_tools.minimal_all",
       "type": "application-privilege"
     }
@@ -11388,8 +11206,7 @@
         "ui:8.2.1:dev_tools/save"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dev_tools.all",
       "type": "application-privilege"
     }
@@ -11431,8 +11248,7 @@
         "ui:8.2.1:dev_tools/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dev_tools.minimal_read",
       "type": "application-privilege"
     }
@@ -11474,8 +11290,7 @@
         "ui:8.2.1:dev_tools/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dev_tools.read",
       "type": "application-privilege"
     }
@@ -11525,8 +11340,7 @@
         "ui:8.2.1:advancedSettings/save"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_advancedSettings.minimal_all",
       "type": "application-privilege"
     }
@@ -11563,8 +11377,7 @@
         "saved_object:8.2.1:url/close_point_in_time"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_advancedSettings.minimal_read",
       "type": "application-privilege"
     }
@@ -11614,8 +11427,7 @@
         "ui:8.2.1:advancedSettings/save"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_advancedSettings.all",
       "type": "application-privilege"
     }
@@ -11652,8 +11464,7 @@
         "saved_object:8.2.1:url/close_point_in_time"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_advancedSettings.read",
       "type": "application-privilege"
     }
@@ -12484,8 +12295,7 @@
         "ui:8.2.1:savedObjectsManagement/shareIntoSpace"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsManagement.minimal_all",
       "type": "application-privilege"
     }
@@ -13316,8 +13126,7 @@
         "ui:8.2.1:savedObjectsManagement/shareIntoSpace"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsManagement.all",
       "type": "application-privilege"
     }
@@ -13706,8 +13515,7 @@
         "ui:8.2.1:savedObjectsManagement/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsManagement.minimal_read",
       "type": "application-privilege"
     }
@@ -14096,8 +13904,7 @@
         "ui:8.2.1:savedObjectsManagement/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsManagement.read",
       "type": "application-privilege"
     }
@@ -14139,8 +13946,7 @@
         "saved_object:8.2.1:url/close_point_in_time"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_indexPatterns.minimal_read",
       "type": "application-privilege"
     }
@@ -14182,8 +13988,7 @@
         "saved_object:8.2.1:url/close_point_in_time"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_indexPatterns.read",
       "type": "application-privilege"
     }
@@ -14238,8 +14043,7 @@
         "ui:8.2.1:indexPatterns/save"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_indexPatterns.minimal_all",
       "type": "application-privilege"
     }
@@ -14294,8 +14098,7 @@
         "ui:8.2.1:indexPatterns/save"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_indexPatterns.all",
       "type": "application-privilege"
     }
@@ -14334,8 +14137,7 @@
         "saved_object:8.2.1:url/close_point_in_time"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "reserved_fleet-setup",
       "type": "application-privilege"
     }
@@ -15971,8 +15773,7 @@
         "ui:8.2.1:savedObjectsManagement/shareIntoSpace"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "all",
       "type": "application-privilege"
     }
@@ -16092,8 +15893,7 @@
         "alerting:8.2.1:transform_health/stackAlerts/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_stackAlerts.all",
       "type": "application-privilege"
     }
@@ -16155,8 +15955,7 @@
         "alerting:8.2.1:transform_health/stackAlerts/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_stackAlerts.read",
       "type": "application-privilege"
     }
@@ -16233,8 +16032,7 @@
         "ui:8.2.1:actions/delete"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_actions.minimal_all",
       "type": "application-privilege"
     }
@@ -16311,8 +16109,7 @@
         "ui:8.2.1:actions/delete"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_actions.all",
       "type": "application-privilege"
     }
@@ -16380,8 +16177,7 @@
         "ui:8.2.1:fleetv2/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleetv2.read",
       "type": "application-privilege"
     }
@@ -16444,8 +16240,7 @@
         "ui:8.2.1:actions/execute"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_actions.minimal_read",
       "type": "application-privilege"
     }
@@ -16508,8 +16303,7 @@
         "ui:8.2.1:actions/execute"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_actions.read",
       "type": "application-privilege"
     }
@@ -16565,8 +16359,7 @@
         "ui:8.2.1:savedObjectsTagging/assign"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsTagging.minimal_all",
       "type": "application-privilege"
     }
@@ -16607,8 +16400,7 @@
         "ui:8.2.1:savedObjectsTagging/assign"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_savedObjectsTagging.read",
       "type": "application-privilege"
     }
@@ -16728,8 +16520,7 @@
         "alerting:8.2.1:transform_health/stackAlerts/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_stackAlerts.minimal_all",
       "type": "application-privilege"
     }
@@ -16841,8 +16632,7 @@
         "ui:8.2.1:fleet/all"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleet.minimal_all",
       "type": "application-privilege"
     }
@@ -16954,8 +16744,7 @@
         "ui:8.2.1:fleetv2/all"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleetv2.minimal_all",
       "type": "application-privilege"
     }
@@ -17067,8 +16856,7 @@
         "ui:8.2.1:fleet/all"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleet.all",
       "type": "application-privilege"
     }
@@ -17141,8 +16929,7 @@
         "ui:8.2.1:canvas/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_canvas.minimal_all",
       "type": "application-privilege"
     }
@@ -17210,8 +16997,7 @@
         "ui:8.2.1:fleet/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleet.minimal_read",
       "type": "application-privilege"
     }
@@ -17279,8 +17065,7 @@
         "ui:8.2.1:fleetv2/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleetv2.minimal_read",
       "type": "application-privilege"
     }
@@ -17348,8 +17133,7 @@
         "ui:8.2.1:fleet/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_fleet.read",
       "type": "application-privilege"
     }
@@ -17403,8 +17187,7 @@
         "ui:8.2.1:canvas/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_canvas.read",
       "type": "application-privilege"
     }
@@ -17498,8 +17281,7 @@
         "ui:8.2.1:osquery/readPacks"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_osquery.all",
       "type": "application-privilege"
     }
@@ -17555,8 +17337,7 @@
         "ui:8.2.1:osquery/readPacks"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_osquery.read",
       "type": "application-privilege"
     }
@@ -17618,8 +17399,7 @@
         "alerting:8.2.1:transform_health/stackAlerts/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_stackAlerts.minimal_read",
       "type": "application-privilege"
     }
@@ -17698,8 +17478,7 @@
         "ui:8.2.1:maps/saveQuery"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_maps.minimal_all",
       "type": "application-privilege"
     }
@@ -17778,8 +17557,7 @@
         "ui:8.2.1:maps/saveQuery"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_maps.all",
       "type": "application-privilege"
     }
@@ -17826,8 +17604,7 @@
         "ui:8.2.1:osquery/write"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_osquery.minimal_all",
       "type": "application-privilege"
     }
@@ -17890,8 +17667,7 @@
         "ui:8.2.1:graph/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_graph.all",
       "type": "application-privilege"
     }
@@ -17945,8 +17721,7 @@
         "ui:8.2.1:canvas/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_canvas.minimal_read",
       "type": "application-privilege"
     }
@@ -18005,8 +17780,7 @@
         "ui:8.2.1:maps/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_maps.read",
       "type": "application-privilege"
     }
@@ -18046,8 +17820,7 @@
         "ui:8.2.1:osquery/read"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_osquery.minimal_read",
       "type": "application-privilege"
     }
@@ -18378,8 +18151,7 @@
         "alerting:8.2.1:siem.thresholdRule/siem/rule/unsnooze"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_siem.minimal_all",
       "type": "application-privilege"
     }
@@ -18615,8 +18387,7 @@
         "alerting:8.2.1:xpack.ml.anomaly_detection_jobs_health/ml/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_ml.minimal_all",
       "type": "application-privilege"
     }
@@ -18732,8 +18503,7 @@
         "alerting:8.2.1:xpack.ml.anomaly_detection_jobs_health/ml/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_ml.minimal_read",
       "type": "application-privilege"
     }
@@ -18876,8 +18646,7 @@
         "alerting:8.2.1:siem.thresholdRule/siem/rule/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_siem.minimal_read",
       "type": "application-privilege"
     }
@@ -18934,8 +18703,7 @@
         "cases:8.2.1:cases/updateConfiguration"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_generalCases.minimal_all",
       "type": "application-privilege"
     }
@@ -18992,8 +18760,7 @@
         "cases:8.2.1:cases/updateConfiguration"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_generalCases.all",
       "type": "application-privilege"
     }
@@ -19034,8 +18801,7 @@
         "cases:8.2.1:cases/findConfigurations"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_generalCases.read",
       "type": "application-privilege"
     }
@@ -19094,8 +18860,7 @@
         "ui:8.2.1:maps/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_maps.minimal_read",
       "type": "application-privilege"
     }
@@ -19144,8 +18909,7 @@
         "ui:8.2.1:graph/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_graph.minimal_read",
       "type": "application-privilege"
     }
@@ -19310,8 +19074,7 @@
         "alerting:8.2.1:xpack.uptime.alerts.durationAnomaly/uptime/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_uptime.minimal_all",
       "type": "application-privilege"
     }
@@ -19476,8 +19239,7 @@
         "alerting:8.2.1:xpack.uptime.alerts.durationAnomaly/uptime/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_uptime.all",
       "type": "application-privilege"
     }
@@ -19560,8 +19322,7 @@
         "alerting:8.2.1:logs.alert.document.count/logs/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_logs.all",
       "type": "application-privilege"
     }
@@ -19669,8 +19430,7 @@
         "alerting:8.2.1:metrics.alert.inventory.threshold/infrastructure/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_infrastructure.all",
       "type": "application-privilege"
     }
@@ -19738,8 +19498,7 @@
         "alerting:8.2.1:metrics.alert.inventory.threshold/infrastructure/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_infrastructure.minimal_read",
       "type": "application-privilege"
     }
@@ -19807,8 +19566,7 @@
         "alerting:8.2.1:metrics.alert.inventory.threshold/infrastructure/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_infrastructure.read",
       "type": "application-privilege"
     }
@@ -19869,8 +19627,7 @@
         "cases:8.2.1:observability/updateConfiguration"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_observabilityCases.minimal_all",
       "type": "application-privilege"
     }
@@ -19915,8 +19672,7 @@
         "cases:8.2.1:observability/findConfigurations"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_observabilityCases.minimal_read",
       "type": "application-privilege"
     }
@@ -19961,8 +19717,7 @@
         "cases:8.2.1:observability/findConfigurations"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_observabilityCases.read",
       "type": "application-privilege"
     }
@@ -20088,8 +19843,7 @@
         "ui:8.2.1:dashboard/storeSearchSession"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dashboard.all",
       "type": "application-privilege"
     }
@@ -20194,8 +19948,7 @@
         "ui:8.2.1:dashboard/saveQuery"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dashboard.minimal_all",
       "type": "application-privilege"
     }
@@ -20300,8 +20053,7 @@
         "ui:8.2.1:visualize/createShortUrl"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_visualize.all",
       "type": "application-privilege"
     }
@@ -20399,8 +20151,7 @@
         "ui:8.2.1:visualize/saveQuery"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_visualize.minimal_all",
       "type": "application-privilege"
     }
@@ -20484,8 +20235,7 @@
         "ui:8.2.1:dashboard/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_dashboard.read",
       "type": "application-privilege"
     }
@@ -20560,8 +20310,7 @@
         "ui:8.2.1:discover/saveQuery"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_discover.minimal_all",
       "type": "application-privilege"
     }
@@ -20632,8 +20381,7 @@
         "ui:8.2.1:visualize/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_visualize.minimal_read",
       "type": "application-privilege"
     }
@@ -20704,8 +20452,7 @@
         "ui:8.2.1:visualize/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_visualize.read",
       "type": "application-privilege"
     }
@@ -20759,8 +20506,7 @@
         "ui:8.2.1:discover/show"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "feature_discover.minimal_read",
       "type": "application-privilege"
     }
@@ -21083,8 +20829,7 @@
         "alerting:8.2.1:monitoring_shard_size/monitoring/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "reserved_monitoring",
       "type": "application-privilege"
     }
@@ -21319,8 +21064,7 @@
         "alerting:8.2.1:xpack.ml.anomaly_detection_jobs_health/ml/alert/update"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "reserved_ml_admin",
       "type": "application-privilege"
     }
@@ -21435,8 +21179,7 @@
         "alerting:8.2.1:xpack.ml.anomaly_detection_jobs_health/ml/alert/find"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "reserved_ml_user",
       "type": "application-privilege"
     }
@@ -21514,8 +21257,7 @@
       },
       "metadata_flattened": null,
       "name": "Alerting: .index-threshold/Test rule with snoozeEndTime",
-      "role_descriptors": {
-      },
+      "role_descriptors": {},
       "version": 8020199
     }
   }
@@ -21561,8 +21303,7 @@
         "ui:8.2.1:ml/canAccessML"
       ],
       "application": "kibana-.kibana",
-      "metadata": {
-      },
+      "metadata": {},
       "name": "reserved_ml_apm_user",
       "type": "application-privilege"
     }
@@ -21600,8 +21341,7 @@
           ]
         }
       ],
-      "metadata": {
-      },
+      "metadata": {},
       "run_as": [
         "*"
       ],
@@ -21792,8 +21532,7 @@
       },
       "metadata_flattened": null,
       "name": "Alerting: .index-threshold/Test rule without snoozeEndTime",
-      "role_descriptors": {
-      },
+      "role_descriptors": {},
       "version": 8020199
     }
   }
@@ -21870,8 +21609,7 @@
       },
       "metadata_flattened": null,
       "name": "Alerting: .index-threshold/Test rule with snoozeEndTime",
-      "role_descriptors": {
-      },
+      "role_descriptors": {},
       "version": 8020199
     }
   }
@@ -21948,8 +21686,7 @@
       },
       "metadata_flattened": null,
       "name": "Alerting: .index-threshold/Test rule without snoozeEndTime",
-      "role_descriptors": {
-      },
+      "role_descriptors": {},
       "version": 8020199
     }
   }
@@ -22026,8 +21763,7 @@
       },
       "metadata_flattened": null,
       "name": "Alerting: .index-threshold/Test rule with snoozeEndTime",
-      "role_descriptors": {
-      },
+      "role_descriptors": {},
       "version": 8020199
     }
   }
