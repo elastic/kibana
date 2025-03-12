@@ -12,7 +12,18 @@ describe('validateOnWeekDay', () => {
   });
 
   it('validates properly formed onWeekDay strings', () => {
-    const weekdays = ['+1MO', '+2TU', '+3WE', '+4TH', '-4FR', '-3SA', '-2SU', '-1MO'];
+    const weekdays = [
+      '+1MO',
+      '+2TU',
+      '+3WE',
+      '+4TH',
+      '+5FR',
+      '-5SA',
+      '-4SU',
+      '-3MO',
+      '-2TU',
+      '-1WE',
+    ];
 
     expect(validateOnWeekDay(weekdays)).toBeUndefined();
   });
@@ -24,8 +35,8 @@ describe('validateOnWeekDay', () => {
   });
 
   it('validates invalid week numbers in onWeekDay strings', () => {
-    expect(validateOnWeekDay(['+5MO', '+3WE', '-7FR'])).toEqual(
-      'Invalid onWeekDay values in recurring schedule: +5MO,-7FR'
+    expect(validateOnWeekDay(['+15MO', '+3WE', '-7FR'])).toEqual(
+      'Invalid onWeekDay values in recurring schedule: +15MO,-7FR'
     );
   });
 

@@ -8,8 +8,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import {
-  snoozeBodyInternalSchema,
-  snoozeParamsInternalSchema,
+  snoozeBodyInternalSchemaV1,
+  snoozeParamsInternalSchemaV1,
 } from '../../../../../../common/routes/rule/apis/snooze';
 import type { ILicenseState } from '../../../../../lib';
 import { RuleMutedError } from '../../../../../lib';
@@ -19,7 +19,7 @@ import { INTERNAL_ALERTING_SNOOZE_RULE } from '../../../../../types';
 import { transformSnoozeBodyV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
-export type SnoozeRuleRequestInternalParamsV1 = TypeOf<typeof snoozeParamsInternalSchema>;
+export type SnoozeRuleRequestInternalParamsV1 = TypeOf<typeof snoozeParamsInternalSchemaV1>;
 
 export const snoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -31,8 +31,8 @@ export const snoozeRuleRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
-        params: snoozeParamsInternalSchema,
-        body: snoozeBodyInternalSchema,
+        params: snoozeParamsInternalSchemaV1,
+        body: snoozeBodyInternalSchemaV1,
       },
     },
     router.handleLegacyErrors(

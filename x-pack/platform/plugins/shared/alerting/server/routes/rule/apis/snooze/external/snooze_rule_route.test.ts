@@ -70,7 +70,7 @@ describe('snoozeAlertRoute', () => {
     jest.clearAllMocks();
   });
 
-  it('snoozes an alert', async () => {
+  it('snoozes a rule', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -327,7 +327,7 @@ describe('snoozeAlertRoute', () => {
     );
 
     await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Custom schedule is required"`
+      `"A schedule is required"`
     );
   });
 

@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import { Frequency } from '@kbn/rrule';
-import type { RRule } from '../../../../../server/application/r_rule/types';
+import type { RRuleRequestV1 } from '../../../r_rule';
 import type { ScheduleRequest } from '../../types/v1';
 import { DEFAULT_TIMEZONE, DURATION_REGEX, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
 
@@ -38,7 +38,7 @@ export const transformCustomScheduleToRRule = (
   schedule: ScheduleRequest
 ): {
   duration: number;
-  rRule: RRule | undefined;
+  rRule: RRuleRequestV1;
 } => {
   const { recurring, duration, start, timezone } = schedule;
 

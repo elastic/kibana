@@ -22,14 +22,15 @@ export const scheduleRequestSchema = schema.object(
     start: schema.string({
       validate: validateStartDateV1,
       meta: {
-        description: 'The start date and time of the schedule in ISO 8601 format.',
+        description:
+          'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.',
       },
     }),
     duration: schema.string({
       validate: validateDurationV1,
       meta: {
         description:
-          'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.',
+          'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.',
       },
     }),
     timezone: schema.maybe(
@@ -46,7 +47,8 @@ export const scheduleRequestSchema = schema.object(
           schema.string({
             validate: validateEndDateV1,
             meta: {
-              description: 'The end date of a recurring schedule in ISO 8601 format.',
+              description:
+                'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.',
             },
           })
         ),
@@ -65,7 +67,7 @@ export const scheduleRequestSchema = schema.object(
             validate: validateOnWeekDayV1,
             meta: {
               description:
-                'The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.',
+                'The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.',
             },
           })
         ),

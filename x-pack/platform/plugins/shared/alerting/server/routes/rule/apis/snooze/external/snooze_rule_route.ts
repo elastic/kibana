@@ -9,11 +9,11 @@ import Boom from '@hapi/boom';
 import { v4 } from 'uuid';
 import type { IRouter } from '@kbn/core/server';
 import {
-  type SnoozeParams,
-  type SnoozeResponse,
-  snoozeBodySchema,
-  snoozeParamsSchema,
-  snoozeResponseSchema,
+  type SnoozeParamsV1,
+  type SnoozeResponseV1,
+  snoozeBodySchemaV1,
+  snoozeParamsSchemaV1,
+  snoozeResponseSchemaV1,
 } from '../../../../../../common/routes/rule/apis/snooze';
 import type { ILicenseState } from '../../../../../lib';
 import { RuleMutedError } from '../../../../../lib';
@@ -25,7 +25,6 @@ import {
   transformCustomScheduleToRRule,
   transformRRuleToCustomSchedule,
 } from '../../../../../../common/routes/schedule';
-import type { SnoozeRuleOptions } from '../../../../../application/rule/methods/snooze';
 
 export const snoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -39,7 +38,7 @@ export const snoozeRuleRoute = (
         access: 'public',
         summary: 'Schedule a snooze for the rule',
         description:
-          'When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time or indefinitely and schedule single or recurring downtimes.',
+          'When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.',
         tags: ['oas-tag:alerting'],
         availability: {
           since: '8.19.0',
@@ -48,12 +47,12 @@ export const snoozeRuleRoute = (
       },
       validate: {
         request: {
-          params: snoozeParamsSchema,
-          body: snoozeBodySchema,
+          params: snoozeParamsSchemaV1,
+          body: snoozeBodySchemaV1,
         },
         response: {
           200: {
-            body: () => snoozeResponseSchema,
+            body: () => snoozeResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
           400: {
@@ -72,11 +71,11 @@ export const snoozeRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const params: SnoozeParams = req.params;
+        const params: SnoozeParamsV1 = req.params;
         const customSchedule = req.body.schedule?.custom;
 
         if (!customSchedule) {
-          throw Boom.badRequest('Custom schedule is required');
+          throw Boom.badRequest('A schedule is required');
         }
 
         const { rRule, duration } = transformCustomScheduleToRRule(customSchedule);
@@ -85,10 +84,10 @@ export const snoozeRuleRoute = (
 
         try {
           const snoozedRule = await rulesClient.snooze({
-            ...params,
+            id: params.id,
             snoozeSchedule: {
               duration,
-              rRule: rRule as SnoozeRuleOptions['snoozeSchedule']['rRule'],
+              rRule,
               id: snoozeScheduleId,
             },
           });
@@ -97,7 +96,7 @@ export const snoozeRuleRoute = (
             (schedule) => schedule.id === snoozeScheduleId
           );
 
-          const response: SnoozeResponse = {
+          const response: SnoozeResponseV1 = {
             body: {
               schedule: {
                 id: snoozeScheduleId,
