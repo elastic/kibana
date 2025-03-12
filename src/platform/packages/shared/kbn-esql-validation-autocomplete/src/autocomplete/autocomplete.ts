@@ -16,13 +16,12 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
   getColumnForASTNode,
   getCommandDefinition,
-  getCommandOption,
   getFunctionDefinition,
   isAssignment,
   isAssignmentComplete,
@@ -36,7 +35,6 @@ import {
   isTimeIntervalItem,
   getAllFunctions,
   isSingleItem,
-  nonNullable,
   getColumnExists,
   findPreviousWord,
   correctQuerySyntax,
@@ -59,7 +57,6 @@ import {
   getFunctionSuggestions,
   getCompatibleLiterals,
   buildConstantsDefinitions,
-  buildVariablesDefinitions,
   buildOptionDefinition,
   buildValueDefinitions,
   getDateLiterals,
@@ -138,7 +135,7 @@ export async function suggest(
     resourceRetriever
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
@@ -172,13 +169,7 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
-  if (
-    astContext.type === 'expression' ||
-    (astContext.type === 'option' && astContext.command?.name === 'join') ||
-    (astContext.type === 'option' && astContext.command?.name === 'dissect') ||
-    (astContext.type === 'option' && astContext.command?.name === 'from') ||
-    (astContext.type === 'option' && astContext.command?.name === 'enrich')
-  ) {
+  if (astContext.type === 'expression') {
     return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
@@ -188,25 +179,11 @@ export async function suggest(
       getFieldsMap,
       getPolicies,
       getPolicyMetadata,
-      getVariablesByType,
+      getVariables,
       resourceRetriever?.getPreferences,
       resourceRetriever,
       supportsControls
     );
-  }
-  if (astContext.type === 'option') {
-    // need this wrap/unwrap thing to make TS happy
-    const { option, ...rest } = astContext;
-    if (option && isOptionItem(option)) {
-      return getOptionArgsSuggestions(
-        innerText,
-        ast,
-        { option, ...rest },
-        getFieldsByType,
-        getFieldsMap,
-        getPolicyMetadata
-      );
-    }
   }
   if (astContext.type === 'function') {
     return getFunctionArgsSuggestions(
@@ -217,7 +194,7 @@ export async function suggest(
       getFieldsMap,
       fullText,
       offset,
-      getVariablesByType,
+      getVariables,
       supportsControls
     );
   }
@@ -239,7 +216,7 @@ export function getFieldsByTypeRetriever(
   resourceRetriever?: ESQLCallbacks
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
-  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const getVariables = resourceRetriever?.getVariables;
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   return {
     getFieldsByType: async (
@@ -252,7 +229,7 @@ export function getFieldsByTypeRetriever(
         supportsControls,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
+      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -355,7 +332,7 @@ async function getSuggestionsWithinCommandExpression(
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getVariables?: () => ESQLControlVariable[] | undefined,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
   callbacks?: ESQLCallbacks,
   supportsControls?: boolean
@@ -396,7 +373,7 @@ async function getSuggestionsWithinCommandExpression(
       getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
       previousCommands: commands,
       callbacks,
-      getVariablesByType,
+      getVariables,
       supportsControls,
       getPolicies,
       getPolicyMetadata,
@@ -694,7 +671,7 @@ async function getExpressionSuggestionsByType(
           );
           if (isNumericType(nodeArgType) && isLiteralItem(rightArg)) {
             // ... EVAL var = 1 <suggest>
-            suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+            suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
           }
           if (isFunctionItem(rightArg)) {
             if (rightArg.args.some(isTimeIntervalItem)) {
@@ -702,7 +679,7 @@ async function getExpressionSuggestionsByType(
               const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
               if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                 // ... EVAL var = 1 year + 2 <suggest>
-                suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+                suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
             }
           }
         } else {
@@ -738,7 +715,7 @@ async function getExpressionSuggestionsByType(
                 const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
                 if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                   // ... EVAL var = 1 year + 2 <suggest>
-                  suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
+                  suggestions.push(...getCompatibleLiterals(['time_literal_unit']));
               }
             }
           }
@@ -763,7 +740,7 @@ async function getExpressionSuggestionsByType(
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
-        suggestions.push(...getCompatibleLiterals(command.name, [argDef.type]));
+        suggestions.push(...getCompatibleLiterals([argDef.type]));
       } else {
         // or it can be anything else as long as it is of the right type and the end (i.e. column or function)
         if (!nodeArg) {
@@ -907,7 +884,7 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   fullText: string,
   offset: number,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  getVariables?: () => ESQLControlVariable[] | undefined,
   supportsControls?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
@@ -1031,14 +1008,13 @@ async function getFunctionArgsSuggestions(
     // Literals
     suggestions.push(
       ...getCompatibleLiterals(
-        command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           supportsControls,
         },
-        getVariablesByType
+        getVariables
       )
     );
 
@@ -1105,7 +1081,7 @@ async function getFunctionArgsSuggestions(
       if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
-          ...getCompatibleLiterals(command.name, ['time_literal_unit'], {
+          ...getCompatibleLiterals(['time_literal_unit'], {
             addComma: shouldAddComma,
             advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
           })
@@ -1185,74 +1161,6 @@ async function getListArgsSuggestions(
             },
             { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
           ))
-        );
-      }
-    }
-  }
-  return suggestions;
-}
-
-/**
- * @deprecated — this will disappear when https://github.com/elastic/kibana/issues/195418 is complete
- * because "options" will be handled in imperative command-specific routines instead of being independent.
- */
-async function getOptionArgsSuggestions(
-  innerText: string,
-  commands: ESQLCommand[],
-  {
-    command,
-    option,
-    node,
-  }: {
-    command: ESQLCommand;
-    option: ESQLCommandOption;
-    node: ESQLSingleAstItem | undefined;
-  },
-  getFieldsByType: GetColumnsByTypeFn,
-  getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
-) {
-  const optionDef = getCommandOption(option.name);
-  if (!optionDef || !optionDef.signature) {
-    return [];
-  }
-  const { nodeArg, lastArg } = extractArgMeta(option, node);
-  const suggestions = [];
-  const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
-
-  const fieldsMap = await getFieldsMaps();
-  const anyVariables = collectVariables(commands, fieldsMap, innerText);
-
-  if (command.name === 'rename') {
-    if (option.args.length < 2) {
-      suggestions.push(...buildVariablesDefinitions([findNewVariable(anyVariables)]));
-    }
-  }
-
-  if (optionDef) {
-    if (!suggestions.length) {
-      const argDefIndex = optionDef.signature.multipleParams
-        ? 0
-        : Math.max(option.args.length - 1, 0);
-      const types = [optionDef.signature.params[argDefIndex].type].filter(nonNullable);
-      // If it's a complete expression then proposed some final suggestions
-      // A complete expression is either a function or a column: <COMMAND> <OPTION> field <here>
-      // Or an assignment complete: <COMMAND> <OPTION> field = ... <here>
-      if (
-        (option.args.length && !isNewExpression && !isAssignment(lastArg)) ||
-        (isAssignment(lastArg) && isAssignmentComplete(lastArg))
-      ) {
-        suggestions.push(
-          ...getFinalSuggestions({
-            comma: optionDef.signature.multipleParams,
-          })
-        );
-      } else if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
-        suggestions.push(
-          ...(await getFieldsByType(types[0] === 'column' ? ['any'] : types, [], {
-            advanceCursor: true,
-            openSuggestions: true,
-          }))
         );
       }
     }
