@@ -194,16 +194,22 @@ export interface DeprecationInfo {
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
-export interface ReindexAction {
-  type: 'reindex';
+
+export interface IndexMetadata {
+  isFrozenIndex: boolean;
+  isInDataStream: boolean;
+  isClosedIndex: boolean;
+}
+
+export interface IndexAction {
   /**
-   * Indicate what blockers have been detected for calling reindex
-   * against this index.
-   *
-   * @remark
-   * In future this could be an array of blockers.
+   * Includes relevant information about the index related to this action
    */
-  blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+  metadata: IndexMetadata;
+}
+
+export interface ReindexAction extends IndexAction {
+  type: 'reindex';
 
   /**
    * The transform IDs that are currently targeting this index
@@ -216,7 +222,7 @@ export interface ReindexAction {
   excludedActions?: string[];
 }
 
-export interface UnfreezeAction {
+export interface UnfreezeAction extends IndexAction {
   type: 'unfreeze';
 }
 
@@ -268,8 +274,6 @@ export interface EnrichedDeprecationInfo
   index?: string;
   correctiveAction?: CorrectiveAction;
   resolveDuringUpgrade: boolean;
-  isFrozenIndex?: boolean;
-  isInDataStream?: boolean;
 }
 
 export interface CloudBackupStatus {

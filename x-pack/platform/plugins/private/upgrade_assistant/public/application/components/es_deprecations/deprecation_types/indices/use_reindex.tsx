@@ -34,6 +34,7 @@ export interface ReindexState {
     isFrozen: boolean;
     isReadonly: boolean;
     isInDataStream: boolean;
+    isClosedIndex: boolean;
   };
 }
 
@@ -113,11 +114,13 @@ export const useReindex = ({
   indexName,
   isFrozen,
   isInDataStream,
+  isClosedIndex,
   api,
 }: {
   indexName: string;
   isFrozen: boolean;
   isInDataStream: boolean;
+  isClosedIndex: boolean;
   api: ApiService;
 }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
@@ -131,6 +134,7 @@ export const useReindex = ({
       aliases: [],
       isFrozen,
       isInDataStream,
+      isClosedIndex,
       isReadonly: false, // we don't have this information in the deprecation list
     },
   });

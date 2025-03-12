@@ -31,6 +31,7 @@ describe('ReindexProgress', () => {
               isFrozen: false,
               isReadonly: false,
               isInDataStream: false,
+              isClosedIndex: false,
             },
           } as ReindexState
         }
@@ -99,6 +100,7 @@ describe('ReindexProgress', () => {
                       "meta": Object {
                         "aliases": Array [],
                         "indexName": "foo",
+                        "isClosedIndex": false,
                         "isFrozen": false,
                         "isInDataStream": false,
                         "isReadonly": false,
@@ -182,6 +184,7 @@ describe('ReindexProgress', () => {
               isFrozen: true,
               isReadonly: false,
               isInDataStream: false,
+              isClosedIndex: false,
             },
           } as ReindexState
         }

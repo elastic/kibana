@@ -19,7 +19,7 @@ export interface UpdateIndexState {
 export interface UseUpdateIndexParams {
   indexName: string;
   api: ApiService;
-  correctiveAction: CorrectiveAction;
+  correctiveAction?: CorrectiveAction;
 }
 
 export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIndexParams) => {

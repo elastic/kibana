@@ -45,6 +45,7 @@ describe('UnfreezeDetailsFlyoutStep', () => {
       isFrozen: true,
       isReadonly: true,
       isInDataStream: false,
+      isClosedIndex: false,
       reindexName: 'some_index-reindexed-for-9',
     },
     hasRequiredPrivileges: true,

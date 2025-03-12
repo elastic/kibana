@@ -10,7 +10,7 @@ import React, { createContext, useContext } from 'react';
 import { ApiService } from '../../../../lib/api';
 import { useReindex, ReindexState } from './use_reindex';
 import { UpdateIndexState, useUpdateIndex } from './use_update_index';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo, IndexAction } from '../../../../../../common/types';
 
 export interface IndexStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -43,11 +43,13 @@ export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const indexName = deprecation.index!;
+  const indexAction = deprecation.correctiveAction as IndexAction;
   const { reindexState, startReindex, cancelReindex } = useReindex({
     indexName,
     api,
-    isInDataStream: Boolean(deprecation.isInDataStream),
-    isFrozen: Boolean(deprecation.isFrozenIndex),
+    isInDataStream: Boolean(indexAction?.metadata.isInDataStream),
+    isFrozen: Boolean(indexAction?.metadata.isFrozenIndex),
+    isClosedIndex: Boolean(indexAction?.metadata.isClosedIndex),
   });
 
   const { updateIndexState, updateIndex } = useUpdateIndex({

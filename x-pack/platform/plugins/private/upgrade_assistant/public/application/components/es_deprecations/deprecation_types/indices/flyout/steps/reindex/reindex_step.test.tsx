@@ -62,6 +62,7 @@ describe('ReindexStep', () => {
         isReadonly: false,
         isFrozen: false,
         isInDataStream: false,
+        isClosedIndex: false,
       },
     } as ReindexState,
   };

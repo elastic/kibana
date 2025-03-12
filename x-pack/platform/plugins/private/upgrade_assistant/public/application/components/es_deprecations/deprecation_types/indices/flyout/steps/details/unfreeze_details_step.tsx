@@ -31,6 +31,7 @@ import { getReindexButtonLabel } from './messages';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { FetchFailedCallOut } from '../fetch_failed_callout';
 import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
+import { IndexClosedParagraph } from '../index_closed_paragraph';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
@@ -51,7 +52,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
 
   const { loadingState, status: reindexStatus, hasRequiredPrivileges, meta } = reindexState;
   const { status: updateIndexStatus } = updateIndexState;
-  const { indexName, isInDataStream } = meta;
+  const { indexName, isInDataStream, isClosedIndex } = meta;
   const loading = loadingState === LoadingState.Loading;
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
@@ -167,6 +168,12 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                             id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.description"
                             defaultMessage="Alternatively, you can reindex the data into a new, compatible index. All existing documents will be copied over to a new index, and the old index will be removed. Depending on the size of the index and the available resources, the reindexing operation can take some time. Your data will be in read-only mode until the reindexing has completed."
                           />
+                          {isClosedIndex && (
+                            <Fragment>
+                              <EuiSpacer size="xs" />
+                              <IndexClosedParagraph />
+                            </Fragment>
+                          )}
                         </EuiText>
                       ),
                     },

@@ -10,7 +10,7 @@ import type {
   MigrationDeprecationsDeprecation,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import _ from 'lodash';
+import { omit } from 'lodash';
 import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
@@ -32,17 +32,18 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
-interface BaseMigrationDeprecation {
+export interface BaseMigrationDeprecation {
   index?: string;
   type: keyof EsDeprecations;
   details?: string;
   message: string;
   url: string;
   isCritical: boolean;
-  metadata?: Record<string, any>;
+  metadata?: EsMetadata;
   resolveDuringUpgrade: boolean;
+  // these properties apply to index_settings migrations only
   isFrozenIndex?: boolean;
-  isInDataStream?: boolean;
+  isClosedIndex?: boolean;
 }
 
 const createBaseMigrationDeprecation = (
@@ -65,8 +66,7 @@ const createBaseMigrationDeprecation = (
     message,
     url,
     isCritical: level === 'critical',
-    ...(metadata?.is_in_data_stream && { isInDataStream: metadata?.is_in_data_stream }),
-    metadata,
+    metadata: metadata as EsMetadata,
     resolveDuringUpgrade,
   };
 };
@@ -131,29 +131,54 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     ...clusterSettingsMigrations,
     ...mlSettingsMigrations,
     ...nodeSettingsMigrations,
-    ...enrichIndexSettingsMigrations(indexSettingsMigrations),
+    ...indexSettingsMigrations,
     ...dataStreamsMigrations,
     ...ilmPoliciesMigrations,
     ...templatesMigrations,
   ].flat();
 };
 
-const enrichIndexSettingsMigrations = (
+const isKnownDeprecation = (deprecation: BaseMigrationDeprecation): boolean => {
+  switch (deprecation.type) {
+    case 'index_settings':
+    case 'cluster_settings':
+    case 'templates':
+    case 'ilm_policies':
+    case 'ml_settings':
+    case 'node_settings':
+    case 'data_streams': {
+      return true;
+    }
+    default: {
+      return false;
+    }
+  }
+};
+
+const enrichIndexSettingsMigrations = async (
+  esClient: ElasticsearchClient,
   deprecations: BaseMigrationDeprecation[]
-): BaseMigrationDeprecation[] => {
-  const deprecationsByIndex = new Map<string, EnrichedDeprecationInfo[]>();
+): Promise<void> => {
+  const deprecationsByIndex = new Map<string, BaseMigrationDeprecation[]>();
+  const indexSettingsDeprecationsWithIndex = deprecations.filter(
+    (deprecation) => deprecation.type === 'index_settings' && deprecation.index
+  );
 
-  const deprecationsWithIndex = deprecations.filter(({ index }) => Boolean(index));
   // we do a first pass to store all the index deprecations in a Map
-
-  deprecationsWithIndex.forEach((deprecation) => {
+  indexSettingsDeprecationsWithIndex.forEach((deprecation) => {
     const indexDeprecations = deprecationsByIndex.get(deprecation.index!) ?? [];
     indexDeprecations.push(deprecation);
     deprecationsByIndex.set(deprecation.index!, indexDeprecations);
   });
 
-  // in a second pass, we update the deprecation info
-  deprecationsWithIndex.forEach((deprecation) => {
+  // fetch open/closed state for all of the index_settings deprecations indices
+  const indexNames = Array.from(deprecationsByIndex.keys());
+  const indexStates = indexNames.length ? await esIndicesStateCheck(esClient, indexNames) : {};
+
+  // Update some properties for each of the index_settings deprecations
+  indexSettingsDeprecationsWithIndex.forEach((deprecation) => {
+    deprecation.isClosedIndex = indexStates[deprecation.index!] === 'closed';
+
     // check if a given deprecation is a "frozen index deprecation"
     const isFrozenIndex = isFrozenDeprecation(deprecation.message, deprecation.index);
 
@@ -164,8 +189,6 @@ const enrichIndexSettingsMigrations = (
         .forEach((indexDeprecation) => (indexDeprecation.isFrozenIndex = true));
     }
   });
-
-  return deprecations;
 };
 
 const excludeDeprecation = (
@@ -186,15 +209,13 @@ const excludeDeprecation = (
   ) {
     return true;
   } else if (
-    isFrozenDeprecation(deprecation.message, deprecation.index) &&
-    deprecation.isInDataStream
-  ) {
-    return true;
-  } else if (
+    deprecation.isCritical &&
     deprecation.type === 'index_settings' &&
     deprecation.isFrozenIndex &&
     correctiveAction?.type === 'reindex'
   ) {
+    // in this scenario we will already have a "frozen index" deprecation for the same index
+    // we will filter this 'reindex' deprecation out, and let the 'unfreeze' one pass through
     return true;
   }
 
@@ -202,68 +223,43 @@ const excludeDeprecation = (
 };
 
 export const getEnrichedDeprecations = async (
-  dataClient: ElasticsearchClient
+  esClient: ElasticsearchClient
 ): Promise<EnrichedDeprecationInfo[]> => {
-  const deprecations = (await dataClient.migration.deprecations()) as EsDeprecations;
-  const systemIndices = await getESSystemIndicesMigrationStatus(dataClient);
+  const esDeprecations = (await esClient.migration.deprecations()) as EsDeprecations;
+  const deprecations = normalizeEsResponse(esDeprecations);
 
+  // Throwing here to avoid allowing upgrades while we have unhandled deprecation types from ES
+  // That might cause the stack to fail to start after upgrade.
+  deprecations.forEach((deprecation) => {
+    if (!isKnownDeprecation(deprecation)) {
+      throw new Error(`Unknown ES deprecation type "${deprecation.type}"`);
+    }
+    return true;
+  });
+
+  // Kibana system indices are treated in a different section of the Upgrade Assistant
+  const systemIndices = await getESSystemIndicesMigrationStatus(esClient);
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
+  const filteredDeprecations = deprecations.filter(
+    (deprecation) =>
+      deprecation.type !== 'index_settings' || !systemIndicesList.includes(deprecation.index!)
+  );
 
-  const indexSettingsIndexNames = Object.keys(deprecations.index_settings);
-  const indexSettingsIndexStates = indexSettingsIndexNames.length
-    ? await esIndicesStateCheck(dataClient, indexSettingsIndexNames)
-    : {};
+  // Set extra metadata properties for index_settings migrations
+  await enrichIndexSettingsMigrations(esClient, filteredDeprecations);
 
-  return normalizeEsResponse(deprecations)
-    .filter((deprecation) => {
-      switch (deprecation.type) {
-        case 'index_settings': {
-          if (!deprecation.index) {
-            return false;
-          }
-          // filter out system indices
-          return !systemIndicesList.includes(deprecation.index);
-        }
-        case 'cluster_settings':
-        case 'templates':
-        case 'ilm_policies':
-        case 'ml_settings':
-        case 'node_settings':
-        case 'data_streams': {
-          return true;
-        }
-        default: {
-          // Throwing here to avoid allowing upgrades while we have unhandled deprecation types from ES
-          // That might cause the stack to fail to start after upgrade.
-          throw new Error(`Unknown ES deprecation type "${deprecation.type}"`);
-        }
-      }
-    })
-    .flatMap((deprecation) => {
-      const correctiveAction = getCorrectiveAction(
-        deprecation.type,
-        deprecation.message,
-        deprecation.metadata as EsMetadata,
-        deprecation.index
-      );
+  // enrich deprecations with the corrective actions, remove metadata
+  return filteredDeprecations.flatMap((deprecation) => {
+    const correctiveAction = getCorrectiveAction(deprecation);
 
-      // Early exclusion of deprecations
-      if (excludeDeprecation(deprecation, correctiveAction)) {
-        return [];
-      }
+    // Prevent some deprecations from showing up in the UI
+    if (excludeDeprecation(deprecation, correctiveAction)) {
+      return []; // equivalent of filtering out, thanks to the flatMap
+    }
 
-      // If we have found deprecation information for index/indices
-      // check whether the index is open or closed.
-      if (deprecation.type === 'index_settings' && correctiveAction?.type === 'reindex') {
-        correctiveAction.blockerForReindexing =
-          indexSettingsIndexStates[deprecation.index!] === 'closed' ? 'index-closed' : undefined;
-      }
-
-      const enrichedDeprecation = {
-        ..._.omit(deprecation, 'metadata'),
-        correctiveAction,
-      };
-
-      return enrichedDeprecation;
-    });
+    return {
+      ...omit(deprecation, 'metadata', 'isFrozenIndex', 'isClosedIndex', 'isInDataStream'),
+      correctiveAction,
+    };
+  });
 };
