@@ -50,7 +50,7 @@ const useUserProfile = ({ username, enabled = true }: { username: string; enable
         avatar: profile?.[0].data.avatar,
       };
     },
-    enabled,
+    enabled: !!(enabled && username?.length),
   });
 };
 

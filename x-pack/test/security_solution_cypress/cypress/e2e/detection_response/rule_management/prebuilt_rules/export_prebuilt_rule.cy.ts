@@ -20,7 +20,7 @@ import {
   selectAllRules,
   selectRulesByName,
 } from '../../../../tasks/alerts_detection_rules';
-import { RULE_NAME, TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
+import { RULE_NAME, SUCCESS_TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createAndInstallMockedPrebuiltRules } from '../../../../tasks/api_calls/prebuilt_rules';
@@ -36,15 +36,6 @@ describe(
   'Detection rules, Prebuilt Rules Export workflow - With Rule Customization',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'prebuiltRulesCustomizationEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     describe('Rule export workflow with single rules', () => {
@@ -72,7 +63,7 @@ describe(
         exportRule('Non-customized prebuilt rule');
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -83,7 +74,7 @@ describe(
         exportRule('Customized prebuilt rule');
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -91,7 +82,7 @@ describe(
         exportRule('Custom rule to export');
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.customRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -101,7 +92,7 @@ describe(
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -113,7 +104,7 @@ describe(
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -122,7 +113,7 @@ describe(
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.customRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
     });
@@ -168,7 +159,7 @@ describe(
             'eql',
             expectedExportedRule(this.nonCustomizedPrebuiltRuleResponse)
           );
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -180,7 +171,7 @@ describe(
             'eql',
             expectedExportedRule(this.customizedPrebuiltRuleResponse)
           );
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -190,7 +181,7 @@ describe(
         bulkExportRules();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.customRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
         });
       });
 
@@ -206,7 +197,7 @@ describe(
               this.customRuleResponse,
             ])
           );
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 3 of 3 rules.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 3 of 3 rules.');
         });
       });
 
@@ -222,7 +213,7 @@ describe(
               this.customizedPrebuiltRuleResponse,
             ])
           );
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 2 of 2 rules.');
+          cy.get(SUCCESS_TOASTER_BODY).should('have.text', 'Successfully exported 2 of 2 rules.');
         });
       });
     });

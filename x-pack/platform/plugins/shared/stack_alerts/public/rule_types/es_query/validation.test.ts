@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EsQueryRuleParams, SearchType } from './types';
+import type { EsQueryRuleParams } from './types';
+import { SearchType } from './types';
 import { validateExpression, hasExpressionValidationErrors } from './validation';
 
 describe('expression params validation', () => {
