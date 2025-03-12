@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERT_INSTANCE_ID,
   ALERT_REASON,
-  ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
   ALERT_RULE_TAGS,
   ALERT_RULE_UUID,
@@ -95,8 +94,8 @@ export function RelatedAlertsView({ alert }: Props) {
       name: 'Rule',
       truncateText: true,
       render: (_, item: Alert) => {
-        const ruleCategory = getAlertFieldValue(item, ALERT_RULE_CATEGORY);
-        return <EuiText size="s">{ruleCategory}</EuiText>;
+        const ruleName = getAlertFieldValue(item, ALERT_RULE_NAME);
+        return <EuiText size="s">{ruleName}</EuiText>;
       },
     },
     {
@@ -170,7 +169,7 @@ export function RelatedAlertsView({ alert }: Props) {
         compressed
         error={isError ? 'Error fetching relevant alerts' : undefined}
         selection={selection}
-        tableLayout={'auto'}
+        tableLayout="auto"
       />
     </EuiFlexGroup>
   );

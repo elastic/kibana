@@ -7,11 +7,14 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
+  ALERT_END,
   ALERT_GROUP,
   ALERT_INSTANCE_ID,
   ALERT_RULE_TAGS,
   ALERT_RULE_UUID,
   ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import dedent from 'dedent';
 import moment from 'moment';
@@ -47,6 +50,7 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
       ]
     : [];
   const startDate = moment(alert.fields[ALERT_START]);
+  const endDate = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
   const tags = alert.fields[ALERT_RULE_TAGS] ?? [];
   const instanceId = alert.fields[ALERT_INSTANCE_ID]?.split(',') ?? [];
 
@@ -55,9 +59,18 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
       filter: [
         {
           range: {
-            'kibana.alert.start': {
-              gte: startDate.clone().subtract(6, 'days').toISOString(),
-              lte: startDate.clone().add(3, 'days').toISOString(),
+            [ALERT_START]: {
+              gte: startDate.clone().subtract(1, 'days').toISOString(),
+              lte: startDate.clone().add(1, 'days').toISOString(),
+            },
+          },
+        },
+      ],
+      must_not: [
+        {
+          term: {
+            [ALERT_UUID]: {
+              value: alert.fields[ALERT_UUID],
             },
           },
         },
@@ -65,6 +78,14 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
       should: [
         ...shouldGroups,
         ...shouldRule,
+        {
+          term: {
+            [ALERT_STATUS]: {
+              value: alert.fields[ALERT_STATUS],
+              boost: 2,
+            },
+          },
+        },
         {
           function_score: {
             functions: [
@@ -79,6 +100,21 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
                 },
                 weight: 10,
               },
+              ...(endDate
+                ? [
+                    {
+                      exp: {
+                        [ALERT_END]: {
+                          origin: endDate.toISOString(),
+                          scale: '10m',
+                          offset: '10m',
+                          decay: 0.5,
+                        },
+                      },
+                      weight: 10,
+                    },
+                  ]
+                : []),
               {
                 script_score: {
                   script: {
@@ -100,7 +136,7 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
                     },
                   },
                 },
-                weight: 5,
+                weight: 2,
               },
               {
                 script_score: {
