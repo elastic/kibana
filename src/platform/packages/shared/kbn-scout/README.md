@@ -189,6 +189,8 @@ If the servers are already running, you can execute tests independently using ei
 npx playwright test --config <plugin-path>/ui_tests/playwright.config.ts --project local
 ```
 
+We use `project` flag to define test target, where tests to be run: local servers or Elastic Cloud. Currently we only support local servers.
+
 ### Contributing
 
 We welcome contributions to improve and extend `kbn-scout`. This guide will help you get started, add new features, and align with existing project standards.
