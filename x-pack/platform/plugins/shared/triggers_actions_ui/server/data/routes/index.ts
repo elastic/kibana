@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { createTimeSeriesQueryRoute } from './time_series_query';
 import { createFieldsRoute } from './fields';
 import { createIndicesRoute } from './indices';
-import { getService } from '..';
+import type { getService } from '..';
 
 interface RegisterRoutesParams {
   logger: Logger;

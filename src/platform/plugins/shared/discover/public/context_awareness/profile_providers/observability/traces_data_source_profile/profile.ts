@@ -8,11 +8,13 @@
  */
 
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory, type DataSourceProfileProvider } from '../../../profiles';
 import { getCellRenderers } from './accessors';
 
+const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
+
 export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider => ({
-  profileId: 'traces-data-source-profile',
+  profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   isExperimental: true,
   profile: {
     getDefaultAppState: () => () => ({

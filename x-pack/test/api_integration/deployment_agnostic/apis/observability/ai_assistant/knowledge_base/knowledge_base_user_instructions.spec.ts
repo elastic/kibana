@@ -308,7 +308,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(createResponse.status).to.be(200);
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
@@ -321,7 +321,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         const conversation = res.body;
         return conversation;
@@ -398,6 +398,83 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         const res2 = await updateInstruction('');
         expect(res2).to.be('');
+      });
+    });
+
+    describe('Forwarding User Instructions via System Message to the LLM', () => {
+      // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
+      this.tags(['failsOnMKI']);
+
+      let proxy: LlmProxy;
+      let connectorId: string;
+      const userInstructionText = 'This is a private instruction';
+      let systemMessage: string;
+
+      before(async () => {
+        proxy = await createLlmProxy(log);
+        connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
+          port: proxy.getPort(),
+        });
+        const res = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+          params: {
+            body: {
+              id: 'private-instruction-id',
+              text: userInstructionText,
+              public: false,
+            },
+          },
+        });
+        expect(res.status).to.be(200);
+
+        const { status, body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/functions',
+          params: {
+            query: {
+              scopes: ['all'],
+            },
+          },
+        });
+
+        expect(status).to.be(200);
+        systemMessage = body.systemMessage;
+      });
+
+      after(async () => {
+        proxy.close();
+        await observabilityAIAssistantAPIClient.deleteActionConnector({
+          actionId: connectorId,
+        });
+      });
+
+      it('includes private KB instructions in the system message sent to the LLM', async () => {
+        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+        const messages: Message[] = [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: 'Today we will be testing user instructions!',
+            },
+          },
+        ];
+        await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+          params: {
+            body: {
+              messages,
+              connectorId,
+              persist: false,
+              screenContexts: [],
+              scopes: ['all'],
+            },
+          },
+        });
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        const simulator = await simulatorPromise;
+        const requestData = simulator.requestBody;
+        expect(requestData.messages[0].content).to.contain(userInstructionText);
+        expect(requestData.messages[0].content).to.eql(systemMessage);
       });
     });
 

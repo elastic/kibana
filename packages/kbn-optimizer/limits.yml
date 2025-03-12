@@ -12,7 +12,6 @@ pageLoadAssetSize:
   charts: 55000
   cloud: 21076
   cloudDataMigration: 19170
-  cloudDefend: 18697
   cloudExperiments: 109746
   cloudFullStory: 18493
   cloudLinks: 55984
@@ -35,7 +34,7 @@ pageLoadAssetSize:
   dataViews: 65000
   dataVisualizer: 30000
   devTools: 38637
-  discover: 99999
+  discover: 25000
   discoverEnhanced: 42730
   discoverShared: 17111
   embeddable: 24000
@@ -121,7 +120,7 @@ pageLoadAssetSize:
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 11550
-  presentationUtil: 33905
+  presentationUtil: 9000
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
@@ -162,6 +161,7 @@ pageLoadAssetSize:
   stackConnectors: 67227
   streams: 16742
   streamsApp: 20537
+  streamsAppWrapper: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586

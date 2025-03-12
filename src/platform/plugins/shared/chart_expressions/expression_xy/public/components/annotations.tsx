@@ -8,7 +8,6 @@
  */
 
 import './annotations.scss';
-import './reference_lines/reference_lines.scss';
 
 import React, { Fragment } from 'react';
 import { snakeCase } from 'lodash';
@@ -69,7 +68,7 @@ const TooltipAnnotationDetails = ({
   return extraFields.length > 0 ? (
     <div className="xyAnnotationTooltip__extraFields">
       {extraFields.map((field) => (
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" key={`${field.key}-${field.name}`}>
           <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">{field.name}:</EuiFlexItem>
           <EuiFlexItem className="xyAnnotationTooltip__extraFieldsValue">
             {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
@@ -287,6 +286,10 @@ export const Annotations = ({
         const { timebucket, time, isGrouped, id: configId } = annotation;
         const strokeWidth = simpleView ? 1 : annotation.lineWidth || 1;
         const id = snakeCase(`${configId}-${time}`);
+        const markerBodyLabel =
+          !simpleView && !isGrouped && annotation.textVisibility && !hasReducedPadding
+            ? annotation.label
+            : undefined;
         return (
           <LineAnnotation
             id={id}
@@ -306,15 +309,8 @@ export const Annotations = ({
               ) : undefined
             }
             markerBody={
-              !simpleView ? (
-                <MarkerBody
-                  label={
-                    !isGrouped && annotation.textVisibility && !hasReducedPadding
-                      ? annotation.label
-                      : undefined
-                  }
-                  isHorizontal={!isHorizontal}
-                />
+              markerBodyLabel ? (
+                <MarkerBody label={markerBodyLabel} isHorizontal={!isHorizontal} />
               ) : undefined
             }
             markerPosition={

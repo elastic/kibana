@@ -134,10 +134,16 @@ export default function ({ getService }) {
           });
 
           it('should handle ES errors', async () => {
-            const payload = { job: { id: 'abc', invalid: 'property' } };
+            const payload = {
+              job: { id: 'abc', ...getJobPayload(indexName).job, invalid: 'property' },
+            };
 
             const { body } = await createJob(payload);
-            expect(body.message).to.contain('unknown field [invalid]');
+            // expect(body.message).to.contain('unknown field [invalid]');
+            // elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+            // At the moment, the client places unknown fields as URL parameters, we are discussing changing that to use the body as a catch-all.
+            // This might revert the asssertion to the above.
+            expect(body.message).to.contain('contains unrecognized parameter: [invalid]');
           });
 
           it('should list the newly created job', async () => {

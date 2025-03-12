@@ -39,7 +39,6 @@ export function useErrorFailedTests({
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
         size: 10000,
         query: {
           bool: {
@@ -60,7 +59,6 @@ export function useErrorFailedTests({
           },
         },
         sort: [{ '@timestamp': 'desc' }],
-      },
     },
     [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, errorStateIdToUse],
     { name: 'getMonitorErrorFailedTests' }

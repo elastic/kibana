@@ -19,10 +19,16 @@ interface Props {
   setIndexName: (name: string) => void;
   setIndexValidationStatus: (status: STATUS) => void;
   fileUpload: FileUploadStartApi;
+  initialIndexName?: string;
 }
 
-export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus, fileUpload }) => {
-  const [indexNameLocal, setIndexNameLocal] = useState('');
+export const IndexInput: FC<Props> = ({
+  setIndexName,
+  setIndexValidationStatus,
+  fileUpload,
+  initialIndexName,
+}) => {
+  const [indexNameLocal, setIndexNameLocal] = useState(initialIndexName ?? '');
   const [indexNameError, setIndexNameError] = useState('');
   const isMounted = useMountedState();
 

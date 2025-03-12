@@ -61,8 +61,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    baseConversations,
-    getLastConversationId,
+    getLastConversation,
+    setLastConversation,
   } = useAssistantContext();
   const {
     allSystemPrompts,
@@ -70,18 +70,20 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
     refetchCurrentUserConversations,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, isAssistantEnabled });
 
   const { currentConversation, handleOnConversationSelected } = useCurrentConversation({
     allSystemPrompts,
     conversations,
     defaultConnector,
+    spaceId,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(),
+    lastConversation: getLastConversation(),
     mayUpdateConversations:
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
+    setLastConversation,
   });
 
   const onConversationChange = useCallback(
@@ -101,7 +103,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       const config = getGenAiConfig(connector);
       const apiProvider = config?.apiProvider;
       const model = config?.defaultModel;
-
       if (currentConversation != null) {
         const conversation = await setApiConfig({
           conversation: currentConversation,
@@ -120,17 +121,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         }
       }
 
-      if (selectedConnectorId != null) {
+      if (connector) {
         setSelectedConnectorId(connectorId);
       }
     },
-    [
-      currentConversation,
-      selectedConnectorId,
-      setApiConfig,
-      onConversationChange,
-      setSelectedConnectorId,
-    ]
+    [currentConversation, setApiConfig, onConversationChange, setSelectedConnectorId]
   );
 
   if (!checkCompleteMetadata) {
