@@ -9,8 +9,7 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/core-ui-settings-common",
-    "@kbn/management-settings-ids",
-    "@kbn/core-ui-settings-browser",
+    "@kbn/server-route-repository",
+    "@kbn/core-http-server",
   ]
 }
