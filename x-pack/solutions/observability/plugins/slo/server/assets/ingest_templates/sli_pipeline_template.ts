@@ -13,7 +13,7 @@ import {
 } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 
-export const getSLIPipelineTemplate = (slo: SLODefinition) => ({
+export const getSLIPipelineTemplate = (slo: SLODefinition, spaceId: string) => ({
   id: getSLOPipelineId(slo.id, slo.revision),
   description: `Ingest pipeline for SLO rollup data [id: ${slo.id}, revision: ${slo.revision}]`,
   processors: [
@@ -39,6 +39,12 @@ export const getSLIPipelineTemplate = (slo: SLODefinition) => ({
       set: {
         field: 'slo.revision',
         value: slo.revision,
+      },
+    },
+    {
+      set: {
+        field: 'spaceId',
+        value: spaceId,
       },
     },
     {
