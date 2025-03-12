@@ -17,7 +17,7 @@ export const getValidatorNode = ({ esClient }: { esClient: ElasticsearchClient }
     const { messages } = state;
     const lastMessage = messages[messages.length - 1];
 
-    if(!state.shouldSelfHeal){
+    if (!state.shouldSelfHeal) {
       return new Command({
         goto: END,
       });

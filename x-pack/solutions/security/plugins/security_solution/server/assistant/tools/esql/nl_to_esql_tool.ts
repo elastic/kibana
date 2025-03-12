@@ -69,7 +69,11 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
         schema: z.object({
           question: z.string().describe(`The user's exact question about ESQL`),
-          shouldSelfHeal: z.boolean().describe("Whether to regenerate the queries' until no errors are returned when the query is run. If the user is asking a general question about ESQL, set this to false. If the user is asking for a query, set this to true."),
+          shouldSelfHeal: z
+            .boolean()
+            .describe(
+              "Whether to regenerate the queries' until no errors are returned when the query is run. If the user is asking a general question about ESQL, set this to false. If the user is asking for a query, set this to true."
+            ),
         }),
         tags: ['esql', 'query-generation', 'knowledge-base'],
       }
