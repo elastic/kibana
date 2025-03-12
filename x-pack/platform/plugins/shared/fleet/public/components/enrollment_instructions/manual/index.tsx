@@ -82,7 +82,7 @@ export const ManualInstructions = ({
   gcpProjectId?: string;
   gcpOrganizationId?: string;
   gcpAccountType?: string;
-  showInstallServers: boolean;
+  showInstallServers?: boolean;
 }) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(
     apiKey,
