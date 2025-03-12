@@ -176,14 +176,14 @@ export const CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.solutionSelection.description',
   {
     defaultMessage:
-      'Only rules associated with the selected categories are affected by the maintenance window.',
+      'Only rules associated with the selected solution are affected by the maintenance window.',
   }
 );
 
 export const CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.solutionSelection.checkboxGroupTitle',
   {
-    defaultMessage: 'Select the categories this should affect',
+    defaultMessage: 'Select the solution this should affect',
   }
 );
 
