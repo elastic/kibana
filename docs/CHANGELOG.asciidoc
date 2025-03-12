@@ -170,8 +170,12 @@ Data ingestion and Fleet::
 * Adds next steps and actions to the agentless integrations flyout ({kibana-pull}203824[#203824]).
 * Adds support for columns when exporting agents to CSV ({kibana-pull}203103[#203103]).
 * Adds status tracking for agentless integrations ({kibana-pull}199567[#199567]).
+ES|QL editor::
+* Adds support for `LOOKUP JOIN` commands ({kibana-pull}205762[#205762]).
 Discover::
 * Adds in-table search ({kibana-pull}206454[#206454]).
+* Renames Saved Search to Discover Session ({kibana-pull}202217[#202217]).
+* Converts the KQL/Lucene query when switching from data view mode to ES|QL mode ({kibana-pull}206391[#206391]).
 Elastic Observability solution::
 * Adds the ability to handle multiple prompts for the Rule connector ({kibana-pull}209221[#209221]).
 * Adds chat history details to conversation list ({kibana-pull}207426[#207426]).
@@ -208,13 +212,11 @@ Dashboards & Visualizations::
 Data ingestion and Fleet::
 * Enables sub-feature privileges for Fleet ({kibana-pull}203182[#203182]).
 Discover and ES|QL::
-* Converts the KQL/Lucene query when switching from data view mode to ES|QL mode ({kibana-pull}206391[#206391]).
 * Removes redundant data fetching when hiding/showing the chart ({kibana-pull}206389[#206389]).
 * Adds a default "All logs" temporary data view to the Observability Solution view ({kibana-pull}205991[#205991]).
 * Adds an "All logs" temporary data view to the Classic solution view ({kibana-pull}209042[#209042]).
 * Formats JSON messages in Observability Logs profile ({kibana-pull}205666[#205666]).
 * Makes Copy action visible on cell hover ({kibana-pull}204744[#204744]).
-* Renames Saved Search to Discover Session ({kibana-pull}202217[#202217]).
 * Adds support for custom formatters in charts ({kibana-pull}201540[#201540]).
 * Refactors RowHeightSettings component to EUI layout ({kibana-pull}203606[#203606]).
 * Highlights matching field values when performing a KQL search on a keyword field ({kibana-pull}201952[#201952]).
