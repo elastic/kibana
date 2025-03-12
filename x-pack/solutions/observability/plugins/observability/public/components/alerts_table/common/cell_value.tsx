@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import React from 'react';
 import {
   ALERT_DURATION,
@@ -66,6 +66,8 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
   const value = getAlertFieldValue(alert, columnId);
 
   switch (columnId) {
+    case '_score':
+      return <EuiBadge color="accent">{alert._score}</EuiBadge>;
     case ALERT_STATUS:
       if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
         // NOTE: This should only be needed to narrow down the type.

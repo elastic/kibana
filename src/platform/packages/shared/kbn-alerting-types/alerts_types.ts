@@ -13,6 +13,7 @@ import { JsonValue } from '@kbn/utility-types';
 export interface MetaAlertFields {
   _id: string;
   _index: string;
+  _score: number;
 }
 
 export interface LegacyField {

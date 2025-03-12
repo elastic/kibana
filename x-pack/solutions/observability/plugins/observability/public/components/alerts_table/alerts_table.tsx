@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ALERT_START } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import React from 'react';
 import { ObservabilityPublicStart } from '../..';
-import AlertActions from '../alert_actions/alert_actions';
-import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
+import AlertActions from '../alert_actions/alert_actions';
+import { AlertsFlyoutBody } from '../alerts_flyout/alerts_flyout_body';
+import { AlertsFlyoutFooter } from '../alerts_flyout/alerts_flyout_footer';
+import { AlertsFlyoutHeader } from '../alerts_flyout/alerts_flyout_header';
+import { AlertsTableCellValue } from './common/cell_value';
+import { getColumns } from './common/get_columns';
 import {
   GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
 } from './types';
-import { AlertsTableCellValue } from './common/cell_value';
-import { AlertsFlyoutBody } from '../alerts_flyout/alerts_flyout_body';
-import { AlertsFlyoutHeader } from '../alerts_flyout/alerts_flyout_header';
-import { AlertsFlyoutFooter } from '../alerts_flyout/alerts_flyout_footer';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { getColumns } from './common/get_columns';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
 
 const columns = getColumns({ showRuleName: true });
 const initialSort = [
   {
-    [ALERT_START]: {
+    _score: {
       order: 'desc' as SortOrder,
     },
   },

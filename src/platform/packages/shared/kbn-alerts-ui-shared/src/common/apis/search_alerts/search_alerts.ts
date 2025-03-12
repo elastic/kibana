@@ -167,6 +167,7 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
       acc.push({
         ...hit.fields,
         _id: hit._id,
+        _score: hit._score,
         _index: hit._index,
       } as Alert);
     }
