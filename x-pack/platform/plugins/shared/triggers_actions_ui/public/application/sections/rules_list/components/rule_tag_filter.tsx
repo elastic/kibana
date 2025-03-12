@@ -17,7 +17,7 @@ import {
   EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
-import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_load_tags_query';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import { useKibana } from '../../../../common';
 
 export interface RuleTagFilterProps {

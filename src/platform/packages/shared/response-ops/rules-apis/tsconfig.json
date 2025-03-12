@@ -23,5 +23,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/alerts-ui-shared",
+    "@kbn/triggers-actions-ui-types",
   ]
 }

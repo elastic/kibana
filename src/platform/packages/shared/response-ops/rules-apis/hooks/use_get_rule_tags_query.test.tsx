@@ -8,7 +8,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useGetRuleTagsQuery } from './use_load_tags_query';
+import { useGetRuleTagsQuery } from './use_get_rule_tags_query';
 import { getRuleTags } from '../apis/get_rule_tags';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
