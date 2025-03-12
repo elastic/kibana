@@ -293,21 +293,7 @@ export const finishSAMLHandshakeEffect = async ({
   samlResponse,
   sid,
 }: SAMLCallbackParams) => {
-  const encodedResponse = encodeURIComponent(samlResponse);
-  const url = kbnHost + '/api/security/saml/callback';
-  const request = {
-    url,
-    method: 'post',
-    data: `SAMLResponse=${encodedResponse}`,
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-      ...(sid ? { Cookie: `sid=${sid}` } : {}),
-    },
-    validateStatus: () => true,
-    maxRedirects: 0,
-  };
-
-  const fetch = Effect.tryPromise(() => axios.request(request));
+  const fetch = Effect.tryPromise(() => axios.request(requestF(samlResponse, kbnHost, sid)));
 
   const main = Effect.gen(function* () {
     yield* Effect.log(`Attempting to finish the saml handshake`);
@@ -444,3 +430,19 @@ export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => 
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
   return new Session(cookie, email);
 };
+
+function requestF(samlResponse, kbnHost, sid) {
+  const encodedResponse = encodeURIComponent(samlResponse);
+  const url = kbnHost + '/api/security/saml/callback';
+  return {
+    url,
+    method: 'post',
+    data: `SAMLResponse=${encodedResponse}`,
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      ...(sid ? { Cookie: `sid=${sid}` } : {}),
+    },
+    validateStatus: () => true,
+    maxRedirects: 0,
+  };
+}
