@@ -39791,6 +39791,16 @@ paths:
           name: kqlQuery
           schema:
             type: string
+        - description: Size provided for cursor based pagination
+          example: 25
+          in: query
+          name: size
+          schema:
+            type: integer
+        - in: query
+          name: searchAfter
+          schema:
+            type: string
         - description: The page to use for pagination, must be greater or equal than 1
           example: 1
           in: query
@@ -40214,6 +40224,69 @@ paths:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
       summary: Enable an SLO
+      tags:
+        - slo
+      x-beta: true
+  /s/{spaceId}/internal/observability/slos/_definitions:
+    get:
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getDefinitionsOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: Indicates if the API returns only outdated SLO or all SLO definitions
+          example: true
+          in: query
+          name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Filters the SLOs by name
+          example: my service availability
+          in: query
+          name: search
+          schema:
+            type: string
+        - description: The page to use for pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of SLOs returned by page
+          example: 100
+          in: query
+          name: perPage
+          schema:
+            default: 100
+            maximum: 1000
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Get the SLO definitions
       tags:
         - slo
       x-beta: true
@@ -55554,6 +55627,25 @@ components:
           type: string
       title: FilterMeta
       type: object
+    SLOs_find_slo_definitions_response:
+      description: |
+        A paginated response of SLO definitions matching the query.
+      properties:
+        page:
+          example: 2
+          type: number
+        perPage:
+          example: 100
+          type: number
+        results:
+          items:
+            $ref: '#/components/schemas/SLOs_slo_definition_response'
+          type: array
+        total:
+          example: 123
+          type: number
+      title: Find SLO definitions response
+      type: object
     SLOs_find_slo_response:
       description: |
         A paginated response of SLOs matching the query.
@@ -55568,6 +55660,12 @@ components:
           items:
             $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           type: array
+        searchAfter:
+          type: string
+        size:
+          description: Size provided for cursor based pagination
+          example: 25
+          type: number
         total:
           example: 34
           type: number
