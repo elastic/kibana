@@ -15,7 +15,7 @@ import {
 
 const initialWidth = 123456789;
 
-describe('Timeline save middleware', () => {
+describe('Timeline localStorage middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
 
   beforeEach(() => {
