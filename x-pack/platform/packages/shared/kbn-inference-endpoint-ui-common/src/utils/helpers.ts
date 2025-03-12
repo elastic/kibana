@@ -47,7 +47,7 @@ export const getNonEmptyValidator = (
       schema
         .map((field: ConfigEntryView) => {
           // validate if submitting or on field edit - value is not default to null
-          if (!field.required && (configData[field.key] !== null || isSubmitting)) {
+          if (field.required && (configData[field.key] !== null || isSubmitting)) {
             // validate secrets fields separately from regular
             if (isSecrets ? field.sensitive : !field.sensitive) {
               if (
