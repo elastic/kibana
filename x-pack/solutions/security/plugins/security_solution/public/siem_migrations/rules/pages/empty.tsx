@@ -38,7 +38,7 @@ export const EmptyMigrationRulesPage = () => {
             actions={
               <SecuritySolutionLinkButton
                 deepLinkId={SecurityPageName.landing}
-                path={`${OnboardingTopicId.siemMigrations}#${OnboardingCardId.siemMigrationsStart}`}
+                path={`${OnboardingTopicId.siemMigrations}#${OnboardingCardId.siemMigrationsRules}`}
               >
                 {i18n.TRANSLATED_RULES_EMPTY_PAGE_CTA}
               </SecuritySolutionLinkButton>
