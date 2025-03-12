@@ -243,6 +243,15 @@ export interface HealthIndicatorAction {
   impacts: HealthReportImpact[];
 }
 
+export type CorrectiveAction =
+  | ReindexAction
+  | UnfreezeAction
+  | MlAction
+  | IndexSettingAction
+  | ClusterSettingAction
+  | DataStreamsAction
+  | HealthIndicatorAction;
+
 export interface EnrichedDeprecationInfo
   extends Omit<
     estypes.MigrationDeprecationsDeprecation,
@@ -257,14 +266,7 @@ export interface EnrichedDeprecationInfo
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
-  correctiveAction?:
-    | ReindexAction
-    | UnfreezeAction
-    | MlAction
-    | IndexSettingAction
-    | ClusterSettingAction
-    | DataStreamsAction
-    | HealthIndicatorAction;
+  correctiveAction?: CorrectiveAction;
   resolveDuringUpgrade: boolean;
   isFrozenIndex?: boolean;
   isInDataStream?: boolean;

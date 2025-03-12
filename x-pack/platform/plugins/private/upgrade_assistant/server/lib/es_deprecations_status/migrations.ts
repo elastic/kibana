@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import _ from 'lodash';
-import type { EnrichedDeprecationInfo } from '../../../common/types';
+import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
@@ -168,6 +168,39 @@ const enrichIndexSettingsMigrations = (
   return deprecations;
 };
 
+const excludeDeprecation = (
+  deprecation: BaseMigrationDeprecation,
+  correctiveAction?: CorrectiveAction
+): boolean => {
+  if (
+    deprecation.type === 'index_settings' &&
+    correctiveAction?.type === 'reindex' &&
+    deprecation.index?.startsWith(ENT_SEARCH_INDEX_PREFIX)
+  ) {
+    return true;
+  } else if (
+    deprecation.type === 'data_streams' &&
+    correctiveAction?.type === 'dataStream' &&
+    correctiveAction.metadata.reindexRequired &&
+    ENT_SEARCH_DATASTREAM_PREFIXES.some((prefix) => deprecation.index?.startsWith(prefix))
+  ) {
+    return true;
+  } else if (
+    isFrozenDeprecation(deprecation.message, deprecation.index) &&
+    deprecation.isInDataStream
+  ) {
+    return true;
+  } else if (
+    deprecation.type === 'index_settings' &&
+    deprecation.isFrozenIndex &&
+    correctiveAction?.type === 'reindex'
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 export const getEnrichedDeprecations = async (
   dataClient: ElasticsearchClient
 ): Promise<EnrichedDeprecationInfo[]> => {
@@ -180,8 +213,6 @@ export const getEnrichedDeprecations = async (
   const indexSettingsIndexStates = indexSettingsIndexNames.length
     ? await esIndicesStateCheck(dataClient, indexSettingsIndexNames)
     : {};
-
-  const deprecationsByIndex = new Map<string, EnrichedDeprecationInfo[]>();
 
   return normalizeEsResponse(deprecations)
     .filter((deprecation) => {
@@ -213,20 +244,11 @@ export const getEnrichedDeprecations = async (
         deprecation.type,
         deprecation.message,
         deprecation.metadata as EsMetadata,
-        deprecation.index,
-        deprecation.isFrozenIndex
+        deprecation.index
       );
 
       // Early exclusion of deprecations
-      if (
-        (deprecation.type === 'index_settings' &&
-          correctiveAction?.type === 'reindex' &&
-          deprecation.index?.startsWith(ENT_SEARCH_INDEX_PREFIX)) ||
-        (deprecation.type === 'data_streams' &&
-          correctiveAction?.type === 'dataStream' &&
-          correctiveAction.metadata.reindexRequired &&
-          ENT_SEARCH_DATASTREAM_PREFIXES.some((prefix) => deprecation.index?.startsWith(prefix)))
-      ) {
+      if (excludeDeprecation(deprecation, correctiveAction)) {
         return [];
       }
 
@@ -242,33 +264,6 @@ export const getEnrichedDeprecations = async (
         correctiveAction,
       };
 
-      if (deprecation.index) {
-        const indexDeprecations = deprecationsByIndex.get(deprecation.index) || [];
-        indexDeprecations.push(enrichedDeprecation);
-        deprecationsByIndex.set(deprecation.index, indexDeprecations);
-      }
-
       return enrichedDeprecation;
-    })
-    .filter((deprecation) => {
-      // Filter out a deprecation IF THE AFFECTED INDEX IS A DATA_STREAM'S BACKING INDEX
-      // Frozen indices are created in 7.x, so they are old / incompatible as well. Thus we can assume there is
-      // an "old data_stream" deprecation that will take care of unfreezing this index
-      if (
-        isFrozenDeprecation(deprecation.message, deprecation.index) &&
-        deprecation.isInDataStream
-      ) {
-        return false;
-      }
-
-      // Filter out deprecations for indices that are frozen, other than the frozen index deprecation itself
-      if (
-        deprecation.isFrozenIndex &&
-        !isFrozenDeprecation(deprecation.message, deprecation.index)
-      ) {
-        return false;
-      }
-
-      return true;
     });
 };
