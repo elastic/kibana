@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { Logger } from '@kbn/logging';
 import { asyncForEach } from '@kbn/std';
@@ -14,7 +12,6 @@ import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { Client, Example, Run } from 'langsmith';
 import { EvaluatorT, evaluate } from 'langsmith/evaluation';
 import { getDefendInsightsGraphInputOverrides } from '../helpers/get_graph_input_overrides';
-import { GraphState } from '../../graphs/default_defend_insights_graph/types';
 import { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 
 /**
@@ -22,16 +19,12 @@ import { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights
  * each dataset run grouped by connector)
  */
 export const runDefendInsightsEvaluations = async ({
-  actionsClient,
-  connectorTimeout,
   evaluatorConnectorId,
   datasetName,
   graphs,
   langSmithApiKey,
   logger,
 }: {
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
   datasetName: string;
   graphs: Array<{
@@ -56,14 +49,13 @@ export const runDefendInsightsEvaluations = async ({
           `Evaluating ${subject} with dataset "${datasetName}" and evaluator "${evaluatorConnectorId}"`
       );
 
-      const predict = async (input: unknown): Promise<GraphState> => {
+      const predict = async (input: unknown) => {
         logger.debug(() => `Raw example Input for ${subject}":\n ${input}`);
 
         // The example `Input` may have overrides for the initial state of the graph:
         const overrides = getDefendInsightsGraphInputOverrides(input);
 
         return graph.invoke(
-          // TODO: type
           {
             ...overrides,
           },
@@ -81,6 +73,7 @@ export const runDefendInsightsEvaluations = async ({
         const actualInsights = run.outputs?.insights ?? [];
 
         if (referenceInsights.length !== actualInsights.length) {
+          // Mismatch in number of insights
           error = `Expected ${referenceInsights.length} insights, but got ${actualInsights.length}`;
         } else {
           for (let i = 0; i < referenceInsights.length; i++) {
@@ -88,11 +81,13 @@ export const runDefendInsightsEvaluations = async ({
             const actGroup = actualInsights[i];
 
             if (refGroup.group !== actGroup.group) {
+              // Mismatch in group name
               error = `Mismatch in group name at index ${i}: expected '${refGroup.group}', got '${actGroup.group}'`;
               break;
             }
 
             if (refGroup.events.length !== actGroup.events.length) {
+              // Mismatch in number of events
               error = `Mismatch in number of events for group '${refGroup.group}': expected ${refGroup.events.length}, got ${actGroup.events.length}`;
               break;
             }
@@ -106,6 +101,7 @@ export const runDefendInsightsEvaluations = async ({
                 refEvent.value !== actEvent.value ||
                 refEvent.endpointId !== actEvent.endpointId
               ) {
+                // Mismatch in event
                 error = `Mismatch in event at group '${refGroup.group}', index ${j}`;
                 break;
               }

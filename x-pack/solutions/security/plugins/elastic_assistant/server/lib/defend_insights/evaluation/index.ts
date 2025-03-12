@@ -109,8 +109,6 @@ export const evaluateDefendInsights = async ({
 
     // run the evaluations for each graph:
     await runDefendInsightsEvaluations({
-      actionsClient,
-      connectorTimeout,
       evaluatorConnectorId,
       datasetName,
       graphs,
