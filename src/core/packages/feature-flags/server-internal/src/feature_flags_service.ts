@@ -25,6 +25,7 @@ import {
 import deepMerge from 'deepmerge';
 import { filter, switchMap, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
+import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
 /**
@@ -55,7 +56,7 @@ export class FeatureFlagsService {
   constructor(private readonly core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
     this.featureFlagsClient = OpenFeature.getClient();
-    OpenFeature.setLogger(this.logger.get('open-feature'));
+    OpenFeature.setLogger(createOpenFeatureLogger(this.logger.get('open-feature')));
   }
 
   /**
