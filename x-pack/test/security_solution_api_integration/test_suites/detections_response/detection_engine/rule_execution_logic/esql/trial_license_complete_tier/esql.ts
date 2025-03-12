@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.from': '2020-10-28T06:00:00.000Z',
         'kibana.alert.rule.immutable': false,
         'kibana.alert.rule.interval': '1h',
-        'kibana.alert.rule.indices': [],
+        'kibana.alert.rule.indices': ['ecs_compliant'],
         'kibana.alert.rule.max_signals': 100,
         'kibana.alert.rule.references': [],
         'kibana.alert.rule.risk_score_mapping': [],
