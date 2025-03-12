@@ -19,28 +19,36 @@ const RETURNED_INTEGRATIONS = 5 as const;
  */
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
   async getIntegrationPackages(): Promise<PackageList | undefined> {
-    return this.dependencies.packageService?.asInternalUser.getPackages();
+    return this.dependencies.packageService?.asInternalUser.getPackages({
+      prerelease: true,
+    });
   }
 
   /** Indexes an array of integrations to be used with ELSER semantic search queries */
   async populate(): Promise<void> {
     const index = await this.getIndexName();
-    const packages = await this.dependencies.packageService?.asInternalUser.getPackages();
+    const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
+      prerelease: true,
+    });
     if (packages) {
       const ragIntegrations = packages.map<RuleMigrationIntegration>((pkg) => ({
         title: pkg.title,
         id: pkg.name,
         description: pkg?.description || '',
         data_streams:
-          pkg.data_streams?.map((stream) => ({
-            dataset: stream.dataset,
-            index_pattern: `${stream.type}-${stream.dataset}-*`,
-            title: stream.title,
-          })) || [],
+          pkg.data_streams
+            ?.filter((stream) => stream.type === 'logs')
+            .map((stream) => ({
+              dataset: stream.dataset,
+              index_pattern: `${stream.type}-${stream.dataset}-*`,
+              title: stream.title,
+            })) || [],
         elser_embedding: [
           pkg.title,
           pkg.description,
-          ...(pkg.data_streams?.map((stream) => stream.title) || []),
+          ...(pkg.data_streams
+            ?.filter((stream) => stream.type === 'logs')
+            .map((stream) => stream.title) || []),
         ].join(' - '),
       }));
       await this.esClient
@@ -60,10 +68,17 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
               },
             ]),
           },
-          { requestTimeout: 10 * 60 * 1000 }
+          { requestTimeout: 10 * 60 * 1000 } // 10 minutes
         )
+        .then((response) => {
+          if (response.errors) {
+            // use the first error to throw
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
+          }
+        })
         .catch((error) => {
-          this.logger.error(`Error populating integrations for migration ${error.message}`);
+          this.logger.error(`Error indexing integrations embeddings: ${error.message}`);
           throw error;
         });
     } else {

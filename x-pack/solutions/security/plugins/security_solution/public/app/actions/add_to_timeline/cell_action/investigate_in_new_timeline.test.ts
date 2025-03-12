@@ -68,7 +68,7 @@ describe('createAddToNewTimelineCellAction', () => {
   });
 
   it('should return display name', () => {
-    expect(addToTimelineAction.getDisplayName(context)).toEqual('Investigate in timeline');
+    expect(addToTimelineAction.getDisplayName(context)).toEqual('Investigate in Timeline');
   });
 
   it('should return icon type', () => {

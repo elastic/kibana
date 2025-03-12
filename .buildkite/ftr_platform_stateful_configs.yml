@@ -81,6 +81,7 @@ enabled:
   - test/functional/apps/discover/group7/config.ts
   - test/functional/apps/discover/group8/config.ts
   - test/functional/apps/discover/context_awareness/config.ts
+  - test/functional/apps/discover/observability/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
@@ -328,6 +329,7 @@ enabled:
   - x-pack/test/security_api_integration/chips.config.ts
   - x-pack/test/security_api_integration/features.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
+  - x-pack/test/security_api_integration/session_shard_missing.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts
   - x-pack/test/security_api_integration/session_concurrent_limit.config.ts

@@ -7,16 +7,16 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { HttpSetup } from '@kbn/core/public';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type { HttpSetup } from '@kbn/core/public';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type {
   IExecutionLog,
   ExecutionLogSortFields,
   IExecutionLogResult,
   AsApiContract,
-  INTERNAL_BASE_ACTION_API_PATH,
   RewriteRequestCase,
 } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { getFilter } from '../rule_api/get_filter';
 
 const getRenamedLog = (data: IExecutionLog) => {

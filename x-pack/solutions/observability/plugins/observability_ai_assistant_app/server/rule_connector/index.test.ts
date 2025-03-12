@@ -24,13 +24,6 @@ const buildConversation = (contentMessage: string) => [
   {
     '@timestamp': expect.any(String),
     message: {
-      role: MessageRole.System,
-      content: '',
-    },
-  },
-  {
-    '@timestamp': expect.any(String),
-    message: {
       role: MessageRole.User,
       content: contentMessage,
     },
@@ -120,7 +113,7 @@ describe('observabilityAIAssistant rule_connector', () => {
         getFunctionClient: async () => ({
           getFunctions: () => [],
           getInstructions: () => [],
-          getAdhocInstructions: () => [],
+          registerInstruction: () => [],
         }),
       },
       context: {},

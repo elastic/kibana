@@ -17,7 +17,8 @@ import {
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from '../util/audit';
+import { SiemMigrationAuditLogger } from '../util/audit';
+import { authz } from '../util/authz';
 import { processLookups } from '../util/lookups';
 import { withLicense } from '../util/with_license';
 
@@ -29,7 +30,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
     .post({
       path: SIEM_RULE_MIGRATION_RESOURCES_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
       options: { body: { maxBytes: 26214400 } }, // rise payload limit to 25MB
     })
     .addVersion(
@@ -50,29 +51,12 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
         ): Promise<IKibanaResponse<UpsertRuleMigrationResourcesResponse>> => {
           const resources = req.body;
           const migrationId = req.params.migration_id;
-          let siemMigrationAuditLogger: SiemMigrationAuditLogger | undefined;
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            const auditLogger = ctx.securitySolution.getAuditLogger();
-            if (auditLogger) {
-              siemMigrationAuditLogger = new SiemMigrationAuditLogger(auditLogger);
-            }
 
-            for (const resource of resources) {
-              if (resource.type === 'macro') {
-                siemMigrationAuditLogger?.log({
-                  action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_MACRO,
-                  id: migrationId,
-                });
-              }
-              if (resource.type === 'lookup') {
-                siemMigrationAuditLogger?.log({
-                  action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_LOOKUP,
-                  id: migrationId,
-                });
-              }
-            }
+            await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
             // Check if the migration exists
             const { data } = await ruleMigrationsClient.data.rules.get(migrationId, { size: 1 });
@@ -102,25 +86,10 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             await ruleMigrationsClient.data.resources.create(resourcesToCreate);
 
             return res.ok({ body: { acknowledged: true } });
-          } catch (err) {
-            logger.error(err);
-            for (const resource of resources) {
-              if (resource.type === 'macro') {
-                siemMigrationAuditLogger?.log({
-                  action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_MACRO,
-                  error: err,
-                  id: migrationId,
-                });
-              }
-              if (resource.type === 'lookup') {
-                siemMigrationAuditLogger?.log({
-                  action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_LOOKUP,
-                  error: err,
-                  id: migrationId,
-                });
-              }
-            }
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logUploadResources({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

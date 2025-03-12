@@ -1,16 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
-  "kbn_references": [
-    "@kbn/i18n",
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "../../../../../typings/emotion.d.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/i18n"]
 }

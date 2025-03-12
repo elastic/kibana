@@ -6,19 +6,21 @@
  */
 
 import { text as streamToString } from 'node:stream/consumers';
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { Stream } from 'openai/streaming';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { AxiosError } from 'axios';
-import {
+import type { AxiosError } from 'axios';
+import type {
   InferenceInferenceRequest,
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { filter, from, identity, map, mergeMap, Observable, tap } from 'rxjs';
-import OpenAI from 'openai';
-import { ChatCompletionChunk } from 'openai/resources';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import type { Observable } from 'rxjs';
+import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
+import type OpenAI from 'openai';
+import type { ChatCompletionChunk } from 'openai/resources';
 import {
   ChatCompleteParamsSchema,
   RerankParamsSchema,
@@ -26,7 +28,7 @@ import {
   TextEmbeddingParamsSchema,
   UnifiedChatCompleteParamsSchema,
 } from '../../../common/inference/schema';
-import {
+import type {
   Config,
   Secrets,
   RerankParams,
@@ -187,7 +189,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
-        path: `_inference/chat_completion/${this.inferenceId}/_unified`,
+        path: `_inference/chat_completion/${this.inferenceId}/_stream`,
         body: { ...params.body, n: undefined }, // exclude n param for now, constant is used on the inference API side
       },
       {
@@ -313,7 +315,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    */
   private async performInferenceApi(
     params: InferenceInferenceRequest,
-    asStream: boolean = false,
+    asStream = false,
     signal?: AbortSignal
   ): Promise<InferenceInferenceResponse> {
     try {

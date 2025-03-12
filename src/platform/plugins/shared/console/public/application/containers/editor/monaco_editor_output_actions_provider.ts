@@ -10,7 +10,7 @@
 import { CSSProperties } from 'react';
 import { debounce } from 'lodash';
 import { monaco } from '@kbn/monaco';
-import { createOutputParser } from '@kbn/monaco/src/console/output_parser';
+import { createOutputParser } from '@kbn/monaco/src/languages/console/output_parser';
 
 import {
   getRequestEndLineNumber,

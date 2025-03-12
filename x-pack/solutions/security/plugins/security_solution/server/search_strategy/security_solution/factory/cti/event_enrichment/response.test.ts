@@ -20,59 +20,57 @@ describe('parseEventEnrichmentResponse', () => {
 
     const expectedInspect = {
       allow_no_indices: true,
-      body: {
-        _source: false,
-        fields: [
-          { field: '*', include_unmapped: true },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: 'code_signature.timestamp',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: 'dll.code_signature.timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              { bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } },
-              { term: { 'event.type': 'indicator' } },
-              {
-                range: {
-                  '@timestamp': {
-                    format: 'strict_date_optional_time',
-                    gte: '2020-09-13T09:00:43.249Z',
-                    lte: '2020-09-14T09:00:43.249Z',
-                  },
-                },
-              },
-            ],
-            minimum_should_match: 1,
-            should: [
-              {
-                match: {
-                  'threat.indicator.file.hash.md5': {
-                    _name: 'file.hash.md5',
-                    query: '1eee2bf3f56d8abed72da2bc523e7431',
-                  },
-                },
-              },
-              { match: { 'threat.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
-              {
-                match: {
-                  'threat.indicator.url.full': { _name: 'url.full', query: 'elastic.co' },
-                },
-              },
-            ],
-          },
+      _source: false,
+      fields: [
+        { field: '*', include_unmapped: true },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
         },
-        stored_fields: ['*'],
+        {
+          field: 'code_signature.timestamp',
+          format: 'strict_date_optional_time',
+        },
+        {
+          field: 'dll.code_signature.timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            { bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } },
+            { term: { 'event.type': 'indicator' } },
+            {
+              range: {
+                '@timestamp': {
+                  format: 'strict_date_optional_time',
+                  gte: '2020-09-13T09:00:43.249Z',
+                  lte: '2020-09-14T09:00:43.249Z',
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+          should: [
+            {
+              match: {
+                'threat.indicator.file.hash.md5': {
+                  _name: 'file.hash.md5',
+                  query: '1eee2bf3f56d8abed72da2bc523e7431',
+                },
+              },
+            },
+            { match: { 'threat.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
+            {
+              match: {
+                'threat.indicator.url.full': { _name: 'url.full', query: 'elastic.co' },
+              },
+            },
+          ],
+        },
       },
+      stored_fields: ['*'],
       ignore_unavailable: true,
       index: ['filebeat-*'],
     };

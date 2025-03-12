@@ -21,10 +21,18 @@ export interface SecretPath {
   path: string[];
   value: PackagePolicyConfigRecordEntry;
 }
-export interface OutputSecretPath {
+export interface SOSecretPath {
   path: string;
   value: string | { id: string };
 }
+
+export type SOSecret =
+  | string
+  | {
+      id: string;
+      hash?: string;
+    };
+
 // this is used in the top level secret_refs array on package and agent policies
 export interface PolicySecretReference {
   id: string;
@@ -36,4 +44,8 @@ export interface DeletedSecretResponse {
 export interface DeletedSecretReference {
   id: string;
   deleted: boolean;
+}
+
+export interface BaseSSLSecrets {
+  ssl?: { key?: SOSecret };
 }

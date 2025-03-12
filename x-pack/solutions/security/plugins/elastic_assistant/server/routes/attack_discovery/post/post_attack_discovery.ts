@@ -73,7 +73,7 @@ export const postAttackDiscoveryRoute = (
           const actions = (await context.elasticAssistant).actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,
@@ -157,9 +157,12 @@ export const postAttackDiscoveryRoute = (
                 attackDiscoveryId,
                 authenticatedUser,
                 dataClient,
+                hasFilter: !!(filter && Object.keys(filter).length),
+                end,
                 latestReplacements,
                 logger,
                 size,
+                start,
                 startTime,
                 telemetry,
               })

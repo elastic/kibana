@@ -12,6 +12,7 @@ import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
@@ -98,10 +99,12 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               component="div"
               grow={true}
             >
-              <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
-                {children}
-                <SecuritySolutionFlyout />
-              </ExpandableFlyoutProvider>
+              <AlertsContextProvider>
+                <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
+                  {children}
+                  <SecuritySolutionFlyout />
+                </ExpandableFlyoutProvider>
+              </AlertsContextProvider>
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
               <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">

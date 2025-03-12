@@ -24,17 +24,17 @@
       "previousMajor": true
     },
     {
-      "version": "8.17.2",
+      "version": "8.17.4",
       "branch": "8.17",
       "previousMajor": true
     },
     {
-      "version": "8.16.4",
+      "version": "8.16.6",
       "branch": "8.16",
       "previousMajor": true
     },
     {
-      "version": "7.17.28",
+      "version": "7.17.29",
       "branch": "7.17"
     }
   ]

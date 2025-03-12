@@ -24,7 +24,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const retryService = getService('retry');
   const securitySolutionApi = getService('securitySolutionApi');
 
-  describe('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/202037
+  describe.skip('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
     beforeEach(async () => {
       await deleteAllPrebuiltRuleAssets(es, log);
       await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });

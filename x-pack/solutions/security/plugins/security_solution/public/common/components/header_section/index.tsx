@@ -6,9 +6,16 @@
  */
 
 import type { EuiTitleSize } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 
 import classnames from 'classnames';
 import { InspectButton } from '../inspect';
@@ -16,46 +23,35 @@ import { InspectButton } from '../inspect';
 import { Subtitle } from '../subtitle';
 import * as i18n from '../../containers/query_toggle/translations';
 
-interface HeaderProps {
-  border?: boolean;
-  height?: number;
-  className?: string; // eslint-disable-line react/no-unused-prop-types
-  $hideSubtitle?: boolean; // eslint-disable-line react/no-unused-prop-types
-}
+const useStyles = (border?: boolean, height?: number) => {
+  const { euiTheme } = useEuiTheme();
 
-const Header = styled.header<HeaderProps>`
-  &.toggle-expand {
-    margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
-  }
+  return {
+    header: css`
+      margin-bottom: 0;
+      user-select: text;
+      ${height ? `height: ${height}px;` : ''}
+      ${border ? `border-bottom: ${euiTheme.border.thin}; padding-bottom: ${euiTheme.size.l};` : ''}
 
-  .no-margin {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-  }
+      &.toggle-expand {
+        margin-bottom: ${euiTheme.size.l};
+      }
 
-  ${({ height }) =>
-    height &&
-    css`
-      height: ${height}px;
-    `}
-  margin-bottom: 0;
-  user-select: text;
+      .no-margin {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+    `,
+  };
+};
 
-  ${({ border }) =>
-    border &&
-    css`
-      border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-      padding-bottom: ${({ theme }) => theme.eui.euiSizeL};
-    `}
-`;
-Header.displayName = 'Header';
-
-export interface HeaderSectionProps extends HeaderProps {
+export interface HeaderSectionProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   children?: React.ReactNode;
   outerDirection?: 'row' | 'rowReverse' | 'column' | 'columnReverse' | undefined;
   growLeftSplit?: boolean;
   headerFilters?: string | React.ReactNode;
+  border?: boolean;
   height?: number;
   hideSubtitle?: boolean;
   id?: string;
@@ -114,6 +110,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   tooltip,
   tooltipTitle,
 }) => {
+  const styles = useStyles(border, height);
   const toggle = useCallback(() => {
     if (toggleQuery) {
       toggleQuery(!toggleStatus);
@@ -125,13 +122,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
     siemHeaderSection: true,
   });
   return (
-    <Header
-      data-test-subj="header-section"
-      border={border}
-      height={height}
-      className={classNames}
-      $hideSubtitle={hideSubtitle}
-    >
+    <header css={styles.header} data-test-subj="header-section" className={classNames}>
       <EuiFlexGroup
         data-test-subj="headerSectionOuterFlexGroup"
         direction={outerDirection}
@@ -221,7 +212,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </Header>
+    </header>
   );
 };
 

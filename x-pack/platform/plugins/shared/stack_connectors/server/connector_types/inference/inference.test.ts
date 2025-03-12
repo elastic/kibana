@@ -12,7 +12,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
@@ -84,7 +84,7 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
         { asStream: true, meta: true }
       );
@@ -288,7 +288,7 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
         { asStream: true, meta: true }
       );
@@ -310,7 +310,7 @@ describe('InferenceConnector', () => {
         {
           body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
           method: 'POST',
-          path: '_inference/chat_completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
         { asStream: true, meta: true, signal }
       );

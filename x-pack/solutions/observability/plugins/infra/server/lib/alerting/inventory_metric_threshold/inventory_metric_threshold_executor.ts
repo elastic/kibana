@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Group } from '@kbn/observability-alerting-rule-utils';
+import type { Group } from '@kbn/alerting-rule-utils';
 import type { ALERT_GROUP } from '@kbn/rule-data-utils';
 import {
   ALERT_REASON,
@@ -350,6 +350,7 @@ export const createInventoryMetricThresholdExecutor =
           assetDetailsLocator,
           inventoryLocator,
         }),
+        reason: alertHits?.[ALERT_REASON],
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS_ID,

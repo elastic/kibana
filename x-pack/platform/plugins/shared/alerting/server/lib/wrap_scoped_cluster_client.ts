@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   TransportRequestOptions,
   TransportResult,
   TransportRequestOptionsWithMeta,
@@ -23,9 +23,9 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
   EqlSearchRequest as EqlSearchRequestWithBody,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SearchMetrics, RuleInfo } from './types';
+import type { SearchMetrics, RuleInfo } from './types';
 
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
@@ -57,9 +57,9 @@ export interface WrappedScopedClusterClient {
 export function createWrappedScopedClusterClientFactory(
   opts: WrapScopedClusterClientFactoryOpts
 ): WrappedScopedClusterClient {
-  let numSearches: number = 0;
-  let esSearchDurationMs: number = 0;
-  let totalSearchDurationMs: number = 0;
+  let numSearches = 0;
+  let esSearchDurationMs = 0;
+  let totalSearchDurationMs = 0;
 
   function logMetrics(metrics: LogSearchMetricsOpts) {
     numSearches++;

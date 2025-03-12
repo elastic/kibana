@@ -51,7 +51,11 @@
     "@kbn/flot-charts",
     "@kbn/core-elasticsearch-server",
     "@kbn/share-plugin",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/response-ops-rule-form",
+    "@kbn/charts-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

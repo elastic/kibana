@@ -406,10 +406,15 @@ export class VisualizationsPlugin
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
-      onAdd: (container, savedObject) => {
+      onAdd: async (container, savedObject) => {
+        const { deserializeState } = await import('./embeddable/state');
+        const initialState = await deserializeState({
+          rawState: { savedObjectId: savedObject.id },
+          references: savedObject.references,
+        });
         container.addNewPanel<VisualizeSerializedState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState: { savedObjectId: savedObject.id },
+          initialState,
         });
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,

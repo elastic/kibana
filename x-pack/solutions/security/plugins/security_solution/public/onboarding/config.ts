@@ -27,7 +27,6 @@ export const onboardingConfig: TopicConfig[] = [
       defaultMessage: 'SIEM Rule migration',
     }),
     body: siemMigrationsBodyConfig,
-    licenseTypeRequired: 'enterprise',
     disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
   },
 ];

@@ -279,8 +279,10 @@ export class CoreAppsService {
       .put({
         path: '/internal/core/_settings',
         access: 'internal',
-        options: {
-          tags: ['access:updateDynamicConfig'],
+        security: {
+          authz: {
+            requiredPrivileges: ['updateDynamicConfig'],
+          },
         },
       })
       .addVersion(

@@ -33,36 +33,36 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
             'stream.name': {
-              type: 'keyword',
+              type: 'system',
             },
           },
+          routing: [
+            {
+              destination: 'logs.test',
+              if: {
+                and: [
+                  {
+                    field: 'numberfield',
+                    operator: 'gt',
+                    value: 15,
+                  },
+                ],
+              },
+            },
+            {
+              destination: 'logs.test2',
+              if: {
+                and: [
+                  {
+                    field: 'field2',
+                    operator: 'eq',
+                    value: 'abc',
+                  },
+                ],
+              },
+            },
+          ],
         },
-        routing: [
-          {
-            destination: 'logs.test',
-            if: {
-              and: [
-                {
-                  field: 'numberfield',
-                  operator: 'gt',
-                  value: 15,
-                },
-              ],
-            },
-          },
-          {
-            destination: 'logs.test2',
-            if: {
-              and: [
-                {
-                  field: 'field2',
-                  operator: 'eq',
-                  value: 'abc',
-                },
-              ],
-            },
-          },
-        ],
       },
     },
   },
@@ -71,9 +71,9 @@ const streams: StreamPutItem[] = [
     stream: {
       ingest: {
         lifecycle: { inherit: {} },
-        routing: [],
         processing: [],
         wired: {
+          routing: [],
           fields: {
             numberfield: {
               type: 'long',
@@ -103,8 +103,8 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
           },
+          routing: [],
         },
-        routing: [],
       },
     },
   },
@@ -120,23 +120,23 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
           },
+          routing: [],
         },
-        routing: [],
       },
     },
   },
 ];
 
 export async function createStreams(apiClient: StreamsSupertestRepositoryClient) {
-  for (const { name: streamId, ...stream } of streams) {
+  for (const { name, ...stream } of streams) {
     await apiClient
-      .fetch('PUT /api/streams/{id}', {
+      .fetch('PUT /api/streams/{name}', {
         params: {
           body: {
             ...stream,
             dashboards: [],
           } as StreamUpsertRequest,
-          path: { id: streamId },
+          path: { name },
         },
       })
       .expect(200)

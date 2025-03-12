@@ -659,12 +659,20 @@
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.ts"
               },
               {
                 "plugin": "globalSearchBar",
@@ -787,6 +795,14 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/helpers.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
               },
@@ -813,6 +829,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1023,10 +1043,6 @@
                 "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/task_manager/nlp_cleanup_task/nlp_cleanup_task.ts"
               },
               {
-                "plugin": "observabilityLogsExplorer",
-                "path": "x-pack/solutions/observability/plugins/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.test.ts"
               },
@@ -1124,67 +1140,67 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1471,12 +1487,64 @@
                 "path": "x-pack/solutions/observability/plugins/inventory/public/services/telemetry/telemetry_service.test.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/helpers/helpers.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1529,6 +1597,22 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/analytics/browser-internal/src/track_performance_measure_entries.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1898,7 +1982,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager_registrations.ts"
               },
               {
                 "plugin": "telemetry",
@@ -1962,7 +2046,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core",

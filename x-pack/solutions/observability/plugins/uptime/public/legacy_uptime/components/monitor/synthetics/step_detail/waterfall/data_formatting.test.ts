@@ -193,20 +193,20 @@ describe('getConnectingTime', () => {
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
     expect(colourPalette).toEqual({
-      blocked: '#dcd4c4',
-      connect: '#da8b45',
-      dns: '#54b399',
-      font: '#aa6556',
-      html: '#f3b3a6',
-      media: '#d6bf57',
-      other: '#e7664c',
-      receive: '#54b399',
-      script: '#9170b8',
-      send: '#d36086',
-      ssl: '#edc5a2',
-      stylesheet: '#ca8eae',
-      wait: '#b0c9e0',
-      xhr: '#e7664c',
+      blocked: '#fbb9b5',
+      connect: '#ffc9c2',
+      dns: '#16c5c0',
+      font: '#eaae01',
+      html: '#feecc1',
+      media: '#ffc7db',
+      other: '#fcd883',
+      receive: '#16c5c0',
+      script: '#bfdbff',
+      send: '#61a2ff',
+      ssl: '#ffe4e1',
+      stylesheet: '#ee72a6',
+      wait: '#d3f6f5',
+      xhr: '#fcd883',
     });
   });
 });
@@ -222,12 +222,12 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#dcd4c4",
+            "colour": "#fbb9b5",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#dcd4c4",
+              "colour": "#fbb9b5",
               "value": "Queued / Blocked: 0.854ms",
             },
           },
@@ -237,12 +237,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#54b399",
+            "colour": "#16c5c0",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#54b399",
+              "colour": "#16c5c0",
               "value": "DNS: 3.560ms",
             },
           },
@@ -252,12 +252,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#da8b45",
+            "colour": "#ffc9c2",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#da8b45",
+              "colour": "#ffc9c2",
               "value": "Connecting: 25.721ms",
             },
           },
@@ -267,12 +267,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#edc5a2",
+            "colour": "#ffe4e1",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#edc5a2",
+              "colour": "#ffe4e1",
               "value": "TLS: 55.387ms",
             },
           },
@@ -282,12 +282,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#d36086",
+            "colour": "#61a2ff",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#d36086",
+              "colour": "#61a2ff",
               "value": "Sending request: 0.360ms",
             },
           },
@@ -297,12 +297,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#d3f6f5",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#b0c9e0",
+              "colour": "#d3f6f5",
               "value": "Waiting (TTFB): 34.578ms",
             },
           },
@@ -312,12 +312,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#ca8eae",
+            "colour": "#ee72a6",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#ca8eae",
+              "colour": "#ee72a6",
               "value": "Content downloading (CSS): 0.552ms",
             },
           },
@@ -327,12 +327,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#dcd4c4",
+            "colour": "#fbb9b5",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#dcd4c4",
+              "colour": "#fbb9b5",
               "value": "Queued / Blocked: 84.546ms",
             },
           },
@@ -342,12 +342,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#d36086",
+            "colour": "#61a2ff",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#d36086",
+              "colour": "#61a2ff",
               "value": "Sending request: 0.239ms",
             },
           },
@@ -357,12 +357,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#d3f6f5",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#b0c9e0",
+              "colour": "#d3f6f5",
               "value": "Waiting (TTFB): 52.561ms",
             },
           },
@@ -372,12 +372,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#9170b8",
+            "colour": "#bfdbff",
             "id": 1,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#9170b8",
+              "colour": "#bfdbff",
               "value": "Content downloading (JS): 3.068ms",
             },
           },
@@ -395,12 +395,12 @@ describe('getSeriesAndDomain', () => {
       Array [
         Object {
           "config": Object {
-            "colour": "#dcd4c4",
+            "colour": "#fbb9b5",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#dcd4c4",
+              "colour": "#fbb9b5",
               "value": "Queued / Blocked: 0.854ms",
             },
           },
@@ -410,12 +410,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#54b399",
+            "colour": "#16c5c0",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#54b399",
+              "colour": "#16c5c0",
               "value": "DNS: 3.560ms",
             },
           },
@@ -425,12 +425,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#da8b45",
+            "colour": "#ffc9c2",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#da8b45",
+              "colour": "#ffc9c2",
               "value": "Connecting: 25.721ms",
             },
           },
@@ -440,12 +440,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#edc5a2",
+            "colour": "#ffe4e1",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#edc5a2",
+              "colour": "#ffe4e1",
               "value": "TLS: 55.387ms",
             },
           },
@@ -455,12 +455,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#d36086",
+            "colour": "#61a2ff",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#d36086",
+              "colour": "#61a2ff",
               "value": "Sending request: 0.360ms",
             },
           },
@@ -470,12 +470,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#b0c9e0",
+            "colour": "#d3f6f5",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#b0c9e0",
+              "colour": "#d3f6f5",
               "value": "Waiting (TTFB): 34.578ms",
             },
           },
@@ -485,12 +485,12 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#ca8eae",
+            "colour": "#ee72a6",
             "id": 0,
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#ca8eae",
+              "colour": "#ee72a6",
               "value": "Content downloading (CSS): 0.552ms",
             },
           },
@@ -500,11 +500,11 @@ describe('getSeriesAndDomain', () => {
         },
         Object {
           "config": Object {
-            "colour": "#9170b8",
+            "colour": "#bfdbff",
             "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
-              "colour": "#9170b8",
+              "colour": "#bfdbff",
               "value": "Content downloading (JS): 2.793ms",
             },
           },

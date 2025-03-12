@@ -67,3 +67,21 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    depends_on: build
+    timeout_in_minutes: 10
+    env:
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      PING_SLACK_TEAM: "@appex-qa-team"
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1

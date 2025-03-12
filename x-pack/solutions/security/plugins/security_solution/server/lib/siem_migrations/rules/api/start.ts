@@ -18,7 +18,8 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger, SiemMigrationsAuditActions } from './util/audit';
+import { SiemMigrationAuditLogger } from './util/audit';
+import { authz } from './util/authz';
 import { getRetryFilter } from './util/retry';
 import { withLicense } from './util/with_license';
 
@@ -30,7 +31,7 @@ export const registerSiemRuleMigrationsStartRoute = (
     .put({
       path: SIEM_RULE_MIGRATION_START_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -50,15 +51,18 @@ export const registerSiemRuleMigrationsStartRoute = (
             connector_id: connectorId,
             retry,
           } = req.body;
-          let siemMigrationAuditLogger: SiemMigrationAuditLogger | undefined;
+
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            const auditLogger = ctx.securitySolution.getAuditLogger();
-            if (auditLogger) {
-              siemMigrationAuditLogger = new SiemMigrationAuditLogger(auditLogger);
+            // Check if the connector exists and user has permissions to read it
+            const connector = await ctx.actions.getActionsClient().get({ id: connectorId });
+            if (!connector) {
+              return res.badRequest({ body: `Connector with id ${connectorId} not found` });
             }
+
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
             if (retry) {
               const { updated } = await ruleMigrationsClient.task.updateToRetry(
                 migrationId,
@@ -78,22 +82,16 @@ export const registerSiemRuleMigrationsStartRoute = (
             });
 
             if (!exists) {
-              return res.noContent();
+              return res.notFound();
             }
 
-            siemMigrationAuditLogger?.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
-              id: migrationId,
-            });
+            await siemMigrationAuditLogger.logStart({ migrationId });
+
             return res.ok({ body: { started } });
-          } catch (err) {
-            logger.error(err);
-            siemMigrationAuditLogger?.log({
-              action: SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED,
-              error: err,
-              id: migrationId,
-            });
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logStart({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )

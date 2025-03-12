@@ -9,7 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { ViewMode } from '@kbn/presentation-publishing';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
@@ -18,6 +17,8 @@ import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
 // @ts-expect-error unconverted file
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
+import { CANVAS_APP } from '../../../common/lib';
+import { coreServices } from '../../services/kibana_services';
 
 const reload$ = new Subject<void>();
 
@@ -26,7 +27,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
   const dispatch = useDispatch();
 
   const createNewEmbeddable = useCallback(
-    (type: string, embeddableInput: EmbeddableInput) => {
+    (type: string, embeddableInput: object) => {
       if (trackCanvasUiMetric) {
         trackCanvasUiMetric(METRIC_TYPE.CLICK, type);
       }
@@ -40,6 +41,14 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
 
   const getCanvasApi = useCallback((): CanvasContainerApi => {
     return {
+      getAppContext: () => ({
+        getCurrentPath: () => {
+          const urlToApp = coreServices.application.getUrlForApp(CANVAS_APP);
+          const inAppPath = window.location.pathname.replace(urlToApp, '');
+          return inAppPath + window.location.search + window.location.hash;
+        },
+        currentAppId: CANVAS_APP,
+      }),
       reload$,
       reload: () => {
         reload$.next();
@@ -50,7 +59,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         initialState,
       }: {
         panelType: string;
-        initialState: EmbeddableInput;
+        initialState: object;
       }) => {
         createNewEmbeddable(panelType, initialState);
       },

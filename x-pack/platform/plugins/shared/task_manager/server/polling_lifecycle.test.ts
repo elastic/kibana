@@ -185,22 +185,6 @@ describe('TaskPollingLifecycle', () => {
   });
 
   describe('stop', () => {
-    test('stops polling once the ES and SavedObjects services become unavailable', () => {
-      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({ elasticsearchAndSOAvailability$, ...taskManagerOpts });
-
-      elasticsearchAndSOAvailability$.next(true);
-
-      clock.tick(150);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
-
-      elasticsearchAndSOAvailability$.next(false);
-
-      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockClear();
-      clock.tick(150);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
-    });
-
     test('stops polling if stop() is called', () => {
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const pollingLifecycle = new TaskPollingLifecycle({
@@ -222,30 +206,6 @@ describe('TaskPollingLifecycle', () => {
 
       clock.tick(100);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
-    });
-
-    test('restarts polling once the ES and SavedObjects services become available again', () => {
-      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
-      new TaskPollingLifecycle({
-        elasticsearchAndSOAvailability$,
-        ...taskManagerOpts,
-      });
-
-      elasticsearchAndSOAvailability$.next(true);
-
-      clock.tick(150);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
-
-      elasticsearchAndSOAvailability$.next(false);
-      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockClear();
-      clock.tick(150);
-
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
-
-      elasticsearchAndSOAvailability$.next(true);
-      clock.tick(150);
-
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
     });
   });
 

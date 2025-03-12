@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
+import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 
-import { KibanaExecutionContext } from '@kbn/core/types';
+import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -18,10 +19,7 @@ import {
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import {
-  apiHasExecutionContext,
-  apiHasParentApi,
-  fetch$,
+import type {
   FetchContext,
   HasParentApi,
   PublishesDataViews,
@@ -30,18 +28,19 @@ import {
   PublishesDataLoading,
   PublishesBlockingError,
 } from '@kbn/presentation-publishing';
-import { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import { apiHasExecutionContext, apiHasParentApi, fetch$ } from '@kbn/presentation-publishing';
+import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
 import { getHitsTotal } from '@kbn/data-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
-import { DiscoverServices } from '../build_services';
+import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
-import { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
+import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 
