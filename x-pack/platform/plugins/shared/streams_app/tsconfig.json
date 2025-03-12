@@ -59,5 +59,8 @@
     "@kbn/licensing-plugin",
     "@kbn/datemath",
     "@kbn/xstate-utils",
+    "@kbn/utility-types",
+    "@kbn/discover-utils",
+    "@kbn/discover-shared-plugin",
   ]
 }
