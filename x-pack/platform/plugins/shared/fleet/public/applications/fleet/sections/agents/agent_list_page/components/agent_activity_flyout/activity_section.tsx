@@ -19,7 +19,8 @@ export const ActivitySection: React.FunctionComponent<{
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ title, actions, abortUpgrade, onClickViewAgents }) => {
+  onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
+}> = ({ title, actions, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
@@ -27,13 +28,15 @@ export const ActivitySection: React.FunctionComponent<{
           <b>{title}</b>
         </EuiText>
       </EuiPanel>
-      {actions.map((currentAction) =>
+      {actions.map((currentAction, index) =>
         currentAction.type === 'UPGRADE' && currentAction.status === 'IN_PROGRESS' ? (
           <UpgradeInProgressActivityItem
             action={currentAction}
             abortUpgrade={abortUpgrade}
             key={currentAction.actionId}
             onClickViewAgents={onClickViewAgents}
+            onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
+            progress={index + 1 / actions.length}
           />
         ) : (
           <ActivityItem

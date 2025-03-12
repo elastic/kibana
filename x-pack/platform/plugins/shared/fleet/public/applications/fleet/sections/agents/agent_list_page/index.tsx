@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
@@ -45,6 +45,7 @@ import {
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
+import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { cloud } = useStartServices();
@@ -62,6 +63,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     isOpen: false,
   });
   const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
+  const [isManageAutoUpgradeModalOpen, setManageAutoUpgradeModalOpen] = useState(false);
+
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>();
   const flyoutContext = useFlyoutContext();
 
   // Agent actions states
@@ -285,9 +289,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentActivityFlyout
             onAbortSuccess={fetchData}
             onClose={() => setAgentActivityFlyoutOpen(false)}
+            openManageAutoUpgradeModal={(policyId: string) => {
+              setSelectedPolicyId(policyId);
+
+              setManageAutoUpgradeModalOpen(true);
+            }}
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
+          />
+        </EuiPortal>
+      ) : null}
+      {isManageAutoUpgradeModalOpen ? (
+        <EuiPortal>
+          <ManageAutoUpgradeAgentsModal
+            key={selectedPolicyId}
+            onClose={() => setManageAutoUpgradeModalOpen(false)}
+            agentPolicy={allAgentPolicies.find((p) => p.id === selectedPolicyId)!}
           />
         </EuiPortal>
       ) : null}

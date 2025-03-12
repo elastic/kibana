@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiLink,
   useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,7 +31,11 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ action, abortUpgrade, onClickViewAgents }) => {
+  onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
+  progress: number;
+}> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents, progress }) => {
+  console.log('the action status is', action);
+  console.log('the progress is', progress);
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
 
@@ -120,9 +125,30 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 </p>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
-            </EuiFlexItem>
+
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiText color="subdued">
+                  <p>Progress: {progress}</p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={() => onClickManageAutoUpgradeAgents(action)}
+                  size="m"
+                  flush="left"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
+                    defaultMessage="Manage auto-upgrade agents"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
             <EuiFlexItem grow={false}>
               {showCancelButton ? (
                 <EuiButton

@@ -27,6 +27,7 @@ import {
   useGetAgentPolicies,
   useStartServices,
   sendPostRetrieveAgentsByActions,
+  sendGetAgents,
 } from '../../../../../hooks';
 import { SO_SEARCH_LIMIT, MAX_FLYOUT_WIDTH } from '../../../../../constants';
 
@@ -46,7 +47,15 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   refreshAgentActivity: boolean;
   setSearch: (search: string) => void;
   setSelectedStatus: (status: string[]) => void;
-}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch, setSelectedStatus }) => {
+  openManageAutoUpgradeModal: (policyId: string) => void;
+}> = ({
+  onClose,
+  onAbortSuccess,
+  refreshAgentActivity,
+  setSearch,
+  setSelectedStatus,
+  openManageAutoUpgradeModal,
+}) => {
   const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
@@ -98,6 +107,29 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           defaultMessage: 'Error viewing selected agents',
         }),
       });
+    }
+  };
+  const onClickManageAutoUpgradeAgents = async (action: ActionStatus) => {
+    // First get the agents by the action id
+    const { data } = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
+    if (data?.items?.length) {
+      const policyId = data.items[0];
+      // then need to get the agents by id
+      const kuery = getKuery({ selectedAgentIds: [policyId] });
+      const { data: agentsData } = await sendGetAgents({
+        kuery,
+        perPage: SO_SEARCH_LIMIT,
+        showInactive: false,
+      });
+
+      console.log('the policyId is', policyId);
+      console.log('the agents are', agentsData);
+      // then use the policy id to open the modal
+      console.log('the agent policy id is', agentsData?.items[0].policy_id);
+      onClose();
+      openManageAutoUpgradeModal(
+        agentsData?.items[0].policy_id ? agentsData.items[0].policy_id : ''
+      );
     }
   };
 
@@ -153,6 +185,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           currentActions={currentActionsEnriched}
           abortUpgrade={abortUpgrade}
           onClickViewAgents={onClickViewAgents}
+          onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           areActionsFullyLoaded={areActionsFullyLoaded}
           onClickShowMore={onClickShowMore}
           dateFilter={dateFilter}

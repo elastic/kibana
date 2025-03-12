@@ -47,6 +47,8 @@ export const FlyoutBody: React.FunctionComponent<{
   currentActions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => Promise<void>;
+  onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
+
   areActionsFullyLoaded: boolean;
   onClickShowMore: () => void;
   dateFilter: moment.Moment | null;
@@ -56,6 +58,7 @@ export const FlyoutBody: React.FunctionComponent<{
   currentActions,
   abortUpgrade,
   onClickViewAgents,
+  onClickManageAutoUpgradeAgents,
   areActionsFullyLoaded,
   onClickShowMore,
   dateFilter,
@@ -162,6 +165,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={inProgressActions}
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
+                onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />
             ) : null}
             {todayActions.length > 0 ? (
@@ -175,6 +179,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={todayActions}
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
+                onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />
             ) : null}
             {Object.keys(otherDays).map((day) => (
@@ -184,6 +189,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={otherDays[day]}
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
+                onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />
             ))}
           </EuiFlexGroup>

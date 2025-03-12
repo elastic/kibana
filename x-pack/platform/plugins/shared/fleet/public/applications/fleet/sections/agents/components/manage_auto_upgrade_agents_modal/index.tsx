@@ -34,7 +34,7 @@ import { StatusColumn } from './status_column';
 export interface ManageAutoUpgradeAgentsModalProps {
   onClose: (refreshPolicy: boolean) => void;
   agentPolicy: AgentPolicy;
-  agentCount: number;
+  agentCount?: number;
 }
 
 export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
