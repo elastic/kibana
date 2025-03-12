@@ -33,5 +33,7 @@ include::advanced/index.asciidoc[]
 
 include::plugin-list.asciidoc[]
 
+include::dependencies-versions.asciidoc[]
+
 include::telemetry.asciidoc[]
 
