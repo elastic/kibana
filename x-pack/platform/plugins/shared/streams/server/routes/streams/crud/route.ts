@@ -210,10 +210,46 @@ export const deleteStreamRoute = createServerRoute({
   },
 });
 
+export const resolveIndexRoute = createServerRoute({
+  endpoint: 'GET /api/streams/_resolve_index',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  params: z.object({
+    query: z.object({
+      index: z.string(),
+    }),
+  }),
+  handler: async ({
+    request,
+    params,
+    getScopedClients,
+  }): Promise<{ stream?: StreamDefinition }> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const response = (
+      await scopedClusterClient.asCurrentUser.indices.get({ index: params.query.index })
+    )[params.query.index];
+    const dataStream = response.data_stream;
+    if (!dataStream) {
+      return {};
+    }
+    const stream = await streamsClient.getStream(dataStream);
+    return { stream };
+  },
+});
+
 export const crudRoutes = {
   ...readStreamRoute,
   ...streamDetailRoute,
   ...listStreamsRoute,
   ...editStreamRoute,
   ...deleteStreamRoute,
+  ...resolveIndexRoute,
 };

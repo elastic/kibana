@@ -19,6 +19,8 @@ import type {
   StreamsApplicationProps,
 } from './types';
 import { StreamsAppServices } from './services/types';
+import { createDiscoverStreamsLink } from './discover_streams_link';
+import { StreamsAppLocatorDefinition } from './app_locator';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
@@ -43,6 +45,17 @@ export class StreamsAppPlugin
   }
 
   start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+    const locator = new StreamsAppLocatorDefinition();
+    pluginsStart.share.url.locators.create(locator);
+    pluginsStart.discoverShared.features.registry.register({
+      id: 'streams',
+      renderStreamsField: createDiscoverStreamsLink({
+        streamStatus$: pluginsStart.streams.status$,
+        streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
+        locator: pluginsStart.share.url.locators.get(locator.id)!,
+        coreApplication: coreStart.application,
+      }),
+    });
     return {
       createStreamsApplicationComponent: () => {
         return ({ appMountParameters, PageTemplate }: StreamsApplicationProps) => {
