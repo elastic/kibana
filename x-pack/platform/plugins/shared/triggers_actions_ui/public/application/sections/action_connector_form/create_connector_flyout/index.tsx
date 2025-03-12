@@ -292,57 +292,62 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
       >
-        <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
-          <EuiFlexItem grow={3}>
-            <EuiFieldSearch
-              fullWidth={true}
-              placeholder={i18n.translate(
-                'xpack.triggersActionsUI.sections.actionConnectorAdd.searchConnector',
-                {
-                  defaultMessage: 'Search',
-                }
-              )}
-              data-test-subj="createConnectorsModalSearch"
-              onChange={onSearchChange}
-              value={searchValue}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFilterGroup>
-              <EuiPopover
-                button={
-                  <EuiFilterButton
-                    iconType="arrowDown"
-                    data-test-subj="compatibilityFilterBtn"
-                    isSelected={selectedOptions.length > 0}
-                    hasActiveFilters={selectedOptions.length > 0}
-                    numActiveFilters={selectedOptions.length}
-                    onClick={onMultiFilterButtonClick}
+        {!hasConnectorTypeSelected && (
+          <>
+            <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
+              <EuiFlexItem grow={3}>
+                <EuiFieldSearch
+                  fullWidth={true}
+                  placeholder={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.searchConnector',
+                    {
+                      defaultMessage: 'Search',
+                    }
+                  )}
+                  data-test-subj="createConnectorsModalSearch"
+                  onChange={onSearchChange}
+                  value={searchValue}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFilterGroup>
+                  <EuiPopover
+                    button={
+                      <EuiFilterButton
+                        iconType="arrowDown"
+                        data-test-subj="compatibilityFilterBtn"
+                        isSelected={selectedOptions.length > 0}
+                        hasActiveFilters={selectedOptions.length > 0}
+                        numActiveFilters={selectedOptions.length}
+                        onClick={onMultiFilterButtonClick}
+                      >
+                        {i18n.translate(
+                          'xpack.triggersActionsUI.sections.actionConnectorAdd.compatibilityFilter',
+                          {
+                            defaultMessage: 'Compatibility',
+                          }
+                        )}
+                      </EuiFilterButton>
+                    }
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
                   >
-                    {i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionConnectorAdd.compatibilityFilter',
-                      {
-                        defaultMessage: 'Compatibility',
-                      }
-                    )}
-                  </EuiFilterButton>
-                }
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-              >
-                <EuiSelectable
-                  allowExclusions={false}
-                  options={categoryOptions}
-                  onChange={onSelectOptionChange}
-                  data-test-subj="selectCategory"
-                >
-                  {(list) => <div style={{ width: 300 }}>{list}</div>}
-                </EuiSelectable>
-              </EuiPopover>
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
+                    <EuiSelectable
+                      allowExclusions={false}
+                      options={categoryOptions}
+                      onChange={onSelectOptionChange}
+                      data-test-subj="selectCategory"
+                    >
+                      {(list) => <div style={{ width: 300 }}>{list}</div>}
+                    </EuiSelectable>
+                  </EuiPopover>
+                </EuiFilterGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {hasConnectorTypeSelected ? (
           <>
             {groupActionTypeModel && (
