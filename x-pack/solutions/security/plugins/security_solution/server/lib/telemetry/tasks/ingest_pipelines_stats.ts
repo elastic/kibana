@@ -17,6 +17,7 @@ import {
   newTelemetryLogger,
 } from '../helpers';
 import { TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT } from '../event_based/events';
+import { telemetryConfiguration } from '../configuration';
 
 const COUNTER_LABELS = ['security_solution', 'pipelines-stats'];
 
@@ -41,12 +42,20 @@ export function createIngestStatsTaskConfig() {
       const log = newTelemetryLogger(logger.get('indices-metadata'), mdc);
       const trace = taskMetricsService.start(taskType);
 
+      const taskConfig = telemetryConfiguration.ingest_pipelines_stats_config;
+
       const start = performance.now();
 
       try {
         logger.info('Running ingest stats task');
 
-        const ingestStats = await receiver.getIngestPipelinesStats('1m');
+        if (!taskConfig.enabled) {
+          logger.info('Ingest stats task is disabled, skipping');
+          await taskMetricsService.end(trace);
+          return 0;
+        }
+
+        const ingestStats = await receiver.getIngestPipelinesStats('3m');
 
         logger.info('Got ingest stats, about to publish EBT events', {
           count: ingestStats.length,
