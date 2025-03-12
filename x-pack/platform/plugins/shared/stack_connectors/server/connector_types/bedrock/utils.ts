@@ -102,7 +102,7 @@ export function parseContent(content: Array<{ text?: string; type: string }>): s
 export const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
 
 export function extractRegionId(url: string) {
-  const match = url.match(/https:\/\/.*?\.([a-z\-0-9]+)\.amazonaws\.com/);
+  const match = (url ?? '').match(/https:\/\/.*?\.([a-z\-0-9]+)\.amazonaws\.com/);
   if (match) {
     return match[1];
   } else {
