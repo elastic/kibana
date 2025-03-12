@@ -7,37 +7,45 @@
 
 import { XYDataLayerConfig, XYState } from '../../../types';
 
+/** @deprecated */
 interface DeprecatedColorMappingColorCode {
   type: 'colorCode';
   colorCode: string;
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingCategoricalColor {
   type: 'categorical';
   paletteId: string;
   colorIndex: number;
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingGradientColor {
   type: 'gradient';
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingLoopColor {
   type: 'loop';
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingRuleAuto {
   type: 'auto';
 }
+/** @deprecated */
 interface DeprecatedColorMappingRuleMatchExactly {
   type: 'matchExactly';
   values: Array<string | string[]>;
 }
+/** @deprecated */
 interface DeprecatedColorMappingRuleMatchExactlyCI {
   type: 'matchExactlyCI';
   values: string[];
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingRuleRange {
   type: 'range';
   min: number;
@@ -46,25 +54,30 @@ interface DeprecatedColorMappingRuleRange {
   maxInclusive: boolean;
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingRuleRegExp {
   type: 'regex';
   values: string;
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingRuleOthers {
   type: 'other';
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingAssignment<R, C> {
   rule: R;
   color: C;
   touched: boolean;
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingCategoricalColorMode {
   type: 'categorical';
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingGradientColorMode {
   type: 'gradient';
   steps: Array<
@@ -105,6 +118,7 @@ export interface DeprecatedColorMappingConfig {
   >;
 }
 
+/** @deprecated */
 interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapping'> {
   colorMapping: DeprecatedColorMappingConfig;
 }
