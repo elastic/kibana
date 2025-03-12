@@ -17,6 +17,8 @@ export function AnnotationTitle({ field, isInvalid }: { field: FieldValues; isIn
   const [value, setValue] = useState<string | undefined>(field.value);
   const prevValue = useRef<string | undefined>(field.value);
 
+  // this is written in this way to make sure when component is in focus
+  // and save is pressed, the focus shifts to save quickly otherwise user will have to press twice
   useDebounce(
     () => {
       if (value !== prevValue.current) {
@@ -24,7 +26,7 @@ export function AnnotationTitle({ field, isInvalid }: { field: FieldValues; isIn
         trigger('annotation.title');
       }
     },
-    100,
+    200,
     [value]
   );
 
