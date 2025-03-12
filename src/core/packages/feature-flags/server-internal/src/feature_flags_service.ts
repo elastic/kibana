@@ -25,6 +25,7 @@ import {
 import deepMerge from 'deepmerge';
 import { filter, switchMap, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
+import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
 /**
@@ -77,7 +78,7 @@ export class FeatureFlagsService {
         if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
-        OpenFeature.setProvider(provider);
+        setProviderWithRetries(provider, this.logger);
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
