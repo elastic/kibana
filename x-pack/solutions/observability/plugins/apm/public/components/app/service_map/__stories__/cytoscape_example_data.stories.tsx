@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFieldNumber,
   EuiFilePicker,
   EuiFlexGroup,
@@ -32,7 +33,7 @@ import { generateServiceMapElements } from './generate_service_map_elements';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 function getHeight() {
-  return window.innerHeight - 150;
+  return window.innerHeight - 200;
 }
 
 const stories: Meta<{}> = {
@@ -100,9 +101,15 @@ export const GenerateMap: Story<{}> = () => {
 };
 
 interface MapFromJSONArgs {
-  json: ServiceMapResponse;
+  json: unknown;
 }
-const MapFromJSONTemplate: Story<MapFromJSONArgs> = () => {
+const assertJSON: (json?: any) => asserts json is ServiceMapResponse = (json) => {
+  if (!!json && !('elements' in json || 'spans' in json)) {
+    throw new Error('invalid json');
+  }
+};
+
+const MapFromJSONTemplate: Story<MapFromJSONArgs> = (args) => {
   const [{ json }, updateArgs] = useArgs();
 
   const [error, setError] = useState<string | undefined>();
@@ -111,14 +118,18 @@ const MapFromJSONTemplate: Story<MapFromJSONArgs> = () => {
   const [uniqueKeyCounter, setUniqueKeyCounter] = useState<number>(0);
   const updateRenderedElements = useCallback(() => {
     try {
+      assertJSON(json);
       if ('elements' in json) {
-        setElements(json.elements);
+        setElements(json.elements ?? []);
       } else {
-        const paths = getPaths({ spans: json.spans });
+        const paths = getPaths({ spans: json.spans ?? [] });
         const nodes = getServiceMapNodes({
-          anomalies: json.anomalies,
+          anomalies: json.anomalies ?? {
+            mlJobIds: [],
+            serviceAnomalies: [],
+          },
           connections: paths.connections,
-          servicesData: json.servicesData,
+          servicesData: json.servicesData ?? [],
           exitSpanDestinations: paths.exitSpanDestinations,
         });
 
@@ -136,7 +147,19 @@ const MapFromJSONTemplate: Story<MapFromJSONArgs> = () => {
   }, [updateRenderedElements]);
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween" style={{ minHeight: '100vh' }}>
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      style={{ minHeight: '100vh' }}
+      gutterSize="xs"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiCallOut
+          size="s"
+          title="Upload a JSON file or paste a JSON object in the Storybook Controls panel."
+          iconType="pin"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow>
         <Cytoscape key={uniqueKeyCounter} elements={elements} height={getHeight()}>
           <Centerer />
