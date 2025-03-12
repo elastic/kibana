@@ -16,7 +16,7 @@ import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { randomInt } from 'crypto';
-import { Effect, Data } from 'effect';
+import { Effect, Data, Schedule } from 'effect';
 import { isValidHostname, isValidUrl } from './helper';
 import {
   CloudSamlSessionParams,
@@ -293,7 +293,7 @@ export const finishSAMLHandshakeEffect = async ({
   samlResponse,
   sid,
 }: SAMLCallbackParams) => {
-  const fetch = Effect.tryPromise(() => axios.request(requestF(samlResponse, kbnHost, sid)));
+  const fetch = Effect.tryPromise(() => axios.request(build(samlResponse, kbnHost, sid)));
 
   const main = Effect.gen(function* () {
     yield* Effect.log(`Attempting to finish the saml handshake`);
@@ -311,7 +311,9 @@ export const finishSAMLHandshakeEffect = async ({
     });
   }).pipe(Effect.withLogSpan('saml_auth#finishSamlHandshake'));
 
-  return await Effect.runPromise(Effect.retry(main, { times: 3 }));
+  const policy = Schedule.compose(Schedule.exponential('10 millis'), Schedule.recurs(3));
+
+  return await Effect.runPromise(Effect.retry(main, policy));
 };
 
 export const finishSAMLHandshake = async ({
@@ -431,7 +433,7 @@ export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => 
   return new Session(cookie, email);
 };
 
-function requestF(samlResponse, kbnHost, sid) {
+function build(samlResponse, kbnHost, sid) {
   const encodedResponse = encodeURIComponent(samlResponse);
   const url = kbnHost + '/api/security/saml/callback';
   return {
