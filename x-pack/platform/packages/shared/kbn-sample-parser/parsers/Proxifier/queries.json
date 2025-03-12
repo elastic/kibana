@@ -1,0 +1,153 @@
+{
+  "queries": [
+    {
+      "id": "open_through_proxy_socks5",
+      "title": "Open through proxy SOCKS5",
+      "description": "Returns log messages where the connection is opened through a SOCKS5 proxy.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "open through proxy SOCKS5",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "open_through_proxy_https",
+      "title": "Open through proxy HTTPS",
+      "description": "Returns log messages where the connection is opened through an HTTPS proxy.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "open through proxy HTTPS",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_could_not_connect_to_proxy_resolve_error",
+      "title": "Error: Could not connect to proxy - resolve error",
+      "description": "Returns log messages where there is an error connecting to a proxy due to a resolution error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "error Could not connect to proxy Could not resolve error",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_could_not_connect_to_proxy_connection_attempt_failed",
+      "title": "Error: Could not connect to proxy - connection attempt failed",
+      "description": "Returns log messages where there is an error connecting to a proxy due to a failed connection attempt.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "error Could not connect to proxy connection attempt failed with error",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_could_not_connect_through_proxy_status_code",
+      "title": "Error: Could not connect through proxy - status code",
+      "description": "Returns log messages where there is an error connecting through a proxy due to a status code issue.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "error Could not connect through proxy Proxy server cannot establish a connection with the target status code",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_could_not_connect_through_proxy_closed_connection",
+      "title": "Error: Could not connect through proxy - closed connection",
+      "description": "Returns log messages where there is an error connecting through a proxy due to the proxy closing the connection unexpectedly.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "error Could not connect through proxy Proxy closed the connection unexpectedly",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_connection_request_canceled",
+      "title": "Error: Connection request canceled",
+      "description": "Returns log messages where a connection request was canceled before completion.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "error A connection request was canceled before the completion",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "close_bytes_sent_received_lifetime",
+      "title": "Close, bytes sent/received, lifetime",
+      "description": "Returns log messages where a connection is closed, showing bytes sent, bytes received, and the connection lifetime.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": ".* close, .* bytes.*sent, .* bytes.*received, lifetime .*"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
