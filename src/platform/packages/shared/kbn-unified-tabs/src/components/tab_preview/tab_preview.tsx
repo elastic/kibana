@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiSplitPanel, EuiText, EuiCode, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiSplitPanel,
+  EuiText,
+  EuiCode,
+  keys,
+  useEuiTheme,
+  type EuiThemeComputed,
+} from '@elastic/eui';
 
 interface TabPreviewProps {
   children: React.ReactNode;
@@ -17,6 +24,7 @@ interface TabPreviewProps {
   setShowPreview: (show: boolean) => void;
   stopPreviewOnHover?: boolean;
 }
+
 export const TabPreview: React.FC<TabPreviewProps> = ({
   children,
   showPreview,
@@ -24,15 +32,32 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   stopPreviewOnHover,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === keys.ESCAPE) {
+        setShowPreview(false);
+      }
+    },
+    [setShowPreview]
+  );
+
+  // enabling closing the preview with the ESC key without altering the current focus
+  useEffect(() => {
+    if (showPreview) {
+      document.addEventListener('keydown', onKeyDown);
+    } else {
+      document.removeEventListener('keydown', onKeyDown);
+    }
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showPreview, onKeyDown]);
 
   return (
-    <div>
+    <div ref={containerRef}>
       <span
         onMouseEnter={() => !stopPreviewOnHover && setShowPreview(true)}
         onMouseLeave={() => setShowPreview(false)}
-        css={css`
-          position: relative;
-        `}
       >
         {children}
       </span>
