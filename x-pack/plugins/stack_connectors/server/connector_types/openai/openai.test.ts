@@ -638,6 +638,23 @@ describe('OpenAIConnector', () => {
         ).toEqual(`API Error: Resource Not Found - Resource not found`);
       });
 
+      it('returns the error.response.data.error', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 404,
+            statusText: 'Resource Not Found',
+            data: {
+              error: 'Resource not found',
+            },
+          },
+        } as AxiosError<{ error?: string }>;
+        expect(
+          // @ts-expect-error expects an axios error as the parameter
+          connector.getResponseErrorMessage(err)
+        ).toEqual(`API Error: Resource Not Found - Resource not found`);
+      });
+
       it('returns auhtorization error', () => {
         const err = {
           response: {
