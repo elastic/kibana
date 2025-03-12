@@ -6,12 +6,12 @@
  */
 
 import { isString } from 'lodash';
-import { DenormalizedAction } from '../../../rules_client';
-import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import type { DenormalizedAction } from '../../../rules_client';
+import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';
 import { adHocRunStatus } from '../../../../common/constants';
-import { RuleDomain } from '../../rule/types';
-import { ScheduleBackfillParam } from '../methods/schedule/types';
+import type { RuleDomain } from '../../rule/types';
+import type { ScheduleBackfillParam } from '../methods/schedule/types';
 
 export const transformBackfillParamToAdHocRun = (
   param: ScheduleBackfillParam,
