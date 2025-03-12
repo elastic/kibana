@@ -297,7 +297,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
               })}
 
               {/* Advanced section */}
-              {(hasAdvancedOptions || packageInfo.type === 'input')  && (
+              {(hasAdvancedOptions || packageInfo.type === 'input') && (
                 <Fragment>
                   <EuiFlexItem>
                     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -370,28 +370,26 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               data-test-subj="packagePolicyDataStreamType"
                               disabled={isEditPage}
                               idSelected={packagePolicyInputStream.data_stream.type || 'logs'}
-                              options={
-                                [
-                                  {
-                                    id: 'logs',
-                                    label: 'Logs',
-                                  },
-                                  {
-                                    id: 'metrics',
-                                    label: 'Metrics',
-                                  },
-                                  {
-                                    id: 'traces',
-                                    label: 'Traces',
-                                  },
-                                ]
-                              }
+                              options={[
+                                {
+                                  id: 'logs',
+                                  label: 'Logs',
+                                },
+                                {
+                                  id: 'metrics',
+                                  label: 'Metrics',
+                                },
+                                {
+                                  id: 'traces',
+                                  label: 'Traces',
+                                },
+                              ]}
                               onChange={(type: string) => {
                                 updatePackagePolicyInputStream({
                                   data_stream: {
                                     ...packagePolicyInputStream.data_stream,
-                                    type: type,
-                                  }
+                                    type,
+                                  },
                                 });
                               }}
                             />
