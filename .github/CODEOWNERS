@@ -34,6 +34,7 @@ examples/routing_example @elastic/kibana-core
 examples/screenshot_mode_example @elastic/appex-sharedux
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
+examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
 examples/ui_action_examples @elastic/appex-sharedux
 examples/ui_actions_explorer @elastic/appex-sharedux
@@ -316,6 +317,7 @@ src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
+src/platform/packages/private/kbn-expression-utils @elastic/kibana-presentation
 src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
@@ -824,6 +826,7 @@ x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_servi
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
@@ -1008,7 +1011,6 @@ x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generat
 x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
-x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
@@ -1164,6 +1166,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/traces_document_profile @elastic/obs-ux-infra_services-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/traces_data_source_profile @elastic/obs-ux-infra_services-team
 
 # Platform Docs
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/index.ts @elastic/platform-docs
@@ -1318,6 +1322,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/observability/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/api_integration/services/infraops_source_configuration.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/pull/34916
 /x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ux-infra_services-team # Assigned to this team since it mostly uses infra/APM components
+/src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces @elastic/obs-ux-infra_services-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/data_quality/ @elastic/obs-ux-logs-team
@@ -2504,6 +2509,7 @@ x-pack/solutions/security/plugins/security_solution/server/assistant/tools/defen
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution_serverless/server/ai4soc @elastic/security-defend-workflows
 x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/defend_insights @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/__mocks__/defend_insights_schema.mock.ts @elastic/security-defend-workflows
 x-pack/plugins/elastic_assistant/server/ai_assistant_data_clients/defend_insights @elastic/security-defend-workflows
@@ -2547,12 +2553,10 @@ x-pack/test/automatic_import_api_integration @elastic/security-scalability
 ## Packages
 x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 ## Plugins
-x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 ## Security Solution sub teams
 x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
