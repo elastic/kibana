@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 
 const KIBANA_HEADER_ID = 'kbnHeaderSecondBar';
+
+const globalCss = css`
+  overscroll-behavior: none;
+`;
 
 interface UseTabGlueStylesProps {
   isSelected: boolean;
@@ -19,33 +23,32 @@ interface UseTabGlueStylesProps {
 
 interface UseTabGlueStylesReturn {
   selectedTabBackgroundColor: string;
-  tabGlueElement: React.ReactNode | undefined;
+  shouldOverflow: boolean;
 }
 
-export const useTabGlueStyles = ({ isSelected }: UseTabGlueStylesProps): UseTabGlueStylesReturn => {
+export const useTabsOverflow = ({ isSelected }: UseTabGlueStylesProps): UseTabGlueStylesReturn => {
   const { euiTheme } = useEuiTheme();
   const selectedTabBackgroundColor = euiTheme.colors.emptyShade;
   const [hasClassicHeader] = useState<boolean>(() =>
     Boolean(document.getElementById(KIBANA_HEADER_ID))
   );
 
+  useEffect(() => {
+    if (!isSelected) {
+      return;
+    }
+
+    document.body.classList.add(globalCss);
+
+    return () => {
+      document.body.classList.remove(globalCss);
+    };
+  }, [isSelected]);
+
   return useMemo(() => {
     return {
       selectedTabBackgroundColor,
-      tabGlueElement:
-        hasClassicHeader && isSelected ? (
-          <div
-            css={css`
-              background-color: ${selectedTabBackgroundColor};
-              height: ${euiTheme.size.m};
-              width: 100%;
-              position: absolute;
-              top: -${euiTheme.size.s};
-              left: 0;
-              z-index: ${Number(euiTheme.levels.header) + 1};
-            `}
-          />
-        ) : undefined,
+      shouldOverflow: isSelected && hasClassicHeader,
     };
-  }, [selectedTabBackgroundColor, isSelected, euiTheme, hasClassicHeader]);
+  }, [selectedTabBackgroundColor, isSelected, hasClassicHeader]);
 };
