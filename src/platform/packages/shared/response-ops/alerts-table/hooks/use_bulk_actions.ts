@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type React from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -306,7 +307,7 @@ export function useBulkActions({
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
   }, [updateBulkActionsState]);
   const setIsBulkActionsLoading = useCallback(
-    (isLoading: boolean = true) => {
+    (isLoading = true) => {
       updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
     },
     [updateBulkActionsState]

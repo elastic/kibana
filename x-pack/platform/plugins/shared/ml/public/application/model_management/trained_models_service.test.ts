@@ -87,7 +87,7 @@ describe('TrainedModelsService', () => {
 
     mockTelemetryService = {
       trackTrainedModelsDeploymentCreated: jest.fn(),
-    };
+    } as unknown as jest.Mocked<ITelemetryClient>;
 
     mockTrainedModelsApiService = {
       getTrainedModelsList: jest.fn(),
