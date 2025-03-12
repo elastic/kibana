@@ -62,6 +62,10 @@ export interface ActivePanel {
 
 export interface ActiveRow {
   id: string;
+  startingPosition: {
+    top: number;
+    left: number;
+  };
   translate: {
     top: number;
     left: number;

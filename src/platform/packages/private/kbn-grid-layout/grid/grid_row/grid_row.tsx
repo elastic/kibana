@@ -14,7 +14,7 @@ import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
-import { DragPreview as DragPanelPreview } from '../grid_panel/drag_preview';
+import { DragPreview as DragPanelPreview } from '../grid_panel/grid_panel_drag_preview';
 import { GridPanel } from '../grid_panel';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { GridRowHeader } from './grid_row_header';

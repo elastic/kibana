@@ -27,7 +27,6 @@ import { MousePosition, UserInteractionEvent } from './types';
  * ensuring responsive updates to the panel's position and grid layout state.
  * The interaction behavior is dynamic and adapts to the input type (mouse or touch).
  */
-
 export const useGridLayoutPanelEvents = ({
   interactionType,
   rowId,

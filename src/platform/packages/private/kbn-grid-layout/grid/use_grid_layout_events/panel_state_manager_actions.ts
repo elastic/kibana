@@ -72,7 +72,7 @@ export const moveAction = (
     return;
   }
 
-  const currentLayout = cloneDeep(proposedGridLayout$.value);
+  const currentLayout = proposedGridLayout$.value;
 
   const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
 

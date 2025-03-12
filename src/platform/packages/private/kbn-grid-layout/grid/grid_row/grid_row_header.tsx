@@ -8,7 +8,7 @@
  */
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useState } from 'react';
-import { distinctUntilChanged, map, skip } from 'rxjs';
+import { distinctUntilChanged, map, pairwise } from 'rxjs';
 
 import {
   EuiButtonIcon,
@@ -83,16 +83,37 @@ export const GridRowHeader = React.memo(
         });
 
       const dragRowStyleSubscription = gridLayoutStateManager.activeRow$
-        .pipe(skip(1))
-        .subscribe((activeRow) => {
+        .pipe(
+          pairwise(),
+          map(([before, after]) => {
+            if (!before && after) {
+              return { type: 'init', activeRow: after };
+            } else if (before && after) {
+              return { type: 'update', activeRow: after };
+            } else {
+              return { type: 'finish', activeRow: before };
+            }
+          })
+        )
+        .subscribe(({ type, activeRow }) => {
           const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-          if (!headerRef) return;
+          if (!headerRef || activeRow?.id !== rowId) return;
 
-          if (activeRow?.id === rowId) {
+          if (type === 'init') {
             setIsActive(true);
+            const width = headerRef.getBoundingClientRect().width;
+            headerRef.style.position = 'fixed';
+            headerRef.style.width = `${width}px`;
+            headerRef.style.top = `${activeRow.startingPosition.top}px`;
+            headerRef.style.left = `${activeRow.startingPosition.left}px`;
+          } else if (type === 'update') {
             headerRef.style.transform = `translate(${activeRow.translate.left}px, ${activeRow.translate.top}px)`;
           } else {
             setIsActive(false);
+            headerRef.style.position = 'relative';
+            headerRef.style.width = ``;
+            headerRef.style.top = ``;
+            headerRef.style.left = ``;
             headerRef.style.transform = ``;
           }
         });
@@ -232,7 +253,7 @@ const styles = {
       },
 
       '.kbnGridLayout--moveRowIcon': {
-        '&:active, &:hover': {
+        '&:active, &:hover, &:focus': {
           cursor: 'move',
           backgroundColor: 'transparent',
           transform: 'none !important',

@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, pick } from 'lodash';
 import { MutableRefObject } from 'react';
 
 import { GridLayoutStateManager } from '../types';
@@ -25,10 +25,11 @@ export const startAction = (
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   if (!headerRef) return;
 
+  const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
   startingMouse.current = getPointerPosition(e);
-
   gridLayoutStateManager.activeRow$.next({
     id: rowId,
+    startingPosition,
     translate: {
       top: 0,
       left: 0,
@@ -56,7 +57,8 @@ export const moveAction = (
   currentMouse: MousePosition
 ) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-  if (!headerRef) return;
+  const currentActiveRow = gridLayoutStateManager.activeRow$.getValue();
+  if (!headerRef || !currentActiveRow) return;
 
   const currentLayout =
     gridLayoutStateManager.proposedGridLayout$.getValue() ??
@@ -92,7 +94,7 @@ export const moveAction = (
   }
 
   gridLayoutStateManager.activeRow$.next({
-    id: rowId,
+    ...currentActiveRow,
     translate: {
       top: currentMouse.clientY - startingMouse.clientY,
       left: currentMouse.clientX - startingMouse.clientX,
