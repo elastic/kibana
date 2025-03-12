@@ -7,17 +7,15 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { RulesSettings } from '../../../common';
 import {
   RULES_SETTINGS_FEATURE_ID,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID,
-  RulesSettings,
   DEFAULT_ALERT_DELETION_SETTINGS,
 } from '../../../common';
-import {
-  RulesSettingsAlertDeletionClient,
-  RulesSettingsAlertDeletionClientConstructorOptions,
-} from './rules_settings_alert_deletion_client';
+import type { RulesSettingsAlertDeletionClientConstructorOptions } from './rules_settings_alert_deletion_client';
+import { RulesSettingsAlertDeletionClient } from './rules_settings_alert_deletion_client';
 
 const mockDateString = '2019-02-12T21:01:22.479Z';
 
