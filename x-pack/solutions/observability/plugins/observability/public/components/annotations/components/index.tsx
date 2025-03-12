@@ -6,14 +6,15 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ObservabilityAnnotationsProps } from './observability_annotation';
-
-const ObservabilityAnnotationsLazy = lazy(() => import('./observability_annotation'));
+import {
+  type ObservabilityAnnotationsProps,
+  ObservabilityAnnotations as ObservabilityAnnotationsComponent,
+} from './observability_annotation';
 
 export function ObservabilityAnnotations(props: ObservabilityAnnotationsProps) {
   return (
     <Suspense fallback={null}>
-      <ObservabilityAnnotationsLazy {...props} />
+      <ObservabilityAnnotationsComponent {...props} />
     </Suspense>
   );
 }
