@@ -30,6 +30,7 @@ import {
   EuiSelectableProps,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   ActionConnector,
   type ActionTypeModel,
@@ -68,6 +69,32 @@ export const RuleActionsConnectorsBody = ({
   const { euiTheme } = useEuiTheme();
 
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
+
+  const containerCss = css`
+    .showForContainer--s,
+    showForContainer--xs {
+      display: none;
+    }
+
+    @media (max-width: 767px) and (min-width: 575px) {
+      .hideForContainer--s {
+        display: none;
+      }
+
+      .showForContainer--s {
+        display: initial !important;
+      }
+    }
+    @media (max-width: 574px) {
+      .hideForContainer--xs {
+        display: none;
+      }
+
+      .showForContainer--xs {
+        display: initial !important;
+      }
+    }
+  `;
 
   const {
     plugins: { actionTypeRegistry },
@@ -431,7 +458,11 @@ export const RuleActionsConnectorsBody = ({
 
   return (
     <>
-      <EuiFlexGroup direction="column" style={{ overflow: responsiveOverflow, height: '100%' }}>
+      <EuiFlexGroup
+        direction="column"
+        style={{ overflow: responsiveOverflow, height: '100%' }}
+        css={containerCss}
+      >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column">
             <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
