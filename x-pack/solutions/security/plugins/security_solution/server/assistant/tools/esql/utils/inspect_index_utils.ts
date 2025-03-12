@@ -10,9 +10,9 @@ export type InspectIndexMapping =
   | undefined
   | string;
 
-  /**
-   * Recursively gets the entries at a given key in an index mapping
-   */
+/**
+ * Recursively gets the entries at a given key in an index mapping
+ */
 export const getEntriesAtKey = (
   mapping: InspectIndexMapping,
   keys: string[]
@@ -42,7 +42,10 @@ export const getEntriesAtKey = (
  * @param maxDepth The maximum depth to recurse into the object
  * @returns A shallow view of the mapping
  */
-export const shallowObjectView = (mapping: InspectIndexMapping, maxDepth = 1): string | Record<string, string> => {
+export const shallowObjectView = (
+  mapping: InspectIndexMapping,
+  maxDepth = 1
+): string | Record<string, string> => {
   if (mapping === undefined) {
     return 'undefined';
   }
@@ -66,12 +69,16 @@ export const shallowObjectView = (mapping: InspectIndexMapping, maxDepth = 1): s
  * @param mapping The index mapping
  * @param maxCharacters The maximum number of characters to return
  * @param maxDepth The maximum depth to recurse into the object
- * @returns A shallow view of the mapping 
+ * @returns A shallow view of the mapping
  */
-export const shallowObjectViewTruncated = (mapping: InspectIndexMapping, maxCharacters: number, maxDepth = 4): string | Record<string, string> => {
+export const shallowObjectViewTruncated = (
+  mapping: InspectIndexMapping,
+  maxCharacters: number,
+  maxDepth = 4
+): string | Record<string, string> => {
   const view = shallowObjectView(mapping, maxDepth);
   if (JSON.stringify(view).length > maxCharacters) {
     return shallowObjectView(view, 1);
   }
   return view;
-}
+};
