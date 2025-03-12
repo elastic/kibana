@@ -16,6 +16,7 @@ import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { randomInt } from 'crypto';
+import { Console, Effect, Data } from 'effect';
 import { isValidHostname, isValidUrl } from './helper';
 import {
   CloudSamlSessionParams,
@@ -256,6 +257,76 @@ ${kbnHost} in the same window.`
   return value;
 };
 
+/*
+So the stack is this:
+```
+Error: SAML callback failed: expected 302, got 401
+    at finishSAMLHandshake (src/platform/packages/shared/kbn-test/src/auth/saml_auth.ts:294:13)
+    at createLocalSAMLSession (src/platform/packages/shared/kbn-test/src/auth/saml_auth.ts:372:18)
+    at SamlSessionManager.createSessionForRole (src/platform/packages/shared/kbn-test/src/auth/session_manager.ts:162:17)
+    at SamlSessionManager.getSessionByRole (src/platform/packages/shared/kbn-test/src/auth/session_manager.ts:136:21)
+    at SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope (src/platform/packages/shared/kbn-test/src/auth/session_manager.ts:196:21)
+    at loginAs (src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts:53:22)
+    at x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel_tests/custom_logs/add_custom_integration.spec.ts:19:7
+```
+
+At first glance, this code feels like a transaction with some state.
+State that was modified before this function is called, namely the sid and the samlResponse.
+
+Dependencies not in the function def:
+encodeURIComponent fn
+axios
+getCookieFromResponseHeaders fn
+
+
+Errors:
+ throw new Error(`SAML callback failed: expected 302, got ${authResponse.status}`, ...
+ throw new Error(`Retry failed after ${maxRetryCount + 1} attempts: ${ex.message}`);
+ throw new Error(`Failed to complete SAML handshake callback`);
+
+*/
+export const finishSAMLHandshakeEffect = async ({
+  kbnHost,
+  samlResponse,
+  sid,
+}: SAMLCallbackParams) => {
+  const encodedResponse = encodeURIComponent(samlResponse);
+  const url = kbnHost + '/api/security/saml/callback';
+  const request = {
+    url,
+    method: 'post',
+    data: `SAMLResponse=${encodedResponse}`,
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      ...(sid ? { Cookie: `sid=${sid}` } : {}),
+    },
+    validateStatus: () => true,
+    maxRedirects: 0,
+  };
+
+  const fetch = Effect.tryPromise(() => axios.request(request));
+
+  const main = Effect.gen(function* () {
+    yield* Effect.log(`Attempting to finish the saml handshake`);
+
+    const throwWhenX = (authResponse: AxiosResponse<any, any>) =>
+      Effect.try(() => {
+        if (authResponse.status === 302)
+          return getCookieFromResponseHeaders(
+            authResponse,
+            'Failed to get cookie from SAML callback response'
+          );
+
+        return yield* new SamlNot302Error(`SAML callback failed: expected 302, got some canned status`)
+      });
+
+    return yield* Effect.flatMap(fetch, throwWhenX);
+  }).pipe(Effect.withLogSpan('saml_auth#finishSamlHandshake'));
+
+  return await Effect.runPromise(Effect.retry(main, { times: 3 }));
+};
+class SamlNot302Error extends Data.TaggedError('SamlNot302Error')<{}> {}
+
 export const finishSAMLHandshake = async ({
   kbnHost,
   samlResponse,
@@ -356,7 +427,7 @@ export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => 
   const ecSession = await createCloudSession({ hostname, email, password, log });
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
   const samlResponse = await createSAMLResponse({ location, ecSession, email, kbnHost, log });
-  const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
+  const cookie = await finishSAMLHandshakeEffect({ kbnHost, samlResponse, sid });
   return new Session(cookie, email);
 };
 
