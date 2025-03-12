@@ -4367,7 +4367,7 @@
     },
     "/api/alerting/rule/{id}/snooze_schedule": {
       "post": {
-        "description": "When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time or indefinitely and schedule single or recurring downtimes.",
+        "description": "When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.",
         "operationId": "post-alerting-rule-id-snooze-schedule",
         "parameters": [
           {
@@ -4403,14 +4403,14 @@
                         "additionalProperties": false,
                         "properties": {
                           "duration": {
-                            "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.",
+                            "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
                             "type": "string"
                           },
                           "recurring": {
                             "additionalProperties": false,
                             "properties": {
                               "end": {
-                                "description": "The end date of a recurring schedule in ISO 8601 format.",
+                                "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
                                 "type": "string"
                               },
                               "every": {
@@ -4443,7 +4443,7 @@
                                 "type": "array"
                               },
                               "onWeekDay": {
-                                "description": "The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.",
+                                "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
                                 "items": {
                                   "type": "string"
                                 },
@@ -4454,7 +4454,7 @@
                             "type": "object"
                           },
                           "start": {
-                            "description": "The start date and time of the schedule in ISO 8601 format.",
+                            "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
                             "type": "string"
                           },
                           "timezone": {
@@ -4497,14 +4497,14 @@
                               "additionalProperties": false,
                               "properties": {
                                 "duration": {
-                                  "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `h`, `m`, or `s` for hours, minutes, seconds. For example: `5h`, `30m`, `5000s`.",
+                                  "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
                                   "type": "string"
                                 },
                                 "recurring": {
                                   "additionalProperties": false,
                                   "properties": {
                                     "end": {
-                                      "description": "The end date of a recurring schedule in ISO 8601 format.",
+                                      "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
                                       "type": "string"
                                     },
                                     "every": {
@@ -4537,7 +4537,7 @@
                                       "type": "array"
                                     },
                                     "onWeekDay": {
-                                      "description": "The specific days of the week (`[MO,TU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA]`) for a recurring schedule.",
+                                      "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
                                       "items": {
                                         "type": "string"
                                       },
@@ -4548,7 +4548,7 @@
                                   "type": "object"
                                 },
                                 "start": {
-                                  "description": "The start date and time of the schedule in ISO 8601 format.",
+                                  "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
                                   "type": "string"
                                 },
                                 "timezone": {
