@@ -69,9 +69,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      // 'configName' is not defined by default to enforce using '--project' flag when running the tests
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
-      configName: 'local',
       [VALID_CONFIG_MARKER]: true,
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',

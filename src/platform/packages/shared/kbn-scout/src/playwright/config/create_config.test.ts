@@ -48,7 +48,6 @@ describe('createPlaywrightConfig', () => {
     expect(config.fullyParallel).toBe(false);
     expect(config.use).toEqual({
       serversConfigDir: SCOUT_SERVERS_ROOT,
-      configName: 'local',
       [VALID_CONFIG_MARKER]: true,
       screenshot: 'only-on-failure',
       testIdAttribute: 'data-test-subj',

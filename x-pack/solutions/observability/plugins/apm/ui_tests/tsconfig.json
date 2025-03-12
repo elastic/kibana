@@ -7,7 +7,6 @@
     "**/*"
   ],
   "kbn_references": [
-    "@kbn/scout",
     "@kbn/apm-synthtrace-client",
     "@kbn/scout-oblt"
   ],

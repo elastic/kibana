@@ -69,7 +69,8 @@ export const coreWorkerFixtures = base.extend<
       const projectUse = workerInfo.project.use as ScoutTestOptions;
       if (!projectUse.configName) {
         throw new Error(
-          'Invalid Playwright project configuration. Make sure to set "configName" property'
+          `Failed to read the 'configName' property. Make sure to run tests with '--project' flag and target enviroment (local or cloud),
+          e.g. 'npx playwright test --project local --config <path_to_Playwright.config.ts>'`
         );
       }
       const serversConfigDir = projectUse.serversConfigDir;
