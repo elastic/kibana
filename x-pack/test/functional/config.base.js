@@ -228,6 +228,20 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [],
         },
+        test_filebeat_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['filebeat*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
 
         global_canvas_all: {
           kibana: [
