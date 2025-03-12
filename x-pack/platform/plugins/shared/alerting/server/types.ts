@@ -266,6 +266,8 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   formatAlert?: FormatAlert<AlertData>;
 }
 
+export type RuleTypeSolution = 'observability' | 'security' | 'stack';
+
 export interface RuleType<
   Params extends RuleTypeParams = never,
   ExtractedParams extends RuleTypeParams = never,
@@ -309,6 +311,7 @@ export interface RuleType<
   >;
   category: string;
   producer: string;
+  solution: RuleTypeSolution;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];
