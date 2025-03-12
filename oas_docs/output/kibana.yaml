@@ -43958,23 +43958,34 @@ paths:
                                                           type: array
                                                         - {}
                                                     type: object
-                                                  - type: object
-                                                    properties:
-                                                      format:
-                                                        minLength: 1
-                                                        type: string
-                                                      type:
-                                                        enum:
-                                                          - keyword
-                                                          - match_only_text
-                                                          - long
-                                                          - double
-                                                          - date
-                                                          - boolean
-                                                          - ip
-                                                        type: string
-                                                    required:
-                                                      - type
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          format:
+                                                            minLength: 1
+                                                            type: string
+                                                          type:
+                                                            enum:
+                                                              - keyword
+                                                              - match_only_text
+                                                              - long
+                                                              - double
+                                                              - date
+                                                              - boolean
+                                                              - ip
+                                                            type: string
+                                                        required:
+                                                          - type
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          type:
+                                                            enum:
+                                                              - system
+                                                            type: string
+                                                        required:
+                                                          - type
                                               type: object
                                             routing:
                                               items:
@@ -44557,6 +44568,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
+      description: Upserts the group settings of a group stream definition
       operationId: put-streams-name-group
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44594,7 +44606,7 @@ paths:
               required:
                 - group
       responses: {}
-      summary: Upserts the group settings of a group stream definition
+      summary: Upsert group stream settings
       tags:
         - streams
       x-state: Technical Preview
@@ -44950,23 +44962,34 @@ paths:
                                               type: array
                                             - {}
                                         type: object
-                                      - type: object
-                                        properties:
-                                          format:
-                                            minLength: 1
-                                            type: string
-                                          type:
-                                            enum:
-                                              - keyword
-                                              - match_only_text
-                                              - long
-                                              - double
-                                              - date
-                                              - boolean
-                                              - ip
-                                            type: string
-                                        required:
-                                          - type
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
                                   type: object
                                 routing:
                                   items:
