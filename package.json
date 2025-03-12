@@ -1260,7 +1260,7 @@
     "reselect": "^4.1.8",
     "resize-observer-polyfill": "1.5.1",
     "rison-node": "1.0.2",
-    "rxjs": "^7.8.1",
+    "rxjs": "^7.8.2",
     "safe-squel": "^5.12.5",
     "seedrandom": "^3.0.5",
     "semver": "^7.7.1",
