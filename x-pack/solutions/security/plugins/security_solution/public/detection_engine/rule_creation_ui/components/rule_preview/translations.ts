@@ -96,7 +96,7 @@ export const QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_TITLE = i18n.translat
 export const QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewRuleDefinitionInvalidWarningMessage',
   {
-    defaultMessage: `One or more defields in the rule definition are invalid. Please fix the rule definition before previewing the rule. You can consult the validation errors in the "Define rule" section.`,
+    defaultMessage: `One or more rule definition fields have validation errors that must be fixed before previewing this rule. To learn more, check the error messages for the invalid rule definition fields.`,
   }
 );
 
