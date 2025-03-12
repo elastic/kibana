@@ -38,8 +38,11 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
    * For parallel tests, we need to add a setup project that runs before the tests project.
    */
   if (options.workers && options.workers > 1) {
+    const parentProject = scoutProjects.find((p) => p.use?.configName);
+
     scoutProjects.unshift({
       name: 'setup',
+      use: parentProject?.use ? { ...parentProject.use } : {},
       testMatch: /global.setup\.ts/,
     });
 
