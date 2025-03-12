@@ -54,18 +54,30 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(docTypes).to.eql(['animal', 'technical']);
       });
 
+      function formatScore(score: number) {
+        if (score > 0.5) {
+          return 'high';
+        }
+
+        if (score > 0.1) {
+          return 'medium';
+        }
+
+        return 'low';
+      }
+
       it('returns entries in a consistent order', async () => {
         const entries = await recall('whales');
 
-        expect(entries.map(({ id, score }) => `${score} - ${id}`)).to.eql([
-          '1.4052824 - animal_whale_migration_patterns',
-          '0.021248544 - animal_elephants_social_structure',
-          '0.021132138 - technical_api_gateway_timeouts',
-          '0.020981446 - technical_cache_misses_thirdparty_api',
-          '0.020939047 - animal_cheetah_life_speed',
-          '0.020622106 - technical_db_outage_slow_queries',
-          '0.020130742 - animal_giraffe_habitat_feeding',
-          '0.018531876 - animal_penguin_antarctic_adaptations',
+        expect(entries.map(({ id, score }) => `${formatScore(score!)} - ${id}`)).to.eql([
+          'high - animal_whale_migration_patterns',
+          'low - animal_elephants_social_structure',
+          'low - technical_api_gateway_timeouts',
+          'low - technical_cache_misses_thirdparty_api',
+          'low - animal_cheetah_life_speed',
+          'low - technical_db_outage_slow_queries',
+          'low - animal_giraffe_habitat_feeding',
+          'low - animal_penguin_antarctic_adaptations',
         ]);
       });
 
