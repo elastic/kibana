@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import type { AgentPolicy } from '../../types';
 import { outputService } from '../output';
 
-import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
+import { getDownloadSourceForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
 import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 import { appContextService } from '../app_context';
@@ -46,18 +46,18 @@ export async function fetchRelatedSavedObjects(
     }, []),
   ]);
 
-  const [outputs, { host: downloadSourceUri, proxy_id: downloadSourceProxyId }, fleetServerHosts] =
-    await Promise.all([
-      outputService.bulkGet(outputIds, { ignoreNotFound: true }),
-      getSourceUriForAgentPolicy(soClient, agentPolicy),
-      getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
-        appContextService
-          .getLogger()
-          ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
+  const [outputs, downloadSource, fleetServerHosts] = await Promise.all([
+    outputService.bulkGet(outputIds, { ignoreNotFound: true }),
+    getDownloadSourceForAgentPolicy(soClient, agentPolicy),
+    getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
+      appContextService
+        .getLogger()
+        ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 
-        return undefined;
-      }),
-    ]);
+      return undefined;
+    }),
+  ]);
+  const { proxy_id: downloadSourceProxyId } = downloadSource;
 
   const dataOutput = outputs.find((output) => output.id === dataOutputId);
   if (!dataOutput) {
@@ -92,7 +92,7 @@ export async function fetchRelatedSavedObjects(
     proxies,
     dataOutput,
     monitoringOutput,
-    downloadSourceUri,
+    downloadSource,
     downloadSourceProxyUri,
     fleetServerHost: fleetServerHosts,
   };
