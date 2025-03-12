@@ -11,21 +11,36 @@ import { appendIndexToJoinCommand } from './create_lookup_index';
 import { monaco } from '@kbn/monaco';
 
 describe('appendIndexToJoinCommand', () => {
-  const cursorPosition = { lineNumber: 1, column: 44 } as monaco.Position;
-  const indexName = 'new_index';
-
   it('should append index name to the join command', () => {
     const result = appendIndexToJoinCommand(
       'FROM kibana_sample_data_logs | LOOKUP JOIN  | LIMIT 10',
       { lineNumber: 1, column: 44 } as monaco.Position,
-      indexName
+      'new_index'
     );
     expect(result).toBe('FROM kibana_sample_data_logs | LOOKUP JOIN new_index | LIMIT 10');
   });
 
-  it('should throw an error if join command is not found', () => {
-    expect(() =>
-      appendIndexToJoinCommand('FROM kibana_sample_data_logs ', cursorPosition, indexName)
-    ).toThrow('Could not find join command in the query');
+  it('should append index name to the join command in multi-line query', () => {
+    const result = appendIndexToJoinCommand(
+      `FROM kibana_sample_data_logs
+  | LOOKUP JOIN\u0020
+  | LIMIT 10`,
+      { lineNumber: 2, column: 17 } as monaco.Position,
+      'new_index'
+    );
+    expect(result).toBe(`FROM kibana_sample_data_logs
+  | LOOKUP JOIN new_index
+  | LIMIT 10`);
+  });
+
+  it('should append index name to the correct join command', () => {
+    const result = appendIndexToJoinCommand(
+      'FROM kibana_sample_data_logs | LOOKUP JOIN new_index ON some_field | LOOKUP JOIN  | LIMIT 10',
+      { lineNumber: 1, column: 82 } as monaco.Position,
+      'another_index'
+    );
+    expect(result).toBe(
+      'FROM kibana_sample_data_logs | LOOKUP JOIN new_index ON some_field | LOOKUP JOIN another_index | LIMIT 10'
+    );
   });
 });

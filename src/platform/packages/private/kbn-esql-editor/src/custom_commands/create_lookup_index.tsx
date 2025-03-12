@@ -15,7 +15,6 @@ import { EuiLink } from '@elastic/eui';
 import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
-import { parse, mutate, BasicPrettyPrinter, ESQLSource } from '@kbn/esql-ast';
 import type { ESQLEditorDeps } from '../types';
 
 /**
@@ -32,35 +31,19 @@ export function appendIndexToJoinCommand(
   cursorPosition: monaco.Position,
   indexName: string
 ): string {
-  const { root } = parse(query);
+  const cursorColumn = cursorPosition?.column ?? 1;
+  const cursorLine = cursorPosition?.lineNumber ?? 1;
 
-  // it could be several join command in the query, hence we need
-  // to find the correct one to append the index name
+  const lines = query.split('\n');
+  const line = lines[cursorLine - 1];
 
-  const cursorColumn = cursorPosition?.column ?? 0;
-  const cursorLine = cursorPosition?.lineNumber ?? 0;
+  const beforeCursor = line.slice(0, cursorColumn - 1);
+  const afterCursor = line.slice(cursorColumn - 1);
 
-  const joinCommand = mutate.commands.join.byIndex(root, 0);
+  const updatedLine = beforeCursor + indexName + afterCursor;
+  lines[cursorLine - 1] = updatedLine;
 
-  if (!joinCommand) {
-    throw new Error('Could not find join command in the query');
-  }
-
-  mutate.generic.commands.args.append(joinCommand, {
-    type: 'source',
-    sourceType: 'index',
-    incomplete: false,
-    location: {
-      min: cursorColumn,
-      max: cursorColumn + indexName.length,
-    },
-    text: indexName,
-    name: indexName,
-  } as ESQLSource);
-
-  const resultQuery = BasicPrettyPrinter.print(root);
-
-  return resultQuery;
+  return lines.join('\n');
 }
 
 export const useCreateLookupIndexCommand = (
