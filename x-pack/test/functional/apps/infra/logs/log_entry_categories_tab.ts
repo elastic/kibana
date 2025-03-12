@@ -11,10 +11,17 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security']);
+  const config = getService('config');
   const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const retry = getService('retry');
   const security = getService('security');
+
+  const retryNavigationOptions = {
+    retryCount: 2,
+    retryDelay: 0,
+    timeout: config.get('timeouts.try') * 2,
+  };
 
   describe('Log Entry Categories Tab', function () {
     this.tags('includeFirefox');
@@ -70,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(await logsUi.logEntryCategoriesPage.getNoDataScreen()).to.be.ok();
             });
           },
-          { retryCount: 2 }
+          retryNavigationOptions
         );
       });
 
@@ -93,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 expect(await logsUi.logEntryCategoriesPage.getSetupScreen()).to.be.ok();
               });
             },
-            { retryCount: 2 }
+            retryNavigationOptions
           );
         });
 
