@@ -805,7 +805,7 @@ describe('waterfall_helpers', () => {
           parentId: 'myTransactionId1',
         } as IWaterfallSpan,
       ];
-      expect(reparentOrphanItems([], traceItems, 'myTransactionId1')).toEqual(traceItems);
+      expect(reparentOrphanItems([], traceItems, myTransactionItem)).toEqual(traceItems);
     });
 
     it('should reparent orphan items to root transaction', () => {
@@ -826,7 +826,7 @@ describe('waterfall_helpers', () => {
           parentId: 'myNotExistingTransactionId1',
         } as IWaterfallSpan,
       ];
-      expect(reparentOrphanItems(['myOrphanSpanId'], traceItems, 'myTransactionId1')).toEqual([
+      expect(reparentOrphanItems(['myOrphanSpanId'], traceItems, myTransactionItem)).toEqual([
         myTransactionItem,
         {
           doc: {
@@ -958,7 +958,7 @@ describe('waterfall_helpers', () => {
           })
         );
 
-        expect(result?.children[0]).toEqual(
+        expect(result?.[0]?.children[0]).toEqual(
           expect.objectContaining({
             item: expect.objectContaining({ id: 'mySpanIdD' }),
             level: 1,
@@ -973,7 +973,7 @@ describe('waterfall_helpers', () => {
 
     describe('convertTreeToList', () => {
       it('should convert the trace tree to a list correctly', () => {
-        const result = convertTreeToList(tree);
+        const result = convertTreeToList([tree]);
 
         expect(result).toEqual(
           expect.arrayContaining([
@@ -1033,7 +1033,7 @@ describe('waterfall_helpers', () => {
         };
 
         const result = updateTraceTreeNode({
-          root: tree,
+          roots: [tree],
           updatedNode,
           waterfall,
           path: {
@@ -1051,7 +1051,7 @@ describe('waterfall_helpers', () => {
           })
         );
 
-        expect(result?.children[0]).toEqual(
+        expect(result?.[0]?.children[0]).toEqual(
           expect.objectContaining({
             item: expect.objectContaining({ id: 'mySpanIdD' }),
             level: 1,
@@ -1060,7 +1060,7 @@ describe('waterfall_helpers', () => {
           })
         );
 
-        expect(result?.children[0].children[0]).toEqual(
+        expect(result?.[0]?.children[0].children[0]).toEqual(
           expect.objectContaining({
             item: expect.objectContaining({ id: 'myTransactionId2' }),
             level: 2,
