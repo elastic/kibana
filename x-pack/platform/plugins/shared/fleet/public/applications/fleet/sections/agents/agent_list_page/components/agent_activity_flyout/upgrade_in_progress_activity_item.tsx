@@ -34,8 +34,6 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
   progress: number;
 }> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents, progress }) => {
-  console.log('the action status is', action);
-  console.log('the progress is', progress);
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
 
