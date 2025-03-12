@@ -11,7 +11,8 @@ import type { DownloadSource, FleetProxy } from '../../../types';
 function getfleetServerHostsEnrollArgs(
   apiKey: string,
   fleetServerHost: string,
-  fleetProxy?: FleetProxy
+  fleetProxy?: FleetProxy,
+  showInstallServers: boolean = false
 ) {
   const proxyHeadersArgs = fleetProxy?.proxy_headers
     ? Object.entries(fleetProxy.proxy_headers).reduce((acc, [proxyKey, proyVal]) => {
@@ -21,7 +22,10 @@ function getfleetServerHostsEnrollArgs(
       }, '')
     : '';
   const proxyArgs = fleetProxy ? ` --proxy-url=${fleetProxy.url}${proxyHeadersArgs}` : '';
-  return `--url=${fleetServerHost || `FLEET_SERVER_HOST`} --enrollment-token=${apiKey}${proxyArgs}`;
+  const showInstallServersArgs = showInstallServers ? ' --install-servers' : '';
+  return `--url=${
+    fleetServerHost || `FLEET_SERVER_HOST`
+  } --enrollment-token=${apiKey}${proxyArgs}${showInstallServersArgs}`;
 }
 
 export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
@@ -67,6 +71,7 @@ export const ManualInstructions = ({
   gcpProjectId = '<PROJECT_ID>',
   gcpOrganizationId = '<ORGANIZATION_ID>',
   gcpAccountType,
+  showInstallServers,
 }: {
   apiKey: string;
   fleetServerHost: string;
@@ -77,8 +82,14 @@ export const ManualInstructions = ({
   gcpProjectId?: string;
   gcpOrganizationId?: string;
   gcpAccountType?: string;
+  showInstallServers: boolean;
 }) => {
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHost, fleetProxy);
+  const enrollArgs = getfleetServerHostsEnrollArgs(
+    apiKey,
+    fleetServerHost,
+    fleetProxy,
+    showInstallServers
+  );
   const downloadBaseUrl = getDownloadBaseUrl(downloadSource);
 
   const fleetServerUrl = enrollArgs?.split('--url=')?.pop()?.split('--enrollment')[0];
