@@ -13,6 +13,14 @@ const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/{name}/processing/_simulate',
   'POST /api/streams/{name}/processing/_suggestions',
   'POST /api/streams/{name}/_fork',
+  'PUT /api/streams/{name}/dashboards/{dashboardId}',
+  'PUT /api/streams/{name}',
+  'PUT /api/streams/{name}/_group',
+  'PUT /api/streams/{name}/_ingest',
+  'DELETE /api/streams/{name}',
+  'POST /api/streams/_enable',
+  'POST /api/streams/_disable',
+  'POST /api/streams/_resync',
 ];
 
 export class StreamsTelemetryClient {
