@@ -52,7 +52,9 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
         solution: 'stack',
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
-      expect(response.body.every((ruleType) => Boolean(ruleType.solution))).to.be(true);
+      expect(
+        response.body.every((ruleType: { solution: string }) => Boolean(ruleType.solution))
+      ).to.be(true);
     });
 
     it('should return actionVariables with both context and state', async () => {
