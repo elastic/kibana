@@ -11,7 +11,7 @@ import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugi
 import {
   transformControlObjectToArray,
   transformControlsWidthAuto,
-  transformControlExplicitInput,
+  transformControlProperties,
   transformControlsSetDefaults,
   transformControlsState,
 } from './control_state';
@@ -20,7 +20,12 @@ describe('control_state', () => {
   const mockControls = {
     control1: { type: 'type1', width: 'auto', explicitInput: { foo: 'bar' } },
     control2: { type: 'type2', width: 'small', explicitInput: { bizz: 'buzz' } },
-    control3: { type: 'type3', grow: true, explicitInput: { boo: 'bear' } },
+    control3: {
+      type: 'type3',
+      grow: true,
+      explicitInput: { boo: 'bear' },
+      unsupportedProperty: 'unsupported',
+    },
   };
 
   describe('transformControlObjectToArray', () => {
@@ -45,7 +50,7 @@ describe('control_state', () => {
   describe('transformControlExplicitInput', () => {
     it('should transform controls explicit input', () => {
       const controlsArray = transformControlObjectToArray(mockControls);
-      const result = transformControlExplicitInput(controlsArray);
+      const result = transformControlProperties(controlsArray);
       expect(result).toHaveProperty('0.controlConfig', { foo: 'bar' });
       expect(result).not.toHaveProperty('0.explicitInput');
 
@@ -54,6 +59,7 @@ describe('control_state', () => {
 
       expect(result).toHaveProperty('2.controlConfig', { boo: 'bear' });
       expect(result).not.toHaveProperty('2.explicitInput');
+      expect(result).not.toHaveProperty('2.unsupportedProperty');
     });
   });
 

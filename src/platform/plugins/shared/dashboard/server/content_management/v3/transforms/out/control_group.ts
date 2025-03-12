@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaults, flow, pick } from 'lodash';
+import { defaults, flow } from 'lodash';
 import {
+  ControlGroupChainingSystem,
+  ControlLabelPosition,
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_CONTROL_LABEL_POSITION,
@@ -23,10 +25,7 @@ export const transformControlGroupOut: (
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
 ) => ControlGroupAttributes = flow(
   transformControlGroupSetDefaults,
-  transformIgnoreParentSettings,
-  transformShowApplySelections,
-  transformLabelPosition,
-  transformPanelsJSON
+  transformControlGroupProperties
 );
 
 // TODO We may want to remove setting defaults in the future
@@ -40,19 +39,27 @@ function transformControlGroupSetDefaults(
   });
 }
 
-function transformIgnoreParentSettings(
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) {
-  const { ignoreParentSettingsJSON, ...restControlGroupInput } = controlGroupInput;
+function transformControlGroupProperties({
+  controlStyle,
+  chainingSystem,
+  showApplySelections,
+  ignoreParentSettingsJSON,
+  panelsJSON,
+}: Required<
+  NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
+>): ControlGroupAttributes {
   return {
-    ...restControlGroupInput,
+    labelPosition: controlStyle as ControlLabelPosition,
+    chainingSystem: chainingSystem as ControlGroupChainingSystem,
+    autoApplySelections: !showApplySelections,
     ignoreParentSettings: ignoreParentSettingsJSON
       ? flow(
           JSON.parse,
           transformIgnoreParentSettingsSetDefaults,
-          pickSupportedIgnoreParentSettings
+          transformIgnoreParentSettingsProperties
         )(ignoreParentSettingsJSON)
       : DEFAULT_IGNORE_PARENT_SETTINGS,
+    controls: panelsJSON ? transformControlsState(panelsJSON) : [],
   };
 }
 
@@ -63,43 +70,16 @@ function transformIgnoreParentSettingsSetDefaults(
   return defaults(ignoreParentSettings, DEFAULT_IGNORE_PARENT_SETTINGS);
 }
 
-function pickSupportedIgnoreParentSettings(
-  ignoreParentSettings: ParentIgnoreSettings
-): ParentIgnoreSettings {
-  return pick(ignoreParentSettings, [
-    'ignoreFilters',
-    'ignoreQuery',
-    'ignoreTimerange',
-    'ignoreValidations',
-  ]);
-}
-
-function transformShowApplySelections(
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) {
-  const { showApplySelections, ...restControlGroupInput } = controlGroupInput;
+function transformIgnoreParentSettingsProperties({
+  ignoreFilters,
+  ignoreQuery,
+  ignoreTimerange,
+  ignoreValidations,
+}: ParentIgnoreSettings): ParentIgnoreSettings {
   return {
-    ...restControlGroupInput,
-    autoApplySelections: !showApplySelections,
-  };
-}
-
-function transformLabelPosition(
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) {
-  const { controlStyle, ...restControlGroupInput } = controlGroupInput;
-  return {
-    ...restControlGroupInput,
-    labelPosition: controlStyle,
-  };
-}
-
-function transformPanelsJSON(
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) {
-  const { panelsJSON, ...restControlGroupInput } = controlGroupInput;
-  return {
-    ...restControlGroupInput,
-    controls: panelsJSON ? transformControlsState(panelsJSON) : [],
+    ignoreFilters,
+    ignoreQuery,
+    ignoreTimerange,
+    ignoreValidations,
   };
 }

@@ -21,14 +21,18 @@ export const transformControlsState: (
   JSON.parse,
   transformControlObjectToArray,
   transformControlsWidthAuto,
-  transformControlExplicitInput,
-  transformControlsSetDefaults
+  transformControlsSetDefaults,
+  transformControlProperties
 );
 
 export function transformControlObjectToArray(controls: Record<string, SerializableRecord>) {
   return Object.entries(controls).map(([id, control]) => ({ id, ...control }));
 }
 
+/**
+ * Some controls were serialized with width set to 'auto'. This function will transform those controls
+ * to have the default width and grow set to true. See @link https://github.com/elastic/kibana/issues/211113.
+ */
 export function transformControlsWidthAuto(controls: SerializableRecord[]) {
   return controls.map((control) => {
     if (control.width === 'auto') {
@@ -38,18 +42,20 @@ export function transformControlsWidthAuto(controls: SerializableRecord[]) {
   });
 }
 
-export function transformControlExplicitInput(
-  controls: SerializableRecord[]
-): SerializableRecord[] {
-  return controls.map(({ explicitInput, ...control }) => ({
-    controlConfig: explicitInput,
-    ...control,
-  }));
-}
-
 // TODO We may want to remove setting defaults in the future
 export function transformControlsSetDefaults(controls: SerializableRecord[]) {
   return controls.map((control) =>
     defaults(control, { grow: DEFAULT_CONTROL_GROW, width: DEFAULT_CONTROL_WIDTH })
   );
+}
+
+export function transformControlProperties(controls: SerializableRecord[]): SerializableRecord[] {
+  return controls.map(({ explicitInput, id, type, width, grow, order }) => ({
+    controlConfig: explicitInput,
+    id,
+    grow,
+    order,
+    type,
+    width,
+  }));
 }

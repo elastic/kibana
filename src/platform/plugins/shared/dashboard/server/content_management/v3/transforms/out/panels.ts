@@ -12,10 +12,10 @@ import { SavedDashboardPanel } from '../../../../dashboard_saved_object';
 import { DashboardAttributes } from '../../types';
 
 export function transformPanelsOut(panelsJSON: string): DashboardAttributes['panels'] {
-  return flow(JSON.parse, transformPanelSetPanelConfig)(panelsJSON);
+  return flow(JSON.parse, transformPanelsProperties)(panelsJSON);
 }
 
-function transformPanelSetPanelConfig(panels: SavedDashboardPanel[]) {
+function transformPanelsProperties(panels: SavedDashboardPanel[]) {
   return panels.map(
     ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
       gridData,

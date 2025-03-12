@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow, pick } from 'lodash';
+import { flow } from 'lodash';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 import { DashboardAttributes } from '../../types';
 
 export function transformOptionsOut(optionsJSON: string): DashboardAttributes['options'] {
-  return flow(JSON.parse, transformOptionsSetDefaults, pickSupportedOptions)(optionsJSON);
+  return flow(JSON.parse, transformOptionsSetDefaults, transformOptionsProperties)(optionsJSON);
 }
 
 // TODO We may want to remove setting defaults in the future
@@ -23,12 +23,18 @@ function transformOptionsSetDefaults(options: DashboardAttributes['options']) {
   };
 }
 
-function pickSupportedOptions(options: DashboardAttributes['options']) {
-  return pick(options, [
-    'hidePanelTitles',
-    'useMargins',
-    'syncColors',
-    'syncCursor',
-    'syncTooltips',
-  ]);
+function transformOptionsProperties({
+  hidePanelTitles,
+  useMargins,
+  syncColors,
+  syncCursor,
+  syncTooltips,
+}: DashboardAttributes['options']) {
+  return {
+    hidePanelTitles,
+    useMargins,
+    syncColors,
+    syncCursor,
+    syncTooltips,
+  };
 }
