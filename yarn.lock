@@ -5694,6 +5694,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/expression-utils@link:src/platform/packages/private/kbn-expression-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expression-xy-plugin@link:src/platform/plugins/shared/chart_expressions/expression_xy":
   version "0.0.0"
   uid ""
