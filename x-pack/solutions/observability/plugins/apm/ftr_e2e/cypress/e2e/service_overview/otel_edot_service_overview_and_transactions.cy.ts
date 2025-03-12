@@ -7,29 +7,23 @@
 
 import url from 'url';
 import { synthtraceOtel } from '../../../synthtrace';
-import { sendotlp } from '../../fixtures/synthtrace/sendotlp';
+import { adserviceEdot } from '../../fixtures/synthtrace/adservice_edot';
 import { checkA11y } from '../../support/commands';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
-const serviceInstanceId = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
+const serviceInstanceId = 'da7a8507-53be-421c-8d77-984f12397213';
 
-const serviceOverviewPath = '/app/apm/services/sendotlp-otel-native-synth/overview';
+const serviceOverviewPath = '/app/apm/services/adservice-edot-synth/overview';
 const baseUrl = url.format({
   pathname: serviceOverviewPath,
   query: { rangeFrom: start, rangeTo: end },
 });
 
-const transactionTabPath = '/app/apm/services/sendotlp-otel-native-synth/transactions/view';
-const transactionUrl = url.format({
-  pathname: transactionTabPath,
-  query: { rangeFrom: start, rangeTo: end, transactionName: 'parent-synth' },
-});
-
 describe('Service Overview', () => {
   before(() => {
     synthtraceOtel.index(
-      sendotlp({
+      adserviceEdot({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
       })
@@ -47,7 +41,7 @@ describe('Service Overview', () => {
     });
 
     it('renders all components on the page', () => {
-      cy.contains('sendotlp-otel-native-synth');
+      cy.contains('adservice-edot-synth');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
       cy.getByTestSubj('latencyChart');
@@ -66,21 +60,16 @@ describe('Service Overview', () => {
     });
 
     it('show information on click', () => {
-      cy.intercept(
-        'GET',
-        '/internal/apm/services/sendotlp-otel-native-synth/metadata/details?*'
-      ).as('metadataDetailsRequest');
+      cy.intercept('GET', '/internal/apm/services/adservice-edot-synth/metadata/details?*').as(
+        'metadataDetailsRequest'
+      );
 
       cy.visitKibana(baseUrl);
 
-      cy.getByTestSubj('service').click();
-      cy.wait('@metadataDetailsRequest');
-      cy.contains('dt', 'Framework name');
-      cy.contains('dd', 'sendotlp-otel-native-synth');
-
       cy.getByTestSubj('opentelemetry').click();
+      cy.wait('@metadataDetailsRequest');
       cy.contains('dt', 'Language');
-      cy.contains('dd', 'go');
+      cy.contains('dd', 'java');
     });
   });
 
@@ -91,7 +80,7 @@ describe('Service Overview', () => {
 
     it('has data in the table', () => {
       cy.visitKibana(baseUrl);
-      cy.contains('sendotlp-otel-native-synth');
+      cy.contains('adservice-edot-synth');
       cy.getByTestSubj('serviceInstancesTableContainer');
       cy.contains(serviceInstanceId);
     });
@@ -102,35 +91,12 @@ describe('Service Overview', () => {
       cy.loginAsViewerUser();
     });
 
-    it('persists transaction type selected when clicking on Transactions tab', () => {
-      cy.intercept(
-        'GET',
-        '/internal/apm/services/sendotlp-otel-native-synth/transaction_types?*'
-      ).as('transactionTypesRequest');
-
-      cy.visitKibana(baseUrl);
-
-      cy.wait('@transactionTypesRequest');
-
-      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'unknown');
-      cy.contains('Transactions').click();
-      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'unknown');
-      cy.contains('parent-synth');
-    });
-
     it('navigates to transaction detail page', () => {
       cy.visitKibana(baseUrl);
       cy.contains('Transactions').click();
 
-      cy.contains('a', 'parent-synth').click();
-      cy.contains('h5', 'parent-synth');
-    });
-    it('shows transaction summary', () => {
-      cy.visitKibana(transactionUrl);
-
-      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.contains('a', 'oteldemo.AdServiceEdotSynth/GetAds').click();
+      cy.contains('h5', 'oteldemo.AdServiceEdotSynth/GetAds');
     });
   });
 
@@ -139,20 +105,11 @@ describe('Service Overview', () => {
       cy.loginAsViewerUser();
       cy.visitKibana(baseUrl);
     });
-    it('errors table is populated', () => {
-      cy.contains('sendotlp-otel-native-synth');
-      cy.contains('*errors.errorString');
-    });
 
     it('navigates to the errors page', () => {
-      cy.contains('sendotlp-otel-native-synth');
+      cy.contains('adservice-edot-synth');
       cy.contains('a', 'View errors').click();
-      cy.url().should('include', '/sendotlp-otel-native-synth/errors');
-    });
-
-    it('navigates to error detail page', () => {
-      cy.contains('a', '*errors.errorString').click();
-      cy.contains('div', 'boom');
+      cy.url().should('include', '/adservice-edot-synth/errors');
     });
   });
 });
