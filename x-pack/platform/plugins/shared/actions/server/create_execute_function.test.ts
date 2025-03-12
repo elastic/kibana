@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
