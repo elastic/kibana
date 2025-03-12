@@ -15,26 +15,38 @@ import {
   sharedDataViewManagerSlice,
 } from './slices';
 
-export const scopes = {
-  [DataViewManagerScopeName.default]: createDataViewSelectionSlice(
-    DataViewManagerScopeName.default
-  ),
-  [DataViewManagerScopeName.timeline]: createDataViewSelectionSlice(
-    DataViewManagerScopeName.timeline
-  ),
-  [DataViewManagerScopeName.detections]: createDataViewSelectionSlice(
-    DataViewManagerScopeName.detections
-  ),
-  [DataViewManagerScopeName.analyzer]: createDataViewSelectionSlice(
-    DataViewManagerScopeName.analyzer
-  ),
-} as const;
+/**
+ * Define registered scopes array.
+ */
+const REGISTERED_SCOPES = [
+  DataViewManagerScopeName.default,
+  DataViewManagerScopeName.timeline,
+  DataViewManagerScopeName.detections,
+  DataViewManagerScopeName.analyzer,
+] as const;
 
+/**
+ * Helper function to create objects with Registered Scope names as keys
+ */
+const createScopeMap = <T>(
+  valueCreator: (scopeName: DataViewManagerScopeName) => T
+): Record<DataViewManagerScopeName, T> => {
+  return REGISTERED_SCOPES.reduce((acc, scopeName) => {
+    acc[scopeName] = valueCreator(scopeName);
+    return acc;
+  }, {} as Record<DataViewManagerScopeName, T>);
+};
+
+/*
+ * Create scopes object
+ */
+export const scopes = createScopeMap(createDataViewSelectionSlice);
+
+/**
+ * Create DataViewManager reducer
+ */
 export const dataViewManagerReducer = combineReducers({
-  [DataViewManagerScopeName.default]: scopes[DataViewManagerScopeName.default].reducer,
-  [DataViewManagerScopeName.timeline]: scopes[DataViewManagerScopeName.timeline].reducer,
-  [DataViewManagerScopeName.detections]: scopes[DataViewManagerScopeName.detections].reducer,
-  [DataViewManagerScopeName.analyzer]: scopes[DataViewManagerScopeName.analyzer].reducer,
+  ...createScopeMap((scopeName) => scopes[scopeName].reducer),
   shared: sharedDataViewManagerSlice.reducer,
 });
 
@@ -44,12 +56,12 @@ export interface RootState {
   dataViewManager: DataviewPickerState;
 }
 
+/**
+ * Create initial state
+ */
 export const initialDataViewManagerState: RootState = {
   dataViewManager: {
+    ...createScopeMap(() => initialScopeState),
     shared: initialSharedState,
-    [DataViewManagerScopeName.default]: initialScopeState,
-    [DataViewManagerScopeName.timeline]: initialScopeState,
-    [DataViewManagerScopeName.detections]: initialScopeState,
-    [DataViewManagerScopeName.analyzer]: initialScopeState,
   },
 };
