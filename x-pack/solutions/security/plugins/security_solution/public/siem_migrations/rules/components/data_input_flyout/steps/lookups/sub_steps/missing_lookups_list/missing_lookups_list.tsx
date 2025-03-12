@@ -41,12 +41,9 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
         <EuiFlexItem>
           <EuiText size="s">
             <FormattedMessage
-              id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.copyExportQuery.description"
+              id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.copyExportQuery.description"
               defaultMessage="Log in to your Splunk admin account, go to the {app}, download the following lookups individually and upload them below. You can also omit lookups that are empty or not needed, and they will be ignored in the translation."
-              values={{
-                app: <b>{i18n.LOOKUPS_SPLUNK_APP}</b>,
-                format: <b>{'JSON'}</b>,
-              }}
+              values={{ app: <b>{i18n.LOOKUPS_SPLUNK_APP}</b> }}
             />
           </EuiText>
         </EuiFlexItem>

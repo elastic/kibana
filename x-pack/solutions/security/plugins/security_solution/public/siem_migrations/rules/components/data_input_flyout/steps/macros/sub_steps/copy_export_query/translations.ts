@@ -13,6 +13,6 @@ export const MACROS_DATA_INPUT_COPY_TITLE = i18n.translate(
 );
 
 export const MACROS_DATA_INPUT_COPY_DESCRIPTION_SECTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.copyExportQuery.description.section',
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.copyExportQuery.descriptionSection',
   { defaultMessage: 'Search and Reporting' }
 );
