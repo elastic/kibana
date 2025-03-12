@@ -163,8 +163,8 @@ export const MIN_VERSION_GCP_CIS = '1.5.2';
 
 export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 
-export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
-export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
+// export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
+// export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
 
 export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
 

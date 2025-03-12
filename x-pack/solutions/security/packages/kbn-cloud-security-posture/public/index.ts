@@ -7,6 +7,7 @@
 
 export * from './src/types';
 export * from './src/constants/navigation';
+export * from './src/constants/detection_engine';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';

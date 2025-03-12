@@ -69,3 +69,6 @@ export const INTERNAL_FEATURE_FLAGS = {
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
+export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
+  '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';

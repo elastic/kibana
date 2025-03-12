@@ -18,10 +18,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   CREATE_DETECTION_FROM_TABLE_ROW_ACTION,
   uiMetricService,
@@ -32,11 +33,17 @@ import {
   DETECTION_ENGINE_ALERTS_KEY,
   DETECTION_ENGINE_RULES_KEY,
 } from '@kbn/cloud-security-posture';
-import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
-import { useKibana } from '../common/hooks/use_kibana';
-import { CloudSecurityPostureStartServices } from '../types';
+// import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  CspClientPluginStartDeps,
+  CloudSecurityPostureStartServices,
+} from '@kbn/cloud-security-posture';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
+
+const TAKE_ACTION_SUBJ = 'csp:take_action';
+const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
 
 interface TakeActionProps {
   createRuleFn?: (http: HttpSetup) => Promise<RuleResponse>;
@@ -219,7 +226,7 @@ const CreateDetectionRule = ({
   queryClient: QueryClient;
   isCreateDetectionRuleDisabled: boolean;
 }) => {
-  const { http, ...startServices } = useKibana().services;
+  const { http, ...startServices } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
 
   const { mutate } = useMutation({
     mutationFn: () => {
