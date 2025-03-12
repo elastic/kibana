@@ -151,7 +151,9 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   );
 
   useEffect(() => {
-    onPageReady();
+    onPageReady({
+      meta: { description: '[ttfmp_onboarding] The UI with onboarding categories is rendered' },
+    });
   }, [onPageReady]);
 
   const featuredCardsForCategoryMap: Record<Category, string[]> = {

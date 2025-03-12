@@ -36,7 +36,7 @@ export function measureInteraction(pathname: string) {
       let performanceMeta: PerformanceMeta | undefined;
       performance.mark(perfomanceMarkers.endPageReady);
 
-      if (eventData?.meta) {
+      if (eventData?.meta?.rangeFrom && eventData?.meta?.rangeTo) {
         const { rangeFrom, rangeTo, description } = eventData.meta;
 
         // Convert the date range  to epoch timestamps (in milliseconds)

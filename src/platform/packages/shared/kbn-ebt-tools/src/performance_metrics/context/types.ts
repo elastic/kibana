@@ -8,7 +8,7 @@
  */
 
 type ApmPageId = 'services' | 'traces' | 'dependencies';
-type InfraPageId = 'hosts';
+type InfraPageId = 'hosts' | 'onboarding';
 
 export type Key = `${ApmPageId}` | `${InfraPageId}`;
 

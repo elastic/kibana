@@ -46,7 +46,11 @@ export const AutoDetectPanel: FunctionComponent = () => {
 
   useEffect(() => {
     if (data) {
-      onPageReady();
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Request to create the onboarding flow succeeded and the flow's UI has rendered`,
+        },
+      });
     }
   }, [data, onPageReady]);
 

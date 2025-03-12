@@ -66,7 +66,11 @@ export const OtelLogsPanel: React.FC = () => {
 
   useEffect(() => {
     if (apiKeyData && setup) {
-      onPageReady();
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Requests to get the environment and to generate API key succeeded and the flow's UI has rendered`,
+        },
+      });
     }
   }, [apiKeyData, onPageReady, setup]);
 
