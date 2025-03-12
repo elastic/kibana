@@ -36,10 +36,6 @@ export function registerReindexDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Start the data stream reindexing`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
@@ -86,10 +82,6 @@ export function registerReindexDataStreamRoutes({
   router.get(
     {
       path: `${BASE_PATH}/{dataStreamName}`,
-      options: {
-        access: 'public',
-        summary: `Get data stream status`,
-      },
       security: {
         authz: {
           enabled: false,
@@ -146,10 +138,6 @@ export function registerReindexDataStreamRoutes({
   router.get(
     {
       path: `${BASE_PATH}/{dataStreamName}/metadata`,
-      options: {
-        access: 'public',
-        summary: `Get data stream reindexing metadata`,
-      },
       security: {
         authz: {
           enabled: false,
@@ -198,10 +186,6 @@ export function registerReindexDataStreamRoutes({
           enabled: false,
           reason: 'Relies on elasticsearch for authorization',
         },
-      },
-      options: {
-        access: 'public',
-        summary: `Cancel Data Stream reindexing`,
       },
       validate: {
         params: schema.object({
