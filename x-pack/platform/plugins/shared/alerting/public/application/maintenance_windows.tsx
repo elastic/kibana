@@ -9,16 +9,16 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MAINTENANCE_WINDOW_PATHS } from '../../common';
 import { useLicense } from '../hooks/use_license';
-import { AlertingPluginStart } from '../plugin';
+import type { AlertingPluginStart } from '../plugin';
 
 const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
 const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
