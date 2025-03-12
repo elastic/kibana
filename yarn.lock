@@ -2167,9 +2167,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.1.1.tgz#2829b0f3cc750c582baa683c2f503594676ba08a"
   integrity sha512-dCoXcCT8V1djwWrP0XSG0gXN5fYDtAw5aF88BPArVBbuCQSWPEBpR9avaWJ6uVjAsOteQ7tdwLMtzrvMKgKKIA==
 
-"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_02.tgz":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_03.tgz":
   version "0.0.11"
-  resolved "file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_02.tgz#1736ccba06053201d765553e4d8b4447b523d7f9"
+  resolved "file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_03.tgz#2330b48b9075f8ecac57a386bf5f2377eef4d6e5"
 
 "@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.11_v_2_poc_02.tgz":
   version "0.0.11"
@@ -2179,9 +2179,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_100.0.0_borealis.0_v_2_poc_03.tgz":
+"@elastic/eui@file:./elastic_eui_100.0.0_borealis.0_v_2_poc_06.tgz":
   version "100.0.0"
-  resolved "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_03.tgz#6950f72630ab8801a0b7131a8b91b38352cc6108"
+  resolved "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_06.tgz#bfc3189568e1c151552e75f7ea320d851e8119c0"
   dependencies:
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
