@@ -234,7 +234,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     const controlSuggestions = fields.length
       ? getControlSuggestion(
           variableType,
-          variables?.map((v) => `?${v.key}`)
+          variables?.map((v) => `??${v.key}`)
         )
       : [];
     suggestions.push(...controlSuggestions);
@@ -516,10 +516,14 @@ export function getControlSuggestionIfSupported(
     return [];
   }
   const variableType = type;
+  const prefix =
+    variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
+      ? '??'
+      : '?';
   const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
   const controlSuggestion = getControlSuggestion(
     variableType,
-    variables?.map((v) => `?${v.key}`)
+    variables?.map((v) => `${prefix}${v.key}`)
   );
   return controlSuggestion;
 }
