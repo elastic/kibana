@@ -46,9 +46,11 @@ export function AnnotationsList() {
   const onDelete = async (deleteSelection?: Annotation) => {
     if (deleteSelection) {
       await deleteAnnotation({ annotations: [deleteSelection] });
+      setIsDeleteModalVisible(false);
     } else {
       await deleteAnnotation({ annotations: selection });
       setSelection([]);
+      setIsDeleteModalVisible(false);
     }
     refetch();
   };
@@ -56,6 +58,7 @@ export function AnnotationsList() {
   const renderToolsLeft = () => {
     return (
       <DeleteAnnotations
+        key="delete-annotations"
         selection={selection}
         isLoading={isDeleteLoading}
         permissions={permissions}
@@ -65,7 +68,14 @@ export function AnnotationsList() {
   };
   const renderToolsRight = () => {
     return [
-      <DatePicker start={start} end={end} setStart={setStart} setEnd={setEnd} refetch={refetch} />,
+      <DatePicker
+        start={start}
+        end={end}
+        setStart={setStart}
+        setEnd={setEnd}
+        refetch={refetch}
+        key="date-picker-annotations"
+      />,
     ];
   };
   const allTags = data?.items?.map((obj) => obj.tags ?? []).flat() ?? [];

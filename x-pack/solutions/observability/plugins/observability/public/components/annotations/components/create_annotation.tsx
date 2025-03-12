@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { Moment } from 'moment';
+import { CreateAnnotationResponse } from '../hooks/use_create_annotation';
 import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 import { AnnotationForm } from '../annotation_form';
 
@@ -37,9 +38,11 @@ export interface CreateAnnotationProps {
   onCancel: () => void;
   isCreateAnnotationsOpen: boolean;
   editAnnotation?: Annotation | null;
-  updateAnnotation: (data: { annotation: Annotation }) => void;
-  createAnnotation: (data: { annotation: CreateAnnotationParams }) => void;
-  deleteAnnotation: (data: { annotations: Annotation[] }) => void;
+  updateAnnotation: (data: { annotation: Annotation }) => Promise<CreateAnnotationResponse>;
+  createAnnotation: (data: {
+    annotation: CreateAnnotationParams;
+  }) => Promise<CreateAnnotationResponse>;
+  deleteAnnotation: (data: { annotations: Annotation[] }) => Promise<void>;
 }
 
 export function CreateAnnotation({
