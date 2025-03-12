@@ -8,14 +8,14 @@
 import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { annotationsIconSet } from '@kbn/event-annotation-components';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
-export function AnnotationIcon({
-  annotation,
-}: {
+export interface AnnotationIconProps {
   annotation: Annotation | CreateAnnotationParams;
-}) {
+}
+
+function AnnotationIcon({ annotation }: AnnotationIconProps) {
   const eventEnd = annotation.event?.end;
   const { euiTheme } = useEuiTheme();
   const annotationStyle = annotation.annotation?.style;
@@ -35,3 +35,6 @@ export function AnnotationIcon({
     />
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default AnnotationIcon;

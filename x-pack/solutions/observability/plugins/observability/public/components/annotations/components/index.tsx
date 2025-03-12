@@ -26,3 +26,15 @@ export function CreateAnnotation(props: CreateAnnotationProps) {
     </Suspense>
   );
 }
+
+import type { AnnotationIconProps } from './annotation_icon';
+
+const AnnotationIconLazy = lazy(() => import('./annotation_icon'));
+
+export function AnnotationIcon(props: AnnotationIconProps) {
+  return (
+    <Suspense fallback={null}>
+      <AnnotationIconLazy {...props} />
+    </Suspense>
+  );
+}
