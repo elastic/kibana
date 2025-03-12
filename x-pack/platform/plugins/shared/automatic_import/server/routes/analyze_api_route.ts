@@ -78,7 +78,7 @@ export function registerApiAnalysisRoutes(router: IRouter<AutomaticImportRouteHa
             signal: abortSignal,
             streaming: false,
             telemetryMetadata: {
-              pluginId: 'security_automatic_import',
+              pluginId: 'automatic_import',
             },
           });
 

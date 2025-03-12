@@ -89,7 +89,7 @@ export function registerAnalyzeLogsRoutes(router: IRouter<AutomaticImportRouteHa
             signal: abortSignal,
             streaming: false,
             telemetryMetadata: {
-              pluginId: 'security_automatic_import',
+              pluginId: 'automatic_import',
             },
           });
           const options = {

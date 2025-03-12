@@ -94,7 +94,7 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
               signal: abortSignal,
               streaming: false,
               telemetryMetadata: {
-                pluginId: 'security_automatic_import',
+                pluginId: 'automatic_import',
               },
             });
 
