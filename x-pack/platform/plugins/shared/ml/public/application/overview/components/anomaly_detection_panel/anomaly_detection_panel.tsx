@@ -182,6 +182,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
 
   return (
     <CollapsiblePanel
+      dataTestSubj={'mlAnomalyDetectionPanel'}
       isOpen={panelsState.adJobs}
       onToggle={(update) => {
         setPanelsState({ ...panelsState, adJobs: update });

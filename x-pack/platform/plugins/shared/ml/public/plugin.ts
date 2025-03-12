@@ -256,7 +256,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       registerManagementSections(
         pluginsSetup.management,
         core,
-        deps,
+        { telemetry: telemetryClient, ...deps },
         this.isServerless,
         this.enabledFeatures,
         this.nlpSettings,

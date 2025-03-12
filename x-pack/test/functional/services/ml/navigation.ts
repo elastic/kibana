@@ -112,12 +112,8 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~overview', expectedValue);
     },
 
-    async assertNotificationsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~notifications', expectedValue);
-    },
-
     async assertAnomalyDetectionTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~anomalyDetection', expectedValue);
+      await this.assertTabEnabled('anomaly_detection', expectedValue);
     },
 
     async assertAnomalyExplorerNavItemEnabled(expectedValue: boolean) {
@@ -129,31 +125,27 @@ export function MachineLearningNavigationProvider({
     },
 
     async assertDataFrameAnalyticsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalytics', expectedValue);
+      await this.assertTabEnabled('analytics', expectedValue);
+    },
+
+    async assertDataFrameAnalyticsResultsExplorerTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalyticsResultsExplorer', expectedValue);
+    },
+
+    async assertDataFrameAnalyticsMapTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalyticsMap', expectedValue);
     },
 
     async assertTrainedModelsNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~trainedModels', expectedValue);
-    },
-
-    async assertNodesNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~nodesOverview', expectedValue);
+      await this.assertTabEnabled('trained_models', expectedValue);
     },
 
     async assertDataVisualizerTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataVisualizer', expectedValue);
     },
 
-    async assertFileDataVisualizerNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~fileDataVisualizer', expectedValue);
-    },
-
-    async assertIndexDataVisualizerNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~indexDataVisualizer', expectedValue);
-    },
-
     async assertSettingsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~settings', expectedValue);
+      await this.assertTabEnabled('ad_settings', expectedValue);
     },
 
     async navigateToOverview() {

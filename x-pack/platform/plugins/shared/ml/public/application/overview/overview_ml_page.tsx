@@ -205,7 +205,7 @@ export const OverviewPage: FC = () => {
                       />
                     </EuiButtonEmpty>
                   }
-                  data-test-subj="mlDataVisualizerCardIndexData"
+                  data-test-subj="mlOverviewCardLogRateAnalysis"
                 />
               </EuiFlexItem>
 

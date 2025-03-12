@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type NodeExpandedRowTab = 'mlNodesOverviewPanelMemoryTab' | 'mlNodesOverviewPanelDetailsTab';
-type PageTab = 'memory-usage' | 'nodes';
 
 export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -25,10 +24,6 @@ export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderCo
       await testSubjects.existOrFail(`mlNodesOverviewPanel ${tabName}Tab`);
     },
 
-    async selectTab(tabName: PageTab) {
-      await testSubjects.click(`mlMemoryUsageTab-${tabName}`);
-    },
-
     async assertMemoryUsageTabsExist() {
       await testSubjects.existOrFail('mlMemoryUsageTabs');
     },
@@ -39,6 +34,14 @@ export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderCo
         'aria-selected'
       );
       expect(isSelected).to.eql('true');
+    },
+
+    async assertMemoryUsageExpandedDetailsPanelExists(selector: string = 'withData') {
+      await testSubjects.existOrFail(`mlJobTreeMap ${selector}`);
+    },
+
+    async assertNodeExpandedDetailsPanelExists() {
+      await testSubjects.existOrFail('mlNodesTableContainer');
     },
 
     async assertRowCount(expectedCount: number) {

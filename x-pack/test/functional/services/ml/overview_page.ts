@@ -11,18 +11,29 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningOverviewPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertADEmptyStateExists() {
       await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
     },
 
+    async assertADCardExists() {
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.existOrFail('mlOverviewAnomalyDetectionCard');
+      });
+    },
+
     async assertADCreateJobButtonExists() {
       await testSubjects.existOrFail('mlCreateNewJobButton');
     },
 
-    async assertADCreateJobButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCreateNewJobButton');
+    async assertADManageJobsButtonExists() {
+      await testSubjects.existOrFail('manageJobsButton');
+    },
+
+    async assertADJobButtonEnabled(subject: string, expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(subject);
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected AD "Create job" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -39,8 +50,40 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
     },
 
+    async assertIndexDataVisualizerCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
+    },
+
+    async assertLogPatternAnalysisCardExists() {
+      await testSubjects.existOrFail('mlOverviewCardLogPatternAnalysis');
+    },
+
+    async assertChangePointDetectionCardExists() {
+      await testSubjects.existOrFail('mlOverviewCardChangePointDetection');
+    },
+
+    async assertTryESQLCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerSelectESQLCard');
+    },
+
+    async assertDataVisualizerImportCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardImportData');
+    },
+
+    async assertDataVisualizerImportIndexCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
+    },
+
+    async assertDataDriftCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardDataDriftData');
+    },
+
     async assertDFACreateJobButtonExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateFirstButton');
+    },
+
+    async assertAnomalyDetectionPanelExists() {
+      await testSubjects.existOrFail('mlAnomalyDetectionPanel');
     },
 
     async assertDFACreateJobButtonEnabled(expectedValue: boolean) {

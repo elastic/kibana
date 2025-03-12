@@ -60,7 +60,7 @@ export const ESQLTryItNowCard: FC = () => {
 
   return (
     <EuiFlexItem>
-      <EuiPanel hasShadow={false} hasBorder>
+      <EuiPanel hasShadow={false} hasBorder data-test-subj="mlDataVisualizerSelectESQLCard">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiImage size="fullWidth" src={esqlImage} alt={'ES|QL input image'} />
