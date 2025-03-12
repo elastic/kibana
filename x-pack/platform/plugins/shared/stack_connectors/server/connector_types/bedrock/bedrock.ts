@@ -70,8 +70,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
+    console.log('url ==>', this.config.apiUrl);
+    console.log('region ==>', extractRegionId(this.config.apiUrl));
+    console.log('region old ==>', extractRegionIdold(this.config.apiUrl));
+    console.log('model ==>', this.config.defaultModel);
     this.bedrockClient = new BedrockRuntimeClient({
-      region: extractRegionId(this.config.apiUrl),
+      region: extractRegionIdold(this.config.apiUrl),
       credentials: {
         accessKeyId: this.secrets.accessKey,
         secretAccessKey: this.secrets.secret,
@@ -553,9 +557,17 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
 }
 
 const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;
-
-function extractRegionId(url: string) {
+function extractRegionIdold(url: string) {
   const match = (url ?? '').match(/bedrock\.(.*?)\.amazonaws\./);
+  if (match) {
+    return match[1];
+  } else {
+    // fallback to us-east-1
+    return 'us-east-1';
+  }
+}
+function extractRegionId(url: string) {
+  const match = url.match(/https:\/\/.*?\.([a-z\-0-9]+)\.amazonaws\.com/);
   if (match) {
     return match[1];
   } else {
