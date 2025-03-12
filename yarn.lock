@@ -3365,7 +3365,7 @@
     "@hapi/bounce" "^3.0.1"
     "@hapi/hoek" "^11.0.2"
 
-"@hapi/statehood@^8.1.1", "@hapi/statehood@^8.2.0":
+"@hapi/statehood@^8.2.0":
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/@hapi/statehood/-/statehood-8.2.0.tgz#f9e9367ad1a02a975dc6b24dad728af19962da0f"
   integrity sha512-63JlCVIrsmuunWsyc3OeuFO+gH6v56swLCl7OM1w09l/exQKPUxSUDF2Slkuw8k91nIzr0A2/aPvjLOWf9ksrg==
