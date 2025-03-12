@@ -77,7 +77,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.fleet.fleetServerHosts.SSLOptionsToggleLabel"
+                      id="xpack.fleet.editOutputFlyout.SSLOptionsToggleLabel"
                       defaultMessage="Set up a TLS secure connection"
                     />
                   )}
