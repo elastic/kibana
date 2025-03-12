@@ -159,7 +159,6 @@ export type TestSummary = t.TypeOf<typeof SummaryCodec>;
 
 export const PingType = t.intersection([
   t.type({
-    timestamp: t.string,
     monitor: MonitorType,
     docId: t.string,
     observer: ObserverCodec,

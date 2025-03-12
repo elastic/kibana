@@ -6523,7 +6523,7 @@
               "AggregationsAggregationContainer",
               "> | undefined; searchAfter?: ",
               "SortResults",
-              " | undefined; pitId?: string | undefined; getStatusSummary?: boolean | undefined; }) => Promise<{ agents: ",
+              " | undefined; openPit?: boolean | undefined; pitId?: string | undefined; pitKeepAlive?: string | undefined; getStatusSummary?: boolean | undefined; }) => Promise<{ agents: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6531,7 +6531,7 @@
                 "section": "def-common.Agent",
                 "text": "Agent"
               },
-              "[]; total: number; page: number; perPage: number; statusSummary?: Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\", number> | undefined; aggregations?: Record<string, ",
+              "[]; total: number; page: number; perPage: number; pit?: string | undefined; statusSummary?: Record<\"error\" | \"offline\" | \"online\" | \"inactive\" | \"degraded\" | \"enrolling\" | \"unenrolling\" | \"unenrolled\" | \"updating\" | \"uninstalled\" | \"orphaned\", number> | undefined; aggregations?: Record<string, ",
               "AggregationsAggregate",
               "> | undefined; }>"
             ],
@@ -6551,7 +6551,7 @@
                   "AggregationsAggregationContainer",
                   "> | undefined; searchAfter?: ",
                   "SortResults",
-                  " | undefined; pitId?: string | undefined; getStatusSummary?: boolean | undefined; }"
+                  " | undefined; openPit?: boolean | undefined; pitId?: string | undefined; pitKeepAlive?: string | undefined; getStatusSummary?: boolean | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/agents/agent_service.ts",
                 "deprecated": false,
@@ -20559,7 +20559,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "(string | number | null)[] | undefined"
+              "any[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -21951,6 +21951,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.upgrade_attempts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "upgrade_attempts",
+            "description": [
+              "\nList of timestamps of attempts of Elastic Agent automatic upgrades"
+            ],
+            "signature": [
+              "string[] | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FleetServerAgent.access_api_key_id",
             "type": "string",
             "tags": [],
@@ -22924,6 +22940,34 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetAgentsResponse.pit",
+            "type": "string",
+            "tags": [],
+            "label": "pit",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.GetAgentsResponse.nextSearchAfter",
+            "type": "string",
+            "tags": [],
+            "label": "nextSearchAfter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "fleet",
             "id": "def-common.GetAgentsResponse.statusSummary",
@@ -25013,6 +25057,20 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackageAssetReference.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -27632,7 +27690,7 @@
         "label": "DisplayedAssetTypes",
         "description": [],
         "signature": [
-          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"index-pattern\" | \"ingest_pipeline\" | \"lens\" | \"visualization\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\")[]"
+          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"lens\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -28681,7 +28739,7 @@
           "InstallableSavedObject",
           " | undefined; installationInfo?: ",
           "InstallationInfo",
-          " | undefined; }"
+          " | undefined; packagePoliciesInfo?: { count: number; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,
