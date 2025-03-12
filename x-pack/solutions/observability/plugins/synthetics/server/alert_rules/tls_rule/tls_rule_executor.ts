@@ -15,16 +15,14 @@ import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import {
   CertResult,
   ConfigKey,
@@ -46,6 +44,7 @@ export class TLSRuleExecutor {
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+  monitorConfigRepository: MonitorConfigRepository;
   logger: Logger;
   spaceId: string;
   ruleName: string;
@@ -68,6 +67,10 @@ export class TLSRuleExecutor {
     });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
+    this.monitorConfigRepository = new MonitorConfigRepository(
+      soClient,
+      server.encryptedSavedObjects.getClient()
+    );
     this.logger = server.logger;
     this.spaceId = spaceId;
     this.ruleName = ruleName;
@@ -115,6 +118,8 @@ export class TLSRuleExecutor {
     this.monitors = await getAllMonitors({
       filter: filtersStr,
       soClient: this.soClient,
+    this.monitors = await this.monitorConfigRepository.getAll({
+      filter: `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`,
     });
 
     this.debug(

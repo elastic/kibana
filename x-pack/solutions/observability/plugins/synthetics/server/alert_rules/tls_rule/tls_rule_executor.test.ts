@@ -12,7 +12,6 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';

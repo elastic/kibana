@@ -16,7 +16,7 @@ import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_manag
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
+import { monitorAttributes } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -91,8 +91,7 @@ export const getMonitors = async (
 
   const { filtersStr } = await getMonitorFilters(context);
 
-  return context.savedObjectsClient.find({
-    type: syntheticsMonitorType,
+  return context.monitorConfigRepository.find({
     perPage,
     page,
     sortField: parseMappingKey(sortField),
@@ -283,7 +282,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
   );
 };
 
-function parseMappingKey(key: string | undefined) {
+export function parseMappingKey(key: string | undefined) {
   switch (key) {
     case 'schedule.keyword':
       return 'schedule.number';
