@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
@@ -29,6 +29,7 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
@@ -39,7 +40,6 @@ import {
   getDuplicateFields,
 } from '../../../../../../common/endpoint/service/artifacts/validations';
 
-import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import { isSignerFieldExcluded } from '../../state/type_guards';
 
 import {
@@ -57,7 +57,6 @@ import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/tran
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
@@ -238,25 +237,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         [key in keyof NewTrustedApp]: boolean;
       }>
     >({});
-
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
-
-    useEffect(() => {
-      if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
-      }
-    }, [item.tags, hasFormChanged]);
-
-    const showAssignmentSection = useMemo(() => {
-      return (
-        isPlatinumPlus ||
-        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
-      );
-    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
-
+    const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateValues(item)
     );
@@ -564,6 +546,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                 options={policies}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
+                isLoading={policiesIsLoading}
                 onChange={handleEffectedPolicyOnChange}
               />
             </EuiFormRow>

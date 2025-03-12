@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useCallback, memo, useRef } from 'react';
 import type { EuiSuperSelectOption, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiForm,
@@ -29,6 +29,7 @@ import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import { OS_TITLES } from '../../../../common/translations';
 import type {
@@ -55,9 +56,7 @@ import {
 } from '../../translations';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
-import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
@@ -115,25 +114,8 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
-
-    const showAssignmentSection = useMemo(() => {
-      return (
-        isPlatinumPlus ||
-        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
-      );
-    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
-
-    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
-    useEffect(() => {
-      if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
-      }
-    }, [item.tags, hasFormChanged]);
-
+    const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const getTestId = useTestIdGenerator(testIdPrefix);
 
     const blocklistEntry = useMemo((): BlocklistEntry => {

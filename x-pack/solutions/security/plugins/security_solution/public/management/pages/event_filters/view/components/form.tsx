@@ -41,6 +41,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
@@ -58,10 +59,8 @@ import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 
 import {
   ABOUT_EVENT_FILTERS,
@@ -161,9 +160,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       const [newComment, setNewComment] = useState('');
       const [hasCommentError, setHasCommentError] = useState(false);
       const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
-      const isPlatinumPlus = useLicense().isPlatinumPlus();
-      const isGlobal = useMemo(() => isArtifactGlobal(exception), [exception]);
-      const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(exception));
       const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
       const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
         hasWrongOperatorWithWildcard([exception])
@@ -199,12 +195,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         []
       );
 
-      const showAssignmentSection = useMemo(() => {
-        return (
-          isPlatinumPlus ||
-          (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
-        );
-      }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+      const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
 
       const isFormValid = useMemo(() => {
         // verify that it has legit entries
@@ -252,14 +243,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           hasWildcardWithWrongOperator,
         ]
       );
-
-      // set initial state of `wasByPolicy` that checks
-      // if the initial state of the exception was by policy or not
-      useEffect(() => {
-        if (!hasFormChanged && exception.tags) {
-          setWasByPolicy(!isArtifactGlobal({ tags: exception.tags }));
-        }
-      }, [exception.tags, hasFormChanged]);
 
       const eventFilterItem = useMemo<ArtifactFormComponentProps['item']>(() => {
         const ef: ArtifactFormComponentProps['item'] = exception;
