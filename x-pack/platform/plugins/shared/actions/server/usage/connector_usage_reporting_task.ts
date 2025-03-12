@@ -196,7 +196,8 @@ export class ConnectorUsageReportingTask {
         };
       }
       this.logger.error(
-        `Usage data could not be pushed to usage-api. Stopped retrying after ${attempts} attempts. Error:${e.message}`
+        `Usage data could not be pushed to usage-api. Stopped retrying after ${attempts} attempts. Error:${e.message}`,
+        { error: { stack_trace: e.stack } }
       );
       return {
         state: {
