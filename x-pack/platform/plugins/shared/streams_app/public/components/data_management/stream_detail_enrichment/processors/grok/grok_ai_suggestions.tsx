@@ -32,7 +32,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
-import { useStreamsEnrichmentReselectSelector } from '../../state_management/stream_enrichment_state_machine';
+import { useStreamsEnrichmentMemoizedSelector } from '../../state_management/stream_enrichment_state_machine';
 
 const RefreshButton = ({
   generatePatterns,
@@ -358,7 +358,7 @@ export function GrokAiSuggestions() {
   } = useKibana();
   const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
   const { definition } = useStreamDetail();
-  const previewDocuments = useStreamsEnrichmentReselectSelector('derivedSamples');
+  const previewDocuments = useStreamsEnrichmentMemoizedSelector('derivedSamples');
 
   if (!isAiEnabled && couldBeEnabled) {
     return (
