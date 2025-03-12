@@ -26,7 +26,6 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 export const GridRowTitle = React.memo(
   ({
     readOnly,
-    isActive,
     rowId,
     editTitleOpen,
     setEditTitleOpen,
@@ -34,7 +33,6 @@ export const GridRowTitle = React.memo(
     collapseButtonRef,
   }: {
     readOnly: boolean;
-    isActive: boolean;
     rowId: string;
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
@@ -93,13 +91,14 @@ export const GridRowTitle = React.memo(
             aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
-            iconType={isActive ? undefined : 'arrowDown'}
+            iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
             size="m"
             id={`kbnGridRowTitle-${rowId}`}
             aria-controls={`kbnGridRow-${rowId}`}
             data-test-subj={`kbnGridRowTitle-${rowId}`}
             textProps={false}
+            className={'kbnGridRowTitle--button'}
             flush="both"
           >
             {editTitleOpen ? null : (
@@ -130,7 +129,7 @@ export const GridRowTitle = React.memo(
           </EuiFlexItem>
         ) : (
           <>
-            {!readOnly && !isActive && (
+            {!readOnly && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="pencil"
@@ -165,6 +164,9 @@ const styles = {
         svg: {
           transition: `transform ${euiTheme.animation.fast} ease`,
           transform: 'rotate(0deg)',
+          // '.kbnGridRowHeader--active &': {
+          //   display: 'none',
+          // },
           '.kbnGridRowContainer--collapsed &': {
             transform: 'rotate(-90deg) !important',
           },

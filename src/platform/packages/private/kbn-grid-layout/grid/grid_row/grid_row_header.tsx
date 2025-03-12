@@ -143,8 +143,7 @@ export const GridRowHeader = React.memo(
         >
           <GridRowTitle
             rowId={rowId}
-            isActive={isActive}
-            readOnly={readOnly}
+            readOnly={readOnly || isActive}
             toggleIsCollapsed={toggleIsCollapsed}
             editTitleOpen={editTitleOpen}
             setEditTitleOpen={setEditTitleOpen}
@@ -157,24 +156,22 @@ export const GridRowHeader = React.memo(
              */
             !editTitleOpen && (
               <>
-                {!isActive && (
-                  <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
-                    <EuiText
-                      color="subdued"
-                      size="s"
-                      data-test-subj={`kbnGridRowHeader-${rowId}--panelCount`}
-                      className={'kbnGridLayout--panelCount'}
-                    >
-                      {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
-                        defaultMessage:
-                          '({panelCount} {panelCount, plural, one {panel} other {panels}})',
-                        values: {
-                          panelCount,
-                        },
-                      })}
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
+                  <EuiText
+                    color="subdued"
+                    size="s"
+                    data-test-subj={`kbnGridRowHeader-${rowId}--panelCount`}
+                    className={'kbnGridLayout--panelCount'}
+                  >
+                    {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
+                      defaultMessage:
+                        '({panelCount} {panelCount, plural, one {panel} other {panels}})',
+                      values: {
+                        panelCount,
+                      },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
                 {!readOnly && (
                   <>
                     {!isActive && (
@@ -190,7 +187,7 @@ export const GridRowHeader = React.memo(
                         />
                       </EuiFlexItem>
                     )}
-                    <EuiFlexItem grow={false} css={[styles.hiddenOnCollapsed, styles.floatToRight]}>
+                    <EuiFlexItem grow={false} css={styles.floatToRight}>
                       <EuiButtonIcon
                         iconType="move"
                         color="text"
@@ -210,7 +207,6 @@ export const GridRowHeader = React.memo(
           }
         </EuiFlexGroup>
         {isActive && <DragPreview rowId={rowId} />}
-        {/* <DragPreview rowId={rowId} />{' '} */}
         {deleteModalVisible && (
           <DeleteGridRowModal rowId={rowId} setDeleteModalVisible={setDeleteModalVisible} />
         )}
@@ -231,18 +227,6 @@ const styles = {
   }),
   headerStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
-      '&.kbnGridRowHeader--active': {
-        width: 'fit-content',
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
-        border: `1px solid ${euiTheme.border.color}`,
-        borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
-        paddingLeft: '8px',
-        minWidth: '300px',
-        zIndex: euiTheme.levels.modal,
-        '.kbnGridLayout--moveRowIcon': {
-          opacity: 1,
-        },
-      },
       height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
       padding: `${euiTheme.size.s} 0px`,
       border: '1px solid transparent', // prevents layout shift
@@ -277,6 +261,14 @@ const styles = {
         &:has(:focus-visible) .kbnGridLayout--deleteRowIcon,
         &:has(:focus-visible) .kbnGridLayout--moveRowIcon`]: {
         opacity: 1,
+      },
+
+      // these styles ensure that dragged rows are rendered **above** everything else + the move icon stays visible
+      '&.kbnGridRowHeader--active': {
+        zIndex: euiTheme.levels.modal,
+        '.kbnGridLayout--moveRowIcon': {
+          opacity: 1,
+        },
       },
     }),
 };

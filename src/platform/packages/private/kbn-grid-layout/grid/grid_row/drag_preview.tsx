@@ -10,24 +10,17 @@
 import React, { useRef } from 'react';
 
 import { css } from '@emotion/react';
-import { UseEuiTheme } from '@elastic/eui';
-// import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
-  // const { gridLayoutStateManager } = useGridLayoutContext();
-
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-
   return <div ref={dragPreviewRef} className={'kbnGridPanel--rowDragPreview'} css={styles} />;
 });
 
-const styles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    width: '100%',
-    height: '32px',
-    margin: '8px 0px',
-    backgroundColor: euiTheme.components.dragDropDraggingBackground,
-    position: 'relative',
-  });
+const styles = css({
+  width: '100%',
+  height: '32px',
+  margin: '8px 0px',
+  position: 'relative',
+});
 
 DragPreview.displayName = 'KbnGridLayoutDragRowPreview';
