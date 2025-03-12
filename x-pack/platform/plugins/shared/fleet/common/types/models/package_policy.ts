@@ -76,7 +76,6 @@ export interface NewPackagePolicy {
   name: string;
   description?: string;
   namespace?: string;
-  dataStreamType?: string;
   enabled: boolean;
   is_managed?: boolean;
   /** @deprecated Nullable to allow user to clear existing policy id */
