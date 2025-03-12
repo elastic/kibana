@@ -17,10 +17,12 @@ const createNodeFromJoinTarget = (ctx: JoinTargetContext): ESQLSource | ESQLIden
 };
 
 export const createJoinCommand = (ctx: JoinCommandContext): ESQLAstJoinCommand => {
-  const command = createCommand('join', ctx);
+  const command = createCommand<'join', ESQLAstJoinCommand>('join', ctx);
 
   // Pick-up the <TYPE> of the command.
-  command.commandType = (ctx._type_?.text ?? 'lookup').toLocaleLowerCase();
+  command.commandType = (
+    ctx._type_?.text ?? 'lookup'
+  ).toLocaleLowerCase() as ESQLAstJoinCommand['commandType'];
 
   const joinTarget = createNodeFromJoinTarget(ctx.joinTarget());
   const joinCondition = ctx.joinCondition();
