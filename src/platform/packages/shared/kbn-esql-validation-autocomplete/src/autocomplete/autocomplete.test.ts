@@ -112,12 +112,6 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | eval var0 = a | /', commands);
   });
 
-  describe('rename', () => {
-    testSuggestions('from a | rename /', getFieldNamesByType('any'));
-    testSuggestions('from a | rename keywordField /', ['AS $0'], ' ');
-    testSuggestions('from a | rename keywordField as /', ['var0']);
-  });
-
   for (const command of ['keep', 'drop']) {
     describe(command, () => {
       testSuggestions(`from a | ${command} /`, getFieldNamesByType('any'));
@@ -405,13 +399,13 @@ describe('autocomplete', () => {
     );
 
     // RENAME field
-    testSuggestions('FROM index1 | RENAME f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | RENAME f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A/', ['AS $0']);
-
-    // RENAME field AS var0
-    testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
+    testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
