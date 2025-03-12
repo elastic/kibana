@@ -11,16 +11,25 @@
 
 import { toRegExp, toRegExpDetails } from 'oniguruma-to-es';
 import { monaco } from '@kbn/monaco';
+import { v4 as uuidv4 } from 'uuid';
+import { unflattenObject } from '@kbn/object-utils';
 
-// Will match %{subPattern} or %{subPattern:fieldName}
-const SUBPATTERNS_REGEX = /%\{[A-Z0-9_]+(?::[A-Za-z0-9_]+)?(?::[A-Za-z]+)?\}/g;
+// Grok patterns use this official naming: %{SYNTAX:SEMANTIC:TYPE}
 
+// Will match %{SYNTAX}, %{SYNTAX:SEMANTIC}, %{SYNTAX:SEMANTIC:TYPE}, and support special characters and dots.
+const SUBPATTERNS_REGEX =
+  /%\{[A-Z0-9_@#$%&*+=\-\.]+(?::[A-Za-z0-9_@#$%&*+=\-\.]+)?(?::[A-Za-z]+)?\}/g;
+
+// Matches "manual" semantic names in the expression, these are user defined capture groups, e.g. (?<field_name>the pattern here)
 const NESTED_FIELD_NAMES_REGEX =
-  /(\(\?<([A-Za-z0-9_]+)(?::([A-Za-z0-9_]+))?(?::([A-Za-z]+))?>)|\(\?:|\(\?>|\(\?!|\(\?<!|\(|\\\(|\\\)|\)|\[|\\\[|\\\]|\]/g;
+  /(\(\?<([A-Za-z0-9_@#$%&*+=\-\.]+)(?::([A-Za-z0-9_@#$%&*+=\-\.]+))?(?::([A-Za-z]+))?>)|\(\?:|\(\?>|\(\?!|\(\?<!|\(|\\\(|\\\)|\)|\[|\\\[|\\\]|\]/g;
 
 // The only supported semantic conversions are int and float. By default all semantics are saved as strings.
 // https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#_grok_basics
 const SUPPORTED_TYPE_CONVERSIONS = ['int', 'float'];
+
+// We supply this suffix to track which capture groups we have generated.
+const CAPTURE_GROUP_GENERATED_ID_SUFFIX = '_____GENERATED_CAPTURE_GROUP_____';
 
 export class GrokCollection {
   private patterns: Map<string, GrokPattern> = new Map();
@@ -51,7 +60,7 @@ export class GrokCollection {
     this.patternKeys = Array.from(this.patterns.keys());
   }
 
-  // Can be used with Monaco code editor to provide suggestions
+  // Can be used with Monaco code editor to provide suggestions.
   public getSuggestionProvider = () => {
     const provider: monaco.languages.CompletionItemProvider = {
       triggerCharacters: ['{'],
@@ -106,7 +115,7 @@ export class GrokPattern {
   private parentCollection: GrokCollection;
 
   constructor(rawPattern: string, id: string, collection: GrokCollection) {
-    // These are keyed to match the regex capturing groups keys
+    // These are keyed to match the regex capturing groups keys, which will be a randomly generated ID.
     this.fields = new Map();
     this.rawPattern = rawPattern;
     this.parentCollection = collection;
@@ -129,22 +138,21 @@ export class GrokPattern {
 
   private resolveSubPatterns = () => {
     let rawPattern = this.rawPattern;
-    // E.g. %{WORD:verb}
     const subPatterns = rawPattern.match(SUBPATTERNS_REGEX) || [];
 
     subPatterns.forEach((matched) => {
-      // Matched will either be %{subPatternName} or %{subPatternName:fieldName} or %{subPatternName:fieldName:type}
-      // Substring example: INT:mynumber:float
+      // Matched will either be %{SYNTAX}, %{SYNTAX:SEMANTIC}, or %{SYNTAX:SEMANTIC:TYPE}
+      // Removes %{ }
       const withBracketsRemoved = matched.substring(2, matched.length - 1);
       const elements = withBracketsRemoved.split(':');
 
-      // E.g. INT
+      // Syntax e.g. INT
       const subPatternName = elements[0];
 
-      // E.g. mynumber (optional)
+      // Semantic e.g. mynumber (optional)
       const fieldName = elements[1];
 
-      // E.g float (optional)
+      // Type e.g float (optional)
       const fieldType = elements[2];
 
       const subPattern = this.parentCollection.getPattern(subPatternName);
@@ -157,17 +165,25 @@ export class GrokPattern {
         subPattern.resolvePattern();
       }
 
+      // Only some patterns will have a semantic / field name, other patterns will be matched but are not captured / part of the structured output.
+      // The replacements will take something like ${WORD} and replace it with a resolved pattern, e.g. \b\w+\b
       if (fieldName) {
+        // We generate a unique ID for the capture group, this is used to map the capture group to the field metadata.
+        // Capture groups, for instance, do not support special characters or dots in the name in JavaScript's regex implementation, but this is allowed in Grok.
+        const generatedId = getGeneratedCaptureGroupId();
+
+        // As we want to track this semantic / field result we also prefix with a named capture group.
         rawPattern = rawPattern.replace(
           matched,
-          '(?<' + fieldName + '>' + subPattern.resolvedPattern! + ')'
+          '(?<' + generatedId + '>' + subPattern.resolvedPattern! + ')'
         );
         const fieldEntry = {
           name: fieldName,
           type: fieldType && SUPPORTED_TYPE_CONVERSIONS.includes(fieldType) ? fieldType : null,
         };
-        this.fields.set(fieldName, fieldEntry);
+        this.fields.set(generatedId, fieldEntry);
       } else {
+        // This will form part of the overal pattern and part of the "continuous" match, but the result won't be captured / part of the structured output.
         rawPattern = rawPattern.replace(matched, subPattern.resolvedPattern!);
       }
     });
@@ -175,7 +191,7 @@ export class GrokPattern {
     this.resolvedPattern = rawPattern;
   };
 
-  // Resolve manual field names in the expression, e.g.: (?<queue_id>[0-9A-F]{10,11})
+  // Resolve manual semantic / field names in the expression provided by capture groups, e.g.: (?<queue_id>[0-9A-F]{10,11})
   private resolveFieldNames = () => {
     if (!this.resolvedPattern) {
       return;
@@ -227,20 +243,21 @@ export class GrokPattern {
         default: {
           nestLevel++;
           // Given (?<queue_id:mything:int> [2] is queue_id, [3] is mything (optional), [4] is int (optional)
-          // In our regex capture group keys we'll see something like $0_queue_id_myname_mytype if name and type are used. Otherwise just queue_id for the key.
-          const captureGroupKey = matched[3]
-            ? `$0_${matched[2]}_${matched[3]}${matched[4] ? `_${matched[4]}` : ''}`
-            : matched[2];
-
-          const fieldEntry = this.fields.get(captureGroupKey);
+          const generatedId = getGeneratedCaptureGroupId();
 
           // This check is so we don't reprocess the field name replacements from resolveSubPatterns
-          if (!fieldEntry) {
-            this.fields.set(captureGroupKey, {
+          if (!matched[2].includes('_____GENERATED_CAPTURE_GROUP_____')) {
+            this.fields.set(generatedId, {
               name: matched[3] ?? matched[2],
               type:
                 matched[4] && SUPPORTED_TYPE_CONVERSIONS.includes(matched[4]) ? matched[4] : null,
             });
+
+            // (?<queue_id:mything:int> becomes (?<GENERATED_ID>
+            this.resolvedPattern = this.resolvedPattern.replace(
+              matched.input,
+              matched.input.replace(matched[2], generatedId)
+            );
           }
 
           break;
@@ -258,25 +275,28 @@ export class GrokPattern {
     if (regenerateRegex || !this.regexp) {
       this.getRegex();
     }
-
     if (this.regexp) {
       return samples.map((sample) => {
         const results = this.regexp?.exec(sample);
+        // Takes our groups, which are keyed by our generated IDs, then we can map these results back to the real metadata we've stored under the fields property.
+        // E.g. real names and real types.
         if (results?.groups) {
-          return Object.entries(results.groups).reduce<Record<string, string | number>>(
-            (acc, [key, value]) => {
-              const field = this.fields.get(key);
-              if (!field) return acc;
-              if (field && field.type === 'int') {
-                acc[field.name] = parseInt(value, 10);
-              } else if (field && field.type === 'float') {
-                acc[field.name] = parseFloat(value);
-              } else {
-                acc[field.name] = value;
-              }
-              return acc;
-            },
-            {}
+          return unflattenObject(
+            Object.entries(results.groups).reduce<Record<string, string | number>>(
+              (acc, [key, value]) => {
+                const field = this.fields.get(key);
+                if (!field) return acc;
+                if (field && field.type === 'int') {
+                  acc[field.name] = parseInt(value, 10);
+                } else if (field && field.type === 'float') {
+                  acc[field.name] = parseFloat(value);
+                } else {
+                  acc[field.name] = value;
+                }
+                return acc;
+              },
+              {}
+            )
           );
         } else {
           return {};
@@ -320,3 +340,9 @@ export class GrokPattern {
     this.regexp = undefined;
   };
 }
+
+const getGeneratedCaptureGroupId = () => {
+  // Named capture groups support underscores, so we replace hyphens with underscores.
+  // Named capture groups must start with a string, not a number, so we prefix with a letter. p_ here just stands for prefix.
+  return `p_${uuidv4().replaceAll('-', '_')}${CAPTURE_GROUP_GENERATED_ID_SUFFIX}`;
+};

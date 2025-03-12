@@ -57,6 +57,22 @@ describe('Grok models', () => {
     expect(parsed).toEqual([{ notype: '578', bytes: 1234, large: 20034343434.2323 }]);
   });
 
+  it('Should parse a pattern with special characters in the semantic', () => {
+    draftGrokExpression.updateExpression('%{WORD:@someword}');
+    const parsed = draftGrokExpression.parse(['test']);
+    expect(parsed).toEqual([{ '@someword': 'test' }]);
+  });
+
+  it('Should support nested semantic names', () => {
+    draftGrokExpression.updateExpression(
+      '%{WORD:log.level} %{WORD:log.other} %{WORD:log.extra} %{WORD:log.nested.test}'
+    );
+    const parsed = draftGrokExpression.parse(['level other extra nestedTest']);
+    expect(parsed).toEqual([
+      { log: { level: 'level', other: 'other', extra: 'extra', nested: { test: 'nestedTest' } } },
+    ]);
+  });
+
   describe('Should parse complex patterns', () => {
     it('Example one', () => {
       draftGrokExpression.updateExpression(
