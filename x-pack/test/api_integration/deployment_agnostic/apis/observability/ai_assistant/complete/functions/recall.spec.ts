@@ -54,18 +54,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(docTypes).to.eql(['animal', 'technical']);
       });
 
-      function formatScore(score: number) {
-        if (score > 0.5) {
-          return 'high';
-        }
-
-        if (score > 0.1) {
-          return 'medium';
-        }
-
-        return 'low';
-      }
-
       it('returns entries in a consistent order', async () => {
         const entries = await recall('whales');
 
@@ -226,6 +214,18 @@ async function addSampleDocsToCustomIndex(
   await setAdvancedSettings(supertest, {
     'observability:aiAssistantSearchConnectorIndexPattern': customSearchConnectorIndex,
   });
+}
+
+function formatScore(score: number) {
+  if (score > 0.5) {
+    return 'high';
+  }
+
+  if (score > 0.1) {
+    return 'medium';
+  }
+
+  return 'low';
 }
 
 // Clear data before running tests
