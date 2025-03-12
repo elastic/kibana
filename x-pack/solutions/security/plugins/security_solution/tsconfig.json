@@ -139,7 +139,6 @@
     "@kbn/shared-ux-router",
     "@kbn/charts-plugin",
     "@kbn/alerts-as-data-utils",
-    "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
     "@kbn/grouping",
     "@kbn/securitysolution-data-table",
