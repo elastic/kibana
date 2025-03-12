@@ -225,13 +225,16 @@ describe('SynonymRuleFlyout', () => {
           />
         </Wrapper>
       );
-      ACTIONS.AddFromTerm('b');
       ACTIONS.AddFromTerm('a');
+      ACTIONS.AddFromTerm('b');
 
       expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
+      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('a');
+      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('b');
+      ACTIONS.PressSortAZButton();
+
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('b');
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('a');
-
       ACTIONS.PressSortAZButton();
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('a');
       expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('b');

@@ -17,6 +17,8 @@ export interface InitialFlyoutState {
   renderExplicit?: boolean;
 }
 
+type SortDirection = 'ascending' | 'descending';
+
 export const useFlyoutState = ({
   synonymRule,
   flyoutMode,
@@ -25,16 +27,18 @@ export const useFlyoutState = ({
   const { parsedFromTerms, parsedToTermsString, parsedIsExplicit } = synonymToComboBoxOption(
     flyoutMode === 'create' ? '' : synonymRule.synonyms
   );
+  const sortedParsedFromTerms = [...parsedFromTerms].sort((a, b) => a.label.localeCompare(b.label));
 
   const isExplicit = renderExplicit || parsedIsExplicit;
 
-  const [fromTerms, setFromTerms] = useState<EuiComboBoxOptionOption[]>(parsedFromTerms);
+  const [fromTerms, setFromTerms] = useState<EuiComboBoxOptionOption[]>(sortedParsedFromTerms);
 
   const [mapToTerms, setMapToTerms] = useState<string>(parsedToTermsString);
   const [isFromTermsInvalid, setIsFromTermsInvalid] = useState(false);
   const [isMapToTermsInvalid, setIsMapToTermsInvalid] = useState(false);
   const [fromTermErrors, setFromTermErrors] = useState<string[]>([]);
   const [mapToTermErrors, setMapToTermErrors] = useState<string[]>([]);
+  const [currentSortDirection, setCurrentSortDirection] = useState<SortDirection>('ascending');
 
   const hasChanges =
     flyoutMode === 'create'
@@ -113,8 +117,14 @@ export const useFlyoutState = ({
     return true;
   };
 
-  const onSortTerms = () => {
-    fromTerms.sort((a, b) => a.label.localeCompare(b.label));
+  const onSortTerms = (direction?: SortDirection) => {
+    if (!direction) {
+      direction = currentSortDirection === 'ascending' ? 'descending' : 'ascending';
+    }
+    fromTerms.sort((a, b) =>
+      direction === 'ascending' ? a.label.localeCompare(b.label) : b.label.localeCompare(a.label)
+    );
+    setCurrentSortDirection(direction);
     setFromTerms([...fromTerms]);
   };
 
@@ -149,6 +159,8 @@ export const useFlyoutState = ({
 
   return {
     canSave,
+    clearFromTerms,
+    currentSortDirection,
     fromTermErrors,
     fromTerms,
     hasChanges,
@@ -157,7 +169,6 @@ export const useFlyoutState = ({
     isMapToTermsInvalid,
     mapToTermErrors,
     mapToTerms,
-    clearFromTerms,
     onCreateOption,
     onMapToChange,
     onSearchChange,

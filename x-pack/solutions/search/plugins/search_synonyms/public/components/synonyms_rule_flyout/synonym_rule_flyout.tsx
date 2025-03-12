@@ -61,6 +61,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
 
   const {
     canSave,
+    currentSortDirection,
     fromTermErrors,
     fromTerms,
     hasChanges,
@@ -83,7 +84,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="s" outsideClickCloses={false}>
       <EuiFlyoutHeader hasBorder>
         {flyoutMode === 'edit' ? (
           <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutEditModeRuleIdText">
@@ -161,7 +162,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem>
                 <EuiFlexGroup responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
@@ -192,13 +193,20 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                       data-test-subj="searchSynonymsSynonymsRuleFlyoutSortAZButton"
                       size="s"
                       color="text"
-                      onClick={onSortTerms}
-                      iconType="sortUp"
+                      onClick={() => onSortTerms()}
+                      iconType={currentSortDirection === 'ascending' ? 'sortUp' : 'sortDown'}
                     >
-                      <FormattedMessage
-                        id="xpack.searchSynonyms.synonymsSetRuleFlyout.sortAZ"
-                        defaultMessage="Sort A-Z"
-                      />
+                      {currentSortDirection === 'ascending' ? (
+                        <FormattedMessage
+                          id="xpack.searchSynonyms.synonymsSetRuleFlyout.sortAZ"
+                          defaultMessage="Sort A-Z"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.searchSynonyms.synonymsSetRuleFlyout.sortZA"
+                          defaultMessage="Sort Z-A"
+                        />
+                      )}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -219,14 +227,17 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          <EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              max-height: 65%;
+            `}
+          >
             <EuiFlexGroup
               direction="column"
               gutterSize="xs"
               tabIndex={0}
               className="eui-yScrollWithShadows"
               css={css`
-                height: 100%;
                 margin: ${euiTheme.size.xs};
               `}
             >
@@ -305,7 +316,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="searchSynonymsSynonymsRuleFlyoutResetChangesButton"

@@ -148,7 +148,7 @@ describe('useFlyoutState hook', () => {
             () =>
               useFlyoutState({
                 synonymRule: {
-                  synonyms: 'synonym1, synonym2',
+                  synonyms: 'synonym1,synonym2',
                 },
                 flyoutMode: 'edit',
               }),
