@@ -735,10 +735,6 @@
                 "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/public/plugin.ts"
               },

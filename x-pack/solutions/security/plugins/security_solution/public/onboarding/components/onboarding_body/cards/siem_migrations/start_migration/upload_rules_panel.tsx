@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiIcon,
   EuiButton,
   EuiButtonEmpty,
   EuiPanel,
@@ -45,7 +44,7 @@ export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
           gutterSize={isUploadMore ? 'm' : 'l'}
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type={SiemMigrationsIcon} className="siemMigrationsIcon" />
+            <SiemMigrationsIcon className="siemMigrationsIcon" />
           </EuiFlexItem>
           <EuiFlexItem>
             {isUploadMore ? (
