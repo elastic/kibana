@@ -21,6 +21,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import {
   getAggregateQueryMode,
   isOfAggregateQueryType,
@@ -30,6 +31,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -158,6 +160,36 @@ export function LensEditConfigurationFlyout({
     });
     return () => s?.unsubscribe();
   }, [dispatch, dataLoading$, layers, framePublicAPI.datasourceLayers]);
+
+  useEffect(() => {
+    // this is for backward compatibility, if the query is of fields or functions type
+    // and the query is not set with ?? or ? in the query, we should set it
+    // https://github.com/elastic/elasticsearch/pull/122459
+    if (isOfAggregateQueryType(query)) {
+      let queryString = query.esql;
+      const currentVariables = getESQLQueryVariables(queryString);
+      if (!currentVariables.length) {
+        return;
+      }
+      // filter out the variables that are not used in the query
+      // and that they are not of type FIELDS or FUNCTIONS
+      const identifierTypeVariables = esqlVariables?.filter(
+        (variable) =>
+          currentVariables.includes(variable.key) &&
+          (variable.type === ESQLVariableType.FIELDS ||
+            variable.type === ESQLVariableType.FUNCTIONS)
+      );
+
+      // check if they are set with ?? or ? in the query
+      if (identifierTypeVariables?.length) {
+        identifierTypeVariables.forEach((variable) => {
+          const pattern = new RegExp(`\\?${variable.key}\\b`, 'g');
+          queryString = queryString.replace(pattern, `??${variable.key}`);
+          setQuery({ ...query, esql: queryString });
+        });
+      }
+    }
+  }, [esqlVariables, parentApi, query]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
