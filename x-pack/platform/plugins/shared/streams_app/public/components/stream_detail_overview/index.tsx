@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiTab,
   EuiTabs,
@@ -37,6 +36,7 @@ import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 import { AssetImage } from '../asset_image';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
+import { useDataStreamStats } from '../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -154,6 +154,8 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
     [definition, dataViews, streamsRepositoryClient, start, end]
   );
 
+  const dataStreamStats = useDataStreamStats({ definition });
+
   const [selectedTab, setSelectedTab] = React.useState<string | undefined>(undefined);
 
   const tabs = [
@@ -180,94 +182,103 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
   return (
     <>
       <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              {docCountFetch.loading ? (
-                <EuiLoadingSpinner size="m" />
-              ) : (
-                docCountFetch.value && (
-                  <EuiText>
-                    {i18n.translate('xpack.streams.entityDetailOverview.docCount', {
-                      defaultMessage: '{docCount} documents',
-                      values: { docCount: formatNumber(docCountFetch.value.details.count) },
-                    })}
-                  </EuiText>
-                )
+        <EuiFlexGroup direction="row" justifyContent="flexEnd">
+          <EuiFlexItem grow>
+            <StreamsAppSearchBar
+              onQuerySubmit={({ dateRange }, isUpdate) => {
+                if (!isUpdate) {
+                  histogramQueryFetch.refresh();
+                  docCountFetch.refresh();
+                  return;
+                }
+
+                if (dateRange) {
+                  setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
+                }
+              }}
+              onRefresh={() => {
+                histogramQueryFetch.refresh();
+              }}
+              placeholder={i18n.translate(
+                'xpack.streams.entityDetailOverview.searchBarPlaceholder',
+                {
+                  defaultMessage: 'Filter data by using KQL',
+                }
+              )}
+              dateRangeFrom={timeRange.from}
+              dateRangeTo={timeRange.to}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexItem grow={3}>
+            <EuiPanel>{JSON.stringify(definition?.effective_lifecycle)}</EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={9}>
+            <EuiPanel>{JSON.stringify(dataStreamStats.stats, null, 2)}</EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem grow={4}>
+              {definition && (
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiTabs>
+                    {tabs.map((tab, index) => (
+                      <EuiTab
+                        isSelected={(!selectedTab && index === 0) || selectedTab === tab.id}
+                        onClick={() => setSelectedTab(tab.id)}
+                        key={tab.id}
+                      >
+                        {tab.name}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                  {
+                    tabs.find(
+                      (tab, index) => (!selectedTab && index === 0) || selectedTab === tab.id
+                    )?.content
+                  }
+                </EuiPanel>
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow>
-              <StreamsAppSearchBar
-                onQuerySubmit={({ dateRange }, isUpdate) => {
-                  if (!isUpdate) {
-                    histogramQueryFetch.refresh();
-                    docCountFetch.refresh();
-                    return;
-                  }
-
-                  if (dateRange) {
-                    setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
-                  }
-                }}
-                onRefresh={() => {
-                  histogramQueryFetch.refresh();
-                }}
-                placeholder={i18n.translate(
-                  'xpack.streams.entityDetailOverview.searchBarPlaceholder',
-                  {
-                    defaultMessage: 'Filter data by using KQL',
-                  }
-                )}
-                dateRangeFrom={timeRange.from}
-                dateRangeTo={timeRange.to}
-              />
+            <EuiFlexItem grow={8}>
+              <EuiPanel hasShadow={false} hasBorder>
+                <EuiFlexGroup
+                  direction="column"
+                  className={css`
+                    height: 100%;
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup justifyContent="flexEnd">
+                      <EuiButton
+                        data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
+                        iconType="discoverApp"
+                        href={discoverLink}
+                        color="text"
+                      >
+                        {i18n.translate(
+                          'xpack.streams.streamDetailOverview.openInDiscoverButtonLabel',
+                          {
+                            defaultMessage: 'Open in Discover',
+                          }
+                        )}
+                      </EuiButton>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow>
+                    <ControlledEsqlChart
+                      result={histogramQueryFetch}
+                      id="entity_log_rate"
+                      metricNames={['metric']}
+                      height={200}
+                      chartType={'bar'}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
             </EuiFlexItem>
-            <EuiButton
-              data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
-              iconType="discoverApp"
-              href={discoverLink}
-              color="text"
-            >
-              {i18n.translate('xpack.streams.streamDetailOverview.openInDiscoverButtonLabel', {
-                defaultMessage: 'Open in Discover',
-              })}
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup direction="column">
-              <ControlledEsqlChart
-                result={histogramQueryFetch}
-                id="entity_log_rate"
-                metricNames={['metric']}
-                height={200}
-                chartType={'bar'}
-              />
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {definition && (
-              <>
-                <EuiTabs>
-                  {tabs.map((tab, index) => (
-                    <EuiTab
-                      isSelected={(!selectedTab && index === 0) || selectedTab === tab.id}
-                      onClick={() => setSelectedTab(tab.id)}
-                      key={tab.id}
-                    >
-                      {tab.name}
-                    </EuiTab>
-                  ))}
-                </EuiTabs>
-                {
-                  tabs.find((tab, index) => (!selectedTab && index === 0) || selectedTab === tab.id)
-                    ?.content
-                }
-              </>
-            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

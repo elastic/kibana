@@ -89,7 +89,7 @@ export function ControlledEsqlChart<T extends string>({
       <LoadingPanel
         loading
         className={css`
-          height: ${height}px;
+          height: 100%;
         `}
       />
     );
@@ -115,7 +115,7 @@ export function ControlledEsqlChart<T extends string>({
     <Chart
       id={id}
       className={css`
-        height: ${height}px;
+        height: 100%;
       `}
     >
       <Tooltip
