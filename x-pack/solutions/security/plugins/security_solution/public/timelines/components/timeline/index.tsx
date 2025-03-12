@@ -113,8 +113,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     : selectedDataViewIdSourcerer;
 
   const selectedPatterns = newDataViewPickerEnabled
-    ? selectedPatternsSourcerer
-    : experimentalSelectedPatterns;
+    ? experimentalSelectedPatterns
+    : selectedPatternsSourcerer;
 
   useEffect(() => {
     if (!savedObjectId && !initialized) {
