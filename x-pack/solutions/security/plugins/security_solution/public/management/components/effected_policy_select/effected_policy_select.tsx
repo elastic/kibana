@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiButtonGroupOptionProps, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
@@ -22,6 +22,12 @@ import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
+import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useGetUpdatedTags } from '../../hooks/artifacts';
+import { useLicense } from '../../../common/hooks/use_license';
 import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../common/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -31,6 +37,12 @@ import { getPolicyDetailPath } from '../../common/routing';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useAppUrl } from '../../../common/lib/kibana/hooks';
 import { Loader } from '../../../common/components/loader';
+import {
+  getPolicyIdsFromArtifact,
+  GLOBAL_ARTIFACT_TAG,
+  isArtifactGlobal,
+} from '../../../../common/endpoint/service/artifacts';
+import { buildPerPolicyTag } from '../../../../common/endpoint/service/artifacts/utils';
 
 const NOOP = () => {};
 const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = { bordered: true, showIcons: false };
@@ -84,24 +96,21 @@ export type EffectedPolicySelectProps = Omit<
   EuiSelectableProps<OptionPolicyData>,
   'onChange' | 'options' | 'children' | 'searchable'
 > & {
+  item: ExceptionListItemSchema | CreateExceptionListItemSchema;
   options: PolicyData[];
-  isGlobal: boolean;
-  isPlatinumPlus: boolean;
   description?: string;
-  onChange: (selection: EffectedPolicySelection) => void;
-  selected?: PolicyData[];
+  onChange: (updatedItem: ExceptionListItemSchema | CreateExceptionListItemSchema) => void;
   disabled?: boolean;
 };
+
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({
-    isGlobal,
-    isPlatinumPlus,
+    item,
     description,
     isLoading = false,
     onChange,
     listProps,
     options,
-    selected = [],
     disabled = false,
     'data-test-subj': dataTestSubj,
     ...otherSelectableProps
@@ -109,11 +118,16 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     const { getAppUrl } = useAppUrl();
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
       'endpointManagementSpaceAwarenessEnabled'
     );
     const canManageGlobalArtifacts =
       useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
+    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
+    const [selectedPolicyIds, setSelectedPolicyIds] = useState(getPolicyIdsFromArtifact(item));
+
+    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
 
     const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(() => {
       const isGlobalButtonDisabled = !isSpaceAwarenessEnabled ? false : !canManageGlobalArtifacts;
@@ -143,7 +157,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     }, [canManageGlobalArtifacts, getTestId, isGlobal, isSpaceAwarenessEnabled]);
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
-      const isPolicySelected = new Set<string>(selected.map((policy) => policy.id));
+      const isPolicySelected = new Set<string>(selectedPolicyIds);
 
       return options
         .map<EffectedPolicyOption>((policy) => ({
@@ -185,29 +199,45 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       isGlobal,
       isPlatinumPlus,
       options,
-      selected,
+      selectedPolicyIds,
     ]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
     >(
       (currentOptions) => {
+        const newPolicyAssignmentTags: string[] = [];
+        const newPolicyIds: string[] = [];
+
+        for (const opt of currentOptions) {
+          if (opt.checked) {
+            newPolicyIds.push(opt.policy.id);
+            newPolicyAssignmentTags.push(buildPerPolicyTag(opt.policy.id));
+          }
+        }
+
+        setSelectedPolicyIds(newPolicyIds);
         onChange({
-          isGlobal,
-          selected: currentOptions.filter((opt) => opt.checked).map((opt) => opt.policy),
+          ...item,
+          tags: getTagsUpdatedBy('policySelection', newPolicyAssignmentTags),
         });
       },
-      [isGlobal, onChange]
+      [getTagsUpdatedBy, item, onChange]
     );
 
     const handleGlobalButtonChange = useCallback(
       (selectedId: string) => {
         onChange({
-          isGlobal: selectedId === 'globalPolicy',
-          selected,
+          ...item,
+          tags: getTagsUpdatedBy(
+            'policySelection',
+            selectedId === 'globalPolicy'
+              ? [GLOBAL_ARTIFACT_TAG]
+              : selectedPolicyIds.map(buildPerPolicyTag)
+          ),
         });
       },
-      [onChange, selected]
+      [getTagsUpdatedBy, item, onChange, selectedPolicyIds]
     );
 
     const listBuilderCallback = useCallback<NonNullable<EuiSelectableProps['children']>>(
@@ -289,4 +319,4 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }
 );
 
-EffectedPolicySelect.displayName = 'EffectedPolicySelect';
+EffectedPolicySelect.displayName = 'EffectedPolicySelectNew';

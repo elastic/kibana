@@ -31,7 +31,9 @@ export const isArtifactByPolicy = (item: Pick<ExceptionListItemSchema, 'tags'>):
   return !isArtifactGlobal(item);
 };
 
-export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'tags'>): string[] => {
+export const getPolicyIdsFromArtifact = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): string[] => {
   const policyIds = [];
   const tags = item.tags ?? [];
 
