@@ -376,6 +376,11 @@ describe('Alerts Client', () => {
             hits: [],
           },
         });
+        clusterClient.bulk.mockResponse({
+          errors: true,
+          took: 201,
+          items: [],
+        });
       });
 
       describe('initializeExecution()', () => {
@@ -1616,6 +1621,7 @@ describe('Alerts Client', () => {
               hits: [],
             },
           });
+
           clusterClient.bulk.mockImplementation(() => {
             throw new Error('fail');
           });
@@ -1635,7 +1641,11 @@ describe('Alerts Client', () => {
           alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
-          await alertsClient.persistAlerts();
+          try {
+            await alertsClient.persistAlerts();
+          } catch (e) {
+            expect(e.message).toBe(`fail`);
+          }
 
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(

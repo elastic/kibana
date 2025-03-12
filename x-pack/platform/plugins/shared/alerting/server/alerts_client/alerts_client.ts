@@ -584,13 +584,11 @@ export class AlertsClient<
           });
         }
       } catch (err) {
-        if (isClusterBlockError(err)) {
-          throw err;
-        }
         this.options.logger.error(
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage} - ${err.message}`,
           this.logTags
         );
+        throw err;
       }
     }
 
