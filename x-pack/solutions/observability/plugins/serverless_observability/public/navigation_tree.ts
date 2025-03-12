@@ -26,6 +26,12 @@ export const createNavigationTree = ({
         breadcrumbStatus: 'hidden',
         children: [
           {
+            title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+              defaultMessage: 'Overview',
+            }),
+            link: 'observability-overview',
+          },
+          {
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
               defaultMessage: 'Discover',
             }),
