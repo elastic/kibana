@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { StreamDetailOverview } from './stream_detail_overview';
+export const formatNumber = (val: number) => {
+  return Number(val).toLocaleString('en', {
+    maximumFractionDigits: 1,
+  });
+};
