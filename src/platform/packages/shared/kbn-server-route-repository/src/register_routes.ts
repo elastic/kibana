@@ -135,8 +135,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return response.ok({ body });
         }
       } catch (error) {
-        logger.error(error);
-
         const opts = {
           statusCode: 500,
           body: {
@@ -154,6 +152,10 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(error);
         }
 
         return response.custom(opts);
