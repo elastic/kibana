@@ -18,7 +18,7 @@ import { NotFoundRoute } from './not_found';
 import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
-import { DiscoverMainRoute2 } from './main/discover_main_route_2';
+import { DiscoverMainRoute2 } from './main';
 
 export interface DiscoverRouterProps {
   services: DiscoverServices;

@@ -13,7 +13,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import type { MainRouteProps } from './discover_main_route';
+import type { MainRoute2Props } from './discover_main_route_2';
 import { DiscoverMainRoute2 } from './discover_main_route_2';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './components/session_view/discover_main_app';
@@ -157,7 +157,7 @@ const mountComponent = (
   hasUserDataView = true,
   locationState?: MainHistoryLocationState
 ) => {
-  const props: MainRouteProps = {
+  const props: MainRoute2Props = {
     customizationCallbacks: [],
     customizationContext: mockCustomizationContext,
   };

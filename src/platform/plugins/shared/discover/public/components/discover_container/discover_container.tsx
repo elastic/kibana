@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
-import { DiscoverMainRoute2 } from '../../application/main/discover_main_route_2';
+import { DiscoverMainRoute2 } from '../../application/main';
 
 export interface DiscoverContainerInternalProps {
   /*
