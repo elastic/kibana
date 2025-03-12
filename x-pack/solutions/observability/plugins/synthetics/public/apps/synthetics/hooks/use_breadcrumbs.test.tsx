@@ -55,6 +55,7 @@ describe('useBreadcrumbs', () => {
         <Route path={OVERVIEW_ROUTE}>
           <SyntheticsSettingsContext.Provider
             value={{
+              darkMode: false,
               basePath: '/app/synthetics',
               canSave: true,
               dateRangeStart: '',

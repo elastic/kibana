@@ -33,8 +33,7 @@ import { login } from '../../../tasks/login';
 
 const URL = '/app/security/threat_intelligence/indicators';
 
-// FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/209050
-describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
+describe('Cases with invalid indicators', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_invalid' }));
@@ -106,7 +105,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
 
     cy.log('should add to new case when clicking on the button in the indicators flyout');
 
-    openFlyout(0);
+    openFlyout();
     openFlyoutTakeAction();
     openAddToNewCaseFromFlyout();
     createNewCaseFromTI();
@@ -123,7 +122,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
 
     cy.log('should add to existing case when clicking on the button in the indicators flyout');
 
-    openFlyout(0);
+    openFlyout();
     openFlyoutTakeAction();
     openAddToExistingCaseFromFlyout();
     selectExistingCase();

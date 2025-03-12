@@ -151,45 +151,19 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
   }
 
-  /**
-   * Retrieves `pending` rule migrations with the provided id and updates their status to `processing`.
-   * This operation is not atomic at migration level:
-   * - Multiple tasks can process different migrations simultaneously.
-   * - Multiple tasks should not process the same migration simultaneously.
-   */
-  async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
+  /** Updates one rule migration status to `processing` */
+  async saveProcessing(id: string): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
-    const query = this.getFilterQuery(migrationId, { status: SiemMigrationStatus.PENDING });
-
-    const storedRuleMigrations = await this.esClient
-      .search<RuleMigration>({ index, query, sort: '_doc', size })
-      .then((response) =>
-        this.processResponseHits(response, { status: SiemMigrationStatus.PROCESSING })
-      )
-      .catch((error) => {
-        this.logger.error(`Error searching rule migrations: ${error.message}`);
-        throw error;
-      });
-
-    await this.esClient
-      .bulk({
-        refresh: 'wait_for',
-        operations: storedRuleMigrations.flatMap(({ id, status }) => [
-          { update: { _id: id, _index: index } },
-          {
-            doc: { status, updated_by: profileId, updated_at: new Date().toISOString() },
-          },
-        ]),
-      })
-      .catch((error) => {
-        this.logger.error(
-          `Error updating for rule migrations status to processing: ${error.message}`
-        );
-        throw error;
-      });
-
-    return storedRuleMigrations;
+    const doc = {
+      status: SiemMigrationStatus.PROCESSING,
+      updated_by: profileId,
+      updated_at: new Date().toISOString(),
+    };
+    await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
+      this.logger.error(`Error updating rule migration status to processing: ${error.message}`);
+      throw error;
+    });
   }
 
   /** Updates one rule migration with the provided data and sets the status to `completed` */

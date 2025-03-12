@@ -9,7 +9,10 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Rules Management - Prebuilt Rules - Prebuilt Rule Customization Disabled', function () {
+    this.tags('skipFIPS');
     loadTestFile(require.resolve('./is_customized_calculation'));
     loadTestFile(require.resolve('./upgrade_perform_prebuilt_rules'));
+    loadTestFile(require.resolve('./rules_import/not_allowed_importing_customized_prebuilt_rules'));
+    loadTestFile(require.resolve('./rules_export/export_prebuilt_rules'));
   });
 };

@@ -8,15 +8,16 @@
  */
 
 import React from 'react';
-import { EuiToolTip, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
-import { getFieldValue } from '@kbn/discover-utils';
+import { formatFieldValue, getFieldValue } from '@kbn/discover-utils';
 import { ServiceNameBadgeWithActions } from '@kbn/discover-contextual-components';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { CellRenderersExtensionParams } from '../../../context_awareness';
+import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
@@ -30,7 +31,8 @@ export const getServiceNameCell =
   (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
-    const serviceNameValue = getFieldValue(props.row, serviceNameField) as string;
+    const serviceNameValue = getFieldValue(props.row, serviceNameField);
+    const field = props.dataView.getFieldByName(serviceNameField);
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
 
     if (!serviceNameValue) {
@@ -43,11 +45,21 @@ export const getServiceNameCell =
       </EuiToolTip>
     );
 
+    const value = formatFieldValue(
+      serviceNameValue,
+      props.row.raw,
+      props.fieldFormats,
+      props.dataView,
+      field,
+      'text'
+    );
+
     return (
       <ServiceNameBadgeWithActions
         onFilter={actions.addFilter}
         icon={getIcon}
-        value={serviceNameValue}
+        rawValue={serviceNameValue}
+        value={value}
         property={serviceNameField}
         core={core}
         share={share}

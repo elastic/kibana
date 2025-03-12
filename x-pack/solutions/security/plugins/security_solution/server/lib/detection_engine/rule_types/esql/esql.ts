@@ -11,7 +11,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   computeIsESQLQueryAggregating,
@@ -24,13 +24,14 @@ import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { createEnrichEventsFunction } from '../utils/enrichments';
-import { rowToDocument } from './utils';
+import { rowToDocument, mergeEsqlResultInSource } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { CreateRuleOptions, RunOpts, SignalSource } from '../types';
+import type { CreateRuleOptions, SecuritySharedParams, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { checkErrorDetails } from '../utils/check_error_details';
 import * as i18n from '../translations';
 
 import {
@@ -47,37 +48,35 @@ import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_a
 import type { ExperimentalFeatures } from '../../../../../common';
 
 export const esqlExecutor = async ({
-  runOpts: {
-    completeRule,
-    tuple,
-    ruleExecutionLogger,
-    bulkCreate,
-    mergeStrategy,
-    primaryTimestamp,
-    secondaryTimestamp,
-    exceptionFilter,
-    unprocessedExceptions,
-    alertTimestampOverride,
-    publicBaseUrl,
-    alertWithSuppression,
-    intendedTimestamp,
-  },
+  sharedParams,
   services,
   state,
-  spaceId,
   experimentalFeatures,
   licensing,
   scheduleNotificationResponseActionsService,
 }: {
-  runOpts: RunOpts<EsqlRuleParams>;
+  sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   state: Record<string, unknown>;
-  spaceId: string;
-  version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }) => {
+  const {
+    completeRule,
+    tuple,
+    primaryTimestamp,
+    secondaryTimestamp,
+    exceptionFilter,
+    unprocessedExceptions,
+    ruleExecutionLogger,
+    spaceId,
+    mergeStrategy,
+    alertTimestampOverride,
+    publicBaseUrl,
+    intendedTimestamp,
+    bulkCreate,
+  } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
   /**
@@ -110,10 +109,11 @@ export const esqlExecutor = async ({
           secondaryTimestamp,
           exceptionFilter,
         });
+        const esqlQueryString = { drop_null_columns: true };
 
         if (isLoggedRequestsEnabled) {
           loggedRequests.push({
-            request: logEsqlRequest(esqlRequest),
+            request: logEsqlRequest(esqlRequest, esqlQueryString),
             description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
           });
         }
@@ -128,7 +128,8 @@ export const esqlExecutor = async ({
 
         const response = await performEsqlRequest({
           esClient: services.scopedClusterClient.asCurrentUser,
-          requestParams: esqlRequest,
+          requestBody: esqlRequest,
+          requestQueryParams: esqlQueryString,
         });
 
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
@@ -177,13 +178,15 @@ export const esqlExecutor = async ({
           });
 
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
-          const { _id, _version, _index, ...source } = document;
+          const { _id, _version, _index, ...esqlResult } = document;
 
+          const sourceDocument = _id ? sourceDocuments[_id] : undefined;
           return {
-            _source: source as SignalSource,
-            fields: _id ? sourceDocuments[_id]?.fields : {},
+            _source: mergeEsqlResultInSource(sourceDocument?._source, esqlResult),
+            fields: sourceDocument?.fields,
             _id: _id ?? '',
-            _index: _index ?? '',
+            _index: _index || sourceDocument?._index || '',
+            _version: sourceDocument?._version,
           };
         });
 
@@ -205,17 +208,12 @@ export const esqlExecutor = async ({
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
+            sharedParams,
             enrichedEvents: syntheticHits,
             toReturn: result,
-            wrapHits,
-            bulkCreate,
             services,
-            ruleExecutionLogger,
-            tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
-            alertTimestampOverride,
-            alertWithSuppression,
             experimentalFeatures,
             buildReasonMessage: buildReasonMessageForEsqlAlert,
             mergeSourceAndFields: true,
@@ -270,6 +268,9 @@ export const esqlExecutor = async ({
         size += tuple.maxSignals;
       }
     } catch (error) {
+      if (checkErrorDetails(error).isUserError) {
+        result.userError = true;
+      }
       result.errors.push(error.message);
       result.success = false;
     }

@@ -37,6 +37,7 @@ export enum GenerationErrorCode {
   UNSUPPORTED_LOG_SAMPLES_FORMAT = 'unsupported-log-samples-format',
   UNPARSEABLE_CSV_DATA = 'unparseable-csv-data',
   CEF_ERROR = 'cef-not-supported',
+  BUILD_INTEGRATION_ERROR = 'build-integration-error',
 }
 
 // Size limits
@@ -48,7 +49,7 @@ export const CATEGORIZATION_REVIEW_MAX_CYCLES = 5;
 export const CATEGORIZATION_RECURSION_LIMIT = 50;
 
 // Name regex pattern
-export const NAME_REGEX_PATTERN = /^[a-z0-9_]+$/;
+export const NAME_REGEX_PATTERN = /^[a-z_][a-z0-9_]+$/;
 
 // Datastream name regex pattern. Same regex that for the name validation in elastic-package
 export const DATASTREAM_NAME_REGEX_PATTERN = /^([a-z0-9]{2}|[a-z0-9][a-z0-9_]+[a-z0-9])$/;

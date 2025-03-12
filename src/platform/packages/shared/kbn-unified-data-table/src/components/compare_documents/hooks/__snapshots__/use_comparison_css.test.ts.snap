@@ -3,7 +3,7 @@
 exports[`useComparisonCss should render with basic diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1qc86qa",
+  "name": "1g4i0o",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -11,11 +11,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -23,7 +23,7 @@ Object {
         .unifiedDataTable__cellValue {
           &,
           & * {
-            color: #007871 !important;
+            color: #09724D !important;
           }
         }
       }
@@ -32,7 +32,7 @@ Object {
         .unifiedDataTable__cellValue {
           &,
           & * {
-            color: #bd271e !important;
+            color: #A71627 !important;
           }
         }
       }
@@ -43,13 +43,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -63,7 +63,7 @@ Object {
 exports[`useComparisonCss should render with basic diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1qc86qa",
+  "name": "1g4i0o",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -71,11 +71,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -83,7 +83,7 @@ Object {
         .unifiedDataTable__cellValue {
           &,
           & * {
-            color: #007871 !important;
+            color: #09724D !important;
           }
         }
       }
@@ -92,7 +92,7 @@ Object {
         .unifiedDataTable__cellValue {
           &,
           & * {
-            color: #bd271e !important;
+            color: #A71627 !important;
           }
         }
       }
@@ -103,13 +103,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -123,7 +123,7 @@ Object {
 exports[`useComparisonCss should render with chars diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "vd39me",
+  "name": "13ke1tw",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -131,11 +131,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -145,13 +145,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -173,7 +173,7 @@ Object {
 exports[`useComparisonCss should render with chars diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "1r8kn6z",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -181,11 +181,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -195,13 +195,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -215,7 +215,7 @@ Object {
 exports[`useComparisonCss should render with lines diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1nu19hw",
+  "name": "i4wm23",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -223,11 +223,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -237,13 +237,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -263,10 +263,10 @@ Object {
     margin-left: calc(-8px - calc(4px / 2));
     text-align: center;
     line-height: 1;
-    font-weight: 500;
+    font-weight: 450;
   ;
-          background-color: #00BFB3;
-          color: #F1F4FA;
+          background-color: #008A5E;
+          color: #ECF1F9;
         }
 
         .unifiedDataTable__comparisonRemovedSegment:before {
@@ -278,10 +278,10 @@ Object {
     margin-left: calc(-8px - calc(4px / 2));
     text-align: center;
     line-height: 1;
-    font-weight: 500;
+    font-weight: 450;
   ;
-          background-color: #BD271E;
-          color: #F1F4FA;
+          background-color: #C61E25;
+          color: #ECF1F9;
         }
       ;
     ;
@@ -293,7 +293,7 @@ Object {
 exports[`useComparisonCss should render with lines diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1mthx0u",
+  "name": "tb1gdy",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -301,11 +301,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -315,13 +315,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -341,7 +341,7 @@ Object {
 exports[`useComparisonCss should render with no diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "1r8kn6z",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -349,11 +349,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -363,13 +363,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -383,7 +383,7 @@ Object {
 exports[`useComparisonCss should render with words diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "vd39me",
+  "name": "13ke1tw",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -391,11 +391,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -405,13 +405,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     
@@ -433,7 +433,7 @@ Object {
 exports[`useComparisonCss should render with words diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "1r8kn6z",
   "next": undefined,
   "styles": "
     .unifiedDataTable__cellValue {
@@ -441,11 +441,11 @@ Object {
     }
 
     .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
+      background-color: #F6F9FC;
     }
 
     
@@ -455,13 +455,13 @@ Object {
     }
 
     .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
+      background-color: #E2F8F0;
+      color: #09724D;
     }
 
     .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
+      background-color: #FFE8E5;
+      color: #A71627;
     }
 
     

@@ -8,6 +8,7 @@
 export enum QueryKeys {
   FetchIndex = 'fetchIndex',
   FetchMapping = 'fetchMapping',
+  FetchOnboardingToken = 'fetchOnboardingToken',
   FetchSearchIndicesStatus = 'fetchSearchIndicesStatus',
   FetchUserStartPrivileges = 'fetchUserStartPrivileges',
   SearchDocuments = 'searchDocuments',
@@ -22,4 +23,4 @@ export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
 export const INDEX_PLACEHOLDER = 'my-index';
 
-export const DEFAULT_DOCUMENT_PAGE_SIZE = 50;
+export const DEFAULT_DOCUMENT_PAGE_SIZE = 10;

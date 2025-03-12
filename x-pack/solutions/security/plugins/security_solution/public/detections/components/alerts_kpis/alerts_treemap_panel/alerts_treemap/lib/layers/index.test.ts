@@ -73,7 +73,7 @@ describe('layers', () => {
       const dataName = 'mimikatz process started';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
-      ).toEqual('#bd271e');
+      ).toEqual('#E7664C');
     });
 
     it('return the default fill color when dataName is not found in the maxRiskSubAggregations', () => {
@@ -169,7 +169,7 @@ describe('layers', () => {
             { index: 0, value: 'Host-k8iyfzraq9' },
           ],
         })
-      ).toEqual('#bd271e');
+      ).toEqual('#E7664C');
     });
 
     it('returns the default fillColor for layer 1 when the group from path is not found', () => {

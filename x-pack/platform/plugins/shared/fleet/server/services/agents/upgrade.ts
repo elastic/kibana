@@ -73,6 +73,7 @@ export async function sendUpgradeAgentsActions(
     upgradeDurationSeconds?: number;
     startTime?: string;
     batchSize?: number;
+    isAutomatic?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -123,4 +124,23 @@ export async function sendUpgradeAgentsActions(
   }
 
   return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentSpaceId);
+}
+
+export async function sendAutomaticUpgradeAgentsActions(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  options: {
+    agents: Agent[];
+    version: string;
+    upgradeDurationSeconds?: number;
+  }
+): Promise<{ actionId: string }> {
+  const currentSpaceId = getCurrentNamespace(soClient);
+  return await upgradeBatch(
+    esClient,
+    options.agents,
+    {},
+    { ...options, isAutomatic: true },
+    currentSpaceId
+  );
 }

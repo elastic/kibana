@@ -10,11 +10,11 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../../data/slo/slo';
-import { Overview as Component, Props } from './overview';
+import { Definition as Component, Props } from '../definition/definition';
 
 export default {
   component: Component,
-  title: 'app/SLO/DetailsPage/Overview',
+  title: 'app/SLO/DetailsPage/Definition',
   decorators: [KibanaReactStorybookDecorator],
 };
 

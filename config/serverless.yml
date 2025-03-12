@@ -270,6 +270,3 @@ discover.enableUiSettingsValidations: true
 xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
-
-# Ensure Serverless is using the Amsterdam theme
-uiSettings.experimental.defaultTheme: "amsterdam"

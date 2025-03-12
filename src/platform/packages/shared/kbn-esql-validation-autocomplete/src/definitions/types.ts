@@ -6,17 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type {
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
+  ESQLSource,
 } from '@kbn/esql-ast';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLCallbacks } from '../shared/types';
+import type { ESQLPolicy } from '../validation/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -42,6 +43,7 @@ export const fieldTypes = [
   'counter_double',
   'unsupported',
   'date_nanos',
+  'function_named_parameters',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -162,13 +164,21 @@ export interface Signature {
      * values that we don't want to show as suggestions.
      */
     literalSuggestions?: string[];
+    mapParams?: string;
   }>;
   minParams?: number;
   returnType: FunctionReturnType;
 }
 
+export enum FunctionDefinitionTypes {
+  AGG = 'agg',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  GROUPING = 'grouping',
+}
+
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'operator';
+  type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -180,7 +190,95 @@ export interface FunctionDefinition {
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
+  customParametersSnippet?: string;
 }
+
+export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
+
+export interface CommandSuggestParams<CommandName extends string> {
+  /**
+   * The text of the query to the left of the cursor.
+   */
+  innerText: string;
+  /**
+   * The AST node of this command.
+   */
+  command: ESQLCommand<CommandName>;
+  /**
+   * Get suggestions for columns by type. This includes fields from any sources as well as
+   * user-defined columns in the query.
+   */
+  getColumnsByType: GetColumnsByTypeFn;
+  /**
+   * Gets the names of all columns
+   */
+  getAllColumnNames: () => string[];
+  /**
+   * Check for the existence of a column by name.
+   * @param column
+   * @returns
+   */
+  columnExists: (column: string) => boolean;
+  /**
+   * Gets the name that should be used for the next variable.
+   *
+   * @param extraFieldNames — names that should be recognized as columns
+   * but that won't be found in the current table from Elasticsearch. This is currently only
+   * used to recognize enrichment fields from a policy in the ENRICH command.
+   * @returns
+   */
+  getSuggestedVariableName: (extraFieldNames?: string[]) => string;
+  /**
+   * Examine the AST to determine the type of an expression.
+   * @param expression
+   * @returns
+   */
+  getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown';
+  /**
+   * Get a list of system preferences (currently the target value for the histogram bar)
+   * @returns
+   */
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>;
+  /**
+   * The definition for the current command.
+   */
+  definition: CommandDefinition<CommandName>;
+  /**
+   * Fetch a list of all available sources
+   * @returns
+   */
+  getSources: () => Promise<ESQLSourceResult[]>;
+  /**
+   * Fetch suggestions for all available policies
+   */
+  getPolicies: () => Promise<SuggestionRawDefinition[]>;
+  /**
+   * Get metadata for a policy by name
+   */
+  getPolicyMetadata: GetPolicyMetadataFn;
+  /**
+   * Inspect the AST and returns the sources that are used in the query.
+   * @param type
+   * @returns
+   */
+  getSourcesFromQuery: (type: 'index' | 'policy') => ESQLSource[];
+  /**
+   * Generate a list of recommended queries
+   * @returns
+   */
+  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  /**
+   * The AST for the query behind the cursor.
+   */
+  previousCommands?: ESQLCommand[];
+  callbacks?: ESQLCallbacks;
+  getVariables?: () => ESQLControlVariable[] | undefined;
+  supportsControls?: boolean;
+}
+
+export type CommandSuggestFunction<CommandName extends string> = (
+  params: CommandSuggestParams<CommandName>
+) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;
@@ -193,21 +291,14 @@ export interface CommandBaseDefinition<CommandName extends string> {
   alias?: string;
   description: string;
   /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
+  /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
-  suggest?: (
-    innerText: string,
-    command: ESQLCommand<CommandName>,
-    getColumnsByType: GetColumnsByTypeFn,
-    columnExists: (column: string) => boolean,
-    getSuggestedVariableName: () => string,
-    getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-    fullTextAst?: ESQLAst,
-    definition?: CommandDefinition<CommandName>,
-    callbacks?: ESQLCallbacks
-  ) => Promise<SuggestionRawDefinition[]>;
+  suggest?: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
@@ -254,7 +345,6 @@ export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
-  hasRecommendedQueries?: boolean;
   /** @deprecated this property will disappear in the future */
   modes: CommandModeDefinition[];
   /** @deprecated this property will disappear in the future */

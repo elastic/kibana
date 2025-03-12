@@ -139,7 +139,6 @@
     "@kbn/shared-ux-router",
     "@kbn/charts-plugin",
     "@kbn/alerts-as-data-utils",
-    "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
     "@kbn/grouping",
     "@kbn/securitysolution-data-table",
@@ -228,6 +227,9 @@
     "@kbn/langchain",
     "@kbn/discover-shared-plugin",
     "@kbn/react-hooks",
+    "@kbn/response-ops-alerts-fields-browser",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/alerting-types",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
     "@kbn/security-solution-connectors",
@@ -237,6 +239,6 @@
     "@kbn/charts-theme",
     "@kbn/product-doc-base-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/security-ai-prompts",
+    "@kbn/security-ai-prompts"
   ]
 }

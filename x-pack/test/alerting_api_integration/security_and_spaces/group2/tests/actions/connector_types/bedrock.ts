@@ -456,7 +456,13 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: { message: bedrockClaude2SuccessResponse.completion },
+              data: {
+                message: bedrockClaude2SuccessResponse.completion,
+                usage: {
+                  input_tokens: 41,
+                  output_tokens: 64,
+                },
+              },
             });
 
             const events: IValidatedEvent[] = await retry.try(async () => {

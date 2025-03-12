@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { getStartEndParams, getNamedParams } from './run_query';
 
 describe('run query helpers', () => {
@@ -82,6 +82,11 @@ describe('run query helpers', () => {
           value: 'go',
           type: ESQLVariableType.VALUES,
         },
+        {
+          key: 'function',
+          value: 'count',
+          type: ESQLVariableType.FUNCTIONS,
+        },
       ];
       const params = getNamedParams(query, time, variables);
       expect(params).toStrictEqual([
@@ -95,6 +100,11 @@ describe('run query helpers', () => {
         },
         {
           agent_name: 'go',
+        },
+        {
+          function: {
+            identifier: 'count',
+          },
         },
       ]);
     });
@@ -119,9 +129,14 @@ describe('run query helpers', () => {
           value: 'go',
           type: ESQLVariableType.VALUES,
         },
+        {
+          key: 'function',
+          value: 'count',
+          type: ESQLVariableType.FUNCTIONS,
+        },
       ];
       const params = getNamedParams(query, time, variables);
-      expect(params).toHaveLength(5);
+      expect(params).toHaveLength(6);
       expect(params[0]).toHaveProperty('_tstart');
       expect(params[1]).toHaveProperty('_tend');
       expect(params[2]).toStrictEqual({
@@ -135,6 +150,22 @@ describe('run query helpers', () => {
       expect(params[4]).toStrictEqual({
         agent_name: 'go',
       });
+
+      expect(params[5]).toStrictEqual({
+        function: {
+          identifier: 'count',
+        },
+      });
     });
+  });
+
+  it('should work correctly with datemath ranges', () => {
+    const time = { from: 'now/d', to: 'now/d' };
+    const query = 'FROM foo | where time < ?_tend amd time > ?_tstart';
+    const params = getStartEndParams(query, time);
+    expect(params).toHaveLength(2);
+    expect(params[0]).toHaveProperty('_tstart');
+    expect(params[1]).toHaveProperty('_tend');
+    expect(params[0]._tstart).not.toEqual(params[1]._tend);
   });
 });

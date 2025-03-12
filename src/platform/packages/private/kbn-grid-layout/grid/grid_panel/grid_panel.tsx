@@ -7,39 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { GridLayoutStateManager } from '../types';
-import { DragHandle, DragHandleApi } from './drag_handle';
+import { useGridLayoutContext } from '../use_grid_layout_context';
+import { DefaultDragHandle } from './drag_handle/default_drag_handle';
+import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './resize_handle';
 
 export interface GridPanelProps {
   panelId: string;
-  rowIndex: number;
-  renderPanelContents: (
-    panelId: string,
-    setDragHandles?: (refs: Array<HTMLElement | null>) => void
-  ) => React.ReactNode;
-  gridLayoutStateManager: GridLayoutStateManager;
+  rowId: string;
 }
 
-export const GridPanel = ({
-  panelId,
-  rowIndex,
-  renderPanelContents,
-  gridLayoutStateManager,
-}: GridPanelProps) => {
-  const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
+export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
+  const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
+    useGridLayoutContext();
+
   const { euiTheme } = useEuiTheme();
+  const dragHandleApi = useDragHandleApi({ panelId, rowId });
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
   const initialStyles = useMemo(() => {
     const initialPanel = (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-      gridLayoutStateManager.gridLayout$.getValue())[rowIndex].panels[panelId];
+      gridLayoutStateManager.gridLayout$.getValue())[rowId].panels[panelId];
     return css`
       position: relative;
       height: calc(
@@ -54,7 +48,7 @@ export const GridPanel = ({
       grid-row-start: ${initialPanel.row + 1};
       grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
     `;
-  }, [gridLayoutStateManager, rowIndex, panelId]);
+  }, [gridLayoutStateManager, rowId, panelId]);
 
   useEffect(
     () => {
@@ -66,8 +60,8 @@ export const GridPanel = ({
       ])
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-          const panel = (proposedGridLayout ?? gridLayout)[rowIndex].panels[panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+          const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
           if (!ref || !panel) return;
 
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
@@ -134,9 +128,9 @@ export const GridPanel = ({
        */
       const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
         (expandedPanelId) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          const panel = gridLayout[rowIndex].panels[panelId];
+          const panel = gridLayout[rowId].panels[panelId];
           if (!ref || !panel) return;
 
           if (expandedPanelId && expandedPanelId === panelId) {
@@ -160,33 +154,25 @@ export const GridPanel = ({
    * Memoize panel contents to prevent unnecessary re-renders
    */
   const panelContents = useMemo(() => {
-    if (!dragHandleApi) return <></>; // delays the rendering of the panel until after dragHandleApi is defined
     return renderPanelContents(panelId, dragHandleApi.setDragHandles);
   }, [panelId, renderPanelContents, dragHandleApi]);
 
   return (
     <div
       ref={(element) => {
-        if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
-          gridLayoutStateManager.panelRefs.current[rowIndex] = {};
+        if (!gridLayoutStateManager.panelRefs.current[rowId]) {
+          gridLayoutStateManager.panelRefs.current[rowId] = {};
         }
-        gridLayoutStateManager.panelRefs.current[rowIndex][panelId] = element;
+        gridLayoutStateManager.panelRefs.current[rowId][panelId] = element;
       }}
       css={initialStyles}
       className="kbnGridPanel"
     >
-      <DragHandle
-        ref={setDragHandleApi}
-        gridLayoutStateManager={gridLayoutStateManager}
-        panelId={panelId}
-        rowIndex={rowIndex}
-      />
+      {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
       {panelContents}
-      <ResizeHandle
-        gridLayoutStateManager={gridLayoutStateManager}
-        panelId={panelId}
-        rowIndex={rowIndex}
-      />
+      <ResizeHandle panelId={panelId} rowId={rowId} />
     </div>
   );
-};
+});
+
+GridPanel.displayName = 'KbnGridLayoutPanel';

@@ -11,23 +11,12 @@ import { i18n } from '@kbn/i18n';
 import {
   type ESQLColumn,
   type ESQLCommand,
-  type ESQLAstItem,
   type ESQLMessage,
   type ESQLFunction,
   isFunctionExpression,
   isWhereExpression,
-  isFieldExpression,
-  Walker,
 } from '@kbn/esql-ast';
-import {
-  getFunctionDefinition,
-  isAssignment,
-  isColumnItem,
-  isFunctionItem,
-  isFunctionOperatorParam,
-  isLiteralItem,
-} from '../shared/helpers';
-import { ENRICH_MODES } from './settings';
+import { isAssignment, isColumnItem, isFunctionItem } from '../shared/helpers';
 import {
   appendSeparatorOption,
   asOption,
@@ -36,13 +25,26 @@ import {
   onOption,
   withOption,
 } from './options';
-import type { CommandDefinition } from './types';
+import { ENRICH_MODES } from './settings';
+
+import { type CommandDefinition } from './types';
+import { checkAggExistence, checkFunctionContent } from './commands_helpers';
+
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForRow } from '../autocomplete/commands/row';
+import { suggest as suggestForShow } from '../autocomplete/commands/show';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
+import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
+import { suggest as suggestForRename } from '../autocomplete/commands/rename';
+import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
+import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -75,41 +77,6 @@ const statsValidator = (command: ESQLCommand) => {
     .filter(isFunctionItem);
 
   if (statsArg.length) {
-    function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
-    }
-    function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
-    }
-
-    function checkAggExistence(arg: ESQLFunction): boolean {
-      if (isWhereExpression(arg)) {
-        return checkAggExistence(arg.args[0] as ESQLFunction);
-      }
-
-      if (isFieldExpression(arg)) {
-        const agg = arg.args[1];
-        const firstFunction = Walker.match(agg, { type: 'function' });
-
-        if (!firstFunction) {
-          return false;
-        }
-
-        return checkAggExistence(firstFunction as ESQLFunction);
-      }
-
-      // TODO the grouping function check may not
-      // hold true for all future cases
-      if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
-        return true;
-      }
-
-      if (isOtherFunction(arg)) {
-        return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
-      }
-
-      return false;
-    }
     // first check: is there an agg function somewhere?
     const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
 
@@ -133,25 +100,6 @@ const statsValidator = (command: ESQLCommand) => {
         }))
       );
     } else {
-      function isConstantOrAggFn(arg: ESQLAstItem): boolean {
-        return isLiteralItem(arg) || isAggFunction(arg);
-      }
-      // now check that:
-      // * the agg function is at root level
-      // * or if it's a builtin function, then all operands are agg functions or literals
-      // * or if it's a eval function then all arguments are agg functions or literals
-      function checkFunctionContent(arg: ESQLFunction) {
-        // TODO the grouping function check may not
-        // hold true for all future cases
-        if (isAggFunction(arg)) {
-          return true;
-        }
-        return (arg as ESQLFunction).args.every(
-          (subArg): boolean =>
-            isConstantOrAggFn(subArg) ||
-            (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
-        );
-      }
       // @TODO: improve here the check to get the last instance of the invalidExpression
       // to provide a better location for the error message
       // i.e. STATS round(round(round( a + sum(b) )))
@@ -190,12 +138,13 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
-    examples: ['row a=1', 'row a=1, b=2'],
+    examples: ['ROW a=1', 'ROW a=1, b=2'],
     signature: {
       multipleParams: true,
       // syntax check already validates part of this
       params: [{ name: 'assignment', type: 'any' }],
     },
+    suggest: suggestForRow,
     options: [],
     modes: [],
   },
@@ -208,24 +157,25 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
-    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
+    suggest: suggestForFrom,
   },
   {
     name: 'show',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    examples: ['show info'],
+    examples: ['SHOW INFO'],
     options: [],
     modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
     },
+    suggest: suggestForShow,
   },
   {
     name: 'metrics',
@@ -326,6 +276,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [asOption],
     modes: [],
+    suggest: suggestForRename,
   },
   {
     name: 'limit',
@@ -340,6 +291,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForLimit,
   },
   {
     name: 'keep',
@@ -449,7 +401,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | dissect a "%{b} %{c}"'],
+    examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
     options: [appendSeparatorOption],
     modes: [],
     signature: {
@@ -459,6 +411,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForDissect,
   },
   {
     name: 'grok',
@@ -466,7 +419,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
+    examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     options: [],
     modes: [],
     signature: {
@@ -476,6 +429,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForGrok,
   },
   {
     name: 'mv_expand',
@@ -485,10 +439,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['row a=[1,2,3] | mv_expand a'],
     options: [],
     modes: [],
+    preview: true,
     signature: {
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
+    suggest: suggestForMvExpand,
   },
   {
     name: 'enrich',
@@ -507,14 +463,15 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
     },
+    suggest: suggestForEnrich,
   },
   {
     name: 'hidden_command',
     description: 'A test fixture to test hidden-ness',
     hidden: true,
     examples: [],
-    modes: [],
     options: [],
+    modes: [],
     signature: {
       params: [],
       multipleParams: false,
@@ -557,6 +514,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.joinDoc', {
       defaultMessage: 'Join table with another table.',
     }),
+    preview: true,
     examples: [
       '… | LOOKUP JOIN lookup_index ON join_field',
       // TODO: Uncomment when other join types are implemented
@@ -564,12 +522,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
-    options: [],
     modes: [],
     signature: {
-      multipleParams: false,
+      multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
+    options: [onOption],
     suggest: suggestForJoin,
   },
 ];

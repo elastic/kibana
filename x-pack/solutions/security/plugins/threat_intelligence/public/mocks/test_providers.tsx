@@ -121,9 +121,7 @@ export const mockedServices = {
   cases: casesServiceMock,
   storage,
   unifiedSearch,
-  triggersActionsUi: {
-    getFieldBrowser: jest.fn().mockReturnValue(null),
-  },
+  triggersActionsUi: {},
   timelines: timelinesServiceMock,
   securityLayout: {
     getPluginWrapper:

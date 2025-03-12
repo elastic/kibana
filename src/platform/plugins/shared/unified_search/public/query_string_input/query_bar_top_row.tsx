@@ -187,6 +187,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   renderQueryInputAppend?: () => React.ReactNode;
   disableExternalPadding?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
+  bubbleSubmitEvent?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -661,7 +662,7 @@ export const QueryBarTopRow = React.memo(
     function renderFilterButtonGroup() {
       return (
         (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="kbnQueryBar__filterButtonGroup">
             <FilterButtonGroup
               items={[props.prepend, renderAddButton()]}
               attached={renderFilterMenuOnly()}
@@ -699,6 +700,7 @@ export const QueryBarTopRow = React.memo(
             isDisabled={props.isDisabled}
             appName={appName}
             submitOnBlur={props.submitOnBlur}
+            bubbleSubmitEvent={props.bubbleSubmitEvent}
             deps={{
               unifiedSearch,
               data,
