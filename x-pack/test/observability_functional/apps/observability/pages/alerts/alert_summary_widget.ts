@@ -11,8 +11,10 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const ALL_ALERTS = 40;
 const ACTIVE_ALERTS = 10;
 
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
+  const { alertControls, header } = getPageObjects(['alertControls', 'header']);
 
   describe('Alert summary widget >', function () {
     this.tags('includeFirefox');
@@ -30,16 +32,38 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    it('shows number of total and active alerts', async () => {
+    it('shows number of total and active alerts when status filter is active', async () => {
       await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
+      await header.waitUntilLoadingHasFinished();
 
-      const activeAlertCount =
-        await observability.components.alertSummaryWidget.getActiveAlertCount();
-      const totalAlertCount =
-        await observability.components.alertSummaryWidget.getTotalAlertCount();
+      await retry.try(async () => {
+        const activeAlertCount =
+          await observability.components.alertSummaryWidget.getActiveAlertCount();
+        const totalAlertCount =
+          await observability.components.alertSummaryWidget.getTotalAlertCount();
 
-      expect(activeAlertCount).to.be(`${ACTIVE_ALERTS} `);
-      expect(totalAlertCount).to.be(`${ALL_ALERTS}`);
+        expect(activeAlertCount).to.be(`${ACTIVE_ALERTS} `);
+        expect(totalAlertCount).to.be(`${ACTIVE_ALERTS}`);
+      });
+    });
+
+    it('shows number of total and active alerts when there is no status filter', async () => {
+      // Clear status filter
+      await alertControls.clearControlSelections('0');
+      await observability.alerts.common.waitForAlertTableToLoad();
+
+      await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
+      await header.waitUntilLoadingHasFinished();
+
+      await retry.try(async () => {
+        const activeAlertCount =
+          await observability.components.alertSummaryWidget.getActiveAlertCount();
+        const totalAlertCount =
+          await observability.components.alertSummaryWidget.getTotalAlertCount();
+
+        expect(activeAlertCount).to.be(`${ACTIVE_ALERTS} `);
+        expect(totalAlertCount).to.be(`${ALL_ALERTS}`);
+      });
     });
   });
 };
