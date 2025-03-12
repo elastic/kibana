@@ -28,8 +28,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 };
 describe('SynonymRuleFlyout', () => {
   const TEST_IDS = {
-    GeneratedIdText: 'searchSynonymsSynonymRuleFlyoutGeneratedIdText',
-    EditModeRuleIdText: 'searchSynonymsSynonymRuleFlyoutEditModeRuleIdText',
+    RuleIdText: 'searchSynonymsSynonymRuleFlyoutRuleIdText',
     ErrorBanner: 'searchSynonymsSynonymsRuleFlyoutErrorBanner',
     AddFromTermsInput: 'searchSynonymsSynonymsRuleFlyoutFromTermsInput',
     FromTermCountLabel: 'searchSynonymsSynonymsRuleFlyoutTermCountLabel',
@@ -98,8 +97,7 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
       // Header
-      expect(screen.getByTestId(TEST_IDS.GeneratedIdText)).toHaveValue('generated-id');
-      expect(screen.queryByTestId(TEST_IDS.EditModeRuleIdText)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_IDS.RuleIdText)).toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.ErrorBanner)).not.toBeInTheDocument();
 
       // From terms
@@ -130,8 +128,7 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
       // Header
-      expect(screen.getByTestId(TEST_IDS.GeneratedIdText)).toHaveValue('generated-id');
-      expect(screen.queryByTestId(TEST_IDS.EditModeRuleIdText)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_IDS.RuleIdText)).toBeInTheDocument();
       expect(screen.queryByTestId(TEST_IDS.ErrorBanner)).not.toBeInTheDocument();
 
       // From terms
@@ -258,10 +255,7 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
       // Header
-      expect(screen.getByTestId(TEST_IDS.EditModeRuleIdText).textContent).toBe(
-        'Rule ID: rule_id_3'
-      );
-      expect(screen.queryByTestId(TEST_IDS.GeneratedIdText)).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_IDS.RuleIdText).textContent).toBe('Rule ID: rule_id_3');
       expect(screen.queryByTestId(TEST_IDS.ErrorBanner)).not.toBeInTheDocument();
 
       // From terms
@@ -324,10 +318,7 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
       // Header
-      expect(screen.getByTestId(TEST_IDS.EditModeRuleIdText).textContent).toBe(
-        'Rule ID: rule_id_3'
-      );
-      expect(screen.queryByTestId(TEST_IDS.GeneratedIdText)).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_IDS.RuleIdText).textContent).toBe('Rule ID: rule_id_3');
       expect(screen.queryByTestId(TEST_IDS.ErrorBanner)).not.toBeInTheDocument();
 
       // From terms

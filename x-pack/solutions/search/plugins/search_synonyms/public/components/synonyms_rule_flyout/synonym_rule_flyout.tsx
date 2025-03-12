@@ -84,30 +84,16 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} size="s" outsideClickCloses={false}>
+    <EuiFlyout onClose={onClose} size={'33%'} outsideClickCloses={false}>
       <EuiFlyoutHeader hasBorder>
-        {flyoutMode === 'edit' ? (
-          <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutEditModeRuleIdText">
-            <b>
-              {i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.title.ruleId', {
-                defaultMessage: 'Rule ID: {ruleId}',
-                values: { ruleId: synonymsRule.id },
-              })}
-            </b>
-          </EuiText>
-        ) : (
-          <EuiFormRow
-            label={i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.title.ruleId', {
-              defaultMessage: 'Rule ID',
+        <EuiText data-test-subj="searchSynonymsSynonymRuleFlyoutRuleIdText">
+          <b>
+            {i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.title.ruleId', {
+              defaultMessage: 'Rule ID: {ruleId}',
+              values: { ruleId: synonymsRule.id },
             })}
-          >
-            <EuiFieldText
-              data-test-subj="searchSynonymsSynonymRuleFlyoutGeneratedIdText"
-              value={synonymsRule.id}
-              readOnly
-            />
-          </EuiFormRow>
-        )}
+          </b>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         css={css`
@@ -141,6 +127,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
         >
           <EuiFlexItem grow={false}>
             <EuiFormRow
+              fullWidth
               label={i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.synonyms', {
                 defaultMessage: 'Add terms to match against',
               })}
@@ -148,6 +135,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
               error={fromTermErrors || null}
             >
               <EuiComboBox
+                fullWidth
                 data-test-subj="searchSynonymsSynonymsRuleFlyoutFromTermsInput"
                 isInvalid={isFromTermsInvalid}
                 noSuggestions
@@ -281,6 +269,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
           {isExplicit && (
             <EuiFlexItem grow={false}>
               <EuiFormRow
+                fullWidth
                 label={i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.synonymsTo', {
                   defaultMessage: 'Map to this term',
                 })}
