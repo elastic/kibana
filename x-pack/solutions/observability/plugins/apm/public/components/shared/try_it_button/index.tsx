@@ -29,6 +29,7 @@ interface Props {
   onClick: () => void;
   popoverContent?: React.ReactElement;
   isLoading: boolean;
+  calloutId: string;
 }
 
 export function TryItButton({
@@ -38,16 +39,14 @@ export function TryItButton({
   popoverContent,
   promoLabel,
   isLoading,
+  calloutId,
 }: Props) {
-  const [showFastFilterTryCallout, setShowFastFilterTryCallout] = useLocalStorage(
-    'apm.showFastFilterTryCallout',
-    true
-  );
+  const [showTryCallout, setShowFastFilterTryCallout] = useLocalStorage(`apm.${calloutId}`, true);
   const { core } = useApmPluginContext();
   const canEditAdvancedSettings = core.application.capabilities.advancedSettings?.save;
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
-  if (!showFastFilterTryCallout) {
+  if (!showTryCallout) {
     return null;
   }
 

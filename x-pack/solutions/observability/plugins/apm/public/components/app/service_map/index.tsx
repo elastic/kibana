@@ -6,9 +6,19 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { apmEnableServiceMapApiV2 } from '@kbn/observability-plugin/common';
+import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -33,6 +43,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { useServiceMap } from './use_service_map';
+import { TryItButton } from '../../shared/try_it_button';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -125,6 +136,11 @@ export function ServiceMap({
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
 
+  const { fields, isSaving, saveSingleSetting } = useEditableSettings([apmEnableServiceMapApiV2]);
+
+  const settingsField = fields[apmEnableServiceMapApiV2];
+  const isServiceMapV2Enabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
+
   if (!license) {
     return null;
   }
@@ -182,6 +198,36 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
+      <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+        <TryItButton
+          isFeatureEnabled={isServiceMapV2Enabled}
+          linkLabel={
+            isServiceMapV2Enabled
+              ? i18n.translate('xpack.apm.serviceList.disableFastFilter', {
+                  defaultMessage: 'Disable the new service map API',
+                })
+              : i18n.translate('xpack.apm.serviceList.enableFastFilter', {
+                  defaultMessage: 'Enable the new service map API',
+                })
+          }
+          onClick={() => {
+            saveSingleSetting(apmEnableServiceMapApiV2, !isServiceMapV2Enabled);
+          }}
+          isLoading={isSaving}
+          popoverContent={
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.apm.serviceList.turnOffFastFilter', {
+                  defaultMessage: 'The new service map API is faster, try it out!',
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          calloutId="showServiceMapV2Callout"
+        />
+        <EuiSpacer size="s" />
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape
