@@ -16,6 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common/types';
 import { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
+import pRetry from 'p-retry';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -143,29 +144,27 @@ const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.
 
 export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Promise<string> => {
   const kbnStatus = await kbnClient.status.get();
-  const agentVersions = await axios
-    .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) =>
-      map(
+  const agentVersions = await pRetry(
+    async () => {
+      const response = await axios.get('https://artifacts-api.elastic.co/v1/versions');
+      return map(
         response.data.versions.filter(isValidArtifactVersion),
         (version) => version.split('-SNAPSHOT')[0]
-      )
-    );
+      );
+    },
+    {
+      retries: 6,
+    }
+  ).catch(() => null);
 
-  let version =
-    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
-    kbnStatus.version.number;
+  const version = agentVersions
+    ? semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`)
+    : kbnStatus.version.number;
 
-  // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
-  // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
-  if (
-    kbnStatus.version.build_snapshot ||
-    kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX')
-  ) {
-    version += '-SNAPSHOT';
-  }
+  const shouldAddSnapshot =
+    kbnStatus.version.build_snapshot || kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX');
 
-  return version;
+  return shouldAddSnapshot ? `${version}-SNAPSHOT` : version;
 };
 
 export const generateRandomString = (length: number) => {
