@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, filter, map, mergeMap, share, Subject, tap } from 'rxjs';
+import { BehaviorSubject, filter, map, mergeMap, ReplaySubject, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -148,7 +148,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const fetchChart$ = new Subject<void>();
+  const fetchChart$ = new ReplaySubject<void>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**
