@@ -136,7 +136,7 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
         <EuiSpacer size="xs" />
         <FormattedMessage
           id="xpack.apm.tutorial.config_otel.description2"
-          defaultMessage="The 'OTEL_METRICS_EXPORTER` and 'OTEL_LOGS_EXPORTER' environment variables may not be supported by some SDKs."
+          defaultMessage="The 'OTEL_METRICS_EXPORTER`, 'OTEL_LOGS_EXPORTER' and 'OTEL_TRACES_EXPORTER' environment variables may not be supported by some SDKs."
         />
         <EuiSpacer size="xs" />
         <FormattedMessage
