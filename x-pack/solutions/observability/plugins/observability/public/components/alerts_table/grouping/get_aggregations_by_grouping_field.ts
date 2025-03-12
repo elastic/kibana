@@ -27,18 +27,8 @@ export const getAggregationsByGroupingField = (field: string): NamedAggregation[
           },
         },
       ];
-      break;
+
     case ALERT_INSTANCE_ID:
-      return [
-        {
-          rulesCountAggregation: {
-            cardinality: {
-              field: ALERT_RULE_UUID,
-            },
-          },
-        },
-      ];
-      break;
     default:
       return [
         {

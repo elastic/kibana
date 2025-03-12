@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { render } from '../../../utils/test_helper';
-import { alertWithGroupsAndTags } from '../mock/alert';
-import { useKibana } from '../../../utils/kibana_react';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { render } from '../../../../utils/test_helper';
+import { alertWithGroupsAndTags } from '../../mock/alert';
+import { useKibana } from '../../../../utils/kibana_react';
+import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
 import { RelatedAlerts } from './related_alerts';
-import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table_lazy';
+import { ObservabilityAlertsTable } from '../../../../components/alerts_table/alerts_table_lazy';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
-} from '../../../../common/constants';
+} from '../../../../../common/constants';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
