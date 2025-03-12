@@ -28,7 +28,7 @@ import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
-import { SSLFormSection } from './ssl_form_section';
+import { SSLFormSection, type FormType } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
@@ -190,7 +190,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       )}
       <EuiSpacer size="m" />
       <SSLFormSection
-        type={inputs.typeInput.value}
+        type={inputs.typeInput.value as FormType}
         inputs={inputs}
         useSecretsStorage={enableSSLSecrets && useSecretsStorage}
         isConvertedToSecret={isConvertedToSecret.sslKey}

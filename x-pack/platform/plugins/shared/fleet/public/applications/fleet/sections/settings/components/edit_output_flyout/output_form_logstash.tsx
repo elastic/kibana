@@ -18,7 +18,7 @@ import { MultiRowInput } from '../multi_row_input';
 import type { OutputFormInputsType } from './use_output_form';
 
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
-import { SSLFormSection } from './ssl_form_section';
+import { SSLFormSection, type FormType } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
@@ -113,6 +113,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         useSecretsStorage={useSecretsStorage}
         isConvertedToSecret={isConvertedToSecret.sslKey}
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+        type={inputs.typeInput.value as FormType}
       />
     </>
   );

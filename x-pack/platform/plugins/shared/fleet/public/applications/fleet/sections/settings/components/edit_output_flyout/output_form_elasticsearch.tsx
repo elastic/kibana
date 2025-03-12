@@ -17,7 +17,7 @@ import { MultiRowInput } from '../multi_row_input';
 import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
-import { SSLFormSection } from './ssl_form_section';
+import { SSLFormSection, type FormType } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
@@ -112,7 +112,7 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
       </EuiFormRow>
       <EuiSpacer size="m" />
       <SSLFormSection
-        type={inputs.typeInput.value}
+        type={inputs.typeInput.value as FormType}
         inputs={inputs}
         useSecretsStorage={enableSSLSecrets && useSecretsStorage}
         isConvertedToSecret={isConvertedToSecret.sslKey}
