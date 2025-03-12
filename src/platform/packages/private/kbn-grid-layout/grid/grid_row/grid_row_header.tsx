@@ -103,7 +103,6 @@ export const GridRowHeader = React.memo(
           const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
           if (!headerRef || activeRow?.id !== rowId) return;
 
-          console.log('update styles', type);
           if (type === 'init') {
             setIsActive(true);
             const width = headerRef.getBoundingClientRect().width;
