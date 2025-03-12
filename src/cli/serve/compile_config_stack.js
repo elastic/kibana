@@ -86,10 +86,7 @@ function getSecurityTierFromCfg(configs) {
   const config = getConfigFromFiles(configs.filter(isNotNull));
 
   const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
-  if (productType) {
-    return productType.product_tier;
-  }
-  return undefined;
+  return productType?.product_tier;
 }
 
 /**
