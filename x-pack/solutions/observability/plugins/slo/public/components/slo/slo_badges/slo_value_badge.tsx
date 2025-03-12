@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -23,15 +23,13 @@ export function SloValueBadge({ slo, isLoading }: SloStatusProps) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
-  const badgeDisplayText = useMemo(() => {
-    return i18n.translate('xpack.slo.sloStatusBadge.sloObjectiveValue', {
-      defaultMessage: '{value} / {objective} (Objective)',
-      values: {
-        value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
-        objective: numeral(slo.objective.target).format(percentFormat),
-      },
-    });
-  }, [slo, percentFormat, hasNoData]);
+  const badgeDisplayText = i18n.translate('xpack.slo.sloStatusBadge.sloObjectiveValue', {
+    defaultMessage: '{value} ({objective} objective)',
+    values: {
+      value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
+      objective: numeral(slo.objective.target).format(percentFormat),
+    },
+  });
 
   if (isLoading || !slo) {
     return <EuiSkeletonText lines={2} data-test-subj="loadingTitle" />;
