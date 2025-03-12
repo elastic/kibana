@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonNavigation',
     'svlCommonPage',
   ]);
+  const retry = getService('retry');
   const synthtrace = getService('svlLogsSynthtraceClient');
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
