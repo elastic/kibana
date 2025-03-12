@@ -88,13 +88,15 @@ export function saveApmIndices(
 
 // remove empty/undefined values
 function removeEmpty(apmIndices: Partial<APMIndices>) {
-  return Object.entries(apmIndices)
-    .map(([key, value]) => [key, value?.trim()])
-    .filter(([_, value]) => !!value)
-    .reduce((obj, [key, value]) => {
+  return Object.entries<string | undefined>(apmIndices).reduce((obj, [key, value]) => {
+    value = value?.trim();
+
+    if (value) {
       obj[key] = value;
-      return obj;
-    }, {} as Record<string, unknown>);
+    }
+
+    return obj;
+  }, {} as Record<string, unknown>);
 }
 
 export async function getApmIndicesSavedObject(savedObjectsClient: SavedObjectsClientContract) {

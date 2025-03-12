@@ -31,25 +31,28 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFr
 export const createTracesContextService = async ({
   apmSourcesAccess,
 }: TracesContextServiceDeps): Promise<TracesContextService> => {
-  let traces: string;
-  let allowedDataSources: RegExp;
-
   if (apmSourcesAccess) {
-    const { transaction, span } = await apmSourcesAccess.getApmIndices();
+    const indices = await apmSourcesAccess.getApmIndices();
 
-    const allIndices = [transaction, span]
-      .flatMap((index) => index.split(','))
-      .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
-    const uniqueIndices = Array.from(new Set(allIndices));
+    if (indices) {
+      const { transaction, span } = indices;
 
-    traces = uniqueIndices.join();
-    allowedDataSources = createRegExpPatternFrom(uniqueIndices, 'data');
-  } else {
-    traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
-    allowedDataSources = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP;
+      const allIndices = [transaction, span]
+        .flatMap((index) => index.split(','))
+        .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
+      const uniqueIndices = Array.from(new Set(allIndices));
+
+      const traces = uniqueIndices.join();
+      const allowedDataSources = [createRegExpPatternFrom(uniqueIndices, 'data')];
+
+      return getTracesContextService(traces, allowedDataSources);
+    }
   }
 
-  return getTracesContextService(traces, [allowedDataSources]);
+  const traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
+  const allowedDataSources = [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+
+  return getTracesContextService(traces, allowedDataSources);
 };
 
 export const getTracesContextService = (traces: string, allowedDataSources: RegExp[]) => ({

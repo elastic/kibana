@@ -23,15 +23,7 @@ export class ApmSourceAccessPlugin
   public setup() {}
 
   public start(core: CoreStart) {
-    const services = registerServices({
-      deps: {
-        uiSettings: core.uiSettings,
-      },
-    });
-
-    return {
-      ...services,
-    };
+    return registerServices(core);
   }
 
   public stop() {}

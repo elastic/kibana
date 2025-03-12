@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
+import type { HttpStart } from '@kbn/core/public';
 import type { APMIndices } from '../common/config_schema';
 
 export interface RegisterServicesParams {
-  deps: {
-    uiSettings: IUiSettingsClient;
-  };
+  http: HttpStart;
 }
 
 export function registerServices(params: RegisterServicesParams) {
   return createApmDataAccessService(params);
 }
 
-export function createApmDataAccessService(params: RegisterServicesParams) {
-  const { uiSettings } = params.deps;
-
+export function createApmDataAccessService({ http }: RegisterServicesParams) {
   const getApmIndices = async () => {
-    return uiSettings.get<APMIndices>(OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID);
+    try {
+      const indices = await http.get<APMIndices>('/internal/apm-sources/settings/apm-indices');
+
+      return indices;
+    } catch (error) {
+      // If unsuccessful, just assume no indices are available from APM.
+      // We will fallback to default settings regardless
+      return undefined;
+    }
   };
 
   const apmSourcesService = {

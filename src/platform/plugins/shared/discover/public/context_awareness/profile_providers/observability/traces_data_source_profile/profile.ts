@@ -20,7 +20,8 @@ export const createTracesDataSourceProfileProvider = ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   isExperimental: true,
   profile: {
-    getDefaultAppState: () => () => ({
+    getDefaultAppState: (prev) => (params) => ({
+      ...prev(params),
       columns: [
         {
           name: '@timestamp',

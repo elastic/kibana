@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import {
-  type PluginInitializerContext,
-  type CoreSetup,
-  type CoreStart,
-  type Plugin,
-  type SavedObjectsClientContract,
-  type Logger,
-  SavedObjectsClient,
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  Plugin,
+  SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
-import { OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID } from '@kbn/management-settings-ids';
 import type { APMSourcesAccessConfig } from '../common/config_schema';
 
 import {
   apmIndicesSavedObjectDefinition,
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
-import { uiSettings } from '../common/ui_settings';
+import { registerRoutes } from './register_routes';
+import { apmSourcesSettingsRouteRepository } from './routes';
 
 /**
  * APM Source setup services
@@ -37,10 +35,12 @@ export class ApmSourcesAccessPlugin
 {
   public config: APMSourcesAccessConfig;
   public logger: Logger;
+  private readonly kibanaVersion: string;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<APMSourcesAccessConfig>();
     this.logger = initContext.logger.get();
+    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   getApmIndices = async (savedObjectsClient: SavedObjectsClientContract) => {
@@ -55,36 +55,30 @@ export class ApmSourcesAccessPlugin
   public setup(core: CoreSetup) {
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
-    core.uiSettings.register({
-      [OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID]: {
-        ...uiSettings[OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID],
-        value: JSON.stringify(this.config.indices, null, 2),
-      },
-    });
 
-    // expose
-    return {
+    const services = {
       apmIndicesFromConfigFile: this.config.indices,
       getApmIndices: this.getApmIndices,
     };
+
+    registerRoutes({
+      core: {
+        setup: core,
+      },
+      logger: this.logger,
+      repository: apmSourcesSettingsRouteRepository,
+      plugin: services,
+      kibanaVersion: this.kibanaVersion,
+    });
+
+    // expose
+    return services;
   }
 
   /**
    * Initialises the user value for APM Sources UI settings.
    */
-  public start(core: CoreStart) {
-    const initSettings = async () => {
-      const soClient = core.savedObjects.createInternalRepository();
-      const indices = await this.getApmIndices(soClient);
-      const uiSettingsClient = core.uiSettings.asScopedToClient(new SavedObjectsClient(soClient));
-      await uiSettingsClient.set(
-        OBSERVABILITY_APM_SOURCES_ACCESS_APM_SOURCES_ID,
-        JSON.stringify(indices, null, 2)
-      );
-    };
-
-    initSettings().catch((e) => this.logger.error(e));
-
+  public start() {
     return {
       getApmIndices: this.getApmIndices,
     };
