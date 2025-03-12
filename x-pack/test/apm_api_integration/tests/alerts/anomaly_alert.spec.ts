@@ -14,7 +14,7 @@ import { range } from 'lodash';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { Effect, pipe } from 'effect';
+import { Effect } from 'effect';
 import {
   APM_ALERTS_INDEX,
   ApmAlertFields,
