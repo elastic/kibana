@@ -13,6 +13,7 @@ import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,
@@ -38,10 +39,7 @@ import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -65,6 +63,7 @@ export class StatusRuleExecutor {
   options: StatusRuleExecutorOptions;
   logger: Logger;
   ruleName: string;
+  monitorConfigRepository: MonitorConfigRepository;
 
   constructor(
     esClient: SyntheticsEsClient,
@@ -80,6 +79,10 @@ export class StatusRuleExecutor {
     this.params = params;
     this.soClient = savedObjectsClient;
     this.esClient = esClient;
+    this.monitorConfigRepository = new MonitorConfigRepository(
+      savedObjectsClient,
+      server.encryptedSavedObjects.getClient()
+    );
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.hasCustomCondition = !isEmpty(this.params);
@@ -125,8 +128,7 @@ export class StatusRuleExecutor {
       projects: this.params?.projects,
     });
 
-    this.monitors = await getAllMonitors({
-      soClient: this.soClient,
+    this.monitors = await this.monitorConfigRepository.getAll({
       filter: filtersStr,
     });
 

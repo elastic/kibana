@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { maintenanceWindowResponseSchemaV1 } from '..';
+import type { maintenanceWindowResponseSchemaV1 } from '..';
 
 export type MaintenanceWindowResponse = TypeOf<typeof maintenanceWindowResponseSchemaV1>;
