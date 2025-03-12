@@ -65,6 +65,6 @@ export function getStoredTimelineColumnsConfig() {
   }
 }
 
-export function setStoredTimelineColumnsConfig(config: LocalStorageColumnSettings) {
+export function setStoredTimelineColumnsConfig(config?: LocalStorageColumnSettings) {
   localStorage.setItem(TIMELINE_COLUMNS_CONFIG_KEY, JSON.stringify(config));
 }

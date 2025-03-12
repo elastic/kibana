@@ -11,6 +11,7 @@ import { updateColumnWidth } from '../actions';
 import {
   TIMELINE_COLUMNS_CONFIG_KEY,
   getStoredTimelineColumnsConfig,
+  setStoredTimelineColumnsConfig,
 } from './timeline_localstorage';
 
 const initialWidth = 123456789;
@@ -21,7 +22,7 @@ describe('Timeline localStorage middleware', () => {
   beforeEach(() => {
     store = createMockStore(undefined, undefined, kibanaMock);
     jest.clearAllMocks();
-    localStorage.removeItem(TIMELINE_COLUMNS_CONFIG_KEY);
+    setStoredTimelineColumnsConfig(undefined);
   });
 
   it('should write the timeline column settings to localStorage', async () => {

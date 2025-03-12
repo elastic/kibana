@@ -205,8 +205,7 @@ describe('Timeline', () => {
     });
 
     test('should not apply changes to the columns when no previous config is stored in localStorage', () => {
-      // overwrite the localstorage with a nasty type cast
-      setStoredTimelineColumnsConfig(undefined as unknown as LocalStorageColumnSettings);
+      setStoredTimelineColumnsConfig(undefined);
       const update = addTimelineToStore({
         id: 'foo',
         timeline: {
