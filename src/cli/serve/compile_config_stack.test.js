@@ -111,6 +111,37 @@ describe('compileConfigStack', () => {
     }
   );
 
+  it('adds no additional `security` tier config to the stack when no product tier', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        serverless: 'es',
+        xpack: {
+          securitySolutionServerless: {
+            enabled: true,
+            productTypes: [
+              {
+                product_line: 'security',
+              },
+            ],
+          },
+        },
+      };
+    });
+    const configList = compileConfigStack({
+      serverless: 'security',
+      dev: true,
+    }).map(toFileNames);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.security.yml',
+      'kibana.yml',
+      'kibana.dev.yml',
+      'serverless.dev.yml',
+      'serverless.security.dev.yml',
+    ]);
+  });
+
   it('defaults to "es" if --serverless and --dev are there', async () => {
     getConfigFromFiles.mockImplementationOnce(() => {
       return {
