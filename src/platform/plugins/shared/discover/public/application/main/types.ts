@@ -7,19 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsyncState } from 'react-use/lib/useAsyncFn';
-import type { RootProfileState } from '../../context_awareness';
-
 export interface MainRouteInitializationState {
   hasESData: boolean;
   hasUserDataView: boolean;
 }
-
-export type InitializeMainRoute = (
-  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
-) => Promise<MainRouteInitializationState>;
-
-export type NarrowAsyncState<TState extends AsyncState<unknown>> = Exclude<
-  TState,
-  { error?: undefined; value?: undefined }
->;

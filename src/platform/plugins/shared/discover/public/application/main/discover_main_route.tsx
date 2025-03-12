@@ -12,8 +12,6 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -22,6 +20,7 @@ import {
   createRuntimeStateManager,
   internalStateActions,
 } from './state_management/redux';
+import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
 import { DiscoverError } from '../../components/common/error_alert';
 import {
@@ -29,13 +28,18 @@ import {
   DiscoverSessionView,
   NoDataPage,
 } from './components/session_view';
-import type { InitializeMainRoute, NarrowAsyncState } from './types';
+import { useAsyncFunction } from './hooks/use_async_function';
+import type { MainRouteInitializationState } from './types';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
 }
+
+type InitializeMainRoute = (
+  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
+) => Promise<MainRouteInitializationState>;
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
@@ -62,29 +66,23 @@ export const DiscoverMainRoute = ({
     createInternalStateStore({ services, runtimeStateManager })
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
-  const initialize = useLatest<InitializeMainRoute>(async (loadedRootProfileState) => {
-    const { dataViews } = services;
-    const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
-      dataViews.hasData.hasESData().catch(() => false),
-      dataViews.hasData.hasUserDataView().catch(() => false),
-      dataViews.defaultDataViewExists().catch(() => false),
-      internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-      initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-    ]);
+  const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
+    async (loadedRootProfileState) => {
+      const { dataViews } = services;
+      const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
+        dataViews.hasData.hasESData().catch(() => false),
+        dataViews.hasData.hasUserDataView().catch(() => false),
+        dataViews.defaultDataViewExists().catch(() => false),
+        internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
+      ]);
 
-    return {
-      hasESData,
-      hasUserDataView: hasUserDataView && defaultDataViewExists,
-    };
-  });
-  const [initializationState, initializeMainRoute] = useAsyncFn<InitializeMainRoute>(
-    (...params) => initialize.current(...params),
-    [initialize],
-    { loading: true }
+      return {
+        hasESData,
+        hasUserDataView: hasUserDataView && defaultDataViewExists,
+      };
+    }
   );
-  const mainRouteInitializationState = initializationState as NarrowAsyncState<
-    typeof initializationState
-  >;
 
   useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {

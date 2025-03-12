@@ -17,7 +17,6 @@ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep, isEqual } from 'lodash';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getValidFilters } from '../../../../utils/get_valid_filters';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../utils/validate_time';
@@ -64,7 +63,8 @@ import { updateSavedSearch } from '../../state_management/utils/update_saved_sea
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
-import type { MainRouteInitializationState, NarrowAsyncState } from '../../types';
+import type { MainRouteInitializationState } from '../../types';
+import { useAsyncFunction } from '../../hooks/use_async_function';
 
 interface DiscoverSessionViewProps {
   mainRouteInitializationState: MainRouteInitializationState;
@@ -116,184 +116,177 @@ export const DiscoverSessionView = ({
   const defaultProfileAdHocDataViewIds = useInternalStateSelector(
     (state) => state.defaultProfileAdHocDataViewIds
   );
-  const initialize = useLatest<InitializeSession>(async (defaultUrlState) => {
-    internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
+  const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
+    async (defaultUrlState) => {
+      internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
 
-    const discoverSessionLoadTracker = ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
-    const urlState = cleanupUrlState(
-      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? defaultUrlState,
-      uiSettings
-    );
-    const persistedDiscoverSession = discoverSessionId
-      ? await savedSearch.get(discoverSessionId)
-      : undefined;
-    const initialQuery =
-      urlState?.query ?? persistedDiscoverSession?.searchSource.getField('query');
-    const isEsqlMode = isOfAggregateQueryType(initialQuery);
-    const discoverSessionDataView = persistedDiscoverSession?.searchSource.getField('index');
-    const discoverSessionHasAdHocDataView = Boolean(
-      discoverSessionDataView && !discoverSessionDataView.isPersisted()
-    );
-    const profileDataViews = runtimeStateManager.adHocDataViews$
-      .getValue()
-      .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
-    const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
-    const canAccessWithoutPersistedDataView =
-      isEsqlMode ||
-      discoverSessionHasAdHocDataView ||
-      profileDataViewsExist ||
-      locationStateHasDataViewSpec;
+      const discoverSessionLoadTracker =
+        ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
+      const urlState = cleanupUrlState(
+        urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? defaultUrlState,
+        uiSettings
+      );
+      const persistedDiscoverSession = discoverSessionId
+        ? await savedSearch.get(discoverSessionId)
+        : undefined;
+      const initialQuery =
+        urlState?.query ?? persistedDiscoverSession?.searchSource.getField('query');
+      const isEsqlMode = isOfAggregateQueryType(initialQuery);
+      const discoverSessionDataView = persistedDiscoverSession?.searchSource.getField('index');
+      const discoverSessionHasAdHocDataView = Boolean(
+        discoverSessionDataView && !discoverSessionDataView.isPersisted()
+      );
+      const profileDataViews = runtimeStateManager.adHocDataViews$
+        .getValue()
+        .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
+      const profileDataViewsExist = profileDataViews.length > 0;
+      const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
+      const canAccessWithoutPersistedDataView =
+        isEsqlMode ||
+        discoverSessionHasAdHocDataView ||
+        profileDataViewsExist ||
+        locationStateHasDataViewSpec;
 
-    if (!mainRouteInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
-      return { showNoDataPage: true };
-    }
-
-    if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
-      if (persistedDiscoverSession.id) {
-        chrome.recentlyAccessed.add(
-          getSavedSearchFullPathUrl(persistedDiscoverSession.id),
-          persistedDiscoverSession.title ??
-            i18n.translate('discover.defaultDiscoverSessionTitle', {
-              defaultMessage: 'Untitled Discover session',
-            }),
-          persistedDiscoverSession.id
-        );
+      if (!mainRouteInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+        return { showNoDataPage: true };
       }
 
-      setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
-    }
+      if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
+        if (persistedDiscoverSession.id) {
+          chrome.recentlyAccessed.add(
+            getSavedSearchFullPathUrl(persistedDiscoverSession.id),
+            persistedDiscoverSession.title ??
+              i18n.translate('discover.defaultDiscoverSessionTitle', {
+                defaultMessage: 'Untitled Discover session',
+              }),
+            persistedDiscoverSession.id
+          );
+        }
 
-    let dataView: DataView;
+        setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
+      }
 
-    if (isOfAggregateQueryType(initialQuery)) {
-      dataView = await getEsqlDataView(
-        initialQuery,
-        runtimeStateManager.currentDataView$.getValue(),
-        services
-      );
-    } else {
-      const result = await loadAndResolveDataView({
-        dataViewId: isDataViewSource(urlState?.dataSource)
-          ? urlState?.dataSource.dataViewId
-          : discoverSessionDataView?.id,
-        dataViewSpec: historyLocationState?.dataViewSpec,
-        savedSearch: persistedDiscoverSession,
-        isEsqlMode,
+      let dataView: DataView;
+
+      if (isOfAggregateQueryType(initialQuery)) {
+        dataView = await getEsqlDataView(
+          initialQuery,
+          runtimeStateManager.currentDataView$.getValue(),
+          services
+        );
+      } else {
+        const result = await loadAndResolveDataView({
+          dataViewId: isDataViewSource(urlState?.dataSource)
+            ? urlState?.dataSource.dataViewId
+            : discoverSessionDataView?.id,
+          dataViewSpec: historyLocationState?.dataViewSpec,
+          savedSearch: persistedDiscoverSession,
+          isEsqlMode,
+          services,
+          internalState,
+          runtimeStateManager,
+        });
+
+        dataView = result.dataView;
+      }
+
+      internalState.dispatch(internalStateActions.setDataView(dataView));
+
+      if (!dataView.isPersisted()) {
+        internalState.dispatch(internalStateActions.appendAdHocDataViews(dataView));
+      }
+
+      const stateContainer = getDiscoverStateContainer({
         services,
+        customizationContext,
+        stateStorageContainer: urlStateStorage,
         internalState,
         runtimeStateManager,
       });
+      const initialState = getInitialState({
+        initialUrlState: urlState,
+        savedSearch: persistedDiscoverSession,
+        overrideDataView: dataView,
+        services,
+      });
+      const discoverSession = updateSavedSearch({
+        savedSearch: persistedDiscoverSession
+          ? copySavedSearch(persistedDiscoverSession)
+          : savedSearch.getNew(),
+        dataView,
+        state: initialState,
+        globalStateContainer: stateContainer.globalState,
+        services,
+      });
 
-      dataView = result.dataView;
-    }
+      if (discoverSession.timeRestore && dataView.isTimeBased()) {
+        const { timeRange, refreshInterval } = discoverSession;
 
-    internalState.dispatch(internalStateActions.setDataView(dataView));
+        if (timeRange && isTimeRangeValid(timeRange)) {
+          services.timefilter.setTime(timeRange);
+        }
 
-    if (!dataView.isPersisted()) {
-      internalState.dispatch(internalStateActions.appendAdHocDataViews(dataView));
-    }
-
-    const stateContainer = getDiscoverStateContainer({
-      services,
-      customizationContext,
-      stateStorageContainer: urlStateStorage,
-      internalState,
-      runtimeStateManager,
-    });
-    const initialState = getInitialState({
-      initialUrlState: urlState,
-      savedSearch: persistedDiscoverSession,
-      overrideDataView: dataView,
-      services,
-    });
-    const discoverSession = updateSavedSearch({
-      savedSearch: persistedDiscoverSession
-        ? copySavedSearch(persistedDiscoverSession)
-        : savedSearch.getNew(),
-      dataView,
-      state: initialState,
-      globalStateContainer: stateContainer.globalState,
-      services,
-    });
-
-    if (discoverSession.timeRestore && dataView.isTimeBased()) {
-      const { timeRange, refreshInterval } = discoverSession;
-
-      if (timeRange && isTimeRangeValid(timeRange)) {
-        services.timefilter.setTime(timeRange);
+        if (refreshInterval && isRefreshIntervalValid(refreshInterval)) {
+          services.timefilter.setRefreshInterval(refreshInterval);
+        }
       }
 
-      if (refreshInterval && isRefreshIntervalValid(refreshInterval)) {
-        services.timefilter.setRefreshInterval(refreshInterval);
+      // Cleaning up the previous state
+      services.filterManager.setAppFilters([]);
+      services.data.query.queryString.clearQuery();
+
+      // Sync global filters (coming from URL) to filter manager.
+      // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is being called after this `loadSavedSearch` function.
+      const globalFilters = stateContainer.globalState?.get()?.filters;
+      const shouldUpdateWithGlobalFilters =
+        globalFilters?.length && !services.filterManager.getGlobalFilters()?.length;
+      if (shouldUpdateWithGlobalFilters) {
+        services.filterManager.setGlobalFilters(globalFilters);
       }
-    }
 
-    // Cleaning up the previous state
-    services.filterManager.setAppFilters([]);
-    services.data.query.queryString.clearQuery();
+      // set data service filters
+      if (initialState.filters?.length) {
+        // Saved search SO persists all filters as app filters
+        services.data.query.filterManager.setAppFilters(cloneDeep(initialState.filters));
+      }
 
-    // Sync global filters (coming from URL) to filter manager.
-    // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is being called after this `loadSavedSearch` function.
-    const globalFilters = stateContainer.globalState?.get()?.filters;
-    const shouldUpdateWithGlobalFilters =
-      globalFilters?.length && !services.filterManager.getGlobalFilters()?.length;
-    if (shouldUpdateWithGlobalFilters) {
-      services.filterManager.setGlobalFilters(globalFilters);
-    }
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      const currentFilters = services.filterManager.getFilters();
+      const validFilters = getValidFilters(dataView, currentFilters);
+      if (!isEqual(currentFilters, validFilters)) {
+        services.filterManager.setFilters(validFilters);
+      }
 
-    // set data service filters
-    if (initialState.filters?.length) {
-      // Saved search SO persists all filters as app filters
-      services.data.query.filterManager.setAppFilters(cloneDeep(initialState.filters));
-    }
+      // set data service query
+      if (initialState.query) {
+        services.data.query.queryString.setQuery(initialState.query);
+      }
 
-    // some filters may not be valid for this context, so update
-    // the filter manager with a modified list of valid filters
-    const currentFilters = services.filterManager.getFilters();
-    const validFilters = getValidFilters(dataView, currentFilters);
-    if (!isEqual(currentFilters, validFilters)) {
-      services.filterManager.setFilters(validFilters);
-    }
+      if (!urlState && shouldUpdateWithGlobalFilters) {
+        discoverSession.searchSource.setField(
+          'filter',
+          cloneDeep(services.filterManager.getFilters())
+        );
+      }
 
-    // set data service query
-    if (initialState.query) {
-      services.data.query.queryString.setQuery(initialState.query);
-    }
+      if (persistedDiscoverSession) {
+        stateContainer.savedSearchState.set(persistedDiscoverSession);
+        stateContainer.savedSearchState.assignNextSavedSearch(discoverSession);
+      } else {
+        stateContainer.savedSearchState.set(discoverSession);
+      }
 
-    if (!urlState && shouldUpdateWithGlobalFilters) {
-      discoverSession.searchSource.setField(
-        'filter',
-        cloneDeep(services.filterManager.getFilters())
-      );
-    }
+      stateContainer.appState.set(initialState);
+      discoverSessionLoadTracker.reportEvent();
 
-    if (persistedDiscoverSession) {
-      stateContainer.savedSearchState.set(persistedDiscoverSession);
-      stateContainer.savedSearchState.assignNextSavedSearch(discoverSession);
-    } else {
-      stateContainer.savedSearchState.set(discoverSession);
-    }
-
-    stateContainer.appState.set(initialState);
-    discoverSessionLoadTracker.reportEvent();
-
-    return { showNoDataPage: false, stateContainer };
-  });
-  const [initializationState, initializeSession] = useAsyncFn<InitializeSession>(
-    (...params) => initialize.current(...params),
-    [initialize],
-    {
-      loading: true,
+      return { showNoDataPage: false, stateContainer };
     }
   );
   const initializeSessionWithDefaultLocationState = useLatest(() => {
     const scopedHistory = getScopedHistory<{ defaultState?: DiscoverAppState }>();
     initializeSession(scopedHistory?.location.state?.defaultState);
   });
-  const initializeSessionState = initializationState as NarrowAsyncState<
-    typeof initializationState
-  >;
   const customizationService = useDiscoverCustomizationService({
     customizationCallbacks,
     stateContainer: initializeSessionState.value?.stateContainer,
