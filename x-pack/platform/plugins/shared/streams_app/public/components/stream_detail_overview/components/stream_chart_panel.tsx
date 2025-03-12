@@ -53,7 +53,6 @@ export function StreamChartPanel({ histogramQueryFetch, discoverLink }: StreamCh
             result={histogramQueryFetch}
             id="entity_log_rate"
             metricNames={['metric']}
-            height={200}
             chartType={'bar'}
           />
         </EuiFlexItem>

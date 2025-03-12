@@ -48,7 +48,7 @@ export function QuickLinks({ definition }: { definition?: IngestStreamGetRespons
                     },
                   })}
                 >
-                  {i18n.translate('xpack.streams.entityDetailOverview.createChildStream', {
+                  {i18n.translate('xpack.streams.entityDetailOverview.addDashboardButton', {
                     defaultMessage: 'Add dashboards',
                   })}
                 </EuiLink>

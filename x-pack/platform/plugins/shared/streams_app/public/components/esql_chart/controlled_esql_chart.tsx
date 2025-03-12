@@ -67,7 +67,7 @@ export function ControlledEsqlChart<T extends string>({
   result: AbortableAsyncState<UnparsedEsqlResponse>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
-  height: number;
+  height?: number;
 }) {
   const {
     core: { uiSettings },
@@ -84,12 +84,14 @@ export function ControlledEsqlChart<T extends string>({
     [result, ...metricNames]
   );
 
+  const effectiveHeight = height ? `${height}px` : '100%';
+
   if (result.loading && !result.value?.values.length) {
     return (
       <LoadingPanel
         loading
         className={css`
-          height: 100%;
+          height: ${effectiveHeight};
         `}
       />
     );
@@ -115,7 +117,7 @@ export function ControlledEsqlChart<T extends string>({
     <Chart
       id={id}
       className={css`
-        height: 100%;
+        height: ${effectiveHeight};
       `}
     >
       <Tooltip
