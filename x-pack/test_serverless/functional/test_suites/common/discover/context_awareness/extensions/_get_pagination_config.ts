@@ -66,6 +66,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('data view mode', () => {
+      it('should render single page pagination without page numbers', async () => {
+        await common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
+        await dataViews.switchTo('my-example-logs,logstash*');
+        await discover.waitUntilSearchingHasFinished();
+        await testSubjects.missingOrFail('tablePaginationPopoverButton');
+        await testSubjects.missingOrFail('pagination-button-previous');
+        await testSubjects.missingOrFail('pagination-button-next');
+      });
+
       it('should render default pagination with page numbers', async () => {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
