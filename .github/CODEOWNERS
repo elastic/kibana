@@ -1167,6 +1167,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/traces_document_profile @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/traces_data_source_profile @elastic/obs-ux-infra_services-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability_root_profile @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 
 # Platform Docs
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/index.ts @elastic/platform-docs
