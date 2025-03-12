@@ -15,8 +15,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiThemeComputed,
   useEuiTheme,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';

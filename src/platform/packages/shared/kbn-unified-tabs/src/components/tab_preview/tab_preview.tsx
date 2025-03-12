@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiSplitPanel, EuiText, EuiCode } from '@elastic/eui';
+import { EuiSplitPanel, EuiText, EuiCode, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 
 interface TabPreviewProps {
   children: React.ReactNode;
@@ -23,6 +23,8 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   setShowPreview,
   stopPreviewOnHover,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <div>
       <span
@@ -35,7 +37,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         {children}
       </span>
       {showPreview && (
-        <EuiSplitPanel.Outer grow css={getPreviewContainerCss()}>
+        <EuiSplitPanel.Outer grow css={getPreviewContainerCss(euiTheme)}>
           <EuiSplitPanel.Inner>
             <EuiText>
               <p>Tab preview</p>
@@ -52,11 +54,12 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   );
 };
 
-function getPreviewContainerCss() {
+const getPreviewContainerCss = (euiTheme: EuiThemeComputed) => {
   return css`
     position: fixed;
     z-index: 10000;
+    margin-top: ${euiTheme.size.xs};
     width: 280px;
     min-height: 112px;
   `;
-}
+};
