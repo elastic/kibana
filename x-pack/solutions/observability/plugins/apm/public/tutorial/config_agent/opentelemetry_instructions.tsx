@@ -35,16 +35,6 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
       value: `Authorization=Bearer ${secretToken ? secretToken : '<secret-token>'}`,
     },
     {
-      setting: 'OTEL_METRICS_EXPORTER',
-      value: 'otlp',
-      notes: 'Enable metrics when supported by your OpenTelemetry client.',
-    },
-    {
-      setting: 'OTEL_LOGS_EXPORTER',
-      value: 'otlp',
-      notes: 'Enable logs when supported by your OpenTelemetry client',
-    },
-    {
       setting: 'OTEL_RESOURCE_ATTRIBUTES',
       value:
         'service.name=<app-name>,service.version=<app-version>,deployment.environment=production',
@@ -132,11 +122,6 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
               </EuiLink>
             ),
           }}
-        />
-        <EuiSpacer size="xs" />
-        <FormattedMessage
-          id="xpack.apm.tutorial.config_otel.description2"
-          defaultMessage="The 'OTEL_METRICS_EXPORTER`, 'OTEL_LOGS_EXPORTER' and 'OTEL_TRACES_EXPORTER' environment variables may not be supported by some SDKs."
         />
         <EuiSpacer size="xs" />
         <FormattedMessage
