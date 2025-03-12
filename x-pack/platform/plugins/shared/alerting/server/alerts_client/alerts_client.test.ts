@@ -57,7 +57,7 @@ import type {
   LogAlertsOpts,
 } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
-import { keys, omit, range } from 'lodash';
+import { keys, omit } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { expandFlattenedAlert } from './lib';
