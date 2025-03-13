@@ -34,17 +34,20 @@ export const RuleDashboards = ( { plugins }) => {
   >();
 
   useEffect(() => {
-    const fetchDashboardTitles = async () => {
-      const dashboardsWithTitles = await Promise.all(
-        (params.dashboards ?? []).map(async (dashboard) => ({
-          label: (await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id))?.attributes.title,
-          value: dashboard.id,
-        }))
-      );
-      setSelectedDashboards(dashboardsWithTitles);
-    };
-
-    fetchDashboardTitles();
+    if((params.dashboards ?? []).length > 0) {
+      const fetchDashboardTitles = async () => {
+        const dashboardsWithTitles = await Promise.all(
+          (params.dashboards ?? []).map(async (dashboard) => ({
+            label: (await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id))?.attributes.title,
+            value: dashboard.id,
+          }))
+        );
+        setSelectedDashboards(dashboardsWithTitles);
+      };
+  
+      fetchDashboardTitles();
+    }
+    
   }, [params.dashboards, dashboardService]);
 
   const onChange = (selectedOptions: any[]) => {
@@ -72,7 +75,9 @@ export const RuleDashboards = ( { plugins }) => {
   }, [dashboardService]);
 
   useEffect(() => {
-    loadDashboards();
+    if (isLinkedDashboardsEnabled) {
+      loadDashboards();
+    }
   }, [loadDashboards]);
 
   return (

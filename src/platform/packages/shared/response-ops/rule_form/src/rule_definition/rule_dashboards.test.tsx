@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDashboards } from './rule_dashboards';
+// import { dashboardServiceProvider } from './dashboard_service';
 
 const mockOnChange = jest.fn();
 
@@ -32,9 +33,9 @@ jest.mock('./dashboard_service', () => ({
 }));
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { dashboardServiceProvider: mockDashboardServiceProvider } = jest.requireMock('./dashboard_service');
 
 describe('RuleDashboards', () => {
-
   beforeEach(() => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
     useRuleFormState.mockReturnValue({
@@ -48,6 +49,21 @@ describe('RuleDashboards', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('does not render linked dashboards combo box when feature flag is disabled', () => {
+    const plugins = {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockReturnValue(false),
+      }
+    };
+
+    render(<RuleDashboards plugins={plugins} />);
+
+    expect(screen.queryByText(/Link dashboard\(s\)/i)).not.toBeInTheDocument();
+    expect(mockDashboardServiceProvider).not.toHaveBeenCalled();
+    expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
+    expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
   });
 
   it('renders linked dashboards combo box when feature flag is enabled', async () => {
@@ -64,18 +80,11 @@ describe('RuleDashboards', () => {
     );
 
     expect(screen.getByText(/Link dashboard\(s\)/i)).toBeInTheDocument();
-  });
-
-  it('does not render linked dashboards combo box when feature flag is disabled', () => {
-    const plugins = {
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(false),
-      }
-    };
-
-    render(<RuleDashboards plugins={plugins} />);
-
-    expect(screen.queryByText(/Link dashboard\(s\)/i)).not.toBeInTheDocument();
+    expect(useRuleFormState).toHaveBeenCalledTimes(1);
+    expect(useRuleFormDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);
+    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
+    expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
   });
 
   it('fetches and displays dashboard titles', async () => {
@@ -106,6 +115,9 @@ describe('RuleDashboards', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
+      expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
   });
 
@@ -138,6 +150,8 @@ describe('RuleDashboards', () => {
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
       expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
+      expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
 
     // Simulate selecting an option in the EuiComboBox
