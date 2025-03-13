@@ -531,7 +531,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
       legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
-      siemMigrations: `${SECURITY_SOLUTION_DOCS}ai-for-security.html`, // TODO: Update this link once the content is available
+      siemMigrations: `${SECURITY_SOLUTION_DOCS}siem-migration.html`,
       llmPerformanceMatrix: `${SECURITY_SOLUTION_DOCS}llm-performance-matrix.html`,
     },
     query: {
