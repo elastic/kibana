@@ -11,7 +11,7 @@ export const relevantPanelSchema = z.object({
   panel: z.object({
     panelIndex: z.string(),
     type: z.string(),
-    embeddableConfig: z.record(z.string(), z.any()),
+    panelConfig: z.record(z.string(), z.any()),
     title: z.string().optional(),
   }),
   matchedBy: z.object({

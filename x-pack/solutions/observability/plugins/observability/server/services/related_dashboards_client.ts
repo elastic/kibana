@@ -105,7 +105,7 @@ export class RelatedDashboardsClient {
             panel: {
               panelIndex: p.panelIndex || uuidv4(),
               type: p.type,
-              embeddableConfig: p.panelConfig,
+              panelConfig: p.panelConfig,
               title: p.title,
             },
             matchedBy: { index: [index] },
@@ -153,7 +153,7 @@ export class RelatedDashboardsClient {
             panel: {
               panelIndex: p.panel.panelIndex || uuidv4(),
               type: p.panel.type,
-              embeddableConfig: p.panel.panelConfig,
+              panelConfig: p.panel.panelConfig,
               title: p.panel.title,
             },
             matchedBy: { fields: Array.from(p.matchingFields) },
