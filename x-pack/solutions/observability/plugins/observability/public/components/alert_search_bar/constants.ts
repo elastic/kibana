@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_STATUS_ACTIVE,
@@ -16,7 +16,7 @@ import {
 import { AlertStatusFilter } from '../../../common/typings';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 
-export const DEFAULT_QUERIES: Query[] = [];
+export const EMPTY_FILTERS: Filter[] = [];
 export const DEFAULT_QUERY_STRING = '';
 
 export const ALL_ALERTS: AlertStatusFilter = {
