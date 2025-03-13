@@ -26,7 +26,6 @@ import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { ImportJobsFlyout } from '../../../../../components/import_export_jobs';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
-import { useMlManagementLocator } from '../../../../../contexts/kibana';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';
@@ -98,8 +97,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   pageState,
   updatePageState,
 }) => {
-  const mlManagementLocator = useMlManagementLocator();
-
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
     (value: string) => {
@@ -177,7 +174,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isLoading: setIsLoading,
     onRefresh: getAnalyticsCallback,
   });
-  const canCreateAnalytics = usePermissionCheck('canCreateDataFrameAnalytics');
 
   useEffect(
     function updateOnTimerRefresh() {
@@ -266,16 +262,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           {stats}
           <EuiFlexGroup direction="row" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <ExportJobsFlyout
-                isDisabled={!canCreateAnalytics}
-                currentTab={'data-frame-analytics'}
-              />
+              <ExportJobsFlyout isDisabled={disabled} currentTab={'data-frame-analytics'} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ImportJobsFlyout
-                isDisabled={!canCreateAnalytics}
-                onImportComplete={getAnalyticsCallback}
-              />
+              <ImportJobsFlyout isDisabled={disabled} onImportComplete={getAnalyticsCallback} />
             </EuiFlexItem>
           </EuiFlexGroup>
 

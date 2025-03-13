@@ -34,7 +34,7 @@ export const SuppliedConfigurationsButton = () => {
 
 export const AnomalyDetectionSettingsButton = () => {
   const redirectToAnomalyDetectionSettingsPage = useCreateAndNavigateToManagementMlLink(
-    undefined,
+    '',
     'ad_settings'
   );
 
