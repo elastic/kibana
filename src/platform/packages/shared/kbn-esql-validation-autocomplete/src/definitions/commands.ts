@@ -30,22 +30,22 @@ import { ENRICH_MODES } from './settings';
 import { type CommandDefinition } from './types';
 import { checkAggExistence, checkFunctionContent } from './commands_helpers';
 
-import { suggest as suggestForSort } from '../autocomplete/commands/sort';
-import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
-import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
-import { suggest as suggestForStats } from '../autocomplete/commands/stats';
-import { suggest as suggestForWhere } from '../autocomplete/commands/where';
-import { suggest as suggestForJoin } from '../autocomplete/commands/join';
-import { suggest as suggestForFrom } from '../autocomplete/commands/from';
-import { suggest as suggestForRow } from '../autocomplete/commands/row';
-import { suggest as suggestForShow } from '../autocomplete/commands/show';
-import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
+import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
-import { suggest as suggestForRename } from '../autocomplete/commands/rename';
+import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
 import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
+import { suggest as suggestForRename } from '../autocomplete/commands/rename';
+import { suggest as suggestForRow } from '../autocomplete/commands/row';
+import { suggest as suggestForShow } from '../autocomplete/commands/show';
+import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import { suggest as suggestForStats } from '../autocomplete/commands/stats';
+import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
