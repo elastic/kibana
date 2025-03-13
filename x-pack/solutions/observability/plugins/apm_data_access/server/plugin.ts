@@ -41,7 +41,9 @@ export class ApmDataAccessPlugin
 
     // expose
     return {
+      // TODO: Deprecate and replace with apmSourcesAccess
       apmIndicesFromConfigFile: this.config,
+      // TODO: Deprecate and replace with apmSourcesAccess
       getApmIndices: plugins.apmSourcesAccess.getApmIndices,
       getServices,
     };

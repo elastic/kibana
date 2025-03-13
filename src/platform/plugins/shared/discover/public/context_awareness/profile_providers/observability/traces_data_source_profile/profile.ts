@@ -11,6 +11,7 @@ import { DataSourceCategory, type DataSourceProfileProvider } from '../../../pro
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getCellRenderers } from './accessors';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
 const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
 
@@ -36,9 +37,10 @@ export const createTracesDataSourceProfileProvider = ({
     getCellRenderers,
   },
   resolve: (params) => {
-    const indexPattern = extractIndexPatternFrom(params);
-
-    if (tracesContextService.containsTracesIndexPattern(indexPattern)) {
+    if (
+      params.rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID &&
+      tracesContextService.containsTracesIndexPattern(extractIndexPatternFrom(params))
+    ) {
       return {
         isMatch: true,
         context: {
