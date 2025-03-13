@@ -95,6 +95,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
 
   return (
     <CollapsiblePanel
+      dataTestSubj={'mlDataFrameAnalyticsPanel'}
       isOpen={panelsState.dfaJobs}
       onToggle={(update) => {
         setPanelsState({ ...panelsState, dfaJobs: update });

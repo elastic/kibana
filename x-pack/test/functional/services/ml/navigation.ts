@@ -55,6 +55,14 @@ export function MachineLearningNavigationProvider({
       });
     },
 
+    async assertStackManagementMlSectionUnauthorized(sectionId: string) {
+      await PageObjects.common.navigateToApp('management');
+      await testSubjects.click(sectionId);
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.existOrFail('mlAccessDenied');
+      });
+    },
+
     async navigateToDiscoverViaAppsMenu() {
       await retry.tryForTime(60 * 1000, async () => {
         await appsMenu.clickLink('Discover');
@@ -270,17 +278,6 @@ export function MachineLearningNavigationProvider({
 
     async navigateToSettings() {
       await this.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
-    },
-
-    async navigateToStackManagementJobsListPage() {
-      // clicks the jobsListLink and loads the jobs list page
-      await testSubjects.click('jobsListLink');
-      await retry.tryForTime(60 * 1000, async () => {
-        // verify that the overall page is present
-        await testSubjects.existOrFail('mlPageStackManagementJobsList');
-        // verify that the default tab with the anomaly detection jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable');
-      });
     },
 
     async navigateToStackManagementInsuficientLicensePage() {

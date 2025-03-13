@@ -36,12 +36,23 @@ export function MachineLearningMemoryUsageProvider({ getService }: FtrProviderCo
       expect(isSelected).to.eql('true');
     },
 
-    async assertMemoryUsageExpandedDetailsPanelExists(selector: string = 'withData') {
-      await testSubjects.existOrFail(`mlJobTreeMap ${selector}`);
+    async assertMemoryUsageExpandedDetailsPanelExists(
+      expectPanelExits: boolean,
+      selector: string = 'withData'
+    ) {
+      if (expectPanelExits) {
+        await testSubjects.existOrFail(`mlJobTreeMap ${selector}`);
+      } else {
+        await testSubjects.missingOrFail('mlJobTreeMap');
+      }
     },
 
-    async assertNodeExpandedDetailsPanelExists() {
-      await testSubjects.existOrFail('mlNodesTableContainer');
+    async assertNodeExpandedDetailsPanelExists(expectPanelExits: boolean = true) {
+      if (expectPanelExits) {
+        await testSubjects.existOrFail('mlNodesTableContainer');
+      } else {
+        await testSubjects.missingOrFail('mlNodesTableContainer');
+      }
     },
 
     async assertRowCount(expectedCount: number) {

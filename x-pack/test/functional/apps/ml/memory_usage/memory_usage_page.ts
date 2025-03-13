@@ -37,19 +37,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('opens page with memory usage and nodes panel expanded', async () => {
-      await ml.memoryUsage.assertMemoryUsageExpandedDetailsPanelExists();
+      await ml.memoryUsage.assertMemoryUsageExpandedDetailsPanelExists(true);
       await ml.memoryUsage.assertNodeExpandedDetailsPanelExists();
     });
-    // TODO: confirm memory usage no longer supports search/sort
-    // it('allows sorting', async () => {
-    //   await ml.memoryUsage.sortColumn('tableHeaderCell_name_1');
-    //   await ml.memoryUsage.assertColumnIsSorted('tableHeaderCell_name_1', 'descending');
-    // });
-
-    // it('allows searching for a node', async () => {
-    //   await ml.memoryUsage.searchForNode('ftr');
-    //   await ml.memoryUsage.assertRowCount(1);
-    // });
 
     it('expands node details and displays memory usage details', async () => {
       await ml.memoryUsage.expandRow();

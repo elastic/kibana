@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function MachineLearningOverviewPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   return {
     async assertADEmptyStateExists() {
@@ -28,8 +29,12 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       await testSubjects.existOrFail('mlCreateNewJobButton');
     },
 
-    async assertADManageJobsButtonExists() {
-      await testSubjects.existOrFail('manageJobsButton');
+    async assertADManageJobsButtonExists(expectExists: boolean = true) {
+      if (expectExists) {
+        await testSubjects.existOrFail('manageJobsButton');
+      } else {
+        await testSubjects.missingOrFail('manageJobsButton');
+      }
     },
 
     async assertADJobButtonEnabled(subject: string, expectedValue: boolean) {
@@ -84,6 +89,21 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
 
     async assertAnomalyDetectionPanelExists() {
       await testSubjects.existOrFail('mlAnomalyDetectionPanel');
+    },
+
+    async assertDFAPanelExists(expectPanelExits: boolean = true) {
+      if (expectPanelExits) {
+        await testSubjects.existOrFail('mlDataFrameAnalyticsPanel');
+      } else {
+        await testSubjects.missingOrFail('mlDataFrameAnalyticsPanel');
+      }
+    },
+
+    async assertAnomalyDetectionPanelTableRowCount(count: number) {
+      const rows = await find.allByCssSelector(
+        `[data-test-subj="mlOverviewTableAnomalyDetection"] .euiTableRow`
+      );
+      expect(rows.length).to.eql(count);
     },
 
     async assertDFACreateJobButtonEnabled(expectedValue: boolean) {
