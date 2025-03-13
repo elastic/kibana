@@ -379,7 +379,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: [],
               wired: {
                 fields: {
-                  myfield: {
+                  'attributes.myfield': {
                     type: 'boolean',
                   },
                 },
@@ -400,7 +400,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 wired: {
                   ...body.stream.ingest.wired,
                   fields: {
-                    myfield: {
+                    'attributes.myfield': {
                       type: 'keyword',
                     },
                   },
@@ -421,7 +421,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: [],
               wired: {
                 fields: {
-                  myfield: {
+                  'attributes.myfield': {
                     type: 'system',
                   },
                 },
