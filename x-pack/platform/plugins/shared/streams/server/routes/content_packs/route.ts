@@ -13,7 +13,7 @@ import {
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-import { createSavedObjectsStreamFromNdJson } from '@kbn/core/packages/saved-objects/server-internal/src/routes/utils';
+import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
