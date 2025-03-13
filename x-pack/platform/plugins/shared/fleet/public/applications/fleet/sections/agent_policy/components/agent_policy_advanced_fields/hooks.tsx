@@ -16,7 +16,10 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../../../hooks';
-import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
+import {
+  DEFAULT_DOWNLOAD_SOURCE_ID,
+  LICENCE_FOR_PER_POLICY_OUTPUT,
+} from '../../../../../../../common/constants';
 import {
   getAllowedOutputTypesForAgentPolicy,
   policyHasFleetServer,
@@ -156,7 +159,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   );
 }
 
-export function useDownloadSourcesOptions(agentPolicy: Partial<NewAgentPolicy | AgentPolicy>) {
+export function useDownloadSourcesOptions() {
   const downloadSourcesRequest = useGetDownloadSources();
 
   const dataDownloadSourceOptions = useMemo(() => {
@@ -202,7 +205,7 @@ function getDefaultDownloadSource(
       }),
       defaultDownloadSourceDisabledMessage
     ),
-    value: DEFAULT_SELECT_VALUE,
+    value: DEFAULT_DOWNLOAD_SOURCE_ID,
     disabled: defaultDownloadSourceDisabled,
   };
 }
