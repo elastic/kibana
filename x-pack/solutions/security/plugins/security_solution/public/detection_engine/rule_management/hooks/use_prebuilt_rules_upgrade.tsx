@@ -201,11 +201,21 @@ export function usePrebuiltRulesUpgrade({
         return;
       }
 
-      await upgradeRulesWithDryRun({
-        mode: 'ALL_RULES',
-        pick_version: isRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
-        filter,
-      });
+      if (isRulesCustomizationEnabled) {
+        await upgradeRulesWithDryRun({
+          mode: 'ALL_RULES',
+          pick_version: 'MERGED',
+          filter,
+        });
+      } else {
+        // Upgrading prebuilt rules to TARGET version will erase any rule customizations.
+        // It's unnecessary to run a dry run request since we don't expect skipped rules.
+        await upgradeRulesRequest({
+          mode: 'ALL_RULES',
+          pick_version: 'TARGET',
+          filter,
+        });
+      }
     } catch {
       // Error is handled by the mutation's onError callback, so no need to do anything here
     } finally {
@@ -214,6 +224,7 @@ export function usePrebuiltRulesUpgrade({
   }, [
     upgradeableRules,
     upgradeRulesWithDryRun,
+    upgradeRulesRequest,
     confirmLegacyMLJobs,
     isRulesCustomizationEnabled,
     filter,
