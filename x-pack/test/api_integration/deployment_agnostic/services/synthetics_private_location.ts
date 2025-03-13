@@ -12,7 +12,7 @@ import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtim
 import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.2.4';
+export const INSTALLED_VERSION = '1.4.0';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
