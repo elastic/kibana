@@ -76,10 +76,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
-        await esClient.deleteByQuery({
-          index: SYNTHETICS_RULE_ALERT_INDEX,
-          query: { match_all: {} },
-        });
       });
 
       it('creates a monitor', async () => {
@@ -203,10 +199,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
-        await esClient.deleteByQuery({
-          index: SYNTHETICS_RULE_ALERT_INDEX,
-          query: { match_all: {} },
-        });
       });
 
       it('creates a monitor', async () => {
@@ -303,10 +295,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
-        await esClient.deleteByQuery({
-          index: SYNTHETICS_RULE_ALERT_INDEX,
-          query: { match_all: {} },
-        });
       });
 
       it('creates a monitor', async () => {
@@ -438,10 +426,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
-        await esClient.deleteByQuery({
-          index: SYNTHETICS_RULE_ALERT_INDEX,
-          query: { match_all: {} },
-        });
       });
 
       it('creates a monitor', async () => {
@@ -738,10 +722,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
-        await esClient.deleteByQuery({
-          index: SYNTHETICS_RULE_ALERT_INDEX,
-          query: { match_all: {} },
-        });
       });
 
       it('creates a monitor', async () => {
@@ -870,10 +850,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
-        await esClient.deleteByQuery({
-          index: SYNTHETICS_RULE_ALERT_INDEX,
-          query: { match_all: {} },
-        });
       });
 
       it('creates a monitor', async () => {
