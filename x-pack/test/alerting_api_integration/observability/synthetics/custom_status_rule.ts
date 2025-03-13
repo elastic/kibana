@@ -663,22 +663,23 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 3,
-          filters: [{ term: { 'monitor.id': monitor.id } }],
+          docCountTarget: 2,
+          filters: [{ term: { 'monitor.id': monitor.id } }, { term: { status: 'active' } }],
         });
-        expect(downResponse.hits.hits[2]._source).property(
+
+        expect(downResponse.hits.hits[1]._source).property(
           'reason',
           `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
         );
-        expect(downResponse.hits.hits[2]._source).property(
+        expect(downResponse.hits.hits[1]._source).property(
           'locationNames',
           'Dev Service and Dev Service 2'
         );
-        expect(downResponse.hits.hits[2]._source).property(
+        expect(downResponse.hits.hits[1]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(downResponse.hits.hits[2]._source).property('locationId', 'dev and dev2');
+        expect(downResponse.hits.hits[1]._source).property('locationId', 'dev and dev2');
       });
 
       it('should trigger recovered alert when the location threshold is no longer met', async () => {
