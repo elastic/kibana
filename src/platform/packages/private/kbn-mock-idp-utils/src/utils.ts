@@ -42,7 +42,8 @@ const parseStringAsync = promisify(parseString);
 export async function createMockIdpMetadata(kibanaUrl: string) {
   const signingKey = await readFile(KBN_CERT_PATH);
   const cert = new X509Certificate(signingKey);
-  const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
+  const trimTrailingSlash = (urlToTrim: string) =>
+    urlToTrim.endsWith('/') ? urlToTrim.slice(0, -1) : urlToTrim;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
   <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
