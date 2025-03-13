@@ -56,9 +56,8 @@ export const moveAction = (
   startingMouse: MousePosition,
   currentMouse: MousePosition
 ) => {
-  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   const currentActiveRow = gridLayoutStateManager.activeRow$.getValue();
-  if (!headerRef || !currentActiveRow) return;
+  if (!currentActiveRow) return;
 
   const currentLayout =
     gridLayoutStateManager.proposedGridLayout$.getValue() ??
@@ -85,6 +84,7 @@ export const moveAction = (
       return midA - midB;
     }
   );
+
   if (!deepEqual(currentRowOrder, updatedRowOrder)) {
     const updatedLayout = cloneDeep(currentLayout);
     updatedRowOrder.forEach((id, index) => {
