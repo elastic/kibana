@@ -22,16 +22,12 @@ import {
   defaultUdtHeaders,
   defaultColumnHeaderType,
 } from '../components/timeline/body/column_headers/default_headers';
-import {
-  DEFAULT_COLUMN_MIN_WIDTH,
-  RESIZED_COLUMN_MIN_WITH,
-} from '../components/timeline/body/constants';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../components/timeline/body/constants';
 import { defaultHeaders } from '../../common/mock';
 import {
   addNewTimeline,
   addTimelineProviders,
   addTimelineToStore,
-  applyDeltaToTimelineColumnWidth,
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
@@ -638,87 +634,6 @@ describe('Timeline', () => {
       const update = removeTimelineColumn({
         id: 'foo',
         columnId: 'does.not.exist',
-        timelineById: mockWithExistingColumns,
-      });
-
-      expect(update.foo.columns).toEqual(expectedColumns);
-    });
-  });
-
-  describe('#applyDeltaToColumnWidth', () => {
-    let mockWithExistingColumns: TimelineById;
-    beforeEach(() => {
-      mockWithExistingColumns = {
-        ...timelineByIdMock,
-        foo: {
-          ...timelineByIdMock.foo,
-          columns: columnsMock,
-        },
-      };
-    });
-    test('should return a new reference and not the same reference', () => {
-      const delta = 50;
-      const update = applyDeltaToTimelineColumnWidth({
-        id: 'foo',
-        columnId: columnsMock[0].id,
-        delta,
-        timelineById: mockWithExistingColumns,
-      });
-
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    test('should update initialWidth with the specified delta when the delta is positive', () => {
-      const aDateColumn = columnsMock[0];
-      const delta = 50;
-      const expectedToHaveNewWidth = {
-        ...aDateColumn,
-        initialWidth: Number(aDateColumn.initialWidth) + 50,
-      };
-      const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
-
-      const update = applyDeltaToTimelineColumnWidth({
-        id: 'foo',
-        columnId: aDateColumn.id,
-        delta,
-        timelineById: mockWithExistingColumns,
-      });
-
-      expect(update.foo.columns).toEqual(expectedColumns);
-    });
-
-    test('should update initialWidth with the specified delta when the delta is negative, and the resulting width is greater than the min column width', () => {
-      const aDateColumn = columnsMock[0];
-      const delta = 50 * -1; // the result will still be above the min column size
-      const expectedToHaveNewWidth = {
-        ...aDateColumn,
-        initialWidth: Number(aDateColumn.initialWidth) - 50,
-      };
-      const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
-
-      const update = applyDeltaToTimelineColumnWidth({
-        id: 'foo',
-        columnId: aDateColumn.id,
-        delta,
-        timelineById: mockWithExistingColumns,
-      });
-
-      expect(update.foo.columns).toEqual(expectedColumns);
-    });
-
-    test('should set initialWidth to `RESIZED_COLUMN_MIN_WITH` when the requested delta results in a column that is too small ', () => {
-      const aDateColumn = columnsMock[0];
-      const delta = (Number(aDateColumn.initialWidth) - 5) * -1; // the requested delta would result in a width of just 5 pixels, which is too small
-      const expectedToHaveNewWidth = {
-        ...aDateColumn,
-        initialWidth: RESIZED_COLUMN_MIN_WITH, // we expect the minimum
-      };
-      const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
-
-      const update = applyDeltaToTimelineColumnWidth({
-        id: 'foo',
-        columnId: aDateColumn.id,
-        delta,
         timelineById: mockWithExistingColumns,
       });
 

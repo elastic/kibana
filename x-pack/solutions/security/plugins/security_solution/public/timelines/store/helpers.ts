@@ -427,56 +427,6 @@ export const removeTimelineColumn = ({
   };
 };
 
-interface ApplyDeltaToTimelineColumnWidth {
-  id: string;
-  columnId: string;
-  delta: number;
-  timelineById: TimelineById;
-}
-
-export const applyDeltaToTimelineColumnWidth = ({
-  id,
-  columnId,
-  delta,
-  timelineById,
-}: ApplyDeltaToTimelineColumnWidth): TimelineById => {
-  const timeline = timelineById[id];
-
-  const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
-  if (columnIndex === -1) {
-    // the column was not found
-    return {
-      ...timelineById,
-      [id]: {
-        ...timeline,
-      },
-    };
-  }
-
-  const requestedWidth =
-    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
-  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
-
-  const columnWithNewWidth = {
-    ...timeline.columns[columnIndex],
-    initialWidth,
-  };
-
-  const columns = [
-    ...timeline.columns.slice(0, columnIndex),
-    columnWithNewWidth,
-    ...timeline.columns.slice(columnIndex + 1),
-  ];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      columns,
-    },
-  };
-};
-
 interface AddTimelineProviderParams {
   id: string;
   providers: DataProvider[];
