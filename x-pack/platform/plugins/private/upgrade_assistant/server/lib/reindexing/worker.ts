@@ -167,7 +167,10 @@ export class ReindexWorker {
           // Apply exponential backoff to reduce system load
           await new Promise((resolve) => setTimeout(resolve, this.currentWorkerPadding));
           // Double the worker padding for next iteration, up to the maximum
-          this.currentWorkerPadding = Math.min(this.currentWorkerPadding * 2, MAX_WORKER_PADDING_MS);
+          this.currentWorkerPadding = Math.min(
+            this.currentWorkerPadding * 2,
+            MAX_WORKER_PADDING_MS
+          );
           this.log.debug(`Worker padding increased to ${this.currentWorkerPadding}ms`);
         } else {
           // Reset to initial value when we have operations with credentials
