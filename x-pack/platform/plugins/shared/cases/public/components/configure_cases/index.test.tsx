@@ -41,6 +41,7 @@ import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useLicense } from '../../common/use_license';
 import * as i18n from './translations';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
@@ -843,15 +844,21 @@ describe('ConfigureCases', () => {
               name: 'Fourth test template',
               caseFields: {
                 customFields: [
-                  ...customFieldsConfigurationMock.map(({ key, type, defaultValue, required }) => ({
-                    key,
-                    type,
-                    value: required
-                      ? defaultValue
-                      : type === CustomFieldTypes.TOGGLE
-                      ? false
-                      : null,
-                  })),
+                  ...customFieldsConfigurationMock.map(({ key, type, defaultValue, required }) => {
+                    const customFieldFactory = customFieldsBuilderMap[type];
+                    const { sanitizeTemplateValue = (v) => v } = customFieldFactory();
+                    return {
+                      key,
+                      type,
+                      value: sanitizeTemplateValue(
+                        (required
+                          ? defaultValue
+                          : type === CustomFieldTypes.TOGGLE
+                          ? false
+                          : null) as Parameters<typeof sanitizeTemplateValue>[0]
+                      ),
+                    };
+                  }),
                   {
                     key: expect.anything(),
                     type: CustomFieldTypes.TEXT as const,
