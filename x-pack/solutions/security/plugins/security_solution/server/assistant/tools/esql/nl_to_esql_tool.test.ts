@@ -127,6 +127,7 @@ describe('NaturalLanguageESQLTool', () => {
 
       const result = await tool.invoke({
         question: 'Generate ESQL to get 100 documents from the .logs index',
+        shouldSelfHeal: true
       });
 
       expect(result).toEqual('Self healing graph response');
