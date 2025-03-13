@@ -64,6 +64,7 @@ interface NetflowRendererProps {
 
 export const NetflowRenderer = React.memo<NetflowRendererProps>(({ data, timelineId }) => (
   <Netflow
+    scopeId={timelineId}
     contextId={`netflow-renderer-${timelineId}-${data._id}`}
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
     destinationGeoContinentName={asArrayIfExists(

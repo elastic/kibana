@@ -100,6 +100,7 @@ export const AuditdGenericLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           field="auditd.result"

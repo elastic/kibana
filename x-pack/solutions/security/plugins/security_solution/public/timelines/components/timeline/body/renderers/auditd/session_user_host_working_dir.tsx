@@ -56,6 +56,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           userName={userName}
