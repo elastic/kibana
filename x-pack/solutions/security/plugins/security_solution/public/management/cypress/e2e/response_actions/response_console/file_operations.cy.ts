@@ -21,9 +21,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// Failing: See https://github.com/elastic/kibana/issues/209066
-// Failing: See https://github.com/elastic/kibana/issues/209065
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });

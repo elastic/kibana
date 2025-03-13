@@ -6,7 +6,7 @@
  */
 
 import { entries, findLastIndex, intersection, isNil } from 'lodash';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
 import { type ESQLAstCommand, parse, ESQLCommandOption } from '@kbn/esql-ast';
 import { isOptionItem, isColumnItem } from '@kbn/esql-validation-autocomplete';

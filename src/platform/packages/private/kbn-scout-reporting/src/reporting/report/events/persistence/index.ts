@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Client as ESClient } from '@elastic/elasticsearch';
+import { Client as ESClient } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import {
   SCOUT_REPORTER_ES_API_KEY,
   SCOUT_REPORTER_ES_URL,

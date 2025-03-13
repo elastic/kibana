@@ -10,17 +10,18 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { Filter, Query } from '@kbn/es-query';
-import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
-import { EsqlTable, getEsqlQueryHits } from '../../../../common';
-import { OnlyEsqlQueryRuleParams } from '../types';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { Filter, Query } from '@kbn/es-query';
+import type { EsqlTable } from '../../../../common';
+import { getEsqlQueryHits } from '../../../../common';
+import type { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;

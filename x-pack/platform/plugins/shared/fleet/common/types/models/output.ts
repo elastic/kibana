@@ -6,7 +6,7 @@
  */
 
 import type { outputType } from '../../constants';
-import type { ValueOf } from '..';
+import type { BaseSSLSecrets, ValueOf } from '..';
 import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
@@ -47,11 +47,7 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {
-    ssl?: {
-      key?: SOSecret;
-    };
-  };
+  secrets?: BaseSSLSecrets;
   preset?: OutputPreset;
 }
 
@@ -62,13 +58,7 @@ export interface NewElasticsearchOutput extends NewBaseOutput {
 export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
-  secrets?: {
-    service_token?: SOSecret;
-    kibana_api_key?: SOSecret;
-    ssl?: {
-      key?: SOSecret;
-    };
-  };
+  secrets?: RemoteESOutputSecrets;
   sync_integrations?: boolean;
   kibana_url?: string | null;
   kibana_api_key?: string | null;
@@ -76,11 +66,6 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
 
 export interface NewLogstashOutput extends NewBaseOutput {
   type: OutputType['Logstash'];
-  secrets?: {
-    ssl?: {
-      key?: SOSecret;
-    };
-  };
 }
 
 export type NewOutput =
@@ -140,10 +125,13 @@ export interface KafkaOutput extends NewBaseOutput {
   timeout?: number;
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
-  secrets?: {
-    password?: SOSecret;
-    ssl?: {
-      key?: SOSecret;
-    };
-  };
+  secrets?: KafkaOutputSecrets;
+}
+
+interface KafkaOutputSecrets extends BaseSSLSecrets {
+  password?: SOSecret;
+}
+interface RemoteESOutputSecrets extends BaseSSLSecrets {
+  service_token?: SOSecret;
+  kibana_api_key?: SOSecret;
 }
