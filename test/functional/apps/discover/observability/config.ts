@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getRowIndicatorProvider } from './get_row_indicator_provider';
-export { createGetDefaultAppState } from './get_default_app_state';
-export { getCellRenderers } from './get_cell_renderers';
-export { getRowAdditionalLeadingControls } from './get_row_additional_leading_controls';
-export { getPaginationConfig } from './get_pagination_config';
+import { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+  const baseConfig = functionalConfig.getAll();
+
+  return {
+    ...baseConfig,
+    testFiles: [require.resolve('.')],
+  };
+}

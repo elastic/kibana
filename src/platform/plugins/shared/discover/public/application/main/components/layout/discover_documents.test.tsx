@@ -13,7 +13,7 @@ import { EuiProvider } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataDocuments$ } from '../../state_management/discover_data_state_container';
+import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -23,15 +23,21 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
+import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverCustomization } from '../../../../customizations';
+import { DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import type { ProfilesManager } from '../../../../context_awareness';
 
 const customisationService = createCustomizationService();
 
-async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
+async function mountComponent(
+  fetchStatus: FetchStatus,
+  hits: EsHitRecord[],
+  profilesManager?: ProfilesManager
+) {
   const services = discoverServiceMock;
 
   services.data.query.timefilter.timefilter.getTime = () => {
@@ -68,7 +74,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   };
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider
+      services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
+    >
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
           <EuiProvider>
