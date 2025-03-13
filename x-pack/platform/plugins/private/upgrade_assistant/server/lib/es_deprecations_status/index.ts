@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   EnrichedDeprecationInfo,
   ESUpgradeStatus,
@@ -19,7 +19,7 @@ import { getHealthIndicators } from './health_indicators';
 import { matchExclusionPattern } from '../data_source_exclusions';
 
 export async function getESUpgradeStatus(
-  dataClient: IScopedClusterClient,
+  dataClient: ElasticsearchClient,
   {
     featureSet,
     dataSourceExclusions,

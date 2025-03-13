@@ -23,6 +23,7 @@ export function registerUpgradeStatusRoute({
   lib: { handleEsError },
   current,
   defaultTarget,
+  log,
 }: RouteDependencies) {
   router.get(
     {
@@ -57,7 +58,7 @@ export function registerUpgradeStatusRoute({
         const {
           totalCriticalDeprecations, // critical deprecations
           totalCriticalHealthIssues, // critical health issues
-        } = await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
+        } = await getESUpgradeStatus(esClient.asCurrentUser, { featureSet, dataSourceExclusions });
 
         const getSystemIndicesMigrationStatus = async () => {
           /**
@@ -159,6 +160,7 @@ export function registerUpgradeStatusRoute({
           },
         });
       } catch (error) {
+        log.error(error);
         return handleEsError({ error, response });
       }
     })

@@ -39,7 +39,9 @@ exports[`ReindexStep renders 1`] = `
           "meta": Object {
             "aliases": Array [],
             "indexName": "myIndex",
+            "isClosedIndex": false,
             "isFrozen": false,
+            "isInDataStream": false,
             "isReadonly": false,
             "reindexName": "reindexed-myIndex",
           },
@@ -130,7 +132,9 @@ exports[`ReindexStep renders for frozen indices 1`] = `
           "meta": Object {
             "aliases": Array [],
             "indexName": "myIndex",
+            "isClosedIndex": false,
             "isFrozen": true,
+            "isInDataStream": false,
             "isReadonly": false,
             "reindexName": "reindexed-myIndex",
           },
