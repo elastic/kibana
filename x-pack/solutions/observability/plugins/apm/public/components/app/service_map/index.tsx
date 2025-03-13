@@ -248,7 +248,6 @@ export function ServiceMap({
           }
           calloutId="showServiceMapV2Callout"
         />
-        <EuiSpacer size="s" />
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true} paddingSize="none">
