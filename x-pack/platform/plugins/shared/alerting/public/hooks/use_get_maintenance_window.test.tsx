@@ -56,9 +56,10 @@ describe('useGetMaintenanceWindow', () => {
     await waitFor(() => expect(mockAddDanger).toBeCalledWith('Unable to get maintenance window.'));
   });
 
-  it('should return an object where showMultipleSolutionsWarning is false', async () => {
+  it('should return an object where showMultipleSolutionsWarning is false when disabled scoped query filter', async () => {
     getMaintenanceWindow.mockResolvedValue({
       categoryIds: ['observability', 'management', 'securitySolution'],
+      scopedQuery: undefined,
     });
 
     const { result } = renderHook(() => useGetMaintenanceWindow('testId'), {
@@ -75,9 +76,10 @@ describe('useGetMaintenanceWindow', () => {
     );
   });
 
-  it('should return object with a hasOldChosenSolutions is true', async () => {
+  it('should return object with a hasOldChosenSolutions is true when disabled scoped query filter', async () => {
     getMaintenanceWindow.mockResolvedValue({
       categoryIds: ['observability', 'management'],
+      scopedQuery: undefined,
     });
 
     const { result } = renderHook(() => useGetMaintenanceWindow('testId'), {
@@ -87,6 +89,26 @@ describe('useGetMaintenanceWindow', () => {
     await waitFor(() =>
       expect(result.current).toEqual({
         showMultipleSolutionsWarning: true,
+        isError: false,
+        isLoading: false,
+        maintenanceWindow: undefined,
+      })
+    );
+  });
+
+  it('should return object with a hasOldChosenSolutions is false when enabled scoped query filter', async () => {
+    getMaintenanceWindow.mockResolvedValue({
+      categoryIds: ['observability', 'management'],
+      scopedQuery: { filter: 'filter' },
+    });
+
+    const { result } = renderHook(() => useGetMaintenanceWindow('testId'), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        showMultipleSolutionsWarning: false,
         isError: false,
         isLoading: false,
         maintenanceWindow: undefined,

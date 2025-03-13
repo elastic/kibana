@@ -20,11 +20,11 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
   const queryFn = async () => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
 
-    const isScopedQueryDisable = !maintenanceWindow.scopedQuery;
-    const showMultipleSolutionsWarning = isScopedQueryDisable
-      ? maintenanceWindow.categoryIds?.length && maintenanceWindow.categoryIds.length < 3
-      : false;
+    const hasScopedQuery = !!maintenanceWindow.scopedQuery;
+    const hasSomeSolutionsButNotAll =
+      maintenanceWindow.categoryIds?.length > 0 && maintenanceWindow.categoryIds.length < 3;
 
+    const showMultipleSolutionsWarning = !hasScopedQuery && hasSomeSolutionsButNotAll;
     return {
       maintenanceWindow: convertFromMaintenanceWindowToForm(maintenanceWindow),
       showMultipleSolutionsWarning,
