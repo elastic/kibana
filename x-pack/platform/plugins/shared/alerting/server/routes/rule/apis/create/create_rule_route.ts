@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { RouteOptions } from '../../..';
+import type { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
@@ -16,8 +16,9 @@ import {
   createBodySchemaV1,
   createParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/create';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import { Rule } from '../../../../application/rule/types';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import type { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
