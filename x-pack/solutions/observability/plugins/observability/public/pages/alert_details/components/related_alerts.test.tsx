@@ -33,9 +33,15 @@ jest.mock('@kbn/alerts-grouping', () => ({
 
 const useKibanaMock = useKibana as jest.Mock;
 const mockKibana = () => {
+  const services = kibanaStartMock.startContract().services;
+  services.spaces.getActiveSpace = jest
+    .fn()
+    .mockImplementation(() =>
+      Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
+    );
   useKibanaMock.mockReturnValue({
     services: {
-      ...kibanaStartMock.startContract().services,
+      ...services,
       http: {
         basePath: {
           prepend: jest.fn(),
