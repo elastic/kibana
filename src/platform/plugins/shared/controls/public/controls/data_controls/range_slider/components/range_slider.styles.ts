@@ -44,11 +44,11 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
 
       /* Stretch the underline across the entire __childrenWrapper and set it to a custom warning color */
       background-size: 100% 100%;
-      --euiFormControlStateColor: ${euiTheme.colors.warning};
+      --euiFormControlStateColor: ${euiTheme.colors.textWarning};
 
       /* But restore the danger color for truly invalid inputs (e.g. min larger than max) */
       &:has(input:invalid) {
-        --euiFormControlStateColor: ${euiTheme.colors.danger};
+        --euiFormControlStateColor: ${euiTheme.colors.textDanger};
       }
 
       /* Remove the append background so the caution icon looks more natural */
@@ -70,11 +70,11 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       `,
       invalid: css`
         &:not(:invalid) {
-          --euiFormControlStateColor: ${euiTheme.colors.warning};
+          --euiFormControlStateColor: ${euiTheme.colors.textWarning};
           color: ${euiTheme.colors.textWarning};
         }
         &:invalid {
-          --euiFormControlStateColor: ${euiTheme.colors.danger};
+          --euiFormControlStateColor: ${euiTheme.colors.textDanger};
           color: ${euiTheme.colors.textDanger};
         }
       `,

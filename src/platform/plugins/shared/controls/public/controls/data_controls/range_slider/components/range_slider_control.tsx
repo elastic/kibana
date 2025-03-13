@@ -217,7 +217,7 @@ export const RangeSliderControl: FC<Props> = ({
                 <EuiIcon
                   tabIndex={0}
                   type="warningFilled"
-                  color={euiTheme.colors.warning}
+                  color={euiTheme.colors.textWarning}
                   title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
                 />
               </EuiToolTip>

@@ -126,7 +126,7 @@ export const OptionsListControl = ({
                 <EuiIcon
                   tabIndex={0}
                   type="warningFilled"
-                  color={euiTheme.colors.warning}
+                  color={euiTheme.colors.textWarning}
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                     invalidSelections.size
                   )}
@@ -147,7 +147,7 @@ export const OptionsListControl = ({
     delimiter,
     invalidSelections,
     api.uuid,
-    euiTheme.colors.warning,
+    euiTheme.colors.textWarning,
   ]);
 
   const button = (
