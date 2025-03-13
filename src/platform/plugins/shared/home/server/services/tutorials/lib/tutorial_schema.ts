@@ -52,6 +52,7 @@ const statusCheckSchema = schema.object({
     query: schema.recordOf(schema.string(), schema.any()),
   }),
 });
+export type StatusCheckSchema = TypeOf<typeof statusCheckSchema>;
 
 const instructionSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -85,24 +86,8 @@ const instructionSetSchema = schema.object({
 });
 export type InstructionSetSchema = TypeOf<typeof instructionSetSchema>;
 
-const idRegExp = /^[a-zA-Z_]+$/;
-const paramSchema = schema.object({
-  defaultValue: schema.any(),
-  id: schema.string({
-    validate(value: string) {
-      if (!idRegExp.test(value)) {
-        return `Does not satisfy regexp ${idRegExp.toString()}`;
-      }
-    },
-  }),
-  label: schema.string(),
-  type: schema.oneOf([schema.literal('number'), schema.literal('string')]),
-});
-export type ParamsSchema = TypeOf<typeof paramSchema>;
-
 const instructionsSchema = schema.object({
   instructionSets: schema.arrayOf(instructionSetSchema),
-  params: schema.maybe(schema.arrayOf(paramSchema)),
 });
 export type InstructionsSchema = TypeOf<typeof instructionsSchema>;
 
