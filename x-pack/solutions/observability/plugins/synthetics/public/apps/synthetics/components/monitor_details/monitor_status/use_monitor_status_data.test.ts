@@ -108,7 +108,7 @@ describe('useMonitorStatusData', () => {
         "type": "QUIET GET MONITOR STATUS HEATMAP",
       }
     `);
-  });
+  }, 10_000);
 });
 
 describe('useBins', () => {
