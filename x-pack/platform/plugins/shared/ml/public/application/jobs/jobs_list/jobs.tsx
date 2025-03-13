@@ -70,7 +70,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
               defaultMessage="Anomaly Detection Jobs"
             />
           </EuiFlexItem>
-          <EuiFlexGroup grow={false} direction="row" gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <SuppliedConfigurationsButton />
             </EuiFlexItem>

@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
@@ -14,6 +15,7 @@ import { createPermissionFailureMessage } from '../../../../../capabilities/chec
 interface Props {
   isDisabled: boolean;
   navigateToSourceSelection: () => void;
+  size?: EuiButtonProps['size'];
 }
 
 export const CreateAnalyticsButton: FC<Props> = ({
@@ -21,15 +23,11 @@ export const CreateAnalyticsButton: FC<Props> = ({
   navigateToSourceSelection,
   size = 's',
 }) => {
-  const handleClick = () => {
-    navigateToSourceSelection();
-  };
-
   const button = (
     <EuiButton
       disabled={isDisabled}
       fill
-      onClick={handleClick}
+      onClick={navigateToSourceSelection.bind(null, null)}
       iconType="plusInCircle"
       size={size}
       data-test-subj="mlAnalyticsButtonCreate"

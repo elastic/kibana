@@ -49,7 +49,7 @@ export function MachineLearningNavigationProvider({
           'ad_settings',
         ],
       });
-      testSubjects.click(sectionId);
+      await testSubjects.click(sectionId);
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(pageSubject);
       });

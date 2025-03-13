@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
@@ -18,7 +18,7 @@ import { UpgradeWarning } from '../../../components/upgrade';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
@@ -51,10 +51,19 @@ export const Page: FC = () => {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
+  const mlManagementLocator = useMlManagementLocator();
+
+  const navigateToSourceSelection = useCallback(async () => {
+    await mlManagementLocator?.navigate({
+      sectionId: 'ml',
+      appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION}`,
+    });
+  }, [mlManagementLocator]);
+
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup grow={false} direction="row" gutterSize="s">
+        <EuiFlexGroup direction="row" gutterSize="s">
           <EuiFlexItem grow={true}>
             <FormattedMessage
               id="xpack.ml.dataframe.analyticsList.title"
@@ -62,7 +71,7 @@ export const Page: FC = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} justifyContent="flexEnd">
-            <CreateAnalyticsButton size="m" />
+            <CreateAnalyticsButton size="m" navigateToSourceSelection={navigateToSourceSelection} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>

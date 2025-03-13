@@ -13,13 +13,13 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { MlFeatures, NLPSettings, ExperimentalFeatures } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
+import type { ITelemetryClient } from '../services/telemetry/types';
 
 export enum MANAGEMENT_SECTION_IDS {
   OVERVIEW = 'overview',
   ANOMALY_DETECTION = 'anomaly_detection',
   ANALYTICS = 'analytics',
   TRAINED_MODELS = 'trained_models',
-  SUPPLIED_CONFIGURATIONS = 'supplied_configurations',
   AD_SETTINGS = 'ad_settings',
 }
 type ManagementSectionId = `${MANAGEMENT_SECTION_IDS}`;
@@ -54,7 +54,7 @@ export const MANAGEMENT_SECTIONS = {
 export function registerManagementSections(
   management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>,
-  deps: { usageCollection?: UsageCollectionSetup }, // TODO: update type
+  deps: { usageCollection?: UsageCollectionSetup; telemetry?: ITelemetryClient }, // TODO: update type
   isServerless: boolean,
   mlFeatures: MlFeatures,
   nlpSettings: NLPSettings,

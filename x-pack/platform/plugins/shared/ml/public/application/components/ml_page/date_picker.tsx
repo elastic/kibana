@@ -13,8 +13,6 @@ import { useMlKibana } from '../../contexts/kibana';
 export const DatePicker = () => {
   const {
     services: {
-      application: { navigateToApp },
-      http: { basePath },
       mlServices: { httpService },
     },
   } = useMlKibana();

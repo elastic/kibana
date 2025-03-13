@@ -27,7 +27,6 @@ import { ImportJobsFlyout } from '../../../../../components/import_export_jobs';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useMlManagementLocator } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';
@@ -199,13 +198,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     pageState,
     updatePageState
   );
-
-  const navigateToSourceSelection = useCallback(async () => {
-    await mlManagementLocator?.navigate({
-      sectionId: 'ml',
-      appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION}`,
-    });
-  }, [mlManagementLocator]);
 
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
