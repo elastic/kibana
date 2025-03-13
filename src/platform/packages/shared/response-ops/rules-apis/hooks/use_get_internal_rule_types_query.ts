@@ -10,11 +10,13 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import { getInternalRuleTypes } from '../apis/get_internal_rule_types';
-import { queryKeys } from '../constants';
+import { queryKeys } from '../query_keys';
+
+export const getKey = queryKeys.getInternalRuleTypes;
 
 export const useGetInternalRuleTypesQuery = ({ http }: { http: HttpStart }) => {
   return useQuery({
-    queryKey: queryKeys.internalRuleTypes(),
+    queryKey: getKey(),
     queryFn: () => getInternalRuleTypes({ http }),
   });
 };

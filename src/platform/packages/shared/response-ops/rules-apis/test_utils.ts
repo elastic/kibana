@@ -6,6 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable no-console */
 
-export const BASE_ALERTING_API_PATH = '/api/alerting';
-export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
+export const testQueryClientConfig = {
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: () => {},
+  },
+};

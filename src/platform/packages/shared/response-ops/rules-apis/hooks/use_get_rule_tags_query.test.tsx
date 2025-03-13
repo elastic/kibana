@@ -13,7 +13,7 @@ import { getRuleTags } from '../apis/get_rule_tags';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { testQueryClientConfig } from '../test_utils';
 import React, { PropsWithChildren } from 'react';
 
 const MOCK_TAGS = ['a', 'b', 'c'];

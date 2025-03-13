@@ -8,36 +8,4 @@
  */
 
 export const BASE_ALERTING_API_PATH = '/api/alerting';
-
-export const queryKeys = {
-  root: 'rules',
-  tags: ({
-    ruleTypeIds,
-    search,
-    perPage,
-    page,
-    refresh,
-  }: {
-    ruleTypeIds?: string[];
-    search?: string;
-    perPage?: number;
-    page: number;
-    refresh?: Date;
-  }) =>
-    [
-      queryKeys.root,
-      'tags',
-      ruleTypeIds,
-      search,
-      perPage,
-      page,
-      {
-        refresh: refresh?.toISOString(),
-      },
-    ] as const,
-  internalRuleTypes: () => [queryKeys.root, 'internalRuleTypes'] as const,
-};
-
-export const mutationKeys = {
-  root: 'rules',
-};
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';

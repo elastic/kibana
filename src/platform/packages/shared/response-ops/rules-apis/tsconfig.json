@@ -18,11 +18,10 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-http-browser",
     "@kbn/actions-types",
-    "@kbn/alerting-plugin",
     "@kbn/i18n",
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/alerts-ui-shared",
     "@kbn/triggers-actions-ui-types",
+    "@kbn/alerting-types",
   ]
 }

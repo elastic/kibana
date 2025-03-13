@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import { useMemo } from 'react';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { useKibana } from '../utils/kibana_react';
 import { useGetFilteredRuleTypes } from './use_get_filtered_rule_types';
 
@@ -15,11 +15,15 @@ export function useGetAvailableRulesWithDescriptions() {
 
   const {
     triggersActionsUi: { ruleTypeRegistry },
+    http,
+    notifications: { toasts },
   } = useKibana().services;
 
   const {
     ruleTypesState: { data: ruleTypes },
-  } = useLoadRuleTypesQuery({
+  } = useGetRuleTypesPermissions({
+    http,
+    toasts,
     filteredRuleTypes,
   });
 

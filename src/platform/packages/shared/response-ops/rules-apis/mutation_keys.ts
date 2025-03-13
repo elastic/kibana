@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const BASE_ALERTING_API_PATH = '/api/alerting';
-export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
+export const mutationKeys = {
+  root: 'rules',
+};

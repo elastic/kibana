@@ -15,6 +15,7 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
+export type RuleTypeSolution = 'observability' | 'security' | 'stack';
 export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;

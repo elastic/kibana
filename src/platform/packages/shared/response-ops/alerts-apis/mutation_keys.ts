@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const BASE_ALERTING_API_PATH = '/api/alerting';
-export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
+export const mutationKeys = {
+  root: 'alerts',
+  muteAlertInstance: () => [mutationKeys.root, 'muteAlertInstance'] as const,
+  unmuteAlertInstance: () => [mutationKeys.root, 'unmuteAlertInstance'] as const,
+};

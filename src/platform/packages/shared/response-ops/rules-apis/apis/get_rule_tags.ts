@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
 
 export interface GetRuleTagsParams {
   // Params
@@ -19,7 +19,7 @@ export interface GetRuleTagsParams {
   page: number;
 
   // Services
-  http: HttpSetup;
+  http: HttpStart;
 }
 
 export interface GetRuleTagsResponse {

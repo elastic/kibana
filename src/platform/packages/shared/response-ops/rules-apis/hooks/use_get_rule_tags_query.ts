@@ -14,7 +14,7 @@ import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SetOptional } from 'type-fest';
 import type { GetRuleTagsParams, GetRuleTagsResponse } from '../apis/get_rule_tags';
 import { getRuleTags } from '../apis/get_rule_tags';
-import { queryKeys } from '../constants';
+import { queryKeys } from '../query_keys';
 
 interface UseGetRuleTagsQueryParams extends SetOptional<GetRuleTagsParams, 'page'> {
   // Params
@@ -26,6 +26,8 @@ interface UseGetRuleTagsQueryParams extends SetOptional<GetRuleTagsParams, 'page
 }
 
 const EMPTY_TAGS: string[] = [];
+
+export const getKey = queryKeys.getRuleTags;
 
 // React query will refetch all prev pages when the cache keys change:
 // https://github.com/TanStack/query/discussions/3576
@@ -69,7 +71,7 @@ export function useGetRuleTagsQuery({
 
   const { refetch, data, fetchNextPage, isLoading, isFetching, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: queryKeys.tags({
+      queryKey: getKey({
         ruleTypeIds,
         search,
         perPage,
