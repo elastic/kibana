@@ -5,101 +5,103 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
-  installationStatuses,
-  useGetPackagesQuery,
-  useGetSettingsQuery,
-} from '@kbn/fleet-plugin/public';
-import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import {
+  EuiButton,
   EuiEmptyPrompt,
   EuiHorizontalRule,
+  EuiLoadingLogo,
   EuiSkeletonLoading,
   EuiSkeletonRectangle,
   EuiSpacer,
 } from '@elastic/eui';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { DATAVIEW_ERROR } from '../../pages/alert_summary/translations';
+import { useKibana } from '../../../common/lib/kibana';
 import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
-import { KPIsSection } from './kpis/kpis_section';
 import { TableSection } from './table/table_section';
-import { useKibana } from '../../../common/lib/kibana';
+import { KPIsSection } from './kpis/kpis_section';
+
+const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
 export interface WrapperProps {
   /**
    *
    */
-  dataView: DataView;
-  /**
-   * TEMP: for demo purposes ONLY, toggles between old and unified components
-   */
-  showUnifiedComponents: boolean;
+  packages: PackageListItem[];
 }
 
 /**
  *
  */
-export const Wrapper = memo(({ dataView, showUnifiedComponents }: WrapperProps) => {
-  const { fleet } = useKibana().services;
-  const isAuthorizedToFetchSettings = fleet?.authz.fleet.readSettings;
-  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
-    enabled: isAuthorizedToFetchSettings,
-  });
-  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
-  const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
-  const { data: allPackages, isLoading } = useGetPackagesQuery(
-    {
-      prerelease: prereleaseIntegrationsEnabled,
-    },
-    {
-      enabled: shouldFetchPackages,
-    }
-  );
-  const installedPackages: PackageListItem[] = useMemo(
-    () =>
-      (allPackages?.items || []).filter(
-        (pkg) =>
-          pkg.status === installationStatuses.Installed ||
-          pkg.status === installationStatuses.InstallFailed
-      ),
-    [allPackages]
-  );
+export const Wrapper = memo(({ packages }: WrapperProps) => {
+  const { data } = useKibana().services;
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dataView, setDataView] = useState<DataView>();
+  const [showUnifiedComponents, setShowUnifiedComponents] = useState<boolean>(false); // TODO TEMP: for demo purposes ONLY, toggles between old and unified components
 
-  if (!isLoading && installedPackages.length === 0) {
+  useEffect(() => {
+    let dv: DataView;
+    const createDataView = async () => {
+      dv = await data.dataViews.create(dataViewSpec);
+      setDataView(dv);
+      setIsLoading(false);
+    };
+    createDataView();
+
+    // clearing after leaving the page //TODO do we need to do that if the data discovery page is using the same??
+    return () => {
+      if (dv?.id) {
+        data.dataViews.clearInstanceCache(dv?.id);
+      }
+    };
+  }, [data.dataViews]);
+
+  if (!dataView) {
+    return <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoKibana" size="xl" />} />;
+  }
+
+  if (!dataView.id) {
     return <EuiEmptyPrompt iconType="error" color="danger" title={<h2>{DATAVIEW_ERROR}</h2>} />;
   }
 
   return (
-    <EuiSkeletonLoading
-      isLoading={isLoading}
-      loadingContent={
-        <>
-          <EuiSkeletonRectangle height={50} width="100%" />
-          <EuiHorizontalRule />
-          <EuiSkeletonRectangle height={50} width="100%" />
-          <EuiSpacer />
-          <EuiSkeletonRectangle height={275} width="100%" />
-          <EuiSpacer />
-          <EuiSkeletonRectangle height={600} width="100%" />
-        </>
-      }
-      loadedContent={
-        <>
-          <IntegrationSection installedPackages={installedPackages} />
-          <EuiHorizontalRule />
-          <SearchBarSection
-            dataView={dataView}
-            installedPackages={installedPackages}
-            showUnifiedComponents={showUnifiedComponents}
-          />
-          <EuiSpacer />
-          <KPIsSection dataView={dataView} />
-          <EuiSpacer />
-          <TableSection dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
-        </>
-      }
-    />
+    <>
+      <EuiButton onClick={() => setShowUnifiedComponents((t) => !t)}>
+        {showUnifiedComponents ? 'Show old components' : 'Show unified components'}
+      </EuiButton>
+      <EuiSkeletonLoading
+        isLoading={isLoading}
+        loadingContent={
+          <>
+            <EuiSkeletonRectangle height={50} width="100%" />
+            <EuiHorizontalRule />
+            <EuiSkeletonRectangle height={50} width="100%" />
+            <EuiSpacer />
+            <EuiSkeletonRectangle height={275} width="100%" />
+            <EuiSpacer />
+            <EuiSkeletonRectangle height={600} width="100%" />
+          </>
+        }
+        loadedContent={
+          <>
+            <IntegrationSection packages={packages} />
+            <EuiHorizontalRule />
+            <SearchBarSection
+              dataView={dataView}
+              packages={packages}
+              showUnifiedComponents={showUnifiedComponents}
+            />
+            <EuiSpacer />
+            <KPIsSection dataView={dataView} />
+            <EuiSpacer />
+            <TableSection dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
+          </>
+        }
+      />
+    </>
   );
 });
 

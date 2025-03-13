@@ -174,6 +174,7 @@ export function PackageCard({
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
 
   const onCardClick = () => {
+    debugger;
     if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
         path: url.slice(INTEGRATIONS_BASE_PATH.length),
@@ -201,6 +202,7 @@ export function PackageCard({
           // This keeps the cards from looking overly unbalanced because of content differences.
           css={css`
             position: relative;
+
             [class*='euiCard__content'] {
               display: flex;
               flex-direction: column;

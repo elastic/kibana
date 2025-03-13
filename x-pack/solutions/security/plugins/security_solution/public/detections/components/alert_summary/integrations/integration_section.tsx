@@ -17,20 +17,20 @@ export interface IntegrationSectionProps {
   /**
    *
    */
-  installedPackages: CustomIntegration[] | PackageListItem[];
+  packages: CustomIntegration[] | PackageListItem[];
 }
 
 /**
  *
  */
-export const IntegrationSection = memo(({ installedPackages }: IntegrationSectionProps) => {
+export const IntegrationSection = memo(({ packages }: IntegrationSectionProps) => {
   const { onClick: addIntegration } = useAddIntegrationsUrl();
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center">
-      {installedPackages.map((installedPackage) => (
+      {packages.map((pkg) => (
         <EuiFlexItem grow={false}>
-          <IntegrationBadge integration={installedPackage} />
+          <IntegrationBadge integration={pkg} />
         </EuiFlexItem>
       ))}
       <EuiFlexItem grow={false}>
