@@ -16,7 +16,7 @@ import { getPromptSuffixForOssModel } from './utils/common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 
-jest.mock('./esqlSelfHealingGraph', () => {
+jest.mock('./esql_self_healing_graph', () => {
   return {
     getEsqlSelfHealingGraph: jest.fn().mockReturnValue({
       invoke: jest.fn().mockResolvedValue({
