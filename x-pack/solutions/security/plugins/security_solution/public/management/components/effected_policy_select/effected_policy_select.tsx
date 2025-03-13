@@ -219,7 +219,8 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
     >(
       (currentOptions) => {
-        const newPolicyAssignmentTags: string[] = [];
+        const newPolicyAssignmentTags: string[] =
+          artifactRestrictedPolicyIds.policyIds.map(buildPerPolicyTag);
         const newPolicyIds: string[] = [];
 
         for (const opt of currentOptions) {
@@ -235,7 +236,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           tags: getTagsUpdatedBy('policySelection', newPolicyAssignmentTags),
         });
       },
-      [getTagsUpdatedBy, item, onChange]
+      [artifactRestrictedPolicyIds.policyIds, getTagsUpdatedBy, item, onChange]
     );
 
     const handleGlobalButtonChange = useCallback(
@@ -246,11 +247,13 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             'policySelection',
             selectedId === 'globalPolicy'
               ? [GLOBAL_ARTIFACT_TAG]
-              : selectedPolicyIds.map(buildPerPolicyTag)
+              : selectedPolicyIds
+                  .concat(artifactRestrictedPolicyIds.policyIds)
+                  .map(buildPerPolicyTag)
           ),
         });
       },
-      [getTagsUpdatedBy, item, onChange, selectedPolicyIds]
+      [artifactRestrictedPolicyIds.policyIds, getTagsUpdatedBy, item, onChange, selectedPolicyIds]
     );
 
     const listBuilderCallback = useCallback<NonNullable<EuiSelectableProps['children']>>(
