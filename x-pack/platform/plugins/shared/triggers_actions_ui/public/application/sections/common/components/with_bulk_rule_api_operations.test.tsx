@@ -43,8 +43,8 @@ jest.mock('../../../lib/rule_api/get_rule', () => ({
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/resolve_rule', () => ({
   resolveRule: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api/rule_types', () => ({
-  loadRuleTypes: jest.fn(),
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
 }));
 jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
   loadActionErrorLog: jest.fn(),
@@ -62,7 +62,7 @@ const { loadRule } = jest.requireMock('../../../lib/rule_api/get_rule');
 const { resolveRule } = jest.requireMock(
   '@kbn/response-ops-rule-form/src/common/apis/resolve_rule'
 );
-const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { loadActionErrorLog } = jest.requireMock('../../../lib/rule_api/load_action_error_log');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
@@ -298,8 +298,8 @@ describe('with_bulk_rule_api_operations', () => {
     const component = mount(<ExtendedComponent />);
     component.find('button').simulate('click');
 
-    expect(loadRuleTypes).toHaveBeenCalledTimes(1);
-    expect(loadRuleTypes).toHaveBeenCalledWith({ http });
+    expect(getRuleTypes).toHaveBeenCalledTimes(1);
+    expect(getRuleTypes).toHaveBeenCalledWith({ http });
   });
 
   it('loadExecutionLogAggregations calls the loadExecutionLogAggregations API', () => {

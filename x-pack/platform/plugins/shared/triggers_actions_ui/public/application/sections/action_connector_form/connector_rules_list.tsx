@@ -25,7 +25,6 @@ import {
   systemConnectorActionRefPrefix,
   preconfiguredConnectorActionRefPrefix,
 } from '@kbn/alerting-plugin/common';
-
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { useKibana } from '../../../common/lib/kibana';
 import { getRuleHealthColor } from '../../../common/lib/rule_status_helpers';

@@ -19,7 +19,7 @@ import {
 import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
