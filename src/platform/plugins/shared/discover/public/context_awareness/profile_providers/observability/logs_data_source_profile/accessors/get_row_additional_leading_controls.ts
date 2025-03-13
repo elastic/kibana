@@ -50,12 +50,17 @@ export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile
       : undefined;
 
     const onStackTraceClick = (props: RowControlRowProps) => {
+      // Open the flyout
       if (setExpandedDoc) {
         setExpandedDoc(props.record);
       }
+
+      // Toggle on the Accordion
       if (setDocViewerAccordionState) {
         setDocViewerAccordionState({ stacktrace: true });
       }
+
+      // Scroll the section into view
       const observer = new MutationObserver((mutations, obs) => {
         const element = document.querySelector(
           '[data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"]'
