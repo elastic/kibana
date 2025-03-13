@@ -28,6 +28,8 @@ import type {
   AgentPolicy,
 } from '../../types';
 import type {
+  DownloadSource,
+  FullAgentPolicyDownload,
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
@@ -45,7 +47,11 @@ import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
-import { getFleetServerHostsSecretReferences, getOutputSecretReferences } from '../secrets';
+import {
+  getFleetServerHostsSecretReferences,
+  getOutputSecretReferences,
+  getDownloadSourceSecretReferences,
+} from '../secrets';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -90,7 +96,7 @@ export async function getFullAgentPolicy(
     dataOutput,
     fleetServerHost,
     monitoringOutput,
-    downloadSourceUri,
+    downloadSource,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
   // Build up an in-memory object for looking up Package Info, so we don't have
@@ -159,7 +165,9 @@ export async function getFullAgentPolicy(
   const fleetserverHostSecretReferences = fleetServerHost
     ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
-
+  const downloadSourceSecretReferences = downloadSource
+    ? getDownloadSourceSecretReferences(downloadSource)
+    : [];
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
@@ -181,14 +189,12 @@ export async function getFullAgentPolicy(
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
+      ...downloadSourceSecretReferences,
       ...packagePolicySecretReferences,
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: {
-        sourceURI: downloadSourceUri,
-        ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
-      },
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxyUri),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -377,14 +383,13 @@ export function generateFleetConfig(
           }),
       };
     }
-
+    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
     if (output?.secrets) {
       config.secrets = {
         ssl: {
-          ...(output.secrets?.ssl?.key &&
-            !output?.ssl?.key && {
-              key: output.secrets.ssl.key,
-            }),
+          ...(output.secrets?.ssl?.key && {
+            key: output.secrets.ssl.key,
+          }),
         },
       };
     }
@@ -440,13 +445,12 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
       }),
     };
   }
-
+  // if both ssl.key and secrets.ssl.key are present, prefer the secrets'
   if (fleetServerHost?.secrets) {
     inputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.key &&
-        !fleetServerHost?.ssl?.key && {
-          ssl: { key: fleetServerHost.secrets?.ssl?.key },
-        }),
+      ...(fleetServerHost?.secrets?.ssl?.key && {
+        ssl: { key: fleetServerHost.secrets?.ssl?.key },
+      }),
     };
   }
   return inputConfig;
@@ -633,7 +637,7 @@ export function transformOutputToFullPolicyOutput(
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
 // This function generates a `bootstrap output` to be sent directly to elastic-agent
-function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
+export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
   | {
       [key: string]: FullAgentPolicyOutput;
     }
@@ -655,12 +659,12 @@ function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | u
         }),
     };
   }
+  // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
   if (fleetServerHost?.secrets) {
     outputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.es_key &&
-        !fleetServerHost?.ssl?.es_key && {
-          ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-        }),
+      ...(fleetServerHost?.secrets?.ssl?.es_key && {
+        ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
+      }),
     };
   }
 
@@ -794,3 +798,38 @@ function buildShipperQueueData(shipper: ShipperOutput) {
   };
 }
 /* eslint-enable @typescript-eslint/naming-convention */
+
+export function getBinarySourceSettings(
+  downloadSource: DownloadSource,
+  downloadSourceProxyUri: string | null
+) {
+  const config: FullAgentPolicyDownload = {
+    sourceURI: downloadSource.host,
+    ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
+  };
+  if (downloadSource?.ssl) {
+    config.ssl = {
+      ...(downloadSource.ssl?.certificate_authorities && {
+        certificate_authorities: downloadSource.ssl.certificate_authorities,
+      }),
+      ...(downloadSource.ssl?.certificate && {
+        certificate: downloadSource.ssl.certificate,
+      }),
+      ...(downloadSource.ssl?.key &&
+        !downloadSource?.secrets?.ssl?.key && {
+          key: downloadSource.ssl.key,
+        }),
+    };
+  }
+  // if both ssl.es_key and secrets.ssl.key are present, prefer the secrets'
+  if (downloadSource?.secrets) {
+    config.secrets = {
+      ssl: {
+        ...(downloadSource.secrets?.ssl?.key && {
+          key: downloadSource.secrets.ssl.key,
+        }),
+      },
+    };
+  }
+  return config;
+}
