@@ -34,7 +34,9 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/shared-ux-table-persist",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/i18n-react",
+    "@kbn/file-upload-common"
   ],
   "exclude": [
     "target/**/*",
