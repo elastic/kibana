@@ -24,6 +24,7 @@ export {
 } from '@kbn/scout';
 
 export type {
+  ApiServicesFixture,
   EsClient,
   KbnClient,
   KibanaUrl,

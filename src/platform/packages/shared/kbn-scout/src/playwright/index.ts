@@ -23,15 +23,17 @@ export { expect } from './expect';
 
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
 export type {
+  ScoutPage,
+  // can be extended with solution specific fixtures
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-  ScoutPage,
+  // can be extended with solution specific API services
+  ApiServicesFixture,
+  // can be extended with solution specific Page Objects
   PageObjects,
 } from './fixtures';
 
 // use to tag tests
 export { tags } from './tags';
-
-export { ingestTestDataHook, ingestSynthtraceDataHook } from './global_hooks';
