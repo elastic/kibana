@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import { IntegrationTool } from "../../types";
-import { StructuredTool, tool } from "@langchain/core/tools";
-import { jsonSchemaToZod } from "@n8n/json-schema-to-zod";
-import { IntegrationsSession } from "./integrations_session";
+import { StructuredTool, tool as toTool } from '@langchain/core/tools';
+import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+import { IntegrationTool } from './types';
+import { IntegrationsSession } from './integrations_session';
 
-export async function getLCTools(integrationsSession: IntegrationsSession): Promise<StructuredTool[]> {
-    const tools = await integrationsSession.getAllTools();
-    return tools.map(tool => convertToLCTool(tool, async (input) => {
-        const result = await integrationsSession.executeTool(tool.name, input);
-        return JSON.stringify(result);
-    }));
+export async function getLCTools(
+  integrationsSession: IntegrationsSession
+): Promise<StructuredTool[]> {
+  const tools = await integrationsSession.getAllTools();
+  return tools.map((tool) =>
+    convertToLCTool(tool, async (input) => {
+      const result = await integrationsSession.executeTool(tool.name, input);
+      return JSON.stringify(result);
+    })
+  );
 }
 
-function convertToLCTool(integrationTool: IntegrationTool, action: (input: any) => Promise<string>): StructuredTool {
-
+function convertToLCTool(
+  integrationTool: IntegrationTool,
+  action: (input: any) => Promise<string>
+): StructuredTool {
   const schema = jsonSchemaToZod(integrationTool.inputSchema);
 
-  return tool(
-    action,
-    {
-      name: integrationTool.name,
-      description: integrationTool.description,
-      schema: schema,
-    }
-  )
+  return toTool(action, {
+    name: integrationTool.name,
+    description: integrationTool.description,
+    schema,
+  });
 }

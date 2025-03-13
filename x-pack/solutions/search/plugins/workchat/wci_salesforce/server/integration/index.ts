@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export enum IntegrationType {
-  salesforce = 'salesforce',
-  custom = 'custom',
-}
+export { getSalesforceIntegrationDefinition } from './salesforce_integration';

@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { IntegrationPlugin, IntegrationTypes } from '@kbn/wci-common';
-
-export interface SalesforceIntegrationPlugin extends IntegrationPlugin {
-  name: IntegrationTypes.Salesforce;
-}
+import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCISalesforcePluginStart {
-  integration: SalesforceIntegrationPlugin;
+export interface WCISalesforcePluginStart {}
+
+export interface WCISalesforcePluginSetupDependencies {
+  workchatApp: WorkChatAppPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCISalesforcePluginSetupDependencies {}
-
-export interface WCISalesforcePluginStartDependencies {
-  inference: InferenceServerStart;
-}
+export interface WCISalesforcePluginStartDependencies {}

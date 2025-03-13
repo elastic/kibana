@@ -5,93 +5,67 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import type { KibanaRequest, ElasticsearchServiceStart } from '@kbn/core/server';
-import { IntegrationPlugin, IntegrationTypes, InternalIntegrationServices } from '@kbn/wci-common';
-import { ExternalIntegration, Integration, InternalIntegration } from './integration';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchServiceStart, KibanaRequest } from '@kbn/core/server';
+import { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
 import { IntegrationsSession } from './integrations_session';
+import type { IntegrationRegistry } from './integration_registry';
+import { IntegrationWithMeta } from './types';
 
 interface IntegrationsServiceOptions {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
-  integrationPlugins: IntegrationPlugin[];
+  registry: IntegrationRegistry;
 }
 
-export interface ExternalIntegrationModel {
+interface IntegrationModel {
   id: string;
-  configuration: Record<string, any>;
-  isInternal: false;
+  type: IntegrationType;
+  configuration: IntegrationConfiguration;
 }
-
-export interface InternalIntegrationModel {
-  id: string;
-  configuration: Record<string, any>;
-  type?: IntegrationTypes;
-  isInternal: true;
-}
-
-type IntegrationModel = ExternalIntegrationModel | InternalIntegrationModel;
 
 // TODO: move to reading from saved objects
-const IntegrationsSO: IntegrationModel[] = [
+const availableIntegrations: IntegrationModel[] = [
   {
     id: '1',
-    type: 'salesforce' as IntegrationTypes,
+    type: IntegrationType.salesforce,
     configuration: {},
-    isInternal: true,
   },
   {
     id: '2',
+    type: IntegrationType.custom,
     configuration: {
       url: 'http://127.0.0.1:3001/sse',
     },
-    isInternal: false,
   },
 ];
 
-function getIntegration(
-  integrationModel: IntegrationModel,
-  integrationPlugins: IntegrationPlugin[]
-): Integration {
-  if (!integrationModel.isInternal) {
-    return new ExternalIntegration(integrationModel.id, integrationModel.configuration);
-  }
-
-  const plugin = integrationPlugins.find((p) => p.name === integrationModel.type);
-  if (!plugin) {
-    throw new Error(`Integration plugin for ${integrationModel.type} not found`);
-  }
-  return new InternalIntegration(integrationModel.id, plugin, integrationModel.configuration);
-}
-
-export function getIntegrations(
-  integrationModels: IntegrationModel[],
-  integrationPlugins: IntegrationPlugin[]
-): Integration[] {
-  return integrationModels.map((model) => getIntegration(model, integrationPlugins));
-}
-
 export class IntegrationsService {
-  private logger: Logger;
-  private elasticsearch: ElasticsearchServiceStart;
-  private integrationPlugins: IntegrationPlugin[];
-  private integrations: Integration[];
+  private readonly logger: Logger;
+  private readonly registry: IntegrationRegistry;
 
-  constructor({ logger, integrationPlugins, elasticsearch }: IntegrationsServiceOptions) {
+  constructor({ logger, registry }: IntegrationsServiceOptions) {
     this.logger = logger;
-    this.elasticsearch = elasticsearch;
-    this.integrationPlugins = integrationPlugins;
-    this.integrations = getIntegrations(IntegrationsSO, this.integrationPlugins);
+    this.registry = registry;
   }
 
   async createSession({ request }: { request: KibanaRequest }): Promise<IntegrationsSession> {
     this.logger.debug('Creating integrations session');
 
-    const services: InternalIntegrationServices = {
-      logger: this.logger.get('session'),
-      elasticsearchClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
-    };
+    // TODO: we should have access to the agent's config to see which integration it is
+    //       configured to access. Should be done once we have agent configuration persisted
 
-    return new IntegrationsSession(services, this.integrations);
+    const integrations = await Promise.all(
+      availableIntegrations.map<Promise<IntegrationWithMeta>>(async (source) => {
+        const definition = this.registry.get(source.type);
+        const integration = await definition.createIntegration({
+          request,
+          configuration: source.configuration,
+        });
+        return Object.assign(integration, { id: source.id });
+      })
+    );
+
+    return new IntegrationsSession({ integrations, logger: this.logger.get('session') });
   }
 }

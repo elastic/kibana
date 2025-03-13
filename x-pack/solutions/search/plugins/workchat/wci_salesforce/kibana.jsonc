@@ -10,7 +10,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "wciSalesforce"],
-    "requiredPlugins": ["inference"],
+    "requiredPlugins": ["inference", "workchatApp"],
     "optionalPlugins": [],
     "requiredBundles": []
   }
