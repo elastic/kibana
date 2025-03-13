@@ -78,7 +78,8 @@
       "savedObjectsTaggingOss",
       "guidedOnboarding",
       "integrationAssistant",
-      "serverless"
+      "serverless",
+      "share"
     ],
     "requiredBundles": [
       "esUiShared",
