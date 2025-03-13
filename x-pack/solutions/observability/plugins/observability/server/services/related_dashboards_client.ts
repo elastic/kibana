@@ -36,7 +36,7 @@ export class RelatedDashboardsClient {
     const relevantDashboardsById = new Map<string, RelatedDashboard>();
     const [alert] = await Promise.all([
       this.alertsClient.getAlertById(this.alertId),
-      this.fetchAllDashboards(1),
+      this.fetchAllDashboards(),
     ]);
     this.alert = alert;
     if (!this.alert) {
@@ -77,7 +77,7 @@ export class RelatedDashboardsClient {
   async fetchDashboards(page: number) {
     const perPage = 1000;
     const dashboards = await this.dashboardClient.search(
-      { limit: perPage, cursor: page },
+      { limit: perPage, cursor: `${page}` },
       { spaces: ['*'] }
     );
     const {
