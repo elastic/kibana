@@ -6,11 +6,11 @@
  */
 
 import { useLoadRuleEventLogs } from '@kbn/triggers-actions-ui-plugin/public';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert } from '@kbn/alerting-types';
 
-const startDate = 'now-10d';
+const startDate = 'now-2d';
 interface AlertData {
   key: number;
   key_as_string: string;
@@ -21,13 +21,13 @@ interface AlertSummary {
   activeAlerts: Alert[];
   recoveredAlertCount: number;
 }
-const useFetchRuleEventLogs = (ruleId?: string) => {
+const useFetchRuleEventLogs = (ruleId?: string, executionLookBackWindow: string = '100') => {
   const loadRuleEventLogs = useLoadRuleEventLogs({
     id: ruleId!,
     dateStart: startDate,
     dateEnd: 'now',
     page: 0,
-    perPage: 1000,
+    perPage: Number(executionLookBackWindow),
   });
 
   const fetchLogs = useCallback(async () => {
@@ -36,7 +36,7 @@ const useFetchRuleEventLogs = (ruleId?: string) => {
   }, [ruleId, loadRuleEventLogs]);
 
   return useQuery({
-    queryKey: ['ruleEventLogs', ruleId],
+    queryKey: ['ruleEventLogs', ruleId, executionLookBackWindow],
     queryFn: fetchLogs,
     enabled: !!ruleId,
   });
@@ -67,15 +67,28 @@ const useFetchRuleEventLogs = (ruleId?: string) => {
 //   });
 // };
 
-const useRuleSensitive = ({ ruleId, ruleTypeId }: { ruleId?: string; ruleTypeId?: string }) => {
+const useRuleSensitive = ({
+  ruleId,
+  ruleTypeId,
+  executionLookBackWindow,
+  sensitivity = '2',
+}: {
+  ruleId?: string;
+  ruleTypeId?: string;
+  executionLookBackWindow?: string;
+  sensitivity?: string;
+}) => {
   // const { http } = useKibana().services;
-  const [state, setState] = useState({ isSensitive: false, zScore: 0, message: '' });
-  const { data: eventLogs } = useFetchRuleEventLogs(ruleId);
+  console.log('executionLookBackWindow', executionLookBackWindow);
+  const { data: eventLogs } = useFetchRuleEventLogs(ruleId, executionLookBackWindow);
   // const { data: alertSummaryData } = useFetchAlertSummary(http, ruleId, ruleTypeId);
-  const test = calculateZScoresWithExponentialWeighting(eventLogs?.data?.data || [], 0.3);
-  console.log('test', test);
+  const ruleSensitivityHistory = calculateZScoresWithExponentialWeighting(
+    eventLogs?.data?.data || [],
+    Number(sensitivity) / 10
+  );
+  // console.log('test', test);
 
-  return { state, updateState: setState };
+  return { ruleSensitivityHistory };
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -133,7 +146,7 @@ function getScalingFactor(executionIntervalSeconds: number): number {
 function calculateZScoresWithExponentialWeighting(
   executions: RuleExecution[],
   alpha: number = 0.2 // Controls how fast old data fades (0.1 = slow, 0.3 = fast)
-): Array<{ timestamp: string; zScore: number | null }> {
+): Array<{ timestamp: string; zScore: number | null; numNewAlerts: number }> {
   if (executions.length < 2) return [];
 
   const executionIntervalSeconds = estimateExecutionInterval(executions);
@@ -142,26 +155,33 @@ function calculateZScoresWithExponentialWeighting(
   const scalingFactor = getScalingFactor(executionIntervalSeconds);
 
   // Convert num_new_alerts to "alerts per normalized time unit"
-  const alertsPerUnit = executions.map(
-    (exe) => (exe.num_new_alerts / executionIntervalSeconds) * scalingFactor
-  );
+  const alertsPerUnit = executions.map((exe) => {
+    return {
+      value: (exe.num_new_alerts / executionIntervalSeconds) * scalingFactor,
+      numNewAlerts: exe.num_new_alerts,
+    };
+  });
 
   if (alertsPerUnit.length < 2) return [];
 
-  let ewmaMean = alertsPerUnit[0]; // Start with first value
+  let ewmaMean = alertsPerUnit[0].value; // Start with first value
   let ewmaVar = 0; // Initial variance
 
   return executions.map((execution, index) => {
-    if (index === 0) return { timestamp: execution.timestamp, zScore: null };
+    if (index === 0) return { timestamp: execution.timestamp, zScore: null, numNewAlerts: 0 };
 
     // Update Exponentially Weighted Moving Average (EWMA) Mean & Variance
-    ewmaMean = alpha * alertsPerUnit[index] + (1 - alpha) * ewmaMean;
-    ewmaVar = alpha * Math.pow(alertsPerUnit[index] - ewmaMean, 2) + (1 - alpha) * ewmaVar;
+    ewmaMean = alpha * alertsPerUnit[index].value + (1 - alpha) * ewmaMean;
+    ewmaVar = alpha * Math.pow(alertsPerUnit[index].value - ewmaMean, 2) + (1 - alpha) * ewmaVar;
     const ewmaStdDev = Math.sqrt(ewmaVar);
 
-    const zScore = ewmaStdDev > 0 ? (alertsPerUnit[index] - ewmaMean) / ewmaStdDev : null;
+    const zScore = ewmaStdDev > 0 ? (alertsPerUnit[index].value - ewmaMean) / ewmaStdDev : null;
 
-    return { timestamp: execution.timestamp, zScore };
+    return {
+      timestamp: execution.timestamp,
+      zScore: zScore !== null ? parseFloat(zScore.toFixed(2)) : 0,
+      numNewAlerts: alertsPerUnit[index].numNewAlerts,
+    };
   });
 }
 
