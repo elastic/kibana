@@ -461,6 +461,7 @@ export const invokeDefendInsightsGraph = async ({
     size,
     start,
     end,
+    connectorType: apiConfig.actionTypeId,
   });
 
   logger?.debug(() => 'invokeDefendInsightsGraph: invoking the Defend insights graph');
@@ -473,6 +474,7 @@ export const invokeDefendInsightsGraph = async ({
       tags,
     }
   )) as GraphState;
+
   const {
     insights,
     anonymizedEvents,

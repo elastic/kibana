@@ -23,12 +23,14 @@ export interface Options {
   insightType: DefendInsightType;
   start?: string;
   end?: string;
+  connectorType?: string;
 }
 
 export const getDefaultGraphState = ({
   insightType,
   start,
   end,
+  connectorType,
 }: Options): StateGraphArgs<GraphState>['channels'] => ({
   insights: {
     value: (current: DefendInsight[] | null, next?: DefendInsight[] | null) => next ?? current,
@@ -36,7 +38,7 @@ export const getDefaultGraphState = ({
   },
   prompt: {
     value: (current: string, next?: string) => next ?? current,
-    default: () => getDefendInsightsPrompt({ type: insightType }),
+    default: () => getDefendInsightsPrompt({ type: insightType, connectorType }),
   },
   anonymizedEvents: {
     value: (current: Document[], next?: Document[]) => next ?? current,
