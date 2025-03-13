@@ -183,7 +183,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                 title: i18n.translate(
                   'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.alternativeOption.title',
                   {
-                    defaultMessage: 'Alternatively: Manually delete index',
+                    defaultMessage: 'Alternative: Delete the index',
                   }
                 ),
                 description: (
