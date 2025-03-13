@@ -668,11 +668,11 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.ts"
               },
               {
                 "plugin": "globalSearchBar",
@@ -1140,67 +1140,67 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -1982,7 +1982,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager_registrations.ts"
               },
               {
                 "plugin": "telemetry",
@@ -2046,7 +2046,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/services/discover_ebt_manager.test.ts"
+                "path": "src/platform/plugins/shared/discover/public/plugin_imports/discover_ebt_manager.test.ts"
               },
               {
                 "plugin": "@kbn/core",
