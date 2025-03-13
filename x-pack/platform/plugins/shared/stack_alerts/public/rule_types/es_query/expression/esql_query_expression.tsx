@@ -261,6 +261,7 @@ export const EsqlQueryExpression: React.FC<
       <EuiFormRow
         id="alertGroup"
         fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.groupBy.length > 0 && groupBy !== undefined}
         error={errors.groupBy as string[]}
         label={
