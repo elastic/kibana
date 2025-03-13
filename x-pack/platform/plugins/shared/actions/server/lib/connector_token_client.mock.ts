@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ConnectorTokenClient } from './connector_token_client';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ConnectorTokenClient } from './connector_token_client';
 
 const createConnectorTokenClientMock = () => {
   const mocked: jest.Mocked<PublicMethodsOf<ConnectorTokenClient>> = {

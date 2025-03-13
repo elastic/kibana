@@ -9,8 +9,8 @@ import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { ConnectorTokenClient } from './connector_token_client';
-import { Logger } from '@kbn/core/server';
-import { ConnectorToken } from '../types';
+import type { Logger } from '@kbn/core/server';
+import type { ConnectorToken } from '../types';
 import * as allRetry from './retry_if_conflicts';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
