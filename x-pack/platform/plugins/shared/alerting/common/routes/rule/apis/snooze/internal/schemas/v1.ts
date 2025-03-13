@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleSnoozeScheduleSchemaV1 } from '../../../request';
+import { ruleSnoozeScheduleSchemaV1 } from '../../../../request';
 
-export const snoozeParamsSchema = schema.object({
+export const snoozeParamsInternalSchema = schema.object({
   id: schema.string(),
 });
 
-export const snoozeBodySchema = schema.object({
+export const snoozeBodyInternalSchema = schema.object({
   snooze_schedule: ruleSnoozeScheduleSchemaV1,
 });
