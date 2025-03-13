@@ -16,9 +16,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { apmEnableServiceMapApiV2 } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import { Subscription } from 'rxjs';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -119,8 +120,34 @@ export function ServiceMap({
   const license = useLicenseContext();
   const serviceName = useServiceName();
 
-  const { config } = useApmPluginContext();
+  const { config, core } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
+
+  const subscriptions = useRef<Subscription>(new Subscription());
+  const [isServiceMapApiV2Enabled, setIsServiceMapApiV2Enabled] = useState<boolean>(
+    core.settings.client.get(apmEnableServiceMapApiV2)
+  );
+
+  useEffect(() => {
+    subscriptions.current.add(
+      core.settings.client.get$<boolean>(apmEnableServiceMapApiV2).subscribe((value) => {
+        setIsServiceMapApiV2Enabled(value);
+      })
+    );
+  }, [core.settings]);
+
+  useEffect(() => {
+    const currentSubscriptions = subscriptions.current;
+    return () => {
+      currentSubscriptions.unsubscribe();
+    };
+  }, []);
+
+  const { fields, isSaving, saveSingleSetting } = useEditableSettings([apmEnableServiceMapApiV2]);
+
+  const settingsField = fields[apmEnableServiceMapApiV2];
+  const isServiceMapV2Enabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
+
   const { data, status, error } = useServiceMap({
     environment,
     kuery,
@@ -128,6 +155,7 @@ export function ServiceMap({
     end,
     serviceGroupId,
     serviceName,
+    isServiceMapApiV2Enabled,
   });
 
   const { ref, height } = useRefDimensions();
@@ -135,11 +163,6 @@ export function ServiceMap({
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
-
-  const { fields, isSaving, saveSingleSetting } = useEditableSettings([apmEnableServiceMapApiV2]);
-
-  const settingsField = fields[apmEnableServiceMapApiV2];
-  const isServiceMapV2Enabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
 
   if (!license) {
     return null;

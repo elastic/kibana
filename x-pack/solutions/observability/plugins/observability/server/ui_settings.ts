@@ -379,7 +379,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     value: false,
-    requiresPageReload: true,
+    requiresPageReload: false,
     type: 'boolean',
     solution: 'oblt',
   },

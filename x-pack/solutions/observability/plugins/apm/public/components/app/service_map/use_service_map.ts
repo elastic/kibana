@@ -6,7 +6,6 @@
  */
 import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { apmEnableServiceMapApiV2 } from '@kbn/observability-plugin/common';
 import type {
   ServiceMapSpan,
   ExitSpanDestination,
@@ -39,6 +38,7 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
+  isServiceMapApiV2Enabled,
 }: {
   environment: Environment;
   kuery: string;
@@ -46,11 +46,10 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
+  isServiceMapApiV2Enabled: boolean;
 }) => {
   const license = useLicenseContext();
-  const { config, core } = useApmPluginContext();
-
-  const isServiceMapApiV2Enabled = core.uiSettings.get<boolean>(apmEnableServiceMapApiV2);
+  const { config } = useApmPluginContext();
 
   const [serviceMapNodes, setServiceMapNodes] = useState<{
     data: SeriviceMapState;
