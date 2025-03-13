@@ -11,12 +11,13 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
 import { UserProfile } from '@kbn/test/src/auth/types';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { DEFAULT_SLO } from './fixtures/slo';
+import { DEFAULT_SLO, DEFAULT_SPACE_FOR_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
 import { TransformHelper, createTransformHelper } from './helpers/transform';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
+  const spaceApi = getService('spaces');
   const sloApi = getService('sloApi');
   const logger = getService('log');
   const retry = getService('retry');
@@ -55,6 +56,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
       await sloApi.deleteAllSLOs(adminRoleAuthc);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
+      await spaceApi.delete('space1');
+      await spaceApi.delete('space2');
     });
 
     it('creates a new slo and transforms', async () => {
@@ -123,6 +126,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: '.slo-observability.summary-v3.4',
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });
+    });
+
+    it('creates two SLOs with matching ids across different spaces', async () => {
+      const spaceApiResponse = await spaceApi.create({
+        ...DEFAULT_SPACE_FOR_SLO,
+        name: 'space1',
+        id: 'space1',
+        initials: '1',
+      });
+      expect(spaceApiResponse.space).property('id');
+      const {
+        space: { id: spaceId1 },
+      } = spaceApiResponse;
+      const apiResponse = await sloApi.createWithSpace(DEFAULT_SLO, spaceId1, adminRoleAuthc, 200);
+      expect(apiResponse).property('id');
+      const { id } = apiResponse;
+      const spaceApiResponse2 = await spaceApi.create({
+        ...DEFAULT_SPACE_FOR_SLO,
+        name: 'space2',
+        id: 'space2',
+        initials: '2',
+      });
+      const {
+        space: { id: spaceId2 },
+      } = spaceApiResponse;
+      expect(spaceApiResponse2.space).property('id');
+      await sloApi.createWithSpace({ ...DEFAULT_SLO, id }, spaceId2, adminRoleAuthc, 409);
     });
 
     describe('groupBy smoke tests', () => {

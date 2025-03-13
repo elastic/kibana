@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();
 
-interface SpaceCreate {
+export interface SpaceCreate {
   name?: string;
   id?: string;
   description?: string;

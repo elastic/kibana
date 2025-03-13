@@ -123,7 +123,7 @@ export class CreateSLO {
   }
 
   private async assertSLOInexistant(slo: SLODefinition) {
-    const exists = await this.repository.exists(slo.id);
+    const exists = await this.repository.exists(slo.id, ['*']);
     if (exists) {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }
