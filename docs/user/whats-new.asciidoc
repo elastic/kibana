@@ -49,6 +49,43 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6e2ccb4a2
 === Dashboards
 
 [discrete]
+==== Dashboard ES|QL controls
+
+You can now bind controls to your ES|QL visualizations in dashboards. When creating a visualization, the ES|QL autocomplete will prompt control insertion for field values, field names, function configuration, and function names. This enables controls that only apply to a specific panel, and exposes visualization configuration such as date histogram interval controls to dashboard users.
+
+Check out the following examples:
+
+* Integrate filtering into your ES|QL experience
+
+[source,esql]
+-------------------
+| WHERE field == ?value
+-------------------
+
+* Fields in controls for dynamic group by
+
+[source,esql]
+-------------------
+| STATS count=COUNT(*) BY ?field
+-------------------
+
+* Variable time ranges? Bind function configuration settings to a control
+
+[source,esql]
+-------------------
+| BUCKET(@timestamp, ?interval),
+-------------------
+
+* …or make the function itself dynamic
+
+[source,esql]
+-------------------
+| STATS metric = ?function
+-------------------
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte42dfaa404bfc2d6/67d2e31e2e4dc59da190d78f/dashboard-esql-controls.gif[Editing ES|QL controls from a dashboard]
+
+[discrete]
 ==== Dashboard layout engine with improved performance and usability 
 
 We’ve rebuilt the Dashboard layout engine for faster authoring and improved performance. The new engine makes resize events behave more predictably, allows drag-and-drop of panels above and below the visible part of the dashboard, and improves browser performance to create a more responsive experience. Read more about the engineering behind this engine in our https://www.elastic.co/search-labs/blog/kibana-dashboard-build-layout[blog post]. 
