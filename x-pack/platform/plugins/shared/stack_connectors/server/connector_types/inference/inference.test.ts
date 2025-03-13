@@ -300,9 +300,6 @@ describe('InferenceConnector', () => {
         {
           asStream: true,
           meta: true,
-          headers: {
-            'X-Elastic-Product-Use-Case': 'unknown',
-          },
         }
       );
     });
@@ -329,9 +326,6 @@ describe('InferenceConnector', () => {
           asStream: true,
           meta: true,
           signal,
-          headers: {
-            'X-Elastic-Product-Use-Case': 'unknown',
-          },
         }
       );
     });
