@@ -43,8 +43,7 @@ import {
   updateTimelineTitleAndDescription,
   updateTimelineGraphEventId,
   updateTimelineColumnWidth,
-  updateTableColumns,
-  upsertTableColumn,
+  upsertTimelineColumn,
 } from './helpers';
 import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
@@ -158,6 +157,10 @@ const columnsMock: ColumnHeaderOptions[] = [
 ];
 
 describe('Timeline', () => {
+  beforeEach(() => {
+    setStoredTimelineColumnsConfig(undefined);
+  });
+
   describe('#add saved object Timeline to store ', () => {
     test('should return a timelineModel with default value and not just a timelineResult ', () => {
       const update = addTimelineToStore({
@@ -321,7 +324,7 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#upsertTableColumn', () => {
+  describe('#upsertTimelineColumn', () => {
     let timelineById: TimelineById = {};
     let columns: ColumnHeaderOptions[] = [];
     let columnToAdd: ColumnHeaderOptions;
@@ -352,7 +355,7 @@ describe('Timeline', () => {
     });
 
     test('should return a new reference and not the same reference', () => {
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columnToAdd,
         id: 'foo',
         index: 0,
@@ -364,7 +367,7 @@ describe('Timeline', () => {
 
     test('should add a new column to an empty collection of columns', () => {
       const expectedColumns = [columnToAdd];
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columnToAdd,
         id: 'foo',
         index: 0,
@@ -377,7 +380,7 @@ describe('Timeline', () => {
     test('should add a new column to an existing collection of columns at the beginning of the collection', () => {
       const expectedColumns = [columnToAdd, ...columns];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columnToAdd,
         id: 'foo',
         index: 0,
@@ -389,7 +392,7 @@ describe('Timeline', () => {
     test('should add a new column to an existing collection of columns in the middle of the collection', () => {
       const expectedColumns = [columns[0], columnToAdd, columns[1], columns[2]];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columnToAdd,
         id: 'foo',
         index: 1,
@@ -402,7 +405,7 @@ describe('Timeline', () => {
     test('should add a new column to an existing collection of columns at the end of the collection', () => {
       const expectedColumns = [...columns, columnToAdd];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columnToAdd,
         id: 'foo',
         index: expectedColumns.length - 1,
@@ -414,7 +417,7 @@ describe('Timeline', () => {
 
     columns.forEach((column, i) => {
       test(`should upsert (NOT add a new column) a column when already exists at the same index (${i})`, () => {
-        const update = upsertTableColumn({
+        const update = upsertTimelineColumn({
           column,
           id: 'foo',
           index: i,
@@ -428,7 +431,7 @@ describe('Timeline', () => {
     test('should allow the 1st column to be moved to the 2nd column', () => {
       const expectedColumns = [columns[1], columns[0], columns[2]];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columns[0],
         id: 'foo',
         index: 1,
@@ -441,7 +444,7 @@ describe('Timeline', () => {
     test('should allow the 1st column to be moved to the 3rd column', () => {
       const expectedColumns = [columns[1], columns[2], columns[0]];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columns[0],
         id: 'foo',
         index: 2,
@@ -454,7 +457,7 @@ describe('Timeline', () => {
     test('should allow the 2nd column to be moved to the 1st column', () => {
       const expectedColumns = [columns[1], columns[0], columns[2]];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columns[1],
         id: 'foo',
         index: 0,
@@ -467,7 +470,7 @@ describe('Timeline', () => {
     test('should allow the 2nd column to be moved to the 3rd column', () => {
       const expectedColumns = [columns[0], columns[2], columns[1]];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columns[1],
         id: 'foo',
         index: 2,
@@ -480,7 +483,7 @@ describe('Timeline', () => {
     test('should allow the 3rd column to be moved to the 1st column', () => {
       const expectedColumns = [columns[2], columns[0], columns[1]];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columns[2],
         id: 'foo',
         index: 0,
@@ -493,7 +496,7 @@ describe('Timeline', () => {
     test('should allow the 3rd column to be moved to the 2nd column', () => {
       const expectedColumns = [columns[0], columns[2], columns[1]];
 
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columns[2],
         id: 'foo',
         index: 1,
@@ -513,7 +516,7 @@ describe('Timeline', () => {
       };
       setStoredTimelineColumnsConfig(storedConfig);
       const expectedColumns = [{ ...columnToAdd, initialWidth }];
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columnToAdd,
         id: 'foo',
         index: 0,
@@ -532,35 +535,11 @@ describe('Timeline', () => {
         },
       };
       setStoredTimelineColumnsConfig(storedConfig);
-      const update = upsertTableColumn({
+      const update = upsertTimelineColumn({
         column: columns[0],
         id: 'foo',
         index: 0,
         timelineById: mockWithExistingColumns,
-      });
-
-      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
-        expect.objectContaining({
-          initialWidth,
-        })
-      );
-    });
-  });
-
-  describe('#updateTableColumns', () => {
-    test('should apply the locally stored column config', () => {
-      const initialWidth = 123456789;
-      const storedConfig: LocalStorageColumnSettings = {
-        '@timestamp': {
-          id: '@timestamp',
-          initialWidth,
-        },
-      };
-      setStoredTimelineColumnsConfig(storedConfig);
-      const update = updateTableColumns({
-        id: 'foo',
-        columns: columnsMock,
-        timelineById: timelineByIdMock,
       });
 
       expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
@@ -890,6 +869,28 @@ describe('Timeline', () => {
         timelineById: timelineByIdMock,
       });
       expect(update.foo.columns).toEqual([...columnsMock]);
+    });
+
+    test('should apply the locally stored column config', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        '@timestamp': {
+          id: '@timestamp',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const update = updateTimelineColumns({
+        id: 'foo',
+        columns: columnsMock,
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
+        expect.objectContaining({
+          initialWidth,
+        })
+      );
     });
   });
 
