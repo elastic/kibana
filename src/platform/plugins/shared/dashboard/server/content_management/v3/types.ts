@@ -32,7 +32,7 @@ import {
   optionsSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
-import { type DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
