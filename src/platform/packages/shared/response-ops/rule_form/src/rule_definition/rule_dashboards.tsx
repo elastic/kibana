@@ -10,11 +10,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiComboBox, EuiSplitPanel, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { dashboardServiceProvider, type DashboardItem } from './dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
 
-export const RuleDashboards = ( { plugins }) => {
+export const RuleDashboards = ({ plugins }) => {
   const { featureFlags, dashboard: dashboardService } = plugins;
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
@@ -87,10 +87,7 @@ export const RuleDashboards = ( { plugins }) => {
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage
-                id="xpack.observability.customThreshold.rule.alertFlyout.linkDashboards"
-                defaultMessage="Link dashboard(s)"
-              />
+              {ALERT_LINK_DASHBOARDS_TITLE}
             </h6>
           </EuiTitle>
           <EuiSpacer size="s" />
