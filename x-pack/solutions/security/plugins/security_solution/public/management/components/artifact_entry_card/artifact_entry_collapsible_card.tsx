@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import type { AnyArtifact } from './types';
 import type { CommonArtifactEntryCardProps } from './artifact_entry_card';
 import { CardContainerPanel } from './components/card_container_panel';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
@@ -36,7 +37,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
+      <CardContainerPanel {...commonProps} item={item as AnyArtifact} data-test-subj={dataTestSubj}>
         <CardSectionPanel className="artifact-entry-collapsible-card">
           <CardCompressedHeader
             artifact={artifact}

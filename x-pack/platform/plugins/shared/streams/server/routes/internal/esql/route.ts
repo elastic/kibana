@@ -8,7 +8,7 @@
 import { UnparsedEsqlResponse, createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import { isNumber } from 'lodash';
-import { createServerRoute } from '../create_server_route';
+import { createServerRoute } from '../../create_server_route';
 import { excludeFrozenQuery, kqlQuery, rangeQuery } from './query_helpers';
 
 export const executeEsqlRoute = createServerRoute({
@@ -67,6 +67,6 @@ export const executeEsqlRoute = createServerRoute({
   },
 });
 
-export const esqlRoutes = {
+export const internalEsqlRoutes = {
   ...executeEsqlRoute,
 };
