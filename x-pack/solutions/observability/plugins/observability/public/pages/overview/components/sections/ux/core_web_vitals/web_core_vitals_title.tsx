@@ -30,6 +30,9 @@ const BROWSER_CORE_WEB_VITALS = i18n.translate(
   }
 );
 
+const CORE_VITALS_URL = 'https://web.dev/vitals/';
+const CORE_VITALS_BROWSER_URL = 'https://github.com/GoogleChrome/web-vitals#browser-support';
+
 export function WebCoreVitalsTitle({
   loading,
   coreVitalPages,
@@ -59,17 +62,18 @@ export function WebCoreVitalsTitle({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink
-            style={{ fontSize: 14 }}
-            data-test-subj="o11yWebCoreVitalsTitleLink"
-            href="https://web.dev/vitals/"
-            external
-            target="_blank"
-          >
-            {i18n.translate('xpack.observability.ux.dashboard.webCoreVitals.help', {
-              defaultMessage: 'Learn more',
-            })}
-          </EuiLink>
+          <EuiText size="s">
+            <EuiLink
+              data-test-subj="o11yWebCoreVitalsTitleLink"
+              href={CORE_VITALS_URL}
+              external
+              target="_blank"
+            >
+              {i18n.translate('xpack.observability.ux.dashboard.webCoreVitals.help', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       {displayTrafficMetric && totalPageViews > 0 && (
@@ -109,7 +113,7 @@ export function WebCoreVitalsTitle({
                     />{' '}
                     <EuiLink
                       data-test-subj="o11yWebCoreVitalsTitleLink"
-                      href="https://github.com/GoogleChrome/web-vitals#browser-support"
+                      href={CORE_VITALS_BROWSER_URL}
                       external
                       target="_blank"
                     >
