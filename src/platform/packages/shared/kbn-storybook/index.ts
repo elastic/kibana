@@ -17,3 +17,4 @@ export { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal };
 export type { StorybookConfig };
 export { runStorybookCli } from './src/lib/run_storybook_cli';
 export { default as WebpackConfig } from './src/webpack.config';
+export { DEFAULT_THEME, THEMES } from './src/lib/themes';
