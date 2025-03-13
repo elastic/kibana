@@ -45,6 +45,7 @@ export const createEsqlAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     executor: (params) =>
       esqlExecutor({
         ...params,
