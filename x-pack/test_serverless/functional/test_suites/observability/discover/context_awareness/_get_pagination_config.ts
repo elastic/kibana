@@ -30,14 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
       // To load more than 500 records
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${currentTimeFrame.from}", "to": "${currentTimeFrame.to}"}`,
       });
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${resetTimeFrame.from}", "to": "${resetTimeFrame.to}"}`,
       });

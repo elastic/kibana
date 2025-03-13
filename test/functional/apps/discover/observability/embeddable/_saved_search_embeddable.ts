@@ -21,9 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover/observability saved search embeddable', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
