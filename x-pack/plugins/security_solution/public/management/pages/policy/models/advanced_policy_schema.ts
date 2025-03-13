@@ -2091,7 +2091,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2102,7 +2102,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2113,7 +2113,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2124,7 +2124,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2135,7 +2135,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2146,7 +2146,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2157,7 +2157,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2168,7 +2168,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2179,7 +2179,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2190,7 +2190,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2201,7 +2201,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2212,7 +2212,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: true',
+          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2223,7 +2223,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2234,7 +2234,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2245,7 +2245,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
