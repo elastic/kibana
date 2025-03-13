@@ -18177,7 +18177,7 @@ ejs@^3.1.10:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-node@^4.10.0, elastic-apm-node@^4.11.0:
+elastic-apm-node@^4.10.0:
   version "4.11.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.11.0.tgz#55ba8a08a653b17ce8120f6a4e690d191d0450aa"
   integrity sha512-QXYjOysgjjASJewDK40iUq8W4fdn/QsJtvl4wsxbSncRfcJCSYPaqfWbxN6YAMpOU0vLp5kBj6tdWPBMTaYrMg==
@@ -18201,6 +18201,49 @@ elastic-apm-node@^4.10.0, elastic-apm-node@^4.11.0:
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
     import-in-the-middle "1.12.0"
+    json-bigint "^1.0.0"
+    lru-cache "10.2.0"
+    measured-reporting "^1.51.1"
+    module-details-from-path "^1.0.3"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^8.15.0"
+    readable-stream "^3.6.2"
+    relative-microtime "^2.0.0"
+    require-in-the-middle "^7.1.1"
+    semver "^7.5.4"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    stream-chopper "^3.0.1"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^4.11.1:
+  version "4.11.1"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.11.1.tgz#8d12e32fdb64a449d42271ae029af46e81476ce6"
+  integrity sha512-puIc1WVCLgfHHhUM4+mX7aQqrXNHB3Sz1VqNA5GuRBn3Nsqsf5Y0iGiqlH5VL/1eY4s2klswJ95UIiLizaUsyA==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.5.0"
+    "@opentelemetry/api" "^1.4.1"
+    "@opentelemetry/core" "^1.11.0"
+    "@opentelemetry/sdk-metrics" "^1.12.0"
+    after-all-results "^2.0.0"
+    agentkeepalive "^4.2.1"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    breadth-filter "^2.0.0"
+    cookie "^0.7.1"
+    core-util-is "^1.0.2"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    fast-stream-to-buffer "^1.0.0"
+    http-headers "^3.0.2"
+    import-in-the-middle "1.13.1"
     json-bigint "^1.0.0"
     lru-cache "10.2.0"
     measured-reporting "^1.51.1"
@@ -21642,6 +21685,16 @@ import-in-the-middle@1.12.0:
   integrity sha512-yAgSE7GmtRcu4ZUSFX/4v69UGXwugFFSdIQJ14LHPOPPQrWv8Y7O9PHsw8Ovk7bKCLe4sjXMbZFqGFcLHpZ89w==
   dependencies:
     acorn "^8.8.2"
+    acorn-import-attributes "^1.9.5"
+    cjs-module-lexer "^1.2.2"
+    module-details-from-path "^1.0.3"
+
+import-in-the-middle@1.13.1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.13.1.tgz#789651f9e93dd902a5a306f499ab51eb72b03a12"
+  integrity sha512-k2V9wNm9B+ysuelDTHjI9d5KPc4l8zAZTGqj+pcynvWkypZd857ryzN8jNC7Pg2YZXNMJcHRPpaDyCBbNyVRpA==
+  dependencies:
+    acorn "^8.14.0"
     acorn-import-attributes "^1.9.5"
     cjs-module-lexer "^1.2.2"
     module-details-from-path "^1.0.3"
