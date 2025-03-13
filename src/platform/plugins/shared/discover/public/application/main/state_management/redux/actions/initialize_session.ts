@@ -136,6 +136,20 @@ export const initializeSession: InternalStateThunkActionCreator<
       dispatch(appendAdHocDataViews(dataView));
     }
 
+    // This must be executed before updateSavedSearch since
+    // it updates the Discover session with timefilter values
+    if (persistedDiscoverSession?.timeRestore && dataView.isTimeBased()) {
+      const { timeRange, refreshInterval } = persistedDiscoverSession;
+
+      if (timeRange && isTimeRangeValid(timeRange)) {
+        services.timefilter.setTime(timeRange);
+      }
+
+      if (refreshInterval && isRefreshIntervalValid(refreshInterval)) {
+        services.timefilter.setRefreshInterval(refreshInterval);
+      }
+    }
+
     const initialState = getInitialState({
       initialUrlState: urlState,
       savedSearch: persistedDiscoverSession,
@@ -152,24 +166,12 @@ export const initializeSession: InternalStateThunkActionCreator<
       services,
     });
 
-    if (discoverSession.timeRestore && dataView.isTimeBased()) {
-      const { timeRange, refreshInterval } = discoverSession;
-
-      if (timeRange && isTimeRangeValid(timeRange)) {
-        services.timefilter.setTime(timeRange);
-      }
-
-      if (refreshInterval && isRefreshIntervalValid(refreshInterval)) {
-        services.timefilter.setRefreshInterval(refreshInterval);
-      }
-    }
-
     // Cleaning up the previous state
     services.filterManager.setAppFilters([]);
     services.data.query.queryString.clearQuery();
 
     // Sync global filters (coming from URL) to filter manager.
-    // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is being called after this `loadSavedSearch` function.
+    // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is called later.
     const globalFilters = stateContainer.globalState?.get()?.filters;
     const shouldUpdateWithGlobalFilters =
       globalFilters?.length && !services.filterManager.getGlobalFilters()?.length;
