@@ -27,7 +27,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/code-editor",
     "@kbn/ui-theme",
-    "@kbn/calculate-auto",
     "@kbn/kibana-react-plugin",
     "@kbn/es-query",
     "@kbn/server-route-repository-client",
@@ -59,5 +58,6 @@
     "@kbn/licensing-plugin",
     "@kbn/datemath",
     "@kbn/xstate-utils",
+    "@kbn/visualization-utils",
   ]
 }
