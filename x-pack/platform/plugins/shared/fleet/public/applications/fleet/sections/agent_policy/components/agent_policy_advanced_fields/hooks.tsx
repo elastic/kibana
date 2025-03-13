@@ -16,10 +16,7 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../../../hooks';
-import {
-  DEFAULT_DOWNLOAD_SOURCE_ID,
-  LICENCE_FOR_PER_POLICY_OUTPUT,
-} from '../../../../../../../common/constants';
+import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
 import {
   getAllowedOutputTypesForAgentPolicy,
   policyHasFleetServer,
@@ -172,14 +169,12 @@ export function useDownloadSourcesOptions() {
 
     return [
       getDefaultDownloadSource(defaultDownloadSourceName),
-      ...downloadSourcesRequest.data.items
-        .filter((item) => !item.is_default)
-        .map((item) => {
-          return {
-            value: item.id,
-            inputDisplay: item.name,
-          };
-        }),
+      ...downloadSourcesRequest.data.items.map((item) => {
+        return {
+          value: item.id,
+          inputDisplay: item.name,
+        };
+      }),
     ];
   }, [downloadSourcesRequest]);
 
@@ -205,7 +200,7 @@ function getDefaultDownloadSource(
       }),
       defaultDownloadSourceDisabledMessage
     ),
-    value: DEFAULT_DOWNLOAD_SOURCE_ID,
+    value: DEFAULT_SELECT_VALUE,
     disabled: defaultDownloadSourceDisabled,
   };
 }
@@ -225,17 +220,15 @@ export function useFleetServerHostsOptions(agentPolicy: Partial<NewAgentPolicy |
 
     return [
       getDefaultFleetServerHosts(defaultFleetServerHostsName),
-      ...fleetServerHostsRequest.data.items
-        .filter((item) => !item.is_default)
-        .map((item) => {
-          const isInternalFleetServerHost = !!item.is_internal;
+      ...fleetServerHostsRequest.data.items.map((item) => {
+        const isInternalFleetServerHost = !!item.is_internal;
 
-          return {
-            value: item.id,
-            inputDisplay: item.name,
-            disabled: isInternalFleetServerHost,
-          };
-        }),
+        return {
+          value: item.id,
+          inputDisplay: item.name,
+          disabled: isInternalFleetServerHost,
+        };
+      }),
     ];
   }, [fleetServerHostsRequest]);
 
