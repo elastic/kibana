@@ -81,8 +81,8 @@ export const getFieldItemsData = ({
             name,
             type: field.type,
             description: field.metadata?.description,
-              category: getCategory(name),
-              selected: selectedFieldIds.has(name),
+            category: getCategory(name),
+            selected: selectedFieldIds.has(name),
           };
           fieldItemsAcc.push(categoryFieldItem);
         }
