@@ -10,6 +10,7 @@ import {
   type ReturnOf,
   createServerRouteFactory,
   type EndpointOf,
+  type ClientRequestParamsOf,
 } from '@kbn/server-route-repository';
 import type { SavedObject } from '@kbn/core/server';
 import {
@@ -29,6 +30,11 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
 >;
 
 export type APIEndpoint = EndpointOf<APMSourcesServerRouteRepository>;
+
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequestParamsOf<
+  APMSourcesServerRouteRepository,
+  TEndpoint
+>;
 
 // get apm indices configuration object
 const apmIndicesRoute = createApmSourcesServerRoute({
