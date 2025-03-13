@@ -119,7 +119,9 @@
     "@kbn/ebt-tools",
     "@kbn/response-ops-rule-params",
     "@kbn/dashboard-plugin",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/controls-plugin",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }

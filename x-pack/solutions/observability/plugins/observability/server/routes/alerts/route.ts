@@ -11,7 +11,7 @@ import {
 } from '@kbn/observability-schema';
 import { IKibanaResponse } from '@kbn/core-http-server';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/server/content_management/v3';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { RelatedDashboardsClient } from '../../services/related_dashboards_client';
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';

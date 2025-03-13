@@ -52,13 +52,6 @@ export const INTEGRATIONS_ENABLED_TOOLTIP = i18n.translate(
   }
 );
 
-export const INTEGRATIONS_BADGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.relatedIntegrations.badgeTitle',
-  {
-    defaultMessage: 'integrations',
-  }
-);
-
 export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.relatedIntegrations.popoverTitle', {
     values: { integrationsCount },

@@ -15,8 +15,7 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { RelevantPanel, RelatedDashboard } from '@kbn/observability-schema';
-import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/server/content_management/v3';
+import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
 
