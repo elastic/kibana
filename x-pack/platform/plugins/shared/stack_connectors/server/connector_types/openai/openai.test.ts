@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { OpenAIConnector } from './openai';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
