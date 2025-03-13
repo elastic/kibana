@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type { SnoozeRuleOptions } from './types';
-
-export { snoozeRule } from './snooze_rule';
+export * from './v1';

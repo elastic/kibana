@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export type { SnoozeRuleOptions } from './types';
-
-export { snoozeRule } from './snooze_rule';
+export const validateInteger = (value: number, fieldName: string) => {
+  if (!Number.isInteger(value)) {
+    return `schedule ${fieldName} must be a positive integer.`;
+  }
+};

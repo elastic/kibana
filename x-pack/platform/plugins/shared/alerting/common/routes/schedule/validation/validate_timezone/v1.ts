@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export type { SnoozeRuleOptions } from './types';
+import moment from 'moment-timezone';
 
-export { snoozeRule } from './snooze_rule';
+export const validateTimezone = (timezone?: string) => {
+  if (timezone && moment.tz.zone(timezone) == null) {
+    return `Invalid schedule timezone: ${timezone}`;
+  }
+  return;
+};
