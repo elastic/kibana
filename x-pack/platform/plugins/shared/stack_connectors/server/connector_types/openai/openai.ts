@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
-import { IncomingMessage } from 'http';
-import {
+import type { IncomingMessage } from 'http';
+import type {
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
-import { Stream } from 'openai/streaming';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Stream } from 'openai/streaming';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -39,7 +40,7 @@ import {
   OpenAiProviderType,
   SUB_ACTION,
 } from '../../../common/openai/constants';
-import {
+import type {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
@@ -152,14 +153,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    // LM Studio returns error.response?.data?.error as string
+    const errorMessage = error.response?.data?.error?.message ?? error.response?.data?.error;
     if (error.response.status === 401) {
-      return `Unauthorized API Error${
-        error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
-      }`;
+      return `Unauthorized API Error${errorMessage ? ` - ${errorMessage}` : ''}`;
     }
-    return `API Error: ${error.response?.statusText}${
-      error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
-    }`;
+    return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data

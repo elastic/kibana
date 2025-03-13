@@ -7,7 +7,7 @@
 import { IKibanaResponse } from '@kbn/core-http-server';
 import { getJourneyScreenshot, ScreenshotReturnTypesUnion } from './get_journey_screenshot';
 import { isRefResult, RefResult } from '../../common/runtime_types';
-import { RouteContext, UptimeRouteContext } from '../routes/types';
+import { RouteContext } from '../routes/types';
 
 export interface ClientContract {
   screenshotRef: RefResult;
@@ -25,7 +25,7 @@ export const journeyScreenshotHandler = async ({
   response,
   request,
   syntheticsEsClient,
-}: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ClientContract>> => {
+}: RouteContext): Promise<IKibanaResponse<ClientContract>> => {
   const { checkGroup, stepIndex } = request.params;
 
   const result: ScreenshotReturnTypesUnion | null = await getJourneyScreenshot({
