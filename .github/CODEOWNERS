@@ -1387,6 +1387,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics/ @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
+/x-pack/test/functional/page_objects/alert_controls.ts @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
 /x-pack/test/monitoring_api_integration @elastic/stack-monitoring
@@ -1856,6 +1857,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
