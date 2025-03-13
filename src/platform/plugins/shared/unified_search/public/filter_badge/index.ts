@@ -18,7 +18,7 @@ export { FilterContent, FilterContentLazy } from './filter_content';
  */
 export const FilterBadgeLazy = React.lazy(async () => {
   const { FilterBadge } = await import('../async_module');
-  return { default : FilterBadge };
+  return { default: FilterBadge };
 });
 
 /**
@@ -34,7 +34,7 @@ export const FilterBadge = withSuspense(FilterBadgeLazy);
  */
 export const FilterBadgeGroupLazy = React.lazy(async () => {
   const { FilterBadgeGroup } = await import('../async_module');
-  return { default : FilterBadgeGroup };
+  return { default: FilterBadgeGroup };
 });
 
 /**
