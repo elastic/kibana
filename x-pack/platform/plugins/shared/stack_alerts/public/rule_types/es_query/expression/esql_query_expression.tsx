@@ -261,6 +261,8 @@ export const EsqlQueryExpression: React.FC<
       <EuiFormRow
         id="alertGroup"
         fullWidth
+        isInvalid={errors.groupBy.length > 0 && groupBy !== undefined}
+        error={errors.groupBy as string[]}
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryGroupByPrompt"

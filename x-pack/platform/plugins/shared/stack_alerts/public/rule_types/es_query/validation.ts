@@ -317,6 +317,14 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
     );
   }
 
+  if (!ruleParams.groupBy || ruleParams.groupBy === 'top') {
+    errors.groupBy.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredGroupByText', {
+        defaultMessage: 'Group by is required.',
+      })
+    );
+  }
+
   return errors;
 };
 
