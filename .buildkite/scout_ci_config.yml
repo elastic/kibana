@@ -2,7 +2,6 @@
 ui_tests:
   enabled:
     - apm
-    - discover_enhanced
     - maps
     - observability_onboarding
   disabled:
