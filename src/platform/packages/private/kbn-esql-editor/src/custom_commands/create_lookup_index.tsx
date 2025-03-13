@@ -37,8 +37,12 @@ export function appendIndexToJoinCommand(
   const lines = query.split('\n');
   const line = lines[cursorLine - 1];
 
-  const beforeCursor = line.slice(0, cursorColumn - 1);
+  let beforeCursor = line.slice(0, cursorColumn - 1);
   const afterCursor = line.slice(cursorColumn - 1);
+
+  // Check if the join command already had an index argument.
+  // Delete the last word before the cursor
+  beforeCursor = beforeCursor.replace(/\S+$/, '');
 
   const updatedLine = beforeCursor + indexName + afterCursor;
   lines[cursorLine - 1] = updatedLine;
