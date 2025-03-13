@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
+import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const tabItem = {
   id: 'test-id',
@@ -19,6 +20,12 @@ const tabItem = {
 
 const tabContentId = 'test-content-id';
 const tabButtonTestSubj = `unifiedTabs_selectTabBtn_${tabItem.id}`;
+
+const tabsSizeConfig = {
+  isScrollable: false,
+  regularTabMaxWidth: MAX_TAB_WIDTH,
+  regularTabMinWidth: MIN_TAB_WIDTH,
+};
 
 describe('Tab', () => {
   it('renders tab', async () => {
@@ -29,6 +36,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         onLabelEdited={onLabelEdited}
@@ -70,6 +78,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         getTabMenuItems={getTabMenuItems}
@@ -98,6 +107,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         onLabelEdited={onLabelEdited}
@@ -130,6 +140,7 @@ describe('Tab', () => {
     render(
       <Tab
         tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
         onLabelEdited={onLabelEdited}

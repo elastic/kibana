@@ -12,7 +12,7 @@ import { PanelText } from '../../../../common/components/panel_text';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 export const RuleMigrationsReadMore = React.memo(() => {
-  const docLink = useKibana().services.docLinks.links.siem.gettingStarted;
+  const docLink = useKibana().services.docLinks.links.securitySolution.siemMigrations;
   return (
     <PanelText size="xs" subdued>
       <p>

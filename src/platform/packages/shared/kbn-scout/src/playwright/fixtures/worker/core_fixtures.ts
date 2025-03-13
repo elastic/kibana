@@ -66,10 +66,15 @@ export const coreWorkerFixtures = base.extend<
    */
   config: [
     ({ log }, use, workerInfo) => {
-      const configName = 'local';
       const projectUse = workerInfo.project.use as ScoutTestOptions;
+      if (!projectUse.configName) {
+        throw new Error(
+          `Failed to read the 'configName' property. Make sure to run tests with '--project' flag and target enviroment (local or cloud),
+          e.g. 'npx playwright test --project local --config <path_to_Playwright.config.ts>'`
+        );
+      }
       const serversConfigDir = projectUse.serversConfigDir;
-      const configInstance = createScoutConfig(serversConfigDir, configName, log);
+      const configInstance = createScoutConfig(serversConfigDir, projectUse.configName, log);
 
       use(configInstance);
     },

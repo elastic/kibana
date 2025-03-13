@@ -881,7 +881,7 @@ export const SOLVABLE_CONFLICT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.solvableConflictTooltipDescription',
   {
     defaultMessage:
-      'This Elastic rule has auto-resolved conflicts that require review before upgrade.',
+      'This Elastic rule has auto-resolved conflicts to review before updating the rule. ',
   }
 );
 
@@ -896,7 +896,7 @@ export const NON_SOLVABLE_CONFLICT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.nonSolvableConflictTooltipDescription',
   {
     defaultMessage:
-      'This Elastic rule has unresolved conflicts that require editing before upgrade.',
+      'This Elastic rule has unresolved conflicts that you must fix before updating the rule.',
   }
 );
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SubFeature } from '@kbn/actions-plugin/common';
-import { RuleType, Rule } from '../../types';
+import type { SubFeature } from '@kbn/actions-plugin/common';
+import type { RuleType, Rule } from '../../types';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add

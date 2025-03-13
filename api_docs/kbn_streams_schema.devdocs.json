@@ -633,7 +633,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })) => Partial<(",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }) => Partial<(",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -647,7 +647,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
         "deprecated": false,
@@ -690,7 +690,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
             "deprecated": false,
@@ -2545,7 +2545,7 @@
             "id": "def-common.FieldDefinition.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (MappingKeywordProperty & { ...; }) | ... 4 more ... | (MappingLongNumberProperty & { ...; })",
+            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (MappingKeywordProperty & { ...; }) | ... 5 more ... | { ...; }",
             "description": [],
             "signature": [
               "[x: string]:  (",
@@ -2562,7 +2562,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
             "deprecated": false,
@@ -3321,7 +3321,7 @@
             "id": "def-common.InheritedFieldDefinition.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ... 5 more ... | (MappingLongNumberProperty & ... 1 more ... & { ...; })",
+            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ... 6 more ... | ({ ...; } & { ...; })",
             "description": [],
             "signature": [
               "[x: string]:  (",
@@ -3338,7 +3338,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ({ type: \"system\"; } & { from: string; })"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
             "deprecated": false,
@@ -4231,7 +4231,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4246,11 +4246,7 @@
         "label": "FieldDefinitionConfigAdvancedParameters",
         "description": [],
         "signature": [
-          "{ meta?: Record<string, string> | undefined; fields?: Record<string, ",
-          "MappingProperty",
-          "> | undefined; copy_to?: ",
-          "Fields",
-          " | undefined; }"
+          "{}"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4628,7 +4624,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ({ type: \"system\"; } & { from: string; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4657,7 +4653,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -5232,7 +5228,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }), Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }, Zod.ZodTypeDef, (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -5246,7 +5242,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -5834,7 +5830,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }), Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; }), Zod.ZodTypeDef, (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingKeywordProperty",
@@ -5848,7 +5844,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,

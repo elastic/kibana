@@ -32,7 +32,6 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]steps[\/\\]create_service_token.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]generate_service_token.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]search_bar.tsx/,
-    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]layouts[\/\\]error.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_advanced_fields[\/\\]advanced_monitoring.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_advanced_fields[\/\\]custom_fields[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_create_inline.tsx/,

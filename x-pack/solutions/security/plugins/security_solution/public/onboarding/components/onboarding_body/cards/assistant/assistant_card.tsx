@@ -76,6 +76,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     allSystemPrompts,
     conversations,
     defaultConnector,
+    spaceId,
     refetchCurrentUserConversations,
     lastConversation: getLastConversation(),
     mayUpdateConversations:
@@ -102,7 +103,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       const config = getGenAiConfig(connector);
       const apiProvider = config?.apiProvider;
       const model = config?.defaultModel;
-
       if (currentConversation != null) {
         const conversation = await setApiConfig({
           conversation: currentConversation,
@@ -121,17 +121,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         }
       }
 
-      if (selectedConnectorId != null) {
+      if (connector) {
         setSelectedConnectorId(connectorId);
       }
     },
-    [
-      currentConversation,
-      selectedConnectorId,
-      setApiConfig,
-      onConversationChange,
-      setSelectedConnectorId,
-    ]
+    [currentConversation, setApiConfig, onConversationChange, setSelectedConnectorId]
   );
 
   if (!checkCompleteMetadata) {

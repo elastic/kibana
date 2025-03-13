@@ -8,6 +8,7 @@
 import {
   getRootIntegrations,
   getRootPrivilegedDataStreams,
+  hasInstallServersInputs,
   isRootPrivilegesRequired,
 } from './package_helpers';
 
@@ -117,5 +118,43 @@ describe('getRootIntegrations', () => {
   it('should return empty array if no packages require root', () => {
     const res = getRootIntegrations([]);
     expect(res).toEqual([]);
+  });
+});
+
+describe('hasInstallServersInputs', () => {
+  it('should return true if any package policy has fleet-server input', () => {
+    const res = hasInstallServersInputs([
+      {
+        inputs: [{ type: 'fleet-server' }],
+      } as any,
+    ]);
+    expect(res).toBe(true);
+  });
+
+  it('should return true if any package policy has apm input', () => {
+    const res = hasInstallServersInputs([
+      {
+        inputs: [{ type: 'apm' }],
+      } as any,
+    ]);
+    expect(res).toBe(true);
+  });
+
+  it('should return true if any package policy has cloudbeat input', () => {
+    const res = hasInstallServersInputs([
+      {
+        inputs: [{ type: 'cloudbeat/cis_aws' }],
+      } as any,
+    ]);
+    expect(res).toBe(true);
+  });
+
+  it('should return false if no package policy has install servers inputs', () => {
+    const res = hasInstallServersInputs([
+      {
+        inputs: [{ type: 'system' }],
+      } as any,
+    ]);
+    expect(res).toBe(false);
   });
 });

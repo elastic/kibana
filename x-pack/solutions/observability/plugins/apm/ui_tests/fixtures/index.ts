@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures, KibanaUrl } from '@kbn/scout';
-import { test as base, createLazyPageObject } from '@kbn/scout';
+import type {
+  ObltPageObjects,
+  ObltTestFixtures,
+  ObltWorkerFixtures,
+  KibanaUrl,
+} from '@kbn/scout-oblt';
+import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 
-export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
+export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
+  pageObjects: ObltPageObjects & {
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
   };
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>({
+export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
@@ -39,3 +44,5 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     await use(extendedPageObjects);
   },
 });
+
+export * as testData from './constants';

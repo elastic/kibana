@@ -5,27 +5,16 @@
  * 2.0.
  */
 
-import { ingestSynthtraceDataHook } from '@kbn/scout';
-import { type FullConfig } from '@playwright/test';
+import { globalSetupHook } from '@kbn/scout-oblt';
+import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
+import { testData } from '../fixtures';
 
-async function globalSetup(config: FullConfig) {
-  const start = '2021-10-10T00:00:00.000Z';
-  const end = '2021-10-10T00:15:00.000Z';
-  const data = {
-    apm: [
-      opbeans({
-        from: new Date(start).getTime(),
-        to: new Date(end).getTime(),
-      }),
-    ],
-    // TODO add infra and otel fixtures
-    infra: [],
-    otel: [],
-  };
+globalSetupHook('Ingest data to Elasticsearch', async ({ apmSynthtraceEsClient }) => {
+  const dataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
+    from: new Date(testData.OPBEANS_START_DATE).getTime(),
+    to: new Date(testData.OPBEANS_END_DATE).getTime(),
+  });
 
-  return ingestSynthtraceDataHook(config, data);
-}
-
-// eslint-disable-next-line import/no-default-export
-export default globalSetup;
+  await apmSynthtraceEsClient.index(dataGenerator);
+});

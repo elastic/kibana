@@ -1667,14 +1667,6 @@
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
               {
-                "plugin": "cloudDefend",
-                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
               },
@@ -21678,7 +21670,7 @@
             "label": "integrations",
             "description": [],
             "signature": [
-              "{ readPackageInfo: boolean; readInstalledPackages: boolean; installPackages: boolean; upgradePackages: boolean; removePackages: boolean; uploadPackages: boolean; readPackageSettings: boolean; writePackageSettings: boolean; readIntegrationPolicies: boolean; writeIntegrationPolicies: boolean; }"
+              "{ all: boolean; readPackageInfo: boolean; readInstalledPackages: boolean; installPackages: boolean; upgradePackages: boolean; removePackages: boolean; uploadPackages: boolean; readPackageSettings: boolean; writePackageSettings: boolean; readIntegrationPolicies: boolean; writeIntegrationPolicies: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/authz.ts",
             "deprecated": false,
@@ -24601,14 +24593,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -27844,21 +27828,6 @@
         "description": [],
         "signature": [
           "\"apm\""
-        ],
-        "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-common.FLEET_CLOUD_DEFEND_PACKAGE",
-        "type": "string",
-        "tags": [],
-        "label": "FLEET_CLOUD_DEFEND_PACKAGE",
-        "description": [],
-        "signature": [
-          "\"cloud_defend\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
         "deprecated": false,

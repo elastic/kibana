@@ -13,7 +13,6 @@ import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DashboardDrilldownsService } from './services';
 
 export interface SetupDependencies {
@@ -27,7 +26,6 @@ export interface StartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
-  dashboard: DashboardStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

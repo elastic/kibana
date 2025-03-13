@@ -46,7 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
-    describe('top nav menu buttons', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/213461
+    describe.skip('top nav menu buttons', () => {
       const focusAndPressButton = async (buttonTestSubject: string | WebElementWrapper) => {
         const button =
           typeof buttonTestSubject === 'string'

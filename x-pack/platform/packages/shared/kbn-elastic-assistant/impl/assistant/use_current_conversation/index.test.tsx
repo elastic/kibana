@@ -9,14 +9,32 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCurrentConversation, Props } from '.';
 import { useConversation } from '../use_conversation';
 import deepEqual from 'fast-deep-equal';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Conversation } from '../../..';
 import { find } from 'lodash';
+import { AIConnector } from '../../connectorland/connector_selector';
 
 // Mock dependencies
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 jest.mock('../use_conversation');
 jest.mock('../helpers');
 jest.mock('fast-deep-equal');
 jest.mock('lodash');
+const defaultConnector: AIConnector = {
+  actionTypeId: '.gen-ai',
+  isPreconfigured: false,
+  isDeprecated: false,
+  referencedByCount: 0,
+  isMissingSecrets: false,
+  isSystemAction: false,
+  secrets: {},
+  id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
+  name: 'OpenAI',
+  config: {
+    apiProvider: 'OpenAI',
+    apiUrl: 'https://api.openai.com/v1/chat/completions',
+  },
+};
 const mockData = {
   welcome_id: {
     id: 'welcome_id',
@@ -52,6 +70,7 @@ describe('useCurrentConversation', () => {
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
     (deepEqual as jest.Mock).mockReturnValue(false);
     (find as jest.Mock).mockReturnValue(undefined);
+    (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
   });
 
   afterEach(() => {
@@ -66,6 +85,7 @@ describe('useCurrentConversation', () => {
     mayUpdateConversations: true,
     refetchCurrentUserConversations: jest.fn().mockResolvedValue({ data: mockData }),
     setLastConversation,
+    spaceId: 'default',
   };
 
   const setupHook = (props: Partial<Props> = {}) => {
@@ -74,6 +94,79 @@ describe('useCurrentConversation', () => {
 
   it('should initialize with correct default values', () => {
     const { result } = setupHook();
+
+    expect(result.current.currentConversation).toEqual({
+      category: 'assistant',
+      id: '',
+      messages: [],
+      replacements: {},
+      title: '',
+    });
+    expect(result.current.currentSystemPrompt).toBeUndefined();
+  });
+
+  it('should initialize with apiConfig if defaultConnector is provided', () => {
+    (useLocalStorage as jest.Mock).mockReturnValue(['456', jest.fn()]);
+    const { result } = setupHook({
+      defaultConnector,
+    });
+
+    expect(result.current.currentConversation).toEqual({
+      category: 'assistant',
+      id: '',
+      messages: [],
+      replacements: {},
+      title: '',
+      apiConfig: {
+        actionTypeId: defaultConnector.actionTypeId,
+        connectorId: defaultConnector.id,
+      },
+    });
+    expect(result.current.currentSystemPrompt).toBeUndefined();
+  });
+
+  it('should initialize with local storage connectorId if app is security solution and local storage connectorId exists', () => {
+    (useLocalStorage as jest.Mock).mockReturnValue(['456', jest.fn()]);
+    const { result } = setupHook({
+      currentAppId: 'securitySolutionUI',
+      connectors: [
+        defaultConnector,
+        {
+          ...defaultConnector,
+          id: '456',
+          actionTypeId: '.bedrock',
+          name: 'My Bedrock',
+        },
+      ],
+    });
+
+    expect(result.current.currentConversation).toEqual({
+      category: 'assistant',
+      id: '',
+      messages: [],
+      replacements: {},
+      title: '',
+      apiConfig: {
+        actionTypeId: '.bedrock',
+        connectorId: '456',
+      },
+    });
+    expect(result.current.currentSystemPrompt).toBeUndefined();
+  });
+
+  it('should initialize without apiConfig if app is security solution and local storage connectorId does not exist', () => {
+    const { result } = setupHook({
+      currentAppId: 'securitySolutionUI',
+      connectors: [
+        defaultConnector,
+        {
+          ...defaultConnector,
+          id: '456',
+          actionTypeId: '.bedrock',
+          name: 'My Bedrock',
+        },
+      ],
+    });
 
     expect(result.current.currentConversation).toEqual({
       category: 'assistant',

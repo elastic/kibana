@@ -13,6 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   catchRetryableEsClientErrors,
+  catchRetryableSearchPhaseExecutionException,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
@@ -61,5 +62,6 @@ export const pickupUpdatedMappings =
       .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId!) });
       })
+      .catch(catchRetryableSearchPhaseExecutionException)
       .catch(catchRetryableEsClientErrors);
   };

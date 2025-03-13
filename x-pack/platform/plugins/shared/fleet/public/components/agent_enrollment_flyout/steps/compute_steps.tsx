@@ -11,7 +11,7 @@ import { EuiSteps, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import { getRootIntegrations } from '../../../../common/services';
+import { getRootIntegrations, hasInstallServersInputs } from '../../../../common/services';
 
 import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
 
@@ -177,6 +177,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
     getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
 
+  const showInstallServers = hasInstallServersInputs(agentPolicy?.package_policies ?? []);
+
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
     fleetServerHost,
@@ -187,6 +189,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     gcpProjectId,
     gcpOrganizationId,
     gcpAccountType,
+    showInstallServers,
   });
 
   const instructionsSteps = useMemo(() => {

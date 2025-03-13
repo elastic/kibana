@@ -78,6 +78,7 @@ describe('AgentService', () => {
               addFleetServers: false,
             },
             integrations: {
+              all: true,
               readPackageInfo: false,
               readInstalledPackages: false,
               installPackages: false,

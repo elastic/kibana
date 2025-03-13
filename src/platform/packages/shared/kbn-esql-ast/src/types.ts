@@ -96,6 +96,15 @@ export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
   commandType: 'lookup' | 'left' | 'right';
 }
 
+export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
+  value: ESQLColumn;
+  key?: ESQLColumn;
+  target?: {
+    type: ESQLColumn;
+    pvalue: ESQLColumn;
+  };
+}
+
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];

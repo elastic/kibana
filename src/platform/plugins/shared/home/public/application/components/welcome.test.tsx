@@ -8,12 +8,16 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import './welcome.test.mocks';
 import { Welcome } from './welcome';
 
 test('should render a Welcome screen', () => {
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} />);
-
-  expect(component).toMatchSnapshot();
+  const { getByText } = render(
+    <I18nProvider>
+      <Welcome urlBasePath="/" onSkip={() => {}} />
+    </I18nProvider>
+  );
+  expect(getByText('Welcome to Elastic')).toBeInTheDocument();
 });

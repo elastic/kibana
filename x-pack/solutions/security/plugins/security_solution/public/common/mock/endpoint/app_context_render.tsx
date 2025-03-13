@@ -27,6 +27,7 @@ import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { UserPrivilegesState } from '../../components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../components/user_privileges/__mocks__';
 import type { AppLinkItems } from '../../links/types';
@@ -134,7 +135,7 @@ export interface AppContextTestRender {
   store: Store<State>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
-  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'unifiedSearch'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'unifiedSearch' | 'spaces'>;
   startServices: StartServices;
   middlewareSpy: MiddlewareActionSpyHelper;
   /**
@@ -252,9 +253,20 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
 export const createAppRootMockRenderer = (): AppContextTestRender => {
   const history = createMemoryHistory<never>();
   const coreStart = createCoreStartMock(history);
-  const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const startServices: StartServices = createStartServicesMock(coreStart);
+  const depsStart: AppContextTestRender['depsStart'] = {
+    ...depsStartMock(),
+    spaces: spacesPluginMock.createStartContract(),
+  };
+
+  (depsStart.spaces.getActiveSpace as jest.Mock).mockImplementation(async () => {
+    return {
+      id: 'default',
+      name: 'default',
+      disabledFeatures: [],
+    };
+  });
 
   const storeReducer = {
     ...SUB_PLUGINS_REDUCER,

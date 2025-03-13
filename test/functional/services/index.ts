@@ -21,7 +21,6 @@ import { ComboBoxService } from './combo_box';
 import { SelectableService } from './selectable';
 import {
   DashboardAddPanelService,
-  DashboardReplacePanelService,
   DashboardExpectService,
   DashboardPanelActionsService,
   DashboardCustomizePanelProvider,
@@ -69,7 +68,6 @@ export const services = {
   dashboardVisualizations: DashboardVisualizationsService,
   dashboardExpect: DashboardExpectService,
   dashboardAddPanel: DashboardAddPanelService,
-  dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
   dashboardCustomizePanel: DashboardCustomizePanelProvider,
   dashboardBadgeActions: DashboardBadgeActionsProvider,

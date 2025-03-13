@@ -10,12 +10,14 @@ import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { RULES_CARD_TITLE } from './translations';
 import { checkRulesComplete } from './rules_check_complete';
-import { getCardIcon } from '../common/card_icon';
+import rulesIcon from './images/rules_icon.png';
+import rulesDarkIcon from './images/rules_icon_dark.png';
 
 export const rulesCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.rules,
   title: RULES_CARD_TITLE,
-  icon: () => getCardIcon(OnboardingCardId.rules),
+  icon: rulesIcon,
+  iconDark: rulesDarkIcon,
   Component: React.lazy(
     () =>
       import(

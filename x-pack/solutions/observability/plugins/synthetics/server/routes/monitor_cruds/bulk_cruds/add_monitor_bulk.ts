@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
 import pMap from 'p-map';
 import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
@@ -13,8 +13,6 @@ import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { SyntheticsServerSetup } from '../../../types';
 import { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import { formatSecrets } from '../../../synthetics_service/utils';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
@@ -24,28 +22,6 @@ import {
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
-
-export const createNewSavedObjectMonitorBulk = async ({
-  soClient,
-  monitorsToCreate,
-}: {
-  soClient: SavedObjectsClientContract;
-  monitorsToCreate: Array<{ id: string; monitor: MonitorFields }>;
-}) => {
-  const newMonitors = monitorsToCreate.map(({ id, monitor }) => ({
-    id,
-    type: syntheticsMonitorType,
-    attributes: formatSecrets({
-      ...monitor,
-      [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-      [ConfigKey.CONFIG_ID]: id,
-      revision: 1,
-    }),
-  }));
-
-  const result = await soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(newMonitors);
-  return result.saved_objects;
-};
 
 type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
@@ -63,7 +39,7 @@ export const syncNewMonitorBulk = async ({
   privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
+  const { server, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
   let newMonitors: CreatedMonitors | null = null;
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
@@ -81,9 +57,8 @@ export const syncNewMonitorBulk = async ({
 
   try {
     const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
-      createNewSavedObjectMonitorBulk({
-        monitorsToCreate,
-        soClient: savedObjectsClient,
+      monitorConfigRepository.createBulk({
+        monitors: monitorsToCreate,
       }),
       syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
     ]);
@@ -182,12 +157,9 @@ export const deleteMonitorIfCreated = async ({
   routeContext: RouteContext;
   newMonitorId: string;
 }) => {
-  const { server, savedObjectsClient } = routeContext;
+  const { server, monitorConfigRepository } = routeContext;
   try {
-    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-      syntheticsMonitorType,
-      newMonitorId
-    );
+    const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
     if (encryptedMonitor) {
       const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 

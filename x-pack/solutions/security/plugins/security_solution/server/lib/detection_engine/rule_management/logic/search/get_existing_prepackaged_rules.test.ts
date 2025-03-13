@@ -17,7 +17,6 @@ import {
   getNonPackagedRules,
   getRules,
   getRulesCount,
-  getNonPackagedRulesCount,
 } from './get_existing_prepackaged_rules';
 
 describe('get_existing_prepackaged_rules', () => {
@@ -148,15 +147,6 @@ describe('get_existing_prepackaged_rules', () => {
       const rulesClient = rulesClientMock.create();
       rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const rules = await getRulesCount({ rulesClient, filter: '' });
-      expect(rules).toEqual(1);
-    });
-  });
-
-  describe('getNonPackagedRulesCount', () => {
-    test('it returns a count', async () => {
-      const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const rules = await getNonPackagedRulesCount({ rulesClient });
       expect(rules).toEqual(1);
     });
   });

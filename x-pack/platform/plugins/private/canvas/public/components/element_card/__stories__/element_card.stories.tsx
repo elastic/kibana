@@ -8,8 +8,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo } from '@kbn/expression-utils';
 import { ElementCard } from '../element_card';
 
 storiesOf('components/Elements/ElementCard', module)
@@ -34,10 +33,10 @@ storiesOf('components/Elements/ElementCard', module)
       <ElementCard
         title="Element 1"
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-        image={props?.elasticLogo}
+        image={elasticLogo}
       />
     ),
-    { decorators: [waitFor(getElasticLogo())] }
+    { decorators: [] }
   )
   .add('with tags', () => (
     <ElementCard

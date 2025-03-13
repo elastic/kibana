@@ -30,3 +30,17 @@ export const catchRetryableEsClientErrors = (
     throw e;
   }
 };
+
+export const catchRetryableSearchPhaseExecutionException = (
+  e: EsErrors.ResponseError
+): Either.Either<RetryableEsClientError, never> => {
+  if (e?.body?.error?.type === 'search_phase_execution_exception') {
+    return Either.left({
+      type: 'retryable_es_client_error' as const,
+      message: e?.message,
+      error: e,
+    });
+  } else {
+    throw e;
+  }
+};

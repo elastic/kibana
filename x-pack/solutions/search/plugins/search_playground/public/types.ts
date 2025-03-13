@@ -234,3 +234,16 @@ export type InferenceActionConnector = ActionConnector & {
   config: { provider: ServiceProviderKeys; inferenceId: string };
 };
 export type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };
+
+export enum PlaygroundPageMode {
+  Chat = 'chat',
+  Search = 'search',
+}
+export enum PlaygroundViewMode {
+  preview = 'preview',
+  query = 'query',
+}
+export interface PlaygroundRouterParameters {
+  pageMode: PlaygroundPageMode;
+  viewMode?: PlaygroundViewMode;
+}

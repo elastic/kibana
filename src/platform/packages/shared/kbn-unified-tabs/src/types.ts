@@ -18,6 +18,14 @@ export interface TabMenuItemWithClick {
   label: string;
   onClick: () => void;
 }
+
+export interface TabsSizeConfig {
+  isScrollable: boolean;
+  regularTabMaxWidth: number;
+  regularTabMinWidth: number;
+  // TODO: extend with possibly different sizes for pinned tabs
+}
+
 export type TabMenuItem = TabMenuItemWithClick | 'divider';
 
 export type GetTabMenuItems = (item: TabItem) => TabMenuItem[];

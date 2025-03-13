@@ -9,6 +9,7 @@
 
 import React, { useMemo } from 'react';
 import {
+  DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
@@ -55,6 +56,13 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     query,
   ]);
 
+  const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
+  const paginationModeConfig = useMemo(() => {
+    return getPaginationConfigAccessor(() => ({
+      paginationMode: DEFAULT_PAGINATION_MODE,
+    }))();
+  }, [getPaginationConfigAccessor]);
+
   return (
     <UnifiedDataTable
       showColumnTokens
@@ -65,6 +73,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+      paginationMode={paginationModeConfig.paginationMode}
       {...props}
     />
   );

@@ -246,6 +246,73 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.createInferenceProviderError",
+        "type": "Function",
+        "tags": [],
+        "label": "createInferenceProviderError",
+        "description": [],
+        "signature": [
+          "(message: string, meta: { status?: number | undefined; } | undefined) => ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskProviderError",
+            "text": "InferenceTaskProviderError"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.createInferenceProviderError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.createInferenceProviderError.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.createInferenceProviderError.$2.status",
+                "type": "number",
+                "tags": [],
+                "label": "status",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.createInferenceRequestAbortedError",
         "type": "Function",
         "tags": [],
@@ -723,6 +790,41 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.isInferenceInternalError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.isInferenceProviderError",
+        "type": "Function",
+        "tags": [],
+        "label": "isInferenceProviderError",
+        "description": [
+          "\nCheck if the given error is an {@link InferenceTaskProviderError}"
+        ],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.isInferenceProviderError.$1",
             "type": "Unknown",
             "tags": [],
             "label": "error",
@@ -1381,6 +1483,68 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ChatCompleteRetryConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChatCompleteRetryConfiguration",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompleteRetryConfiguration.retryOn",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "retryOn",
+            "description": [
+              "\nDefines the strategy for error retry\n\nEither one of\n- all: will retry all errors\n- auto: will only retry errors that could be recoverable (e.g rate limit, connectivity)\nOf a custom function to manually handle filtering\n\nDefaults to \"auto\""
+            ],
+            "signature": [
+              "\"all\" | \"auto\" | ((err: Error) => boolean) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompleteRetryConfiguration.initialDelay",
+            "type": "number",
+            "tags": [],
+            "label": "initialDelay",
+            "description": [
+              "\nThe initial delay for incremental backoff, in ms.\n\nDefaults to 1000."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ChatCompleteRetryConfiguration.backoffMultiplier",
+            "type": "number",
+            "tags": [],
+            "label": "backoffMultiplier",
+            "description": [
+              "\nThe backoff exponential multiplier.\n\nDefaults to 2."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.ChatCompletionChunkToolCall",
         "type": "Interface",
         "tags": [],
@@ -1930,12 +2094,51 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.OutputOptions.maxRetries",
+            "type": "number",
+            "tags": [],
+            "label": "maxRetries",
+            "description": [
+              "\nThe maximum amount of times to retry in case of error returned from the provider.\n\nDefaults to 3."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.OutputOptions.retryConfiguration",
+            "type": "Object",
+            "tags": [],
+            "label": "retryConfiguration",
+            "description": [
+              "\nOptional configuration for the retry mechanism.\n\nNote that defaults are very fine, so only use this if you really have a reason to do so."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.OutputOptions.retry",
             "type": "Object",
             "tags": [],
             "label": "retry",
             "description": [
-              "\nOptional configuration for retrying the call if an error occurs."
+              "\nOptional configuration for retrying the call if output-specific error occurs."
             ],
             "signature": [
               "{ onValidationError?: number | boolean | undefined; } | undefined"
@@ -2493,7 +2696,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+              "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | \"maxRetries\" | \"retryConfiguration\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2596,7 +2799,15 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
+              " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; previousMessages?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2719,6 +2930,14 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
               " | undefined; } & TToolOptions"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
@@ -2794,6 +3013,14 @@
             "docId": "kibKbnInferenceCommonPluginApi",
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
+          },
+          " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteRetryConfiguration",
+            "text": "ChatCompleteRetryConfiguration"
           },
           " | undefined; } & TToolOptions"
         ],
@@ -3250,6 +3477,38 @@
             "text": "InferenceTaskErrorCode"
           },
           ".internalError, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceTaskProviderError",
+        "type": "Type",
+        "tags": [],
+        "label": "InferenceTaskProviderError",
+        "description": [
+          "\nInference error thrown when calling the provider through its connector returned an error.\n\nIt includes error responses returned from the provider,\nand any potential errors related to connectivity issue."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskError",
+            "text": "InferenceTaskError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceTaskErrorCode",
+            "text": "InferenceTaskErrorCode"
+          },
+          ".providerError, { status?: number | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
         "deprecated": false,
@@ -3810,7 +4069,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+          "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | \"maxRetries\" | \"retryConfiguration\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3843,7 +4102,15 @@
             "section": "def-common.ChatCompleteMetadata",
             "text": "ChatCompleteMetadata"
           },
-          " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
+          " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteRetryConfiguration",
+            "text": "ChatCompleteRetryConfiguration"
+          },
+          " | undefined; previousMessages?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

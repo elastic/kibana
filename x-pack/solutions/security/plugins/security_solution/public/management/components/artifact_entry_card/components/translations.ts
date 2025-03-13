@@ -162,3 +162,16 @@ export const DESCRIPTION_LABEL = i18n.translate(
     defaultMessage: 'Description',
   }
 );
+
+export const MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.translations.noGlobalArtifactManagementAllowedMessage',
+  { defaultMessage: 'Management of global artifacts requires additional privilege' }
+);
+
+export const MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.translations.sharedPerPolicyArtifactNotAllowed',
+  {
+    defaultMessage:
+      'Management of artifacts shared across multiple spaces is only allowed from the space where it was created from',
+  }
+);

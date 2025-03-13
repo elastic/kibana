@@ -3330,3 +3330,58 @@
   "coreMigrationVersion": "8.8.0",
   "typeMigrationVersion": "10.2.0"
 }
+
+{
+  "id": "ce023765-c6b8-4198-8d0b-318229c2294b",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-03-11T18:18:29.712Z",
+  "created_at": "2025-03-11T18:18:23.099Z",
+  "version": "WzExNSwxXQ==",
+  "attributes": {
+    "version": 3,
+    "description": "",
+    "refreshInterval": {
+      "pause": true,
+      "value": 60000
+    },
+    "timeRestore": true,
+    "timeFrom": "now-15y",
+    "title": "discover session multiple data views",
+    "timeTo": "now",
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{}",
+      "showApplySelections": false
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"search\",\"title\":\"Rendering Test: saved search\",\"panelRefName\":\"panel_acc95967-6664-4922-b4e8-5cdeed30d5d8\",\"embeddableConfig\":{\"description\":\"\",\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"columns\":[\"bytes\",\"clientip\"],\"rowsPerPage\":10,\"grid\":{}},\"panelIndex\":\"acc95967-6664-4922-b4e8-5cdeed30d5d8\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"acc95967-6664-4922-b4e8-5cdeed30d5d8\"}}]",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[{\"meta\":{\"disabled\":false,\"negate\":false,\"alias\":null,\"key\":\"animal\",\"field\":\"animal\",\"type\":\"exists\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"exists\":{\"field\":\"animal\"}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    }
+  },
+  "references": [
+    {
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c"
+    },
+    {
+      "name": "acc95967-6664-4922-b4e8-5cdeed30d5d8:panel_acc95967-6664-4922-b4e8-5cdeed30d5d8",
+      "type": "search",
+      "id": "be5accf0-3dca-11e8-8660-4d65aa086b3c"
+    },
+    {
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern",
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.2.0"
+}

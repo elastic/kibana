@@ -6,15 +6,15 @@
     "title": "just a map",
     "uiStateJSON": "{\"isLayerTOCOpen\":true}"
   },
-  "coreMigrationVersion": "8.5.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:08:48.262Z",
   "id": "0b849ed0-70f5-11e9-8625-9580c4904684",
-  "migrationVersion": {
-    "map": "8.4.0"
-  },
+  "managed": false,
   "references": [],
   "type": "map",
-  "updated_at": "2019-05-07T18:22:17.405Z",
-  "version": "WzExLDJd"
+  "typeMigrationVersion": "8.4.0",
+  "updated_at": "2025-03-04T15:08:48.262Z",
+  "version": "WzEwMSwxXQ=="
 }
 
 {
@@ -30,11 +30,10 @@
     "title": "dashboard with map",
     "version": 1
   },
-  "coreMigrationVersion": "8.5.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:08:48.262Z",
   "id": "1c1a87f0-70f5-11e9-8625-9580c4904684",
-  "migrationVersion": {
-    "dashboard": "8.4.0"
-  },
+  "managed": false,
   "references": [
     {
       "id": "0b849ed0-70f5-11e9-8625-9580c4904684",
@@ -43,8 +42,9 @@
     }
   ],
   "type": "dashboard",
-  "updated_at": "2019-05-07T18:22:45.231Z",
-  "version": "WzEyLDJd"
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-04T15:08:48.262Z",
+  "version": "WzEwMiwxXQ=="
 }
 
 {
@@ -53,15 +53,15 @@
     "timeFieldName": "@timestamp",
     "title": "logstash-*"
   },
-  "coreMigrationVersion": "8.5.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:08:48.262Z",
   "id": "logstash-*",
-  "migrationVersion": {
-    "index-pattern": "8.0.0"
-  },
+  "managed": false,
   "references": [],
   "type": "index-pattern",
-  "updated_at": "2018-12-21T00:43:07.096Z",
-  "version": "WzcsMl0="
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2025-03-04T15:08:48.262Z",
+  "version": "WzEwMywxXQ=="
 }
 
 {
@@ -75,11 +75,10 @@
     "version": 1,
     "visState": "{\"title\":\"A Pie\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}},\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"distinctColors\":true,\"legendDisplay\":\"show\",\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"geo.src\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}"
   },
-  "coreMigrationVersion": "8.5.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:08:48.262Z",
   "id": "75c3e060-1e7c-11e9-8488-65449e65d0ed",
-  "migrationVersion": {
-    "visualization": "8.3.0"
-  },
+  "managed": false,
   "references": [
     {
       "id": "logstash-*",
@@ -88,8 +87,62 @@
     }
   ],
   "type": "visualization",
-  "updated_at": "2019-01-22T19:32:31.206Z",
-  "version": "WzgsMl0="
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2025-03-04T15:08:48.262Z",
+  "version": "WzEwNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "8d913dad-2e9f-4bb9-ac27-d107eaff6f67",
+        "key": {
+          "timestamp": "2015-09-20T14:30:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "a date annotation"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:10:43.953Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "75feb2b7-e666-48ec-a996-0abb7a8bcc05",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "event-annotation-group_dataView-ref-logstash-*",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2025-03-04T15:10:43.953Z",
+  "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "version": "WzExMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "timeFieldName": "@timestamp",
+    "title": "logs*"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:08:48.262Z",
+  "id": "b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "7.11.0",
+  "updated_at": "2025-03-04T15:08:48.262Z",
+  "version": "WzEwNywxXQ=="
 }
 
 {
@@ -126,13 +179,13 @@
       "language": "kuery",
       "query": "response:200"
     },
-    "title": "OKJpgs"
+    "title": "OKJpgs",
+    "titleKeyword": "OKJpgs"
   },
-  "coreMigrationVersion": "8.5.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:08:48.262Z",
   "id": "OKJpgs",
-  "migrationVersion": {
-    "query": "8.0.0"
-  },
+  "managed": false,
   "references": [
     {
       "id": "b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b",
@@ -141,52 +194,59 @@
     }
   ],
   "type": "query",
-  "updated_at": "2019-07-17T17:54:26.378Z",
-  "version": "WzEzLDJd"
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-04T15:08:48.262Z",
+  "version": "WzEwNSwxXQ=="
 }
 
 {
   "attributes": {
-    "description": "",
-    "hits": 0,
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{}",
+      "showApplySelections": false
     },
-    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":true,\"syncCursor\":true,\"syncTooltips\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"visualization\",\"title\":\"A Pie\",\"panelRefName\":\"panel_1\",\"embeddableConfig\":{\"description\":\"\",\"enhancements\":{\"dynamicActions\":{\"events\":[]}}},\"panelIndex\":\"1\",\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"}},{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"syncColors\":true,\"syncCursor\":true,\"syncTooltips\":true,\"filters\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"attributes\":{\"title\":\"\",\"visualizationType\":\"lnsXY\",\"type\":\"lens\",\"references\":[{\"type\":\"index-pattern\",\"id\":\"logstash-*\",\"name\":\"indexpattern-datasource-layer-2bdfa5c4-6f40-4ceb-ba0b-108302e44529\"},{\"type\":\"event-annotation-group\",\"id\":\"75feb2b7-e666-48ec-a996-0abb7a8bcc05\",\"name\":\"ref-f4f8ddea-8c80-4eb2-8140-ff702d58d45d\"}],\"state\":{\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"bar_stacked\",\"layers\":[{\"layerId\":\"2bdfa5c4-6f40-4ceb-ba0b-108302e44529\",\"accessors\":[\"064e7a9b-7260-4da3-9aeb-56630cb4963e\"],\"position\":\"top\",\"seriesType\":\"bar_stacked\",\"showGridlines\":false,\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rule\":{\"type\":\"other\"},\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}},\"xAccessor\":\"f131cec1-0176-48a0-b1ea-e1fde8b5a8d6\"},{\"persistanceType\":\"byReference\",\"layerId\":\"b644789d-5895-407a-916c-deb4c4a1f807\",\"layerType\":\"annotations\",\"annotationGroupRef\":\"ref-f4f8ddea-8c80-4eb2-8140-ff702d58d45d\"}]},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"datasourceStates\":{\"formBased\":{\"layers\":{\"2bdfa5c4-6f40-4ceb-ba0b-108302e44529\":{\"columns\":{\"f131cec1-0176-48a0-b1ea-e1fde8b5a8d6\":{\"label\":\"@timestamp\",\"dataType\":\"date\",\"operationType\":\"date_histogram\",\"sourceField\":\"@timestamp\",\"isBucketed\":true,\"scale\":\"interval\",\"params\":{\"interval\":\"auto\",\"includeEmptyRows\":true,\"dropPartials\":false}},\"064e7a9b-7260-4da3-9aeb-56630cb4963e\":{\"label\":\"Median of memory\",\"dataType\":\"number\",\"operationType\":\"median\",\"sourceField\":\"memory\",\"isBucketed\":false,\"scale\":\"ratio\",\"params\":{\"emptyAsNull\":true}}},\"columnOrder\":[\"f131cec1-0176-48a0-b1ea-e1fde8b5a8d6\",\"064e7a9b-7260-4da3-9aeb-56630cb4963e\"],\"incompleteColumns\":{},\"sampling\":1}}},\"indexpattern\":{\"layers\":{}},\"textBased\":{\"layers\":{}}},\"internalReferences\":[],\"adHocDataViews\":{}}}},\"panelIndex\":\"160d1338-0bf6-48cf-a8aa-99aea1a780e3\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"160d1338-0bf6-48cf-a8aa-99aea1a780e3\"}}]",
     "timeRestore": false,
     "title": "A Dashboard",
-    "version": 1
+    "version": 3
   },
-  "coreMigrationVersion": "8.5.0",
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-04T15:08:48.262Z",
   "id": "i-exist",
-  "migrationVersion": {
-    "dashboard": "8.4.0"
-  },
+  "managed": false,
   "references": [
     {
       "id": "75c3e060-1e7c-11e9-8488-65449e65d0ed",
       "name": "1:panel_1",
       "type": "visualization"
+    },
+    {
+      "id": "logstash-*",
+      "name": "1:kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "160d1338-0bf6-48cf-a8aa-99aea1a780e3:indexpattern-datasource-layer-2bdfa5c4-6f40-4ceb-ba0b-108302e44529",
+      "type": "index-pattern"
+    },
+    {
+      "id": "75feb2b7-e666-48ec-a996-0abb7a8bcc05",
+      "name": "160d1338-0bf6-48cf-a8aa-99aea1a780e3:ref-f4f8ddea-8c80-4eb2-8140-ff702d58d45d",
+      "type": "event-annotation-group"
     }
   ],
   "type": "dashboard",
-  "updated_at": "2019-01-22T19:32:47.232Z",
-  "version": "WzksMl0="
-}
-
-{
-  "attributes": {
-    "timeFieldName": "@timestamp",
-    "title": "logs*"
-  },
-  "coreMigrationVersion": "7.17.2",
-  "id": "b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b",
-  "migrationVersion": {
-    "index-pattern": "7.11.0"
-  },
-  "references": [],
-  "type": "index-pattern",
-  "updated_at": "2018-12-21T00:43:07.096Z",
-  "version": "WzEwLDJd"
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-04T15:10:51.913Z",
+  "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "version": "WzExMiwxXQ=="
 }

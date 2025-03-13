@@ -14,7 +14,7 @@ import {
 import { asNotificationExecutionSource } from '../lib';
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
 
 jest.mock('../application/connector/methods/get_all/get_all');

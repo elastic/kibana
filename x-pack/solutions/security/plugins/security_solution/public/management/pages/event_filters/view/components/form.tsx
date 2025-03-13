@@ -197,9 +197,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         [exception]
       );
 
-      const [areConditionsValid, setAreConditionsValid] = useState(
-        !!exception.entries.length || false
-      );
+      const [areConditionsValid, setAreConditionsValid] = useState(!!exception.entries.length);
       // compute this for initial render only
       const existingComments = useMemo<ExceptionListItemSchema['comments']>(
         () => (exception as ExceptionListItemSchema)?.comments,
@@ -238,7 +236,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           cleanupEntries(item);
           onChange({
             item,
-            isValid: isFormValid && areConditionsValid,
+            isValid: isFormValid && areConditionsValid && hasFormChanged,
             confirmModalLabels: hasWildcardWithWrongOperator
               ? CONFIRM_WARNING_MODAL_LABELS(
                   i18n.translate(
@@ -251,7 +249,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               : undefined,
           });
         },
-        [areConditionsValid, exception, isFormValid, onChange, hasWildcardWithWrongOperator]
+        [
+          areConditionsValid,
+          exception,
+          hasFormChanged,
+          isFormValid,
+          onChange,
+          hasWildcardWithWrongOperator,
+        ]
       );
 
       // set initial state of `wasByPolicy` that checks
@@ -556,11 +561,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       // conditions and handler
       const handleOnBuilderChange = useCallback(
         (arg: OnChangeProps) => {
-          const hasDuplicates =
+          const isCalledWithoutChanges =
             (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
             isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
 
-          if (hasDuplicates) {
+          if (isCalledWithoutChanges) {
             const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
             if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
@@ -568,7 +573,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             }
 
             setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
-            if (!hasFormChanged) setHasFormChanged(true);
             return;
           } else {
             setHasDuplicateFields(false);

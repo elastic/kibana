@@ -21,7 +21,9 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { i18n } from '@kbn/i18n';
 
-const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false, name: 'amsterdam' });
+import { DEFAULT_THEME, getKibanaTheme } from './themes';
+
+const theme$ = new BehaviorSubject<CoreTheme>(getKibanaTheme(DEFAULT_THEME));
 const userProfile = { getUserProfile$: () => of(null) };
 
 const i18nStart: I18nStart = {
@@ -41,11 +43,11 @@ const analytics: AnalyticsServiceStart = {
 const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   // TODO: Add a switcher to see components in other locales or pseudo locale
   i18n.init({ locale: 'en', messages: {} });
-  const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
+  const { darkMode, name } = getKibanaTheme(globals.euiTheme);
 
   useEffect(() => {
-    theme$.next({ darkMode: colorMode === 'dark', name: 'amsterdam' });
-  }, [colorMode]);
+    theme$.next({ darkMode, name });
+  }, [darkMode, name, globals.euiTheme]);
 
   return (
     <KibanaRootContextProvider {...{ theme: { theme$ }, userProfile, analytics, i18n: i18nStart }}>

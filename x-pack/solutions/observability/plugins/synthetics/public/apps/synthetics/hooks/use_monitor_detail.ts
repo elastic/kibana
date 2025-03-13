@@ -50,7 +50,7 @@ export const useMonitorDetail = (
 
   if (!result || result.hits.hits.length !== 1) return { data: undefined, loading };
   return {
-    data: { ...result.hits.hits[0]._source, timestamp: result.hits.hits[0]._source['@timestamp'] },
+    data: result.hits.hits[0]._source,
     loading,
   };
 };

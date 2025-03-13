@@ -7,7 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -34,11 +34,11 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
     dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
-    dashboardService: DashboardStart,
+    share: SharePluginStart,
     private data: DataPublicPluginStart,
     mlApi: MlApi
   ) {
-    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi);
+    super(dataViews, kibanaConfig, timeFilter, share, mlApi);
   }
 
   public async createAndSaveJob(

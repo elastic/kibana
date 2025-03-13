@@ -7,8 +7,9 @@
 
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,

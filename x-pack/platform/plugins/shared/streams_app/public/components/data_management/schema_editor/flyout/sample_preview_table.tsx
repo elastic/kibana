@@ -42,19 +42,22 @@ const SamplePreviewTableContent = ({
 
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('POST /api/streams/{name}/schema/fields_simulation', {
-        signal,
-        params: {
-          path: {
-            name: stream.name,
+      return streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/schema/fields_simulation',
+        {
+          signal,
+          params: {
+            path: {
+              name: stream.name,
+            },
+            body: {
+              field_definitions: [
+                { ...convertToFieldDefinitionConfig(nextField), name: nextField.name },
+              ],
+            },
           },
-          body: {
-            field_definitions: [
-              { ...convertToFieldDefinitionConfig(nextField), name: nextField.name },
-            ],
-          },
-        },
-      });
+        }
+      );
     },
     [stream.name, nextField, streamsRepositoryClient],
     { disableToastOnError: true }

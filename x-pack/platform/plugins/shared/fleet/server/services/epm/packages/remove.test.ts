@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { packagePolicyService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
 
-import { removeInstallation } from './remove';
+import { deleteESAsset, removeInstallation } from './remove';
 
 jest.mock('../..', () => {
   return {
@@ -109,5 +110,36 @@ describe('removeInstallation', () => {
       id: 'system',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
+  });
+});
+
+describe('deleteESAsset', () => {
+  it('should not delete @custom components template', async () => {
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    await deleteESAsset(
+      {
+        id: 'logs@custom',
+        type: ElasticsearchAssetType.componentTemplate,
+      },
+      esClient
+    );
+
+    expect(esClient.cluster.deleteComponentTemplate).not.toBeCalled();
+  });
+
+  it('should delete @package components template', async () => {
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    await deleteESAsset(
+      {
+        id: 'logs-nginx.access@package',
+        type: ElasticsearchAssetType.componentTemplate,
+      },
+      esClient
+    );
+
+    expect(esClient.cluster.deleteComponentTemplate).toBeCalledWith(
+      { name: 'logs-nginx.access@package' },
+      expect.anything()
+    );
   });
 });

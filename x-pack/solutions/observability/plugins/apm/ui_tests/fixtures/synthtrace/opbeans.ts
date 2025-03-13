@@ -4,9 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
-export function opbeans({ from, to }: { from: number; to: number }) {
+export function opbeans({
+  from,
+  to,
+}: {
+  from: number;
+  to: number;
+}): SynthtraceGenerator<ApmFields> {
   const range = timerange(from, to);
 
   const opbeansJava = apm

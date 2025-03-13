@@ -11,9 +11,8 @@ import React from 'react';
 import type { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
+import { useNewTabProps } from '../../hooks/use_new_tab_props';
 import { STORYBOOK_TITLE } from './storybook_constants';
-
-let TMP_COUNTER = 0;
 
 export default {
   title: `${STORYBOOK_TITLE}/Tabs`,
@@ -25,22 +24,22 @@ export default {
   },
 };
 
-const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (args) => (
-  <TabbedContent
-    {...args}
-    createItem={() => {
-      TMP_COUNTER += 1;
-      return {
-        id: `tab_${TMP_COUNTER}`,
-        label: `Tab ${TMP_COUNTER}`,
-      };
-    }}
-    onChanged={action('onClosed')}
-    renderContent={(item) => (
-      <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
-    )}
-  />
-);
+const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (args) => {
+  const { getNewTabDefaultProps } = useNewTabProps({
+    numberOfInitialItems: args.initialItems.length,
+  });
+
+  return (
+    <TabbedContent
+      {...args}
+      createItem={getNewTabDefaultProps}
+      onChanged={action('onClosed')}
+      renderContent={(item) => (
+        <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
+      )}
+    />
+  );
+};
 
 export const Default = TabbedContentTemplate.bind({});
 Default.args = {

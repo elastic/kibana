@@ -11,7 +11,7 @@ import type {
   GetViewInAppRelativeUrlFnOpts,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import { logThresholdParamsSchema } from '@kbn/response-ops-rule-params/log_threshold';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
@@ -167,6 +167,7 @@ export function registerLogThresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'logs',
+    solution: observabilityFeatureId,
     useSavedObjectReferences: {
       extractReferences,
       injectReferences,

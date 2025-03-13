@@ -93,6 +93,7 @@ describe('aggregate()', () => {
         name: 'myType',
         category: 'test',
         producer: 'myApp',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,

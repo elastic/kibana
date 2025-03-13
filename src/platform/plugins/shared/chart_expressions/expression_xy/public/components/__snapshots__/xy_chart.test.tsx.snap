@@ -34,11 +34,6 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
       label="Annotation"
     />
   }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   placement="bottom"
   style={
@@ -135,11 +130,6 @@ exports[`XYChart component annotations should render grouped line annotations pr
       isHorizontal={true}
     />
   }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   placement="bottom"
   style={
@@ -192,11 +182,6 @@ exports[`XYChart component annotations should render grouped line annotations wi
         }
       }
       hasReducedPadding={true}
-      isHorizontal={true}
-    />
-  }
-  markerBody={
-    <MarkerBody
       isHorizontal={true}
     />
   }
