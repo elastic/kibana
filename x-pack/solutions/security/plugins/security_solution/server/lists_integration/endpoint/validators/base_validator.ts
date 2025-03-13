@@ -219,6 +219,7 @@ export class BaseValidator {
 
       if (
         this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
+        invalidPolicyIds.length > 0 &&
         currentItem
       ) {
         const currentItemPolicyIds = getPolicyIdsFromArtifact(currentItem);
@@ -237,7 +238,7 @@ export class BaseValidator {
   }
 
   /**
-   * If the item being updated is `by policy`, method validates if anyting was changes in regard to
+   * If the item being updated is `by policy`, method validates if anything was changes in regard to
    * the effected scope of the by policy settings.
    *
    * @param updatedItem
