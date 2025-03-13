@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { SessionViewConfig } from '../../../common/types';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type { Sort } from '../components/timeline/body/sort';
 import type {
   DataProvider,
   QueryOperator,
@@ -25,7 +24,6 @@ import {
 } from '../../../common/api/timeline';
 import type {
   ColumnHeaderOptions,
-  TimelineEventsType,
   SerializedFilterQuery,
   TimelinePersistInput,
   SortColumnTimeline,
@@ -37,14 +35,11 @@ import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
 import type { TimelineById, TimelineModelSettings } from './types';
 import { DEFAULT_FROM_MOMENT, DEFAULT_TO_MOMENT } from '../../common/utils/default_date_settings';
-import {
-  DEFAULT_COLUMN_MIN_WIDTH,
-  RESIZED_COLUMN_MIN_WITH,
-} from '../components/timeline/body/constants';
 import { activeTimeline } from '../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
 import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
+import { getStoredTimelineColumnsConfig } from './middlewares/timeline_localstorage';
 
 interface AddTimelineNoteParams {
   id: string;
@@ -115,6 +110,20 @@ export const shouldResetActiveTimelineContext = (
 };
 
 /**
+ * Merges a given timeline column config with locally stored timeline column config
+ */
+function mergeInLocalColumnConfig(columns: TimelineModel['columns']) {
+  const storedColumnsConfig = getStoredTimelineColumnsConfig();
+  if (storedColumnsConfig) {
+    return columns.map((column) => ({
+      ...column,
+      initialWidth: storedColumnsConfig[column.id]?.initialWidth || column.initialWidth,
+    }));
+  }
+  return columns;
+}
+
+/**
  * Add a saved object timeline to the store
  * and default the value to what need to be if values are null
  */
@@ -127,11 +136,13 @@ export const addTimelineToStore = ({
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
   }
+
   return {
     ...timelineById,
     [id]: {
       ...timeline,
       isLoading: timelineById[id].isLoading,
+      columns: mergeInLocalColumnConfig(timeline.columns),
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
@@ -169,20 +180,24 @@ export const addNewTimeline = ({
           templateTimelineVersion: 1,
         }
       : {};
+  const newTimeline = {
+    id,
+    ...(timeline ? timeline : {}),
+    ...timelineDefaults,
+    ...timelineProps,
+    dateRange,
+    savedObjectId: null,
+    version: null,
+    isSaving: false,
+    isLoading: false,
+    timelineType,
+    ...templateTimelineInfo,
+  };
   return {
     ...timelineById,
     [id]: {
-      id,
-      ...(timeline ? timeline : {}),
-      ...timelineDefaults,
-      ...timelineProps,
-      dateRange,
-      savedObjectId: null,
-      version: null,
-      isSaving: false,
-      isLoading: false,
-      timelineType,
-      ...templateTimelineInfo,
+      ...newTimeline,
+      columns: mergeInLocalColumnConfig(newTimeline.columns),
     },
   };
 };
@@ -403,7 +418,7 @@ export const upsertTimelineColumn = ({
       ...timelineById,
       [id]: {
         ...timeline,
-        columns: reordered,
+        columns: mergeInLocalColumnConfig(reordered),
       },
     };
   }
@@ -416,7 +431,7 @@ export const upsertTimelineColumn = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      columns,
+      columns: mergeInLocalColumnConfig(columns),
     },
   };
 };
@@ -440,57 +455,7 @@ export const removeTimelineColumn = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      columns,
-    },
-  };
-};
-
-interface ApplyDeltaToTimelineColumnWidth {
-  id: string;
-  columnId: string;
-  delta: number;
-  timelineById: TimelineById;
-}
-
-export const applyDeltaToTimelineColumnWidth = ({
-  id,
-  columnId,
-  delta,
-  timelineById,
-}: ApplyDeltaToTimelineColumnWidth): TimelineById => {
-  const timeline = timelineById[id];
-
-  const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
-  if (columnIndex === -1) {
-    // the column was not found
-    return {
-      ...timelineById,
-      [id]: {
-        ...timeline,
-      },
-    };
-  }
-
-  const requestedWidth =
-    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
-  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
-
-  const columnWithNewWidth = {
-    ...timeline.columns[columnIndex],
-    initialWidth,
-  };
-
-  const columns = [
-    ...timeline.columns.slice(0, columnIndex),
-    columnWithNewWidth,
-    ...timeline.columns.slice(columnIndex + 1),
-  ];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      columns,
+      columns: mergeInLocalColumnConfig(columns),
     },
   };
 };
@@ -578,7 +543,7 @@ export const updateTimelineColumns = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      columns,
+      columns: mergeInLocalColumnConfig(columns),
     },
   };
 };
@@ -604,28 +569,6 @@ export const updateTimelineTitleAndDescription = ({
       ...timeline,
       description: description.trim(),
       title: title.trim(),
-    },
-  };
-};
-
-interface UpdateTimelineEventTypeParams {
-  id: string;
-  eventType: TimelineEventsType;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineEventType = ({
-  id,
-  eventType,
-  timelineById,
-}: UpdateTimelineEventTypeParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      eventType,
     },
   };
 };
@@ -702,7 +645,7 @@ export const updateTimelineRange = ({
 
 interface UpdateTimelineSortParams {
   id: string;
-  sort: Sort[];
+  sort: SortColumnTimeline[];
   timelineById: TimelineById;
 }
 
@@ -1259,111 +1202,6 @@ export const setLoadingTableEvents = ({
   };
 };
 
-interface RemoveTableColumnParams {
-  id: string;
-  columnId: string;
-  timelineById: TimelineById;
-}
-
-export const removeTableColumn = ({
-  id,
-  columnId,
-  timelineById,
-}: RemoveTableColumnParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const columns = timeline.columns.filter((c) => c.id !== columnId);
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      columns,
-    },
-  };
-};
-
-/**
- * Adds or updates a column. When updating a column, it will be moved to the
- * new index
- */
-export const upsertTableColumn = ({
-  column,
-  id,
-  index,
-  timelineById,
-}: AddTimelineColumnParams): TimelineById => {
-  const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.columns.findIndex((c) => c.id === column.id);
-
-  if (alreadyExistsAtIndex !== -1) {
-    // remove the existing entry and add the new one at the specified index
-    const reordered = timeline.columns.filter((c) => c.id !== column.id);
-    reordered.splice(index, 0, column); // ⚠️ mutation
-
-    return {
-      ...timelineById,
-      [id]: {
-        ...timeline,
-        columns: reordered,
-      },
-    };
-  }
-  // add the new entry at the specified index
-  const columns = [...timeline.columns];
-  columns.splice(index, 0, column); // ⚠️ mutation
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      columns,
-    },
-  };
-};
-
-interface UpdateTableColumnsParams {
-  id: string;
-  columns: ColumnHeaderOptions[];
-  timelineById: TimelineById;
-}
-
-export const updateTableColumns = ({
-  id,
-  columns,
-  timelineById,
-}: UpdateTableColumnsParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      columns,
-    },
-  };
-};
-
-interface UpdateTableSortParams {
-  id: string;
-  sort: SortColumnTimeline[];
-  timelineById: TimelineById;
-}
-
-export const updateTableSort = ({
-  id,
-  sort,
-  timelineById,
-}: UpdateTableSortParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      sort,
-    },
-  };
-};
-
 interface SetSelectedTableEventsParams {
   id: string;
   eventIds: Record<string, TimelineNonEcsData[]>;
@@ -1471,56 +1309,6 @@ export const setInitializeTimelineSettings = ({
           ...timelineSettingsProps,
         },
       };
-};
-
-interface ApplyDeltaToTableColumnWidth {
-  id: string;
-  columnId: string;
-  delta: number;
-  timelineById: TimelineById;
-}
-
-export const applyDeltaToTableColumnWidth = ({
-  id,
-  columnId,
-  delta,
-  timelineById,
-}: ApplyDeltaToTableColumnWidth): TimelineById => {
-  const timeline = timelineById[id];
-
-  const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
-  if (columnIndex === -1) {
-    // the column was not found
-    return {
-      ...timelineById,
-      [id]: {
-        ...timeline,
-      },
-    };
-  }
-
-  const requestedWidth =
-    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
-  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
-
-  const columnWithNewWidth = {
-    ...timeline.columns[columnIndex],
-    initialWidth,
-  };
-
-  const columns = [
-    ...timeline.columns.slice(0, columnIndex),
-    columnWithNewWidth,
-    ...timeline.columns.slice(columnIndex + 1),
-  ];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      columns,
-    },
-  };
 };
 
 export const updateTimelineColumnWidth = ({
