@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiSkeletonLoading, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
 import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integrations';
 import { LandingPage } from '../../components/alert_summary/landing_page/landing_page';
+import { Wrapper } from '../../components/alert_summary/wrapper';
+import { LOADING_INTEGRATIONS } from './translations';
 
 /**
  *
@@ -17,39 +18,21 @@ import { LandingPage } from '../../components/alert_summary/landing_page/landing
 export const AlertSummaryPage = () => {
   const { availableInstalledPackage, installedPackages, isLoading } = useFetchIntegrations();
 
-  return (
-    <EuiSkeletonLoading
-      isLoading={isLoading}
-      loadingContent={
-        <div
-          css={css`
-            margin: auto;
-            width: 700px;
-          `}
-        >
-          <EuiSkeletonRectangle height={400} width="100%" />
-          <EuiSpacer size="xxl" />
-          <EuiSkeletonRectangle height={40} width="100%" />
-          <EuiSpacer size="s" />
-          <EuiSkeletonRectangle height={20} width="100%" />
-          <EuiSpacer size="xl" />
-          <EuiSkeletonRectangle height={100} width="100%" />
-        </div>
-      }
-      loadedContent={
-        <>
-          <LandingPage packages={availableInstalledPackage} />
-        </>
-        // <>
-        //   {installedPackages.length > 0 ? (
-        //     <Wrapper packages={availableInstalledPackage} />
-        //   ) : (
-        //     <LandingPage packages={installedPackages} />
-        //   )}
-        // </>
-      }
-    />
-  );
+  if (isLoading) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+        title={<h2>{LOADING_INTEGRATIONS}</h2>}
+      />
+    );
+  }
+
+  // TODO don't forget to put back === here instead of >
+  if (installedPackages.length > 0) {
+    return <LandingPage packages={availableInstalledPackage} />;
+  }
+
+  return <Wrapper packages={installedPackages} />;
 };
 
 AlertSummaryPage.displayName = 'AlertSummaryPage';

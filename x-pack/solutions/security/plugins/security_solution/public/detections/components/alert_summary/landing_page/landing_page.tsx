@@ -15,7 +15,6 @@ import { MORE_INTEGRATIONS, SUB_TITLE, TITLE } from './translations';
 
 const PRIMARY_INTEGRATIONS = [
   'splunk', // doesnt yet exist
-  'sentinel_one',
   'google_secops',
 ];
 
