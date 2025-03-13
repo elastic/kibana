@@ -6,7 +6,11 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ITelemetryClient, TrainedModelsDeploymentEbtProps } from './types';
+import type {
+  ITelemetryClient,
+  TrainedModelsDeploymentEbtProps,
+  TrainedModelsModelTestedEbtProps,
+} from './types';
 import { TrainedModelsTelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -14,5 +18,9 @@ export class TelemetryClient implements ITelemetryClient {
 
   public trackTrainedModelsDeploymentCreated = (eventProps: TrainedModelsDeploymentEbtProps) => {
     this.analytics.reportEvent(TrainedModelsTelemetryEventTypes.DEPLOYMENT_CREATED, eventProps);
+  };
+
+  public trackTrainedModelsModelTested = (eventProps: TrainedModelsModelTestedEbtProps) => {
+    this.analytics.reportEvent(TrainedModelsTelemetryEventTypes.MODEL_TESTED, eventProps);
   };
 }

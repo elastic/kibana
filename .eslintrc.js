@@ -1471,7 +1471,8 @@ module.exports = {
         'playwright/no-slowed-test': 'error',
         'playwright/no-standalone-expect': 'error',
         'playwright/no-unsafe-references': 'error',
-        'playwright/no-wait-for-selector': 'warn',
+        'playwright/no-useless-await': 'error',
+        'playwright/no-wait-for-selector': 'error',
         'playwright/max-nested-describe': ['error', { max: 1 }],
         'playwright/missing-playwright-await': 'error',
         'playwright/prefer-comparison-matcher': 'error',
@@ -1607,9 +1608,9 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}',
       ],
@@ -1625,6 +1626,24 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+
+    /**
+     * ResponseOps overrides
+     */
+
+    {
+      files: [
+        'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
       },
     },
 
