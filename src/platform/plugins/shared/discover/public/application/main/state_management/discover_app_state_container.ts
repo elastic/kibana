@@ -225,7 +225,8 @@ export const getDiscoverAppStateContainer = ({
   };
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
-    return getStateDefaults({
+    return getInitialState({
+      initialUrlState: undefined,
       savedSearch: newSavedSearch,
       services,
     });
@@ -377,7 +378,14 @@ export function getInitialState({
     overrideDataView,
     services,
   });
-  return handleSourceColumnState({ ...defaultAppState, ...initialUrlState }, services.uiSettings);
+  const mergedState = { ...defaultAppState, ...initialUrlState };
+
+  // https://github.com/elastic/kibana/issues/122555
+  if (typeof mergedState.hideChart !== 'boolean') {
+    mergedState.hideChart = undefined;
+  }
+
+  return handleSourceColumnState(mergedState, services.uiSettings);
 }
 
 /**

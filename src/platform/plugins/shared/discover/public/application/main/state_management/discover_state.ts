@@ -34,7 +34,7 @@ import { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppLocatorParams } from '../../../../common';
 import { DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
-import { getDiscoverAppStateContainer } from './discover_app_state_container';
+import { getDiscoverAppStateContainer, getInitialState } from './discover_app_state_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
@@ -47,7 +47,7 @@ import {
 import type { InternalStateStore, RuntimeStateManager } from './redux';
 import { internalStateActions } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { getDefaultAppState, getSavedSearchContainer } from './discover_saved_search_container';
+import { getSavedSearchContainer } from './discover_saved_search_container';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -545,7 +545,11 @@ export function getDiscoverStateContainer({
       savedSearch: nextSavedSearch,
       timefilter: services.timefilter,
     });
-    const newAppState = getDefaultAppState(nextSavedSearch, services);
+    const newAppState = getInitialState({
+      initialUrlState: undefined,
+      savedSearch: nextSavedSearch,
+      services,
+    });
 
     // a saved search can't have global (pinned) filters so we can reset global filters state
     const globalFilters = globalStateContainer.get()?.filters;
