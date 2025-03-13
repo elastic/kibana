@@ -22,10 +22,12 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   const mlManagementLocator = useMlManagementLocator();
 
   const [hasDFAs, setHasDFAs] = useState(false);
-  const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics] = usePermissionCheck([
-    'canCreateDataFrameAnalytics',
-    'canStartStopDataFrameAnalytics',
-  ]);
+  const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics, canGetDataFrameAnalytics] =
+    usePermissionCheck([
+      'canCreateDataFrameAnalytics',
+      'canStartStopDataFrameAnalytics',
+      'canGetDataFrameAnalytics',
+    ]);
 
   const disabled =
     !mlNodesAvailable() || !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
@@ -47,6 +49,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
       appId: `analytics`,
     });
   }, [mlManagementLocator]);
+
   const availableActions = useMemo(() => {
     const actions: React.ReactNode[] = [];
     if (hasDFAs) {
@@ -54,7 +57,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
         <EuiButton
           color="primary"
           onClick={navigateToResultsExplorer}
-          isDisabled={disabled}
+          isDisabled={!canGetDataFrameAnalytics}
           data-test-subj="mlAnalyticsResultsExplorerButton"
         >
           <FormattedMessage
@@ -82,7 +85,13 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
       );
     }
     return actions;
-  }, [disabled, navigateToDFAManagementPath, hasDFAs, navigateToResultsExplorer]);
+  }, [
+    disabled,
+    navigateToDFAManagementPath,
+    hasDFAs,
+    navigateToResultsExplorer,
+    canGetDataFrameAnalytics,
+  ]);
 
   const mlApi = useMlApi();
   useEffect(() => {

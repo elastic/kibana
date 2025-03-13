@@ -25,6 +25,7 @@ import {
   SuppliedConfigurationsButton,
 } from './components/supplied_configurations_button';
 import { NewJobButton } from './components/new_job_button';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -59,6 +60,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
+  const [canCreateJob] = usePermissionCheck(['canCreateJob']);
 
   return (
     <>
@@ -94,6 +96,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
         jobsViewState={pageState}
         onJobsViewStateUpdate={setPageState}
         showNodeInfo={showNodeInfo}
+        canCreateJob={canCreateJob}
       />
       <HelpMenu docLink={helpLink} />
     </>

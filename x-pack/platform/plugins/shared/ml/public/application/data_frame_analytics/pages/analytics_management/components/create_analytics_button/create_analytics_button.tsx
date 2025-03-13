@@ -27,7 +27,7 @@ export const CreateAnalyticsButton: FC<Props> = ({
     <EuiButton
       disabled={isDisabled}
       fill
-      onClick={navigateToSourceSelection.bind(null, null)}
+      onClick={navigateToSourceSelection}
       iconType="plusInCircle"
       size={size}
       data-test-subj="mlAnalyticsButtonCreate"

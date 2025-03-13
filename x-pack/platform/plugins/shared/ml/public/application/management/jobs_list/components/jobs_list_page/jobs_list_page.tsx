@@ -35,7 +35,10 @@ import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
 import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
-import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
+import {
+  checkGetManagementMlJobsResolver,
+  usePermissionCheck,
+} from '../../../../capabilities/check_capabilities';
 
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
@@ -98,6 +101,7 @@ export const JobsListPage: FC<Props> = ({
     setInitialized(true);
   };
 
+  const [canCreateJob] = usePermissionCheck(['canCreateJob']);
   useEffect(() => {
     check();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -220,14 +224,17 @@ export const JobsListPage: FC<Props> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <ExportJobsFlyout
-                          isDisabled={false}
+                          isDisabled={!canCreateJob}
                           currentTab={
                             currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
                           }
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <ImportJobsFlyout isDisabled={false} onImportComplete={refreshJobs} />
+                        <ImportJobsFlyout
+                          isDisabled={!canCreateJob}
+                          onImportComplete={refreshJobs}
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <SpaceManagement

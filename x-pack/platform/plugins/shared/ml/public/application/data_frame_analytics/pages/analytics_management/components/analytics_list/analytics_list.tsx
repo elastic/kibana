@@ -177,6 +177,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isLoading: setIsLoading,
     onRefresh: getAnalyticsCallback,
   });
+  const canCreateAnalytics = usePermissionCheck('canCreateDataFrameAnalytics');
 
   useEffect(
     function updateOnTimerRefresh() {
@@ -265,10 +266,16 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           {stats}
           <EuiFlexGroup direction="row" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <ExportJobsFlyout isDisabled={false} currentTab={'data-frame-analytics'} />
+              <ExportJobsFlyout
+                isDisabled={!canCreateAnalytics}
+                currentTab={'data-frame-analytics'}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ImportJobsFlyout isDisabled={false} onImportComplete={getAnalyticsCallback} />
+              <ImportJobsFlyout
+                isDisabled={!canCreateAnalytics}
+                onImportComplete={getAnalyticsCallback}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
 

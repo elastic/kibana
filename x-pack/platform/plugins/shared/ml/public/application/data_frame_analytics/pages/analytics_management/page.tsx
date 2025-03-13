@@ -22,6 +22,7 @@ import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
@@ -60,6 +61,7 @@ export const Page: FC = () => {
     });
   }, [mlManagementLocator]);
 
+  const canCreateAnalytics = usePermissionCheck('canCreateDataFrameAnalytics');
   return (
     <>
       <MlPageHeader>
@@ -71,7 +73,11 @@ export const Page: FC = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} justifyContent="flexEnd">
-            <CreateAnalyticsButton size="m" navigateToSourceSelection={navigateToSourceSelection} />
+            <CreateAnalyticsButton
+              size="m"
+              navigateToSourceSelection={navigateToSourceSelection}
+              isDisabled={!canCreateAnalytics}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>

@@ -8,7 +8,7 @@
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,20 +16,18 @@ import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useMlManagementLocator } from '../../../../contexts/kibana';
 
 export function NewJobButton({ size = 's' }) {
-  //@TODO: remove
-  console.log(`--@@size`, size);
   const canCreateJob = usePermissionCheck('canCreateJob');
   const buttonEnabled = canCreateJob && mlNodesAvailable();
   const mlLocator = useMlManagementLocator();
 
-  const redirectToCreateJobSelectIndexPage = async () => {
-    if (!mlLocator) return;
+  const redirectToCreateJobSelectIndexPage = useCallback(async () => {
+    if (!mlLocator || !canCreateJob) return;
 
     await mlLocator.navigate({
       sectionId: 'ml',
       appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX}`,
     });
-  };
+  }, [mlLocator, canCreateJob]);
 
   return (
     <EuiButton

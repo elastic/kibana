@@ -434,6 +434,7 @@ export class JobsListViewUI extends Component {
 
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
+    const { canCreateJob } = this.props;
     const jobIds = jobsSummaryList.map((j) => j.id);
 
     const noJobsFound = !loading && jobIds.length === 0;
@@ -466,10 +467,16 @@ export class JobsListViewUI extends Component {
                   </EuiFlexItem>
                   <EuiFlexGroup direction="row" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <ExportJobsFlyout isDisabled={false} currentTab={'anomaly-detector'} />
+                      <ExportJobsFlyout
+                        isDisabled={!canCreateJob}
+                        currentTab={'anomaly-detector'}
+                      />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <ImportJobsFlyout isDisabled={false} onImportComplete={this.refreshJobs} />
+                      <ImportJobsFlyout
+                        isDisabled={!canCreateJob}
+                        onImportComplete={this.refreshJobs}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <EuiFlexGroup justifyContent="flexEnd">
@@ -588,6 +595,7 @@ export class JobsListViewUI extends Component {
 
 JobsListViewUI.propTypes = {
   euiTheme: PropTypes.object.isRequired,
+  canCreateJob: PropTypes.bool.isRequired,
 };
 
 export const JobsListView = withKibana(JobsListViewUI);
