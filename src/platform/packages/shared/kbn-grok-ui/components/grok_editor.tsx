@@ -89,9 +89,9 @@ export const GrokEditor = ({
     const lineCount = model?.getLineCount() ?? 0;
 
     // Overall (continuous) match ranges
-    const overallMatchRanges = [];
+    const overallMatchRanges: monaco.Range[] = [];
     const captureGroupDecorations: monaco.editor.IModelDeltaDecoration[] = [];
-    const outputResult = [];
+    const outputResult: Array<Record<string, string | number>> = [];
 
     for (let i = 1; i <= lineCount; i++) {
       const line = model?.getLineContent(i) ?? '';
@@ -152,18 +152,20 @@ export const GrokEditor = ({
       }
     }
 
+    const overallMatchDecorations: monaco.editor.IModelDeltaDecoration[] = overallMatchRanges.map(
+      (range) => {
+        return {
+          range,
+          options: {
+            inlineClassName: 'grok-pattern-match',
+          },
+        };
+      }
+    );
+
     sampleEditorDecorationsCollection.current?.clear();
     sampleEditorDecorationsCollection.current?.set(
-      overallMatchRanges
-        .map((range) => {
-          return {
-            range,
-            options: {
-              inlineClassName: 'grok-pattern-match',
-            },
-          };
-        })
-        .concat(captureGroupDecorations)
+      overallMatchDecorations.concat(captureGroupDecorations)
     );
 
     setOutput(outputResult);
