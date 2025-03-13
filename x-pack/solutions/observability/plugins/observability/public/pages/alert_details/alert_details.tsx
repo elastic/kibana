@@ -54,6 +54,7 @@ import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
+import useSensitiveRule from '../../hooks/use_sensitive_rule';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -112,7 +113,10 @@ export function AlertDetails() {
   });
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
-
+  const {} = useSensitiveRule({
+    ruleId,
+    ruleTypeId: rule?.ruleTypeId,
+  });
   const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -134,7 +138,8 @@ export function AlertDetails() {
     }
     history.replace({ search: searchParams.toString() });
   };
-
+  console.log(rule);
+  console.log(alertDetail);
   useEffect(() => {
     if (!alertDetail || !observabilityAIAssistant) {
       return;

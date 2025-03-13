@@ -7,3 +7,5 @@
 
 export { useSubAction } from './use_sub_action';
 export { useLoadRuleTypesQuery } from './use_load_rule_types_query';
+export { useLoadRuleEventLogs } from './use_load_rule_event_logs';
+export { useLoadAlertSummary } from './use_load_alert_summary';
