@@ -9,7 +9,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { get, groupBy, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
 import { FlattenRecord } from '@kbn/streams-schema';
-import { StreamsClient } from '../../../lib/streams/client';
+import { StreamsClient } from '../../../../lib/streams/client';
 import { simulateProcessing } from './simulation_handler';
 import { ProcessingSuggestionBody } from './route';
 
