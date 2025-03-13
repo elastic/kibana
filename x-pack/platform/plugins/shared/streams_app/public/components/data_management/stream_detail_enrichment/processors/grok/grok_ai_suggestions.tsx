@@ -184,7 +184,7 @@ function InnerGrokAiSuggestions({
     setSuggestionsError(undefined);
     setSuggestions(undefined);
     streamsRepositoryClient
-      .fetch('POST /api/streams/{name}/processing/_suggestions', {
+      .fetch('POST /internal/streams/{name}/processing/_suggestions', {
         signal: abortController.signal,
         params: {
           path: { name: definition.stream.name },

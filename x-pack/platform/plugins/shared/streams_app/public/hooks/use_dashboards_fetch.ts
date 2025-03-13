@@ -21,7 +21,7 @@ export const useDashboardsFetch = (name?: string) => {
       if (!name) {
         return Promise.resolve(undefined);
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/dashboards', {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
         signal,
         params: {
           path: {
