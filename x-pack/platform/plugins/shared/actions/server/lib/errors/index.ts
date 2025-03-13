@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ErrorThatHandlesItsOwnResponse } from './types';
+import type { ErrorThatHandlesItsOwnResponse } from './types';
 
 export function isErrorThatHandlesItsOwnResponse(
   e: ErrorThatHandlesItsOwnResponse

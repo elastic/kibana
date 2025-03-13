@@ -58,5 +58,6 @@
     "@kbn/traced-es-client",
     "@kbn/licensing-plugin",
     "@kbn/datemath",
+    "@kbn/xstate-utils",
   ]
 }

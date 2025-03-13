@@ -85,7 +85,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         },
       });
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
       expect(status).to.be(200);
     });
 
@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         },
       });
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
       const simulator = await simulatorPromise;
       const requestData = simulator.requestBody; // This is the request sent to the LLM
       expect(requestData.messages[0].content).to.eql(SYSTEM_MESSAGE);

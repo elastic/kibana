@@ -3368,15 +3368,7 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ reverse: boolean; name: string; rangeType: \"number\" | \"percent\"; stops: ",
-          {
-            "pluginId": "@kbn/coloring",
-            "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.ColorStop",
-            "text": "ColorStop"
-          },
-          "[]; continuity: ",
+          "{ reverse: boolean; name: string; rangeType: \"number\" | \"percent\"; continuity: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",
@@ -3384,7 +3376,15 @@
             "section": "def-common.PaletteContinuity",
             "text": "PaletteContinuity"
           },
-          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; colorStops: ",
+          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; stops: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.ColorStop",
+            "text": "ColorStop"
+          },
+          "[]; colorStops: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",

@@ -12,6 +12,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last, omit } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { SpanLink } from '@kbn/apm-types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { APMConfig } from '../..';
 import {
@@ -27,6 +28,8 @@ import {
   ERROR_LOG_MESSAGE,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
+  LINKS_SPAN_ID,
+  LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -35,6 +38,7 @@ import {
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS,
@@ -102,6 +106,7 @@ export async function getTraceItems({
     PARENT_ID,
     TRANSACTION_ID,
     SPAN_ID,
+    SPAN_DESTINATION_SERVICE_RESOURCE,
     ERROR_CULPRIT,
     ERROR_LOG_MESSAGE,
     ERROR_EXC_MESSAGE,
@@ -298,7 +303,10 @@ async function getTraceDocsPerPage({
     SPAN_COMPOSITE_COMPRESSION_STRATEGY,
     SPAN_COMPOSITE_SUM,
     SPAN_SYNC,
+    SPAN_DESTINATION_SERVICE_RESOURCE,
     CHILD_ID,
+    LINKS_SPAN_ID,
+    LINKS_TRACE_ID,
   ] as const);
 
   const body = {
@@ -345,6 +353,16 @@ async function getTraceDocsPerPage({
   return {
     hits: res.hits.hits.map((hit) => {
       const sort = hit.sort;
+      const fields = unflattenKnownApmEventFields(hit?.fields);
+      const spanLinksFromFields: SpanLink[] =
+        fields?.links?.span_id && fields?.links?.trace_id
+          ? [
+              {
+                trace: { id: fields.links.trace_id as string },
+                span: { id: fields.links.span_id as string },
+              },
+            ]
+          : [];
       const spanLinksSource = 'span' in hit._source ? hit._source.span?.links : undefined;
 
       if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
@@ -363,7 +381,7 @@ async function getTraceDocsPerPage({
             composite: spanEvent.span.composite
               ? (spanEvent.span.composite as Required<WaterfallSpan['span']>['composite'])
               : undefined,
-            links: spanLinksSource,
+            links: spanLinksSource ?? spanLinksFromFields,
           },
           ...(spanEvent.child ? { child: spanEvent.child as WaterfallSpan['child'] } : {}),
         };
@@ -382,7 +400,7 @@ async function getTraceDocsPerPage({
         },
         span: {
           ...txEvent.span,
-          links: spanLinksSource,
+          links: spanLinksSource ?? spanLinksFromFields,
         },
       };
 

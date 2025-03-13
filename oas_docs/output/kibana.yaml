@@ -69,7 +69,9 @@ tags:
     name: APM annotations
   - description: Create APM fleet server schema.
     name: APM server schema
-  - description: Configure APM source maps.
+  - description: |
+      Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
+      For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
   - description: |
       Cases are used to open and track issues. You can add assignees and tags to your cases, set their severity and status, and add alerts, comments, and visualizations. You can also send cases to external incident management systems by configuring connectors.
@@ -228,7 +230,16 @@ tags:
   - name: system
     x-displayName: System
     description: |
-      Get information about the system status, resource usage, and installed plugins.
+      Get information about the system status, resource usage, features, and installed plugins.
+  - description: |
+      Get information about the system status, resource usage, features, and installed plugins.
+    name: system
+    x-displayName: System
+  - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
+    name: upgrade
+    x-displayName: Upgrade assistant
+  - name: user session
+    x-displayName: User session management
 paths:
   /api/actions/connector_types:
     get:
@@ -5086,7 +5097,8 @@ paths:
         - APM agent configuration
   /api/apm/sourcemaps:
     get:
-      description: Returns an array of Fleet artifacts, including source map uploads.
+      description: |
+        Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
       operationId: getSourceMaps
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5104,6 +5116,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getSourceMapsResponse1:
+                  $ref: '#/components/examples/APM_UI_source_maps_get_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_source_maps_response'
           description: Successful response
@@ -5134,8 +5149,17 @@ paths:
       summary: Get source maps
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
     post:
-      description: Upload a source map for a specific service and version.
+      description: |
+        Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.
+        The maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
       operationId: uploadSourceMap
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5150,6 +5174,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                uploadSourceMapResponse1:
+                  $ref: '#/components/examples/APM_UI_source_maps_upload_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_upload_source_maps_response'
           description: Successful response
@@ -5183,12 +5210,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/APM_UI_501_response'
           description: Not Implemented response
-      summary: Upload source map
+      summary: Upload a source map
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
+            -H 'Content-Type: multipart/form-data' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+            -F 'service_name="foo"' \
+            -F 'service_version="1.0.0"' \
+            -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
   /api/apm/sourcemaps/{id}:
     delete:
-      description: Delete a previously uploaded source map.
+      description: |
+        Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.
       operationId: deleteSourceMap
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5240,6 +5279,13 @@ paths:
       summary: Delete source map
       tags:
         - APM sourcemaps
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9" \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: ApiKey ${YOUR_API_KEY}'
   /api/asset_criticality:
     delete:
       description: Delete the asset criticality record for a specific entity.
@@ -15065,6 +15111,89 @@ paths:
       summary: Create a shared exception list
       tags:
         - Security Exceptions API
+  /api/features:
+    get:
+      description: |
+        Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.
+      operationId: get-features
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getFeaturesExample:
+                  value: |
+                    {
+                      "features": [
+                        {
+                          "name": "tasks",
+                          "description": "Manages task results"
+                        },
+                        {
+                          "name": "security",
+                          "description": "Manages configuration for Security features, such as users and roles"
+                        },
+                        {
+                          "name": "searchable_snapshots",
+                          "description": "Manages caches and configuration for searchable snapshots"
+                        },
+                        {
+                          "name": "logstash_management",
+                          "description": "Enables Logstash Central Management pipeline storage"
+                        },
+                        {
+                          "name": "transform",
+                          "description": "Manages configuration and state for transforms"
+                        },
+                        {
+                          "name": "kibana",
+                          "description": "Manages Kibana configuration and reports"
+                        },
+                        {
+                          "name": "synonyms",
+                          "description": "Manages synonyms"
+                        },
+                        {
+                          "name": "async_search",
+                          "description": "Manages results of async searches"
+                        },
+                        {
+                          "name": "ent_search",
+                          "description": "Manages configuration for Enterprise Search features"
+                        },
+                        {
+                          "name": "machine_learning",
+                          "description": "Provides anomaly detection and forecasting functionality"
+                        },
+                        {
+                          "name": "geoip",
+                          "description": "Manages data related to GeoIP database downloader"
+                        },
+                        {
+                          "name": "watcher",
+                          "description": "Manages Watch definitions and state"
+                        },
+                        {
+                          "name": "fleet",
+                          "description": "Manages configuration for Fleet"
+                        },
+                        {
+                          "name": "enrich",
+                          "description": "Manages data related to Enrich policies"
+                        },
+                        {
+                          "name": "inference_plugin",
+                          "description": "Inference plugin for managing inference services and inference"
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get features
+      tags:
+        - system
+      x-state: Technical Preview
   /api/fleet/agent_download_sources:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
@@ -15097,6 +15226,36 @@ paths:
                           description: The ID of the proxy to use for this download source. See the proxies API for more information.
                           nullable: true
                           type: string
+                        secrets:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ssl:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            certificate:
+                              type: string
+                            certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            key:
+                              type: string
                       required:
                         - id
                         - name
@@ -15166,6 +15325,36 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    key:
+                      type: string
               required:
                 - name
                 - host
@@ -15195,6 +15384,36 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -15307,6 +15526,36 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -15371,6 +15620,36 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                secrets:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ssl:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
+                ssl:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    certificate:
+                      type: string
+                    certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    key:
+                      type: string
               required:
                 - name
                 - host
@@ -15400,6 +15679,36 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      secrets:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          ssl:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
+                      ssl:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          certificate:
+                            type: string
+                          certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          key:
+                            type: string
                     required:
                       - id
                       - name
@@ -20066,8 +20375,40 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  secrets:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      ssl:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          key:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                        required:
+                                          - key
                                   sourceURI:
                                     type: string
+                                  ssl:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      certificate:
+                                        type: string
+                                      certificate_authorities:
+                                        items:
+                                          type: string
+                                        type: array
+                                      key:
+                                        type: string
+                                      renegotiation:
+                                        type: string
+                                      verification_mode:
+                                        type: string
                                 required:
                                   - sourceURI
                               features:
@@ -20842,7 +21183,6 @@ paths:
           name: page
           required: false
           schema:
-            default: 1
             type: number
         - in: query
           name: perPage
@@ -20891,6 +21231,26 @@ paths:
             enum:
               - asc
               - desc
+            type: string
+        - in: query
+          name: searchAfter
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: openPit
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: pitId
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pitKeepAlive
+          required: false
+          schema:
             type: string
       responses:
         '200':
@@ -21069,12 +21429,7 @@ paths:
                           nullable: true
                           type: number
                         sort:
-                          items:
-                            anyOf:
-                              - type: number
-                              - type: string
-                              - enum: []
-                                nullable: true
+                          items: {}
                           type: array
                         status:
                           enum:
@@ -21110,6 +21465,11 @@ paths:
                               - input
                               - output
                               - other
+                            type: string
+                          nullable: true
+                          type: array
+                        upgrade_attempts:
+                          items:
                             type: string
                           nullable: true
                           type: array
@@ -21183,10 +21543,14 @@ paths:
                         - enrolled_at
                         - local_metadata
                     type: array
+                  nextSearchAfter:
+                    type: string
                   page:
                     type: number
                   perPage:
                     type: number
+                  pit:
+                    type: string
                   statusSummary:
                     additionalProperties:
                       type: number
@@ -21521,12 +21885,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
@@ -21562,6 +21921,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -21863,12 +22227,7 @@ paths:
                         nullable: true
                         type: number
                       sort:
-                        items:
-                          anyOf:
-                            - type: number
-                            - type: string
-                            - enum: []
-                              nullable: true
+                        items: {}
                         type: array
                       status:
                         enum:
@@ -21904,6 +22263,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -24223,6 +24587,11 @@ paths:
             type: boolean
         - in: query
           name: excludeInstallStatus
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: withPackagePoliciesCount
           required: false
           schema:
             type: boolean
@@ -39718,24 +40087,17 @@ paths:
             schema:
               type: object
               properties:
-                eventDataView:
-                  nullable: true
-                  type: string
-                eventIngested:
-                  nullable: true
-                  type: string
-                eventTimestamp:
-                  nullable: true
-                  type: string
                 note:
                   $ref: '#/components/schemas/Security_Timeline_API_BareNote'
+                  description: The note to add or update.
                 noteId:
+                  description: The `savedObjectId` of the note
+                  example: 709f99c6-89b6-4953-9160-35945c8e174e
                   nullable: true
                   type: string
-                overrideOwner:
-                  nullable: true
-                  type: boolean
                 version:
+                  description: The version of the note
+                  example: WzQ2LDFd
                   nullable: true
                   type: string
               required:
@@ -40133,7 +40495,7 @@ paths:
         - Security Osquery API
   /api/pinned_event:
     patch:
-      description: Pin an event to an existing Timeline.
+      description: Pin/unpin an event to/from an existing Timeline.
       operationId: PersistPinnedEventRoute
       requestBody:
         content:
@@ -40142,16 +40504,22 @@ paths:
               type: object
               properties:
                 eventId:
+                  description: The `_id` of the associated event for this pinned event.
+                  example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
                   type: string
                 pinnedEventId:
+                  description: The `savedObjectId` of the pinned event you want to unpin.
+                  example: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
                   nullable: true
                   type: string
                 timelineId:
+                  description: The `savedObjectId` of the timeline that you want this pinned event unpinned from.
+                  example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   type: string
               required:
                 - eventId
                 - timelineId
-        description: The pinned event to add or update, along with additional metadata.
+        description: The pinned event to add or unpin, along with additional metadata.
         required: true
       responses:
         '200':
@@ -40159,8 +40527,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
-          description: Indicates the event was successfully pinned to the Timeline.
-      summary: Pin an event
+          description: Indicates the event was successfully pinned to or unpinned from the Timeline.
+      summary: Pin/unpin an event
       tags:
         - Security Timeline API
   /api/risk_score/engine/dangerously_delete_data:
@@ -41406,13 +41774,9 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
-                    type: boolean
-                  pipeline_exists:
                     type: boolean
                   product_documentation_status:
                     type: string
@@ -42396,6 +42760,113 @@ paths:
       summary: Create or update roles
       tags:
         - roles
+  /api/security/session/_invalidate:
+    post:
+      description: |
+        Invalidate user sessions that match a query. To use this API, you must be a superuser.
+      operationId: post-security-session-invalidate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              invalidateRequestExample1:
+                description: Run `POST api/security/session/_invalidate` to invalidate all existing sessions.
+                summary: Invalidate all sessions
+                value: |-
+                  {
+                    "match" : "all"
+                  }
+              invalidateRequestExample2:
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any SAML authentication provider.
+                summary: Invalidate all SAML sessions
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "saml" }
+                    }
+                  }
+              invalidateRequestExample3:
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by the SAML authentication provider named `saml1`.
+                summary: Invalidate sessions for a provider
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "saml", "name": "saml1" }
+                    }
+                  }
+              invalidateRequestExample4:
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any OpenID Connect authentication provider for the user with the username `user@my-oidc-sso.com`.
+                summary: Invalidate sessions for a user
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "oidc" },
+                      "username": "user@my-oidc-sso.com"
+                    }
+                  }
+            schema:
+              type: object
+              properties:
+                match:
+                  description: |
+                    The method Kibana uses to determine which sessions to invalidate. If it is `all`, all existing sessions will be invalidated. If it is `query`, only the sessions that match the query will be invalidated.
+                  enum:
+                    - all
+                    - query
+                  type: string
+                query:
+                  description: |
+                    The query that Kibana uses to match the sessions to invalidate when the `match` parameter is set to `query`.
+                  type: object
+                  properties:
+                    provider:
+                      description: The authentication providers that will have their user sessions invalidated.
+                      type: object
+                      properties:
+                        name:
+                          description: The authentication provider name.
+                          type: string
+                        type:
+                          description: |
+                            The authentication provide type. For example: `basic`, `token`, `saml`, `oidc`, `kerberos`, or `pki`.
+                          type: string
+                      required:
+                        - type
+                    username:
+                      description: The username that will have its sessions invalidated.
+                      type: string
+                  required:
+                    - provider
+              required:
+                - match
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    description: The number of sessions that were successfully invalidated.
+                    type: integer
+          description: Indicates a successful call
+        '403':
+          description: Indicates that the user may not be authorized to invalidate sessions for other users.
+      summary: Invalidate user sessions
+      tags:
+        - user session
+      x-state: Technical Preview
   /api/spaces/_copy_saved_objects:
     post:
       description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
@@ -42986,11 +43457,17 @@ paths:
               type: object
               properties:
                 savedObjectIds:
+                  description: The list of IDs of the Timelines or Timeline templates to delete
+                  example:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
                     type: string
                   type: array
                 searchIds:
-                  description: Saved search ids that should be deleted alongside the timelines
+                  description: Saved search IDs that should be deleted alongside the timelines
+                  example:
+                    - 23f3-43g34g322-e5g5hrh6h-45454
+                    - 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   items:
                     type: string
                   type: array
@@ -43008,12 +43485,12 @@ paths:
       description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
-        - description: The ID of the template timeline to retrieve
+        - description: The `savedObjectId` of the template timeline to retrieve
           in: query
           name: template_timeline_id
           schema:
             type: string
-        - description: The ID of the Timeline to retrieve.
+        - description: The `savedObjectId` of the Timeline to retrieve.
           in: query
           name: id
           schema:
@@ -43039,10 +43516,15 @@ paths:
               properties:
                 timeline:
                   $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
+                  description: The timeline object of the Timeline or Timeline template that you’re updating.
                 timelineId:
+                  description: The `savedObjectId` of the Timeline or Timeline template that you’re updating.
+                  example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   nullable: true
                   type: string
                 version:
+                  description: The version of the Timeline or Timeline template that you’re updating.
+                  example: WzE0LDFd
                   nullable: true
                   type: string
               required:
@@ -43057,7 +43539,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
-          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+          description: Indicates that the Timeline was successfully updated.
         '405':
           content:
             application/json:
@@ -43065,10 +43547,13 @@ paths:
                 type: object
                 properties:
                   body:
+                    description: The error message
+                    example: update timeline error
                     type: string
                   statusCode:
+                    example: 405
                     type: number
-          description: Indicates that the user does not have the required access to create a draft Timeline.
+          description: Indicates that the user does not have the required access to create a Timeline.
       summary: Update a Timeline
       tags:
         - Security Timeline API
@@ -43085,14 +43570,20 @@ paths:
                   $ref: '#/components/schemas/Security_Timeline_API_TimelineStatus'
                   nullable: true
                 templateTimelineId:
+                  description: A unique identifier for the Timeline template.
+                  example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   nullable: true
                   type: string
                 templateTimelineVersion:
+                  description: Timeline template version number.
+                  example: 12
                   nullable: true
                   type: number
                 timeline:
                   $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
                 timelineId:
+                  description: A unique identifier for the Timeline.
+                  example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   nullable: true
                   type: string
                 timelineType:
@@ -43119,8 +43610,11 @@ paths:
                 type: object
                 properties:
                   body:
+                    description: The error message
+                    example: update timeline error
                     type: string
                   statusCode:
+                    example: 405
                     type: number
           description: Indicates that there was an error in the Timeline creation.
       summary: Create a Timeline or Timeline template
@@ -43355,6 +43849,7 @@ paths:
               properties:
                 file: {}
                 isImmutable:
+                  description: Whether the Timeline should be immutable
                   enum:
                     - 'true'
                     - 'false'
@@ -43377,10 +43872,11 @@ paths:
                 type: object
                 properties:
                   body:
-                    type: string
-                  id:
+                    description: The error message
+                    example: Invalid file extension
                     type: string
                   statusCode:
+                    example: 400
                     type: number
           description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.
         '404':
@@ -43389,9 +43885,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  body:
+                    description: The error message
+                    example: Unable to find saved object client
                     type: string
                   statusCode:
+                    example: 404
                     type: number
           description: Indicates that we were unable to locate the saved object client necessary to handle the import.
         '409':
@@ -43401,10 +43900,11 @@ paths:
                 type: object
                 properties:
                   body:
-                    type: string
-                  id:
+                    description: The error message
+                    example: Could not import timelines
                     type: string
                   statusCode:
+                    example: 409
                     type: number
           description: Indicates the import of Timelines was unsuccessful.
       summary: Import Timelines
@@ -43513,24 +44013,28 @@ paths:
           name: sort_field
           schema:
             $ref: '#/components/schemas/Security_Timeline_API_SortFieldTimeline'
-        - in: query
+        - description: Whether to sort the results `ascending` or `descending`
+          in: query
           name: sort_order
           schema:
             enum:
               - asc
               - desc
             type: string
-        - in: query
+        - description: How many results should returned at once
+          in: query
           name: page_size
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: How many pages should be skipped
+          in: query
           name: page_index
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: Allows to search for timelines by their title
+          in: query
           name: search
           schema:
             nullable: true
@@ -43548,20 +44052,32 @@ paths:
                 type: object
                 properties:
                   customTemplateTimelineCount:
+                    description: The amount of custom Timeline templates in the results
+                    example: 2
                     type: number
                   defaultTimelineCount:
+                    description: The amount of `default` type Timelines in the results
+                    example: 90
                     type: number
                   elasticTemplateTimelineCount:
+                    description: The amount of Elastic's Timeline templates in the results
+                    example: 8
                     type: number
                   favoriteCount:
+                    description: The amount of favorited Timelines
+                    example: 5
                     type: number
                   templateTimelineCount:
+                    description: The amount of Timeline templates in the results
+                    example: 10
                     type: number
                   timeline:
                     items:
                       $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
                     type: array
                   totalCount:
+                    description: The total amount of results
+                    example: 100
                     type: number
                 required:
                   - timeline
@@ -43574,13 +44090,412 @@ paths:
                 type: object
                 properties:
                   body:
+                    description: The error message
+                    example: get timeline error
                     type: string
                   statusCode:
+                    example: 405
                     type: number
           description: Bad request. The user supplied invalid data.
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
+  /api/upgrade_assistant/add_query_default_field/{index}:
+    get:
+      description: |
+        In Elasticsearch 7.0 and later, some query types, such as simple query string, have a limit to the number of fields they can query against. To configure the cap in Elasticsearch, set the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
+        For indices with more fields than the cap, add the `index.query.default_field` index setting to inform Elasticsearch which fields to use by default when no field is specified for a query. Use the add default field API to add the `index.query.default_field` setting to an Elasticsearch index.
+        To add the `index.query.default_field` index setting to the specified index, Kibana generates an array of all fields from the index mapping. The fields contain the types specified in `fieldTypes`. Kibana appends any other fields specified in `otherFields` to the array of default fields.
+      operationId: get-upgrade-default
+      requestBody:
+        content:
+          application/json:
+            examples:
+              addQueryDefaultFieldExampleRequest1:
+                description: Run `GET /api/upgrade_assistant/add_query_default_field/myIndex` to add the `index.query.default_field` setting to an Elasticsearch index.
+                value: |-
+                  {
+                    "fieldTypes": ["text", "keyword"], 
+                    "otherFields": ["myField.*"] 
+                  }
+            schema:
+              type: object
+              properties:
+                fieldTypes:
+                  description: |
+                    An array of Elasticsearch field types that generate the list of fields.
+                  type: array
+                otherFields:
+                  description: |
+                    An optional array of additional field names, dot-delimited.
+                  type: array
+              required:
+                - fieldTypes
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+          description: Indicates a successful call.
+        '400':
+          description: Indicates that the index already has the `index.query.default_field` setting. No changes are made to the index.
+      summary: Add a default field
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/{index}:
+    get:
+      description: |
+        Check the status of the reindex task.
+      operationId: get-upgrade-reindex
+      parameters:
+        - description: The name of the index that is reindexing.
+          in: path
+          name: index
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "reindexOp": {
+                        "indexName": ".ml-state",
+                        "newIndexName": ".reindexed-v7-ml-state", 
+                        "status": 0, 
+                        "lastCompletedStep": 40, 
+                        "reindexTaskId": "QprwvTMzRQ2MLWOW22oQ4Q:11819", 
+                        "reindexTaskPercComplete": 0.3, 
+                        "errorMessage": null 
+                      },
+                      "warnings": [], 
+                      "hasRequiredPrivileges": true 
+                    }
+              schema:
+                type: object
+                properties:
+                  hasRequiredPrivileges:
+                    description: |
+                      Specifies whether the user has sufficient privileges to reindex this index. When security is unavailable or disabled, it is `true`.
+                    type: boolean
+                  reindexOp:
+                    type: object
+                    properties:
+                      errorMessage:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                      indexName:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                      lastCompletedStep:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                      newIndexName:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_newIndexName'
+                      reindexTaskId:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                      reindexTaskPercComplete:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                      status:
+                        $ref: '#/components/schemas/Upgrade_assistant_APIs_status'
+                  warnings:
+                    description: |
+                      An array of any warning codes that explain what changes are required for this reindex. For example:
+                      - `0` specifies to remove the `_all` meta field. - `1` specifies to convert any coerced boolean values in the source document. For example, `yes`, `1`, and `off`. - `2` specifies to convert documents to support Elastic Common Schema. Applies only to APM indices created in 6.x.
+                    type: array
+          description: Indicates a successful call.
+      summary: Get the reindex status
+      tags:
+        - upgrade
+      x-state: Technical Preview
+    post:
+      description: |
+        Start a new reindex or resume a paused reindex.
+        The following steps are performed during a reindex task:
+
+        1. Set the index to read-only.
+        1. Create a new index.
+        1. Reindex documents into the new index.
+        1. Create an index alias for the new index.
+        1. Delete the old index.
+      operationId: start-upgrade-reindex
+      parameters:
+        - description: The name of the index to reindex.
+          in: path
+          name: index
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                startUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "indexName": ".ml-state",
+                      "newIndexName": ".reindexed-v7-ml-state", 
+                      "status": 0, 
+                      "lastCompletedStep": 0, 
+                      "reindexTaskId": null, 
+                      "reindexTaskPercComplete": null, 
+                      "errorMessage": null 
+                    }
+              schema:
+                type: object
+                properties:
+                  errorMessage:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                  indexName:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                  lastCompletedStep:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                  newIndexName:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_newIndexName'
+                  reindexTaskId:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                  reindexTaskPercComplete:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                  status:
+                    $ref: '#/components/schemas/Upgrade_assistant_APIs_status'
+          description: Indicates a successful call.
+      summary: Start or resume reindexing
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/{index}/cancel:
+    post:
+      description: |
+        Cancel reindexes that are waiting for the Elasticsearch reindex task to complete. For example, cancel reindexing if the `lastCompletedStep` has the value `40`.
+      operationId: cancel-upgrade-reindex
+      parameters:
+        - description: The name of the index that was reindexing.
+          in: path
+          name: index
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                cancelUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "acknowledged": true
+                    }
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+          description: Indicates a successful call.
+      summary: Cancel reindexing
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/batch:
+    post:
+      description: |
+        Start or resume multiple reindexing tasks in one request. Additionally, reindexing tasks started or resumed via the batch endpoint will be placed on a queue and run one-by-one, which ensures that minimal cluster resources are consumed over time.
+      operationId: batch-start-upgrade-reindex
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                indexNames:
+                  description: |
+                    The list of index names to be reindexed. The order of the indices determines the order that the reindex tasks are run.
+                  items:
+                    type: string
+                  type: array
+              required:
+                - indexNames
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                batchStartUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "enqueued": [ 
+                        {
+                          "indexName": "index1",
+                          "newIndexName": "reindexed-v8-index1",
+                          "status": 3,
+                          "lastCompletedStep": 0,
+                          "locked": null,
+                          "reindexTaskId": null,
+                          "reindexTaskPercComplete": null,
+                          "errorMessage": null,
+                          "runningReindexCount": null,
+                          "reindexOptions": { 
+                            "queueSettings": {
+                              "queuedAt": 1583406985489 
+                            }
+                          }
+                        }
+                      ],
+                      "errors": [ 
+                        {
+                          "indexName": "index2",
+                          "message": "Something went wrong!"
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  enqueued:
+                    description: |
+                      A list of reindex tasks created. The order in the array indicates the order in which tasks will be run.
+                    items:
+                      type: object
+                      properties:
+                        errorMessage:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                        indexName:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                        lastCompletedStep:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                        locked:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_locked'
+                        reindexOptions:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexOptions'
+                        reindexTaskId:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                        reindexTaskPercComplete:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                        runningReindexCount:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_runningReindexCount'
+                    type: array
+                  errors:
+                    description: |
+                      A list of errors that may have occurred preventing the reindex task from being created.
+                    items:
+                      - type: object
+                    type: array
+          description: Indicates a successful call.
+      summary: Batch start or resume reindexing
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/reindex/batch/queue:
+    get:
+      description: |
+        Check the current reindex batch queue.
+      operationId: get-batch-upgrade-reindex
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getBatchUpgradeReindexResponseExample1:
+                  value: |-
+                    {
+                      "queue": [ 
+                        {
+                          "indexName": "index1",
+                          "newIndexName": "reindexed-v8-index2",
+                          "status": 3,
+                          "lastCompletedStep": 0,
+                          "locked": null,
+                          "reindexTaskId": null,
+                          "reindexTaskPercComplete": null,
+                          "errorMessage": null,
+                          "runningReindexCount": null,
+                          "reindexOptions": {
+                            "queueSettings": {
+                              "queuedAt": 1583406985489
+                            }
+                          }
+                        },
+                        {
+                          "indexName": "index2",
+                          "newIndexName": "reindexed-v8-index2",
+                          "status": 3,
+                          "lastCompletedStep": 0,
+                          "locked": null,
+                          "reindexTaskId": null,
+                          "reindexTaskPercComplete": null,
+                          "errorMessage": null,
+                          "runningReindexCount": null,
+                          "reindexOptions": {
+                            "queueSettings": {
+                              "queuedAt": 1583406987334
+                            }
+                          }
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  queue:
+                    description: |
+                      Items in this array indicate reindex tasks at a given point in time and the order in which they will be run.
+                    items:
+                      type: object
+                      properties:
+                        errorMessage:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_errorMessage'
+                        indexName:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_indexName'
+                        lastCompletedStep:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_lastCompletedStep'
+                        locked:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_locked'
+                        reindexOptions:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexOptions'
+                        reindexTaskId:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskId'
+                        reindexTaskPercComplete:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_reindexTaskPercComplete'
+                        runningReindexCount:
+                          $ref: '#/components/schemas/Upgrade_assistant_APIs_runningReindexCount'
+                    type: array
+          description: Indicates a successful call.
+      summary: Get the batch reindex queue
+      tags:
+        - upgrade
+      x-state: Technical Preview
+  /api/upgrade_assistant/status:
+    get:
+      description: Check the status of your cluster.
+      operationId: get-upgrade-status
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getUpgradeStatusResponseExample1:
+                  value: |-
+                    {
+                      "readyForUpgrade": false,
+                      "cluster": [
+                        {
+                          "message": "Cluster deprecated issue",
+                          "details":"You have 2 system indices that must be migrated and 5 Elasticsearch deprecation issues and 0 Kibana deprecation issues that must be resolved before upgrading."
+                        }
+                      ]
+                    }
+          description: Indicates a successful call.
+      summary: Get the upgrade readiness status
+      tags:
+        - upgrade
+      x-state: Technical Preview
   /s/{spaceId}/api/observability/slos:
     get:
       description: |
@@ -43593,6 +44508,16 @@ paths:
           example: 'slo.name:latency* and slo.tags : "prod"'
           in: query
           name: kqlQuery
+          schema:
+            type: string
+        - description: Size provided for cursor based pagination
+          example: 25
+          in: query
+          name: size
+          schema:
+            type: integer
+        - in: query
+          name: searchAfter
           schema:
             type: string
         - description: The page to use for pagination, must be greater or equal than 1
@@ -44012,6 +44937,68 @@ paths:
       summary: Enable an SLO
       tags:
         - slo
+  /s/{spaceId}/internal/observability/slos/_definitions:
+    get:
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getDefinitionsOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: Indicates if the API returns only outdated SLO or all SLO definitions
+          example: true
+          in: query
+          name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Filters the SLOs by name
+          example: my service availability
+          in: query
+          name: search
+          schema:
+            type: string
+        - description: The page to use for pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of SLOs returned by page
+          example: 100
+          in: query
+          name: perPage
+          schema:
+            default: 100
+            maximum: 1000
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Get the SLO definitions
+      tags:
+        - slo
 components:
   examples:
     Alerting_get_health_response:
@@ -44250,6 +45237,64 @@ components:
             id: recovered
             name: Recovered
           rule_task_timeout: 5m
+    APM_UI_source_maps_get_200_response1:
+      description: A successful response from `GET /api/apm/sourcemaps`.
+      value: |
+        {
+          "artifacts": [
+            {
+              "type": "sourcemap",
+              "identifier": "foo-1.0.0",
+              "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "body": {
+                "serviceName": "foo",
+                "serviceVersion": "1.0.0",
+                "bundleFilepath": "/test/e2e/general-usecase/bundle.js",
+                "sourceMap": {
+                  "version": 3,
+                  "file": "static/js/main.chunk.js",
+                  "sources": [
+                    "fleet-source-map-client/src/index.css",
+                    "fleet-source-map-client/src/App.js",
+                    "webpack:///./src/index.css?bb0a",
+                    "fleet-source-map-client/src/index.js",
+                    "fleet-source-map-client/src/reportWebVitals.js"
+                  ],
+                  "sourcesContent": [
+                    "content"
+                  ],
+                  "mappings": "mapping",
+                  "sourceRoot": ""
+                }
+              },
+              "created": "2021-07-09T20:47:44.812Z",
+              "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "compressionAlgorithm": "zlib",
+              "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "decodedSize": 441,
+              "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+              "encodedSize": 237,
+              "encryptionAlgorithm": "none",
+              "packageName": "apm"
+            }
+          ]
+        }
+    APM_UI_source_maps_upload_200_response1:
+      description: A successful response from `POST /api/apm/sourcemaps`.
+      value:
+        body: eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI
+        compressionAlgorithm: zlib
+        created: '2021-07-09T20:47:44.812Z'
+        decodedSha256: 644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        decodedSize: 441
+        encodedSha256: 024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24
+        encodedSize: 237
+        encryptionAlgorithm: none
+        id: apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        identifier: foo-1.0.0
+        packageName: apm
+        relative_url: /api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
+        type: sourcemap
     Cases_add_comment_request:
       summary: Adds a comment to a case.
       value:
@@ -49184,8 +50229,8 @@ components:
           type: string
         sourcemap:
           description: |
-            The source map. String or file upload. It must follow the
-            [source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).
+            The source map. It can be a string or file upload. It must follow the
+            [source map format specification](https://tc39.es/ecma426/).
           format: binary
           type: string
       required:
@@ -62315,52 +63360,42 @@ components:
         - orphan
       type: string
     Security_Timeline_API_BareNote:
-      type: object
-      properties:
-        created:
-          nullable: true
-          type: number
-        createdBy:
-          nullable: true
-          type: string
-        eventId:
-          nullable: true
-          type: string
-        note:
-          nullable: true
-          type: string
-        timelineId:
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-      required:
-        - timelineId
+      allOf:
+        - $ref: '#/components/schemas/Security_Timeline_API_NoteCreatedAndUpdatedMetadata'
+        - type: object
+          properties:
+            eventId:
+              description: The `_id` of the associated event for this note.
+              example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+              nullable: true
+              type: string
+            note:
+              description: The text of the note
+              example: This is an example text
+              nullable: true
+              type: string
+            timelineId:
+              description: The `savedObjectId` of the Timeline that this note is associated with
+              example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+              type: string
+          required:
+            - timelineId
     Security_Timeline_API_BarePinnedEvent:
-      type: object
-      properties:
-        created:
-          nullable: true
-          type: number
-        createdBy:
-          nullable: true
-          type: string
-        eventId:
-          type: string
-        timelineId:
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-      required:
-        - eventId
-        - timelineId
+      allOf:
+        - $ref: '#/components/schemas/Security_Timeline_API_PinnedEventCreatedAndUpdatedMetadata'
+        - type: object
+          properties:
+            eventId:
+              description: The `_id` of the associated event for this pinned event.
+              example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+              type: string
+            timelineId:
+              description: The `savedObjectId` of the timeline that this pinned event is associated with
+              example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+              type: string
+          required:
+            - eventId
+            - timelineId
     Security_Timeline_API_ColumnHeaderResult:
       type: object
       properties:
@@ -62453,7 +63488,7 @@ components:
           $ref: '#/components/schemas/Security_Timeline_API_DataProviderType'
           nullable: true
     Security_Timeline_API_DataProviderType:
-      description: The type of data provider to create. Valid values are `default` and `template`.
+      description: The type of data provider.
       enum:
         - default
         - template
@@ -62487,6 +63522,10 @@ components:
         - savedObjectId
         - version
     Security_Timeline_API_FavoriteTimelineResult:
+      description: Indicates when and who marked a Timeline as a favorite.
+      example:
+        favoriteDate: 1741337636741
+        userName: elastic
       type: object
       properties:
         favoriteDate:
@@ -62499,6 +63538,16 @@ components:
           nullable: true
           type: string
     Security_Timeline_API_FilterTimelineResult:
+      example:
+        meta:
+          alias: Custom filter name
+          disabled: false
+          index: .alerts-security.alerts-default,logs-*
+          key: '@timestamp'
+          negate: false,
+          type: exists
+          value: exists
+        query: '{"exists":{"field":"@timestamp"}}'
       type: object
       properties:
         exists:
@@ -62572,26 +63621,41 @@ components:
       type: object
       properties:
         errors:
+          description: The list of failed Timeline imports
           items:
             type: object
             properties:
               error:
+                description: The error containing the reason why the timeline could not be imported
                 type: object
                 properties:
                   message:
+                    description: The reason why the timeline could not be imported
+                    example: Malformed JSON
                     type: string
                   status_code:
+                    description: The HTTP status code of the error
+                    example: 400
                     type: number
               id:
+                description: The ID of the timeline that failed to import
+                example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
                 type: string
           type: array
         success:
+          description: Indicates whether any of the Timelines were successfully imports
           type: boolean
         success_count:
+          description: The amount of successfully imported/updated Timelines
+          example: 99
           type: number
         timelines_installed:
+          description: The amount of successfully installed Timelines
+          example: 80
           type: number
         timelines_updated:
+          description: The amount of successfully updated Timelines
+          example: 19
           type: number
     Security_Timeline_API_ImportTimelines:
       allOf:
@@ -62631,18 +63695,46 @@ components:
         - type: object
           properties:
             noteId:
+              description: The `savedObjectId` of the note
+              example: 709f99c6-89b6-4953-9160-35945c8e174e
               type: string
             version:
+              description: The version of the note
+              example: WzQ2LDFd
               type: string
           required:
             - noteId
             - version
+    Security_Timeline_API_NoteCreatedAndUpdatedMetadata:
+      type: object
+      properties:
+        created:
+          description: The time the note was created, using a 13-digit Epoch timestamp.
+          example: 1587468588922
+          nullable: true
+          type: number
+        createdBy:
+          description: The user who created the note.
+          example: casetester
+          nullable: true
+          type: string
+        updated:
+          description: The last time the note was updated, using a 13-digit Epoch timestamp
+          example: 1741344876825
+          nullable: true
+          type: number
+        updatedBy:
+          description: The user who last updated the note
+          example: casetester
+          nullable: true
+          type: string
     Security_Timeline_API_PersistPinnedEventResponse:
       oneOf:
         - $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
         - type: object
           properties:
             unpinned:
+              description: Indicates whether the event was successfully unpinned
               type: boolean
           required:
             - unpinned
@@ -62654,12 +63746,39 @@ components:
         - type: object
           properties:
             pinnedEventId:
+              description: The `savedObjectId` of this pinned event
+              example: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
               type: string
             version:
+              description: The version of this pinned event
+              example: WzQ2LDFe
               type: string
           required:
             - pinnedEventId
             - version
+    Security_Timeline_API_PinnedEventCreatedAndUpdatedMetadata:
+      type: object
+      properties:
+        created:
+          description: The time the pinned event was created, using a 13-digit Epoch timestamp.
+          example: 1587468588922
+          nullable: true
+          type: number
+        createdBy:
+          description: The user who created the pinned event.
+          example: casetester
+          nullable: true
+          type: string
+        updated:
+          description: The last time the pinned event was updated, using a 13-digit Epoch timestamp
+          example: 1741344876825
+          nullable: true
+          type: number
+        updatedBy:
+          description: The user who last updated the pinned event
+          example: casetester
+          nullable: true
+          type: string
     Security_Timeline_API_QueryMatchResult:
       type: object
       properties:
@@ -62705,6 +63824,7 @@ components:
       required:
         - note
     Security_Timeline_API_RowRendererId:
+      description: Identifies the available row renderers
       enum:
         - alert
         - alerts
@@ -62746,25 +63866,51 @@ components:
       type: object
       properties:
         columns:
+          description: The Timeline's columns
+          example:
+            - columnHeaderType: not-filtered
+              id: '@timestamp'
+            - columnHeaderType: not-filtered
+              id: event.category
           items:
             $ref: '#/components/schemas/Security_Timeline_API_ColumnHeaderResult'
           nullable: true
           type: array
         created:
+          description: The time the Timeline was created, using a 13-digit Epoch timestamp.
+          example: 1587468588922
           nullable: true
           type: number
         createdBy:
+          description: The user who created the Timeline.
+          example: casetester
           nullable: true
           type: string
         dataProviders:
+          description: Object containing query clauses
+          example:
+            - enabled: true
+              excluded: false
+              id: id-d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b
+              name: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b
+              queryMatch:
+                field: _id,
+                operator: ':'
+                value: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b,
           items:
             $ref: '#/components/schemas/Security_Timeline_API_DataProviderResult'
           nullable: true
           type: array
         dataViewId:
+          description: ID of the Timeline's Data View
+          example: security-solution-default
           nullable: true
           type: string
         dateRange:
+          description: The Timeline's search period.
+          example:
+            end: 1587456479201
+            start: 1587370079200
           nullable: true
           type: object
           properties:
@@ -62781,9 +63927,17 @@ components:
                 - nullable: true
                   type: number
         description:
+          description: The Timeline's description
+          example: Investigating exposure of CVE XYZ
           nullable: true
           type: string
         eqlOptions:
+          description: EQL query that is used in the correlation tab
+          example:
+            eventCategoryField: event.category
+            query: sequence\n[process where process.name == "sudo"]\n[any where true]
+            size: 100
+            timestampField: '@timestamp'
           nullable: true
           type: object
           properties:
@@ -62806,9 +63960,13 @@ components:
               nullable: true
               type: string
         eventType:
+          deprecated: true
+          description: Event types displayed in the Timeline
+          example: all
           nullable: true
           type: string
         excludedRowRendererIds:
+          description: A list of row renderers that should not be used when in `Event renderers` mode
           items:
             $ref: '#/components/schemas/Security_Timeline_API_RowRendererId'
           nullable: true
@@ -62819,53 +63977,72 @@ components:
           nullable: true
           type: array
         filters:
+          description: A list of filters that should be applied to the query
           items:
             $ref: '#/components/schemas/Security_Timeline_API_FilterTimelineResult'
           nullable: true
           type: array
         indexNames:
+          description: A list of index names to use in the query (e.g. when the default data view has been modified)
+          example:
+            - .logs*
           items:
             type: string
           nullable: true
           type: array
         kqlMode:
+          description: |-
+            Indicates whether the KQL bar filters the query results or searches for additional results, where:
+              * `filter`: filters query results
+              * `search`: displays additional search results
+          example: search
           nullable: true
           type: string
         kqlQuery:
           $ref: '#/components/schemas/Security_Timeline_API_SerializedFilterQueryResult'
           nullable: true
         savedQueryId:
+          description: The ID of the saved query that might be used in the Query tab
+          example: c7b16904-02d7-4f32-b8f2-cc20f9625d6e
           nullable: true
           type: string
         savedSearchId:
+          description: The ID of the saved search that is used in the ES|QL tab
+          example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
           nullable: true
           type: string
         sort:
           $ref: '#/components/schemas/Security_Timeline_API_Sort'
           nullable: true
         status:
-          enum:
-            - active
-            - draft
-            - immutable
+          $ref: '#/components/schemas/Security_Timeline_API_TimelineStatus'
           nullable: true
-          type: string
         templateTimelineId:
+          description: A unique ID (UUID) for Timeline templates. For Timelines, the value is `null`.
+          example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
           nullable: true
           type: string
         templateTimelineVersion:
+          description: Timeline template version number. For Timelines, the value is `null`.
+          example: 12
           nullable: true
           type: number
         timelineType:
           $ref: '#/components/schemas/Security_Timeline_API_TimelineType'
           nullable: true
         title:
+          description: The Timeline's title.
+          example: CVE XYZ investigation
           nullable: true
           type: string
         updated:
+          description: The last time the Timeline was updated, using a 13-digit Epoch timestamp
+          example: 1741344876825
           nullable: true
           type: number
         updatedBy:
+          description: The user who last updated the Timeline
+          example: casetester
           nullable: true
           type: string
     Security_Timeline_API_SavedTimelineWithSavedObjectId:
@@ -62874,13 +64051,24 @@ components:
         - type: object
           properties:
             savedObjectId:
+              description: The `savedObjectId` of the Timeline or Timeline template
+              example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
               type: string
             version:
+              description: The version of the Timeline or Timeline template
+              example: WzE0LDFd
               type: string
           required:
             - savedObjectId
             - version
     Security_Timeline_API_SerializedFilterQueryResult:
+      description: KQL bar query.
+      example:
+        filterQuery: null
+        kuery:
+          expression: '_id : *'
+          kind: kuery
+        serializedQuery: '{"bool":{"should":[{"exists":{"field":"_id"}}],"minimum_should_match":1}}'
       type: object
       properties:
         filterQuery:
@@ -62915,6 +64103,10 @@ components:
         - created
       type: string
     Security_Timeline_API_SortObject:
+      description: Object indicating how rows are sorted in the Timeline's grid
+      example:
+        columnId: '@timestamp'
+        sortDirection: desc
       type: object
       properties:
         columnId:
@@ -62933,26 +64125,35 @@ components:
         - type: object
           properties:
             eventIdToNoteIds:
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_Note'
               nullable: true
               type: array
             noteIds:
+              description: A list of all the ids of notes that are associated to this Timeline.
+              example:
+                - 709f99c6-89b6-4953-9160-35945c8e174e
               items:
                 type: string
               nullable: true
               type: array
             notes:
+              description: A list of all the notes that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_Note'
               nullable: true
               type: array
             pinnedEventIds:
+              description: A list of all the ids of pinned events that are associated to this Timeline.
+              example:
+                - 983f99c6-89b6-4953-9160-35945c8a194f
               items:
                 type: string
               nullable: true
               type: array
             pinnedEventsSaveObject:
+              description: A list of all the pinned events that are associated to this Timeline.
               items:
                 $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
               nullable: true
@@ -62995,14 +64196,14 @@ components:
             - savedObjectId
             - version
     Security_Timeline_API_TimelineStatus:
-      description: The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
+      description: The status of the Timeline.
       enum:
         - active
         - draft
         - immutable
       type: string
     Security_Timeline_API_TimelineType:
-      description: The type of timeline to create. Valid values are `default` and `template`.
+      description: The type of Timeline.
       enum:
         - default
         - template
@@ -63244,6 +64445,25 @@ components:
           type: string
       title: FilterMeta
       type: object
+    SLOs_find_slo_definitions_response:
+      description: |
+        A paginated response of SLO definitions matching the query.
+      properties:
+        page:
+          example: 2
+          type: number
+        perPage:
+          example: 100
+          type: number
+        results:
+          items:
+            $ref: '#/components/schemas/SLOs_slo_definition_response'
+          type: array
+        total:
+          example: 123
+          type: number
+      title: Find SLO definitions response
+      type: object
     SLOs_find_slo_response:
       description: |
         A paginated response of SLOs matching the query.
@@ -63258,6 +64478,12 @@ components:
           items:
             $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           type: array
+        searchAfter:
+          type: string
+        size:
+          description: Size provided for cursor based pagination
+          example: 25
+          type: number
         total:
           example: 34
           type: number
@@ -64147,6 +65373,47 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Upgrade_assistant_APIs_errorMessage:
+      description: The error that caused the reindex to fail, if it failed.
+      type: string
+    Upgrade_assistant_APIs_indexName:
+      description: The name of the old index.
+      type: string
+    Upgrade_assistant_APIs_lastCompletedStep:
+      description: |
+        The last successfully completed step of the reindex. For example:
+        - `0`: The reindex task has been created in Kibana. - `10`: The index group services stopped. Only applies to some system indices. - `20`: The index is set to readonly. - `30`: The new destination index has been created. - `40`: The reindex task in Elasticsearch has started. - `50`: The reindex task in Elasticsearch has completed. - `60`: Aliases were created to point to the new index, and the old index has been deleted. - `70`: The index group services have resumed. Only applies to some system indices.
+      type: integer
+    Upgrade_assistant_APIs_locked:
+      type: string
+    Upgrade_assistant_APIs_newIndexName:
+      description: The name of the new index.
+      type: string
+    Upgrade_assistant_APIs_reindexOptions:
+      description: The presence of this key indicates that the reindex job will occur in the batch.
+      type: object
+      properties:
+        queueSettings:
+          type: object
+          properties:
+            queuedAt:
+              description: A Unix timestamp of when the reindex task was placed in the queue.
+              type: number
+    Upgrade_assistant_APIs_reindexTaskId:
+      description: |
+        The task ID of the reindex task in Elasticsearch. This value appears when the reindexing starts.
+      type: string
+    Upgrade_assistant_APIs_reindexTaskPercComplete:
+      description: |
+        The progress of the reindexing task in Elasticsearch. It appears in decimal form, from 0 to 1.
+      type: number
+    Upgrade_assistant_APIs_runningReindexCount:
+      type: number
+    Upgrade_assistant_APIs_status:
+      description: |
+        The reindex status. For example:
+        - `0`: In progress - `1`: Completed - `2`: Failed - `3`: Paused
+      type: integer
     bedrock_config:
       title: Connector request properties for an Amazon Bedrock connector
       description: Defines properties for connectors when type is `.bedrock`.
@@ -65917,27 +67184,30 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the rule to apply to a specific service name.
         transactionType:
           type: string
-          description: The transaction type from APM
+          description: Filter the rule to apply to a specific transaction type.
         windowSize:
           type: number
           example: 6
-          description: The window size
+          description: |
+            The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
         windowUnit:
           type: string
-          description: The window size unit
+          description: |
+            The type of units for the time window. For example: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
-          description: The environment from APM
+          description: Filter the rule to apply to a specific environment.
         anomalySeverityType:
           type: string
-          description: The anomaly threshold value
+          description: |
+            The severity of anomalies that will generate alerts: critical, major, minor, or warning.
           enum:
             - critical
             - major
@@ -65952,24 +67222,26 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the errors coming from your application to apply the rule to a specific service.
         windowSize:
           type: number
-          description: The window size
+          description: |
+            The time frame in which the errors must occur (in `windowUnit` units). Generally it should be a value higher than the rule check interval to avoid gaps in detection.
           example: 6
         windowUnit:
           type: string
-          description: The window size unit
+          description: |
+            The type of units for the time window: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
-          description: The environment from APM
+          description: Filter the errors coming from your application to apply the rule to a specific environment.
         threshold:
           type: number
-          description: The error count threshold value
+          description: The error count threshold.
         groupBy:
           type: array
           default:
@@ -65983,8 +67255,12 @@ components:
               - service.environment
               - transaction.name
               - error.grouping_key
+          description: |
+            Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
         errorGroupingKey:
           type: string
+          description: |
+            Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.
     params_property_apm_transaction_duration:
       required:
         - windowSize
@@ -65995,29 +67271,32 @@ components:
       properties:
         serviceName:
           type: string
-          description: The service name from APM
+          description: Filter the rule to apply to a specific service.
         transactionType:
           type: string
-          description: The transaction type from APM
+          description: Filter the rule to apply to a specific transaction type.
         transactionName:
           type: string
-          description: The transaction name from APM
+          description: Filter the rule to apply to a specific transaction name.
         windowSize:
           type: number
-          description: The window size
+          description: |
+            The size of the time window (in `windowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
           example: 6
         windowUnit:
           type: string
-          description: ç
+          description: |
+            The type of units for the time window. For example: minutes, hours, or days.
           enum:
             - m
             - h
             - d
         environment:
           type: string
+          description: Filter the rule to apply to a specific environment.
         threshold:
           type: number
-          description: The latency threshold value
+          description: The latency threshold value.
         groupBy:
           type: array
           default:
@@ -66032,12 +67311,15 @@ components:
               - service.environment
               - transaction.type
               - transaction.name
+          description: |
+            Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.
         aggregationType:
           type: string
           enum:
             - avg
             - 95th
             - 99th
+          description: The type of aggregation to perform.
     params_property_apm_transaction_error_rate:
       required:
         - windowSize

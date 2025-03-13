@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
-import { ProfileProviderServices } from '../../profile_provider_services';
+import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory } from '../../../profiles';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import {
   getCellRenderers,
   getRowIndicatorProvider,
   getRowAdditionalLeadingControls,
   createGetDefaultAppState,
+  getPaginationConfig,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
@@ -27,6 +29,7 @@ export const createLogsDataSourceProfileProvider = (
     getCellRenderers,
     getRowIndicatorProvider,
     getRowAdditionalLeadingControls,
+    getPaginationConfig,
   },
   resolve: (params) => {
     if (params.rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {

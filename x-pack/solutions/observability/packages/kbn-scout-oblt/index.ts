@@ -17,10 +17,10 @@ export type {
 // re-export from @kbn/scout
 export {
   expect,
+  globalSetupHook,
   tags,
   createPlaywrightConfig,
   createLazyPageObject,
-  ingestTestDataHook,
 } from '@kbn/scout';
 
 export type {
@@ -29,7 +29,6 @@ export type {
   KibanaUrl,
   ScoutLogger,
   ScoutPage,
-  PageObjects,
   ScoutServerConfig,
   ScoutTestConfig,
   ScoutPlaywrightOptions,

@@ -11,6 +11,7 @@ import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/anal
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
+import { systemMessageSorted } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/complete/functions/helpers';
 import {
   createLlmProxy,
   LlmProxy,
@@ -19,6 +20,8 @@ import { interceptRequest } from '../../common/intercept_request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
+import { deleteConnectors } from '../../common/connectors';
+import { deleteConversations } from '../../common/conversations';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -51,36 +54,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       })
       .expect(200);
     return parseCookie(response.headers['set-cookie'][0])!;
-  }
-
-  async function deleteConversations() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/conversations',
-    });
-
-    for (const conversation of response.body.conversations) {
-      await observabilityAIAssistantAPIClient.editor({
-        endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
-        params: {
-          path: {
-            conversationId: conversation.conversation.id,
-          },
-        },
-      });
-    }
-  }
-
-  async function deleteConnectors() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'GET /internal/observability_ai_assistant/connectors',
-    });
-
-    for (const connector of response.body) {
-      await supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    }
   }
 
   async function createOldConversation() {
@@ -154,8 +127,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   describe('Conversations', () => {
     let proxy: LlmProxy;
     before(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await createOldConversation();
 
@@ -247,7 +220,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                 await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                await proxy.waitForAllInterceptorsSettled();
+                await proxy.waitForAllInterceptorsToHaveBeenCalled();
                 await header.waitUntilLoadingHasFinished();
               });
 
@@ -255,6 +228,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 const response = await observabilityAIAssistantAPIClient.editor({
                   endpoint: 'POST /internal/observability_ai_assistant/conversations',
                 });
+
+                const functionResponse = await observabilityAIAssistantAPIClient.editor({
+                  endpoint: 'GET /internal/observability_ai_assistant/functions',
+                  params: {
+                    query: {
+                      scopes: ['observability'],
+                    },
+                  },
+                });
+
+                const primarySystemMessage = functionResponse.body.systemMessage;
 
                 expect(response.body.conversations.length).to.eql(2);
 
@@ -267,10 +251,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 const [firstUserMessage, contextRequest, contextResponse, assistantResponse] =
                   messages.map((msg) => msg.message);
 
-                const systemMessageContent =
-                  'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.\n\n    It\'s very important to not assume what the user is meaning. Ask them for clarification if needed.\n\n    If you are unsure about which function should be used and with what arguments, ask the user for clarification or confirmation.\n\n    In KQL ("kqlFilter")) escaping happens with double quotes, not single quotes. Some characters that need escaping are: \':()\\    /". Always put a field value in double quotes. Best: service.name:"opbeans-go". Wrong: service.name:opbeans-go. This is very important!\n\n    You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.\n\n    Note that ES|QL (the Elasticsearch Query Language which is a new piped language) is the preferred query language.\n\n    If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results\n    returned to you, before executing the same tool or another tool again if needed.\n\n    DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (`service.name == "foo"`) with "kqlFilter" (`service.name:"foo"`).\n\n    The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the Stack Management app under the option AI Assistants.\n    If the user asks how to change the language, reply in the same language the user asked in.\n\nYou MUST use the "query" function when the user wants to:\n  - visualize data\n  - run any arbitrary query\n  - breakdown or filter ES|QL queries that are displayed on the current page\n  - convert queries from another language to ES|QL\n  - asks general questions about ES|QL\n\n  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.\n  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.\n\n  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.\n\n  Even if the "query" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,\n  even if it has been called before.\n\n  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.\n  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.\n\nYou MUST use the "get_dataset_info"  function before calling the "query" or the "changes" functions.\n\nIf a function requires an index, you MUST use the results from the dataset info functions.\n\nYou do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.\n\nWhen asked questions about the Elastic stack or products, You should use the retrieve_elastic_doc function before answering,\n      to retrieve documentation related to the question. Consider that the documentation returned by the function\n      is always more up to date and accurate than any own internal knowledge you might have.';
+                expect(systemMessage).to.contain(
+                  'You are a helpful assistant for Elastic Observability. Your goal is '
+                );
 
-                expect(systemMessage).to.eql(systemMessageContent);
+                expect(systemMessageSorted(systemMessage!)).to.eql(
+                  systemMessageSorted(primarySystemMessage)
+                );
 
                 expect(firstUserMessage.content).to.eql('hello');
 
@@ -305,7 +292,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                  await proxy.waitForAllInterceptorsSettled();
+                  await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
                 });
 
@@ -375,7 +362,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
             describe('and opening an old conversation', () => {
               before(async () => {
-                log.info('SQREN: Opening the old conversation');
                 const conversations = await testSubjects.findAll(
                   ui.pages.conversations.conversationLink
                 );
@@ -394,9 +380,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     'And what are SLIs?'
                   );
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
-                  log.info('SQREN: Waiting for the message to be displayed');
 
-                  await proxy.waitForAllInterceptorsSettled();
+                  await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
                 });
 
@@ -404,7 +389,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   before(async () => {
                     await telemetry.setOptIn(true);
 
-                    log.info('SQREN: Clicking on the positive feedback button');
                     const feedbackButtons = await testSubjects.findAll(
                       ui.pages.conversations.positiveFeedbackButton
                     );
@@ -443,8 +427,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     after(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await ui.auth.logout();
       proxy.close();
