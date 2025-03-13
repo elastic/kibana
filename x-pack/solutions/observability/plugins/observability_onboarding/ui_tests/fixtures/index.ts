@@ -8,8 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { test as base } from '@kbn/scout-oblt';
 import type {
-  ApiServicesFixture,
   KbnClient,
+  ObltApiServicesFixture,
   ObltTestFixtures,
   ObltWorkerFixtures,
 } from '@kbn/scout-oblt';
@@ -17,7 +17,7 @@ import { getOnboardingApiHelper, OnboardingApiService } from './apis/onboarding'
 
 export type ExtendedScoutTestFixtures = ObltTestFixtures;
 
-export interface ExtendedApiServicesFixture extends ApiServicesFixture {
+export interface ExtendedApiServicesFixture extends ObltApiServicesFixture {
   onboarding: OnboardingApiService;
 }
 export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
@@ -41,7 +41,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
   },
   apiServices: [
     async (
-      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      { apiServices, kbnClient }: { apiServices: ObltApiServicesFixture; kbnClient: KbnClient },
       use: (extendedApiServices: ExtendedApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as ExtendedApiServicesFixture;

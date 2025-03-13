@@ -7,6 +7,7 @@
 
 export { test, spaceTest } from './src/playwright';
 export type {
+  ObltApiServicesFixture,
   ObltPageObjects,
   ObltTestFixtures,
   ObltWorkerFixtures,
@@ -24,7 +25,6 @@ export {
 } from '@kbn/scout';
 
 export type {
-  ApiServicesFixture,
   EsClient,
   KbnClient,
   KibanaUrl,
