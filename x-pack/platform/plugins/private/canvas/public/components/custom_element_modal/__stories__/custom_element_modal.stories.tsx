@@ -8,8 +8,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo } from '@kbn/expression-utils';
 import { CustomElementModal } from '../custom_element_modal';
 
 export default {
@@ -59,12 +58,11 @@ export const WithImage: StoryObj = {
   render: (_, props) => (
     <CustomElementModal
       title="Edit custom element"
-      image={props?.elasticLogo}
+      image={elasticLogo}
       onCancel={action('onCancel')}
       onSave={action('onSave')}
     />
   ),
 
   name: 'with image',
-  decorators: [waitFor(getElasticLogo())],
 };

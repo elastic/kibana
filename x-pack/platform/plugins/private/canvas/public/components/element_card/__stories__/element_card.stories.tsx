@@ -8,8 +8,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo } from '@kbn/expression-utils';
 import { ElementCard } from '../element_card';
 
 export default {
@@ -44,12 +43,11 @@ export const WithImage: StoryObj = {
     <ElementCard
       title="Element 1"
       description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis."
-      image={props?.elasticLogo}
+      image={elasticLogo}
     />
   ),
 
   name: 'with image',
-  decorators: [waitFor(getElasticLogo())],
 };
 
 export const WithTags: StoryObj = {

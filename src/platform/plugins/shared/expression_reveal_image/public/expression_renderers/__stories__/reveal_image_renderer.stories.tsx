@@ -9,19 +9,13 @@
 
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
-import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import type { Meta } from '@storybook/react';
+import { elasticOutline, elasticLogo } from '@kbn/expression-utils';
 import { getRevealImageRenderer } from '..';
 import { Origin } from '../../../common/types/expression_functions';
 
-const Renderer = ({
-  elasticLogo,
-  elasticOutline,
-}: {
-  elasticLogo: string;
-  elasticOutline: string;
-}) => {
+const Renderer = () => {
   const config = {
     image: elasticLogo,
     emptyImage: elasticOutline,
@@ -37,10 +31,7 @@ export default {
 };
 
 export const Default = {
-  render: (_, props) => (
-    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
-  ),
+  render: (_, props) => <Renderer />,
 
   name: 'default',
-  decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())],
 } as Meta;

@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import type { Meta } from '@storybook/react';
+import { elasticLogo } from '@kbn/expression-utils';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
 
-const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
+const Renderer = () => {
   const config = {
     dataurl: elasticLogo,
     mode: ImageMode.COVER,
@@ -37,9 +37,8 @@ export default {
 
 export const Default = {
   render: (_, props) => {
-    return <Renderer elasticLogo={props?.elasticLogo} />;
+    return <Renderer />;
   },
 
   name: 'default',
-  decorators: [waitFor(getElasticLogo())],
 } as Meta;

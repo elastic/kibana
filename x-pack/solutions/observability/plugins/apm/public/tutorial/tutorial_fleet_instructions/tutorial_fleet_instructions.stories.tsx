@@ -8,7 +8,7 @@
 import type { StoryObj } from '@storybook/react';
 import React from 'react';
 import type { HttpStart } from '@kbn/core/public';
-import TutorialFleetInstructions from '.';
+import { TutorialFleetInstructions } from '.';
 
 interface Args {
   hasFleetPoliciesWithApmIntegration: boolean;
@@ -19,12 +19,7 @@ function Wrapper({ hasFleetPoliciesWithApmIntegration }: Args) {
     get: () => ({ hasData: hasFleetPoliciesWithApmIntegration }),
   } as unknown as HttpStart;
   return (
-    <TutorialFleetInstructions
-      http={http}
-      basePath="http://localhost:5601"
-      isDarkTheme={false}
-      kibanaVersion="8.0.0"
-    />
+    <TutorialFleetInstructions http={http} basePath="http://localhost:5601" isDarkTheme={false} />
   );
 }
 
