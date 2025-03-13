@@ -23,5 +23,6 @@
     "@kbn/repo-info",
     "@kbn/code-editor",
     "@kbn/i18n",
+    "@kbn/object-utils",
   ]
 }
