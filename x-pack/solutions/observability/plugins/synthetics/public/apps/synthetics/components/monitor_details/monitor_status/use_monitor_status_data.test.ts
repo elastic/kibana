@@ -90,7 +90,7 @@ describe('useMonitorStatusData', () => {
     await act(async () => {
       result.current.handleResize({ width: 250, height: 800 });
       // this is necessary for debounce to complete
-      await new Promise((r) => setTimeout(r, 4100));
+      await new Promise((r) => setTimeout(r, 7100));
     });
     const fetchActions = dispatchMock.mock.calls.filter(
       (args) => args[0].type === 'QUIET GET MONITOR STATUS HEATMAP'
