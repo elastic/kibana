@@ -33,7 +33,7 @@ export const emptyState: LatestTaskStateSchema = {
   alertRecoveredInstances: {},
   previousStartedAt: null,
   summaryActions: {},
-  executionUuid: null,
+  executionUuid: undefined,
 };
 
 type Mutable<T> = {
