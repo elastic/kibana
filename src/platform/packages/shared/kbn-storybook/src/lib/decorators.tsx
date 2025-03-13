@@ -21,7 +21,7 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { i18n } from '@kbn/i18n';
 
-const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false, name: 'amsterdam' });
+const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false, name: 'borealis' });
 const userProfile = { getUserProfile$: () => of(null) };
 
 const i18nStart: I18nStart = {
@@ -44,7 +44,7 @@ const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
 
   useEffect(() => {
-    theme$.next({ darkMode: colorMode === 'dark', name: 'amsterdam' });
+    theme$.next({ darkMode: colorMode === 'dark', name: 'borealis' });
   }, [colorMode]);
 
   return (

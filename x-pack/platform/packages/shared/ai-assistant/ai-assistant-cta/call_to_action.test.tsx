@@ -7,35 +7,35 @@
 
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 
 import { AssistantCallToAction, AssistantCallToActionProps } from './call_to_action';
 import { translations } from './call_to_action.translations';
 
 describe('AssistantCallToAction', () => {
-  const mountComponent = async (props: Partial<AssistantCallToActionProps> = {}) =>
-    mountWithIntl(<AssistantCallToAction {...props} />, { wrappingComponent: EuiThemeProvider });
+  const renderComponent = (props: Partial<AssistantCallToActionProps> = {}) =>
+    render(<AssistantCallToAction {...props} />, { wrapper: EuiThemeProvider });
 
   it('renders with default title and no description or children', async () => {
-    const component = await mountComponent();
+    renderComponent();
 
-    expect(component.contains(translations.title)).toBeTruthy();
-    expect(component.contains(translations.description)).not.toBeTruthy();
+    expect(screen.queryByText(translations.title)).toBeInTheDocument();
+    expect(screen.queryByText(translations.description)).not.toBeInTheDocument();
   });
 
   it('renders with a custom title and description', async () => {
     const title = 'Custom Title';
     const description = 'Custom Description';
-    const component = await mountComponent({ title, description });
+    renderComponent({ title, description });
 
-    expect(component.contains(title)).toBeTruthy();
-    expect(component.contains(description)).toBeTruthy();
+    expect(screen.queryByText(title)).toBeInTheDocument();
+    expect(screen.queryByText(description)).toBeInTheDocument();
   });
 
   it('renders with children', async () => {
     const childText = 'Child Element';
-    const component = await mountComponent({ children: <div>{childText}</div> });
+    renderComponent({ children: <div>{childText}</div> });
 
-    expect(component.contains(childText)).toBeTruthy();
+    expect(screen.queryByText(childText)).toBeInTheDocument();
   });
 });

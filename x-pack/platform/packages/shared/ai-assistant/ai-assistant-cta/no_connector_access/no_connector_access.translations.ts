@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { translations as defaultTranslations } from '../call_to_action.translations';
 
-const panelTitle = i18n.translate('xpack.aiAssistant.callToAction.noConnectorAccess.panelTitle', {
+const cardTitle = i18n.translate('xpack.aiAssistant.callToAction.noConnectorAccess.cardTitle', {
   defaultMessage: 'No Access to Set Up Gen AI Connector',
 });
 
-const panelDescription = i18n.translate(
-  'xpack.aiAssistant.callToAction.noConnectorAccess.panelDescription',
+const cardDescription = i18n.translate(
+  'xpack.aiAssistant.callToAction.noConnectorAccess.cardDescription',
   {
     defaultMessage:
       'Looks like you don’t have the right permissions to set up a Gen AI Connector. Reach out to your admin to get access.',
@@ -25,6 +25,6 @@ const panelDescription = i18n.translate(
  */
 export const translations = {
   description: defaultTranslations.description,
-  panelTitle,
-  panelDescription,
+  cardTitle,
+  cardDescription,
 };

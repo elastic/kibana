@@ -7,18 +7,21 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
 import { AssistantCallToAction } from '../call_to_action';
 
 import { translations } from './no_connector_access.translations';
+import { CallToActionCard } from '../call_to_action_panel';
 
 /**
  * A call to action that is displayed if the user does not have permission or ability to add a connector.
  */
 export const NoConnectorAccess = () => (
   <AssistantCallToAction description={translations.description}>
-    <EuiCallOut iconType="lock" title={translations.panelTitle} color="warning">
-      <EuiText size="s">{translations.panelDescription}</EuiText>
-    </EuiCallOut>
+    <CallToActionCard
+      iconType="lock"
+      color="warning"
+      title={translations.cardTitle}
+      description={translations.cardDescription}
+    />
   </AssistantCallToAction>
 );

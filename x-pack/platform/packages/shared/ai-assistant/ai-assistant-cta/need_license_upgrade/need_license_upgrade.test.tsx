@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { NeedLicenseUpgrade, NeedLicenseUpgradeProps } from './need_license_upgrade';
 import { translations } from './need_license_upgrade.translations';
 import { translations as defaultTranslations } from '../call_to_action.translations';
@@ -19,15 +19,15 @@ describe('NeedLicenseUpgrade', () => {
     render(<NeedLicenseUpgrade {...props} />, { wrapper: EuiThemeProvider });
 
   it('renders the component with the correct title and description', () => {
-    const { getByText } = renderComponent({ onManageLicense });
-    expect(getByText(defaultTranslations.titleUnlock)).toBeDefined();
-    expect(getByText(translations.description)).toBeDefined();
+    renderComponent({ onManageLicense });
+    expect(screen.queryByText(defaultTranslations.titleUnlock)).toBeInTheDocument();
+    expect(screen.queryByText(translations.description)).toBeInTheDocument();
   });
 
   it('renders the button with the correct text', () => {
-    const { getByText } = renderComponent({ onManageLicense });
+    renderComponent({ onManageLicense });
 
-    expect(getByText(translations.buttonLabel)).toBeDefined();
+    expect(screen.queryByText(translations.buttonLabel)).toBeInTheDocument();
   });
 
   it('calls onManageSubscription when the button is clicked', () => {

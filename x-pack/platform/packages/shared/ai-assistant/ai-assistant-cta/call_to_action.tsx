@@ -56,6 +56,7 @@ const Actions = ({ children }: Pick<AssistantCallToActionProps, 'children'>) => 
   return <EuiFlexItem css={styles.actions}>{children}</EuiFlexItem>;
 };
 
+/** Props for the `AssistantCallToAction` */
 export interface AssistantCallToActionProps {
   /** Background color of the panel. Needed to ensure the `AssistantBeacon` blends properly with the page.  Defaults to `plain`. */
   color?: Extract<EuiPanelProps['color'], 'plain' | 'subdued'>;

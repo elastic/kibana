@@ -13,12 +13,12 @@ const description = i18n.translate('xpack.aiAssistant.callToAction.needTierUpgra
     'The Elastic AI Assistant is only available with an Enterprise license. Upgrade now to start using it!',
 });
 
-const panelTitle = i18n.translate('xpack.aiAssistant.callToAction.needTierUpgrade.panelTitle', {
+const cardTitle = i18n.translate('xpack.aiAssistant.callToAction.needTierUpgrade.cardTitle', {
   defaultMessage: 'Tier upgrade required',
 });
 
-const panelDescription = i18n.translate(
-  'xpack.aiAssistant.callToAction.needTierUpgrade.panelDescription',
+const cardDescription = i18n.translate(
+  'xpack.aiAssistant.callToAction.needTierUpgrade.cardDescription',
   {
     defaultMessage:
       'To use this feature, you’ll need to upgrade your Elastic Cloud Serverless feature tier.',
@@ -35,7 +35,7 @@ const buttonLabel = i18n.translate('xpack.aiAssistant.callToAction.needTierUpgra
 export const translations = {
   title: defaultTranslations.titleUnlock,
   description,
-  panelTitle,
-  panelDescription,
+  cardTitle,
+  cardDescription,
   buttonLabel,
 };

@@ -7,40 +7,34 @@
 
 import React from 'react';
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { AssistantCallToAction } from '../call_to_action';
 
 import { translations } from './need_tier_upgrade.translations';
+import { CallToActionCard } from '../call_to_action_panel';
 
 /**
  * Props for the `NeedTierUpgrade` call to action.
  */
 export interface NeedTierUpgradeProps {
+  /** Callback to handle managing the subscription. */
   onManageSubscription: () => void;
 }
-
-const NeedTierUpgradePanel = ({ onManageSubscription }: NeedTierUpgradeProps) => (
-  <EuiCallOut iconType="lock" title={translations.panelTitle} color="warning">
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <EuiText size="s">{translations.panelDescription}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <span>
-          <EuiButton color="warning" fill onClick={onManageSubscription}>
-            {translations.buttonLabel}
-          </EuiButton>
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiCallOut>
-);
 
 /**
  * A pure component that renders a call to action to upgrade the tier on a Serverless project.
  */
-export const NeedTierUpgrade = (props: NeedTierUpgradeProps) => (
+export const NeedTierUpgrade = ({ onManageSubscription }: NeedTierUpgradeProps) => (
   <AssistantCallToAction title={translations.title} description={translations.description}>
-    <NeedTierUpgradePanel {...props} />
+    <CallToActionCard
+      iconType="lock"
+      color="warning"
+      title={translations.cardTitle}
+      description={translations.cardDescription}
+    >
+      <EuiButton color="warning" fill onClick={onManageSubscription}>
+        {translations.buttonLabel}
+      </EuiButton>
+    </CallToActionCard>
   </AssistantCallToAction>
 );

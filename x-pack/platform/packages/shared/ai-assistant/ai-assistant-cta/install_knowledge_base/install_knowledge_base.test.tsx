@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import { InstallKnowledgeBase, InstallKnowledgeBaseProps } from './install_knowledge_base';
@@ -19,10 +19,10 @@ describe('InstallKnowledgeBase', () => {
     render(<InstallKnowledgeBase {...props} />, { wrapper: EuiThemeProvider });
 
   it('renders the component with the correct title and description', () => {
-    const { getByText } = renderComponent({ onInstallKnowledgeBase });
+    renderComponent({ onInstallKnowledgeBase });
 
-    expect(getByText(translations.panelTitle)).toBeDefined();
-    expect(getByText(translations.panelDescription)).toBeDefined();
+    expect(screen.queryByText(translations.cardTitle)).toBeInTheDocument();
+    expect(screen.queryByText(translations.cardDescription)).toBeInTheDocument();
   });
 
   it('calls onInstallKnowledgeBase when the button is clicked', () => {
@@ -33,8 +33,8 @@ describe('InstallKnowledgeBase', () => {
   });
 
   it('renders the button with the correct text', () => {
-    const { getByText } = renderComponent({ onInstallKnowledgeBase });
+    renderComponent({ onInstallKnowledgeBase });
 
-    expect(getByText(translations.installButton)).toBeDefined();
+    expect(screen.queryByText(translations.installButton)).toBeInTheDocument();
   });
 });

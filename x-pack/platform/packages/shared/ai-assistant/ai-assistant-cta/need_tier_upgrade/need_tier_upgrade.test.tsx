@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { NeedTierUpgrade, type NeedTierUpgradeProps } from './need_tier_upgrade';
 import { translations } from './need_tier_upgrade.translations';
 import { translations as defaultTranslations } from '../call_to_action.translations';
@@ -19,18 +19,18 @@ describe('NeedTierUpgrade', () => {
     render(<NeedTierUpgrade {...props} />, { wrapper: EuiThemeProvider });
 
   it('renders the component with the correct title and description', () => {
-    const { getByText } = renderComponent({ onManageSubscription });
+    renderComponent({ onManageSubscription });
 
-    expect(getByText(translations.panelTitle)).toBeDefined();
-    expect(getByText(translations.panelDescription)).toBeDefined();
-    expect(getByText(defaultTranslations.titleUnlock)).toBeDefined();
-    expect(getByText(translations.description)).toBeDefined();
+    expect(screen.queryByText(translations.cardTitle)).toBeInTheDocument();
+    expect(screen.queryByText(translations.cardDescription)).toBeInTheDocument();
+    expect(screen.queryByText(defaultTranslations.titleUnlock)).toBeInTheDocument();
+    expect(screen.queryByText(translations.description)).toBeInTheDocument();
   });
 
   it('renders the button with the correct text', () => {
-    const { getByText } = renderComponent({ onManageSubscription });
+    renderComponent({ onManageSubscription });
 
-    expect(getByText(translations.buttonLabel)).toBeDefined();
+    expect(screen.queryByText(translations.buttonLabel)).toBeInTheDocument();
   });
 
   it('calls onManageSubscription when the button is clicked', () => {

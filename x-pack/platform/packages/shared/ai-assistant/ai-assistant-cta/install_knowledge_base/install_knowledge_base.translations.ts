@@ -7,15 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-const panelTitle = i18n.translate(
-  'xpack.aiAssistant.callToAction.installKnowledgeBase.panelTitle',
-  {
-    defaultMessage: 'You have not set up a Knowledge Base yet.',
-  }
-);
+const cardTitle = i18n.translate('xpack.aiAssistant.callToAction.installKnowledgeBase.cardTitle', {
+  defaultMessage: 'You have not set up a Knowledge Base yet.',
+});
 
-const panelDescription = i18n.translate(
-  'xpack.aiAssistant.callToAction.installKnowledgeBase.panelDescription',
+const cardDescription = i18n.translate(
+  'xpack.aiAssistant.callToAction.installKnowledgeBase.cardDescription',
   {
     defaultMessage:
       'Your Generative AI Connector is setup, but you need to also set up a knowledge base to get started.',
@@ -33,7 +30,7 @@ const installButton = i18n.translate(
  * Translations for the `InstallKnowledgeBaseComponent`.
  */
 export const translations = {
-  panelTitle,
-  panelDescription,
+  cardTitle,
+  cardDescription,
   installButton,
 };

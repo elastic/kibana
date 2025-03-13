@@ -6,46 +6,34 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
 import { AssistantCallToAction } from '../call_to_action';
 import { translations } from './install_knowledge_base.translations';
-
-const InstallKnowledgeBasePanel = ({ onInstallKnowledgeBase }: InstallKnowledgeBaseProps) => (
-  <EuiCallOut iconType="database" title={translations.panelTitle}>
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <EuiText size="s">{translations.panelDescription}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <span>
-          <EuiButton
-            color="primary"
-            fill
-            iconType="download"
-            size="s"
-            onClick={onInstallKnowledgeBase}
-          >
-            {translations.installButton}
-          </EuiButton>
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiCallOut>
-);
+import { CallToActionCard } from '../call_to_action_panel';
 
 /**
  * Props for the `InstallKnowledgeBase`.
  */
 export interface InstallKnowledgeBaseProps {
+  /** Callback to handle installing a knowledge base. */
   onInstallKnowledgeBase: () => void;
 }
 
 /**
  * A pure component that renders a call to action to install a knowledge base.
  */
-export const InstallKnowledgeBase = (props: InstallKnowledgeBaseProps) => (
+export const InstallKnowledgeBase = ({ onInstallKnowledgeBase }: InstallKnowledgeBaseProps) => (
   <AssistantCallToAction>
-    <InstallKnowledgeBasePanel {...props} />
+    <CallToActionCard
+      iconType="database"
+      color="primary"
+      title={translations.cardTitle}
+      description={translations.cardDescription}
+    >
+      <EuiButton color="primary" fill iconType="download" size="s" onClick={onInstallKnowledgeBase}>
+        {translations.installButton}
+      </EuiButton>
+    </CallToActionCard>
   </AssistantCallToAction>
 );
