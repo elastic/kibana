@@ -22,7 +22,7 @@ export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefi
 
 export interface DetectedField {
   name: string;
-  type?: FieldDefinitionType;
+  type?: FieldDefinitionType | 'system';
 }
 
 interface BaseFormState {
