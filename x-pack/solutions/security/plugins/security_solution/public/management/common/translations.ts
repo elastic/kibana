@@ -321,7 +321,6 @@ export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
   };
 };
 
-// FIXME:PT consolidate message once PR 213820 merges
 export const NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE = i18n.translate(
   'xpack.securitySolution.translations.noGlobalArtifactManagementAllowedMessage',
   { defaultMessage: 'Management of global artifacts requires additional privilege' }
