@@ -33,9 +33,9 @@ import {
   FieldDefinition,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy, some } from 'lodash';
-import { StreamsClient } from '../../../lib/streams/client';
-import { DetectedMappingFailureError } from '../../../lib/streams/errors/detected_mapping_failure_error';
-import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
+import { StreamsClient } from '../../../../lib/streams/client';
+import { DetectedMappingFailureError } from '../../../../lib/streams/errors/detected_mapping_failure_error';
+import { formatToIngestProcessors } from '../../../../lib/streams/helpers/processing';
 
 export interface ProcessingSimulationParams {
   path: {
