@@ -111,7 +111,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     if (isOfAggregateQueryType(initialQuery)) {
       dataView = await getEsqlDataView(
         initialQuery,
-        runtimeStateManager.currentDataView$.getValue(),
+        discoverSessionDataView ?? runtimeStateManager.currentDataView$.getValue(),
         services
       );
     } else {
