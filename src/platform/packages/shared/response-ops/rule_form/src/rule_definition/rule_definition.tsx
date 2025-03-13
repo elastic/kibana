@@ -24,7 +24,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleSpecificFlappingProperties, RuleTypeParams } from '@kbn/alerting-types';
+import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
   RuleSettingsFlappingTitleTooltip,
@@ -54,7 +54,7 @@ import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import { RuleDashboards} from './rule_dashboards';
+import { RuleDashboards } from './rule_dashboards';
 
 export const RuleDefinition = () => {
   const {
