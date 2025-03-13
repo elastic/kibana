@@ -34,7 +34,6 @@ import {
 import { CONTENT_ID } from '../../../common/content_management';
 import { type DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
-
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
 // Panel config has some defined types but also allows for custom keys added by embeddables
