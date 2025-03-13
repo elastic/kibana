@@ -23,11 +23,12 @@ export const getIndexNamesTool = ({ esClient }: { esClient: ElasticsearchClient 
           format: 'json',
           expand_wildcards: 'all',
         })
-        .then((response) =>
-          response
-            .map((index) => index.index)
-            .filter((index) => index != null)
-            .sort() as string[]
+        .then(
+          (response) =>
+            response
+              .map((index) => index.index)
+              .filter((index) => index != null)
+              .sort() as string[]
         );
       return `These are the full names of the available indeces. To query them, you must use the full index name verbatim or you can use the "*" character as a wildcard anywhere within the index name.\n\n${generateIndexNamesWithWildcards(
         indexNames
