@@ -66,19 +66,13 @@ export function UXActionMenu({
             <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
               <EuiHeaderLink
                 data-test-subj="uxAnalyzeBtn"
-                color="text"
+                color="primary"
                 href={uxExploratoryViewLink}
-                iconType="visBarVerticalStacked"
               >
                 {ANALYZE_DATA}
               </EuiHeaderLink>
             </EuiToolTip>
-            <EuiHeaderLink
-              color="primary"
-              iconType="indexOpen"
-              iconSide="left"
-              href={application.getUrlForApp('/apm/tutorial')}
-            >
+            <EuiHeaderLink color="primary" href={application.getUrlForApp('/apm/tutorial')}>
               {i18n.translate('xpack.ux.addDataButtonLabel', {
                 defaultMessage: 'Add data',
               })}
