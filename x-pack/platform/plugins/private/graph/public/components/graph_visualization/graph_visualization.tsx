@@ -126,8 +126,9 @@ export function GraphVisualization({
                   y2={edge.topTarget.ky}
                   className="gphEdge"
                   strokeLinecap="round"
+                  style={{ strokeWidth: edge.width }}
                   css={[
-                    styles.edge(euiThemeContext, edge.width),
+                    styles.edge(euiThemeContext),
                     // the stroke and stroke-opacity are overridden
                     edge.isSelected &&
                       css`
@@ -145,8 +146,9 @@ export function GraphVisualization({
                     edgeClick(edge);
                   }}
                   className="gphEdge gphEdge--clickable"
+                  style={{ strokeWidth: Math.max(edge.width, 15) }}
                   css={[
-                    styles.edge(euiThemeContext, Math.max(edge.width, 15)),
+                    styles.edge(euiThemeContext),
                     // fill is overridden
                     styles.edgeClickable,
                   ]}
@@ -300,11 +302,10 @@ const styles = {
     },
   }),
 
-  edge: ({ euiTheme }: UseEuiTheme, edgeWidth = 2) =>
+  edge: ({ euiTheme }: UseEuiTheme) =>
     css({
       fill: euiTheme.colors.mediumShade,
       stroke: euiTheme.colors.mediumShade,
-      strokeWidth: edgeWidth,
       strokeOpacity: 0.5,
       fontSize: `calc(${euiTheme.size.s} - 2px)`,
     }),
