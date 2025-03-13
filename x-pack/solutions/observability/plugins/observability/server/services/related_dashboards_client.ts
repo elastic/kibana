@@ -36,7 +36,7 @@ export class RelatedDashboardsClient {
     const relevantDashboardsById = new Map<string, RelatedDashboard>();
     const [alert] = await Promise.all([
       this.alertsClient.getAlertById(this.alertId),
-      this.fetchDashboards(),
+      this.fetchAllDashboards(1),
     ]);
     this.alert = alert;
     if (!this.alert) {
@@ -74,14 +74,28 @@ export class RelatedDashboardsClient {
     return { suggestedDashboards: Array.from(relevantDashboardsById.values()) };
   }
 
-  async fetchDashboards() {
-    const dashboards = await this.dashboardClient.search({}, { spaces: ['*'] });
+  async fetchDashboards(page: number) {
+    const perPage = 1000;
+    const dashboards = await this.dashboardClient.search(
+      { limit: perPage, cursor: page },
+      { spaces: ['*'] }
+    );
     const {
       result: { hits },
     } = dashboards;
     hits.forEach((dashboard: Dashboard) => {
       this.dashboardsById.set(dashboard.id, dashboard);
     });
+    const fetchedUntil = (page - 1) * perPage + dashboards.result.hits.length;
+
+    if (dashboards.result.pagination.total <= fetchedUntil) {
+      return;
+    }
+    await this.fetchDashboards(page + 1);
+  }
+
+  async fetchAllDashboards() {
+    await this.fetchDashboards(1);
   }
 
   getDashboardsByIndex(index: string): {
