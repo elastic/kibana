@@ -55,13 +55,24 @@ describe('manage_tabs', () => {
 
   describe('addTab', () => {
     it('adds a tab', () => {
+      const maxItemsCount = 100;
       const newItem = { id: 'tab-5', label: 'Tab 5' };
       const prevState = { items, selectedItem: items[0] };
-      const nextState = addTab(prevState, newItem);
+      const nextState = addTab(prevState, newItem, maxItemsCount);
 
       expect(nextState.items).not.toBe(items);
       expect(nextState.items).toEqual([...items, newItem]);
       expect(nextState.selectedItem).toBe(newItem);
+    });
+
+    it('should not add a tab if limit is reached', () => {
+      const maxItemsCount = items.length;
+      const newItem = { id: 'tab-5', label: 'Tab 5' };
+      const prevState = { items, selectedItem: items[0] };
+      const nextState = addTab(prevState, newItem, maxItemsCount);
+
+      expect(nextState.items).toBe(items);
+      expect(nextState.selectedItem).toBe(items[0]);
     });
   });
 
