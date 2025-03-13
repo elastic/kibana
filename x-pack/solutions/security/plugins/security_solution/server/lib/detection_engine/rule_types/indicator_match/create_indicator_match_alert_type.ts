@@ -65,6 +65,7 @@ export const createIndicatorMatchAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     async executor(execOptions) {
       const { sharedParams, services, state } = execOptions;
 
