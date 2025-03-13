@@ -13,9 +13,9 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -167,27 +167,45 @@ export class AlertsClient<
       this.runTimestampString = opts.runTimestamp.toISOString();
     }
     await this.legacyAlertsClient.initializeExecution(opts);
+    const { executionUuid } = opts;
 
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
-      const getTrackedAlerts = async () => {
+      const getTrackedAlertsByExecutionUuid = async (uuid: string) => {
         const result = await this.search({
           seq_no_primary_term: true,
           query: {
             bool: {
-              must: {
-                term: {
-                  [ALERT_RULE_UUID]: this.options.rule.id,
-                },
-              },
-              must_not: {
-                term: {
-                  [ALERT_PREVIOUS_ACTION_GROUP]: ALERT_STATUS_RECOVERED,
-                },
-              },
-              should: [
-                { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
-                { term: { [ALERT_STATUS]: ALERT_STATUS_RECOVERED } },
+              must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
+              filter: [{ term: { [ALERT_RULE_EXECUTION_UUID]: uuid } }],
+            },
+          },
+        });
+        return result.hits;
+      };
+
+      const getTrackedAlertsByAlertUuids = async () => {
+        const { activeAlertsFromState = {}, recoveredAlertsFromState = {} } = opts;
+        const uuidsToFetch: string[] = [];
+        Object.values(activeAlertsFromState).forEach((activeAlert) =>
+          uuidsToFetch.push(activeAlert.meta?.uuid!)
+        );
+        Object.values(recoveredAlertsFromState).forEach((recoveredAlert) =>
+          uuidsToFetch.push(recoveredAlert.meta?.uuid!)
+        );
+
+        if (uuidsToFetch.length <= 0) {
+          return [];
+        }
+
+        const result = await this.search({
+          size: uuidsToFetch.length,
+          seq_no_primary_term: true,
+          query: {
+            bool: {
+              filter: [
+                { term: { [ALERT_RULE_UUID]: this.options.rule.id } },
+                { terms: { [ALERT_UUID]: uuidsToFetch } },
               ],
             },
           },
@@ -196,8 +214,9 @@ export class AlertsClient<
       };
 
       try {
-        // get all AAD alerts
-        const results = await getTrackedAlerts();
+        const results = executionUuid
+          ? await getTrackedAlertsByExecutionUuid(executionUuid)
+          : await getTrackedAlertsByAlertUuids();
 
         for (const hit of results.flat()) {
           const alertHit: Alert & AlertData = hit._source as Alert & AlertData;

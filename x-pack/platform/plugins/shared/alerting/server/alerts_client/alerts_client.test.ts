@@ -138,7 +138,6 @@ const trackedAlert1Raw = {
     uuid: 'abc',
   },
 };
-
 const trackedAlert2Raw = {
   state: { foo: true, start: '2023-03-28T02:27:28.159Z', duration: '36000000000000' },
   meta: {
@@ -146,6 +145,15 @@ const trackedAlert2Raw = {
     flappingHistory: [true, false, false],
     lastScheduledActions: { group: 'default', date: new Date().toISOString() },
     uuid: 'def',
+  },
+};
+
+const trackedAlert3Raw = {
+  state: { foo: false },
+  meta: {
+    flapping: false,
+    flappingHistory: [true, false, false],
+    uuid: 'xyz',
   },
 };
 
@@ -430,28 +438,58 @@ describe('Alerts Client', () => {
 
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const executionOptionsWithAlerts = {
+            ...defaultExecutionOpts,
+            activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
+            recoveredAlertsFromState: { '3': trackedAlert3Raw },
+          };
+
+          await alertsClient.initializeExecution(executionOptionsWithAlerts);
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            defaultExecutionOpts
+            executionOptionsWithAlerts
           );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
             query: {
               bool: {
-                must: {
-                  term: {
-                    [ALERT_RULE_UUID]: '1',
-                  },
-                },
-                must_not: {
-                  term: {
-                    [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
-                  },
-                },
-                should: [
-                  { term: { [ALERT_STATUS]: 'active' } },
-                  { term: { [ALERT_STATUS]: 'recovered' } },
+                filter: [
+                  { term: { [ALERT_RULE_UUID]: '1' } },
+                  { terms: { [ALERT_UUID]: ['abc', 'def', 'xyz'] } },
                 ],
+              },
+            },
+            seq_no_primary_term: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
+            ignore_unavailable: true,
+            size: 3,
+          });
+
+          spy.mockRestore();
+        });
+
+        test('should query for alerts with execution uuid when provided', async () => {
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            executionUuid: '1234',
+          });
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
+            ...defaultExecutionOpts,
+            executionUuid: '1234',
+          });
+
+          expect(clusterClient.search).toHaveBeenCalledWith({
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                filter: [{ term: { [ALERT_RULE_EXECUTION_UUID]: '1234' } }],
               },
             },
             seq_no_primary_term: true,
@@ -487,43 +525,21 @@ describe('Alerts Client', () => {
             .mockImplementation(() => mockLegacyAlertsClient);
 
           const alertsClient = new AlertsClient(alertsClientParams);
+          const executionOptionsWithUuid = {
+            ...defaultExecutionOpts,
+            executionUuid: '1234',
+          };
 
           try {
-            await alertsClient.initializeExecution(defaultExecutionOpts);
+            await alertsClient.initializeExecution(executionOptionsWithUuid);
           } catch (e) {
             spy.mockRestore();
             expect(e.message).toBe(`search failed!`);
           }
 
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            defaultExecutionOpts
+            executionOptionsWithUuid
           );
-
-          expect(clusterClient.search).toHaveBeenCalledWith({
-            query: {
-              bool: {
-                must: {
-                  term: {
-                    [ALERT_RULE_UUID]: '1',
-                  },
-                },
-                must_not: {
-                  term: {
-                    [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
-                  },
-                },
-                should: [
-                  { term: { [ALERT_STATUS]: 'active' } },
-                  { term: { [ALERT_STATUS]: 'recovered' } },
-                ],
-              },
-            },
-            seq_no_primary_term: true,
-            index: useDataStreamForAlerts
-              ? '.alerts-test.alerts-default'
-              : '.internal.alerts-test.alerts-default-*',
-            ignore_unavailable: true,
-          });
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error searching for tracked alerts by UUID ${ruleInfo} - search failed!`,
@@ -2162,7 +2178,6 @@ describe('Alerts Client', () => {
             },
           });
         });
-
         test('should get the persistent lifecycle alerts affected by scoped query successfully', async () => {
           const alertsClient = new AlertsClient(alertsClientParams);
           // @ts-ignore
@@ -2708,8 +2723,8 @@ describe('Alerts Client', () => {
             [ALERT_INSTANCE_ID]: alertInstanceId,
             [ALERT_STATUS]: 'active',
           };
-
-          clusterClient.search.mockResolvedValue({
+          const newClusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          newClusterClient.search.mockResolvedValue({
             took: 10,
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
@@ -2731,12 +2746,15 @@ describe('Alerts Client', () => {
             {},
             'default',
             'recovered'
-          >(alertsClientParams);
+          >({
+            ...alertsClientParams,
+            elasticsearchClientPromise: Promise.resolve(newClusterClient),
+          });
 
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
             activeAlertsFromState: {
-              [alertInstanceId]: {},
+              [alertInstanceId]: trackedAlert1Raw,
             },
           });
 
@@ -3229,7 +3247,11 @@ describe('Alerts Client', () => {
             },
           });
 
-          await alertsClient.initializeExecution(defaultExecutionOpts);
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
+          });
+
           expect(alertsClient.isTrackedAlert('1')).toBe(true);
           expect(alertsClient.isTrackedAlert('2')).toBe(true);
           expect(alertsClient.isTrackedAlert('3')).toBe(false);

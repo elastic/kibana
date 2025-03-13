@@ -443,6 +443,7 @@ export class TaskRunner<
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
       summaryActions: actionSchedulerResult.throttledSummaryActions,
+      executionUuid: this.executionId,
     };
   }
 
