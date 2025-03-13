@@ -134,6 +134,7 @@ describe('Edit settings', () => {
     cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
     cy.getBySel(SETTINGS_OUTPUTS.NAME_INPUT).clear().type('output-logstash-1');
     cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('logstash');
+    cy.getBySel(SETTINGS_OUTPUTS.SSL_BUTTON).click();
     cy.get('[placeholder="Specify host"').clear().type('logstash:5044');
     cy.get('[placeholder="Specify ssl certificate"]').clear().type('SSL CERTIFICATE');
     cy.get('[placeholder="Specify certificate key"]').clear().type('SSL KEY');

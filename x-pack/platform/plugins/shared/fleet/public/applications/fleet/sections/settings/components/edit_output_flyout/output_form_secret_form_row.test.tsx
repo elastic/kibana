@@ -84,24 +84,6 @@ describe('SecretFormRow', () => {
     expect(cancelEdit).toHaveBeenCalled();
   });
 
-  it('should call the onToggleSecretStorage function when the revert link is clicked', () => {
-    const { getByText } = renderReactTestingLibraryWithI18n(
-      <SecretFormRow
-        title={title}
-        clear={clear}
-        useSecretsStorage={useSecretsStorage}
-        onToggleSecretStorage={onToggleSecretStorage}
-        cancelEdit={cancelEdit}
-      >
-        <input type="text" />
-      </SecretFormRow>
-    );
-
-    fireEvent.click(getByText('Click to use plain text storage instead'));
-
-    expect(onToggleSecretStorage).toHaveBeenCalledWith(false);
-  });
-
   it('should not display the cancel change button when no initial value is provided', () => {
     const { queryByTestId } = renderReactTestingLibraryWithI18n(
       <SecretFormRow
