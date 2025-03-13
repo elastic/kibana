@@ -298,7 +298,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
-  suggest?: CommandSuggestFunction<CommandName>;
+  suggest: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
