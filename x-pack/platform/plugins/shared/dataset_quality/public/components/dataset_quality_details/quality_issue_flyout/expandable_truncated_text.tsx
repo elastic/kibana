@@ -36,6 +36,7 @@ export const ExpandableTruncatedText = ({
       {shouldTruncate && (
         <EuiCode>
           <button
+            data-test-subj="truncatedTextToggle"
             onClick={() => setIsExpanded(!isExpanded)}
             color="primary"
             css={{ fontWeight: 'bold', textDecoration: 'underline' }}
