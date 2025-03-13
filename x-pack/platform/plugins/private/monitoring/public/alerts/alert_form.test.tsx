@@ -36,6 +36,7 @@ const { loadActionTypes } = jest.requireMock(
 );
 
 jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
   useGetRuleTypesPermissions: jest.fn(),
 }));
 
