@@ -40,7 +40,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
   // Define the directory path
   const definitionsPath = path.join(
     pathToElasticsearch,
-    '/docs/reference/query-languages/esql/kibana/definition'
+    '/docs/reference/query-languages/esql/kibana/definition/functions'
   );
   const docsPath = path.join(
     pathToElasticsearch,
