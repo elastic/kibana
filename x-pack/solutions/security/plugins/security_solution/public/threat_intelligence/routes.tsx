@@ -6,16 +6,12 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
-import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
 import type { Store } from 'redux';
 import { useSelector } from 'react-redux';
-import type { SelectedDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import { useUserPrivileges } from '../common/components/user_privileges';
 import { useSetUrlParams } from '../management/components/artifact_list_page/hooks/use_set_url_params';
 import { BlockListForm } from '../management/pages/blocklist/view/components/blocklist_form';
 import { BlocklistsApiClient } from '../management/pages/blocklist/services';
-import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 import { getStore, inputsSelectors } from '../common/store';
 import { useKibana } from '../common/lib/kibana';
 import { FiltersGlobal } from '../common/components/filters_global';
@@ -32,6 +28,9 @@ import { InputsModelId } from '../common/store/inputs/constants';
 import { ArtifactFlyout } from '../management/components/artifact_list_page/components/artifact_flyout';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { extractTimelineCapabilities } from '../common/utils/timeline_capabilities';
+import type { SecuritySolutionPluginContext, SelectedDataView } from './types';
+import { useInvestigateInTimeline } from './hooks/use_investigate_in_timeline';
+import { THREAT_INTELLIGENCE_BASE_PATH } from './constants/navigation';
 
 const ThreatIntelligence = memo(() => {
   const {
@@ -109,6 +108,6 @@ ThreatIntelligence.displayName = 'ThreatIntelligence';
 export const routes: SecuritySubPluginRoutes = [
   {
     path: THREAT_INTELLIGENCE_BASE_PATH,
-    render: () => <ThreatIntelligence />,
+    render: ThreatIntelligence,
   },
 ];

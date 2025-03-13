@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+import { routes } from './routes';
+
+export class ThreatIntelligence {
+  public setup() {}
+
+  public start() {
+    return {
+      routes,
+    };
+  }
+}

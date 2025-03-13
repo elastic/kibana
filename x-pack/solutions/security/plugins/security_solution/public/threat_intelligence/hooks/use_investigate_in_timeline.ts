@@ -6,15 +6,15 @@
  */
 
 import { useCallback } from 'react';
-import { timelineDefaults } from '../timelines/store/defaults';
-import { APP_UI_ID } from '../../common/constants';
-import type { DataProvider } from '../../common/types';
-import { TimelineId } from '../../common/types/timeline';
-import { TimelineTypeEnum } from '../../common/api/timeline';
-import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
-import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
-import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
-import { useUpdateTimeline } from '../timelines/components/open_timeline/use_update_timeline';
+import { timelineDefaults } from '../../timelines/store/defaults';
+import { APP_UI_ID } from '../../../common/constants';
+import type { DataProvider } from '../../../common/types';
+import { TimelineId } from '../../../common/types/timeline';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
+import { useStartTransaction } from '../../common/lib/apm/use_start_transaction';
+import { useCreateTimeline } from '../../timelines/hooks/use_create_timeline';
+import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
+import { useUpdateTimeline } from '../../timelines/components/open_timeline/use_update_timeline';
 
 interface UseInvestigateInTimelineActionProps {
   /**
