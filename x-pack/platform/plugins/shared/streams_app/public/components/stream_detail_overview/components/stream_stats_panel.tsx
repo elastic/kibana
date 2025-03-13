@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
@@ -12,7 +19,7 @@ import { IngestStreamGetResponse, IngestStreamLifecycleILM } from '@kbn/streams-
 import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 
 import { LocatorPublic } from '@kbn/share-plugin/public';
-import type { StreamDetailsResponse } from '@kbn/streams-plugin/server/routes/streams/crud/route';
+import type { StreamDetailsResponse } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { IlmLink } from '../../data_management/stream_detail_lifecycle/ilm_link';
 import {
   formatBytes,
@@ -27,7 +34,6 @@ interface StreamStatsPanelProps {
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }
 
-// Component to display retention information
 const RetentionDisplay = ({
   definition,
   ilmLocator,
@@ -56,9 +62,8 @@ const RetentionDisplay = ({
   );
 };
 
-// Component for individual stat items
 interface StatItemProps {
-  label: string;
+  label: ReactNode;
   value: ReactNode;
   withBorder?: boolean;
 }
@@ -79,7 +84,14 @@ const StatItem = ({ label, value, withBorder = false }: StatItemProps) => {
         <EuiText size="xs" color="subdued">
           {label}
         </EuiText>
-        <EuiText size="m">{value}</EuiText>
+        <EuiText
+          size="m"
+          className={css`
+            font-weight: bold;
+          `}
+        >
+          {value}
+        </EuiText>
       </EuiFlexGroup>
     </EuiFlexItem>
   );
@@ -135,7 +147,18 @@ export function StreamStatsPanel({
               value={docCount ? formatNumber(docCount.details.count || 0) : '-'}
             />
             <StatItem
-              label={storageSizeLabel}
+              label={
+                <>
+                  {storageSizeLabel}
+                  <EuiIconTip
+                    content={i18n.translate('xpack.streams.streamDetailOverview.sizeTip', {
+                      defaultMessage:
+                        'Estimated size based on the number of documents in the current time range and the total size of the stream.',
+                    })}
+                    position="right"
+                  />
+                </>
+              }
               value={
                 dataStreamStats && docCount
                   ? formatBytes(getStorageSizeForTimeRange(dataStreamStats, docCount))
@@ -144,8 +167,24 @@ export function StreamStatsPanel({
               withBorder
             />
             <StatItem
-              label={ingestionLabel}
-              value={dataStreamStats ? formatIngestionRate(dataStreamStats.bytesPerDay || 0) : '-'}
+              label={
+                <>
+                  {ingestionLabel}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.streams.streamDetailLifecycle.ingestionRateDetails',
+                      {
+                        defaultMessage:
+                          'Estimated average (stream total size divided by the number of days since creation).',
+                      }
+                    )}
+                    position="right"
+                  />
+                </>
+              }
+              value={
+                dataStreamStats ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true) : '-'
+              }
               withBorder
             />
           </EuiFlexGroup>
