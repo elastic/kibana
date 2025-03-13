@@ -139,7 +139,7 @@ async function doUpgrade(
 
   const updatePackagePolicy = updatePackageInputs(
     {
-      ...omit(packagePolicy, 'id', 'spaceIds'),
+      ...omit(packagePolicy, 'id', 'spaceIds', 'secret_references'),
       inputs: packagePolicy.inputs,
       package: {
         ...packagePolicy.package!,
