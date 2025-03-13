@@ -35,12 +35,9 @@ const { loadActionTypes } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
 );
 
-jest.mock(
-  '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_types_query',
-  () => ({
-    useLoadRuleTypesQuery: jest.fn(),
-  })
-);
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  useGetRuleTypesPermissions: jest.fn(),
+}));
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
