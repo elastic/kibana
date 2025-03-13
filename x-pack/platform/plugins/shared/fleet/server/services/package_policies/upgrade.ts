@@ -383,10 +383,6 @@ export async function _packagePoliciesBulkUpgrade({
               pkgVersion: upgradePkgVersion,
             });
 
-          if (currentPackagePolicy.is_managed && !options?.force) {
-            throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
-          }
-
           const updatePackagePolicy = await doUpgrade(
             soClient,
             esClient,
@@ -467,10 +463,6 @@ export async function _packagePoliciesUpgrade({
           packagePolicy,
           pkgVersion,
         });
-
-      if (currentPackagePolicy.is_managed && !options?.force) {
-        throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
-      }
 
       const updatePackagePolicy = await doUpgrade(
         soClient,
