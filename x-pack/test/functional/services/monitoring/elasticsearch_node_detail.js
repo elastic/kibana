@@ -19,6 +19,9 @@ export function MonitoringElasticsearchNodeDetailProvider({ getService }) {
   const SUBJ_SUMMARY_NODE_TYPE = `${SUBJ_SUMMARY} > nodeType`;
   const SUBJ_SUMMARY_STATUS = `${SUBJ_SUMMARY} > statusIcon`;
 
+  const SUBJ_SUMMARY_LOGS = 'monitoringLogs';
+  const SUBJ_SUMMARY_LOGS_LINK = `${SUBJ_SUMMARY_LOGS} > monitoringLogsLink`;
+
   return new (class ElasticsearchNodeDetail {
     async clickAdvanced() {
       return testSubjects.click('esItemDetailAdvancedLink');
@@ -36,6 +39,10 @@ export function MonitoringElasticsearchNodeDetailProvider({ getService }) {
         nodeType: await testSubjects.getVisibleText(SUBJ_SUMMARY_NODE_TYPE),
         status: await testSubjects.getAttribute(SUBJ_SUMMARY_STATUS, 'alt'),
       };
+    }
+
+    viewLogsLinkIsShowing() {
+      return testSubjects.exists(SUBJ_SUMMARY_LOGS_LINK);
     }
   })();
 }
