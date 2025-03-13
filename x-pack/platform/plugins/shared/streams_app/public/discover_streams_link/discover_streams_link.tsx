@@ -56,18 +56,33 @@ function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
   );
 }
 
+function getFallbackStreamName(flattenedDoc: Record<string, unknown>) {
+  const wiredStreamName = flattenedDoc['stream.name'];
+  if (wiredStreamName) {
+    return String(wiredStreamName);
+  }
+  const dsnsType = flattenedDoc['data_stream.type'];
+  const dsnsDataset = flattenedDoc['data_stream.dataset'];
+  const dsnsNamespace = flattenedDoc['data_stream.namespace'];
+  if (dsnsType && dsnsDataset && dsnsNamespace) {
+    return `${dsnsType}-${dsnsDataset}-${dsnsNamespace}`;
+  }
+  return undefined;
+}
+
 function DiscoverStreamsLinkContent({
   streamsRepositoryClient,
   doc,
   locator,
 }: DiscoverStreamsLinkProps) {
   const index = doc.raw._index;
+  const flattenedDoc = doc.flattened;
   const { value, loading, error } = useStreamsAppFetch(
-    ({ signal }) => {
+    async ({ signal }) => {
       if (!index) {
-        return;
+        return getFallbackStreamName(flattenedDoc);
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/_resolve_index', {
+      const definition = await streamsRepositoryClient.fetch('GET /api/streams/_resolve_index', {
         signal,
         params: {
           query: {
@@ -75,24 +90,25 @@ function DiscoverStreamsLinkContent({
           },
         },
       });
+      return definition?.stream?.name;
     },
     [streamsRepositoryClient, index],
     { disableToastOnError: true }
   );
-  const params = useMemo(() => ({ name: value?.stream?.name }), [value]);
+  const params = useMemo(() => ({ name: value }), [value]);
   const redirectUrl = useMemo(() => locator.getRedirectUrl(params), [locator, params]);
   const empty = <span>-</span>;
-  if (!index) {
+  if (!index && !value) {
     return empty;
   }
   if (loading) {
     return <EuiLoadingSpinner size="s" />;
   }
-  if (error || !value?.stream) {
+  if (error || !value) {
     return empty;
   }
 
-  return <EuiLink href={redirectUrl}>{value.stream.name}</EuiLink>;
+  return <EuiLink href={redirectUrl}>{value}</EuiLink>;
 }
 
 // eslint-disable-next-line import/no-default-export
