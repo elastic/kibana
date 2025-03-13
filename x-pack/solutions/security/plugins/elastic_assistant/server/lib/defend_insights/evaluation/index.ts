@@ -109,6 +109,7 @@ export const evaluateDefendInsights = async ({
 
     // run the evaluations for each graph:
     await runDefendInsightsEvaluations({
+      insightType: DefendInsightType.Enum.incompatible_antivirus,
       evaluatorConnectorId,
       datasetName,
       graphs,

@@ -9,8 +9,10 @@ import type { Connector } from '@kbn/actions-plugin/server/application/connector
 import { Logger } from '@kbn/logging';
 import { asyncForEach } from '@kbn/std';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import { Client, Example, Run } from 'langsmith';
-import { EvaluatorT, evaluate } from 'langsmith/evaluation';
+import { Client } from 'langsmith';
+import { evaluate } from 'langsmith/evaluation';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { getDefendInsightsCustomEvaluator } from '../helpers/get_custom_evaluator';
 import { getDefendInsightsGraphInputOverrides } from '../helpers/get_graph_input_overrides';
 import { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 
@@ -24,6 +26,7 @@ export const runDefendInsightsEvaluations = async ({
   graphs,
   langSmithApiKey,
   logger,
+  insightType,
 }: {
   evaluatorConnectorId: string | undefined;
   datasetName: string;
@@ -39,6 +42,7 @@ export const runDefendInsightsEvaluations = async ({
   }>;
   langSmithApiKey: string | undefined;
   logger: Logger;
+  insightType: DefendInsightType;
 }): Promise<void> =>
   asyncForEach(graphs, async ({ connector, graph, llmType, name, traceOptions }) => {
     const subject = `connector "${connector.name}" (${llmType}), running experiment "${name}"`;
@@ -67,56 +71,7 @@ export const runDefendInsightsEvaluations = async ({
         );
       };
 
-      const customEvaluator: EvaluatorT = (run: Run, example: Example | undefined) => {
-        let error: string | undefined;
-        const referenceInsights = example?.outputs?.insights ?? [];
-        const actualInsights = run.outputs?.insights ?? [];
-
-        if (referenceInsights.length !== actualInsights.length) {
-          // Mismatch in number of insights
-          error = `Expected ${referenceInsights.length} insights, but got ${actualInsights.length}`;
-        } else {
-          for (let i = 0; i < referenceInsights.length; i++) {
-            const refGroup = referenceInsights[i];
-            const actGroup = actualInsights[i];
-
-            if (refGroup.group !== actGroup.group) {
-              // Mismatch in group name
-              error = `Mismatch in group name at index ${i}: expected '${refGroup.group}', got '${actGroup.group}'`;
-              break;
-            }
-
-            if (refGroup.events.length !== actGroup.events.length) {
-              // Mismatch in number of events
-              error = `Mismatch in number of events for group '${refGroup.group}': expected ${refGroup.events.length}, got ${actGroup.events.length}`;
-              break;
-            }
-
-            for (let j = 0; j < refGroup.events.length; j++) {
-              const refEvent = refGroup.events[j];
-              const actEvent = actGroup.events[j];
-
-              if (
-                refEvent.id !== actEvent.id ||
-                refEvent.value !== actEvent.value ||
-                refEvent.endpointId !== actEvent.endpointId
-              ) {
-                // Mismatch in event
-                error = `Mismatch in event at group '${refGroup.group}', index ${j}`;
-                break;
-              }
-            }
-
-            if (error) break;
-          }
-        }
-
-        return {
-          key: 'correct',
-          score: error ? 0 : 1,
-          comment: error,
-        };
-      };
+      const customEvaluator = getDefendInsightsCustomEvaluator({ insightType });
 
       const evalOutput = await evaluate(predict, {
         client: new Client({ apiKey: langSmithApiKey }),

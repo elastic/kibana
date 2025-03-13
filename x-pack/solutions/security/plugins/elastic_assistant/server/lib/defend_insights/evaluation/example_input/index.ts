@@ -32,8 +32,6 @@ export const ExampleDefendInsightsInput = z.object({
   unrefinedResults: z.array(DefendInsight).nullable().optional(),
 });
 
-export type ExampleDefendInsightsInput = z.infer<typeof ExampleDefendInsightsInput>;
-
 /**
  * The optional overrides for an example input
  */
