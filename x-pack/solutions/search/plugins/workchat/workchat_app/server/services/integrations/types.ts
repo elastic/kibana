@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+import type { Tool } from '@modelcontextprotocol/sdk/types';
+import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 import type { WorkChatIntegration } from '@kbn/wci-common';
 
 export type IntegrationWithMeta = WorkChatIntegration & {
   id: string;
 };
+
+export type IntegrationToolInputSchema = Tool['inputSchema'];
+
+export interface IntegrationTool {
+  name: string;
+  description: string;
+  inputSchema: JsonSchemaObject;
+}

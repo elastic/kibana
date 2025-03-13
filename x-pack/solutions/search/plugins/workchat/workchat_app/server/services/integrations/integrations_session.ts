@@ -8,8 +8,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 import type { Logger } from '@kbn/core/server';
-import { IntegrationToolInputSchema } from '../../types';
-import { IntegrationTool } from '../../types';
+import { IntegrationToolInputSchema, IntegrationTool } from './types';
 import type { IntegrationWithMeta } from './types';
 
 const TOOL_NAME_SEPARATOR = '___';
