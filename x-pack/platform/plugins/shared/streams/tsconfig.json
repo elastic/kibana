@@ -39,6 +39,7 @@
     "@kbn/storage-adapter",
     "@kbn/traced-es-client",
     "@kbn/es-query",
-    "@kbn/core-elasticsearch-client-server-internal"
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/utils"
   ]
 }
