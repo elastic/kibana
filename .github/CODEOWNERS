@@ -472,6 +472,7 @@ src/platform/plugins/shared/expression_repeat_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_reveal_image @elastic/kibana-presentation
 src/platform/plugins/shared/expression_shape @elastic/kibana-presentation
 src/platform/plugins/shared/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
+src/platform/packages/private/kbn-expression-utils @elastic/kibana-presentation
 src/platform/plugins/shared/chart_expressions/expression_xy @elastic/kibana-visualizations
 examples/expressions_explorer @elastic/kibana-visualizations
 src/platform/plugins/shared/expressions @elastic/kibana-visualizations

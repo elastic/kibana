@@ -516,6 +516,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       updatePrebuiltDetectionRules: isServerless
         ? `${SERVERLESS_DOCS}security-prebuilt-rules-management.html#update-prebuilt-rules`
         : `${SECURITY_SOLUTION_DOCS}prebuilt-rules-management.html#update-prebuilt-rules`,
+      prebuiltRuleCustomizationPromoBlog: isServerless
+        ? '' // URL for Serverless to be added later, once the blog post is published. Issue: https://github.com/elastic/kibana/issues/209000
+        : `${ELASTIC_WEBSITE_URL}blog/security-prebuilt-rules-editing`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -529,6 +532,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
       legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      siemMigrations: `${SECURITY_SOLUTION_DOCS}ai-for-security.html`, // TODO: Update this link once the content is available
+      llmPerformanceMatrix: `${SECURITY_SOLUTION_DOCS}llm-performance-matrix.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

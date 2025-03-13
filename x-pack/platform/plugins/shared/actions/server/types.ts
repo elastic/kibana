@@ -6,8 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import {
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
@@ -18,16 +18,16 @@ import {
   ISavedObjectsRepository,
   IScopedClusterClient,
 } from '@kbn/core/server';
-import { AnySchema } from 'joi';
-import { SubActionConnector } from './sub_action_framework/sub_action_connector';
-import { ServiceParams } from './sub_action_framework/types';
-import { ActionTypeRegistry } from './action_type_registry';
-import { PluginSetupContract, PluginStartContract } from './plugin';
-import { ActionsClient } from './actions_client';
-import { ActionTypeExecutorResult, SubFeature } from '../common';
-import { TaskInfo } from './lib/action_executor';
-import { ConnectorTokenClient } from './lib/connector_token_client';
-import { ActionsConfigurationUtilities } from './actions_config';
+import type { AnySchema } from 'joi';
+import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import type { ServiceParams } from './sub_action_framework/types';
+import type { ActionTypeRegistry } from './action_type_registry';
+import type { PluginSetupContract, PluginStartContract } from './plugin';
+import type { ActionsClient } from './actions_client';
+import type { ActionTypeExecutorResult, SubFeature } from '../common';
+import type { TaskInfo } from './lib/action_executor';
+import type { ConnectorTokenClient } from './lib/connector_token_client';
+import type { ActionsConfigurationUtilities } from './actions_config';
 
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -40,10 +40,10 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
-import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
+import type { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';
 export { ActionExecutionSourceType } from './lib';
-import { ConnectorUsageCollector } from './usage';
+import type { ConnectorUsageCollector } from './usage';
 export { ConnectorUsageCollector } from './usage';
 
 export interface Services {

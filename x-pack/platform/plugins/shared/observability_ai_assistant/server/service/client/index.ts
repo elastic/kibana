@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { notFound } from '@hapi/boom';
+import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -46,7 +46,7 @@ import {
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  type AdHocInstruction,
+  type Instruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -140,7 +140,7 @@ export class ObservabilityAIAssistantClient {
       return false;
     }
 
-    return conversation.user.id
+    return conversation.user.id && user.id
       ? conversation.user.id === user.id
       : conversation.user.name === user.name;
   };
@@ -161,6 +161,10 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    if (!this.isConversationOwnedByUser(conversation._source!)) {
+      throw forbidden('Deleting a conversation is only allowed for the owner of the conversation.');
+    }
+
     await this.dependencies.esClient.asInternalUser.delete({
       id: conversation._id!,
       index: conversation._index,
@@ -172,7 +176,7 @@ export class ObservabilityAIAssistantClient {
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
-    instructions: adHocInstructions = [],
+    userInstructions: apiUserInstructions = [],
     messages: initialMessages,
     signal,
     persist,
@@ -191,7 +195,7 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: AdHocInstruction[];
+    userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -207,18 +211,16 @@ export class ObservabilityAIAssistantClient {
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `This conversation will be persisted in Kibana and available at this url: ${
+          functionClient.registerInstruction(
+            `This conversation will be persisted in Kibana and available at this url: ${
               kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`,
-          });
+            }.`
+          );
         }
 
-        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
-
-        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+        const kbUserInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(
+          shareReplay()
+        );
 
         // if it is:
         // - a new conversation
@@ -243,12 +245,12 @@ export class ObservabilityAIAssistantClient {
                 tracer: completeTracer,
               }).pipe(shareReplay());
 
-        const systemMessage$ = userInstructions$.pipe(
-          map((userInstructions) => {
+        const systemMessage$ = kbUserInstructions$.pipe(
+          map((kbUserInstructions) => {
             return getSystemMessageFromInstructions({
               applicationInstructions: functionClient.getInstructions(),
-              userInstructions,
-              adHocInstructions: allAdHocInstructions,
+              kbUserInstructions,
+              apiUserInstructions,
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
             });
           }),
@@ -257,8 +259,8 @@ export class ObservabilityAIAssistantClient {
 
         // we continue the conversation here, after resolving both the materialized
         // messages and the knowledge base instructions
-        const nextEvents$ = forkJoin([systemMessage$, userInstructions$]).pipe(
-          switchMap(([systemMessage, userInstructions]) => {
+        const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
+          switchMap(([systemMessage, kbUserInstructions]) => {
             // if needed, inject a context function request here
             const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(initialMessages)
@@ -285,8 +287,8 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                userInstructions,
-                adHocInstructions,
+                kbUserInstructions,
+                apiUserInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,
@@ -561,7 +563,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
-      throw new Error('Cannot update conversation that is not owned by the user');
+      throw forbidden('Updating a conversation is only allowed for the owner of the conversation.');
     }
 
     const updatedConversation: Conversation = merge(
@@ -574,35 +576,6 @@ export class ObservabilityAIAssistantClient {
       id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
-      refresh: true,
-    });
-
-    return updatedConversation;
-  };
-
-  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const updatedConversation: Conversation = merge(
-      {},
-      conversation,
-      { conversation: { title } },
-      this.getConversationUpdateValues(new Date().toISOString())
-    );
-
-    await this.dependencies.esClient.asInternalUser.update({
-      id: document._id!,
-      index: document._index,
-      doc: { conversation: { title } },
       refresh: true,
     });
 
@@ -629,6 +602,25 @@ export class ObservabilityAIAssistantClient {
     });
 
     return createdConversation;
+  };
+
+  updatePartial = async ({
+    conversationId,
+    updates,
+  }: {
+    conversationId: string;
+    updates: Partial<{ public: boolean }>;
+  }): Promise<Conversation> => {
+    const conversation = await this.get(conversationId);
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const updatedConversation: Conversation = merge({}, conversation, {
+      ...(updates.public !== undefined && { public: updates.public }),
+    });
+
+    return this.update(conversationId, updatedConversation);
   };
 
   duplicateConversation = async (conversationId: string): Promise<Conversation> => {
@@ -769,7 +761,12 @@ export class ObservabilityAIAssistantClient {
     sortBy: string;
     sortDirection: 'asc' | 'desc';
   }) => {
-    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+    return this.dependencies.knowledgeBaseService.getEntries({
+      query,
+      sortBy,
+      sortDirection,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   deleteKnowledgeBaseEntry = async (id: string) => {
