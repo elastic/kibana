@@ -584,7 +584,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): SuggestionRa
         defaultMessage: 'Click to create',
       }
     ),
-    sortText: '1',
+    sortText: '0-0',
     command: {
       id: `esql.control.lookup_index.create`,
       title: i18n.translate(
