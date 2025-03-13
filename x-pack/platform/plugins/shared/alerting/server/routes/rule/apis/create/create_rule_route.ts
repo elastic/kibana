@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'node:path';
 import type { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
@@ -15,6 +14,7 @@ import type {
 import {
   createBodySchemaV1,
   createParamsSchemaV1,
+  createRuleParamsExamplesV1,
 } from '../../../../../common/routes/rule/apis/create';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
@@ -40,7 +40,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         access: 'public',
         summary: `Create a rule`,
         tags: ['oas-tag:alerting'],
-        oasOperationObject: () => path.join(__dirname, 'create_rule.examples.yaml'),
+        oasOperationObject: createRuleParamsExamplesV1,
       },
       validate: {
         request: {

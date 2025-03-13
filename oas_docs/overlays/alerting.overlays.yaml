@@ -4,35 +4,6 @@ info:
   title: Overlays for the alerting rule examples and parameters
   version: 0.0.1
 actions:
-  # Add some alerting API examples
-  - target: "$.paths['/api/alerting/rule/{id}']['put']"
-    description: "Add examples to update rule API"
-    update:
-      requestBody:
-        content:
-          application/json:
-            examples:
-              updateRuleRequest:
-                $ref: '../examples/update_rule_request.yaml'
-      responses:
-        200:
-          content:
-            application/json:
-              examples:
-                updateRuleResponse:
-                  $ref: '../examples/update_rule_response.yaml'
-  - target: "$.paths['/api/alerting/rules/_find']['get']"
-    description: "Add examples to find rules API"
-    update:
-      responses:
-        200:
-          content:
-            application/json:
-              examples:
-                findRulesResponse:
-                  $ref: '../examples/find_rules_response.yaml'
-                findConditionalActionRulesResponse:
-                  $ref: '../examples/find_rules_response_conditional_action.yaml'
   # Fix some optional path parameters
   - target: "$.paths['/api/alerting/rule/{id}']['post'].parameters[?(@.name=='id')]"
     description: Remove optional indicator from path parameter
