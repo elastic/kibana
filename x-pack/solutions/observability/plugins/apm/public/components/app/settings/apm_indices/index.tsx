@@ -23,12 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
+import { useSourcesAPIFetcher, callSourcesAPI } from '@kbn/apm-sources-access-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { clearCache } from '../../../../services/rest/call_api';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 const APM_INDEX_LABELS = [
   {
@@ -63,23 +62,23 @@ const APM_INDEX_LABELS = [
   },
 ];
 
-async function saveApmIndices({ apmIndices }: { apmIndices: Record<string, string> }) {
-  await callApmApi('POST /internal/apm/settings/apm-indices/save', {
-    signal: null,
-    params: {
-      body: apmIndices,
-    },
+async function saveApmIndices({
+  http,
+  apmIndices,
+}: {
+  http: HttpStart;
+  apmIndices: Record<string, string>;
+}) {
+  await callSourcesAPI(http, 'POST /internal/apm-sources/settings/apm-indices/save', {
+    body: apmIndices,
   });
 
-  clearCache();
   // Reload window to update APM data view with new indices
   window.location.reload();
 }
 
-type ApiResponse = APIReturnType<`GET /internal/apm/settings/apm-index-settings`>;
-
 // avoid infinite loop by initializing the state outside the component
-const INITIAL_STATE: ApiResponse = { apmIndexSettings: [] };
+const INITIAL_STATE = { apmIndexSettings: [] };
 
 export function ApmIndices() {
   const { core } = useApmPluginContext();
@@ -94,9 +93,9 @@ export function ApmIndices() {
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, refetch } = useFetcher((_callApmApi) => {
-    return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
-  }, []);
+  const { data = INITIAL_STATE, refetch } = useSourcesAPIFetcher({
+    pathname: 'GET /internal/apm-sources/settings/apm-index-settings',
+  });
 
   const { data: space } = useFetcher(() => {
     return services.spaces?.getActiveSpace();
@@ -120,7 +119,7 @@ export function ApmIndices() {
     event.preventDefault();
     setIsSaving(true);
     try {
-      await saveApmIndices({ apmIndices });
+      await saveApmIndices({ http: core.http, apmIndices });
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.succeeded.title', {
           defaultMessage: 'Indices applied',

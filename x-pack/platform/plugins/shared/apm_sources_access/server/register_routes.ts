@@ -9,6 +9,9 @@ import {
   type ServerRouteRepository,
   parseEndpoint,
   passThroughValidationObject,
+  decodeRequestParams,
+  stripNullishRequestParameters,
+  IoTsParamsObject,
 } from '@kbn/server-route-repository';
 import type {
   KibanaRequest,
@@ -44,8 +47,11 @@ export const registerRoutes = ({
 }) => {
   const router = core.setup.http.createRouter();
 
-  for (const { endpoint, handler, security } of Object.values(repository)) {
+  for (const route of Object.values(repository)) {
+    const { endpoint, handler, security } = route;
     const { method, pathname, version } = parseEndpoint(endpoint);
+
+    const params = 'params' in route ? route.params : undefined;
 
     const wrappedHandler = async (
       context: RequestHandlerContext,
@@ -53,6 +59,17 @@ export const registerRoutes = ({
       response: KibanaResponseFactory
     ) => {
       try {
+        const validatedParams =
+          params &&
+          decodeRequestParams(
+            stripNullishRequestParameters({
+              params: request.params,
+              body: request.body,
+              query: request.query,
+            }),
+            params as IoTsParamsObject
+          );
+
         const { aborted, data } = await Promise.race([
           handler({
             request,
@@ -60,6 +77,7 @@ export const registerRoutes = ({
             logger,
             core,
             plugin,
+            params: validatedParams,
             kibanaVersion,
           }).then(
             (

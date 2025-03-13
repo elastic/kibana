@@ -18,6 +18,8 @@ const plugin = async (initContext: PluginInitializerContext) => {
   return new ApmSourcesAccessPlugin(initContext);
 };
 
+export type { APIEndpoint, APIReturnType, APMSourcesServerRouteRepository } from './routes';
+
 export type {
   APMIndices,
   APMSourcesAccessConfig,

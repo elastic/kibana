@@ -40,7 +40,7 @@ export default function apmIndicesTests({ getService }: DeploymentAgnosticFtrPro
 
     it('returns APM Indices', async () => {
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
+        endpoint: 'GET /internal/apm-sources/settings/apm-indices',
       });
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
@@ -57,7 +57,7 @@ export default function apmIndicesTests({ getService }: DeploymentAgnosticFtrPro
       const INDEX_VALUE = 'foo-*';
 
       const writeResponse = await apmApiClient.writeUser({
-        endpoint: 'POST /internal/apm/settings/apm-indices/save',
+        endpoint: 'POST /internal/apm-sources/settings/apm-indices/save',
         params: {
           body: { transaction: INDEX_VALUE },
         },
@@ -65,7 +65,7 @@ export default function apmIndicesTests({ getService }: DeploymentAgnosticFtrPro
       expect(writeResponse.status).to.be(200);
 
       const readResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
+        endpoint: 'GET /internal/apm-sources/settings/apm-indices',
       });
 
       expect(readResponse.status).to.be(200);
