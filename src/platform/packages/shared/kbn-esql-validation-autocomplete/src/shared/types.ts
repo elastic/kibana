@@ -44,7 +44,7 @@ export interface ESQLCallbacks {
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
-  getPreferences?: () => Promise<{ histogramBarTarget: number; supportedApps?: string[] }>;
+  getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
