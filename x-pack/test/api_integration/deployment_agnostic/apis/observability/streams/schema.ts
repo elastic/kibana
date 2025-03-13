@@ -43,7 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Unmapped fields API', () => {
       it('Returns unmapped fields', async () => {
         const response = await apiClient
-          .fetch('GET /api/streams/{name}/schema/unmapped_fields', {
+          .fetch('GET /internal/streams/{name}/schema/unmapped_fields', {
             params: {
               path: {
                 name: 'logs',
@@ -62,7 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Fields simulation API', () => {
       it('Returns failure status when simulation would fail', async () => {
         const response = await apiClient.fetch(
-          'POST /api/streams/{name}/schema/fields_simulation',
+          'POST /internal/streams/{name}/schema/fields_simulation',
           {
             params: {
               path: {
@@ -81,7 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       it('Returns success status when simulation would succeed', async () => {
         const response = await apiClient.fetch(
-          'POST /api/streams/{name}/schema/fields_simulation',
+          'POST /internal/streams/{name}/schema/fields_simulation',
           {
             params: {
               path: {
@@ -112,7 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await forkStream(apiClient, 'logs', forkBody);
         const response = await apiClient.fetch(
-          'POST /api/streams/{name}/schema/fields_simulation',
+          'POST /internal/streams/{name}/schema/fields_simulation',
           {
             params: {
               path: {
