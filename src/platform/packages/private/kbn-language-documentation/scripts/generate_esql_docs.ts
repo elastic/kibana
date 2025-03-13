@@ -44,7 +44,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
   );
   const docsPath = path.join(
     pathToElasticsearch,
-    '/docs/reference/query-languages/esql/kibana/docs'
+    '/docs/reference/query-languages/esql/kibana/docs/functions'
   );
 
   // Read the directory
