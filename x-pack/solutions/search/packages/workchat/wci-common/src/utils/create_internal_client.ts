@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory';
-import { Client } from '@modelcontextprotocol/sdk/client/index';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { IntegrationClient } from '../types';
 
 /**

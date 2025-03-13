@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Tool } from '@modelcontextprotocol/sdk/types';
+import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 import type { WorkChatIntegration } from '@kbn/wci-common';
 

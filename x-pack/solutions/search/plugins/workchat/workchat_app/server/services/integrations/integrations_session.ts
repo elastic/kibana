@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@modelcontextprotocol/sdk/client/index';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 import type { Logger } from '@kbn/core/server';
 import { IntegrationToolInputSchema, IntegrationTool } from './types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@modelcontextprotocol/sdk/client/index';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '../mcp/sse_client';
 import type { IntegrationClient } from '../types';
 
