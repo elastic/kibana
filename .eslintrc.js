@@ -1636,6 +1636,7 @@ module.exports = {
       files: [
         'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
