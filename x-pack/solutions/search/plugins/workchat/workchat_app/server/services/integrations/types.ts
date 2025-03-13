@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export enum IntegrationType {
-  salesforce = 'salesforce',
-  custom = 'custom',
-}
+import type { WorkChatIntegration } from '@kbn/wci-common';
+
+export type IntegrationWithMeta = WorkChatIntegration & {
+  id: string;
+};

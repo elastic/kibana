@@ -1,19 +1,25 @@
-import { EventSource, type ErrorEvent, type EventSourceInit } from "eventsource";
-import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
-import { JSONRPCMessage, JSONRPCMessageSchema } from "@modelcontextprotocol/sdk/types.js";
-
-/***
- * Taken from https://github.com/modelcontextprotocol/typescript-sdk/blob/main/src/client/sse.ts
- * 
- * TODO: remove this once figured out how to import the auth package 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EventSource, type ErrorEvent, type EventSourceInit } from 'eventsource';
+import { Transport } from '@modelcontextprotocol/sdk/shared/transport';
+import { JSONRPCMessage, JSONRPCMessageSchema } from '@modelcontextprotocol/sdk/types';
+
+/*
+ * Taken from https://github.com/modelcontextprotocol/typescript-sdk/blob/main/src/client/sse.ts
+ *
+ * TODO: remove this once figured out how to import the auth package
+ */
 
 export class SseError extends Error {
   constructor(
     public readonly code: number | undefined,
     message: string | undefined,
-    public readonly event: ErrorEvent,
+    public readonly event: ErrorEvent
   ) {
     super(`SSE error: ${message}`);
   }
@@ -22,11 +28,10 @@ export class SseError extends Error {
 /**
  * Configuration options for the `SSEClientTransport`.
  */
-export type SSEClientTransportOptions = {
-
+export interface SSEClientTransportOptions {
   /**
    * Customizes the initial SSE request to the server (the request that begins the stream).
-   * 
+   *
    * NOTE: Setting this property will prevent an `Authorization` header from
    * being automatically attached to the SSE request, if an `authProvider` is
    * also given. This can be worked around by setting the `Authorization` header
@@ -38,7 +43,7 @@ export type SSEClientTransportOptions = {
    * Customizes recurring POST requests to the server.
    */
   requestInit?: RequestInit;
-};
+}
 
 /**
  * Client transport for SSE: this will connect to a server using Server-Sent Events for receiving
@@ -56,10 +61,7 @@ export class SSEClientTransport implements Transport {
   onerror?: (error: Error) => void;
   onmessage?: (message: JSONRPCMessage) => void;
 
-  constructor(
-    url: URL,
-    opts?: SSEClientTransportOptions,
-  ) {
+  constructor(url: URL, opts?: SSEClientTransportOptions) {
     this._url = url;
     this._eventSourceInit = opts?.eventSourceInit;
     this._requestInit = opts?.requestInit;
@@ -76,19 +78,21 @@ export class SSEClientTransport implements Transport {
       this._eventSource = new EventSource(
         this._url.href,
         this._eventSourceInit ?? {
-          fetch: (url, init) => this._commonHeaders().then((headers) => fetch(url, {
-            ...init,
-            headers: {
-              ...headers,
-              Accept: "text/event-stream"
-            }
-          })),
-        },
+          fetch: (url, init) =>
+            this._commonHeaders().then((headers) =>
+              fetch(url, {
+                ...init,
+                headers: {
+                  ...headers,
+                  Accept: 'text/event-stream',
+                },
+              })
+            ),
+        }
       );
       this._abortController = new AbortController();
 
       this._eventSource.onerror = (event) => {
-
         const error = new SseError(event.code, event.message, event);
         reject(error);
         this.onerror?.(error);
@@ -98,14 +102,14 @@ export class SSEClientTransport implements Transport {
         // The connection is open, but we need to wait for the endpoint to be received.
       };
 
-      this._eventSource.addEventListener("endpoint", (event: Event) => {
+      this._eventSource.addEventListener('endpoint', (event: Event) => {
         const messageEvent = event as MessageEvent;
 
         try {
           this._endpoint = new URL(messageEvent.data, this._url);
           if (this._endpoint.origin !== this._url.origin) {
             throw new Error(
-              `Endpoint origin does not match connection origin: ${this._endpoint.origin}`,
+              `Endpoint origin does not match connection origin: ${this._endpoint.origin}`
             );
           }
         } catch (error) {
@@ -137,7 +141,7 @@ export class SSEClientTransport implements Transport {
   async start() {
     if (this._eventSource) {
       throw new Error(
-        "SSEClientTransport already started! If using Client class, note that connect() calls start() automatically.",
+        'SSEClientTransport already started! If using Client class, note that connect() calls start() automatically.'
       );
     }
 
@@ -152,16 +156,16 @@ export class SSEClientTransport implements Transport {
 
   async send(message: JSONRPCMessage): Promise<void> {
     if (!this._endpoint) {
-      throw new Error("Not connected");
+      throw new Error('Not connected');
     }
 
     try {
       const commonHeaders = await this._commonHeaders();
       const headers = new Headers({ ...commonHeaders, ...this._requestInit?.headers });
-      headers.set("content-type", "application/json");
+      headers.set('content-type', 'application/json');
       const init = {
         ...this._requestInit,
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify(message),
         signal: this._abortController?.signal,
@@ -170,9 +174,7 @@ export class SSEClientTransport implements Transport {
       const response = await fetch(this._endpoint, init);
       if (!response.ok) {
         const text = await response.text().catch(() => null);
-        throw new Error(
-          `Error POSTing to endpoint (HTTP ${response.status}): ${text}`,
-        );
+        throw new Error(`Error POSTing to endpoint (HTTP ${response.status}): ${text}`);
       }
     } catch (error) {
       this.onerror?.(error as Error);

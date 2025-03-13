@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { InternalIntegrationServices } from '@kbn/wci-common';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-
-interface SearchResult {}
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export function getMcpServer(
-  configuration: Record<string, any>,
-  services: InternalIntegrationServices
-): McpServer {
+export function createMcpServer({
+  configuration,
+  elasticsearchClient,
+  logger,
+}: {
+  configuration: Record<string, any>;
+  elasticsearchClient: ElasticsearchClient;
+  logger: Logger;
+}): McpServer {
   const server = new McpServer({
     name: 'wci-salesforce',
     version: '1.0.0',
   });
 
   server.tool('search', 'search on HR docs', { query: z.string() }, async ({ query }) => {
-    services.logger.info(`Searching for ${query}`);
+    logger.info(`Searching for ${query}`);
 
     // use advanced technology to simulate long running tools for demo
     await delay(4000);
 
-    const result = await services.elasticsearchClient.search<SearchResult>({
+    const result = await elasticsearchClient.search({
       index: 'semantic_text_docs_dense3',
       query: {
         semantic: {
@@ -48,7 +51,7 @@ export function getMcpServer(
       },
     });
 
-    services.logger.info(`Found ${result.hits.hits.length} hits`);
+    logger.info(`Found ${result.hits.hits.length} hits`);
 
     const contentFragments = result.hits.hits.map((hit) => {
       return {

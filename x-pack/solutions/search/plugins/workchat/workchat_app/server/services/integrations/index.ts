@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export enum IntegrationType {
-  salesforce = 'salesforce',
-  custom = 'custom',
-}
+export { IntegrationRegistry } from './integration_registry';
+export { IntegrationsService } from './integrations_service';
+export { registerInternalIntegrationTypes } from './integration_types';

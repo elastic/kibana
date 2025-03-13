@@ -21,6 +21,7 @@ import {
   AgentFactory,
   ChatService,
 } from './services';
+import { IntegrationRegistry, registerInternalIntegrationTypes } from './services/integrations';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -38,6 +39,7 @@ export class WorkChatAppPlugin
     >
 {
   private readonly logger: LoggerFactory;
+  private readonly integrationRegistry = new IntegrationRegistry();
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {
@@ -47,7 +49,7 @@ export class WorkChatAppPlugin
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies>,
     pluginsDependencies: WorkChatAppPluginSetupDependencies
-  ) {
+  ): WorkChatAppPluginSetup {
     const router = core.http.createRouter();
     registerRoutes({
       core,
@@ -63,16 +65,27 @@ export class WorkChatAppPlugin
 
     registerTypes({ savedObjects: core.savedObjects });
 
-    return {};
+    registerInternalIntegrationTypes({ registry: this.integrationRegistry });
+
+    return {
+      integrations: {
+        register: (integration) => {
+          return this.integrationRegistry.register(integration);
+        },
+      },
+    };
   }
 
-  public start(core: CoreStart, pluginsDependencies: WorkChatAppPluginStartDependencies) {
-    const { wciSalesforce } = pluginsDependencies;
+  public start(
+    core: CoreStart,
+    pluginsDependencies: WorkChatAppPluginStartDependencies
+  ): WorkChatAppPluginStart {
+    this.integrationRegistry.blockRegistration();
 
     const integrationsService = new IntegrationsService({
       logger: this.logger.get('services.integrations'),
-      integrationPlugins: [wciSalesforce.integration],
       elasticsearch: core.elasticsearch,
+      registry: this.integrationRegistry,
     });
 
     const conversationService = new ConversationServiceImpl({

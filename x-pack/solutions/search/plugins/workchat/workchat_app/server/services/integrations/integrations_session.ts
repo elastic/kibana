@@ -5,62 +5,73 @@
  * 2.0.
  */
 
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
-import { InternalIntegrationServices } from '@kbn/wci-common';
+import type { Logger } from '@kbn/core/server';
 import { IntegrationToolInputSchema } from '../../types';
 import { IntegrationTool } from '../../types';
-import { Integration } from './integration';
+import type { IntegrationWithMeta } from './types';
 
-/*
-    This class is used to manage the integrations session.
-    It is responsible for connecting to the integrations (internal & external) and executing tools.
-    It also provides a way to get all the tools from all the integrations.
+const TOOL_NAME_SEPARATOR = '___';
 
-For internal based integrations:
-
-    At plugin start:
-        - Integrations are initialized
-        - MCP server is not created
-
-    At Chat session start:
-        - MCP server is created, with internal services (actions, elasticsearch) passed to it
-
-    At Chat session end:
-        - MCP server is stopped
-
-For external (SSE) based integrations:
-
-    At plugin start:
-        - Integrations are initialized
-        - MCP isn't connected
-
-    At Chat session start:
-        - MCP server is connected, passing in authentication token for the user
-        - MCP server deals with own internal services and manages own API Keys (Example: API key to access elasticsearch)
-
-*/
+/**
+ * This class is used to manage the integrations session.
+ * It is responsible for connecting to the integrations (internal & external) and executing tools.
+ * It also provides a way to get all the tools from all the integrations.
+ *
+ * ## Internal-based Integrations:
+ *
+ * - **At plugin start:**
+ *   - Integrations are initialized.
+ *   - MCP server is not created.
+ *
+ * - **At Chat session start:**
+ *   - MCP server is created, with internal services (actions, Elasticsearch) passed to it.
+ *
+ * - **At Chat session end:**
+ *   - MCP server is stopped.
+ *
+ * ## External (SSE)-based Integrations:
+ *
+ * - **At plugin start:**
+ *   - Integrations are initialized.
+ *   - MCP isn't connected.
+ *
+ * - **At Chat session start:**
+ *   - MCP server is connected, passing in an authentication token for the user.
+ *   - MCP server manages its own internal services and API keys
+ *     (e.g., API key to access Elasticsearch).
+ */
 export class IntegrationsSession {
-  static TOOL_NAME_SEPARATOR = '___';
-  private clients: Record<string, Client> = {};
+  private readonly integrations: IntegrationWithMeta[];
+  private readonly logger: Logger;
+
+  private sessionState: Record<string, IntegrationState> = {};
   private connected = false;
 
-  constructor(public services: InternalIntegrationServices, public integrations: Integration[]) {}
+  constructor({ integrations, logger }: { integrations: IntegrationWithMeta[]; logger: Logger }) {
+    this.integrations = integrations;
+    this.logger = logger;
+  }
 
   private async ensureConnected() {
     if (this.connected) {
       return;
     }
 
-    this.clients = await this.integrations.reduce(async (accPromise, integration) => {
+    this.sessionState = await this.integrations.reduce(async (accPromise, integration) => {
       const acc = await accPromise;
       try {
-        acc[integration.id] = await integration.connect(this.services);
+        const integClient = integration.client;
+        acc[integration.id] = {
+          client: await integClient.connect(),
+          disconnect: integClient.disconnect,
+        };
       } catch (e) {
-        this.services.logger.warn(`Error connecting integration: ${integration.id}`);
+        this.logger.warn(`Error connecting integration: ${integration.id}`);
       }
       return acc;
-    }, Promise.resolve<Record<string, Client>>({}));
+    }, Promise.resolve<Record<string, IntegrationState>>({}));
 
     this.connected = true;
   }
@@ -69,20 +80,20 @@ export class IntegrationsSession {
     await this.ensureConnected();
 
     const toolCalls = await Promise.all(
-      Object.keys(this.clients).map(async (clientId) => {
+      Object.keys(this.sessionState).map(async (clientId) => {
         try {
-          const client = this.clients[clientId];
+          const client = this.sessionState[clientId].client;
           const toolsResponse = await client.listTools();
           if (toolsResponse && toolsResponse.tools && Array.isArray(toolsResponse.tools)) {
             return toolsResponse.tools.map((tool) => ({
-              name: `${clientId}${IntegrationsSession.TOOL_NAME_SEPARATOR}${tool.name}`,
+              name: `${clientId}${TOOL_NAME_SEPARATOR}${tool.name}`,
               description: tool.description || '',
               inputSchema: (tool.inputSchema || {}) as JsonSchemaObject,
             }));
           }
           return [];
         } catch (err) {
-          this.services.logger.warn(`Error fetching tools for client: ${clientId}`);
+          this.logger.warn(`Error fetching tools for client: ${clientId}`);
           return [];
         }
       })
@@ -94,12 +105,12 @@ export class IntegrationsSession {
   async executeTool(serverToolName: string, params: IntegrationToolInputSchema) {
     await this.ensureConnected();
 
-    const [clientKey, toolName] = serverToolName.split(IntegrationsSession.TOOL_NAME_SEPARATOR);
-    const client = this.clients[clientKey];
-    if (!client) {
+    const [clientKey, toolName] = serverToolName.split(TOOL_NAME_SEPARATOR);
+    const integration = this.sessionState[clientKey];
+    if (!integration) {
       throw new Error(`Client not found: ${clientKey}`);
     }
-    return client.callTool({
+    return integration.client.callTool({
       name: toolName,
       arguments: params,
     });
@@ -110,8 +121,13 @@ export class IntegrationsSession {
       return;
     }
 
-    await Promise.all(Object.values(this.clients).map((client) => client.close()));
-    this.clients = {};
+    await Promise.all(Object.values(this.sessionState).map((session) => session.disconnect()));
+    this.sessionState = {};
     this.connected = false;
   }
+}
+
+interface IntegrationState {
+  client: Client;
+  disconnect: () => Promise<void>;
 }

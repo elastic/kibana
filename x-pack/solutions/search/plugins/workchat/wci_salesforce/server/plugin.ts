@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-
+import type {
+  CoreStart,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 import type {
   WCISalesforcePluginStart,
   WCISalesforcePluginSetup,
   WCISalesforcePluginSetupDependencies,
-  WCISalesforcePluginStartDependencies
+  WCISalesforcePluginStartDependencies,
 } from './types';
-import { getMcpServer } from './mcp_server';
-import { IntegrationTypes } from '@kbn/wci-common';
+import { getSalesforceIntegrationDefinition } from './integration';
 
 export class WCISalesforcePlugin
   implements
@@ -25,18 +29,30 @@ export class WCISalesforcePlugin
       WCISalesforcePluginStartDependencies
     >
 {
-  constructor(context: PluginInitializerContext) {}
+  private readonly logger: Logger;
 
-  public setup(core: CoreSetup, pluginsDependencies: WCISalesforcePluginSetupDependencies) {
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+  }
+
+  public setup(
+    core: CoreSetup,
+    { workchatApp }: WCISalesforcePluginSetupDependencies
+  ): WCISalesforcePluginSetup {
+    workchatApp.integrations.register(
+      getSalesforceIntegrationDefinition({
+        core,
+        logger: this.logger,
+      })
+    );
+
     return {};
   }
 
-  public start(core: CoreStart, pluginsDependencies: WCISalesforcePluginStartDependencies) {
-    return {
-      integration: {
-        mcpServer: getMcpServer,
-        name: IntegrationTypes.Salesforce
-      }
-    };
+  public start(
+    core: CoreStart,
+    pluginsDependencies: WCISalesforcePluginStartDependencies
+  ): WCISalesforcePluginStart {
+    return {};
   }
 }
