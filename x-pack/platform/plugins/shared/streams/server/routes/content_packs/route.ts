@@ -7,7 +7,6 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
-import { createServerRoute } from '../create_server_route';
 import {
   createConcatStream,
   createListStream,
@@ -15,9 +14,8 @@ import {
   createPromiseFromStreams,
 } from '@kbn/utils';
 import { createSavedObjectsStreamFromNdJson } from '@kbn/core/packages/saved-objects/server-internal/src/routes/utils';
+import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
-
-const PLACEHOLDER = '__CONTENT_PACK_INDEX_PATTERN__';
 
 const downloadContentPacksRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/content_packs',
@@ -37,7 +35,10 @@ const downloadContentPacksRoute = createServerRoute({
     },
   },
   async handler({ params, request, response, getScopedClients, context }) {
-    const { assetClient, soClient } = await getScopedClients({ request });
+    const { assetClient, soClient, streamsClient } = await getScopedClients({ request });
+
+    await streamsClient.ensureStream(params.path.name);
+
     const dashboards = await assetClient
       .getAssets({ entityId: params.path.name, entityType: 'stream' })
       .then((assets) => assets.filter(({ assetType }) => assetType === 'dashboard'));
@@ -54,9 +55,8 @@ const downloadContentPacksRoute = createServerRoute({
 
     const savedObjects: string[] = await createPromiseFromStreams([
       exportStream,
-      createMapStream((obj: unknown) => {
-        const str = JSON.stringify(obj);
-        return str.replaceAll(params.path.name, PLACEHOLDER);
+      createMapStream((savedObject) => {
+        return JSON.stringify(savedObject);
       }),
       createConcatStream([]),
     ]);
@@ -64,7 +64,7 @@ const downloadContentPacksRoute = createServerRoute({
     return response.ok({
       body: savedObjects.join('\n'),
       headers: {
-        'Content-Disposition': `attachment; filename="export.ndjson"`,
+        'Content-Disposition': `attachment; filename="content_pack.ndjson"`,
         'Content-Type': 'application/ndjson',
       },
     });
@@ -95,15 +95,13 @@ const uploadContentPacksRoute = createServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  async handler({ params, request, response, getScopedClients, context }) {
-    const { assetClient, soClient } = await getScopedClients({ request });
+  async handler({ params, request, getScopedClients, context }) {
+    const { assetClient, soClient, streamsClient } = await getScopedClients({ request });
+
+    await streamsClient.ensureStream(params.path.name);
 
     const updatedSavedObjectsStream = await createPromiseFromStreams([
       await createSavedObjectsStreamFromNdJson(params.body.content_pack),
-      createMapStream((savedObject: unknown) => {
-        const str = JSON.stringify(savedObject);
-        return JSON.parse(str.replaceAll(PLACEHOLDER, params.path.name));
-      }),
       createConcatStream([]),
     ]);
 
@@ -114,22 +112,23 @@ const uploadContentPacksRoute = createServerRoute({
       overwrite: true,
     });
 
-    if (successResults?.length) {
-      await Promise.all(
-        successResults
-          .filter((so) => so.type === 'dashboard')
-          .map((so) =>
-            assetClient.linkAsset({
-              entityId: params.path.name,
-              entityType: 'stream',
-              assetType: 'dashboard',
-              assetId: so.destinationId ?? so.id,
-            })
-          )
+    const createdAssets = (successResults ?? [])
+      .filter((savedObject) => savedObject.type === 'dashboard')
+      .map((dashboard) => ({
+        assetType: 'dashboard' as const,
+        assetId: dashboard.destinationId ?? dashboard.id,
+      }));
+
+    if (createdAssets.length > 0) {
+      await assetClient.bulk(
+        { entityId: params.path.name, entityType: 'stream' },
+        createdAssets.map((asset) => ({
+          index: { asset },
+        }))
       );
     }
 
-    return response.ok();
+    return { errors, created: createdAssets };
   },
 });
 
