@@ -38,6 +38,7 @@ import {
   createEsqlDataSource,
   DataSourceType,
   isDataSourceType,
+  isEsqlSource,
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import type { InternalStateStore } from './redux';
@@ -383,6 +384,11 @@ export function getInitialState({
   // https://github.com/elastic/kibana/issues/122555
   if (typeof mergedState.hideChart !== 'boolean') {
     mergedState.hideChart = undefined;
+  }
+
+  // Don't allow URL state to overwrite the data source if there's an ES|QL query
+  if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
+    mergedState.dataSource = createEsqlDataSource();
   }
 
   return handleSourceColumnState(mergedState, services.uiSettings);
