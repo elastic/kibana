@@ -1,5 +1,10 @@
 # Common information about prebuilt rules <!-- omit from toc -->
 
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
+
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](#features).
+
 ## Table of contents <!-- omit from toc -->
 
 <!--
@@ -11,8 +16,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Features](#features)
 - [Common terminology](#common-terminology)
 - [Common assumptions](#common-assumptions)
-- [Common non-functional requirements](#common-non-functional-requirements)
-- [Common functional requirements](#common-functional-requirements)
+- [Common technical requirements](#common-technical-requirements)
+- [Common product requirements](#common-product-requirements)
+  - [Customizable rule fields](#customizable-rule-fields)
+  - [Non-customizable rule fields](#non-customizable-rule-fields)
 
 ## Tickets
 
@@ -95,8 +102,8 @@ Terminology related to prebuilt rule customization:
   - For a customized field, `current_version.field` != `base_version.field`.
 - **Non-customized field**: a prebuilt rule's field that has the original value from the originally installed prebuilt rule.
   - For a non-customized field, `current_version.field` == `base_version.field`.
-- **Customizable rule field**: a rule field that is able to be customized on a prebuilt rule. A comprehenseive list can be found in `./shared_assets/customizable_rule_fields.md`.
-- **Non-customizable rule field**: a rule field that is unable to be customized on a prebuilt rule. A comprehenseive list can be found in `./shared_assets/non_customizable_rule_fields.md`.
+- **Customizable rule field**: a rule field that is able to be customized on a prebuilt rule. A comprehenseive list can be found [below](#customizable-rule-fields).
+- **Non-customizable rule field**: a rule field that is unable to be customized on a prebuilt rule. A comprehenseive list can be found [below](#non-customizable-rule-fields).
 
 Terminology related to the "rule source" object:
 
@@ -109,6 +116,8 @@ Terminology related to UI and UX:
 
 ## Common assumptions
 
+**Assumptions about test environments and scenarios** outlined in all of the test plans related to prebuilt rules.
+
 Unless explicitly indicated otherwise:
 
 - Scenarios in the test plans only apply to prebuilt detection rules. Some scenarios may apply to both prebuilt and custom detection rules, in which case it should be clearly stated.
@@ -119,7 +128,9 @@ Unless explicitly indicated otherwise:
   - on the `Essentials` tier in a Serverless Security environment.
 - User has the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
 
-## Common non-functional requirements
+## Common technical requirements
+
+**Non-functional requirements** for the functionality of prebuilt rules. These apply to all of / most of the prebuilt rules workflows and test plans.
 
 - Package installation, rule installation and rule upgrade workflows should work:
   - regardless of the package type: with historical rule versions or without;
@@ -128,6 +139,66 @@ Unless explicitly indicated otherwise:
 - Kibana should not crash with Out Of Memory exception during package installation.
 - For test purposes, it should be possible to use detection rules package versions lower than the latest.
 
-## Common functional requirements
+## Common product requirements
 
-TBD
+**Functional requirements** for the functionality of prebuilt rules. These apply to all of / most of the prebuilt rules workflows and test plans.
+
+### Customizable rule fields
+
+These are the fields of prebuilt rules that users should be able to customize:
+
+| Rule type        | Field name in UI          | Diffable rule field       |
+| ---------------- | ------------------------- | ------------------------- |
+| All rule types   | Rule name                 | `name`                    |
+| All rule types   | Rule description          | `description`             |
+| All rule types   | Tags                      | `tags`                    |
+| All rule types   | Default severity          | `severity`                |
+| All rule types   | Severity Override         | `severity_mapping`        |
+| All rule types   | Default risk score        | `risk_score`              |
+| All rule types   | Risk score override       | `risk_score_mapping`      |
+| All rule types   | Reference URLs            | `references`              |
+| All rule types   | False positive examples   | `false_positives`         |
+| All rule types   | MITRE ATT&CK™ threats     | `threat`                  |
+| All rule types   | Setup guide               | `setup`                   |
+| All rule types   | Investigation guide       | `note`                    |
+| All rule types   | Related integrations      | `related_integrations`    |
+| All rule types   | Required fields           | `required_fields`         |
+| All rule types   | Rule schedule             | `rule_schedule`           |
+| All rule types   | Max alerts per run        | `max_signals`             |
+| All rule types   | Rule name override        | `rule_name_override`      |
+| All rule types   | Timestamp override        | `timestamp_override`      |
+| All rule types   | Timeline template         | `timeline_template`       |
+| All rule types   | Building block `*`        | `building_block`          |
+| All rule types   | Investigation fields      | `investigation_fields`    |
+| All rule types   | Data source `**`          | `data_source`             |
+| All rule types   | Suppress alerts           | `alert_suppression`       |
+| Custom Query     | Custom query              | `kql_query`               |
+| Saved Query      | Custom query              | `kql_query`               |
+| EQL              | EQL query                 | `eql_query`               |
+| ESQL             | ESQL query                | `esql_query`              |
+| Threat Match     | Custom query              | `kql_query`               |
+| Threat Match     | Indicator index patterns  | `threat_index`            |
+| Threat Match     | Indicator index query     | `threat_query`            |
+| Threat Match     | Indicator mapping         | `threat_mapping`          |
+| Threat Match     | Indicator prefix override | `threat_indicator_path`   |
+| Threshold        | Custom query              | `kql_query`               |
+| Threshold        | Threshold config          | `threshold`               |
+| Machine Learning | Machine Learning job      | `machine_learning_job_id` |
+| Machine Learning | Anomaly score threshold   | `anomaly_threshold`       |
+| New Terms        | Custom query              | `kql_query`               |
+| New Terms        | Fields                    | `new_terms_fields`        |
+| New Terms        | History Window Size       | `history_window_start`    |
+
+- `*` Building block field is used to mark alerts as building block alerts.
+- `**` Data Source represents index patterns or a data view. Machine Learning rules don't have data_source field.
+
+### Non-customizable rule fields
+
+These are the fields of prebuilt rules that users should not be able to customize:
+
+| Field name   | Diffable rule field |
+| ------------ | ------------------- |
+| Rule type    | `type`              |
+| Rule version | `version`           |
+| Rule author  | `author`            |
+| Rule license | `license`           |

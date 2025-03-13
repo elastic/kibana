@@ -39,54 +39,52 @@ export const useStepMetrics = (step?: JourneyStep) => {
   const { data } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'synthetics.type': ['step/metrics', 'step/end'],
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'synthetics.type': ['step/metrics', 'step/end'],
               },
-              {
-                term: {
-                  'monitor.check_group': checkGroupId,
-                },
+            },
+            {
+              term: {
+                'monitor.check_group': checkGroupId,
               },
-              {
-                term: {
-                  'synthetics.step.index': Number(stepIndex),
-                },
+            },
+            {
+              term: {
+                'synthetics.step.index': Number(stepIndex),
               },
-            ],
+            },
+          ],
+        },
+      },
+      aggs: {
+        fcp: {
+          sum: {
+            field: SYNTHETICS_FCP,
           },
         },
-        aggs: {
-          fcp: {
-            sum: {
-              field: SYNTHETICS_FCP,
-            },
+        lcp: {
+          sum: {
+            field: SYNTHETICS_LCP,
           },
-          lcp: {
-            sum: {
-              field: SYNTHETICS_LCP,
-            },
+        },
+        cls: {
+          sum: {
+            field: SYNTHETICS_CLS,
           },
-          cls: {
-            sum: {
-              field: SYNTHETICS_CLS,
-            },
+        },
+        dcl: {
+          sum: {
+            field: SYNTHETICS_DCL,
           },
-          dcl: {
-            sum: {
-              field: SYNTHETICS_DCL,
-            },
-          },
-          totalDuration: {
-            sum: {
-              field: SYNTHETICS_STEP_DURATION,
-            },
+        },
+        totalDuration: {
+          sum: {
+            field: SYNTHETICS_STEP_DURATION,
           },
         },
       },
@@ -98,39 +96,37 @@ export const useStepMetrics = (step?: JourneyStep) => {
   const { data: transferData } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        runtime_mappings: {
-          'synthetics.payload.transfer_size': {
-            type: 'double',
-          },
+      size: 0,
+      runtime_mappings: {
+        'synthetics.payload.transfer_size': {
+          type: 'double',
         },
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'synthetics.type': 'journey/network_info',
-                },
+      },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'synthetics.type': 'journey/network_info',
               },
-              {
-                term: {
-                  'monitor.check_group': checkGroupId,
-                },
-              },
-              {
-                term: {
-                  'synthetics.step.index': Number(stepIndex),
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          transferSize: {
-            sum: {
-              field: 'synthetics.payload.transfer_size',
             },
+            {
+              term: {
+                'monitor.check_group': checkGroupId,
+              },
+            },
+            {
+              term: {
+                'synthetics.step.index': Number(stepIndex),
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        transferSize: {
+          sum: {
+            field: 'synthetics.payload.transfer_size',
           },
         },
       },

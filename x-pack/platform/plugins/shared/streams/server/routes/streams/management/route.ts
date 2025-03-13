@@ -144,14 +144,14 @@ export const sampleStreamRoute = createServerRoute({
         ? Object.fromEntries(
             getFields(condition).map((field) => [
               field.name,
-              { type: field.type === 'string' ? 'keyword' : 'double' },
+              { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
             ])
           )
         : undefined,
       sort: [
         {
           '@timestamp': {
-            order: 'desc',
+            order: 'desc' as const,
           },
         },
       ],

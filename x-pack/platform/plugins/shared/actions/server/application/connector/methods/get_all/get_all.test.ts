@@ -6,7 +6,7 @@
  */
 
 import { ActionsClient } from '../../../../actions_client';
-import { ActionsAuthorization } from '../../../../authorization/actions_authorization';
+import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { getOAuthJwtAccessToken } from '../../../../lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../../../../lib/get_oauth_client_credentials_access_token';
@@ -21,9 +21,9 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import { getAllUnsecured } from './get_all';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
@@ -842,62 +842,29 @@ describe('getAllUnsecured()', () => {
     expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith({
       index: kibanaIndices,
       ignore_unavailable: true,
-      body: {
-        aggs: {
-          '1': {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': '1',
-                                },
+      aggs: {
+        '1': {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': '1',
                               },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
                               },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          testPreconfigured: {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': 'testPreconfigured',
-                                },
-                              },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
-                              },
-                            ],
-                          },
+                            },
+                          ],
                         },
                       },
                     },
@@ -907,10 +874,41 @@ describe('getAllUnsecured()', () => {
             },
           },
         },
-        size: 0,
-        query: {
-          match_all: {},
+        testPreconfigured: {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': 'testPreconfigured',
+                              },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
+      },
+      size: 0,
+      query: {
+        match_all: {},
       },
     });
 
@@ -1020,62 +1018,29 @@ describe('getAllUnsecured()', () => {
     expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith({
       index: kibanaIndices,
       ignore_unavailable: true,
-      body: {
-        aggs: {
-          '1': {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': '1',
-                                },
+      aggs: {
+        '1': {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': '1',
                               },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
                               },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          testPreconfigured: {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': 'testPreconfigured',
-                                },
-                              },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
-                              },
-                            ],
-                          },
+                            },
+                          ],
                         },
                       },
                     },
@@ -1085,10 +1050,41 @@ describe('getAllUnsecured()', () => {
             },
           },
         },
-        size: 0,
-        query: {
-          match_all: {},
+        testPreconfigured: {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': 'testPreconfigured',
+                              },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
+      },
+      size: 0,
+      query: {
+        match_all: {},
       },
     });
 

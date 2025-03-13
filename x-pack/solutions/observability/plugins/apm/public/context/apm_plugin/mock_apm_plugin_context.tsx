@@ -92,6 +92,7 @@ const mockCore = merge({}, coreStart, {
 const mockConfig: ConfigSchema = {
   serviceMapEnabled: true,
   ui: {
+    serviceMapApiV2Enabled: false,
     enabled: false,
   },
   latestAgentVersionsUrl: '',
@@ -207,6 +208,9 @@ export function MockApmPluginContextWrapper({
   if (contextValue.core) {
     createCallApmApi(contextValue.core);
   }
+
+  performance.mark = jest.fn();
+  performance.clearMeasures = jest.fn();
 
   const contextHistory = useHistory();
 

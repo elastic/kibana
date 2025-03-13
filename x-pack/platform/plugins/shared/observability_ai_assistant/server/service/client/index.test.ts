@@ -130,7 +130,6 @@ describe('Observability AI Assistant client', () => {
     getActions: jest.fn(),
     validate: jest.fn(),
     getInstructions: jest.fn(),
-    getAdhocInstructions: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
@@ -158,6 +157,12 @@ describe('Observability AI Assistant client', () => {
     functionClientMock.hasAction.mockReturnValue(false);
     functionClientMock.getActions.mockReturnValue([]);
 
+    internalUserEsClientMock.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    } as any);
+
     currentUserEsClientMock.search.mockResolvedValue({
       hits: {
         hits: [],
@@ -171,7 +176,6 @@ describe('Observability AI Assistant client', () => {
     knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
-    functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
@@ -510,6 +514,9 @@ describe('Observability AI Assistant client', () => {
                   labels: {},
                   numeric_labels: {},
                   public: false,
+                  user: {
+                    name: 'johndoe',
+                  },
                   messages: [user('How many alerts do I have?')],
                 },
               },
@@ -766,6 +773,7 @@ describe('Observability AI Assistant client', () => {
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
+          logger: expect.any(Object),
           connectorId: 'foo',
           messages: [
             {

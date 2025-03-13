@@ -36,6 +36,7 @@ paths:
             $ref: '../model/components.schema.yaml#/components/schemas/SortFieldTimeline'
         - in: query
           name: sort_order
+          description: Whether to sort the results `ascending` or `descending`
           schema:
             type: string
             enum:
@@ -43,16 +44,19 @@ paths:
               - desc
         - in: query
           name: page_size
+          description: How many results should returned at once
           schema:
             nullable: true
             type: string
         - in: query
           name: page_index
+          description: How many pages should be skipped
           schema:
             nullable: true
             type: string
         - in: query
           name: search
+          description: Allows to search for timelines by their title
           schema:
             nullable: true
             type: string
@@ -68,10 +72,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [
-                  timeline,
-                  totalCount,
-                ]
+                required: [timeline, totalCount]
                 properties:
                   timeline:
                     type: array
@@ -79,16 +80,28 @@ paths:
                       $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
                   totalCount:
                     type: number
+                    description: The total amount of results
+                    example: 100
                   defaultTimelineCount:
                     type: number
+                    description: The amount of `default` type Timelines in the results
+                    example: 90
                   templateTimelineCount:
                     type: number
+                    description: The amount of Timeline templates in the results
+                    example: 10
                   favoriteCount:
                     type: number
+                    description: The amount of favorited Timelines
+                    example: 5
                   elasticTemplateTimelineCount:
                     type: number
+                    description: The amount of Elastic's Timeline templates in the results
+                    example: 8
                   customTemplateTimelineCount:
                     type: number
+                    description: The amount of custom Timeline templates in the results
+                    example: 2
         '400':
           description: Bad request. The user supplied invalid data.
           content:
@@ -98,5 +111,8 @@ paths:
                 properties:
                   body:
                     type: string
+                    description: The error message
+                    example: get timeline error
                   statusCode:
                     type: number
+                    example: 405
