@@ -30,11 +30,18 @@ jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
   useOnExpandableFlyoutClose: jest.fn(),
 }));
 
-const entity = {
+const entity: EntityEcs = {
   id: '123',
   name: 'test-entity',
-  type: 'universal',
-  timestamp: new Date(),
+  type: 'container',
+  tags: ['tag1', 'tag2'],
+  labels: { label1: 'value1', label2: 'value2' },
+  criticality: 'high_impact',
+  category: 'test',
+};
+
+const source = {
+  '@timestamp': '2025-10-01T12:00:00.000Z',
 };
 
 describe('useDynamicEntityFlyout', () => {
@@ -66,16 +73,18 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
-        entity: { ...entity, type: 'universal', name: 'testUniversal' },
+        entity: { ...entity, type: 'container', name: 'testUniversal' },
+        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
     });
 
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UniversalEntityPanelKey,
-        params: { entity: { ...entity, type: 'universal', name: 'testUniversal' } },
+        params: { entity: { ...entity, type: 'container', name: 'testUniversal' }, source },
       },
     });
   });
@@ -88,11 +97,13 @@ describe('useDynamicEntityFlyout', () => {
     act(() => {
       result.current.openDynamicFlyout({
         entity: { ...entity, type: 'user', name: 'testUser' },
+        source,
         scopeId: 'scope1',
         contextId: 'context1',
       });
     });
 
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UserPanelKey,
@@ -114,6 +125,7 @@ describe('useDynamicEntityFlyout', () => {
       });
     });
 
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: HostPanelKey,
@@ -135,6 +147,7 @@ describe('useDynamicEntityFlyout', () => {
       });
     });
 
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: ServicePanelKey,
@@ -149,7 +162,7 @@ describe('useDynamicEntityFlyout', () => {
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'user' } as EntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'user' } as EntityEcs, source });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -161,7 +174,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'host' } as EntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'host' } as EntityEcs, source });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -173,7 +186,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'service' } as EntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'service' } as EntityEcs, source });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -183,6 +196,8 @@ describe('useDynamicEntityFlyout', () => {
       })
     );
     expect(onFlyoutCloseMock).toHaveBeenCalled();
+
+    expect(openFlyoutMock).toHaveBeenCalledTimes(0);
   });
 
   it('should close the flyout when closeDynamicFlyout is called', () => {
@@ -195,5 +210,6 @@ describe('useDynamicEntityFlyout', () => {
     });
 
     expect(closeFlyoutMock).toHaveBeenCalled();
+    expect(openFlyoutMock).toHaveBeenCalledTimes(0);
   });
 });

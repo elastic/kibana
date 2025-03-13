@@ -7,16 +7,20 @@
 
 import { z } from '@kbn/zod';
 import { conflict } from '@hapi/boom';
-import { BooleanFromString } from '@kbn/zod-helpers';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
 import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 
 export const enableStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_enable',
+  endpoint: 'POST /api/streams/_enable 2023-10-31',
   params: z.object({}),
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Enable streams',
+    description: 'Enables wired streams',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -43,28 +47,28 @@ export const enableStreamsRoute = createServerRoute({
 });
 
 export const disableStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/_disable',
-  params: z.object({
-    query: z
-      .object({
-        force: BooleanFromString.optional(),
-      })
-      .optional(),
-  }),
+  endpoint: 'POST /api/streams/_disable 2023-10-31',
+  params: z.object({}),
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Disable streams',
+    description:
+      'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
-      requiredPrivileges: ['streams_write'],
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   handler: async ({ request, params, getScopedClients }): Promise<DisableStreamsResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    const { force } = params?.query ?? {};
-
-    return await streamsClient.disableStreams({ force });
+    return await streamsClient.disableStreams();
   },
 });
 

@@ -63,7 +63,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
   }
 
   async disable() {
-    await this.kibana!.fetch('/api/streams/_disable?force=true', {
+    await this.kibana!.fetch('/api/streams/_disable', {
       method: 'POST',
       timeout: 5 * 60 * 1000,
       headers: {

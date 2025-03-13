@@ -2568,29 +2568,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "dashboard",
-        "id": "def-common.DashboardContainerByReferenceInput",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardContainerByReferenceInput",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          }
-        ],
-        "path": "src/platform/plugins/shared/dashboard/common/dashboard_container/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "dashboard",

@@ -55,7 +55,11 @@ import {
   syncUnwiredStreamDefinitionObjects,
   syncWiredStreamDefinitionObjects,
 } from './helpers/sync';
-import { validateAncestorFields, validateDescendantFields } from './helpers/validate_fields';
+import {
+  validateAncestorFields,
+  validateDescendantFields,
+  validateSystemFields,
+} from './helpers/validate_fields';
 import {
   validateRootStreamChanges,
   validateStreamChildrenChanges,
@@ -299,7 +303,7 @@ export class StreamsClient {
     });
 
     if (parentDefinition) {
-      const isRoutingToChild = parentDefinition.ingest.routing.find(
+      const isRoutingToChild = parentDefinition.ingest.wired.routing.find(
         (item) => item.destination === name
       );
 
@@ -309,7 +313,7 @@ export class StreamsClient {
         // The user can set the condition later on the parent
         await this.updateStreamRouting({
           definition: parentDefinition,
-          routing: parentDefinition.ingest.routing.concat({
+          routing: parentDefinition.ingest.wired.routing.concat({
             destination: name,
             if: { never: {} },
           }),
@@ -330,14 +334,14 @@ export class StreamsClient {
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
-                routing: [
-                  {
-                    destination: stream.name,
-                    if: { never: {} },
-                  },
-                ],
                 wired: {
                   fields: {},
+                  routing: [
+                    {
+                      destination: stream.name,
+                      if: { never: {} },
+                    },
+                  ],
                 },
               },
             },
@@ -534,6 +538,8 @@ export class StreamsClient {
       fields: definition.ingest.wired.fields,
     });
 
+    validateSystemFields(definition);
+
     validateDescendantFields({
       descendants,
       fields: definition.ingest.wired.fields,
@@ -543,7 +549,7 @@ export class StreamsClient {
       validateStreamChildrenChanges(existingDefinition, definition);
     }
 
-    for (const item of definition.ingest.routing) {
+    for (const item of definition.ingest.wired.routing) {
       if (descendantsById[item.destination]) {
         continue;
       }
@@ -558,9 +564,9 @@ export class StreamsClient {
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],
-            routing: [],
             wired: {
               fields: {},
+              routing: [],
             },
           },
         },
@@ -615,14 +621,21 @@ export class StreamsClient {
     if: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = asIngestStreamDefinition(await this.getStream(parent));
+    if (!isWiredStreamDefinition(parentDefinition)) {
+      throw new MalformedStreamIdError('Cannot fork a stream that is not managed');
+    }
 
     const childDefinition: WiredStreamDefinition = {
       name,
-      ingest: { lifecycle: { inherit: {} }, processing: [], routing: [], wired: { fields: {} } },
+      ingest: { lifecycle: { inherit: {} }, processing: [], wired: { fields: {}, routing: [] } },
     };
 
     // check whether root stream has a child of the given name already
-    if (parentDefinition.ingest.routing.some((item) => item.destination === childDefinition.name)) {
+    if (
+      parentDefinition.ingest.wired.routing.some(
+        (item) => item.destination === childDefinition.name
+      )
+    ) {
       throw new MalformedStreamIdError(
         `The stream with ID (${name}) already exists as a child of the parent stream`
       );
@@ -641,7 +654,7 @@ export class StreamsClient {
 
     await this.updateStreamRouting({
       definition: updatedParentDefinition!,
-      routing: parentDefinition.ingest.routing.concat({
+      routing: parentDefinition.ingest.wired.routing.concat({
         destination: name,
         if: condition,
       }),
@@ -768,7 +781,6 @@ export class StreamsClient {
       name: dataStream.name,
       ingest: {
         lifecycle: { inherit: {} },
-        routing: [],
         processing: [],
         unwired: {},
       },
@@ -830,7 +842,6 @@ export class StreamsClient {
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
-        routing: [],
         unwired: {},
       },
     }));
@@ -893,7 +904,7 @@ export class StreamsClient {
 
         await this.updateStreamRouting({
           definition: parentDefinition,
-          routing: parentDefinition.ingest.routing.filter(
+          routing: parentDefinition.ingest.wired.routing.filter(
             (item) => item.destination !== definition.name
           ),
         });
@@ -901,7 +912,7 @@ export class StreamsClient {
 
       // delete the children first, as this will update
       // the parent as well
-      for (const item of definition.ingest.routing) {
+      for (const item of definition.ingest.wired.routing) {
         await this.deleteStream(item.destination);
       }
 
@@ -1114,10 +1125,10 @@ export class StreamsClient {
     routing,
   }: {
     definition: WiredStreamDefinition;
-    routing: WiredStreamDefinition['ingest']['routing'];
+    routing: WiredStreamDefinition['ingest']['wired']['routing'];
   }) {
     const update = cloneDeep(definition);
-    update.ingest.routing = routing;
+    update.ingest.wired.routing = routing;
 
     await this.updateStoredStream(update);
 
