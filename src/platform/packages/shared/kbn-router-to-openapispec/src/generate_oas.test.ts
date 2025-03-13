@@ -471,9 +471,6 @@ describe('generateOpenApiDocument', () => {
             {
               options: {
                 access: 'public',
-                options: {
-                  oasOperationObject,
-                },
               },
             },
           ],
@@ -481,6 +478,9 @@ describe('generateOpenApiDocument', () => {
       },
       bodySchema: createSharedConfigSchema(),
     });
+
+    versionedRouters[0].getRoutes()[0].handlers[0].options!.options!.oasOperationObject =
+      oasOperationObject;
 
     const oas = await generateOpenApiDocument(
       { routers, versionedRouters },

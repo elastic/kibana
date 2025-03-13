@@ -131,8 +131,8 @@ export const processVersionedRouter = async (
 
       setXState(route.options.options?.availability, operation);
 
-      if (route.options.options?.oasOperationObject) {
-        await mergeOperation(route.options.options.oasOperationObject(), operation);
+      if (handler.options.options?.oasOperationObject) {
+        await mergeOperation(handler.options.options.oasOperationObject(), operation);
       }
 
       const path: OpenAPIV3.PathItemObject = {
