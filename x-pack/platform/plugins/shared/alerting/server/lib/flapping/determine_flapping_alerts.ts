@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { Alert } from '../../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../../types';
-import { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
+import type { Logger } from '@kbn/logging';
+import type { Alert } from '../../alert';
+import type { AlertInstanceState, AlertInstanceContext } from '../../types';
+import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 import { setFlapping } from './set_flapping';
 import { setFlappingHistoryAndTrackedAlerts } from './set_flapping_history_and_tracked_alerts';
 import { delayRecoveredFlappingAlerts } from './delay_recovered_flapping_alerts';

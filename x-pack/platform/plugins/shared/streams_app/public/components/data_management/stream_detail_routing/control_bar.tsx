@@ -57,7 +57,7 @@ export function ControlBar({
       return;
     }
 
-    return streamsRepositoryClient.fetch('POST /api/streams/{name}/_fork', {
+    return streamsRepositoryClient.fetch('POST /api/streams/{name}/_fork 2023-10-31', {
       signal,
       params: {
         path: {
@@ -96,7 +96,7 @@ export function ControlBar({
       },
     } as IngestUpsertRequest;
 
-    return streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest', {
+    return streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
       signal,
       params: {
         path: {

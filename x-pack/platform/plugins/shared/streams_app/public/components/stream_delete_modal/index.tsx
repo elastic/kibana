@@ -117,7 +117,7 @@ export function StreamDeleteModal({
             onClick={async () => {
               try {
                 setDeleteInProgress(true);
-                await streamsRepositoryClient.fetch('DELETE /api/streams/{name}', {
+                await streamsRepositoryClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
                   signal: abortController.signal,
                   params: {
                     path: {
