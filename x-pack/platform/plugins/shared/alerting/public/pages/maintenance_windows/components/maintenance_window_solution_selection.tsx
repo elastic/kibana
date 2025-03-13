@@ -38,7 +38,7 @@ const RADIO_OPTIONS = [
 ].sort((a, b) => a.id.localeCompare(b.id));
 
 export interface MaintenanceWindowSolutionSelectionProps {
-  selectedSolution: string;
+  selectedSolution?: string;
   availableSolutions: string[];
   errors?: string[];
   isLoading?: boolean;

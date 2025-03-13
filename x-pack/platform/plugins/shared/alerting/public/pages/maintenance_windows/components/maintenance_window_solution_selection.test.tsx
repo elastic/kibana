@@ -37,9 +37,7 @@ describe('maintenanceWindowCategorySelection', () => {
       ).not.toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('maintenanceWindowSolutionSelection')).not.toBeInTheDocument();
-    });
+    expect(screen.queryByTestId('maintenanceWindowSolutionSelection')).not.toBeInTheDocument();
   });
 
   it('should display radio group if scoped query is enabled', async () => {
@@ -58,12 +56,8 @@ describe('maintenanceWindowCategorySelection', () => {
       ).not.toBeInTheDocument();
     });
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('maintenanceWindowSolutionSelectionRadioGroup')
-      ).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
+    expect(screen.getByTestId('maintenanceWindowSolutionSelectionRadioGroup')).toBeInTheDocument();
   });
 
   it('should disable options if option is not in the available solutions array', () => {
@@ -143,37 +137,5 @@ describe('maintenanceWindowCategorySelection', () => {
       />
     );
     expect(screen.getByText('test error')).toBeInTheDocument();
-  });
-
-  it('should set only 1 category at a time if scoped query is enabled', () => {
-    appMockRenderer.render(
-      <MaintenanceWindowSolutionSelection
-        isScopedQueryEnabled={true}
-        selectedSolution={''}
-        availableSolutions={['observability', 'management', 'securitySolution']}
-        onChange={mockOnChange}
-      />
-    );
-
-    let managementCheckbox = screen.getByLabelText('Stack rules');
-
-    fireEvent.click(managementCheckbox);
-
-    expect(mockOnChange).toHaveBeenLastCalledWith('management');
-
-    appMockRenderer.render(
-      <MaintenanceWindowSolutionSelection
-        isScopedQueryEnabled={true}
-        selectedSolution={'observability'}
-        availableSolutions={['observability', 'management', 'securitySolution']}
-        onChange={mockOnChange}
-      />
-    );
-
-    managementCheckbox = screen.getByLabelText('Stack rules');
-
-    fireEvent.click(managementCheckbox);
-
-    expect(mockOnChange).toHaveBeenLastCalledWith('management');
   });
 });

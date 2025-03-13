@@ -96,9 +96,9 @@ describe('useGetMaintenanceWindow', () => {
     );
   });
 
-  it('should return object with a hasOldChosenSolutions is false when enabled scoped query filter', async () => {
+  it('should return an object where a hasOldChosenSolutions is false if scopedQuery is defined', async () => {
     getMaintenanceWindow.mockResolvedValue({
-      categoryIds: ['observability', 'management'],
+      categoryIds: ['observability'],
       scopedQuery: { filter: 'filter' },
     });
 

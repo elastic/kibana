@@ -30,7 +30,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { Filter } from '@kbn/es-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
@@ -50,14 +49,9 @@ import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintena
 import { MaintenanceWindowSolutionSelection } from './maintenance_window_solution_selection';
 import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
+import { VALID_CATEGORIES } from '../constants';
 
 const UseField = getUseField({ component: Field });
-
-const VALID_CATEGORIES = [
-  DEFAULT_APP_CATEGORIES.observability.id,
-  DEFAULT_APP_CATEGORIES.security.id,
-  DEFAULT_APP_CATEGORIES.management.id,
-];
 
 export interface CreateMaintenanceWindowFormProps {
   onCancel: () => void;
@@ -167,7 +161,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           formData.timezone ? formData.timezone[0] : defaultTimezone,
           formData.recurringSchedule
         ),
-        ...(formData.solutionId ? { categoryIds: [formData.solutionId] } : {}),
+        // ...(formData.solutionId ? { categoryIds: [formData.solutionId] } : {}),
+        categoryIds: formData.solutionId ? [formData.solutionId] : VALID_CATEGORIES,
         scopedQuery: scopedQueryPayload,
       };
 
@@ -254,6 +249,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     (isEnabled: boolean) => {
       if (isEnabled) {
         setFieldValue('solutionId', availableSolutions.sort()[0]);
+      } else {
+        setFieldValue('solutionId', undefined);
       }
       setIsScopedQueryEnabled(isEnabled);
     },
@@ -417,7 +414,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               <MaintenanceWindowSolutionSelection
                 isScopedQueryEnabled={isScopedQueryEnabled}
                 isLoading={isLoadingRuleTypes}
-                selectedSolution={solutionId || ''}
+                selectedSolution={solutionId ?? undefined}
                 availableSolutions={availableSolutions}
                 errors={field.errors.map((error) => error.message)}
                 onChange={onSolutionIdChange}
