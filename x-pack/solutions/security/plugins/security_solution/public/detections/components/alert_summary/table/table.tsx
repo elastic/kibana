@@ -33,7 +33,11 @@ import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_gr
 import { useDispatch } from 'react-redux';
 import type { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { GetSecurityAlertsTableProp } from '../../alerts_table/types';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type {
+  GetSecurityAlertsTableProp,
+  SecurityAlertsTableContext,
+} from '../../alerts_table/types';
 import { groupIdSelector } from '../../../../common/store/grouping/selectors';
 import { updateGroups } from '../../../../common/store/grouping/actions';
 import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
@@ -153,9 +157,40 @@ export const RenderAdditionalToolbarControls = memo(
 );
 RenderAdditionalToolbarControls.displayName = 'RenderAdditionalToolbarControls';
 
-export const ActionsCellComponent = memo(({ rowIndex, ecsAlert, leadingControlColumn }) => {
-  const Action = leadingControlColumn.rowCellRender;
-  return <>{'hello'}</>;
+export const ActionsCellComponent = memo(({ ecsAlert, legacyAlert }) => {
+  const data = useMemo<TimelineItem>(
+    () => ({
+      _id: (ecsAlert as Ecs)._id,
+      _index: (ecsAlert as Ecs)._index,
+      ecs: ecsAlert as Ecs,
+      data: legacyAlert as TimelineItem['data'],
+    }),
+    [ecsAlert, legacyAlert]
+  );
+
+  const { data: timelineNonEcsData, ecs, _id: eventId, _index: indexName } = data ?? {};
+
+  const { openFlyout } = useExpandableFlyoutApi();
+  const onOpenFlyout = useCallback(
+    () =>
+      openFlyout({
+        right: {
+          id: IOCPanelKey,
+          params: {
+            doc: ecs,
+          },
+        },
+      }),
+    [ecs, openFlyout]
+  );
+
+  return (
+    <>
+      <EuiButtonIcon iconType="expand" onClick={onOpenFlyout} size="s" color="primary" />
+      <AssistantRowControlColumn />
+      <MoreActionsRowControlColumn ecs={ecs} />
+    </>
+  );
 });
 ActionsCellComponent.displayName = 'ActionsCellComponent';
 
@@ -389,6 +424,17 @@ export const Table = memo(({ dataView, groupingFilters, showUnifiedComponents }:
 
   const getBulkActions = useMemo(() => getBulkActionsByTableType(), []);
 
+  const additionalContext: SecurityAlertsTableContext = useMemo(
+    () => ({
+      isDetails: false,
+      truncate: true,
+      isDraggable: false,
+      leadingControlColumn: leadingControlColumns[0],
+      tableType: TableId.alertsOnAlertSummaryPage,
+    }),
+    [leadingControlColumns]
+  );
+
   return (
     <>
       {showUnifiedComponents ? (
@@ -420,15 +466,18 @@ export const Table = memo(({ dataView, groupingFilters, showUnifiedComponents }:
         />
       ) : (
         <AlertsTable
+          actionsColumnWidth={98}
+          additionalContext={additionalContext}
           browserFields={browserFields}
           columns={columns}
           consumers={ALERT_TABLE_CONSUMERS}
           getBulkActions={getBulkActions}
           id={TableId.alertsOnAlertSummaryPage}
-          leadingControlColumns={leadingControlColumns}
+          // leadingControlColumns={leadingControlColumns}
           query={finalBoolQuery}
           renderAdditionalToolbarControls={renderAdditionalToolbarControls}
-          // renderActionsCell={ActionsCellComponent}
+          renderActionsCell={ActionsCellComponent}
+          // renderActionsCell={ActionsCell}
           renderCellValue={renderCellValue}
           ruleTypeIds={RULE_TYPE_IDS}
           services={services2}

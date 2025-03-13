@@ -37,7 +37,7 @@ export interface SearchBarSectionProps {
   /**
    *
    */
-  installedPackages: CustomIntegration[] | PackageListItem[];
+  packages: CustomIntegration[] | PackageListItem[];
   /**
    * TEMP: for demo purposes ONLY, toggles between old and unified components
    */
@@ -48,7 +48,7 @@ export interface SearchBarSectionProps {
  *
  */
 export const SearchBarSection = memo(
-  ({ dataView, installedPackages, showUnifiedComponents }: SearchBarSectionProps) => {
+  ({ dataView, packages, showUnifiedComponents }: SearchBarSectionProps) => {
     const dispatch = useDispatch();
     const [dateRange, setDateRange] = useState<TimeRange>(defaultTimeRange);
     const [query, setQuery] = useState<Query>(defaultQuery);
@@ -107,11 +107,11 @@ export const SearchBarSection = memo(
 
     const sources: EuiSelectableOption[] = useMemo(
       () =>
-        installedPackages.map((relatedIntegration: PackageListItem) => ({
+        packages.map((relatedIntegration: PackageListItem) => ({
           label: relatedIntegration.title,
           checked: 'on',
         })),
-      [installedPackages]
+      [packages]
     );
 
     return (

@@ -5,58 +5,50 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { Wrapper } from '../../components/alert_summary/wrapper';
-import { DATAVIEW_ERROR } from './translations';
-import { useKibana } from '../../../common/lib/kibana';
-
-const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
+import { EuiSkeletonLoading, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { css } from '@emotion/react';
+import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integrations';
+import { LandingPage } from '../../components/alert_summary/landing_page/landing_page';
 
 /**
  *
  */
 export const AlertSummaryPage = () => {
-  const { data } = useKibana().services;
-  const [dataView, setDataView] = useState<DataView>();
-  const [showUnifiedComponents, setShowUnifiedComponents] = useState<boolean>(true);
-
-  useEffect(() => {
-    let dv: DataView;
-    const createDataView = async () => {
-      dv = await data.dataViews.create(dataViewSpec);
-      setDataView(dv);
-    };
-    createDataView();
-
-    // clearing after leaving the page //TODO do we need to do that if the data discovery page is using the same??
-    return () => {
-      if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv?.id);
-      }
-    };
-  }, [data.dataViews]);
-
-  if (!dataView) {
-    return <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoKibana" size="xl" />} />;
-  }
-
-  if (!dataView.id) {
-    return <EuiEmptyPrompt iconType="error" color="danger" title={<h2>{DATAVIEW_ERROR}</h2>} />;
-  }
+  const { availableInstalledPackage, installedPackages, isLoading } = useFetchIntegrations();
 
   return (
-    <>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => setShowUnifiedComponents((t) => !t)}>
-            {showUnifiedComponents ? 'Show old components' : 'Show unified components'}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <Wrapper dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
-    </>
+    <EuiSkeletonLoading
+      isLoading={isLoading}
+      loadingContent={
+        <div
+          css={css`
+            margin: auto;
+            width: 700px;
+          `}
+        >
+          <EuiSkeletonRectangle height={400} width="100%" />
+          <EuiSpacer size="xxl" />
+          <EuiSkeletonRectangle height={40} width="100%" />
+          <EuiSpacer size="s" />
+          <EuiSkeletonRectangle height={20} width="100%" />
+          <EuiSpacer size="xl" />
+          <EuiSkeletonRectangle height={100} width="100%" />
+        </div>
+      }
+      loadedContent={
+        <>
+          <LandingPage packages={availableInstalledPackage} />
+        </>
+        // <>
+        //   {installedPackages.length > 0 ? (
+        //     <Wrapper packages={availableInstalledPackage} />
+        //   ) : (
+        //     <LandingPage packages={installedPackages} />
+        //   )}
+        // </>
+      }
+    />
   );
 };
 

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ADD_INTEGRATION = i18n.translate(
   'xpack.securitySolution.alertSummary.integrations.addIntegrationButtonLabel',
   {
-    defaultMessage: 'Add integrations',
+    defaultMessage: 'Add integration',
   }
 );
 
