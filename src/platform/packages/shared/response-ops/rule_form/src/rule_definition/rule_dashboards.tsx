@@ -8,29 +8,39 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiComboBox, EuiSplitPanel, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiComboBox, EuiSplitPanel, EuiFlexItem, EuiSpacer, EuiTitle, EuiComboBoxOptionOption } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-types';
+import { RuleFormPlugins } from '../types';
 import { dashboardServiceProvider, type DashboardItem } from './dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
 
-export const RuleDashboards = ({ plugins }) => {
+interface RuleFormPluginsProps {
+  plugins: Pick<RuleFormPlugins, 'dashboard' | 'featureFlags'>;
+}
+
+interface DashboardOption {
+  value: string;
+  label: string;
+}
+
+interface RuleTypeParamsWithDashboards extends RuleTypeParams {
+  dashboards?: Array<{ id: string }>;
+}
+
+export const RuleDashboards = ({ plugins }: RuleFormPluginsProps) => {
   const { featureFlags, dashboard: dashboardService } = plugins;
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
-  const params = formData.params as RuleTypeParams & { dashboards?: DashboardItem[] };
-
+  const params = formData.params as RuleTypeParamsWithDashboards;
   const isLinkedDashboardsEnabled = featureFlags.getBooleanValue('rca.linkedDashboards', false);
 
   const [dashboardList, setDashboardList] = useState<
-    Array<{
-      value: string;
-      label: string;
-    }>
+    Array<DashboardOption> | undefined
   >();
 
   const [selectedDashboards, setSelectedDashboards] = useState<
-    Array<{ label: string; value: string }> | undefined
+    Array<EuiComboBoxOptionOption<string>> | undefined
   >();
 
   useEffect(() => {
@@ -50,7 +60,7 @@ export const RuleDashboards = ({ plugins }) => {
     
   }, [params.dashboards, dashboardService]);
 
-  const onChange = (selectedOptions: any[]) => {
+  const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedDashboards(selectedOptions);
     dispatch({
       type: 'setParamsProperty',
