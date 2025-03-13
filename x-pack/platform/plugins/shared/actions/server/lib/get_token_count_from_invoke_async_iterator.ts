@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { encode } from 'gpt-tokenizer';
-import { Stream } from 'openai/streaming';
-import { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai/resources/chat/completions';
+import type { Stream } from 'openai/streaming';
+import type {
+  ChatCompletionMessageParam,
+  ChatCompletionChunk,
+} from 'openai/resources/chat/completions';
 
 export interface InvokeAsyncIteratorBody {
   messages: ChatCompletionMessageParam[];
@@ -69,7 +72,7 @@ type StreamParser = (
 ) => Promise<string>;
 
 const parseOpenAIStream: StreamParser = async (streamIterable, logger) => {
-  let responseBody: string = '';
+  let responseBody = '';
   try {
     for await (const data of streamIterable) {
       if (!data) continue;

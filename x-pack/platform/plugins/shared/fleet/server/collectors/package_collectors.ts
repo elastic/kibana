@@ -12,10 +12,17 @@ import { getPackageSavedObjects } from '../services/epm/packages/get';
 import { agentPolicyService } from '../services';
 import type { NewPackagePolicy } from '../types';
 
+import type { AgentUsage } from './agent_collectors';
+
 export interface PackageUsage {
   name: string;
   version: string;
   enabled: boolean;
+}
+
+export interface AgentlessUsage {
+  agentlessPackages: PackageUsage[];
+  agentlessAgents: AgentUsage;
 }
 
 export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<PackageUsage[]> => {
@@ -34,17 +41,35 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
   const packagesInAgentPolicies = agentPolicies.items.map((agentPolicy) => {
     const packagePolicies: NewPackagePolicy[] = agentPolicy.package_policies as NewPackagePolicy[];
     return packagePolicies
-      .map((packagePolicy) => packagePolicy.package?.name)
-      .filter((packageName): packageName is string => packageName !== undefined);
+      .filter(
+        (packagePolicy): packagePolicy is NewPackagePolicy =>
+          packagePolicy.package?.name !== undefined && packagePolicy.supports_agentless !== true
+      )
+      .map((packagePolicy) => packagePolicy.package?.name);
   });
-
   const enabledPackages = _.uniq(_.flatten(packagesInAgentPolicies));
 
+  const packagesInAgentlessPolicies = agentPolicies.items.map((agentPolicy) => {
+    const packagePolicies: NewPackagePolicy[] = agentPolicy.package_policies as NewPackagePolicy[];
+    return packagePolicies
+      .filter(
+        (packagePolicy): packagePolicy is NewPackagePolicy =>
+          packagePolicy.package?.name !== undefined && packagePolicy.supports_agentless === true
+      )
+      .map((packagePolicy) => packagePolicy.package?.name);
+  });
+  const enabledAgentlessPackages = _.uniq(_.flatten(packagesInAgentlessPolicies));
+
   return packagesSavedObjects.saved_objects.map((p) => {
+    const agentBased = enabledPackages.includes(p.attributes.name);
+    const agentless = enabledAgentlessPackages.includes(p.attributes.name);
+    const enabled = agentBased || agentless;
     return {
       name: p.attributes.name,
       version: p.attributes.version,
-      enabled: enabledPackages.includes(p.attributes.name),
+      enabled,
+      ...(enabled && agentBased && { agent_based: true }), // Only include if true
+      ...(enabled && agentless && { agentless: true }), // Only include if true
     };
   });
 };
