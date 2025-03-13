@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.error', {
-  defaultMessage: 'Unable to load data',
+  defaultMessage: 'Unable to create a data view',
 });
 export const LOADING_INTEGRATIONS = i18n.translate('xpack.securitySolution.alertSummary.loading', {
   defaultMessage: 'Loading integrations',

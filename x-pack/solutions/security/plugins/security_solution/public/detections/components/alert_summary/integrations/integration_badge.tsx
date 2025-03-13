@@ -6,9 +6,15 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CustomIntegration } from '@kbn/custom-integrations-plugin/public';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { CardIcon } from '@kbn/fleet-plugin/public';
 import { LAST_SYNCED } from './translations';
@@ -20,74 +26,74 @@ export interface IntegrationProps {
   /**
    *
    */
-  integration: CustomIntegration | PackageListItem;
+  integration: PackageListItem;
+  /**
+   *
+   */
+  isLoading: boolean;
+  /**
+   *
+   */
+  lastActivity: number;
 }
 
 /**
  *
  */
-export const IntegrationBadge = memo(({ integration }: IntegrationProps) => {
-  const { euiTheme } = useEuiTheme();
+export const IntegrationBadge = memo(
+  ({ integration, isLoading, lastActivity }: IntegrationProps) => {
+    const { euiTheme } = useEuiTheme();
 
-  const icons = useMemo(
-    () => (!integration.icons || !integration.icons.length ? [] : integration.icons),
-    [integration]
-  );
-  const packageName = useMemo(
-    () => ('name' in integration ? integration.name : integration.id),
-    [integration]
-  );
-  const integrationName = useMemo(
-    () => ('integration' in integration ? integration.integration || '' : ''),
-    [integration]
-  );
-  const version = useMemo(
-    () => ('version' in integration ? integration.version || '' : ''),
-    [integration]
-  );
+    const icons = useMemo(
+      () => (!integration.icons || !integration.icons.length ? [] : integration.icons),
+      [integration]
+    );
 
-  return (
-    <EuiPanel
-      css={css`
-        min-width: ${MIN_WIDTH}px;
-      `}
-      hasBorder={true}
-      hasShadow={false}
-      paddingSize="s"
-    >
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <CardIcon
-            icons={icons}
-            integrationName={integrationName}
-            packageName={packageName}
-            size="xl"
-            version={version}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiText
-                css={css`
-                  font-weight: ${euiTheme.font.weight.medium};
-                `}
-                size="xs"
-              >
-                {integration.title}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs" color="subdued">
-                {LAST_SYNCED}
-                <FormattedRelativePreferenceDate value={new Date().getTime()} />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-});
+    return (
+      <EuiPanel
+        css={css`
+          min-width: ${MIN_WIDTH}px;
+        `}
+        hasBorder={true}
+        hasShadow={false}
+        paddingSize="s"
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <CardIcon
+              icons={icons}
+              integrationName={integration.title}
+              packageName={integration.name}
+              size="xl"
+              version={integration.version}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                <EuiText
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.medium};
+                  `}
+                  size="xs"
+                >
+                  {integration.title}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSkeletonText lines={1} size="xs" isLoading={isLoading}>
+                  <EuiText size="xs" color="subdued">
+                    {LAST_SYNCED}
+                    <FormattedRelativePreferenceDate value={lastActivity} />
+                  </EuiText>
+                </EuiSkeletonText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+);
 
 IntegrationBadge.displayName = 'IntegrationBadge';

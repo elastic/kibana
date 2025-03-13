@@ -13,7 +13,6 @@ import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SourceFilterButton } from './sources_filter_button';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -37,7 +36,7 @@ export interface SearchBarSectionProps {
   /**
    *
    */
-  packages: CustomIntegration[] | PackageListItem[];
+  packages: PackageListItem[];
   /**
    * TEMP: for demo purposes ONLY, toggles between old and unified components
    */
