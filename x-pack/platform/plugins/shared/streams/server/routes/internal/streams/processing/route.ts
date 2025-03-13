@@ -12,9 +12,9 @@ import {
   processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { checkAccess } from '../../../lib/streams/stream_crud';
-import { createServerRoute } from '../../create_server_route';
-import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
+import { checkAccess } from '../../../../lib/streams/stream_crud';
+import { createServerRoute } from '../../../create_server_route';
+import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
 import { handleProcessingSuggestion } from './suggestions_handler';
 
@@ -28,7 +28,7 @@ const paramsSchema = z.object({
 }) satisfies z.Schema<ProcessingSimulationParams>;
 
 export const simulateProcessorRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/processing/_simulate',
+  endpoint: 'POST /internal/streams/{name}/processing/_simulate',
   options: {
     access: 'internal',
   },
@@ -70,7 +70,7 @@ const suggestionsParamsSchema = z.object({
 });
 
 export const processingSuggestionRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/processing/_suggestions',
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions',
   options: {
     access: 'internal',
   },
@@ -96,7 +96,7 @@ export const processingSuggestionRoute = createServerRoute({
   },
 });
 
-export const processingRoutes = {
+export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
   ...processingSuggestionRoute,
 };

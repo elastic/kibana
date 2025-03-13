@@ -16,7 +16,7 @@ import {
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
 
-export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
 
 export interface SimulationMachineDeps {
   data: DataPublicPluginStart;
