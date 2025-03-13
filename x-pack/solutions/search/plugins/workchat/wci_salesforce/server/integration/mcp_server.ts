@@ -8,6 +8,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
+import { caseRetrieval } from './tools';
+import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol';
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -68,6 +70,28 @@ export function createMcpServer({
       content: contentFragments,
     };
   });
+
+  server.tool(
+    'case_retrieval',
+    'Search and filter through Salesforce cases',
+    { query: z.string() },
+    async ({ query }) => {
+      logger.info(`Searching cases for ${query}`);
+
+
+      const response = await caseRetrieval(elasticsearchClient, 'support_cases1"');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(response),
+          },
+        ],
+      };
+    }
+  );
+
 
   return server;
 }
