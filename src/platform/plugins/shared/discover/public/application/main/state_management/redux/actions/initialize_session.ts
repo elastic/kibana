@@ -59,6 +59,10 @@ export const initializeSession: InternalStateThunkActionCreator<
   ) => {
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange());
 
+    /**
+     * "No data" checks
+     */
+
     const discoverSessionLoadTracker =
       services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
@@ -91,6 +95,10 @@ export const initializeSession: InternalStateThunkActionCreator<
       return { showNoDataPage: true };
     }
 
+    /**
+     * Session initialization
+     */
+
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       if (persistedDiscoverSession.id) {
         services.chrome.recentlyAccessed.add(
@@ -109,12 +117,14 @@ export const initializeSession: InternalStateThunkActionCreator<
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
+      // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
         discoverSessionDataView ?? runtimeStateManager.currentDataView$.getValue(),
         services
       );
     } else {
+      // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
         dataViewId: isDataViewSource(urlState?.dataSource)
           ? urlState?.dataSource.dataViewId
@@ -150,6 +160,8 @@ export const initializeSession: InternalStateThunkActionCreator<
       }
     }
 
+    // Get the initial state based on a combo of the URL and persisted session,
+    // then get an updated copy of the session with the applied initial state
     const initialState = getInitialState({
       initialUrlState: urlState,
       savedSearch: persistedDiscoverSession,
@@ -165,6 +177,10 @@ export const initializeSession: InternalStateThunkActionCreator<
       globalStateContainer: stateContainer.globalState,
       services,
     });
+
+    /**
+     * Sync global services
+     */
 
     // Cleaning up the previous state
     services.filterManager.setAppFilters([]);
@@ -198,6 +214,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       services.data.query.queryString.setQuery(initialState.query);
     }
 
+    // Make sure global filters make it to the Discover session
     if (!urlState && shouldUpdateWithGlobalFilters) {
       discoverSession.searchSource.setField(
         'filter',
@@ -205,13 +222,20 @@ export const initializeSession: InternalStateThunkActionCreator<
       );
     }
 
+    /**
+     * Update state containers
+     */
+
     if (persistedDiscoverSession) {
+      // Set the persisted session first, then assign the
+      // updated session to ensure unsaved changes are detected
       stateContainer.savedSearchState.set(persistedDiscoverSession);
       stateContainer.savedSearchState.assignNextSavedSearch(discoverSession);
     } else {
       stateContainer.savedSearchState.set(discoverSession);
     }
 
+    // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
     discoverSessionLoadTracker.reportEvent();
