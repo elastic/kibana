@@ -95,7 +95,7 @@ export const createAttackDiscoverySchedulesRoute = (
             enabled: true,
             consumer: 'siem',
             tags: ['attack_discovery'],
-            throttle: null,
+            // throttle: null,
             params: {
               alertsIndexPattern: '.alerts-security.alerts-default',
               anonymizationFields,
@@ -110,8 +110,24 @@ export const createAttackDiscoverySchedulesRoute = (
               subAction: 'invokeAI',
             },
             schedule: { interval },
-            actions: [],
-            notifyWhen: null,
+            actions: [
+              {
+                id: '0ae538a8-f12d-4a0d-b50e-7d6e934ef412',
+                params: {
+                  message:
+                    '[AD] Scheduling rule {{context.rule.name}} generated {{state.signals_count}} alerts\n```\n{{context.alerts}}\n```\n',
+                },
+                actionTypeId: '.slack',
+                uuid: '19f13cd3-b5c0-45cb-b629-666ceaeaa48e',
+                frequency: {
+                  notifyWhen: 'onActiveAlert',
+                  throttle: null,
+                  summary: true,
+                },
+                group: 'default',
+              },
+            ],
+            // notifyWhen: null,
           });
           logger.info(`Created attack discovery schedule rule: ${scheduleRule.id}`);
 
