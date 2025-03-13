@@ -403,46 +403,6 @@ interface AddTimelineColumnParams {
   timelineById: TimelineById;
 }
 
-/**
- * Adds or updates a column. When updating a column, it will be moved to the
- * new index
- */
-export const upsertTimelineColumn = ({
-  column,
-  id,
-  index,
-  timelineById,
-}: AddTimelineColumnParams): TimelineById => {
-  const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.columns.findIndex((c) => c.id === column.id);
-
-  if (alreadyExistsAtIndex !== -1) {
-    // remove the existing entry and add the new one at the specified index
-    const reordered = timeline.columns.filter((c) => c.id !== column.id);
-    reordered.splice(index, 0, column); // ⚠️ mutation
-
-    return {
-      ...timelineById,
-      [id]: {
-        ...timeline,
-        columns: reordered,
-      },
-    };
-  }
-
-  // add the new entry at the specified index
-  const columns = [...timeline.columns];
-  columns.splice(index, 0, column); // ⚠️ mutation
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      columns,
-    },
-  };
-};
-
 interface RemoveTimelineColumnParams {
   id: string;
   columnId: string;

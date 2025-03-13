@@ -45,7 +45,7 @@ import {
   updateTimelineShowTimeline,
   updateTimelineSort,
   updateTimelineTitleAndDescription,
-  upsertTimelineColumn,
+  upsertTableColumn,
   updateTimelineGraphEventId,
   updateTimelineColumnWidth,
 } from './helpers';
@@ -324,7 +324,7 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#upsertTimelineColumn', () => {
+  describe('#upsertTableColumn', () => {
     let timelineById: TimelineById = {};
     let columns: ColumnHeaderOptions[] = [];
     let columnToAdd: ColumnHeaderOptions;
@@ -354,7 +354,7 @@ describe('Timeline', () => {
     });
 
     test('should return a new reference and not the same reference', () => {
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columnToAdd,
         id: 'foo',
         index: 0,
@@ -366,7 +366,7 @@ describe('Timeline', () => {
 
     test('should add a new column to an empty collection of columns', () => {
       const expectedColumns = [columnToAdd];
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columnToAdd,
         id: 'foo',
         index: 0,
@@ -379,7 +379,7 @@ describe('Timeline', () => {
     test('should add a new column to an existing collection of columns at the beginning of the collection', () => {
       const expectedColumns = [columnToAdd, ...columns];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columnToAdd,
         id: 'foo',
         index: 0,
@@ -391,7 +391,7 @@ describe('Timeline', () => {
     test('should add a new column to an existing collection of columns in the middle of the collection', () => {
       const expectedColumns = [columns[0], columnToAdd, columns[1], columns[2]];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columnToAdd,
         id: 'foo',
         index: 1,
@@ -404,7 +404,7 @@ describe('Timeline', () => {
     test('should add a new column to an existing collection of columns at the end of the collection', () => {
       const expectedColumns = [...columns, columnToAdd];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columnToAdd,
         id: 'foo',
         index: expectedColumns.length - 1,
@@ -416,7 +416,7 @@ describe('Timeline', () => {
 
     columns.forEach((column, i) => {
       test(`should upsert (NOT add a new column) a column when already exists at the same index (${i})`, () => {
-        const update = upsertTimelineColumn({
+        const update = upsertTableColumn({
           column,
           id: 'foo',
           index: i,
@@ -430,7 +430,7 @@ describe('Timeline', () => {
     test('should allow the 1st column to be moved to the 2nd column', () => {
       const expectedColumns = [columns[1], columns[0], columns[2]];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columns[0],
         id: 'foo',
         index: 1,
@@ -443,7 +443,7 @@ describe('Timeline', () => {
     test('should allow the 1st column to be moved to the 3rd column', () => {
       const expectedColumns = [columns[1], columns[2], columns[0]];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columns[0],
         id: 'foo',
         index: 2,
@@ -456,7 +456,7 @@ describe('Timeline', () => {
     test('should allow the 2nd column to be moved to the 1st column', () => {
       const expectedColumns = [columns[1], columns[0], columns[2]];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columns[1],
         id: 'foo',
         index: 0,
@@ -469,7 +469,7 @@ describe('Timeline', () => {
     test('should allow the 2nd column to be moved to the 3rd column', () => {
       const expectedColumns = [columns[0], columns[2], columns[1]];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columns[1],
         id: 'foo',
         index: 2,
@@ -482,7 +482,7 @@ describe('Timeline', () => {
     test('should allow the 3rd column to be moved to the 1st column', () => {
       const expectedColumns = [columns[2], columns[0], columns[1]];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columns[2],
         id: 'foo',
         index: 0,
@@ -495,7 +495,7 @@ describe('Timeline', () => {
     test('should allow the 3rd column to be moved to the 2nd column', () => {
       const expectedColumns = [columns[0], columns[2], columns[1]];
 
-      const update = upsertTimelineColumn({
+      const update = upsertTableColumn({
         column: columns[2],
         id: 'foo',
         index: 1,
