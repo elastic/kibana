@@ -3503,6 +3503,50 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "updateRuleRequest": {
+                  "description": "Update an index threshold rule that uses a server log connector to send notifications when the threshold is met.",
+                  "summary": "Index threshold rule",
+                  "value": {
+                    "actions": [
+                      {
+                        "frequency": {
+                          "notify_when": "onActionGroupChange",
+                          "summary": false
+                        },
+                        "group": "threshold met",
+                        "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+                        "params": {
+                          "level": "info",
+                          "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                        }
+                      }
+                    ],
+                    "name": "new name",
+                    "params": {
+                      "aggField": "sheet.version",
+                      "aggType": "avg",
+                      "groupBy": "top",
+                      "index": [
+                        ".updated-index"
+                      ],
+                      "termField": "name.keyword",
+                      "termSize": 6,
+                      "threshold": [
+                        1000
+                      ],
+                      "thresholdComparator": ">",
+                      "timeField": "@timestamp",
+                      "timeWindowSize": 5,
+                      "timeWindowUnit": "m"
+                    },
+                    "schedule": {
+                      "interval": "1m"
+                    },
+                    "tags": []
+                  }
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -3782,6 +3826,86 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "updateRuleResponse": {
+                    "description": "The response for successfully updating an index threshold rule.",
+                    "summary": "Index threshold rule",
+                    "value": {
+                      "actions": [
+                        {
+                          "connector_type_id": ".server-log",
+                          "frequency": {
+                            "notify_when": "onActionGroupChange",
+                            "summary": false,
+                            "throttle": null
+                          },
+                          "group": "threshold met",
+                          "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+                          "params": {
+                            "level": "info",
+                            "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}"
+                          },
+                          "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d"
+                        }
+                      ],
+                      "api_key_created_by_user": false,
+                      "api_key_owner": "elastic",
+                      "consumer": "alerts",
+                      "created_at": "2024-03-26T23:13:20.985Z",
+                      "created_by": "elastic",
+                      "enabled": true,
+                      "execution_status": {
+                        "last_duration": 52,
+                        "last_execution_date": "2024-03-26T23:22:51.390Z",
+                        "status": "ok"
+                      },
+                      "id": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74",
+                      "last_run": {
+                        "alerts_count": {
+                          "active": 0,
+                          "ignored": 0,
+                          "new": 0,
+                          "recovered": 0
+                        },
+                        "outcome": "succeeded",
+                        "outcome_msg": null,
+                        "warning": null
+                      },
+                      "mute_all": false,
+                      "muted_alert_ids": [],
+                      "name": "new name",
+                      "next_run": "2024-03-26T23:23:51.316Z",
+                      "params": {
+                        "aggField": "sheet.version",
+                        "aggType": "avg",
+                        "groupBy": "top",
+                        "index": [
+                          ".updated-index"
+                        ],
+                        "termField": "name.keyword",
+                        "termSize": 6,
+                        "threshold": [
+                          1000
+                        ],
+                        "thresholdComparator": ">",
+                        "timeField": "@timestamp",
+                        "timeWindowSize": 5,
+                        "timeWindowUnit": "m"
+                      },
+                      "revision": 1,
+                      "rule_type_id": ".index-threshold",
+                      "running": false,
+                      "schedule": {
+                        "interval": "1m"
+                      },
+                      "scheduled_task_id": "4c5eda00-e74f-11ec-b72f-5b18752ff9ea",
+                      "tags": [],
+                      "throttle": null,
+                      "updated_at": "2024-03-26T23:22:59.949Z",
+                      "updated_by": "elastic"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -5155,6 +5279,257 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "findConditionalActionRulesResponse": {
+                    "description": "A response that contains information about an index threshold rule.",
+                    "summary": "Index threshold rule",
+                    "value": {
+                      "data": [
+                        {
+                          "actions": [
+                            {
+                              "frequency": {
+                                "notify_when": "onActionGroupChange",
+                                "summary": false,
+                                "throttle": null
+                              },
+                              "group": "threshold met",
+                              "id": "9dca3e00-74f5-11ed-9801-35303b735aef",
+                              "params": {
+                                "connector_type_id": ".server-log",
+                                "level": "info",
+                                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                              },
+                              "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+                            }
+                          ],
+                          "api_key_created_by_user": false,
+                          "api_key_owner": "elastic",
+                          "consumer": "alerts",
+                          "created_at": "2022-12-05T23:40:33.132Z",
+                          "created_by": "elastic",
+                          "enabled": true,
+                          "execution_status": {
+                            "last_duration": 48,
+                            "last_execution_date": "2022-12-06T01:44:23.983Z",
+                            "status": "ok"
+                          },
+                          "id": "3583a470-74f6-11ed-9801-35303b735aef",
+                          "last_run": {
+                            "alerts_count": {
+                              "active": 0,
+                              "ignored": 0,
+                              "new": 0,
+                              "recovered": 0
+                            },
+                            "outcome": "succeeded",
+                            "outcome_msg": null,
+                            "warning": null
+                          },
+                          "mute_all": false,
+                          "muted_alert_ids": [],
+                          "name": "my alert",
+                          "next_run": "2022-12-06T01:45:23.912Z",
+                          "params": {
+                            "aggField": "sheet.version",
+                            "aggType": "avg",
+                            "groupBy": "top",
+                            "index": [
+                              "test-index"
+                            ],
+                            "termField": "name.keyword",
+                            "termSize": 6,
+                            "threshold": [
+                              1000
+                            ],
+                            "thresholdComparator": ">",
+                            "timeField": "@timestamp",
+                            "timeWindowSize": 5,
+                            "timeWindowUnit": "m"
+                          },
+                          "revision": 1,
+                          "rule_type_id": ".index-threshold",
+                          "schedule": {
+                            "interval": "1m"
+                          },
+                          "scheduled_task_id": "3583a470-74f6-11ed-9801-35303b735aef",
+                          "tags": [
+                            "cpu"
+                          ],
+                          "throttle": null,
+                          "updated_at": "2022-12-05T23:40:33.132Z",
+                          "updated_by": "elastic"
+                        }
+                      ],
+                      "page": 1,
+                      "per_page": 10,
+                      "total": 1
+                    }
+                  },
+                  "findRulesResponse": {
+                    "description": "A response that contains information about a security rule that has conditional actions.",
+                    "summary": "Security rule",
+                    "value": {
+                      "data": [
+                        {
+                          "actions": [
+                            {
+                              "alerts_filter": {
+                                "query": {
+                                  "filters": [
+                                    {
+                                      "$state": {
+                                        "store": "appState"
+                                      },
+                                      "meta": {
+                                        "alias": null,
+                                        "disabled": false,
+                                        "field": "client.geo.region_iso_code",
+                                        "index": "c4bdca79-e69e-4d80-82a1-e5192c621bea",
+                                        "key": "client.geo.region_iso_code",
+                                        "negate": false,
+                                        "params": {
+                                          "query": "CA-QC",
+                                          "type": "phrase"
+                                        }
+                                      },
+                                      "query": {
+                                        "match_phrase": {
+                                          "client.geo.region_iso_code": "CA-QC"
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "kql": ""
+                                },
+                                "timeframe": {
+                                  "days": [
+                                    7
+                                  ],
+                                  "hours": {
+                                    "end": "17:00",
+                                    "start": "08:00"
+                                  },
+                                  "timezone": "UTC"
+                                }
+                              },
+                              "connector_type_id": ".index",
+                              "frequency": {
+                                "notify_when": "onActiveAlert",
+                                "summary": true,
+                                "throttle": null
+                              },
+                              "group": "default",
+                              "id": "49eae970-f401-11ed-9f8e-399c75a2deeb",
+                              "params": {
+                                "documents": [
+                                  {
+                                    "alert_id": {
+                                      "[object Object]": null
+                                    },
+                                    "context_message": {
+                                      "[object Object]": null
+                                    },
+                                    "rule_id": {
+                                      "[object Object]": null
+                                    },
+                                    "rule_name": {
+                                      "[object Object]": null
+                                    }
+                                  }
+                                ]
+                              },
+                              "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+                            }
+                          ],
+                          "api_key_created_by_user": false,
+                          "api_key_owner": "elastic",
+                          "consumer": "siem",
+                          "created_at": "2023-05-16T15:50:28.358Z",
+                          "created_by": "elastic",
+                          "enabled": true,
+                          "execution_status": {
+                            "last_duration": 166,
+                            "last_execution_date": "2023-05-16T20:26:49.590Z",
+                            "status": "ok"
+                          },
+                          "id": "6107a8f0-f401-11ed-9f8e-399c75a2deeb",
+                          "last_run": {
+                            "alerts_count": {
+                              "active": 0,
+                              "ignored": 0,
+                              "new": 0,
+                              "recovered": 0
+                            },
+                            "outcome": "succeeded",
+                            "outcome_msg": [
+                              "Rule execution completed successfully"
+                            ],
+                            "outcome_order": 0,
+                            "warning": null
+                          },
+                          "mute_all": false,
+                          "muted_alert_ids": [],
+                          "name": "security_rule",
+                          "next_run": "2023-05-16T20:27:49.507Z",
+                          "notify_when": null,
+                          "params": {
+                            "author": [],
+                            "description": "A security threshold rule.",
+                            "exceptionsList": [],
+                            "falsePositives": [],
+                            "filters": [],
+                            "from": "now-3660s",
+                            "immutable": false,
+                            "index": [
+                              "kibana_sample_data_logs"
+                            ],
+                            "language": "kuery",
+                            "license": "",
+                            "maxSignals": 100,
+                            "meta": {
+                              "from": "1h",
+                              "kibana_siem_app_url": "https://localhost:5601/app/security"
+                            },
+                            "outputIndex": "",
+                            "query": "*",
+                            "references": [],
+                            "riskScore": 21,
+                            "riskScoreMapping": [],
+                            "ruleId": "an_internal_rule_id",
+                            "severity": "low",
+                            "severityMapping": [],
+                            "threat": [],
+                            "threshold": {
+                              "cardinality": [],
+                              "field": [
+                                "bytes"
+                              ],
+                              "value": 1
+                            },
+                            "to": "now",
+                            "type": "threshold",
+                            "version": 1
+                          },
+                          "revision": 1,
+                          "rule_type_id": "siem.thresholdRule",
+                          "running": false,
+                          "schedule": {
+                            "interval": "1m"
+                          },
+                          "scheduled_task_id": "6107a8f0-f401-11ed-9f8e-399c75a2deeb",
+                          "tags": [],
+                          "throttle": null,
+                          "updated_at": "2023-05-16T20:25:42.559Z",
+                          "updated_by": "elastic"
+                        }
+                      ],
+                      "page": 1,
+                      "per_page": 10,
+                      "total": 1
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
