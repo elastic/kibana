@@ -27,7 +27,7 @@ export const InstallKnowledgeBase = ({ onInstallKnowledgeBase }: InstallKnowledg
   <AssistantCallToAction>
     <CallToActionCard
       iconType="database"
-      color="primary"
+      color="subdued"
       title={translations.cardTitle}
       description={translations.cardDescription}
     >
