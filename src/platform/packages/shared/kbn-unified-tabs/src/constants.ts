@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TabItem } from '../types';
+export const MAX_TAB_LABEL_LENGTH = 500;
 
-export const getTabIdAttribute = (item: TabItem) => {
-  return `tab-${item.id}`;
-};
-
-export const getTabAttributes = (item: TabItem, tabContentId: string) => {
-  return {
-    id: getTabIdAttribute(item),
-    'aria-controls': tabContentId,
-  };
-};
+export const MAX_TAB_WIDTH = 280;
+export const MIN_TAB_WIDTH = 96;

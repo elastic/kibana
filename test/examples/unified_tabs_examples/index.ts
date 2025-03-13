@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TabItem } from '../types';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-export const getTabIdAttribute = (item: TabItem) => {
-  return `tab-${item.id}`;
-};
-
-export const getTabAttributes = (item: TabItem, tabContentId: string) => {
-  return {
-    id: getTabIdAttribute(item),
-    'aria-controls': tabContentId,
-  };
-};
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Unified Tabs Examples', () => {
+    loadTestFile(require.resolve('./manage_tabs'));
+  });
+}
