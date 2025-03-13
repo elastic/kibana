@@ -26,10 +26,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type {
-  DeletePackagePoliciesResponse,
-  ExperimentalDataStreamFeature,
-} from '../../common/types';
+import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -116,7 +113,13 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: UpdatePackagePolicy[],
-    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean },
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      asyncDeploy?: boolean;
+      fromBulkUpgrade?: boolean;
+      oldPackagePolicies?: PackagePolicy[];
+    },
     currentVersion?: string
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -231,15 +234,6 @@ export interface PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<void>;
-
-  getUpgradePackagePolicyInfo(
-    soClient: SavedObjectsClientContract,
-    id: string
-  ): Promise<{
-    packagePolicy: PackagePolicy;
-    packageInfo: PackageInfo;
-    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
-  }>;
 
   /**
    * Remove an output from all package policies that are using it, and replace the output by the default ones.

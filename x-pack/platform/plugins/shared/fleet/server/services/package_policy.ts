@@ -7,9 +7,8 @@
 /* eslint-disable max-classes-per-file */
 
 import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
-import { chunk, indexBy, uniq } from 'lodash/fp';
+import { indexBy } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
 import type {
   AuthenticatedUser,
@@ -36,7 +35,6 @@ import { HTTPAuthorizationHeader } from '../../common/http_authorization_header'
 
 import {
   packageToPackagePolicy,
-  packageToPackagePolicyInputs,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
@@ -65,7 +63,6 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
-  PackagePolicyPackage,
   Installation,
   ExperimentalDataStreamFeature,
   DeletePackagePoliciesResponse,
@@ -76,7 +73,6 @@ import type {
 import {
   FleetError,
   fleetErrorToResponseOptions,
-  PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
   PackagePolicyRestrictionRelatedError,
   PackagePolicyNotFoundError,
@@ -86,7 +82,6 @@ import {
   AgentPolicyNotFoundError,
   InputNotFoundError,
   StreamNotFoundError,
-  FleetNotFoundError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -115,14 +110,8 @@ import type { FleetAuthzRouteConfig } from './security';
 
 import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 
-import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
-import {
-  getPackageInfo,
-  getInstallation,
-  ensureInstalledPackage,
-  getInstallationObject,
-} from './epm/packages';
+import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
@@ -159,7 +148,11 @@ import {
 } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 import { updatePackagePolicySpaces } from './spaces/package_policy';
-import { runWithCache } from './epm/packages/cache';
+import {
+  _packagePoliciesGetUpgradeDryRunDiff,
+  _packagePoliciesBulkUpgrade,
+  _packagePoliciesUpgrade,
+} from './package_policies/upgrade';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -1674,107 +1667,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     return result;
   }
 
-  // TODO should move out, public only for unit tests
-  public async getUpgradePackagePolicyInfo(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    packagePolicy?: PackagePolicy,
-    pkgVersion?: string
-  ): Promise<{
-    packagePolicy: PackagePolicy;
-    packageInfo: PackageInfo;
-    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
-  }> {
-    if (!packagePolicy) {
-      packagePolicy = (await this.get(soClient, id)) ?? undefined;
-    }
-
-    let experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [];
-
-    if (!pkgVersion && packagePolicy) {
-      const installedPackage = await getInstallation({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package!.name,
-      });
-
-      if (!installedPackage) {
-        throw new FleetError(
-          i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
-            defaultMessage: 'Package {name} is not installed',
-            values: {
-              name: packagePolicy.package!.name,
-            },
-          })
-        );
-      }
-
-      pkgVersion = installedPackage.version;
-      experimentalDataStreamFeatures = installedPackage.experimental_data_stream_features ?? [];
-    }
-
-    let packageInfo: PackageInfo | undefined;
-
-    if (packagePolicy) {
-      packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy!.package!.name,
-        pkgVersion: pkgVersion ?? '',
-        prerelease: !!pkgVersion, // using prerelease only if version is specified
-      });
-    }
-
-    this.validateUpgradePackagePolicy(id, packageInfo, packagePolicy);
-
-    return {
-      packagePolicy: packagePolicy!,
-      packageInfo: packageInfo!,
-      experimentalDataStreamFeatures,
-    };
-  }
-
-  private validateUpgradePackagePolicy(
-    id: string,
-    packageInfo?: PackageInfo,
-    packagePolicy?: PackagePolicy
-  ) {
-    if (!packagePolicy) {
-      throw new FleetError(
-        i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
-          defaultMessage: 'Package policy with id {id} not found',
-          values: { id },
-        })
-      );
-    }
-
-    if (!packagePolicy.package?.name) {
-      throw new FleetError(
-        i18n.translate('xpack.fleet.packagePolicy.packageNotFoundError', {
-          defaultMessage: 'Package policy with id {id} has no named package',
-          values: { id },
-        })
-      );
-    }
-
-    const isInstalledVersionLessThanPolicyVersion = semverLt(
-      packageInfo?.version ?? '',
-      packagePolicy.package.version
-    );
-
-    if (isInstalledVersionLessThanPolicyVersion) {
-      throw new PackagePolicyIneligibleForUpgradeError(
-        i18n.translate('xpack.fleet.packagePolicy.ineligibleForUpgradeError', {
-          defaultMessage:
-            "Package policy {id}'s package version {version} of package {name} is newer than the installed package version. Please install the latest version of {name}.",
-          values: {
-            id: packagePolicy.id,
-            name: packagePolicy.package.name,
-            version: packagePolicy.package.version,
-          },
-        })
-      );
-    }
-  }
-
   public async bulkUpgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -1782,118 +1674,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options?: { user?: AuthenticatedUser; force?: boolean },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
-    // Bulk upgrade packages policies
-    // 1. bulk get policies
-    // 2. get pkg version if not specificed based on installed version
-    // 3. for each policies get upgraded
-    // 4. bulkUpdate policies
-    return runWithCache(async () => {
-      const result: UpgradePackagePolicyResponse = [];
-      for (const chunkedIds of chunk(MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, ids)) {
-        const packagePolicies = await this.getByIDs(soClient, chunkedIds, {
-          ignoreMissing: true,
-        });
-        const packagePoliciesById = indexBy('id', packagePolicies);
-
-        const packageVersionMap = new Map<string, string>();
-
-        if (!pkgVersion) {
-          const packageNames =
-            packagePolicies
-              ?.map((policy) => policy.package?.name)
-              .filter((packageName): packageName is string => typeof packageName !== 'undefined') ??
-            [];
-
-          await pMap(
-            uniq(packageNames),
-            async (pkgName) => {
-              const installation = await getInstallation({
-                savedObjectsClient: soClient,
-                pkgName,
-              });
-
-              if (installation) {
-                packageVersionMap.set(pkgName, installation.version);
-              }
-            },
-            {
-              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
-            }
-          );
-        }
-
-        const updatedPackagePolicies: Array<NewPackagePolicy & { version?: string; id: string }> =
-          [];
-        for (const id of chunkedIds) {
-          try {
-            const packagePolicy = packagePoliciesById[id];
-            if (!packagePolicy) {
-              throw new FleetNotFoundError(`Package policy ${id} not found`);
-            }
-
-            const upgradePkgVersion = pkgVersion
-              ? pkgVersion
-              : packageVersionMap.get(packagePolicy.package?.name ?? '');
-
-            const { packagePolicy: currentPackagePolicy, packageInfo } =
-              await this.getUpgradePackagePolicyInfo(
-                soClient,
-                id,
-                packagePolicy,
-                upgradePkgVersion
-              );
-
-            if (currentPackagePolicy.is_managed && !options?.force) {
-              throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
-            }
-
-            const updatePackagePolicy = await this.doUpgrade(
-              soClient,
-              esClient,
-              currentPackagePolicy,
-              packageInfo
-            );
-
-            updatedPackagePolicies.push({ ...updatePackagePolicy, id });
-          } catch (error) {
-            result.push({
-              id,
-              success: false,
-              ...fleetErrorToResponseOptions(error),
-            });
-          }
-        }
-
-        const bulkUpdateResults = await this.bulkUpdate(
-          soClient,
-          esClient,
-          updatedPackagePolicies,
-          {
-            asyncDeploy: true,
-            fromBulkUpgrade: true,
-            force: options?.force,
-            user: options?.user,
-            oldPackagePolicies: packagePolicies,
-          }
-        );
-
-        for (const res of bulkUpdateResults.updatedPolicies ?? []) {
-          result.push({
-            id: res.id,
-            name: res.name,
-            success: true,
-          });
-        }
-
-        for (const res of bulkUpdateResults.failedPolicies ?? []) {
-          result.push({
-            id: res.packagePolicy.id as string,
-            success: false,
-            ...fleetErrorToResponseOptions(res.error as FleetError),
-          });
-        }
-      }
-      return result;
+    return _packagePoliciesBulkUpgrade({
+      packagePolicyService: this,
+      soClient,
+      esClient,
+      ids,
+      options,
+      pkgVersion,
     });
   }
 
@@ -1905,84 +1692,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
-    return runWithCache(async () => {
-      const result: UpgradePackagePolicyResponse = [];
-
-      try {
-        const { packagePolicy: currentPackagePolicy, packageInfo } =
-          await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
-
-        if (currentPackagePolicy.is_managed && !options?.force) {
-          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
-        }
-
-        const updatePackagePolicy = await this.doUpgrade(
-          soClient,
-          esClient,
-          currentPackagePolicy,
-          packageInfo
-        );
-
-        const updateOptions = {
-          skipUniqueNameVerification: true,
-          ...options,
-        };
-
-        await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
-
-        result.push({
-          id,
-          name: updatePackagePolicy.name,
-          success: true,
-        });
-      } catch (error) {
-        result.push({
-          id,
-          success: false,
-          ...fleetErrorToResponseOptions(error),
-        });
-      }
-
-      return result;
+    return _packagePoliciesUpgrade({
+      packagePolicyService: this,
+      soClient,
+      esClient,
+      id,
+      options,
+      packagePolicy,
+      pkgVersion,
     });
-  }
-
-  private async doUpgrade(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    packagePolicy: PackagePolicy,
-    packageInfo: PackageInfo,
-    assetsMap?: PackagePolicyAssetsMap
-  ) {
-    const updatePackagePolicy = updatePackageInputs(
-      {
-        ...omit(packagePolicy, 'id', 'spaceIds'),
-        inputs: packagePolicy.inputs,
-        package: {
-          ...packagePolicy.package!,
-          version: packageInfo.version,
-        },
-      },
-      packageInfo,
-      packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
-    );
-    if (!assetsMap) {
-      assetsMap = await getAgentTemplateAssetsMap({
-        logger: appContextService.getLogger(),
-        packageInfo,
-        savedObjectsClient: soClient,
-      });
-    }
-
-    updatePackagePolicy.inputs = _compilePackagePolicyInputs(
-      packageInfo,
-      updatePackagePolicy.vars || {},
-      updatePackagePolicy.inputs as PackagePolicyInput[],
-      assetsMap
-    );
-    updatePackagePolicy.elasticsearch = packageInfo.elasticsearch;
-
-    return updatePackagePolicy;
   }
 
   public async getUpgradeDryRunDiff(
@@ -1991,110 +1709,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
-    try {
-      let packageInfo: PackageInfo;
-      let experimentalDataStreamFeatures;
-
-      ({ packagePolicy, packageInfo, experimentalDataStreamFeatures } =
-        await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion));
-
-      const assetsMap = await getAgentTemplateAssetsMap({
-        logger: appContextService.getLogger(),
-        packageInfo,
-        savedObjectsClient: soClient,
-      });
-
-      // Ensure the experimental features from the Installation saved object come through on the package policy
-      // during an upgrade dry run
-      if (packagePolicy.package) {
-        packagePolicy.package.experimental_data_stream_features = experimentalDataStreamFeatures;
-      }
-
-      return this.calculateDiff(soClient, packagePolicy, packageInfo, assetsMap);
-    } catch (error) {
-      return {
-        hasErrors: true,
-        ...fleetErrorToResponseOptions(error),
-      };
-    }
-  }
-
-  private async calculateDiff(
-    soClient: SavedObjectsClientContract,
-    packagePolicy: PackagePolicy,
-    packageInfo: PackageInfo,
-    assetsMap: PackagePolicyAssetsMap
-  ): Promise<UpgradePackagePolicyDryRunResponseItem> {
-    const updatedPackagePolicy = updatePackageInputs(
-      {
-        ...omit(packagePolicy, 'id', 'spaceIds'),
-        inputs: packagePolicy.inputs,
-        package: {
-          ...packagePolicy.package!,
-          version: packageInfo.version,
-          experimental_data_stream_features:
-            packagePolicy.package?.experimental_data_stream_features,
-        },
-      },
-      packageInfo,
-      packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
-      true
-    );
-    updatedPackagePolicy.inputs = _compilePackagePolicyInputs(
-      packageInfo,
-      updatedPackagePolicy.vars || {},
-      updatedPackagePolicy.inputs as PackagePolicyInput[],
-      assetsMap
-    );
-    updatedPackagePolicy.elasticsearch = packageInfo.elasticsearch;
-
-    const hasErrors = 'errors' in updatedPackagePolicy;
-
-    this.sendUpgradeTelemetry(
-      packagePolicy.package!,
-      packageInfo.version,
-      hasErrors,
-      updatedPackagePolicy.errors
-    );
-
-    return {
-      name: updatedPackagePolicy.name,
-      diff: [packagePolicy, updatedPackagePolicy],
-      // TODO: Currently only returns the agent inputs for current package policy, not the upgraded one
-      // as we only show this version in the UI
-      agent_diff: [storedPackagePolicyToAgentInputs(packagePolicy, packageInfo)],
-      hasErrors,
-    };
-  }
-
-  private sendUpgradeTelemetry(
-    packagePolicyPackage: PackagePolicyPackage,
-    latestVersion: string,
-    hasErrors: boolean,
-    errors?: Array<{ key: string | undefined; message: string }>
-  ) {
-    if (packagePolicyPackage.version !== latestVersion) {
-      const upgradeTelemetry: PackageUpdateEvent = {
-        packageName: packagePolicyPackage.name,
-        currentVersion: packagePolicyPackage.version,
-        newVersion: latestVersion,
-        status: hasErrors ? 'failure' : 'success',
-        error: hasErrors ? errors : undefined,
-        dryRun: true,
-        eventType: 'package-policy-upgrade' as UpdateEventType,
-      };
-      sendTelemetryEvents(
-        appContextService.getLogger(),
-        appContextService.getTelemetryEventsSender(),
-        upgradeTelemetry
-      );
-      appContextService
-        .getLogger()
-        .info(
-          `Package policy upgrade dry run ${hasErrors ? 'resulted in errors' : 'ran successfully'}`
-        );
-      appContextService.getLogger().debug(() => JSON.stringify(upgradeTelemetry));
-    }
+    return _packagePoliciesGetUpgradeDryRunDiff({
+      packagePolicyService: this,
+      soClient,
+      id,
+      packagePolicy,
+      pkgVersion,
+    });
   }
 
   public async enrichPolicyWithDefaultsFromPackage(

@@ -200,7 +200,6 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
-    getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
     fetchAllItems: jest.fn((..._) => {
