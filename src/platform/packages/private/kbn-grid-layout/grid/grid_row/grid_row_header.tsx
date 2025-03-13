@@ -214,6 +214,7 @@ export const GridRowHeader = React.memo(
                           defaultMessage: 'Move section',
                         })}
                         onMouseDown={startInteraction}
+                        data-test-subj={`kbnGridRowHeader-${rowId}--dragHandle`}
                       />
                     </EuiFlexItem>
                   </>
