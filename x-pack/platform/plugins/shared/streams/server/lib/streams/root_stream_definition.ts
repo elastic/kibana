@@ -18,12 +18,6 @@ export const rootStreamDefinition: WiredStreamDefinition = {
     wired: {
       routing: [],
       fields: {
-        '@timestamp': {
-          type: 'date',
-        },
-        'stream.name': {
-          type: 'system',
-        },
         ...baseFields,
       },
     },

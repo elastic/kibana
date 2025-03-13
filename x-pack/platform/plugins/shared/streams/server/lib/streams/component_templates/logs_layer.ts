@@ -39,7 +39,7 @@ export const baseFields: FieldDefinition = {
     type: 'date',
   },
   'stream.name': {
-    type: 'keyword',
+    type: 'system',
   },
   'scope.dropped_attributes_count': {
     type: 'long',
