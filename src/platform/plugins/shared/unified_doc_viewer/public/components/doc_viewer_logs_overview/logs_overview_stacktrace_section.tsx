@@ -23,9 +23,11 @@ const stacktraceAccordionTitle = i18n.translate(
 export function LogsOverviewStacktraceSection({
   hit,
   dataView,
+  isExpanded,
 }: {
   hit: DataTableRecord;
   dataView: DataView;
+  isExpanded: boolean;
 }) {
   const accordionId = useGeneratedHtmlId({
     prefix: stacktraceAccordionTitle,
@@ -41,7 +43,7 @@ export function LogsOverviewStacktraceSection({
           </EuiTitle>
         }
         paddingSize="m"
-        initialIsOpen={false}
+        initialIsOpen={isExpanded}
         data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"
       >
         <StacktraceContent hit={hit} dataView={dataView} />

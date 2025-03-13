@@ -35,6 +35,7 @@ export const createGetDocViewer =
           component: (props) => (
             <UnifiedDocViewerLogsOverview
               {...props}
+              docViewerAccordionState={params.docViewerAccordionState}
               renderAIAssistant={logsAIAssistantFeature?.render}
             />
           ),

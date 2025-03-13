@@ -84,6 +84,11 @@ export interface DocViewerExtensionParams {
    * The record being displayed in the doc viewer
    */
   record: DataTableRecord;
+
+  /**
+   * Todo:
+   */
+  docViewerAccordionState: Record<string, boolean>;
 }
 
 /**
@@ -181,6 +186,12 @@ export interface RowControlsExtensionParams {
    * The current query
    */
   query?: DiscoverAppState['query'];
+  /**
+   * Todo: Define this parameter
+   * @param record
+   */
+  setExpandedDoc?: (record: DataTableRecord) => void;
+  setDocViewerAccordionState?: (param: Record<string, boolean>) => void;
 }
 
 /**

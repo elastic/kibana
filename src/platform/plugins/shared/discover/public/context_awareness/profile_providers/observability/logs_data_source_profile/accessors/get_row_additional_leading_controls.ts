@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RowControlRowProps } from '@kbn/discover-utils';
 import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -15,10 +16,22 @@ import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
+const scrollToSection = (id: string) => {
+  const element = document.querySelector(
+    '[data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"]'
+  );
+
+  if (element) {
+    setTimeout(() => {
+      element.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100); // We need this delay because after the element is rendered, it takes some time before it can be scrolledIntoView
+  }
+};
+
 export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
   (prev) => (params) => {
     const additionalControls = prev(params) || [];
-    const { updateESQLQuery, query } = params;
+    const { updateESQLQuery, query, setExpandedDoc, setDocViewerAccordionState } = params;
 
     const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
       ? queryContainsMetadataIgnored(query)
@@ -36,13 +49,36 @@ export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile
         }
       : undefined;
 
+    const onStackTraceClick = (props: RowControlRowProps) => {
+      if (setExpandedDoc) {
+        setExpandedDoc(props.record);
+      }
+      if (setDocViewerAccordionState) {
+        setDocViewerAccordionState({ stacktrace: true });
+      }
+      const observer = new MutationObserver((mutations, obs) => {
+        const element = document.querySelector(
+          '[data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"]'
+        );
+        if (element) {
+          scrollToSection('unifiedDocViewLogsOverviewStacktraceAccordion');
+          obs.disconnect();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    };
+
     return [
       ...additionalControls,
       createDegradedDocsControl({
         enabled: isDegradedDocsControlEnabled,
         addIgnoredMetadataToQuery,
       }),
-      createStacktraceControl(),
+      createStacktraceControl({ onClick: onStackTraceClick }),
     ];
   };
 
