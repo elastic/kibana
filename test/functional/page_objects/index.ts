@@ -35,10 +35,12 @@ import { DashboardPageControls } from './dashboard_page_controls';
 import { DashboardPageLinks } from './dashboard_page_links';
 import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
+import { UnifiedTabsPageObject } from './unified_tabs';
 import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
+import { SpaceSettingsPageObject } from './space_settings';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -72,7 +74,9 @@ export const pageObjects = {
   indexPatternFieldEditorObjects: IndexPatternFieldEditorPageObject,
   unifiedSearch: UnifiedSearchPageObject,
   unifiedFieldList: UnifiedFieldListPageObject,
+  unifiedTabs: UnifiedTabsPageObject,
   filesManagement: FilesManagementPageObject,
+  spaceSettings: SpaceSettingsPageObject,
 };
 
 export { SolutionNavigationProvider } from './solution_navigation';
