@@ -6,7 +6,7 @@
  */
 
 import type { CorrectiveAction } from '../../../common/types';
-import type { BaseMigrationDeprecation } from './migrations';
+import type { BaseDeprecation } from './migrations';
 
 interface Action {
   action_type: 'remove_settings';
@@ -53,9 +53,7 @@ const ES_INDEX_MESSAGES_REQUIRING_REINDEX = [
 export const isFrozenDeprecation = (message: string, indexName?: string): boolean =>
   Boolean(indexName) && message.includes(`Index [${indexName}] is a frozen index`);
 
-export const getCorrectiveAction = (
-  deprecation: BaseMigrationDeprecation
-): CorrectiveAction | undefined => {
+export const getCorrectiveAction = (deprecation: BaseDeprecation): CorrectiveAction | undefined => {
   const { index, type, message, metadata } = deprecation;
 
   const indexSettingDeprecation = metadata?.actions?.find(

@@ -152,7 +152,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                   </EuiText>
                 ),
               },
-              /* We cannot unfreeze backing indices (that would break the related data_stream) */
+              /* We cannot reindex backing indices in the same way as regular indices (that would break the related data_stream) */
               ...(!isInDataStream
                 ? [
                     {
@@ -226,7 +226,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {/* We cannot unfreeze backing indices (that would break the related data_stream) */}
+              {/* We cannot reindex backing indices in the same way as regular indices (that would break the related data_stream) */}
               {!isInDataStream && !hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -247,12 +247,11 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                     fill
                     onClick={unfreeze}
                     disabled={loading}
-                    data-test-subj="startIndexReadonlyButton"
+                    data-test-subj="startUnfreezeButton"
                   >
                     <FormattedMessage
                       id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreezeIndexButton"
                       defaultMessage="Unfreeze"
-                      data-test-subj="startIndexReadonlyButton"
                     />
                   </EuiButton>
                 </EuiFlexItem>

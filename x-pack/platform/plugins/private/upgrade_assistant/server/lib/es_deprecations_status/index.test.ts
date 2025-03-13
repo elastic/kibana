@@ -450,6 +450,11 @@ describe('getESUpgradeStatus', () => {
         Object {
           "correctiveAction": Object {
             "excludedActions": Array [],
+            "metadata": Object {
+              "isClosedIndex": false,
+              "isFrozenIndex": false,
+              "isInDataStream": false,
+            },
             "type": "reindex",
           },
           "details": "This index was created using version: 6.8.13",

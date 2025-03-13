@@ -32,7 +32,7 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
-export interface BaseMigrationDeprecation {
+export interface BaseDeprecation {
   index?: string;
   type: keyof EsDeprecations;
   details?: string;
@@ -41,15 +41,15 @@ export interface BaseMigrationDeprecation {
   isCritical: boolean;
   metadata?: EsMetadata;
   resolveDuringUpgrade: boolean;
-  // these properties apply to index_settings migrations only
+  // these properties apply to index_settings deprecations only
   isFrozenIndex?: boolean;
   isClosedIndex?: boolean;
 }
 
-const createBaseMigrationDeprecation = (
+const createBaseDeprecation = (
   migrationDeprecation: MigrationDeprecationsDeprecation,
   { deprecationType, indexName }: { deprecationType: keyof EsDeprecations; indexName?: string }
-): BaseMigrationDeprecation => {
+): BaseDeprecation => {
   const {
     details,
     message,
@@ -72,10 +72,10 @@ const createBaseMigrationDeprecation = (
 };
 
 const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
-  const indexSettingsMigrations = Object.entries(migrationsResponse.index_settings).flatMap(
+  const indexSettingsDeprecations = Object.entries(migrationsResponse.index_settings).flatMap(
     ([indexName, migrationDeprecations]) => {
       return migrationDeprecations.flatMap((migrationDeprecation) =>
-        createBaseMigrationDeprecation(migrationDeprecation, {
+        createBaseDeprecation(migrationDeprecation, {
           indexName,
           deprecationType: 'index_settings',
         })
@@ -83,10 +83,10 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
-  const dataStreamsMigrations = Object.entries(migrationsResponse.data_streams).flatMap(
+  const dataStreamsDeprecations = Object.entries(migrationsResponse.data_streams).flatMap(
     ([indexName, dataStreamDeprecations]) => {
       return dataStreamDeprecations.flatMap((depractionData) =>
-        createBaseMigrationDeprecation(depractionData, {
+        createBaseDeprecation(depractionData, {
           indexName,
           deprecationType: 'data_streams',
         })
@@ -94,10 +94,10 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
-  const ilmPoliciesMigrations = Object.entries(migrationsResponse.ilm_policies).flatMap(
+  const ilmPoliciesDeprecations = Object.entries(migrationsResponse.ilm_policies).flatMap(
     ([indexName, ilmPolicyDeprecations]) => {
       return ilmPolicyDeprecations.flatMap((ilmPolicyData) =>
-        createBaseMigrationDeprecation(ilmPolicyData, {
+        createBaseDeprecation(ilmPolicyData, {
           indexName,
           deprecationType: 'ilm_policies',
         })
@@ -105,10 +105,10 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
-  const templatesMigrations = Object.entries(migrationsResponse.templates).flatMap(
-    ([indexName, templatesDeprecations]) => {
-      return templatesDeprecations.flatMap((templatesDataa) =>
-        createBaseMigrationDeprecation(templatesDataa, {
+  const templatesDeprecations = Object.entries(migrationsResponse.templates).flatMap(
+    ([indexName, templateDeprecations]) => {
+      return templateDeprecations.flatMap((templateData) =>
+        createBaseDeprecation(templateData, {
           indexName,
           deprecationType: 'templates',
         })
@@ -116,29 +116,29 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
-  const mlSettingsMigrations = migrationsResponse.ml_settings.map((depractionData) =>
-    createBaseMigrationDeprecation(depractionData, { deprecationType: 'ml_settings' })
+  const mlSettingsDeprecations = migrationsResponse.ml_settings.map((depractionData) =>
+    createBaseDeprecation(depractionData, { deprecationType: 'ml_settings' })
   );
-  const nodeSettingsMigrations = migrationsResponse.node_settings.map((depractionData) =>
-    createBaseMigrationDeprecation(depractionData, { deprecationType: 'node_settings' })
+  const nodeSettingsDeprecations = migrationsResponse.node_settings.map((depractionData) =>
+    createBaseDeprecation(depractionData, { deprecationType: 'node_settings' })
   );
 
-  const clusterSettingsMigrations = migrationsResponse.cluster_settings.map((depractionData) =>
-    createBaseMigrationDeprecation(depractionData, { deprecationType: 'cluster_settings' })
+  const clusterSettingsDeprecations = migrationsResponse.cluster_settings.map((depractionData) =>
+    createBaseDeprecation(depractionData, { deprecationType: 'cluster_settings' })
   );
 
   return [
-    ...clusterSettingsMigrations,
-    ...mlSettingsMigrations,
-    ...nodeSettingsMigrations,
-    ...indexSettingsMigrations,
-    ...dataStreamsMigrations,
-    ...ilmPoliciesMigrations,
-    ...templatesMigrations,
+    ...clusterSettingsDeprecations,
+    ...mlSettingsDeprecations,
+    ...nodeSettingsDeprecations,
+    ...indexSettingsDeprecations,
+    ...dataStreamsDeprecations,
+    ...ilmPoliciesDeprecations,
+    ...templatesDeprecations,
   ].flat();
 };
 
-const isKnownDeprecation = (deprecation: BaseMigrationDeprecation): boolean => {
+const isKnownDeprecation = (deprecation: BaseDeprecation): boolean => {
   switch (deprecation.type) {
     case 'index_settings':
     case 'cluster_settings':
@@ -155,17 +155,17 @@ const isKnownDeprecation = (deprecation: BaseMigrationDeprecation): boolean => {
   }
 };
 
-const enrichIndexSettingsMigrations = async (
+const enrichIndexSettingsDeprecations = async (
   esClient: ElasticsearchClient,
-  deprecations: BaseMigrationDeprecation[]
+  deprecations: BaseDeprecation[]
 ): Promise<void> => {
-  const deprecationsByIndex = new Map<string, BaseMigrationDeprecation[]>();
-  const indexSettingsDeprecationsWithIndex = deprecations.filter(
-    (deprecation) => deprecation.type === 'index_settings' && deprecation.index
+  const deprecationsByIndex = new Map<string, BaseDeprecation[]>();
+  const indexSettingsDeprecations = deprecations.filter(
+    (deprecation) => deprecation.type === 'index_settings'
   );
 
   // we do a first pass to store all the index deprecations in a Map
-  indexSettingsDeprecationsWithIndex.forEach((deprecation) => {
+  indexSettingsDeprecations.forEach((deprecation) => {
     const indexDeprecations = deprecationsByIndex.get(deprecation.index!) ?? [];
     indexDeprecations.push(deprecation);
     deprecationsByIndex.set(deprecation.index!, indexDeprecations);
@@ -176,7 +176,7 @@ const enrichIndexSettingsMigrations = async (
   const indexStates = indexNames.length ? await esIndicesStateCheck(esClient, indexNames) : {};
 
   // Update some properties for each of the index_settings deprecations
-  indexSettingsDeprecationsWithIndex.forEach((deprecation) => {
+  indexSettingsDeprecations.forEach((deprecation) => {
     deprecation.isClosedIndex = indexStates[deprecation.index!] === 'closed';
 
     // check if a given deprecation is a "frozen index deprecation"
@@ -192,7 +192,7 @@ const enrichIndexSettingsMigrations = async (
 };
 
 const excludeDeprecation = (
-  deprecation: BaseMigrationDeprecation,
+  deprecation: BaseDeprecation,
   correctiveAction?: CorrectiveAction
 ): boolean => {
   if (
@@ -234,10 +234,9 @@ export const getEnrichedDeprecations = async (
     if (!isKnownDeprecation(deprecation)) {
       throw new Error(`Unknown ES deprecation type "${deprecation.type}"`);
     }
-    return true;
   });
 
-  // Kibana system indices are treated in a different section of the Upgrade Assistant
+  // Kibana system indices are handled in a different section of the Upgrade Assistant
   const systemIndices = await getESSystemIndicesMigrationStatus(esClient);
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
   const filteredDeprecations = deprecations.filter(
@@ -245,8 +244,8 @@ export const getEnrichedDeprecations = async (
       deprecation.type !== 'index_settings' || !systemIndicesList.includes(deprecation.index!)
   );
 
-  // Set extra metadata properties for index_settings migrations
-  await enrichIndexSettingsMigrations(esClient, filteredDeprecations);
+  // Set extra metadata properties for index_settings deprecations
+  await enrichIndexSettingsDeprecations(esClient, filteredDeprecations);
 
   // enrich deprecations with the corrective actions, remove metadata
   return filteredDeprecations.flatMap((deprecation) => {
