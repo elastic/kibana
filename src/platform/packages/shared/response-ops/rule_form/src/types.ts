@@ -22,7 +22,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';

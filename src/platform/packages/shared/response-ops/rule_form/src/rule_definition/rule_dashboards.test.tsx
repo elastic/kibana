@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -13,12 +22,12 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./dashboard_service', () => ({
-  dashboardServiceProvider: jest.fn().mockReturnValue({ 
+  dashboardServiceProvider: jest.fn().mockReturnValue({
     fetchDashboard: jest.fn().mockImplementation(async (id: string) => {
       return {
         attributes: { title: `Dashboard ${id}` },
       };
-    }), 
+    }),
     fetchDashboards: jest.fn().mockResolvedValue([
       {
         id: '1',
@@ -27,13 +36,14 @@ jest.mock('./dashboard_service', () => ({
       {
         id: '2',
         attributes: { title: 'Dashboard 2' },
-      }
-    ])
+      },
+    ]),
   }),
 }));
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
-const { dashboardServiceProvider: mockDashboardServiceProvider } = jest.requireMock('./dashboard_service');
+const { dashboardServiceProvider: mockDashboardServiceProvider } =
+  jest.requireMock('./dashboard_service');
 
 describe('RuleDashboards', () => {
   beforeEach(() => {
@@ -55,7 +65,7 @@ describe('RuleDashboards', () => {
     const plugins = {
       featureFlags: {
         getBooleanValue: jest.fn().mockReturnValue(false),
-      }
+      },
     };
 
     render(<RuleDashboards plugins={plugins} />);
@@ -70,9 +80,9 @@ describe('RuleDashboards', () => {
     const plugins = {
       featureFlags: {
         getBooleanValue: jest.fn().mockReturnValue(true),
-      }
+      },
     };
-    
+
     render(
       <IntlProvider locale="en">
         <RuleDashboards plugins={plugins} />
@@ -94,7 +104,7 @@ describe('RuleDashboards', () => {
           dashboards: [
             {
               id: 1,
-            }
+            },
           ],
         },
       },
@@ -104,9 +114,9 @@ describe('RuleDashboards', () => {
       featureFlags: {
         getBooleanValue: jest.fn().mockReturnValue(true),
       },
-      dashboard: {}
+      dashboard: {},
     };
-    
+
     render(
       <IntlProvider locale="en">
         <RuleDashboards plugins={plugins} />
@@ -128,7 +138,7 @@ describe('RuleDashboards', () => {
           dashboards: [
             {
               id: '1',
-            }
+            },
           ],
         },
       },
@@ -155,7 +165,9 @@ describe('RuleDashboards', () => {
     });
 
     // Simulate selecting an option in the EuiComboBox
-    const inputWrap = screen.getByTestId('ruleLinkedDashboards').querySelector('.euiComboBox__inputWrap');
+    const inputWrap = screen
+      .getByTestId('ruleLinkedDashboards')
+      .querySelector('.euiComboBox__inputWrap');
     if (inputWrap) {
       fireEvent.click(inputWrap);
     }
@@ -165,7 +177,10 @@ describe('RuleDashboards', () => {
       type: 'setParamsProperty',
       payload: {
         property: 'dashboards',
-        value: [{ id: '1', title: 'Dashboard 1' }, { id: '2', title: 'Dashboard 2' }],
+        value: [
+          { id: '1', title: 'Dashboard 1' },
+          { id: '2', title: 'Dashboard 2' },
+        ],
       },
     });
 
