@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getRuleTypes } from './get_rule_types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { unmuteAlertInstance } from './unmute_alert_instance';
 
 const http = httpServiceMock.createStartContract();
 
-describe('unmuteAlertInstance', () => {
-  test('should call mute instance alert API', async () => {
-    const result = await unmuteAlertInstance({ http, id: '1/', instanceId: '12/3' });
-    expect(result).toEqual(undefined);
-    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+describe('getRuleTypes', () => {
+  it('should call the rule types API', async () => {
+    const resolvedValue = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await getRuleTypes({
+      http,
+    });
+
+    expect(result).toEqual(resolvedValue);
+
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        Array [
-          "/api/alerting/rule/1%2F/alert/12%2F3/_unmute",
-        ],
+        "/api/alerting/rule_types",
       ]
     `);
   });

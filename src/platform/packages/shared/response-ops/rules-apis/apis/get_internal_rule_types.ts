@@ -9,9 +9,9 @@
 
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import type { RuleTypeSolution } from '@kbn/alerting-plugin/server/types';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
 
 export interface InternalRuleType extends RuleType<string, string> {
   solution: RuleTypeSolution;
@@ -51,7 +51,7 @@ const rewriteRuleType: RewriteRequestCase<InternalRuleType> = ({
   ...rest,
 });
 
-export async function getInternalRuleTypes({ http }: { http: HttpSetup }) {
+export async function getInternalRuleTypes({ http }: { http: HttpStart }) {
   const res = await http.get<Array<AsApiContract<InternalRuleType>>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`
   );

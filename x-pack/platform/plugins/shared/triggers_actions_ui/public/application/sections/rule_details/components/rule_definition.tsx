@@ -19,7 +19,7 @@ import {
 import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
-import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -39,6 +39,8 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 }) => {
   const {
     application: { capabilities, navigateToApp },
+    http,
+    notifications: { toasts },
   } = useKibana().services;
 
   const [ruleType, setRuleType] = useState<RuleType>();
@@ -46,7 +48,9 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   const hasConditions = !!(rule?.params.criteria as any[])?.length;
   const {
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesIsLoading },
-  } = useLoadRuleTypesQuery({
+  } = useGetRuleTypesPermissions({
+    http,
+    toasts,
     filteredRuleTypes,
   });
   const ruleTypes = useMemo(() => [...ruleTypeIndex.values()], [ruleTypeIndex]);
