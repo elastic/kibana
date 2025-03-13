@@ -32,7 +32,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     ready: boolean;
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
-    model_stats?: MlTrainedModelStats;
+    model_stats?: Partial<MlTrainedModelStats>;
   }> => {
     const client = await service.getClient({ request });
 
