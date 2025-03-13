@@ -109,8 +109,6 @@ const linkDashboardRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
-
-    await streamsClient.ensureStream(params.path.name);
     const {
       path: { dashboardId, name: streamName },
     } = params;
