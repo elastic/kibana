@@ -55,6 +55,9 @@ Set this property to `true` to quote exported values.
 [[csv-separator]]`csv:separator`::
 A string that serves as the separator for exported values.
 
+[[data_views-fields_excluded_data_tiers]]`data_views:fields_excluded_data_tiers`::
+Allows the exclusion of listed data tiers when getting a field list for faster performance.
+
 [[dateformat]]`dateFormat`::
 The format to use for displaying
 https://momentjs.com/docs/#/displaying/format/[pretty formatted dates].

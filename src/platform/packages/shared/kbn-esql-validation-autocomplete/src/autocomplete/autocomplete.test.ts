@@ -1046,9 +1046,10 @@ describe('autocomplete', () => {
           { filterText: '_source', text: '_source, ', command: TRIGGER_SUGGESTION_COMMAND },
         ]);
         // no comma if there are no more fields
-        testSuggestions('FROM a METADATA _id, _ignored, _index, _source, _index_mode, _version/', [
-          { filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND },
-        ]);
+        testSuggestions(
+          'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _version/',
+          [{ filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND }]
+        );
       });
 
       describe.each(['KEEP', 'DROP'])('%s <field>', (commandName) => {

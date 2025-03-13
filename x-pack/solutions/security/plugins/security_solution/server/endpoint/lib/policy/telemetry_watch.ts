@@ -10,36 +10,48 @@ import type { Subscription } from 'rxjs';
 import type {
   ElasticsearchClient,
   ElasticsearchServiceStart,
-  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
-  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import pRetry from 'p-retry';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { stringify } from '../../utils/stringify';
+
+interface TelemetryConfigWatcherOptions {
+  /** Retry SO operations immediately, without any delay. Useful for testing.
+   */
+  immediateRetry: boolean;
+}
 
 export class TelemetryConfigWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
   private policyService: PackagePolicyClient;
+  private endpointAppContextService: EndpointAppContextService;
   private subscription: Subscription | undefined;
-  private soStart: SavedObjectsServiceStart;
+  private retryOptions: Partial<pRetry.Options>;
+
   constructor(
     policyService: PackagePolicyClient,
-    soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
-    endpointAppContextService: EndpointAppContextService
+    endpointAppContextService: EndpointAppContextService,
+    options: TelemetryConfigWatcherOptions = { immediateRetry: false }
   ) {
     this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
+    this.endpointAppContextService = endpointAppContextService;
     this.logger = endpointAppContextService.createLogger(this.constructor.name);
-    this.soStart = soStart;
+
+    this.retryOptions = {
+      retries: 4,
+      minTimeout: options.immediateRetry ? 0 : 1000,
+    };
   }
 
   /**
@@ -49,16 +61,8 @@ export class TelemetryConfigWatcher {
    * intentionally using the system user here. Be very aware of what you are using this
    * client to do
    */
-  private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+  private makeInternalSOClient(): SavedObjectsClientContract {
+    return this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
   }
 
   public start(telemetryConfigProvider: TelemetryConfigProvider) {
@@ -79,6 +83,8 @@ export class TelemetryConfigWatcher {
       page: number;
       perPage: number;
     };
+    let updated = 0;
+    let failed = 0;
 
     this.logger.debug(
       `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
@@ -86,14 +92,28 @@ export class TelemetryConfigWatcher {
 
     do {
       try {
-        response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
-          page: page++,
-          perPage: 100,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-        });
+        response = await pRetry(
+          () =>
+            this.policyService.list(this.makeInternalSOClient(), {
+              page,
+              perPage: 100,
+              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+            }),
+          {
+            onFailedAttempt: (error) =>
+              this.logger.debug(
+                `Failed to read package policies on ${
+                  error.attemptNumber
+                }. attempt on page ${page}, reason: ${stringify(error)}`
+              ),
+            ...this.retryOptions,
+          }
+        );
       } catch (e) {
         this.logger.warn(
-          `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${e.message}`
+          `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${stringify(
+            e
+          )}`
         );
         return;
       }
@@ -112,29 +132,46 @@ export class TelemetryConfigWatcher {
 
       if (updates.length) {
         try {
-          await this.policyService.bulkUpdate(
-            this.makeInternalSOClient(this.soStart),
-            this.esClient,
-            updates
+          const updateResult = await pRetry(
+            () =>
+              this.policyService.bulkUpdate(this.makeInternalSOClient(), this.esClient, updates),
+            {
+              onFailedAttempt: (error) =>
+                this.logger.debug(
+                  `Failed to bulk update package policies on ${
+                    error.attemptNumber
+                  }. attempt, reason: ${stringify(error)}`
+                ),
+              ...this.retryOptions,
+            }
           );
-        } catch (e) {
-          // try again for transient issues
-          try {
-            await this.policyService.bulkUpdate(
-              this.makeInternalSOClient(this.soStart),
-              this.esClient,
-              updates
-            );
-          } catch (ee) {
+
+          if (updateResult.failedPolicies.length) {
             this.logger.warn(
-              `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
-                (update) => update.id
-              )}`
+              `Cannot update telemetry flag in the following policies:\n${updateResult.failedPolicies
+                .map((entry) => `- id: ${entry.packagePolicy.id}, error: ${stringify(entry.error)}`)
+                .join('\n')}`
             );
-            this.logger.warn(ee);
           }
+
+          updated += updateResult.updatedPolicies?.length ?? 0;
+          failed += updateResult.failedPolicies.length;
+        } catch (e) {
+          this.logger.warn(
+            `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
+              (update) => update.id
+            )}\n\n${stringify(e)}`
+          );
+
+          failed += updates.length;
         }
       }
+
+      page++;
     } while (response.page * response.perPage < response.total);
+
+    this.logger.info(
+      `Finished updating global_telemetry_enabled flag to ${isTelemetryEnabled} in Defend package policies: ${updated} succeeded, ${failed} failed.`
+    );
   }
 }

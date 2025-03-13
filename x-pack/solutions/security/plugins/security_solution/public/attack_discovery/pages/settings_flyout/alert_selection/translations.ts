@@ -36,13 +36,6 @@ export const ALERT_SUMMARY = i18n.translate(
   }
 );
 
-export const FILTER_YOUR_DATA = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.filterYourDataPlaceholder',
-  {
-    defaultMessage: 'Filter your data using KQL syntax',
-  }
-);
-
 export const SELECT_FIELD = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.alertsTable.selectFieldLabel',
   {

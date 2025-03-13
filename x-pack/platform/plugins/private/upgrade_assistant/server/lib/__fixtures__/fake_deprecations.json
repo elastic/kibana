@@ -164,6 +164,19 @@
         "resolve_during_rolling_upgrade": false
       }
     ],
+    "transforms_index": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This index has version: 7.17.25",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true,
+          "transform_ids": ["abc"]
+        }
+      }
+    ],
     "myindex": [
       {
         "level": "critical",
@@ -219,21 +232,63 @@
         "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
         "resolve_during_rolling_upgrade": false,
         "_meta": {
-          "backing_indices": {
-            "count": 52,
-            "need_upgrading": {
-              "count": 37,
-              "searchable_snapshot": {
-                "count": 23,
-                "fully_mounted": {
-                  "count": 7
-                },
-                "partially_mounted": {
-                  "count": 16
-                }
-              }
-            }
-          }
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
+        }
+      }
+    ],
+    "logs-enterprise_search.default": [
+      {
+        "level": "critical",
+        "message": "Old data stream with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
+        }
+      }
+    ],
+    "logs-app_search.default": [
+      {
+        "level": "critical",
+        "message": "Old data stream with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
+        }
+      }
+    ],
+    "logs-workplace_search.default": [
+      {
+        "level": "critical",
+        "message": "Old data stream with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
         }
       }
     ]

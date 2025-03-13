@@ -64,11 +64,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
           level: 'critical',
           title: ENT_SEARCH_NODE_DEPRECATION_TITLE,
         }),
-        deprecate('customHeaders', '9.0.0', {
-          documentationUrl: context.docLinks.enterpriseSearch.upgrade9x,
-          level: 'critical',
-          title: ENT_SEARCH_NODE_DEPRECATION_TITLE,
-        }),
         deprecate('isCloud', '9.0.0', {
           level: 'critical',
         }),

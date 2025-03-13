@@ -55,7 +55,7 @@ export const storybookAliases = {
   kibana_react: 'src/platform/plugins/shared/kibana_react/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   logs_explorer: 'x-pack/solutions/observability/plugins/logs_explorer/.storybook',
-  management: 'packages/kbn-management/storybook/config',
+  management: 'src/platform/packages/shared/kbn-management/storybook/config',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   observability_ai_assistant:
     'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
@@ -70,7 +70,7 @@ export const storybookAliases = {
   // Skipped, please check and fix https://github.com/elastic/kibana/issues/207227
   // security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
-  serverless: 'packages/serverless/storybook/config',
+  serverless: 'src/platform/packages/shared/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',

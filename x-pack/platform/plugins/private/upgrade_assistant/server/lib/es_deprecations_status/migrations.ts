@@ -22,6 +22,7 @@ import {
   isFrozenDeprecation,
 } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
+import { ENT_SEARCH_DATASTREAM_PREFIXES, ENT_SEARCH_INDEX_PREFIX } from '../enterprise_search';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -123,8 +124,6 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
   ].flat();
 };
 
-const ENT_SEARCH_INDICES_PREFIX = '.ent-search-';
-
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
@@ -173,11 +172,15 @@ export const getEnrichedDeprecations = async (
         deprecation.index
       );
 
+      // Early exclusion of deprecations
       if (
-        // Early exclusion of enterprise search indices that need to be reindexed
-        deprecation.index &&
-        deprecation.index.startsWith(ENT_SEARCH_INDICES_PREFIX) &&
-        correctiveAction?.type === 'reindex'
+        (deprecation.type === 'index_settings' &&
+          correctiveAction?.type === 'reindex' &&
+          deprecation.index?.startsWith(ENT_SEARCH_INDEX_PREFIX)) ||
+        (deprecation.type === 'data_streams' &&
+          correctiveAction?.type === 'dataStream' &&
+          correctiveAction.metadata.reindexRequired &&
+          ENT_SEARCH_DATASTREAM_PREFIXES.some((prefix) => deprecation.index?.startsWith(prefix)))
       ) {
         return [];
       }

@@ -77,6 +77,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.goToTimeRange();
       await retry.try(async () => {
         await clickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        const filters = await find.allByCssSelector('.euiCheckbox');
+        expect(filters).length(2);
+        const [timeFilter, ipFilter] = filters;
+        expect(await timeFilter.getVisibleText()).to.be(
+          '@timestamp: Sep 21, 2015 @ 09:00:00.000 to Sep 21, 2015 @ 12:00:00.000'
+        );
+        expect(await ipFilter.getVisibleText()).to.be('ip: 97.220.3.248');
+
         await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
       });
 

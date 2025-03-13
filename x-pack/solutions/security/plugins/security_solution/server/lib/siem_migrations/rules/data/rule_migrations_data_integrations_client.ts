@@ -19,13 +19,17 @@ const RETURNED_INTEGRATIONS = 5 as const;
  */
 export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
   async getIntegrationPackages(): Promise<PackageList | undefined> {
-    return this.dependencies.packageService?.asInternalUser.getPackages();
+    return this.dependencies.packageService?.asInternalUser.getPackages({
+      prerelease: true,
+    });
   }
 
   /** Indexes an array of integrations to be used with ELSER semantic search queries */
   async populate(): Promise<void> {
     const index = await this.getIndexName();
-    const packages = await this.dependencies.packageService?.asInternalUser.getPackages();
+    const packages = await this.dependencies.packageService?.asInternalUser.getPackages({
+      prerelease: true,
+    });
     if (packages) {
       const ragIntegrations = packages.map<RuleMigrationIntegration>((pkg) => ({
         title: pkg.title,
@@ -64,10 +68,17 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
               },
             ]),
           },
-          { requestTimeout: 10 * 60 * 1000 }
+          { requestTimeout: 10 * 60 * 1000 } // 10 minutes
         )
+        .then((response) => {
+          if (response.errors) {
+            // use the first error to throw
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
+          }
+        })
         .catch((error) => {
-          this.logger.error(`Error populating integrations for migration ${error.message}`);
+          this.logger.error(`Error indexing integrations embeddings: ${error.message}`);
           throw error;
         });
     } else {

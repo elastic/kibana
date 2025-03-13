@@ -33,6 +33,7 @@ export async function* readOnlyExecute(
     return {
       migrationOp: {
         status: DataStreamMigrationStatus.completed,
+        resolutionType: 'readonly',
         taskPercComplete: 1,
         progressDetails: {
           startTimeMs,
@@ -65,6 +66,7 @@ export async function* readOnlyExecute(
 
       yield {
         migrationOp: {
+          resolutionType: 'readonly',
           status,
           taskPercComplete,
           progressDetails: {
@@ -80,6 +82,7 @@ export async function* readOnlyExecute(
   } catch (error) {
     return {
       migrationOp: {
+        resolutionType: 'readonly',
         status: DataStreamMigrationStatus.failed,
         errorMessage: error.message || 'Unknown error occurred',
       },
@@ -88,6 +91,7 @@ export async function* readOnlyExecute(
 
   return {
     migrationOp: {
+      resolutionType: 'readonly',
       status: DataStreamMigrationStatus.completed,
       taskPercComplete: 1,
       progressDetails: {

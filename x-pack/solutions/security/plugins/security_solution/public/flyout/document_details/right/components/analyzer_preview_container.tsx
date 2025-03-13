@@ -37,8 +37,8 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
   // decide whether to show the analyzer preview or not
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
@@ -120,31 +120,38 @@ export const AnalyzerPreviewContainer: React.FC = () => {
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >
-      {isEnabled ? (
-        <AnalyzerPreview />
-      ) : (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataDescription"
-          defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
-          values={{
-            sysmon: <EuiMark>{'sysmon'}</EuiMark>,
-            winlogbeat: <EuiMark>{'winlogbeat'}</EuiMark>,
-            link: (
-              <EuiLink
-                href="https://www.elastic.co/guide/en/security/current/visual-event-analyzer.html"
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataLinkText"
-                  defaultMessage="Visual event analyzer"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      )}
+      {isEnabled ? <AnalyzerPreview /> : <AnalyzerPreviewNoDataMessage />}
     </ExpandablePanel>
   );
 };
 
 AnalyzerPreviewContainer.displayName = 'AnalyzerPreviewContainer';
+
+/**
+ * No data message for the analyzer preview.
+ */
+export const AnalyzerPreviewNoDataMessage: React.FC = () => {
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.visualizations.analyzerPreview.noDataDescription"
+      defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
+      values={{
+        sysmon: <EuiMark>{'sysmon'}</EuiMark>,
+        winlogbeat: <EuiMark>{'winlogbeat'}</EuiMark>,
+        link: (
+          <EuiLink
+            href="https://www.elastic.co/guide/en/security/current/visual-event-analyzer.html"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataLinkText"
+              defaultMessage="Visual event analyzer"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+};
+
+AnalyzerPreviewNoDataMessage.displayName = 'AnalyzerPreviewNoDataMessage';

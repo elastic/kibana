@@ -62,6 +62,12 @@ export const loadSecurityLabs = async (
 
     logger.info(`Loaded ${response?.length ?? 0} Security Labs docs into the Knowledge Base`);
 
+    try {
+      kbDataClient.options.setIsKBSetupInProgress(kbDataClient.spaceId, false);
+    } catch (e) {
+      /* empty */
+    }
+
     return response.length > 0;
   } catch (e) {
     logger.error(`Failed to load Security Labs docs into the Knowledge Base\n${e}`);

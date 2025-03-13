@@ -60,20 +60,22 @@ export const UserPanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <>
-          <FlyoutRiskSummary
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
-            entityType={EntityType.user}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {Array.isArray(riskScoreState.data) &&
+        riskScoreState.isModuleEnabled &&
+        riskScoreState.data.length > 0 && (
+          <>
+            <FlyoutRiskSummary
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              isLinkEnabled={isLinkEnabled}
+              entityType={EntityType.user}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
       <AssetCriticalityAccordion
         entity={{ name: userName, type: EntityType.user }}
         onChange={onAssetCriticalityChange}

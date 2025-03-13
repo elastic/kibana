@@ -203,6 +203,16 @@ export interface ReindexAction {
    * In future this could be an array of blockers.
    */
   blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+
+  /**
+   * The transform IDs that are currently targeting this index
+   */
+  transformIds?: string[];
+
+  /**
+   * The actions that should be excluded from the reindex corrective action.
+   */
+  excludedActions?: string[];
 }
 
 export interface UnfreezeAction {
@@ -329,3 +339,5 @@ export interface FeatureSet {
   reindexCorrectiveActions: boolean;
   migrateDataStreams: boolean;
 }
+
+export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;

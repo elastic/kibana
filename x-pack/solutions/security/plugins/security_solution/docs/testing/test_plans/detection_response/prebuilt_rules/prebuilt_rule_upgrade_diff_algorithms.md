@@ -2,6 +2,9 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
+
 ## Summary <!-- omit from toc -->
 
 This is a test plan for the diff algorithms used in the workflows of upgrading prebuilt rules and specifically in the `upgrade/_review` endpoint.
@@ -18,7 +21,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
     - [**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
@@ -53,31 +59,49 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Users can customize prebuilt detection rules](https://github.com/elastic/kibana/issues/174168) epic
-- [Implement single-line string diff algorithm](https://github.com/elastic/kibana/issues/180158)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Implement number diff algorithm](https://github.com/elastic/kibana/issues/180160)
+- [Implement single-line string diff algorithm](https://github.com/elastic/kibana/issues/180158)
+- [Implement multi-line string diff algorithm](https://github.com/elastic/kibana/issues/180159)
 - [Implement array of scalar values diff algorithm](https://github.com/elastic/kibana/issues/180162)
+- [Implement data source fields diff algorithm](https://github.com/elastic/kibana/issues/187659)
+- [Implement query fields diff algorithms](https://github.com/elastic/kibana/issues/187658)
+- [Implement `concurrent_searches` and `items_per_search` fields diff algorithms](https://github.com/elastic/kibana/issues/188061)
+- [Implement rule type diff algorithm](https://github.com/elastic/kibana/issues/190482)
+- [Tests for prebuilt rule customization workflow](https://github.com/elastic/kibana/issues/202068)
+- [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
 ### Terminology
 
-- **Base version**: Also labeled as `base_version`. This is the version of a rule authored by Elastic as it is installed from the `security_detection_engine` package, with no customizations to any fields by the user.
-
-- **Current version**: Also labeled as `current_version`. This is the version of the rule that the user currently has installed. Consists of the `base_version` of the rules plus all customization applies to its fields by the user.
-
-- **Target version**: Also labeled as `target_version`. This is the version of the rule that contains the update from Elastic.
-
-- **Merged version**: Also labeled as `merged_version`. This is the version of the rule that we determine via the various algorithms. It could contain a mix of all the rule versions on a per-field basis to create a singluar version of the rule containing all relevant updates and user changes to display to the user.
-
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **Grouped fields**
   - `data_source`: an object that contains a `type` field with a value of `data_view_id` or `index_patterns` and another field that's either `data_view_id` of type string OR `index_patterns` of type string array
   - `kql_query`: an object that contains a `type` field with a value of `inline_query` or `saved_query` and other fields based on whichever type is defined. If it's `inline_query`, the object contains a `query` string field, a `language` field that's either `kuery` or `lucene`, and a `filters` field which is an array of kibana filters. If the type field is `saved_query`, the object only contains a `saved_query_id` string field.
   - `eql_query`: an object that contains a `query` string field, a `language` field that always has the value: `eql`, and a `filters` field that contains an array of kibana filters.
   - `esql_query`: an object that contains a `query` string field and a `language` field that always has the value: `esql`.
 
+## Requirements
+
 ### Assumptions
 
+Assumptions about test environments and scenarios outlined in this test plan.
+
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - All scenarios will contain at least 1 prebuilt rule installed in Kibana.
 - A new version will be available for rule(s).
+
+### Technical requirements
+
+Non-functional requirements for the functionality outlined in this test plan.
+
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
+
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
 
 ## Scenarios
 

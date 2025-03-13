@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { AlertSelectionQuery } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -24,6 +25,7 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
 describe('AlertSelectionQuery', () => {
   const defaultProps = {
     end: 'now',
+    filterManager: jest.fn() as unknown as FilterManager,
     filters: [],
     query: { query: '', language: 'kuery' },
     setEnd: jest.fn(),

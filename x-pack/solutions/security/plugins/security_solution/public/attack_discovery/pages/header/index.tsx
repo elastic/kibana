@@ -15,12 +15,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ConnectorSelectorInline, useAssistantContext } from '@kbn/elastic-assistant';
+import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { SettingsModal } from './settings_modal';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 
@@ -51,10 +50,6 @@ const HeaderComponent: React.FC<Props> = ({
   setLocalStorageAttackDiscoveryMaxAlerts,
   stats,
 }) => {
-  const {
-    assistantFeatures: { attackDiscoveryAlertFiltering },
-  } = useAssistantContext();
-
   const { euiTheme } = useEuiTheme();
   const disabled = connectorId == null;
 
@@ -120,24 +115,15 @@ const HeaderComponent: React.FC<Props> = ({
         `}
         grow={false}
       >
-        {attackDiscoveryAlertFiltering ? (
-          <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip">
-            <EuiButtonIcon
-              aria-label={i18n.SETTINGS}
-              color="text"
-              data-test-subj="openAlertSelection"
-              iconType="gear"
-              onClick={openFlyout}
-            />
-          </EuiToolTip>
-        ) : (
-          <SettingsModal
-            connectorId={connectorId}
-            isLoading={isLoading}
-            localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-            setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
+        <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip">
+          <EuiButtonIcon
+            aria-label={i18n.SETTINGS}
+            color="text"
+            data-test-subj="openAlertSelection"
+            iconType="gear"
+            onClick={openFlyout}
           />
-        )}
+        </EuiToolTip>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

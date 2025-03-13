@@ -19,4 +19,14 @@ export const AGENTLESS_GLOBAL_TAG_NAME_TEAM = 'team';
 export const AGENTLESS_ALLOWED_OUTPUT_TYPES = [outputType.Elasticsearch];
 
 // Input types to disable for agentless integrations
-export const AGENTLESS_DISABLED_INPUTS = ['tcp', 'udp', 'filestream', 'http_endpoint', 'winlog'];
+export const AGENTLESS_DISABLED_INPUTS = [
+  'tcp',
+  'udp',
+  'filestream',
+  'http_endpoint',
+  'winlog',
+  'o365audit',
+  'gcp-pubsub',
+  'azure-eventhub',
+  'logfile',
+];

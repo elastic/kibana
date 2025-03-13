@@ -1139,7 +1139,15 @@ exports[`XYChart component it renders area 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -2694,7 +2702,15 @@ exports[`XYChart component it renders bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -4249,7 +4265,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -5804,7 +5828,15 @@ exports[`XYChart component it renders line 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -7359,7 +7391,15 @@ exports[`XYChart component it renders stacked area 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -8914,7 +8954,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -10469,7 +10517,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -12054,7 +12110,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -13847,7 +13911,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -15633,7 +15705,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />

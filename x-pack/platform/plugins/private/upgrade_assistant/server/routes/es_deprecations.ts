@@ -13,7 +13,7 @@ import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
 export function registerESDeprecationRoutes({
-  config: { featureSet },
+  config: { featureSet, dataSourceExclusions },
   router,
   lib: { handleEsError },
   licensing,
@@ -36,7 +36,7 @@ export function registerESDeprecationRoutes({
           savedObjects: { client: savedObjectsClient },
           elasticsearch: { client },
         } = await core;
-        const status = await getESUpgradeStatus(client, featureSet);
+        const status = await getESUpgradeStatus(client, { featureSet, dataSourceExclusions });
 
         const asCurrentUser = client.asCurrentUser;
         const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);

@@ -81,6 +81,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index was created using version: 6.8.13",
@@ -94,6 +95,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index has version: 7.17.28-8.0.0",
@@ -107,6 +109,7 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": "index-closed",
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index was created using version: 6.8.13",
@@ -175,6 +178,24 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "excludedActions": Array [],
+        "transformIds": Array [
+          "abc",
+        ],
+        "type": "reindex",
+      },
+      "details": "This index has version: 7.17.25",
+      "index": "transforms_index",
+      "isCritical": true,
+      "message": "Old index with a compatibility version < 8.0",
+      "resolveDuringUpgrade": false,
+      "type": "index_settings",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+    },
+    Object {
+      "correctiveAction": Object {
+        "blockerForReindexing": undefined,
+        "excludedActions": Array [],
         "type": "reindex",
       },
       "details": "This index has version: 7.17.25",
@@ -186,7 +207,20 @@ Object {
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
     },
     Object {
-      "correctiveAction": undefined,
+      "correctiveAction": Object {
+        "metadata": Object {
+          "excludedActions": Array [],
+          "ignoredIndicesRequiringUpgrade": Array [],
+          "ignoredIndicesRequiringUpgradeCount": 0,
+          "indicesRequiringUpgrade": Array [
+            ".ds-some-backing-index-5-2024.11.07-000001",
+          ],
+          "indicesRequiringUpgradeCount": 1,
+          "reindexRequired": true,
+          "totalBackingIndices": 2,
+        },
+        "type": "dataStream",
+      },
       "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
       "index": "my-v7-data-stream",
       "isCritical": true,
@@ -216,7 +250,7 @@ Object {
       "url": "https://github.com/elastic/elasticsearch/pull/117172",
     },
   ],
-  "totalCriticalDeprecations": 8,
+  "totalCriticalDeprecations": 9,
   "totalCriticalHealthIssues": 0,
 }
 `;

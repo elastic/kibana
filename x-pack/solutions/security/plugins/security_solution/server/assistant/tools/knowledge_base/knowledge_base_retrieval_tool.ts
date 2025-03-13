@@ -58,11 +58,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           required: false,
         });
 
-        if (contentReferencesStore) {
-          return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
-        }
-
-        return JSON.stringify(docs);
+        return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
       },
       tags: ['knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
@@ -70,9 +66,9 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   },
 };
 
-function enrichDocument(contentReferencesStore: ContentReferencesStore) {
+function enrichDocument(contentReferencesStore: ContentReferencesStore | undefined) {
   return (document: Document<Record<string, string>>) => {
-    if (document.id == null) {
+    if (document.id == null || contentReferencesStore == null) {
       return document;
     }
     const documentId = document.id;

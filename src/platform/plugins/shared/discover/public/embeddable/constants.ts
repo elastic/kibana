@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { SearchEmbeddableSerializedState } from './types';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
@@ -37,9 +38,10 @@ export const EDITABLE_SAVED_SEARCH_KEYS: Readonly<Array<keyof SavedSearchAttribu
 ] as const;
 
 /** This constant refers to the dashboard panel specific state */
-export const EDITABLE_PANEL_KEYS = [
+export const EDITABLE_PANEL_KEYS: Readonly<Array<keyof SearchEmbeddableSerializedState>> = [
   'title', // panel title
   'description', // panel description
   'timeRange', // panel custom time range
   'hidePanelTitles', // panel hidden title
+  'enhancements', // panel enhancements (e.g. drilldowns)
 ] as const;

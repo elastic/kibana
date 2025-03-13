@@ -8,5 +8,4 @@
 export * from './host';
 export * from './user';
 export * from './service';
-export * from './universal';
 export { getCommonFieldDescriptions } from './common';
