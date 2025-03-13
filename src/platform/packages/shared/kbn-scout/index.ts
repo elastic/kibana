@@ -13,11 +13,10 @@ export {
   test,
   spaceTest,
   lighthouseTest,
+  globalSetupHook,
   tags,
   createPlaywrightConfig,
   createLazyPageObject,
-  ingestTestDataHook,
-  ingestSynthtraceDataHook,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
