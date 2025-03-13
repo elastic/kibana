@@ -11,5 +11,7 @@
     "@kbn/i18n",
     "@kbn/server-route-repository",
     "@kbn/core-http-server",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core-http-browser",
   ]
 }
