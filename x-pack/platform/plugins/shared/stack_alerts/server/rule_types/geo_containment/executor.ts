@@ -6,6 +6,7 @@
  */
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { StackAlertType } from '../types';
 import type { RuleExecutorOptions } from '../../types';
 import {
   canSkipBoundariesFetch,
@@ -38,7 +39,8 @@ export async function executor({
   GeoContainmentRuleState,
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  StackAlertType
 >): Promise<{ state: GeoContainmentRuleState }> {
   const boundariesRequestMeta = {
     geoField: params.geoField,
