@@ -1300,7 +1300,7 @@ finalize it.
         .send(props.body as object);
     },
     /**
-     * Pin an event to an existing Timeline.
+     * Pin/unpin an event to/from an existing Timeline.
      */
     persistPinnedEventRoute(props: PersistPinnedEventRouteProps, kibanaSpace: string = 'default') {
       return supertest
