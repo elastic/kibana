@@ -205,7 +205,6 @@ describe('Timeline', () => {
     });
 
     test('should not apply changes to the columns when no previous config is stored in localStorage', () => {
-      setStoredTimelineColumnsConfig(undefined);
       const update = addTimelineToStore({
         id: 'foo',
         timeline: {
@@ -351,7 +350,6 @@ describe('Timeline', () => {
           columns,
         },
       };
-      setStoredTimelineColumnsConfig(undefined);
     });
 
     test('should return a new reference and not the same reference', () => {
