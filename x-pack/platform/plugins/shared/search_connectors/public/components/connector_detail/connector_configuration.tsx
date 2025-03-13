@@ -43,12 +43,12 @@ import { useAppContext } from '../../app_context';
 import { docLinks } from '../shared/doc_links';
 
 export const ConnectorConfiguration: React.FC = () => {
-  const { connector, updateConnectorConfigurationStatus } = useValues(ConnectorViewLogic);
-  const { connectorTypes: connectors, hasPlatinumLicense } = useAppContext();
-  const { isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
   const {
     services: { http },
   } = useKibana();
+  const { connector, updateConnectorConfigurationStatus } = useValues(ConnectorViewLogic({ http }));
+  const { connectorTypes: connectors, hasPlatinumLicense } = useAppContext();
+  const { isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
   const { advancedSnippet } = useValues(ConnectorFilteringLogic);
 
   const NATIVE_CONNECTORS = useMemo(
@@ -62,7 +62,7 @@ export const ConnectorConfiguration: React.FC = () => {
     [connectors]
   );
 
-  const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
+  const { updateConnectorConfiguration } = useActions(ConnectorViewLogic({ http }));
 
   if (!connector) {
     return <></>;

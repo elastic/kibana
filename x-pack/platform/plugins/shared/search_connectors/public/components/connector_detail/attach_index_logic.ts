@@ -53,6 +53,7 @@ export interface AttachIndexValues {
 }
 
 export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndexActions>>({
+  key: (props) => props.http,
   actions: {
     checkIndexExists: ({ indexName }) => ({
       indexName,
@@ -90,6 +91,7 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
       IndexExistsApiLogic,
       ['status as indexExistsApiStatus'],
     ],
+    keys: [ConnectorViewLogic, ['http']],
   },
   listeners: ({ actions, values }) => ({
     attachIndexApiSuccess: () => {

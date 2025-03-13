@@ -39,10 +39,13 @@ interface ConfigurationStepProps {
 }
 
 export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, setCurrentStep }) => {
-  const { connector, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic);
-  const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
-  const { setFormDirty } = useActions(NewConnectorLogic);
-  const { overlays, http } = useKibana().services;
+  const { overlays, http, application } = useKibana().services;
+
+  const { connector, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic({ http }));
+  const { updateConnectorConfiguration } = useActions(ConnectorViewLogic({ http }));
+  const { setFormDirty } = useActions(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
   const [isFormEditing, setIsFormEditing] = useState<boolean>(false);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const isSyncing = false;

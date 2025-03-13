@@ -51,10 +51,7 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
         onClick,
         shouldNotCreateHref,
         http: services.http,
-        navigateToUrl: services.application?.navigateToUrl as (
-          path: string,
-          options?: CreateHrefOptions | undefined
-        ) => Promise<void>,
+        navigateToUrl: services.application?.navigateToUrl as any,
         history: history as ScopedHistory,
       })}
     />

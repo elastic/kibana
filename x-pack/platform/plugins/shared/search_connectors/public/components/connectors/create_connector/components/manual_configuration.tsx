@@ -47,7 +47,9 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   selfManagePreference,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana();
+  const {
+    services: { http, application },
+  } = useKibana();
   const {
     plugins: { share, console },
   } = useAppContext();
@@ -62,7 +64,9 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   const closePopover = () => {
     setPopover(false);
   };
-  const { selectedConnector, rawName } = useValues(NewConnectorLogic);
+  const { selectedConnector, rawName } = useValues(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [flyoutContent, setFlyoutContent] = useState<'manual_config' | 'client'>();
   const getCodeSnippet = (): string => {
@@ -189,7 +193,7 @@ GET connector-${rawName}/_search
       `}
     >
       <TryInConsoleButton
-        application={services.application}
+        application={application}
         sharePlugin={share}
         consolePlugin={console}
         content={i18n.translate(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -33,6 +33,8 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { ScopedHistory } from '@kbn/core/public';
 import { useActions, useValues } from 'kea';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useAppContext } from '../../../app_context';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
@@ -55,15 +57,28 @@ export const CreateConnector: React.FC = () => {
   } = useKibana();
 
   const history = useHistory();
+  const { isAgentlessEnabled } = useAppContext();
 
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
-  const [selfManagePreference, setSelfManagePreference] =
-    useState<SelfManagePreference>('selfManaged');
+  const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
 
-  const { selectedConnector, currentStep, isFormDirty } = useValues(NewConnectorLogic);
-  const { setCurrentStep } = useActions(NewConnectorLogic);
+  const { selectedConnector, currentStep, isFormDirty } = useValues(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
+  const { setCurrentStep } = useActions(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
   const stepStates = generateStepState(currentStep);
+  useEffect(() => {
+    if (
+      (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
+      !isAgentlessEnabled
+    ) {
+      setSelfManagePreference('selfManaged');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConnector]);
 
   const getSteps = (selfManaged: boolean): EuiContainedStepProps[] => {
     return [
@@ -166,7 +181,16 @@ export const CreateConnector: React.FC = () => {
   });
 
   return (
-    <>
+    <KibanaPageTemplate
+      pageHeader={{
+        description: i18n.translate('xpack.enterpriseSearch.createConnector.description', {
+          defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
+        }),
+        pageTitle: i18n.translate('xpack.enterpriseSearch.createConnector..title', {
+          defaultMessage: 'Create a connector',
+        }),
+      }}
+    >
       <EuiFlexGroup gutterSize="m">
         {/* Col 1 */}
         <EuiFlexItem grow={2}>
@@ -182,7 +206,7 @@ export const CreateConnector: React.FC = () => {
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;
-              min-height: 466px;
+              min-height: 550px;
               border: 1px solid ${euiTheme.colors.lightShade};
             `}
           >
@@ -271,6 +295,6 @@ export const CreateConnector: React.FC = () => {
         {/* Col 2 */}
         <EuiFlexItem grow={7}>{stepContent[currentStep]}</EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </KibanaPageTemplate>
   );
 };

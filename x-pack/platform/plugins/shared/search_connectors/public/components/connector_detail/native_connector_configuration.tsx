@@ -21,6 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
 import { ResearchConfiguration } from '../search_index/connector/native_connector_configuration/research_configuration';
@@ -32,7 +33,10 @@ import { BetaConnectorCallout } from '../shared/beta/beta_connector_callout';
 import { useAppContext } from '../../app_context';
 
 export const NativeConnectorConfiguration: React.FC = () => {
-  const { connector } = useValues(ConnectorViewLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { connector } = useValues(ConnectorViewLogic({ http }));
   const { connectorTypes: connectors } = useAppContext();
 
   const NATIVE_CONNECTORS = useMemo(

@@ -9,6 +9,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
 import { Provider } from 'react-redux';
+import { Store } from 'redux';
 
 import { Route, Routes, Router } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -32,6 +33,10 @@ export const renderApp = (
   params: ManagementAppMountParams,
   connectorTypes: ConnectorDefinition[]
 ) => {
+  resetContext({
+    createStore: true,
+  });
+  const store = getContext().store;
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({
     notifications: core.notifications,
     history: params.history,
@@ -43,6 +48,7 @@ export const renderApp = (
       plugins={plugins}
       pluginStart={pluginStart}
       connectorTypes={connectorTypes}
+      store={store}
     />,
     params.element
   );
@@ -69,11 +75,13 @@ const AppWithExecutionContext = ({
   plugins,
   connectorTypes,
   params,
+  store,
 }: {
   core: CoreStart;
   plugins: SearchConnectorsPluginStartDependencies;
   params: ManagementAppMountParams;
   connectorTypes: ConnectorDefinition[];
+  store: Store;
 }) => {
   const { executionContext } = core;
 
@@ -101,13 +109,6 @@ const AppWithExecutionContext = ({
     kibanaVersion: 'main',
     indexMappingComponent,
   };
-
-  resetContext({
-    createStore: {
-      paths: ['enterprise_search'],
-    },
-  });
-  const store = getContext().store;
   return (
     <Router history={params.history}>
       <AppContextProvider value={appContext}>
@@ -125,9 +126,10 @@ interface AppProps {
   pluginStart: SearchConnectorsPluginStart;
   params: ManagementAppMountParams;
   connectorTypes: ConnectorDefinition[];
+  store: Store;
 }
 
-const App = ({ core, plugins, pluginStart, params, connectorTypes }: AppProps) => {
+const App = ({ core, plugins, pluginStart, params, connectorTypes, store }: AppProps) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -143,6 +145,7 @@ const App = ({ core, plugins, pluginStart, params, connectorTypes }: AppProps) =
           params={params}
           connectorTypes={connectorTypes}
           plugins={plugins}
+          store={store}
         />
       </KibanaContextProviderForPlugin>
     </KibanaRenderContextProvider>

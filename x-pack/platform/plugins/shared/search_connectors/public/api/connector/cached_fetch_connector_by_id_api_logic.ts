@@ -54,6 +54,7 @@ export interface CachedFetchConnectorByIdApiLogicValues {
 export const CachedFetchConnectorByIdApiLogic = kea<
   MakeLogicType<CachedFetchConnectorByIdApiLogicValues, CachedFetchConnectorByIdApiLogicActions>
 >({
+  key: (props) => props.http,
   actions: {
     clearPollTimeout: true,
     createPollTimeout: (duration) => ({ duration }),
@@ -72,13 +73,13 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       }
     },
   }),
-  listeners: ({ actions, values }) => ({
-    apiError: (http) => {
+  listeners: ({ actions, values, props }) => ({
+    apiError: () => {
       if (values.pollTimeoutId) {
         actions.createPollTimeout(FETCH_CONNECTOR_POLLING_DURATION_ON_FAILURE);
       }
     },
-    apiSuccess: (http) => {
+    apiSuccess: () => {
       if (values.pollTimeoutId) {
         actions.createPollTimeout(FETCH_CONNECTOR_POLLING_DURATION);
       }
@@ -89,7 +90,7 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       }
 
       const timeoutId = setTimeout(() => {
-        actions.makeRequest({ connectorId: values.connectorId, http: values.http });
+        actions.makeRequest({ connectorId: values.connectorId, http: props.http });
       }, duration);
       actions.setTimeoutId(timeoutId);
     },
@@ -99,7 +100,7 @@ export const CachedFetchConnectorByIdApiLogic = kea<
         if (connectorId === values.connectorId) return;
         clearTimeout(values.pollTimeoutId);
       }
-      actions.makeRequest({ connectorId, http: values.http });
+      actions.makeRequest({ connectorId, http: props.http });
 
       actions.createPollTimeout(FETCH_CONNECTOR_POLLING_DURATION);
     },

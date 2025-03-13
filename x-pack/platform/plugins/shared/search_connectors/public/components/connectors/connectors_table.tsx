@@ -14,7 +14,6 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
 } from '@elastic/eui';
 
@@ -34,6 +33,7 @@ import { ConnectorType } from './connector_type';
 import { ConnectorViewItem } from './connectors_logic';
 import { generateEncodedPath } from '../shared/encode_path_params';
 import { useAppContext } from '../../app_context';
+import { EuiLinkTo } from '../shared/react_router_helpers';
 
 interface ConnectorsTableProps {
   isCrawler: boolean;
@@ -79,13 +79,11 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
               }
             ),
             render: (connector: ConnectorViewItem) => (
-              <EuiLink
-                href={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
-                external={false}
-                target="_blank"
+              <EuiLinkTo
+                to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
               >
                 {connector.name}
-              </EuiLink>
+              </EuiLinkTo>
             ),
             width: '25%',
           },

@@ -25,6 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
 import { SelfManagePreference } from '../create_connector';
 import { useAppContext } from '../../../../app_context';
@@ -43,6 +44,9 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
   selfManaged,
   disabled,
 }) => {
+  const {
+    services: { http, application },
+  } = useKibana();
   const { euiTheme } = useEuiTheme();
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<OptionData>>>(
     []
@@ -89,8 +93,12 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
     () => connectorTypes.sort((a, b) => a.name.localeCompare(b.name)),
     [connectorTypes]
   );
-  const { selectedConnector } = useValues(NewConnectorLogic);
-  const { setSelectedConnector } = useActions(NewConnectorLogic);
+  const { selectedConnector } = useValues(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
+  const { setSelectedConnector } = useActions(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
 
   const getInitialOptions = () => {
     return allConnectors.map((connector, key) => {
@@ -138,7 +146,8 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
 
   useEffect(() => {
     selectableSetOptions(initialOptions);
-  }, [initialOptions, selfManaged]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selfManaged]);
 
   return (
     <EuiComboBox

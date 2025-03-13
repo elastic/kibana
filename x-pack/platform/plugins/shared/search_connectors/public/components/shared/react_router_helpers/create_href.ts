@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { History } from 'history';
-
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup, ScopedHistory } from '@kbn/core/public';
 
 /**
  * This helper uses React Router's createHref function to generate links with router basenames included.
@@ -25,7 +23,7 @@ import { HttpSetup } from '@kbn/core/public';
  * Links completely outside of Kibana should not use our React Router helpers or navigateToUrl.
  */
 interface CreateHrefDeps {
-  history: History;
+  history: ScopedHistory;
   http: HttpSetup;
 }
 export interface CreateHrefOptions {

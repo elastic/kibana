@@ -13,6 +13,7 @@ import moment from 'moment';
 import { Pagination } from '@elastic/eui';
 import { ConnectorSyncJob, pageToPagination, Paginate } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   CancelSyncApiActions,
   CancelSyncApiLogic,
@@ -69,6 +70,7 @@ export interface SyncJobsViewValues {
   syncJobsPagination: Pagination;
   syncJobsStatus: Status;
   syncTriggeredLocally: boolean;
+  http?: HttpSetup;
 }
 
 export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsViewActions>>({
@@ -145,6 +147,7 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
           from: values.syncJobsPagination.pageIndex * (values.syncJobsPagination.pageSize || 0),
           size: values.syncJobsPagination.pageSize ?? 10,
           type: values.selectedSyncJobCategory,
+          http: values.http,
         });
       }
     },

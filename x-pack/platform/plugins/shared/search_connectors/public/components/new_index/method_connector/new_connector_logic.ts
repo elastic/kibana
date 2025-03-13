@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Connector, ConnectorDefinition } from '@kbn/search-connectors';
 
-import { NavigateToUrlOptions } from '@kbn/core/public';
+import { HttpSetup, NavigateToUrlOptions } from '@kbn/core/public';
 import {
   AddConnectorApiLogic,
   AddConnectorApiLogicActions,
@@ -59,7 +59,6 @@ export interface NewConnectorValues {
   rawName: string;
   selectedConnector: ConnectorDefinition | null;
   shouldGenerateConfigAfterCreate: boolean;
-  navigateToUrl?: (url: string, options?: NavigateToUrlOptions) => Promise<void>;
 }
 
 type NewConnectorActions = {
@@ -92,7 +91,18 @@ type NewConnectorActions = {
   };
 };
 
-export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnectorActions>>({
+export interface NewConnectorLogicProps {
+  http?: HttpSetup;
+  navigateToUrl?: (url: string, options?: NavigateToUrlOptions) => Promise<void>;
+}
+
+export const NewConnectorLogic = kea<
+  MakeLogicType<NewConnectorValues, NewConnectorActions, NewConnectorLogicProps>
+>({
+  key: (props) => ({
+    http: props.http,
+    navigateToUrl: props.navigateToUrl,
+  }),
   actions: {
     createConnector: ({
       isSelfManaged,
@@ -127,20 +137,21 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       AddConnectorApiLogic,
       ['status as createConnectorApiStatus'],
     ],
+    keys: [ConnectorViewLogic, ['http']],
   },
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     connectorCreated: ({ id, uiFlags }) => {
-      if (uiFlags?.shouldNavigateToConnectorAfterCreate && values.navigateToUrl) {
-        values.navigateToUrl(
+      if (uiFlags?.shouldNavigateToConnectorAfterCreate && props.navigateToUrl) {
+        props.navigateToUrl(
           generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
             connectorId: id,
             tabId: SearchIndexTabId.CONFIGURATION,
           })
         );
       } else {
-        actions.fetchConnector({ connectorId: id });
+        actions.fetchConnector({ connectorId: id, http: props.http });
         if (!uiFlags || uiFlags.shouldGenerateAfterCreate) {
-          actions.generateConfiguration({ connectorId: id });
+          actions.generateConfiguration({ connectorId: id, http: props.http });
         }
       }
     },
@@ -170,6 +181,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
             shouldGenerateAfterCreate,
             shouldNavigateToConnectorAfterCreate,
           },
+          http: props.http,
         });
       } else {
         if (values.generatedNameData && values.selectedConnector) {
@@ -184,6 +196,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
               shouldGenerateAfterCreate,
               shouldNavigateToConnectorAfterCreate,
             },
+            http: props.http,
           });
         }
       }
@@ -193,6 +206,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
         actions.generateConnectorName({
           connectorType: connector.serviceType,
           isManagedConnector: connector.isNative,
+          http: props.http,
         });
       }
     },

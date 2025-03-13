@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { ConnectorDeployment } from '../../connector_detail/deployment';
 import { NEXT_BUTTON_LABEL } from '../translations';
@@ -24,7 +25,10 @@ interface DeploymentStepProps {
 }
 
 export const DeploymentStep: React.FC<DeploymentStepProps> = ({ setCurrentStep }) => {
-  const { connector } = useValues(ConnectorViewLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { connector } = useValues(ConnectorViewLogic({ http }));
   const isNextStepEnabled =
     connector && !(!connector.status || connector.status === ConnectorStatus.CREATED);
 

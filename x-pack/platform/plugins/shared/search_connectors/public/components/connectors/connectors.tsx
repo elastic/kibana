@@ -132,7 +132,10 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                     iconType="plusInCircle"
                     fill
                     onClick={() => {
-                      application?.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                      const url = application?.getUrlForApp('management', {
+                        path: `/data/search_connectors`,
+                      });
+                      application?.navigateToUrl(`${url}${NEW_INDEX_SELECT_CONNECTOR_PATH}`);
                     }}
                   >
                     <FormattedMessage
@@ -165,7 +168,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     >
       <DeleteConnectorModal isCrawler={isCrawler} />
       <>
-        {application?.capabilities.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
+        {showDefaultSettingsFlyout && (
           <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
         )}
         {!isCrawler && (

@@ -12,6 +12,8 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiTabProps } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
@@ -23,6 +25,8 @@ import { generateEncodedPath } from '../shared/encode_path_params';
 import { useAppContext } from '../../app_context';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
+import { ConnectorName } from './connector_name';
+import { ConnectorDescription } from './connector_description';
 
 export enum ConnectorDetailTabId {
   // all indices
@@ -38,14 +42,19 @@ export enum ConnectorDetailTabId {
 
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
-  const { hasFilteringFeature, index, connector } = useValues(ConnectorViewLogic);
-  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } =
-    useActions(ConnectorViewLogic);
+  const {
+    services: { application, http },
+  } = useKibana();
+  const { hasFilteringFeature, index, connector } = useValues(ConnectorViewLogic({ http }));
+  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } = useActions(
+    ConnectorViewLogic({ http })
+  );
   useEffect(() => {
     stopConnectorPoll();
     fetchConnectorApiReset();
     startConnectorPoll(connectorId);
-  }, [connectorId, fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectorId]);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -54,10 +63,6 @@ export const ConnectorDetail: React.FC = () => {
   const {
     plugins: { guidedOnboarding },
   } = useAppContext();
-
-  const {
-    services: { application },
-  } = useKibana();
 
   useEffect(() => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
@@ -237,5 +242,23 @@ export const ConnectorDetail: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
 
-  return <>{selectedTab?.content || null}</>;
+  return (
+    <KibanaPageTemplate
+      // pageChrome={[...connectorsBreadcrumbs, connector?.name ?? '...']}
+      // isLoading={isLoading}
+      pageHeader={{
+        description: connector ? <ConnectorDescription connector={connector} /> : '...',
+        pageTitle: connector ? <ConnectorName connector={connector} /> : '...',
+        rightSideGroupProps: {
+          gutterSize: 's',
+          responsive: false,
+          wrap: false,
+        },
+        // rightSideItems: getHeaderActions(index, connector),
+        tabs: tabs as Array<EuiTabProps & { label: React.ReactNode }>,
+      }}
+    >
+      {selectedTab?.content || null}
+    </KibanaPageTemplate>
+  );
 };

@@ -85,18 +85,18 @@ export interface ConnectorsValues {
     searchQuery?: string;
     size: number;
   };
-  http?: HttpSetup;
   status: typeof FetchConnectorsApiLogic.values.status;
 }
 
 export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsActions>>({
   actions: {
     closeDeleteModal: true,
-    fetchConnectors: ({ fetchCrawlersOnly, from, size, searchQuery }) => ({
+    fetchConnectors: ({ fetchCrawlersOnly, from, size, searchQuery, http }) => ({
       fetchCrawlersOnly,
       from,
       searchQuery,
       size,
+      http,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
     openDeleteModal: (connectorName, connectorId, indexName) => ({

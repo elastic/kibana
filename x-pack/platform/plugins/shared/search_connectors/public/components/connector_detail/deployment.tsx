@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GetApiKeyByIdLogic } from '../../api/api_key/get_api_key_by_id_api_logic';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
@@ -49,9 +50,12 @@ export const ConnectorDeployment: React.FC = () => {
     'docker'
   );
   const { kibanaVersion } = useAppContext();
+  const {
+    services: { http },
+  } = useKibana();
   const { generatedData, isGenerateLoading } = useValues(DeploymentLogic);
-  const { index, isLoading, connector, connectorId } = useValues(ConnectorViewLogic);
-  const { fetchConnector } = useActions(ConnectorViewLogic);
+  const { index, isLoading, connector, connectorId } = useValues(ConnectorViewLogic({ http }));
+  const { fetchConnector } = useActions(ConnectorViewLogic({ http }));
   const { generateConfiguration } = useActions(DeploymentLogic);
   const { makeRequest: getApiKeyById } = useActions(GetApiKeyByIdLogic);
   const { data: apiKeyMetaData } = useValues(GetApiKeyByIdLogic);
@@ -226,7 +230,7 @@ export const ConnectorDeployment: React.FC = () => {
                     <WaitingForConnectorStep
                       isLoading={isLoading}
                       isRecheckDisabled={!index}
-                      recheck={() => fetchConnector({ connectorId: connector.id })}
+                      recheck={() => fetchConnector({ connectorId: connector.id, http })}
                     />
                   ) : (
                     <ConnectorLinked />

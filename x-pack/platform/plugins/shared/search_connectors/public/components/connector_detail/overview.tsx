@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { SyncJobs } from '../search_index/sync_jobs/sync_jobs';
 
@@ -30,11 +31,14 @@ import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert
 import { docLinks } from '../shared/doc_links';
 
 export const ConnectorDetailOverview: React.FC = () => {
+  const {
+    services: { http },
+  } = useKibana();
   const { indexData } = useValues(IndexViewLogic);
-  const { connector, error, connectorAgentlessPolicy } = useValues(ConnectorViewLogic);
+  const { connector, error, connectorAgentlessPolicy } = useValues(ConnectorViewLogic({ http }));
 
-  const { showModal } = useActions(ConvertConnectorLogic);
-  const { isModalVisible } = useValues(ConvertConnectorLogic);
+  const { showModal } = useActions(ConvertConnectorLogic({ http }));
+  const { isModalVisible } = useValues(ConvertConnectorLogic({ http }));
 
   return (
     <>

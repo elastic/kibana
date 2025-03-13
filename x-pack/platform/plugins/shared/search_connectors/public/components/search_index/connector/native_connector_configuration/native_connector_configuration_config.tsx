@@ -45,7 +45,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
   } = useKibana();
   const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
-  const { hasAdvancedFilteringFeature } = useValues(ConnectorViewLogic);
+  const { hasAdvancedFilteringFeature } = useValues(ConnectorViewLogic({ http }));
   const { advancedSnippet } = useValues(ConnectorFilteringLogic);
   const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
 
@@ -58,6 +58,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
         makeRequest({
           configuration,
           connectorId: connector.id,
+          http,
         })
       }
       subscriptionLink={docLinks.licenseManagement}

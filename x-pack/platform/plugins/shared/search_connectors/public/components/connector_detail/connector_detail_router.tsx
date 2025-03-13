@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CONNECTOR_DETAIL_PATH, CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 
 import { IndexNameLogic } from '../search_index/index_name_logic';
@@ -21,18 +22,22 @@ import { ConnectorDetail } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailRouter: React.FC = () => {
+  const {
+    services: { http },
+  } = useKibana();
   useEffect(() => {
     const unmountName = IndexNameLogic.mount();
-    const unmountView = ConnectorViewLogic.mount();
+    const unmountView = ConnectorViewLogic({ http }).mount();
     const unmountIndexView = IndexViewLogic.mount();
     return () => {
       unmountName();
       unmountView();
       unmountIndexView();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { setIndexName } = useActions(IndexNameLogic);
-  const { connector } = useValues(ConnectorViewLogic);
+  const { connector } = useValues(ConnectorViewLogic({ http }));
   const { startFetchIndexPoll, stopFetchIndexPoll, resetFetchIndexApi } =
     useActions(IndexViewLogic);
   const indexName = connector?.index_name || '';

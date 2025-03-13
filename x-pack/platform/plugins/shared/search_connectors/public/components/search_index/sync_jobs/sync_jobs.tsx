@@ -15,6 +15,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, useEuiTheme } from '@
 import { i18n } from '@kbn/i18n';
 import { Connector, SyncJobsTable } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { hasDocumentLevelSecurityFeature } from '../../../utils/connector_helpers';
 
 import { SyncJobsViewLogic } from './sync_jobs_view_logic';
@@ -28,6 +29,9 @@ export interface SyncJobsProps {
 }
 
 export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
+  const {
+    services: { http },
+  } = useKibana();
   const shouldShowAccessSyncs = hasDocumentLevelSecurityFeature(connector);
   const errorOnAccessSync = Boolean(connector.last_access_control_sync_error);
   const errorOnContentSync = Boolean(connector.last_sync_error);
@@ -52,7 +56,8 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
 
   useEffect(() => {
     setConnectorId(connector.id);
-  }, [connector, setConnectorId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connector]);
 
   useEffect(() => {
     if (connectorId) {
@@ -61,15 +66,11 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
         from: pagination.pageIndex * (pagination.pageSize || 0),
         size: pagination.pageSize ?? 10,
         type: selectedSyncJobCategory,
+        http,
       });
     }
-  }, [
-    connectorId,
-    fetchSyncJobs,
-    pagination.pageIndex,
-    pagination.pageSize,
-    selectedSyncJobCategory,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectorId, selectedSyncJobCategory]);
 
   useEffect(() => {
     if (selectedIndexType === 'content-index') {

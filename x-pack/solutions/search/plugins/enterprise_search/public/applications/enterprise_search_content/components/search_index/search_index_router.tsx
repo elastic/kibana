@@ -17,6 +17,7 @@ import {
 } from '@kbn/search-connectors-plugin/public';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { HttpLogic } from '../../../shared/http';
 import {
   OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
   SEARCH_INDEX_PATH,
@@ -27,13 +28,15 @@ import {
 import { SearchIndex } from './search_index';
 
 export const SearchIndexRouter: React.FC = () => {
+  const { http } = useValues(HttpLogic);
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const { setIndexName } = useActions(IndexNameLogic);
   const { startFetchIndexPoll, stopFetchIndexPoll, resetFetchIndexApi } =
     useActions(IndexViewLogic);
   const { connector } = useValues(IndexViewLogic);
-  const { startConnectorPoll, stopConnectorPoll, fetchConnectorApiReset } =
-    useActions(ConnectorViewLogic);
+  const { startConnectorPoll, stopConnectorPoll, fetchConnectorApiReset } = useActions(
+    ConnectorViewLogic({ http })
+  );
 
   useEffect(() => {
     const unmountName = IndexNameLogic.mount();

@@ -25,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FilteringRulesTable } from '@kbn/search-connectors/components/sync_jobs/filtering_rules_table';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isAdvancedSyncRuleSnippetEmpty } from '../../../../utils/sync_rules_helpers';
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 
@@ -34,8 +35,12 @@ import { SyncRulesStateCallouts } from './sync_rules_callouts';
 import { docLinks } from '../../../shared/doc_links';
 
 export const ConnectorSyncRules: React.FC = () => {
-  const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } =
-    useValues(ConnectorViewLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } = useValues(
+    ConnectorViewLogic({ http })
+  );
   const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =
     useActions(ConnectorFilteringLogic);
   const { advancedSnippet, draftErrors, draftState, filteringRules, hasDraft, isEditing } =

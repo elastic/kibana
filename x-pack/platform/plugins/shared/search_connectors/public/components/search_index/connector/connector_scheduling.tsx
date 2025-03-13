@@ -59,10 +59,11 @@ export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({
 
 export const ConnectorScheduling: React.FC = () => {
   const {
-    services: { application },
+    services: { application, http },
   } = useKibana();
-  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
-    useValues(ConnectorViewLogic);
+  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } = useValues(
+    ConnectorViewLogic({ http })
+  );
   const { status } = useValues(UpdateConnectorSchedulingApiLogic);
   const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
   const [hasChanges, setHasChanges] = useState<boolean>(false);

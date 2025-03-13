@@ -34,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CREATE_CONNECTOR_PLUGIN } from '../../../../../common/constants';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
 
@@ -66,9 +67,16 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
+  const {
+    services: { http, application },
+  } = useKibana();
 
-  const { connectorName } = useValues(NewConnectorLogic);
-  const { setRawName, createConnector } = useActions(NewConnectorLogic);
+  const { connectorName } = useValues(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
+  const { setRawName, createConnector } = useActions(
+    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+  );
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlyout

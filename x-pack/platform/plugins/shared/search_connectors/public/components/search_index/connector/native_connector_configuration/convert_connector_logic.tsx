@@ -13,6 +13,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { HttpSetup } from '@kbn/core/public';
 import { Status } from '../../../../../common/types/api';
 import {
   ConvertConnectorApiLogic,
@@ -39,8 +40,12 @@ type ConvertConnectorActions = Pick<
   showModal(): void;
 };
 
+export interface ConvertConnectorLogicProps {
+  http?: HttpSetup;
+}
+
 export const ConvertConnectorLogic = kea<
-  MakeLogicType<ConvertConnectorValues, ConvertConnectorActions>
+  MakeLogicType<ConvertConnectorValues, ConvertConnectorActions, ConvertConnectorLogicProps>
 >({
   actions: {
     convertConnector: () => true,
@@ -48,9 +53,11 @@ export const ConvertConnectorLogic = kea<
     hideModal: () => true,
     showModal: () => true,
   },
+  key: (props) => props.http,
   connect: {
     actions: [ConvertConnectorApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
     values: [ConvertConnectorApiLogic, ['status'], ConnectorViewLogic, ['connectorId']],
+    keys: [ConnectorViewLogic, ['http']],
   },
   listeners: ({ actions, values }) => ({
     apiSuccess: () => {

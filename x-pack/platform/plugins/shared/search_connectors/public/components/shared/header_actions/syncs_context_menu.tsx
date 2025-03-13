@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ConnectorStatus, IngestionStatus } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CancelSyncsApiLogic } from '../../../api/connector/cancel_syncs_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
@@ -38,10 +39,14 @@ export interface SyncsContextMenuProps {
 }
 
 export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = false }) => {
+  const {
+    services: { http },
+  } = useKibana();
   const { isAgentlessEnabled } = useAppContext();
   const { ingestionStatus, isCanceling, isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
-  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
-    useValues(ConnectorViewLogic);
+  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } = useValues(
+    ConnectorViewLogic({ http })
+  );
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync, cancelSyncs } =
     useActions(SyncsLogic);

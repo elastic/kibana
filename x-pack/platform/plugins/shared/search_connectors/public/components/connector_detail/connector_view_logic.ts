@@ -101,11 +101,17 @@ export interface ConnectorViewValues {
   recheckIndexLoading: boolean;
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
   updateConnectorConfigurationStatus: Status;
+}
+
+export interface ConnectorViewLogicProps {
   http?: HttpSetup;
 }
 
-export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, ConnectorViewActions>>({
+export const ConnectorViewLogic = kea<
+  MakeLogicType<ConnectorViewValues, ConnectorViewActions, ConnectorViewLogicProps>
+>({
   actions: {},
+  key: (props) => props.http,
   connect: {
     actions: [
       CachedFetchConnectorByIdApiLogic,
@@ -151,45 +157,46 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       GetConnectorAgentlessPolicyApiLogic,
       ['data as connectorAgentlessPolicy', 'status as getConnectorAgentlessPolicyStatus'],
     ],
+    keys: [CachedFetchConnectorByIdApiLogic, ['http']],
   },
-  events: ({ actions }) => ({
+  events: ({ actions, values }) => ({
     beforeUnmount: () => {
       actions.stopConnectorPoll();
       actions.fetchConnectorApiReset();
     },
   }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     fetchConnectorApiSuccess: ({ connector }) => {
       if (!values.index && connector?.index_name) {
-        actions.fetchIndex({ indexName: connector.index_name });
+        actions.fetchIndex({ indexName: connector.index_name, http: props.http });
       }
       if (connector?.id && connector.is_native) {
-        actions.getConnectorAgentlessPolicy({ connectorId: connector.id, http: values.http });
+        actions.getConnectorAgentlessPolicy({ connectorId: connector.id, http: props.http });
       }
     },
     generateApiKeySuccess: () => {
       if (values.connectorId) {
-        actions.fetchConnector({ connectorId: values.connectorId });
+        actions.fetchConnector({ connectorId: values.connectorId, http: props.http });
       }
     },
     generateConfigurationSuccess: () => {
       if (values.connectorId) {
-        actions.fetchConnector({ connectorId: values.connectorId });
+        actions.fetchConnector({ connectorId: values.connectorId, http: props.http });
       }
     },
     nameAndDescriptionApiError: () => {
       if (values.connectorId) {
-        actions.fetchConnector({ connectorId: values.connectorId });
+        actions.fetchConnector({ connectorId: values.connectorId, http: props.http });
       }
     },
     nameAndDescriptionApiSuccess: () => {
       if (values.connectorId) {
-        actions.fetchConnector({ connectorId: values.connectorId });
+        actions.fetchConnector({ connectorId: values.connectorId, http: props.http });
       }
     },
     updateConnectorConfigurationSuccess: () => {
       if (values.connectorId) {
-        actions.fetchConnector({ connectorId: values.connectorId });
+        actions.fetchConnector({ connectorId: values.connectorId, http: props.http });
       }
     },
   }),

@@ -47,17 +47,17 @@ interface FinishUpStepProps {
 }
 
 export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
+  const { http, application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
   const [showNext, setShowNext] = useState(false);
 
   const { isWaitingForSync, isSyncing: isSyncingProp } = useValues(IndexViewLogic);
-  const { connector } = useValues(ConnectorViewLogic);
+  const { connector } = useValues(ConnectorViewLogic({ http }));
   const { startSync } = useActions(SyncsLogic);
 
   const isSyncing = isWaitingForSync || isSyncingProp;
 
-  const { http, application } = useKibana().services;
   const {
     plugins: { share, discover },
   } = useAppContext();
