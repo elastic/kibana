@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SlackApiService } from '../../../common/slack_api/types';
+import type { SlackApiService } from '../../../common/slack_api/types';
 import { api } from './api';
 
 const createMock = (): jest.Mocked<SlackApiService> => {
