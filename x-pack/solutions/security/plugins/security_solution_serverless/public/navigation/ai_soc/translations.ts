@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALERT_SUMMARY = i18n.translate(
-  'xpack.securitySolution.navigation.aiSoc.alertSummary',
+  'xpack.securitySolutionServerless.navigation.aiSoc.alertSummary',
   {
     defaultMessage: 'Alert summary',
   }
