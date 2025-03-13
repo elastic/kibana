@@ -35,4 +35,8 @@ export class DraftGrokExpression {
   public getRegexPattern = () => {
     return this.grokPattern.getRegexPattern();
   };
+
+  public getFields = () => {
+    return this.grokPattern.getFields();
+  };
 }

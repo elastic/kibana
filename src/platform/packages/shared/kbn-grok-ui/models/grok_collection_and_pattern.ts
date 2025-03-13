@@ -13,6 +13,8 @@ import { toRegExp, toRegExpDetails } from 'oniguruma-to-es';
 import { monaco } from '@kbn/monaco';
 import { v4 as uuidv4 } from 'uuid';
 import { unflattenObject } from '@kbn/object-utils';
+import { euiPaletteColorBlindBehindText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 // Grok patterns use this official naming: %{SYNTAX:SEMANTIC:TYPE}
 
@@ -31,9 +33,17 @@ const SUPPORTED_TYPE_CONVERSIONS = ['int', 'float'];
 // We supply this suffix to track which capture groups we have generated.
 const CAPTURE_GROUP_GENERATED_ID_SUFFIX = '_____GENERATED_CAPTURE_GROUP_____';
 
+const CUSTOM_NAMED_CAPTURE_PATTERN_PREFIX = i18n.translate(
+  'kbn.grokUi.customNamedCapturePatternPrefix',
+  { defaultMessage: 'Custom named capture ' }
+);
+
 export class GrokCollection {
   private patterns: Map<string, GrokPattern> = new Map();
   private patternKeys: string[] = [];
+  // NOTE: This doesn't subscribe to EUI_VIS_COLOR_STORE changes at the moment, whilst UI / UX is being finalised.
+  private colourPalette = euiPaletteColorBlindBehindText({ rotations: 3 });
+  private colourIndex = 0;
 
   public getPattern(id: string) {
     return this.patterns.get(id);
@@ -60,6 +70,7 @@ export class GrokCollection {
     this.patternKeys = Array.from(this.patterns.keys());
   }
 
+  // Only relevant for Monaco users.
   // Can be used with Monaco code editor to provide suggestions.
   public getSuggestionProvider = () => {
     const provider: monaco.languages.CompletionItemProvider = {
@@ -99,6 +110,31 @@ export class GrokCollection {
     };
     return provider;
   };
+
+  public getColour = () => {
+    // Loop back to 0 once at the end of the rotations
+    this.colourIndex = this.colourIndex + 1 <= this.colourPalette.length ? this.colourIndex + 1 : 0;
+    return this.colourPalette[this.colourIndex];
+  };
+
+  // Only relevant for Monaco users.
+  // Monaco doesn't support dynamic inline styles, so we need to generate static styles for the colour palette.
+  public getColourPaletteStyles = () => {
+    const styles: Record<string, { backgroundColor: string; cursor: string }> = {};
+    for (let $i = 0; $i < this.colourPalette.length; $i++) {
+      const colour = this.colourPalette[$i];
+      const colourWithoutHash = colour.substring(1);
+      styles[`.grok-pattern-match-${colourWithoutHash}`] = {
+        backgroundColor: colour,
+        cursor: 'pointer',
+      };
+    }
+    return styles;
+  };
+
+  public resetColourIndex = () => {
+    this.colourIndex = 0;
+  };
 }
 
 export class GrokPattern {
@@ -130,6 +166,7 @@ export class GrokPattern {
       return this.resolvedPattern;
     }
 
+    this.parentCollection.resetColourIndex();
     this.fields.clear();
     this.resolveSubPatterns();
     this.resolveFieldNames();
@@ -166,7 +203,7 @@ export class GrokPattern {
       }
 
       // Only some patterns will have a semantic / field name, other patterns will be matched but are not captured / part of the structured output.
-      // The replacements will take something like ${WORD} and replace it with a resolved pattern, e.g. \b\w+\b
+      // The replacements will take something like ${WORD} and replace it with a resolved Oniguruma pattern, e.g. \b\w+\b
       if (fieldName) {
         // We generate a unique ID for the capture group, this is used to map the capture group to the field metadata.
         // Capture groups, for instance, do not support special characters or dots in the name in JavaScript's regex implementation, but this is allowed in Grok.
@@ -180,6 +217,8 @@ export class GrokPattern {
         const fieldEntry = {
           name: fieldName,
           type: fieldType && SUPPORTED_TYPE_CONVERSIONS.includes(fieldType) ? fieldType : null,
+          colour: this.parentCollection.getColour(),
+          pattern: matched,
         };
         this.fields.set(generatedId, fieldEntry);
       } else {
@@ -251,6 +290,8 @@ export class GrokPattern {
               name: matched[3] ?? matched[2],
               type:
                 matched[4] && SUPPORTED_TYPE_CONVERSIONS.includes(matched[4]) ? matched[4] : null,
+              colour: this.parentCollection.getColour(),
+              pattern: `${CUSTOM_NAMED_CAPTURE_PATTERN_PREFIX} ` + String.raw`${matched[1]}`,
             });
 
             // (?<queue_id:mything:int> becomes (?<GENERATED_ID>
@@ -338,6 +379,10 @@ export class GrokPattern {
     this.rawPattern = rawPattern;
     this.resolvedPattern = null;
     this.regexp = undefined;
+  };
+
+  public getFields = () => {
+    return this.fields;
   };
 }
 
