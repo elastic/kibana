@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
@@ -37,6 +38,7 @@ export const wrapSuppressedEsqlAlerts = ({
   primaryTimestamp,
   secondaryTimestamp,
   intendedTimestamp,
+  expandedFields,
 }: {
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
@@ -54,6 +56,7 @@ export const wrapSuppressedEsqlAlerts = ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   intendedTimestamp: Date | undefined;
+  expandedFields?: string[];
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
     (event, i) => {
@@ -71,6 +74,7 @@ export const wrapSuppressedEsqlAlerts = ({
         tuple,
         isRuleAggregating,
         index: i,
+        expandedFields,
       });
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
@@ -110,5 +114,5 @@ export const wrapSuppressedEsqlAlerts = ({
     }
   );
 
-  return wrapped;
+  return uniqBy(wrapped, (alert) => alert._id);
 };
