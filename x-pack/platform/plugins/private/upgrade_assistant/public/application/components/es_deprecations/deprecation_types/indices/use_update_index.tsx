@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import type { UpdateIndexOperation } from '../../../../../../common/update_index';
-import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import type { CorrectiveAction } from '../../../../../../common/types';
 import type { ApiService } from '../../../../lib/api';
 
 export interface UpdateIndexState {
@@ -19,7 +19,7 @@ export interface UpdateIndexState {
 export interface UseUpdateIndexParams {
   indexName: string;
   api: ApiService;
-  correctiveAction: EnrichedDeprecationInfo['correctiveAction'];
+  correctiveAction?: CorrectiveAction;
 }
 
 export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIndexParams) => {
