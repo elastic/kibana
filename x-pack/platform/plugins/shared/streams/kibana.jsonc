@@ -18,7 +18,6 @@
       "licensing",
       "taskManager",
       "alerting",
-      "telemetry",
       "inference"
     ],
     "optionalPlugins": [
