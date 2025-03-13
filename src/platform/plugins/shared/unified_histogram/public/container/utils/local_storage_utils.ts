@@ -21,7 +21,8 @@ const getLocalStorageKey = (prefix: string, key: string) => `${prefix}:${key}`;
 export const getChartHidden = (
   storage: Storage,
   localStorageKeyPrefix: string
-): boolean | undefined => storage.get(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY));
+): boolean | undefined =>
+  storage.get(getLocalStorageKey(localStorageKeyPrefix, CHART_HIDDEN_KEY)) ?? undefined;
 
 /**
  * Get the top panel height from local storage
