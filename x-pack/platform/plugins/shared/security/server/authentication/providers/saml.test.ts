@@ -20,7 +20,7 @@ import {
 } from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
-import mockSAMLResponses from '../__fixtures__/mock_saml_responses.json';
+import { mockSamlResponses } from '../__fixtures__/mock_saml_responses';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -32,7 +32,7 @@ describe('SAMLAuthenticationProvider', () => {
     typeof elasticsearchServiceMock.createScopedClusterClient
   >;
 
-  const mockSAMLSet1 = mockSAMLResponses.set1;
+  const mockSAMLSet1 = mockSamlResponses.set1;
 
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
@@ -357,7 +357,7 @@ describe('SAMLAuthenticationProvider', () => {
           authentication: mockUser,
         });
 
-        const requestIds = Object.values(mockSAMLResponses).map((response) => response.requestId);
+        const requestIds = Object.values(mockSamlResponses).map((response) => response.requestId);
         const requestIdsResult = [...requestIds.slice(0, 24), ...requestIds.slice(25)];
 
         await expect(
@@ -365,7 +365,7 @@ describe('SAMLAuthenticationProvider', () => {
             request,
             {
               type: SAMLLogin.LoginWithSAMLResponse,
-              samlResponse: mockSAMLResponses.set25.samlResponse,
+              samlResponse: mockSamlResponses.set25.samlResponse,
             },
             {
               requestIds,
@@ -390,7 +390,7 @@ describe('SAMLAuthenticationProvider', () => {
       it('should replace the first requestId in the list if a new User-Initiated call is made and there are 50 existing requestIds in the state', async () => {
         const request = httpServerMock.createKibanaRequest();
 
-        const requestIds = Object.values(mockSAMLResponses).map((response) => response.requestId);
+        const requestIds = Object.values(mockSamlResponses).map((response) => response.requestId);
         const newRequestId = '_mock_request_id_51';
         const requestIdsResult = [...requestIds.slice(1), newRequestId];
 
