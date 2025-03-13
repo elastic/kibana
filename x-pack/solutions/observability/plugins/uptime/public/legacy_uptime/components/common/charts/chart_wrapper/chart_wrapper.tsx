@@ -40,6 +40,7 @@ export const ChartWrapper: FC<PropsWithChildren<Props>> = ({
           transition: 'opacity 0.2s',
         }}
         {...(rest as HTMLAttributes<HTMLDivElement>)}
+        role="figure"
       >
         {children}
       </div>
