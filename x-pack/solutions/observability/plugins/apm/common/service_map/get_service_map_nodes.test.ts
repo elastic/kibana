@@ -63,6 +63,12 @@ const httpLoadBalancer = createExitSpan({
   spanSubtype: 'http',
 });
 
+const elasticSearchExternal = createExitSpan({
+  spanDestinationServiceResource: 'elasticsearch',
+  spanType: 'db',
+  spanSubtype: 'elasticsearch',
+});
+
 // Define anomalies
 const anomalies = {
   mlJobIds: ['apm-test-1234-ml-module-name'],
@@ -133,14 +139,10 @@ describe('getServiceMapNodes', () => {
 
     const { edges, nodes } = partitionElements(elements);
 
-    expect(getIds(nodes)).toEqual([
-      '>opbeans-java|kafka/some-queue',
-      'opbeans-java',
-      'opbeans-node',
-    ]);
+    expect(getIds(nodes)).toEqual(['>kafka/some-queue', 'opbeans-java', 'opbeans-node']);
     expect(getIds(edges)).toEqual([
-      '>opbeans-java|kafka/some-queue~opbeans-node',
-      'opbeans-java~>opbeans-java|kafka/some-queue',
+      '>kafka/some-queue~opbeans-node',
+      'opbeans-java~>kafka/some-queue',
     ]);
   });
 
@@ -155,6 +157,10 @@ describe('getServiceMapNodes', () => {
           from: getExternalConnectionNode({ ...nodejsExternal, ...javaService }),
           to: getServiceConnectionNode(nodejsService),
         },
+        {
+          from: getExternalConnectionNode({ ...nodejsExternal, ...goService }),
+          to: getServiceConnectionNode(nodejsService),
+        },
       ],
       connections: [
         {
@@ -162,10 +168,10 @@ describe('getServiceMapNodes', () => {
           destination: getExternalConnectionNode({ ...nodejsExternal, ...javaService }),
         },
         {
-          source: getServiceConnectionNode(javaService),
+          source: getServiceConnectionNode(goService),
           destination: getExternalConnectionNode({
             ...nodejsExternal,
-            ...javaService,
+            ...goService,
             spanType: 'foo',
           }),
         },
@@ -177,8 +183,37 @@ describe('getServiceMapNodes', () => {
 
     const { edges, nodes } = partitionElements(elements);
 
-    expect(getIds(nodes)).toEqual(['opbeans-java', 'opbeans-node']);
-    expect(getIds(edges)).toEqual(['opbeans-java~opbeans-node']);
+    expect(getIds(nodes)).toEqual(['opbeans-go', 'opbeans-java', 'opbeans-node']);
+    expect(getIds(edges)).toEqual(['opbeans-go~opbeans-node', 'opbeans-java~opbeans-node']);
+  });
+
+  it('collapses external destinations based on span.destination.resource.name for exit spans without downstream transactions', () => {
+    const response: ServiceMapConnections = {
+      servicesData: [],
+      exitSpanDestinations: [],
+      connections: [
+        {
+          source: getServiceConnectionNode(javaService),
+          destination: getExternalConnectionNode({ ...elasticSearchExternal, ...javaService }),
+        },
+        {
+          source: getServiceConnectionNode(goService),
+          destination: getExternalConnectionNode({
+            ...elasticSearchExternal,
+            ...goService,
+            spanType: 'foo',
+          }),
+        },
+      ],
+      anomalies,
+    };
+
+    const { elements } = getServiceMapNodes(response);
+
+    const { edges, nodes } = partitionElements(elements);
+
+    expect(getIds(nodes)).toEqual(['>elasticsearch', 'opbeans-go', 'opbeans-java']);
+    expect(getIds(edges)).toEqual(['opbeans-go~>elasticsearch', 'opbeans-java~>elasticsearch']);
   });
 
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
@@ -213,10 +248,10 @@ describe('getServiceMapNodes', () => {
 
     const { edges, nodes } = partitionElements(elements);
 
-    expect(getIds(nodes)).toEqual(['>opbeans-java|opbeans-node', 'opbeans-java']);
-    expect(getIds(edges)).toEqual(['opbeans-java~>opbeans-java|opbeans-node']);
+    expect(getIds(nodes)).toEqual(['>opbeans-node', 'opbeans-java']);
+    expect(getIds(edges)).toEqual(['opbeans-java~>opbeans-node']);
 
-    const nodejsNode = elements.find((node) => node.data.id === '>opbeans-java|opbeans-node');
+    const nodejsNode = elements.find((node) => node.data.id === '>opbeans-node');
     // @ts-expect-error
     expect(nodejsNode?.data[SPAN_TYPE]).toBe('external');
     // @ts-expect-error

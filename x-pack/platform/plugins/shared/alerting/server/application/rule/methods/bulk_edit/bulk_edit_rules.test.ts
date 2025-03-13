@@ -263,6 +263,7 @@ describe('bulkEdit()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -779,6 +780,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -3123,6 +3125,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         category: 'test',
         validLegacyConsumers: [],
       });
@@ -3169,6 +3172,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         category: 'test',
         validLegacyConsumers: [],
       });

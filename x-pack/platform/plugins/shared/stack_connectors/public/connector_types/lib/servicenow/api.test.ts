@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getChoices, getAppInfo, getOAuthToken } from './api';
-import { ServiceNowActionConnector } from './types';
+import type { ServiceNowActionConnector } from './types';
 
 const choicesResponse = {
   status: 'ok',
