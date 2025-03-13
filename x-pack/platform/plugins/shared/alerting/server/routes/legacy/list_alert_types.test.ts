@@ -65,6 +65,7 @@ describe('listAlertTypesRoute', () => {
         },
         category: 'test',
         producer: 'test',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
@@ -114,7 +115,7 @@ describe('listAlertTypesRoute', () => {
     expect(rulesClient.listRuleTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: listTypes,
+      body: listTypes.map(({ solution, ...ruleType }) => ruleType),
     });
   });
 
@@ -161,6 +162,7 @@ describe('listAlertTypesRoute', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
@@ -218,6 +220,7 @@ describe('listAlertTypesRoute', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,

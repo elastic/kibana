@@ -54,6 +54,7 @@ const ruleTypes = [
     },
     category: 'test',
     producer: 'test',
+    solution: 'stack',
     enabledInLicense: true,
     defaultScheduleInterval: '10m',
     hasAlertsMappings: false,
