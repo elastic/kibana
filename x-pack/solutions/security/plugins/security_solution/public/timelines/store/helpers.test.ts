@@ -41,9 +41,10 @@ import {
   updateTimelineShowTimeline,
   updateTimelineSort,
   updateTimelineTitleAndDescription,
-  upsertTableColumn,
   updateTimelineGraphEventId,
   updateTimelineColumnWidth,
+  updateTableColumns,
+  upsertTableColumn,
 } from './helpers';
 import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
@@ -347,6 +348,7 @@ describe('Timeline', () => {
           columns,
         },
       };
+      setStoredTimelineColumnsConfig(undefined);
     });
 
     test('should return a new reference and not the same reference', () => {
@@ -499,6 +501,73 @@ describe('Timeline', () => {
       });
 
       expect(update.foo.columns).toEqual(expectedColumns);
+    });
+
+    test('should apply the locally stored column config to new columns', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        'event.action': {
+          id: 'event.action',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const expectedColumns = [{ ...columnToAdd, initialWidth }];
+      const update = upsertTableColumn({
+        column: columnToAdd,
+        id: 'foo',
+        index: 0,
+        timelineById,
+      });
+
+      expect(update.foo.columns).toEqual(expectedColumns);
+    });
+
+    test('should apply the locally stored column config to existing columns', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        '@timestamp': {
+          id: '@timestamp',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const update = upsertTableColumn({
+        column: columns[0],
+        id: 'foo',
+        index: 0,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
+        expect.objectContaining({
+          initialWidth,
+        })
+      );
+    });
+  });
+
+  describe('#updateTableColumns', () => {
+    test('should apply the locally stored column config', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        '@timestamp': {
+          id: '@timestamp',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const update = updateTableColumns({
+        id: 'foo',
+        columns: columnsMock,
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
+        expect.objectContaining({
+          initialWidth,
+        })
+      );
     });
   });
 

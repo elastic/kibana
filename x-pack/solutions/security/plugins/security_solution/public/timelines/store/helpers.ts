@@ -1237,7 +1237,7 @@ export const upsertTableColumn = ({
       ...timelineById,
       [id]: {
         ...timeline,
-        columns: reordered,
+        columns: mergeInLocalColumnConfig(reordered),
       },
     };
   }
@@ -1249,7 +1249,7 @@ export const upsertTableColumn = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      columns,
+      columns: mergeInLocalColumnConfig(columns),
     },
   };
 };
@@ -1270,7 +1270,7 @@ export const updateTableColumns = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      columns,
+      columns: mergeInLocalColumnConfig(columns),
     },
   };
 };
