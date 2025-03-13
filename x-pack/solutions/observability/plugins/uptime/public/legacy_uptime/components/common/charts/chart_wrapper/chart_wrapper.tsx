@@ -33,17 +33,16 @@ export const ChartWrapper: FC<PropsWithChildren<Props>> = ({
 
   return (
     <EuiErrorBoundary>
-      <div
+      <figure
         style={{
           height,
           opacity,
           transition: 'opacity 0.2s',
         }}
         {...(rest as HTMLAttributes<HTMLDivElement>)}
-        role="figure"
       >
         {children}
-      </div>
+      </figure>
       {loading === true && (
         <EuiFlexGroup
           justifyContent="spaceAround"
