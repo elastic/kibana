@@ -44,11 +44,13 @@ export interface ESQLCallbacks {
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
-  getPreferences?: () => Promise<{ histogramBarTarget: number }>;
+  getPreferences?: () => Promise<{ histogramBarTarget: number; supportedApps?: string[] }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
   getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
+  /** Returns the current Kibana app ID, e.g. discover, dashboard etc. */
+  getCurrentAppId?: () => Promise<string | undefined>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

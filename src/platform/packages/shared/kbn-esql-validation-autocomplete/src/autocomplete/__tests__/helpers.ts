@@ -298,6 +298,7 @@ export function createCustomCallbackMocks(
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getCurrentAppId: jest.fn(async () => 'discover'),
   };
 }
 

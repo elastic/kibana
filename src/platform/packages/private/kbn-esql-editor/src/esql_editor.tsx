@@ -34,6 +34,7 @@ import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { firstValueFrom, of } from 'rxjs';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -435,7 +436,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
 
-  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+  const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, query.esql);
@@ -497,6 +498,9 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getCurrentAppId: async () => {
+        return await firstValueFrom(application?.currentAppId$ ?? of(undefined));
+      },
     };
     return callbacks;
   }, [
@@ -517,6 +521,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     histogramBarTarget,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
+    application?.currentAppId$,
   ]);
 
   const onIndexCreated = useCallback(

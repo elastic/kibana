@@ -66,11 +66,11 @@ describe('autocomplete.suggest', () => {
         const labels = suggestions.map((s) => s.label);
 
         expect(labels).toEqual([
+          'Create lookup index',
           'join_index',
           'join_index_with_alias',
           'join_index_alias_1',
           'join_index_alias_2',
-          'Create lookup index',
         ]);
 
         const createIndexCommandSuggestion = suggestions.find(
@@ -87,9 +87,19 @@ describe('autocomplete.suggest', () => {
           filterText: '',
           kind: 'Issue',
           label: 'Create lookup index',
-          sortText: '1',
+          sortText: '0-0',
           text: '',
         });
+      });
+
+      test('does not suggest create index command for other apps than Discover', async () => {
+        const { suggest, callbacks } = await setup();
+        callbacks.getCurrentAppId.mockResolvedValue('dashboard');
+
+        const suggestions = await suggest('FROM index | LEFT JOIN /');
+        const labels = suggestions.map((s) => s.label);
+
+        expect(labels).not.toContain('Create lookup index');
       });
 
       test('suggests create index command with the user input', async () => {
@@ -111,7 +121,7 @@ describe('autocomplete.suggest', () => {
           filterText: 'new_join_index',
           kind: 'Issue',
           label: 'Create lookup index',
-          sortText: '1',
+          sortText: '0-0',
           text: '',
         });
       });
