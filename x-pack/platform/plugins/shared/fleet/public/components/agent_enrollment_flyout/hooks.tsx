@@ -18,11 +18,7 @@ import {
   useGetPackageInfoByKeyQuery,
   useStartServices,
 } from '../../hooks';
-import {
-  FLEET_KUBERNETES_PACKAGE,
-  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
-  FLEET_CLOUD_DEFEND_PACKAGE,
-} from '../../../common';
+import { FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common';
 
 import {
   getTemplateUrlFromAgentPolicy,
@@ -47,7 +43,7 @@ import type {
 } from './types';
 
 // Packages that requires custom elastic-agent manifest
-const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_DEFEND_PACKAGE]);
+const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
 
 export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   const [agentPolicyWithPackagePolicies, setAgentPolicy] = useState<AgentPolicy | null>(null);

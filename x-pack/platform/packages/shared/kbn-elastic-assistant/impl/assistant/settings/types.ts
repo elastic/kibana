@@ -15,14 +15,13 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 
-export type BaseSettingsTabs =
+export type ModalSettingsTabs = typeof QUICK_PROMPTS_TAB | typeof SYSTEM_PROMPTS_TAB;
+
+export type ManagementSettingsTabs =
   | typeof CONVERSATIONS_TAB
   | typeof QUICK_PROMPTS_TAB
   | typeof SYSTEM_PROMPTS_TAB
   | typeof ANONYMIZATION_TAB
   | typeof KNOWLEDGE_BASE_TAB
-  | typeof EVALUATION_TAB;
-
-export type AdditionalSettingsTabs = typeof CONNECTORS_TAB;
-
-export type SettingsTabs = BaseSettingsTabs | AdditionalSettingsTabs;
+  | typeof EVALUATION_TAB
+  | typeof CONNECTORS_TAB;

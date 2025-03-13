@@ -82,7 +82,7 @@ export class UpdateSLO {
           { logger: this.logger }
         );
       } catch (err) {
-        this.logger.error(
+        this.logger.debug(
           `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. ${err}`
         );
 
@@ -90,7 +90,7 @@ export class UpdateSLO {
           try {
             await operation();
           } catch (rollbackErr) {
-            this.logger.error(`Rollback operation failed. ${rollbackErr}`);
+            this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
           }
         });
 
@@ -161,7 +161,7 @@ export class UpdateSLO {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back. ${err}`
       );
 
@@ -169,7 +169,7 @@ export class UpdateSLO {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
         }
       });
 

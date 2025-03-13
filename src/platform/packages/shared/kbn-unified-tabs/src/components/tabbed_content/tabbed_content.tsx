@@ -7,13 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TabsBar } from '../tabs_bar';
+import { TabsBar, type TabsBarProps } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
+import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
+import {
+  addTab,
+  closeTab,
+  selectTab,
+  insertTabAfter,
+  replaceTabWith,
+  closeOtherTabs,
+  closeTabsToTheRight,
+} from '../../utils/manage_tabs';
 import { TabItem } from '../../types';
 
-export interface TabbedContentProps {
+export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   initialItems: TabItem[];
   initialSelectedItemId?: string;
   'data-test-subj'?: string;
@@ -30,6 +40,7 @@ export interface TabbedContentState {
 export const TabbedContent: React.FC<TabbedContentProps> = ({
   initialItems,
   initialSelectedItemId,
+  maxItemsCount,
   renderContent,
   createItem,
   onChanged,
@@ -44,54 +55,62 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     };
   });
   const { items, selectedItem } = state;
+  const stateRef = React.useRef<TabbedContentState>();
+  stateRef.current = state;
 
   const changeState = useCallback(
     (getNextState: (prevState: TabbedContentState) => TabbedContentState) => {
-      _setState((prevState) => {
-        const nextState = getNextState(prevState);
-        onChanged(nextState);
-        return nextState;
-      });
+      if (!stateRef.current) {
+        return;
+      }
+
+      const nextState = getNextState(stateRef.current);
+      _setState(nextState);
+      onChanged(nextState);
     },
     [_setState, onChanged]
   );
 
+  const onLabelEdited = useCallback(
+    async (item: TabItem, newLabel: string) => {
+      const editedItem = { ...item, label: newLabel };
+      changeState((prevState) => replaceTabWith(prevState, item, editedItem));
+    },
+    [changeState]
+  );
+
   const onSelect = useCallback(
-    (item: TabItem) => {
-      changeState((prevState) => ({
-        ...prevState,
-        selectedItem: item,
-      }));
+    async (item: TabItem) => {
+      changeState((prevState) => selectTab(prevState, item));
     },
     [changeState]
   );
 
   const onClose = useCallback(
-    (item: TabItem) => {
-      changeState((prevState) => {
-        const nextItems = prevState.items.filter((prevItem) => prevItem.id !== item.id);
-        // TODO: better selection logic
-        const nextSelectedItem = nextItems.length ? nextItems[nextItems.length - 1] : null;
-
-        return {
-          items: nextItems,
-          selectedItem:
-            prevState.selectedItem?.id !== item.id ? prevState.selectedItem : nextSelectedItem,
-        };
-      });
+    async (item: TabItem) => {
+      changeState((prevState) => closeTab(prevState, item));
     },
     [changeState]
   );
 
-  const onAdd = useCallback(() => {
+  const onAdd = useCallback(async () => {
     const newItem = createItem();
-    changeState((prevState) => {
-      return {
-        items: [...prevState.items, newItem],
-        selectedItem: newItem,
-      };
+    changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
+  }, [changeState, createItem, maxItemsCount]);
+
+  const getTabMenuItems = useMemo(() => {
+    return getTabMenuItemsFn({
+      tabsState: state,
+      onDuplicate: (item) => {
+        const newItem = createItem();
+        newItem.label = `${item.label} (copy)`;
+        changeState((prevState) => insertTabAfter(prevState, newItem, item));
+      },
+      onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
+      onCloseTabsToTheRight: (item) =>
+        changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [changeState, createItem]);
+  }, [changeState, createItem, state]);
 
   return (
     <EuiFlexGroup
@@ -104,8 +123,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         <TabsBar
           items={items}
           selectedItem={selectedItem}
+          maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
+          getTabMenuItems={getTabMenuItems}
           onAdd={onAdd}
+          onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onClose={onClose}
         />

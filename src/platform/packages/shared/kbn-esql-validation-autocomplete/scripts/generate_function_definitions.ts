@@ -43,6 +43,8 @@ const bucketParameterTypes: Array<
   // field   // bucket   //from    // to   //result
   ['date', 'date_period', null, null, 'date'],
   ['date', 'integer', 'date', 'date', 'date'],
+  ['date_nanos', 'date_period', null, null, 'date_nanos'],
+  ['date_nanos', 'integer', 'date', 'date', 'date_nanos'],
   // Modified time_duration to time_literal
   ['date', 'time_literal', null, null, 'date'],
   ['double', 'double', null, null, 'double'],

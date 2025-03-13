@@ -115,7 +115,6 @@ export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const INVESTIGATIONS_PATH = '/investigations' as const;
 export const MACHINE_LEARNING_PATH = '/ml' as const;
 export const ASSETS_PATH = '/assets' as const;
-export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;

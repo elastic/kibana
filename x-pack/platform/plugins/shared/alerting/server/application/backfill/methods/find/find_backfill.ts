@@ -6,11 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObject, SavedObjectsFindOptionsReference } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
+import type { SavedObject, SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { buildKueryNodeFilter } from '../../../../rules_client/common';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { RulesClientContext } from '../../../../rules_client';
+import type { RulesClientContext } from '../../../../rules_client';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
@@ -21,9 +22,9 @@ import {
 } from '../../../../rules_client/common/audit_events';
 import type { FindBackfillParams, FindBackfillResult } from './types';
 import { findBackfillQuerySchema } from './schemas';
-import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
-import { Backfill } from '../../result/types';
+import type { Backfill } from '../../result/types';
 
 export async function findBackfill(
   context: RulesClientContext,

@@ -241,7 +241,6 @@ describe('stepInstallILMPolicies', () => {
           conditions: { kibana: { version: 'x.y.z' } },
           owner: { github: 'elastic/fleet' },
         } as any,
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
       },
