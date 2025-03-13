@@ -87,7 +87,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             id: response.body.schedule.id,
             custom: {
               ...snoozeSchedule.schedule.custom,
-              duration: '10d',
+              duration: '240h',
               timezone: 'UTC',
             },
           },
