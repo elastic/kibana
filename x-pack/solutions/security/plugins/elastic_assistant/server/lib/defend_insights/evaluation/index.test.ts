@@ -11,6 +11,10 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getLlmType } from '../../../routes/utils';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { Logger } from '@kbn/logging';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 
 jest.mock('./run_evaluations');
 jest.mock('@kbn/langchain/server', () => ({
@@ -54,8 +58,8 @@ describe('evaluateDefendInsights', () => {
       },
     ];
 
-    const mockActionsClient = {} as any;
-    const mockEsClient = {} as any;
+    const mockActionsClient = {} as unknown as PublicMethodsOf<ActionsClient>;
+    const mockEsClient = {} as unknown as ElasticsearchClient;
 
     await evaluateDefendInsights({
       actionsClient: mockActionsClient,
@@ -69,7 +73,7 @@ describe('evaluateDefendInsights', () => {
       evaluatorConnectorId: 'eval-connector',
       langSmithApiKey: 'api-key',
       langSmithProject: 'project-name',
-      logger: mockLogger as any,
+      logger: mockLogger as unknown as Logger,
       runName: 'test-run',
       size: 10,
     });
