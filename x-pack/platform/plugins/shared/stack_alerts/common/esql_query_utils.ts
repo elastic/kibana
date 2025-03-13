@@ -7,8 +7,9 @@
 
 import { entries, findLastIndex, intersection, isNil } from 'lodash';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
-import { type ESQLAstCommand, parse, ESQLCommandOption } from '@kbn/esql-ast';
+import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
+import type { ESQLCommandOption } from '@kbn/esql-ast';
+import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
 import { isOptionItem, isColumnItem } from '@kbn/esql-validation-autocomplete';
 
 type EsqlDocument = Record<string, string | null>;
