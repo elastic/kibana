@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiButtonGroupOptionProps, EuiSelectableProps } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiButtonGroup,
   EuiCheckbox,
   EuiFlexGroup,
@@ -26,9 +27,13 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { useArtifactRestrictedPolicyAssignments } from '../../hooks/artifacts/use_artifact_restricted_policy_assignments';
 import { useGetUpdatedTags } from '../../hooks/artifacts';
 import { useLicense } from '../../../common/hooks/use_license';
-import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../common/translations';
+import {
+  ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE,
+  NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE,
+} from '../../common/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { PolicyData } from '../../../../common/endpoint/types';
@@ -125,9 +130,17 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     const canManageGlobalArtifacts =
       useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
+    const artifactRestrictedPolicyIds = useArtifactRestrictedPolicyAssignments(item);
     const [selectedPolicyIds, setSelectedPolicyIds] = useState(getPolicyIdsFromArtifact(item));
 
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
+    const selectedAssignmentType = useMemo(() => {
+      if (isSpaceAwarenessEnabled) {
+        return canManageGlobalArtifacts && isGlobal ? 'globalPolicy' : 'perPolicy';
+      }
+
+      return isGlobal ? 'globalPolicy' : 'perPolicy';
+    }, [canManageGlobalArtifacts, isGlobal, isSpaceAwarenessEnabled]);
 
     const toggleGlobal: EuiButtonGroupOptionProps[] = useMemo(() => {
       const isGlobalButtonDisabled = !isSpaceAwarenessEnabled ? false : !canManageGlobalArtifacts;
@@ -138,7 +151,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.global', {
             defaultMessage: 'Global',
           }),
-          iconType: isGlobal ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedAssignmentType === 'globalPolicy' ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('global'),
           isDisabled: isGlobalButtonDisabled,
           toolTipContent: isGlobalButtonDisabled
@@ -150,11 +163,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           label: i18n.translate('xpack.securitySolution.endpoint.effectedPolicySelect.perPolicy', {
             defaultMessage: 'Per Policy',
           }),
-          iconType: !isGlobal ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedAssignmentType === 'perPolicy' ? 'checkInCircleFilled' : 'empty',
           'data-test-subj': getTestId('perPolicy'),
         },
       ];
-    }, [canManageGlobalArtifacts, getTestId, isGlobal, isSpaceAwarenessEnabled]);
+    }, [canManageGlobalArtifacts, getTestId, isSpaceAwarenessEnabled, selectedAssignmentType]);
 
     const selectableOptions: EffectedPolicyOption[] = useMemo(() => {
       const isPolicySelected = new Set<string>(selectedPolicyIds);
@@ -284,7 +297,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               <StyledButtonGroup
                 legend="Global Policy Toggle"
                 options={toggleGlobal}
-                idSelected={isGlobal ? 'globalPolicy' : 'perPolicy'}
+                idSelected={selectedAssignmentType}
                 onChange={handleGlobalButtonChange}
                 color="primary"
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
@@ -294,7 +307,8 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           </StyledEuiFlexItemButtonGroup>
         </EuiFlexGroup>
         <EuiSpacer />
-        {!isGlobal &&
+
+        {selectedAssignmentType === 'perPolicy' &&
           (isLoading ? (
             <Loader size="l" data-test-subj={getTestId('policiesLoader')} />
           ) : (
@@ -314,6 +328,16 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </StyledEuiSelectable>
             </EuiFormRow>
           ))}
+        {artifactRestrictedPolicyIds.policyIds.length > 0 && (
+          <>
+            <EuiSpacer />
+            <EuiCallOut size="s">
+              {ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(
+                artifactRestrictedPolicyIds.policyIds.length
+              )}
+            </EuiCallOut>
+          </>
+        )}
       </EffectivePolicyFormContainer>
     );
   }

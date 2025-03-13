@@ -27,6 +27,7 @@ export const useBulkFetchFleetIntegrationPolicies = (
 
   return useQuery<BulkGetPackagePoliciesResponse, IHttpFetchError>({
     queryKey: ['bulkFetchFleetIntegrationPolicies', ids, ignoreMissing],
+    refetchOnWindowFocus: false,
     ...options,
     queryFn: async () => {
       return http.post(packagePolicyRouteService.getBulkGetPath(), {
