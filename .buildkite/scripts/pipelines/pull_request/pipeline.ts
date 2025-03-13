@@ -156,7 +156,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution/,
+        /^x-pack\/solutions\/observability\/plugins/,
         /^package.json/,
         /^yarn.lock/,
       ])) ||

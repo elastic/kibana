@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
 import { rulesLocatorID } from '../../../common';
-import { ALERT_STATUS_FILTER } from '../../components/alert_search_bar/constants';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
@@ -78,6 +77,7 @@ function InternalAlertsPage() {
     share: {
       url: { locators },
     },
+    spaces,
     triggersActionsUi: {
       getAlertsSearchBar: AlertsSearchBar,
       getAlertSummaryWidget: AlertSummaryWidget,
@@ -92,6 +92,7 @@ function InternalAlertsPage() {
     },
   } = data;
   const { ObservabilityPageTemplate } = usePluginContext();
+  const [filterControls, setFilterControls] = useState<Filter[]>([]);
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
@@ -267,9 +268,22 @@ function InternalAlertsPage() {
               {...alertSearchBarStateProps}
               appName={ALERTS_SEARCH_BAR_ID}
               onEsQueryChange={setEsQuery}
+              filterControls={filterControls}
+              onFilterControlsChange={setFilterControls}
               showFilterBar
-              services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
+              services={{
+                timeFilterService,
+                AlertsSearchBar,
+                http,
+                data,
+                dataViews,
+                notifications,
+                spaces,
+                useToasts,
+                uiSettings,
+              }}
             />
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertSummaryWidget
@@ -289,12 +303,12 @@ function InternalAlertsPage() {
               <AlertsGrouping<AlertsByGroupingAgg>
                 ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                 consumers={observabilityAlertFeatureIds}
-                defaultFilters={
-                  ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
-                }
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
-                globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
+                globalFilters={[
+                  ...(alertSearchBarStateProps.filters ?? DEFAULT_FILTERS),
+                  ...filterControls,
+                ]}
                 globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
