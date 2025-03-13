@@ -8,7 +8,6 @@
 import React from 'react';
 import { Meta, StoryFn } from '@storybook/react';
 
-import { EuiButton } from '@elastic/eui';
 import { AssistantAvatar as Component } from '../avatar';
 
 export default {
@@ -32,9 +31,4 @@ export default {
   },
 } as Meta<typeof Component>;
 
-export const Avatar: StoryFn<typeof Component> = (args) => (
-  <>
-    <Component {...args} />
-    <EuiButton fill>Test</EuiButton>
-  </>
-);
+export const Avatar: StoryFn<typeof Component> = (args) => <Component {...args} />;
