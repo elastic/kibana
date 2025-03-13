@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import { DESCRIPTION } from './translations';
 

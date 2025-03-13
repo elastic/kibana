@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import type { VFC } from 'react';
+import React from 'react';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { EMPTY_VALUE } from '../../../../constants/common';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
 import { DateFormatter } from '../../../../components/date_formatter';
 import { unwrapValue } from '../../utils/unwrap_value';
 import { TLPBadge } from './tlp_badge';

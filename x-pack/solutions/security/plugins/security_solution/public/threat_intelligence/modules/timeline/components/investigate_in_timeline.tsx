@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { type VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useInvestigateInTimeline } from '../hooks/use_investigate_in_timeline';
 import { useSecurityContext } from '../../../hooks/use_security_context';
-import { Indicator } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_ICON_LABEL } from './translations';
 
 export interface InvestigateInTimelineProps {
@@ -41,7 +40,8 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
   onClick,
   'data-test-subj': dataTestSub,
 }) => {
-  const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
+  // FIXME: const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
+  const investigateInTimelineFn = () => {};
   const securitySolutionContext = useSecurityContext();
 
   if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
@@ -79,7 +79,8 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
   data,
   'data-test-subj': dataTestSub,
 }) => {
-  const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
+  // FIXME: const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
+  const investigateInTimelineFn = () => {};
   const securitySolutionContext = useSecurityContext();
 
   if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, VFC } from 'react';
+import type { VFC } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import {
   EuiDataGrid,
-  EuiDataGridColumnCellActionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -18,23 +19,25 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   EuiDataGridColumn,
   EuiDataGridRowHeightsOptions,
 } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { CellActions } from './cell_actions';
 import { cellPopoverRendererFactory } from './cell_popover_renderer';
 import { cellRendererFactory } from './cell_renderer';
-import { BrowserFields } from '../../../../types';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import type { BrowserFields } from '../../../../types';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
 import { EmptyState } from '../../../../components/empty_state';
-import { IndicatorsTableContext, IndicatorsTableContextValue } from '../../hooks/use_table_context';
+import type { IndicatorsTableContextValue } from '../../hooks/use_table_context';
+import { IndicatorsTableContext } from '../../hooks/use_table_context';
 import { IndicatorsFlyout } from '../flyout/flyout';
-import { ColumnSettingsValue } from '../../hooks/use_column_settings';
+import type { ColumnSettingsValue } from '../../hooks/use_column_settings';
 import { useToolbarOptions } from '../../hooks/use_toolbar_options';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { getFieldSchema } from '../../utils/get_field_schema';
-import { Pagination } from '../../services/fetch_indicators';
+import type { Pagination } from '../../services/fetch_indicators';
 import { TABLE_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 import { useSecurityContext } from '../../../../hooks/use_security_context';
 

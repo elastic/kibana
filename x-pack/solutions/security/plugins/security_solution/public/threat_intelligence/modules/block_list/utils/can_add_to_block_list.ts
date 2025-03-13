@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**

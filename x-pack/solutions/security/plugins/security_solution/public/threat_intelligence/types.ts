@@ -117,15 +117,6 @@ export interface SecuritySolutionPluginContext {
   securitySolutionStore: Store;
 
   /**
-   * Pass UseInvestigateInTimeline functionality to TI plugin
-   */
-  getUseInvestigateInTimeline: ({
-    dataProviders,
-    from,
-    to,
-  }: UseInvestigateInTimelineProps) => () => Promise<void>;
-
-  /**
    * Whether the current user has access to timeline
    */
   hasAccessToTimeline: boolean;

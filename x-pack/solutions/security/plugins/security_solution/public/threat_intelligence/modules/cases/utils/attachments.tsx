@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import { JsonValue } from '@kbn/utility-types';
-import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { JsonValue } from '@kbn/utility-types';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/constants';
+import { CASE_ATTACHMENT_TYPE_ID } from '../../../../../common/threat_intelligence/constants';
 import { EMPTY_VALUE } from '../../../constants/common';
-import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 /**

@@ -26,7 +26,6 @@ import { deleteOneQuery, setQuery } from '../../common/store/inputs/actions';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { ArtifactFlyout } from '../../management/components/artifact_list_page/components/artifact_flyout';
 import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
-import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 
 export const useSecurityContext = (): SecuritySolutionPluginContext => {
   const {
@@ -49,7 +48,6 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
       getPageWrapper: () => SecuritySolutionPageWrapper,
       licenseService,
       sourcererDataView: sourcererDataView as unknown as SelectedDataView,
-      getUseInvestigateInTimeline: useInvestigateInTimeline,
       hasAccessToTimeline,
 
       blockList: {
