@@ -380,6 +380,7 @@ class AgentPolicyService {
       user?: AuthenticatedUser;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipDeploy?: boolean;
+      hasFleetServer?: boolean;
     } = {}
   ): Promise<AgentPolicy> {
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -416,8 +417,12 @@ class AgentPolicyService {
       soClient,
       agentPolicy,
       {},
-      getAllowedOutputTypesForAgentPolicy(agentPolicy)
+      getAllowedOutputTypesForAgentPolicy({
+        ...agentPolicy,
+        has_fleet_server: options?.hasFleetServer,
+      })
     );
+
     validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(

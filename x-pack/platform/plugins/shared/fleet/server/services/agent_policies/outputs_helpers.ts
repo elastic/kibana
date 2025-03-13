@@ -54,6 +54,7 @@ export async function validateOutputForPolicy(
   allowedOutputTypeForPolicy: string[] = Object.values(outputType)
 ) {
   if (
+    Object.keys(existingData).length !== 0 &&
     newData.data_output_id === existingData.data_output_id &&
     newData.monitoring_output_id === existingData.monitoring_output_id
   ) {

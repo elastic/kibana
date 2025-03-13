@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getDefaultFleetServerpolicyId } from '../../../../../../common/services/agent_policies_helpers';
 import type { useComboInput, useInput, useSwitchInput } from '../../../hooks';
 import {
-  sendCreateAgentPolicy,
+  sendCreateAgentPolicyForRq,
   sendGetOneAgentPolicy,
   useFleetStatus,
   useStartServices,
@@ -115,15 +115,14 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
         if (existingPolicy.data?.item) {
           setFleetServerPolicyId(existingPolicy.data?.item.id);
         } else {
-          const createPolicyResponse = await sendCreateAgentPolicy(
+          const createPolicyResponse = await sendCreateAgentPolicyForRq(
             quickStartFleetServerPolicyFields,
             {
               withSysMonitoring: true,
             }
           );
-          setFleetServerPolicyId(createPolicyResponse.data?.item.id);
+          setFleetServerPolicyId(createPolicyResponse.item.id);
         }
-
         setStatus('success');
       }
     } catch (err) {
