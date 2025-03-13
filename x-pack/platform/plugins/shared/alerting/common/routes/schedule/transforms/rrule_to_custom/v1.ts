@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { isEmpty, isUndefined, omitBy } from 'lodash';
 import { Frequency } from '@kbn/rrule';
 import type { RRule } from '../../../../../server/application/r_rule/types';
@@ -25,6 +26,24 @@ const transformFrequencyToEvery = (frequency: Frequency) => {
   }
 };
 
+const getDurationInString = (duration: number): string => {
+  const durationInDays = moment.duration(duration, 'milliseconds').asDays();
+  if (durationInDays > 1) {
+    return `${durationInDays}d`;
+  }
+
+  const durationInHours = moment.duration(duration, 'milliseconds').asHours();
+  if (durationInHours > 1) {
+    return `${durationInHours}h`;
+  }
+
+  const durationInSeconds = moment.duration(duration, 'milliseconds').asSeconds();
+  if (durationInSeconds % 60 === 0) {
+    return `${durationInSeconds / 60}m`;
+  }
+  return `${durationInSeconds}s`;
+};
+
 export const transformRRuleToCustomSchedule = (snoozeSchedule?: {
   duration: number;
   rRule: RRule;
@@ -35,6 +54,7 @@ export const transformRRuleToCustomSchedule = (snoozeSchedule?: {
 
   const { rRule, duration } = snoozeSchedule;
   const transformedFrequency = transformFrequencyToEvery(rRule.freq as Frequency);
+  const transformedDuration = getDurationInString(duration);
 
   const recurring = {
     end: rRule.until ? new Date(rRule.until).toISOString() : undefined,
@@ -48,7 +68,7 @@ export const transformRRuleToCustomSchedule = (snoozeSchedule?: {
   const filteredRecurring = omitBy(recurring, isUndefined);
 
   return {
-    duration: duration.toString(),
+    duration: transformedDuration,
     start: new Date(rRule.dtstart).toISOString(),
     timezone: rRule.tzid,
     ...(isEmpty(filteredRecurring) ? {} : { recurring: filteredRecurring }),

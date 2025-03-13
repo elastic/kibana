@@ -17,7 +17,7 @@ describe('transformRRuleToCustomSchedule', () => {
           tzid: 'UTC',
         },
       })
-    ).toEqual({ duration: '7200000', start: '2021-05-10T00:00:00.000Z', timezone: 'UTC' });
+    ).toEqual({ duration: '2h', start: '2021-05-10T00:00:00.000Z', timezone: 'UTC' });
   });
 
   it('transforms to start date and timezone correctly', () => {
@@ -30,7 +30,7 @@ describe('transformRRuleToCustomSchedule', () => {
         },
       })
     ).toEqual({
-      duration: '1500000',
+      duration: '25m',
       start: '2025-02-10T21:30:00.000Z',
       timezone: 'America/New_York',
     });
@@ -50,7 +50,7 @@ describe('transformRRuleToCustomSchedule', () => {
         },
       })
     ).toEqual({
-      duration: '1800000',
+      duration: '30m',
       start: '2025-02-17T19:04:46.320Z',
       recurring: { every: '6M', end: '2025-05-17T05:05:00.000Z', onWeekDay: ['Mo', 'FR'] },
       timezone: 'UTC',
@@ -71,7 +71,7 @@ describe('transformRRuleToCustomSchedule', () => {
         },
       })
     ).toEqual({
-      duration: '1800000',
+      duration: '30m',
       start: '2025-02-17T19:04:46.320Z',
       recurring: { every: '1d', end: '2025-05-17T05:05:00.000Z', onWeekDay: ['Mo', 'FR'] },
       timezone: 'UTC',
@@ -93,7 +93,7 @@ describe('transformRRuleToCustomSchedule', () => {
         },
       })
     ).toEqual({
-      duration: '18000000',
+      duration: '5h',
       start: '2025-02-17T19:04:46.320Z',
       recurring: {
         every: '1M',
@@ -118,7 +118,7 @@ describe('transformRRuleToCustomSchedule', () => {
         },
       })
     ).toEqual({
-      duration: '300000',
+      duration: '5m',
       start: '2025-01-14T05:05:00.000Z',
       recurring: { every: '2w', occurrences: 3 },
       timezone: 'UTC',
