@@ -20,7 +20,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/ai-assistant-icon",
   ]
