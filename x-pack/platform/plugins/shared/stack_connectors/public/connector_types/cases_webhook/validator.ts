@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
-import {
+import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import type {
   ValidationError,
   ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
