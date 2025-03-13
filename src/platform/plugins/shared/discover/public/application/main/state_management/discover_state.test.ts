@@ -66,23 +66,14 @@ async function getState(
     runtimeStateManager,
     history: nextHistory,
   });
-  nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
   await nextState.internalState.dispatch(internalStateActions.loadDataViewList());
   if (savedSearch) {
-    nextState.savedSearchState.load = jest.fn(() => {
-      nextState.savedSearchState.set(copySavedSearch(savedSearch));
-      return Promise.resolve(savedSearch);
-    });
     jest.spyOn(discoverServiceMock.savedSearch, 'get').mockImplementation(() => {
       nextState.savedSearchState.set(copySavedSearch(savedSearch));
       return Promise.resolve(savedSearch);
     });
   } else {
-    nextState.savedSearchState.load = jest.fn(() => {
-      nextState.savedSearchState.set(copySavedSearch(savedSearchMockWithTimeFieldNew));
-      return Promise.resolve(savedSearchMockWithTimeFieldNew);
-    });
     jest.spyOn(discoverServiceMock.savedSearch, 'get').mockImplementation(() => {
       nextState.savedSearchState.set(copySavedSearch(savedSearchMockWithTimeFieldNew));
       return Promise.resolve(savedSearchMockWithTimeFieldNew);
@@ -1209,7 +1200,6 @@ describe('Discover state', () => {
         })
       );
       expect(state.appState.get().filters).toHaveLength(1);
-      state.appState.isEmptyURL = jest.fn().mockReturnValue(true);
       history.push('/');
       await state.internalState.dispatch(
         internalStateActions.initializeSession({

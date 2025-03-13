@@ -47,10 +47,6 @@ import { internalStateActions } from './redux';
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
   /**
-   * Returns if the current URL is empty
-   */
-  isEmptyURL: () => boolean;
-  /**
    * Returns the previous state, used for diffing e.g. if fetching new data is necessary
    */
   getPrevious: () => DiscoverAppState;
@@ -334,16 +330,10 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
-  const isEmptyURL = () => {
-    const urlValue = stateStorage.get(APP_STATE_URL_KEY);
-    return urlValue === undefined || urlValue === null;
-  };
-
   const getPrevious = () => previousState;
 
   return {
     ...enhancedAppContainer,
-    isEmptyURL,
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,

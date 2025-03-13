@@ -22,7 +22,6 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isFunction } from 'lodash';
 import type { DiscoverServices } from '../../..';
-import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
 import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
@@ -146,11 +145,6 @@ export interface DiscoverStateContainer {
      * Initializing state containers and start subscribing to changes triggering e.g. data fetching
      */
     initializeAndSync: () => () => void;
-    /**
-     * Load a saved search by id or create a new one that's not persisted yet
-     * @param LoadParams - optional parameters to load a saved search
-     */
-    loadSavedSearch: (param?: LoadParams) => Promise<SavedSearch | undefined>;
     /**
      * Create and select a temporary/adhoc data view by a given index pattern
      * Used by the Data View Picker
@@ -414,19 +408,6 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
-  const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
-    return loadSavedSearchFn(params ?? {}, {
-      appStateContainer,
-      dataStateContainer,
-      internalState,
-      runtimeStateManager,
-      savedSearchContainer,
-      globalStateContainer,
-      services,
-      setDataView,
-    });
-  };
-
   /**
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
@@ -601,7 +582,6 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       fetchData,
-      loadSavedSearch,
       onChangeDataView,
       createAndAppendAdHocDataView,
       onDataViewCreated,
