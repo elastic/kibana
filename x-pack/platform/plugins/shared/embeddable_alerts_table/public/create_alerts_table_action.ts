@@ -8,12 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import {
-  IncompatibleActionError,
-  UiActionsStart,
-  ADD_PANEL_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { fetchRuleTypes } from '@kbn/alerts-ui-shared/src/common/apis/fetch_rule_types';
 import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';

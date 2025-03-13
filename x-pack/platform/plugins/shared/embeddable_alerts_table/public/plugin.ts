@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EMBEDDABLE_ALERTS_TABLE_ID } from './constants';
-import {
+import type {
   EmbeddableAlertsTablePluginSetup,
   EmbeddableAlertsTablePluginStart,
   SetupDependencies,

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
   initializeTitleManager,
@@ -18,9 +18,9 @@ import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/aler
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import { BehaviorSubject } from 'rxjs';
-import { StartDependencies } from './types';
+import type { StartDependencies } from './types';
 import { EMBEDDABLE_ALERTS_TABLE_ID } from './constants';
-import {
+import type {
   EmbeddableAlertsTableApi,
   EmbeddableAlertsTableRuntimeState,
   EmbeddableAlertsTableSerializedState,
