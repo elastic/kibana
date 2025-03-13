@@ -21,6 +21,10 @@ export const createServerRoute: CreateServerRouteFactory<
 > = ({ handler, ...config }) => {
   return createPlainStreamsServerRoute({
     ...config,
+    options: {
+      ...config.options,
+      tags: [...(config.options?.tags ?? []), 'oas-tag:streams'],
+    },
     handler: (options) => {
       const { telemetry } = options;
       const finishTracking = telemetry.startTrackingEndpointLatency({

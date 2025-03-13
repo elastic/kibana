@@ -22,14 +22,17 @@ export const useDashboardsFetch = (name?: string) => {
       if (!name) {
         return Promise.resolve(undefined);
       }
-      const response = await streamsRepositoryClient.fetch('GET /api/streams/{name}/dashboards', {
-        signal,
-        params: {
-          path: {
-            name,
+      const response = await streamsRepositoryClient.fetch(
+        'GET /api/streams/{name}/dashboards 2023-10-31',
+        {
+          signal,
+          params: {
+            path: {
+              name,
+            },
           },
-        },
-      });
+        }
+      );
 
       telemetryClient.trackAssetCounts({
         name,
