@@ -43,7 +43,7 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getPointerPosition(ev);
         }
-        moveAction(gridLayoutStateManager, rowId, startingMouse.current, pointerPixel.current);
+        moveAction(gridLayoutStateManager, startingMouse.current, pointerPixel.current);
       };
 
       const onEnd = () => commitAction(gridLayoutStateManager);

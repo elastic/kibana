@@ -52,7 +52,6 @@ export const commitAction = ({
 
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
-  rowId: string,
   startingMouse: MousePosition,
   currentMouse: MousePosition
 ) => {

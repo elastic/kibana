@@ -50,12 +50,7 @@ describe('row state manager actions', () => {
           getBoundingClientRect: jest.fn().mockReturnValue({ top: 25, height: 100 }),
         } as any as HTMLDivElement,
       };
-      moveAction(
-        gridLayoutStateManager,
-        'second',
-        { clientX: 0, clientY: 0 },
-        { clientX: 0, clientY: 0 }
-      );
+      moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
 
       const newRowOrder = getRowKeysInOrder(gridLayoutStateManager.proposedGridLayout$.getValue()!);
       expect(newRowOrder).toEqual(['first', 'third', 'second']);
@@ -64,7 +59,6 @@ describe('row state manager actions', () => {
     it('calculates translate based on old and new mouse position', () => {
       moveAction(
         gridLayoutStateManager,
-        'second',
         { clientX: 20, clientY: 150 },
         { clientX: 100, clientY: 10 }
       );
