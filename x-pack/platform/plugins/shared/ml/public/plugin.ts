@@ -251,18 +251,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
-    if (pluginsSetup.management) {
-      registerManagementSections(
-        pluginsSetup.management,
-        core,
-        { telemetry: telemetryClient, ...deps },
-        this.isServerless,
-        this.enabledFeatures,
-        this.nlpSettings,
-        this.experimentalFeatures
-      );
-    }
-
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing
       .pipe(
@@ -296,6 +284,18 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               this.isServerless,
               isEsqlEnabled
             );
+
+            if (pluginsSetup.management && fullLicense) {
+              registerManagementSections(
+                pluginsSetup.management,
+                core,
+                { telemetry: telemetryClient, ...deps },
+                this.isServerless,
+                this.enabledFeatures,
+                this.nlpSettings,
+                this.experimentalFeatures
+              );
+            }
 
             if (
               pluginsSetup.triggersActionsUi &&
