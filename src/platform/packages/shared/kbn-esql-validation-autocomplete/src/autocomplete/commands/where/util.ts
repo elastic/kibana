@@ -8,13 +8,19 @@
  */
 
 import { ESQLSingleAstItem } from '@kbn/esql-ast';
-import { isColumnItem, isFunctionItem } from '../../../shared/helpers';
+import {
+  isColumnItem,
+  isFunctionItem,
+  isLiteralItem,
+  isTimeIntervalItem,
+} from '../../../shared/helpers';
 
 export type CaretPosition =
   | 'after_column'
   | 'after_function'
   | 'after_not'
   | 'after_operator'
+  | 'after_literal'
   | 'empty_expression';
 
 export const getPosition = (
@@ -46,6 +52,10 @@ export const getPosition = (
 
     if (isFunctionItem(expressionRoot) && expressionRoot.subtype !== 'variadic-call') {
       return 'after_operator';
+    }
+
+    if (isLiteralItem(expressionRoot) || isTimeIntervalItem(expressionRoot)) {
+      return 'after_literal';
     }
   }
 

@@ -382,6 +382,8 @@ describe('autocomplete.suggest', () => {
         ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
           'double',
         ]),
+        ', ',
+        '| ',
       ]);
       await assertSuggestions('from a | eval var0 = abs(b/) | eval abs(var0)', [
         ...getFieldNamesByType(absParameterTypes),
@@ -557,12 +559,10 @@ describe('autocomplete.suggest', () => {
         triggerCharacter: ' ',
       });
 
-      // If a literal number is detected then suggest also date period keywords
       await assertSuggestions(
         'from a | eval a = 1 /',
         [
-          ...dateSuggestions,
-          ',',
+          ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
             'eval',
@@ -573,7 +573,14 @@ describe('autocomplete.suggest', () => {
         ],
         { triggerCharacter: ' ' }
       );
-      await assertSuggestions('from a | eval a = 1 year /', [',', '| ', 'IS NOT NULL', 'IS NULL']);
+      await assertSuggestions('from a | eval a = 1 year /', [
+        ', ',
+        '| ',
+        '+ $0',
+        '- $0',
+        'IS NOT NULL',
+        'IS NULL',
+      ]);
       await assertSuggestions(
         'from a | eval var0=date_trunc(/)',
         [

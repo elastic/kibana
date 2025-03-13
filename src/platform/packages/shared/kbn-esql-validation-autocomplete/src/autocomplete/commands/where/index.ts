@@ -76,38 +76,21 @@ export async function suggestForExpression({
   const position = getPosition(innerText, expressionRoot);
   switch (position) {
     /**
-     * After a column name
+     * After a literal, column, or complete (non-operator) function call
      */
+    case 'after_literal':
     case 'after_column':
-      const columnType = getExpressionType(expressionRoot);
-
-      if (!isParameterType(columnType)) {
-        break;
-      }
-
-      suggestions.push(
-        ...getOperatorSuggestions({
-          command: commandName,
-          leftParamType: columnType,
-          ignored: ['='],
-        })
-      );
-      break;
-
-    /**
-     * After a complete (non-operator) function call
-     */
     case 'after_function':
-      const returnType = getExpressionType(expressionRoot);
+      const expressionType = getExpressionType(expressionRoot);
 
-      if (!isParameterType(returnType)) {
+      if (!isParameterType(expressionType)) {
         break;
       }
 
       suggestions.push(
         ...getOperatorSuggestions({
           command: commandName,
-          leftParamType: returnType,
+          leftParamType: expressionType,
           ignored: ['='],
         })
       );

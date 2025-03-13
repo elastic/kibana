@@ -8,7 +8,7 @@
  */
 
 import type { ESQLSingleAstItem } from '@kbn/esql-ast';
-import { isAssignment } from '../../../..';
+import { isAssignment, isColumnItem } from '../../../..';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { suggestForExpression } from '../where';
@@ -37,14 +37,19 @@ export async function suggest(
   });
 
   // EVAL-specific stuff
-
   const positionInExpression = getPosition(params.innerText, expressionRoot);
   if (positionInExpression === 'empty_expression' && !insideAssignment) {
     suggestions.push(getNewVariableSuggestion(params.getSuggestedVariableName()));
   }
 
-  if (params.getExpressionType(expressionRoot) !== 'unknown') {
-    // complete expression, so suggest the finishing characters
+  if (
+    // don't suggesting finishing characters if incomplete expression
+    params.getExpressionType(expressionRoot) !== 'unknown' &&
+    // don't suggest finishing characters if the expression is a column
+    // because "EVAL columnName" is a useless expression
+    expressionRoot &&
+    !isColumnItem(expressionRoot)
+  ) {
     suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' });
   }
 
