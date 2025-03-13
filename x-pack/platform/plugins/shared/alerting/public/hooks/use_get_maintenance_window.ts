@@ -21,8 +21,9 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
 
     const hasScopedQuery = !!maintenanceWindow.scopedQuery;
-    const hasSomeSolutionsButNotAll =
-      maintenanceWindow.categoryIds?.length > 0 && maintenanceWindow.categoryIds.length < 3;
+    const hasSomeSolutionsButNotAll = maintenanceWindow.categoryIds
+      ? maintenanceWindow.categoryIds.length > 0 && maintenanceWindow.categoryIds.length < 3
+      : false;
 
     const showMultipleSolutionsWarning = !hasScopedQuery && hasSomeSolutionsButNotAll;
     return {
