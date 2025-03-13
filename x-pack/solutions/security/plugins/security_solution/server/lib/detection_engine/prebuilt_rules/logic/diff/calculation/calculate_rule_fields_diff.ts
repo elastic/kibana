@@ -227,7 +227,7 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   risk_score: numberDiffAlgorithm,
   risk_score_mapping: simpleDiffAlgorithm,
   references: createScalarArrayDiffAlgorithm({
-    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.Merge,
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
   }),
   false_positives: simpleDiffAlgorithm,
   threat: simpleDiffAlgorithm,
