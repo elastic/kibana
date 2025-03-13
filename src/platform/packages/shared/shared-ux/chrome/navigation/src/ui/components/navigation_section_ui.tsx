@@ -15,6 +15,9 @@ import {
   EuiSpacer,
   type EuiCollapsibleNavItemProps,
   type EuiCollapsibleNavSubItemProps,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
@@ -508,6 +511,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           ...rest
         } = item;
 
+        // @ts-ignore title accepts JSX elements and they render correctly but the type definition expects a string
         const parsed: EuiCollapsibleNavSubItemProps = subItems
           ? {
               ...rest,
@@ -519,6 +523,14 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
               ...rest,
               href,
               linkProps,
+              title: (
+                <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+                  <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiBetaBadge size="s" label="" iconType="beaker" alignment="middle" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
             };
 
         return parsed;
