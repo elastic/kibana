@@ -19,7 +19,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('discover/observability', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -39,7 +41,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         solution: 'classic',
       });
       await common.unsetTime();
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     loadTestFile(require.resolve('./embeddable/_saved_search_embeddable'));
