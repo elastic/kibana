@@ -39,6 +39,7 @@ export const SelectedNodeItem = ({
 
   return (
     <button
+      className="gphSelectionList__field"
       aria-hidden="true"
       onClick={() => onSelectedFieldClick(node)}
       css={({ euiTheme }: UseEuiTheme) => css`
