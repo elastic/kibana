@@ -12,7 +12,9 @@ import { css } from '@emotion/react';
 import {
   EuiSplitPanel,
   EuiText,
-  EuiCode,
+  EuiHealth,
+  EuiFlexGroup,
+  EuiFlexItem,
   keys,
   useEuiTheme,
   type EuiThemeComputed,
@@ -22,6 +24,7 @@ interface TabPreviewProps {
   children: React.ReactNode;
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
+  tabName: string;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
 }
@@ -30,6 +33,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   children,
   showPreview,
   setShowPreview,
+  tabName,
   stopPreviewOnHover,
   previewDelay = 500,
 }) => {
@@ -94,10 +98,11 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
               <p>Tab preview</p>
             </EuiText>
           </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner grow={false} color="subdued">
-            <EuiText>
-              <EuiCode>Preview bottom panel</EuiCode>
-            </EuiText>
+          <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="s">
+            {/* TODO color should be chosen based on session state */}
+            <EuiHealth color="success" textSize="m">
+              {tabName}
+            </EuiHealth>
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>
       )}

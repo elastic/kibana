@@ -100,6 +100,7 @@ export const Tab: React.FC<TabProps> = ({
       showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
+      tabName={item.label}
     >
       <EuiFlexGroup
         ref={containerRef}
