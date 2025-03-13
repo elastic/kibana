@@ -92,7 +92,29 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.17.3]]
 == {kib} 8.17.3
 
-The 8.17.3 release includes the following bug fixes.
+The 8.17.3 release includes the following bug fixes and known issue.
+
+[float]
+[[known-issues-8.17.3]]
+=== Known issues
+.Error migrating and validating the inventory-view saved object
+
+[discrete]
+[[known-209996]]
+[%collapsible]
+====
+*Details* +
+
+During the saved object migration process in Kibana bootstrap, the validation of the inventory-view saved object may fail, preventing the bootstrap process from completing.
+
+This issue may also occur when saving a view on the Infrastructure Inventory page due to a schema validation error.
+
+For more information, refer to https://github.com/elastic/kibana/issues/209996[#209996].
+
+*Impact* +
+
+The validation error prevents Kibana from completing the bootstrap process, which may affect Kibana availability. Additionally, it blocks users from saving views in the Infrastructure Inventory pag
+====
 
 [float]
 [[fixes-v8.17.3]]
@@ -179,6 +201,7 @@ include::CHANGELOG.asciidoc[tag=known-issue-187254]
 When upgrading to a newer version, the Upgrade Assistant displays critical warnings for the deprecation of configuring source mode in mappings. These warnings can safely be ignored.
 
 For more information, refer to https://github.com/elastic/kibana/issues/206400[#206400].
+
 ====
 // end::known-issue-206400[]
 
