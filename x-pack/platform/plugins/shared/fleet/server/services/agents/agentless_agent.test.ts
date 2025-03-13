@@ -213,7 +213,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
