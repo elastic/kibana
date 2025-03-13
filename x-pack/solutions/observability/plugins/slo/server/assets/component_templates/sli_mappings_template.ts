@@ -48,6 +48,9 @@ export const SLI_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
             },
           },
         },
+        spaceId: {
+          type: 'keyword',
+        },
         // Synthetics specific fields
         monitor: {
           properties: {
