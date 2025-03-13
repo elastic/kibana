@@ -10,7 +10,7 @@ import { InternalIntegrationServices } from '@kbn/wci-common';
 import { z } from '@kbn/zod';
 import { Client } from 'elasticsearch-8.x';
 
-interface SearchResults {}
+interface SearchResult {}
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -35,7 +35,7 @@ export function getMcpServer(
 
   async function searchCrawlerResource(indexName: string, query: string, size: number = 5) {
     try {
-      const result = await esClient.search<SearchResults>({
+      const result = await esClient.search<SearchResult>({
         index: indexName,
         query: {
           semantic: {
@@ -93,7 +93,7 @@ export function getMcpServer(
     { query: z.string() },
     async ({ query }) => {
       services.logger.info(`Searching documentation for ${query}`);
-      const fragments = await searchCrawlerResource('search-elastic-docs', query);
+      const fragments = await seaqrchCrawlerResource('search-elastic-docs', query);
       return {
         content: fragments,
       };
@@ -106,7 +106,7 @@ export function getMcpServer(
     // use advanced technology to simulate long running tools for demo
     await delay(4000);
 
-    const result = await services.elasticsearchClient.search<SearchResults>({
+    const result = await services.elasticsearchClient.search<SearchResult>({
       index: 'semantic_text_docs_dense3',
       query: {
         semantic: {
