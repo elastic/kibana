@@ -173,4 +173,24 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
       expect(detailsMarkdown.textContent).toEqual(expected);
     });
   });
+
+  describe('horizontal overflow for content', () => {
+    it.each([['summaryContent'], ['detailsContent']])(
+      'enables horizontal scrolling for the %s content',
+      (contentTestId) => {
+        render(
+          <TestProviders>
+            <AttackDiscoveryTab
+              attackDiscovery={mockAttackDiscovery}
+              replacements={mockReplacements}
+            />
+          </TestProviders>
+        );
+
+        const content = screen.getByTestId(contentTestId);
+
+        expect(content).toHaveStyle('overflow-x: auto');
+      }
+    );
+  });
 });
