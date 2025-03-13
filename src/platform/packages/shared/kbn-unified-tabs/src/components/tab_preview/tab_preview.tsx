@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { css } from '@emotion/react';
+import useEvent from 'react-use/lib/useEvent';
 import {
   EuiSplitPanel,
   EuiHealth,
@@ -18,6 +19,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiLoadingSpinner,
+  EuiPortal,
   type EuiThemeComputed,
   EuiText,
 } from '@elastic/eui';
@@ -51,6 +53,18 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const [previewTimer, setPreviewTimer] = useState<NodeJS.Timeout | null>(null);
+  const tabRef = useRef<HTMLSpanElement>(null);
+  const [tabPosition, setTabPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (showPreview && tabRef.current) {
+      const rect = tabRef.current.getBoundingClientRect();
+      setTabPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+      });
+    }
+  }, [showPreview]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -61,15 +75,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
     [setShowPreview]
   );
 
-  // enables closing the preview with the ESC key without altering the current focus
-  useEffect(() => {
-    if (showPreview) {
-      document.addEventListener('keydown', onKeyDown);
-    } else {
-      document.removeEventListener('keydown', onKeyDown);
-    }
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [showPreview, onKeyDown]);
+  useEvent('keydown', onKeyDown);
 
   useEffect(() => {
     return () => {
@@ -100,48 +106,56 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
 
   return (
     <div>
-      <span onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <span onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} ref={tabRef}>
         {children}
       </span>
-      <EuiSplitPanel.Outer grow css={getPreviewContainerCss(euiTheme, showPreview)}>
-        <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
-          <EuiCodeBlock
-            language={previewContent.query.language}
-            transparentBackground
+      <EuiPortal>
+        <EuiSplitPanel.Outer grow css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}>
+          <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
+            <EuiCodeBlock
+              language={previewContent.query.language}
+              transparentBackground
+              paddingSize="none"
+            >
+              {previewContent.query.query}
+            </EuiCodeBlock>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner
+            grow={false}
+            color="subdued"
             paddingSize="none"
+            css={getSplitPanelCss(euiTheme)}
           >
-            {previewContent.query.query}
-          </EuiCodeBlock>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner
-          grow={false}
-          color="subdued"
-          paddingSize="none"
-          css={getSplitPanelCss(euiTheme)}
-        >
-          {previewContent.status === 'running' ? (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText>{previewContent.name}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            <EuiHealth color={previewContent.status} textSize="m">
-              {previewContent.name}
-            </EuiHealth>
-          )}
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
+            {previewContent.status === 'running' ? (
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText>{previewContent.name}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiHealth color={previewContent.status} textSize="m">
+                {previewContent.name}
+              </EuiHealth>
+            )}
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+      </EuiPortal>
     </div>
   );
 };
 
-const getPreviewContainerCss = (euiTheme: EuiThemeComputed, showPreview: boolean) => {
+const getPreviewContainerCss = (
+  euiTheme: EuiThemeComputed,
+  showPreview: boolean,
+  tabPosition: { top: number; left: number }
+) => {
   return css`
-    position: fixed;
+    position: absolute;
+    top: ${tabPosition.top}px;
+    left: ${tabPosition.left}px;
     z-index: 10000;
     margin-top: ${euiTheme.size.xs};
     width: 280px;
