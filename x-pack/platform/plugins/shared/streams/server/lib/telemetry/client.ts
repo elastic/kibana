@@ -10,17 +10,17 @@ import { StreamEndpointLatencyProps } from './types';
 import { STREAMS_ENDPOINT_LATENCY_EVENT } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
-  'POST /api/streams/{name}/processing/_simulate',
-  'POST /api/streams/{name}/processing/_suggestions',
-  'POST /api/streams/{name}/_fork',
-  'PUT /api/streams/{name}/dashboards/{dashboardId}',
-  'PUT /api/streams/{name}',
-  'PUT /api/streams/{name}/_group',
-  'PUT /api/streams/{name}/_ingest',
-  'DELETE /api/streams/{name}',
-  'POST /api/streams/_enable',
-  'POST /api/streams/_disable',
-  'POST /api/streams/_resync',
+  'POST /api/streams/{name}/processing/_simulate 2023-10-31',
+  'POST /api/streams/{name}/processing/_suggestions 2023-10-31',
+  'POST /api/streams/{name}/_fork 2023-10-31',
+  'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+  'PUT /api/streams/{name} 2023-10-31',
+  'PUT /api/streams/{name}/_group 2023-10-31',
+  'PUT /api/streams/{name}/_ingest 2023-10-31',
+  'DELETE /api/streams/{name} 2023-10-31',
+  'POST /api/streams/_enable 2023-10-31',
+  'POST /api/streams/_disable 2023-10-31',
+  'POST /api/streams/_resync 2023-10-31',
 ];
 
 export class StreamsTelemetryClient {
