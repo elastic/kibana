@@ -19,7 +19,7 @@ export interface InitialFlyoutState {
 
 type SortDirection = 'ascending' | 'descending';
 
-export const useFlyoutState = ({
+export const useSynonymRuleFlyoutState = ({
   synonymRule,
   flyoutMode,
   renderExplicit = false,

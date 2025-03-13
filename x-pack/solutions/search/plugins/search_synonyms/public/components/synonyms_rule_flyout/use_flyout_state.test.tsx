@@ -10,7 +10,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-describe('useFlyoutState hook', () => {
+describe('useSynonymRuleFlyoutState hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -23,10 +23,10 @@ describe('useFlyoutState hook', () => {
     describe('create mode', () => {
       describe('equivalent terms', () => {
         it('should be false by default in create mode', async () => {
-          const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+          const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
-              useFlyoutState({
+              useSynonymRuleFlyoutState({
                 synonymRule: {
                   synonyms: '',
                 },
@@ -42,10 +42,10 @@ describe('useFlyoutState hook', () => {
         });
 
         it('should be true when fromTerms has changes in create mode', async () => {
-          const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+          const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
-              useFlyoutState({
+              useSynonymRuleFlyoutState({
                 synonymRule: {
                   synonyms: '',
                 },
@@ -69,10 +69,10 @@ describe('useFlyoutState hook', () => {
       });
       describe('explicit terms', () => {
         it('should be false by default in create mode', async () => {
-          const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+          const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
-              useFlyoutState({
+              useSynonymRuleFlyoutState({
                 synonymRule: {
                   synonyms: '',
                 },
@@ -88,10 +88,10 @@ describe('useFlyoutState hook', () => {
         });
 
         it('should be true when fromTerms has changes ', async () => {
-          const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+          const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
-              useFlyoutState({
+              useSynonymRuleFlyoutState({
                 synonymRule: {
                   synonyms: '',
                 },
@@ -115,10 +115,10 @@ describe('useFlyoutState hook', () => {
       });
 
       it('should be true when mapToTerms has changes', async () => {
-        const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+        const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
-            useFlyoutState({
+            useSynonymRuleFlyoutState({
               synonymRule: {
                 synonyms: '',
               },
@@ -143,10 +143,10 @@ describe('useFlyoutState hook', () => {
     describe('edit mode', () => {
       describe('equivalent terms', () => {
         it('should be true when fromTerms has changes', async () => {
-          const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+          const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
-              useFlyoutState({
+              useSynonymRuleFlyoutState({
                 synonymRule: {
                   synonyms: 'synonym1,synonym2',
                 },
@@ -170,10 +170,10 @@ describe('useFlyoutState hook', () => {
 
       describe('explicit terms', () => {
         it('should be true when mapToTerms has changes', async () => {
-          const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+          const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
-              useFlyoutState({
+              useSynonymRuleFlyoutState({
                 synonymRule: {
                   synonyms: 'synonym1 => synonym2',
                 },
@@ -199,10 +199,10 @@ describe('useFlyoutState hook', () => {
 
   describe('reset changes', () => {
     it('should reset changes in equivalent when in edit mode', async () => {
-      const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+      const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
-          useFlyoutState({
+          useSynonymRuleFlyoutState({
             synonymRule: {
               synonyms: 'synonym1,synonym2',
             },
@@ -240,10 +240,10 @@ describe('useFlyoutState hook', () => {
     });
 
     it('should reset changes in explicit when in edit mode', async () => {
-      const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+      const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
-          useFlyoutState({
+          useSynonymRuleFlyoutState({
             synonymRule: {
               synonyms: 'synonym1 => synonym2',
             },
@@ -274,10 +274,10 @@ describe('useFlyoutState hook', () => {
     });
 
     it('should reset changes in equivalent when in create mode', async () => {
-      const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+      const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
-          useFlyoutState({
+          useSynonymRuleFlyoutState({
             synonymRule: {
               synonyms: '',
             },
@@ -308,10 +308,10 @@ describe('useFlyoutState hook', () => {
     });
 
     it('should reset changes in explicit when in create mode', async () => {
-      const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+      const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
-          useFlyoutState({
+          useSynonymRuleFlyoutState({
             synonymRule: {
               synonyms: '',
             },
@@ -347,10 +347,10 @@ describe('useFlyoutState hook', () => {
 
     describe('fromTerms validation', () => {
       it('should be invalid when fromTerms has multiple explicit separators', async () => {
-        const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+        const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
-            useFlyoutState({
+            useSynonymRuleFlyoutState({
               synonymRule: {
                 synonyms: '',
               },
@@ -373,10 +373,10 @@ describe('useFlyoutState hook', () => {
         });
       });
       it('should be invalid when search term exist in fromTerms', async () => {
-        const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+        const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
-            useFlyoutState({
+            useSynonymRuleFlyoutState({
               synonymRule: {
                 synonyms: 'search',
               },
@@ -398,10 +398,10 @@ describe('useFlyoutState hook', () => {
     });
     describe('mapToTerms validation', () => {
       it('shoud be invalid when mapToTerms is empty', async () => {
-        const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+        const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
-            useFlyoutState({
+            useSynonymRuleFlyoutState({
               synonymRule: {
                 synonyms: '',
               },
@@ -422,10 +422,10 @@ describe('useFlyoutState hook', () => {
         });
       });
       it('should be invalid when mapToTerms has explicit separators', async () => {
-        const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+        const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
-            useFlyoutState({
+            useSynonymRuleFlyoutState({
               synonymRule: {
                 synonyms: '',
               },
@@ -448,10 +448,10 @@ describe('useFlyoutState hook', () => {
         });
       });
       it('should be invalid when mapToTerms has empty values', async () => {
-        const { useFlyoutState } = jest.requireActual('./use_flyout_state');
+        const { useSynonymRuleFlyoutState } = jest.requireActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
-            useFlyoutState({
+            useSynonymRuleFlyoutState({
               synonymRule: {
                 synonyms: 'test => thing',
               },

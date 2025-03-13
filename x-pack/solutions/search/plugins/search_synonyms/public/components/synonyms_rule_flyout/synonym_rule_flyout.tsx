@@ -32,7 +32,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { synonymsOptionToString } from '../../utils/synonyms_utils';
 import { usePutSynonymsRule } from '../../hooks/use_put_synonyms_rule';
-import { useFlyoutState } from './use_flyout_state';
+import { useSynonymRuleFlyoutState } from './use_flyout_state';
 
 interface SynonymRuleFlyoutProps {
   onClose: () => void;
@@ -77,7 +77,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
     onSortTerms,
     removeTermFromOptions,
     resetChanges,
-  } = useFlyoutState({
+  } = useSynonymRuleFlyoutState({
     synonymRule: synonymsRule,
     flyoutMode,
     renderExplicit,
@@ -121,103 +121,108 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
         <EuiFlexGroup
           justifyContent="spaceBetween"
           direction="column"
+          gutterSize="none"
           css={css`
             height: 100%;
           `}
         >
           <EuiFlexItem grow={false}>
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.synonyms', {
-                defaultMessage: 'Add terms to match against',
-              })}
-              isInvalid={isFromTermsInvalid}
-              error={fromTermErrors || null}
-            >
-              <EuiComboBox
-                fullWidth
-                data-test-subj="searchSynonymsSynonymsRuleFlyoutFromTermsInput"
-                isInvalid={isFromTermsInvalid}
-                noSuggestions
-                placeholder={i18n.translate(
-                  'xpack.searchSynonyms.synonymsSetRuleFlyout.synonyms.inputPlaceholder',
-                  { defaultMessage: 'Add terms to match against' }
-                )}
-                onCreateOption={onCreateOption}
-                delimiter=","
-                onSearchChange={onSearchChange}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-              <EuiFlexItem>
-                <EuiFlexGroup responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText
-                      size="s"
-                      color="subdued"
-                      data-test-subj="searchSynonymsSynonymsRuleFlyoutTermCountLabel"
-                    >
-                      <p>
-                        {fromTerms.length <= 1 ? (
-                          <FormattedMessage
-                            id="xpack.searchSynonyms.synonymsSetRuleFlyout.synonymsCount.single"
-                            defaultMessage="{count} term"
-                            values={{ count: fromTerms.length }}
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.searchSynonyms.synonymsSetRuleFlyout.synonymsCount.multiple"
-                            defaultMessage="{count} terms"
-                            values={{ count: fromTerms.length }}
-                          />
-                        )}
-                      </p>
-                    </EuiText>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  fullWidth
+                  label={i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.synonyms', {
+                    defaultMessage: 'Add terms to match against',
+                  })}
+                  isInvalid={isFromTermsInvalid}
+                  error={fromTermErrors || null}
+                >
+                  <EuiComboBox
+                    fullWidth
+                    data-test-subj="searchSynonymsSynonymsRuleFlyoutFromTermsInput"
+                    isInvalid={isFromTermsInvalid}
+                    noSuggestions
+                    placeholder={i18n.translate(
+                      'xpack.searchSynonyms.synonymsSetRuleFlyout.synonyms.inputPlaceholder',
+                      { defaultMessage: 'Add terms to match against' }
+                    )}
+                    onCreateOption={onCreateOption}
+                    delimiter=","
+                    onSearchChange={onSearchChange}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiFlexGroup responsive={false} alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiText
+                          size="s"
+                          color="subdued"
+                          data-test-subj="searchSynonymsSynonymsRuleFlyoutTermCountLabel"
+                        >
+                          <p>
+                            {fromTerms.length <= 1 ? (
+                              <FormattedMessage
+                                id="xpack.searchSynonyms.synonymsSetRuleFlyout.synonymsCount.single"
+                                defaultMessage="{count} term"
+                                values={{ count: fromTerms.length }}
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.searchSynonyms.synonymsSetRuleFlyout.synonymsCount.multiple"
+                                defaultMessage="{count} terms"
+                                values={{ count: fromTerms.length }}
+                              />
+                            )}
+                          </p>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          data-test-subj="searchSynonymsSynonymsRuleFlyoutSortAZButton"
+                          size="s"
+                          color="text"
+                          onClick={() => onSortTerms()}
+                          iconType={currentSortDirection === 'ascending' ? 'sortUp' : 'sortDown'}
+                        >
+                          {currentSortDirection === 'ascending' ? (
+                            <FormattedMessage
+                              id="xpack.searchSynonyms.synonymsSetRuleFlyout.sortAZ"
+                              defaultMessage="Sort A-Z"
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.searchSynonyms.synonymsSetRuleFlyout.sortZA"
+                              defaultMessage="Sort Z-A"
+                            />
+                          )}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="searchSynonymsSynonymsRuleFlyoutSortAZButton"
+                      data-test-subj="searchSynonymsSynonymsRuleFlyoutRemoveAllButton"
+                      color="danger"
                       size="s"
-                      color="text"
-                      onClick={() => onSortTerms()}
-                      iconType={currentSortDirection === 'ascending' ? 'sortUp' : 'sortDown'}
+                      onClick={clearFromTerms}
                     >
-                      {currentSortDirection === 'ascending' ? (
-                        <FormattedMessage
-                          id="xpack.searchSynonyms.synonymsSetRuleFlyout.sortAZ"
-                          defaultMessage="Sort A-Z"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.searchSynonyms.synonymsSetRuleFlyout.sortZA"
-                          defaultMessage="Sort Z-A"
-                        />
-                      )}
+                      <FormattedMessage
+                        id="xpack.searchSynonyms.synonymsSetRuleFlyout.clearAll"
+                        defaultMessage="Remove all"
+                      />
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="searchSynonymsSynonymsRuleFlyoutRemoveAllButton"
-                  color="danger"
-                  size="s"
-                  onClick={clearFromTerms}
-                >
-                  <FormattedMessage
-                    id="xpack.searchSynonyms.synonymsSetRuleFlyout.clearAll"
-                    defaultMessage="Remove all"
-                  />
-                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
 
           <EuiFlexItem
             css={css`
-              max-height: 65%;
+              max-height: ${isExplicit ? '75%' : '90%'};
             `}
           >
             <EuiFlexGroup
@@ -242,7 +247,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
                     }}
                     iconOnClickAriaLabel="remove"
                   >
-                    {' '}
+                    &nbsp;
                     {opt.label}
                   </EuiBadge>
                 </span>
@@ -309,7 +314,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="searchSynonymsSynonymsRuleFlyoutResetChangesButton"
-                  iconType={'refresh'}
+                  iconType="refresh"
                   disabled={!hasChanges}
                   onClick={resetChanges}
                 >
