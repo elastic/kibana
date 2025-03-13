@@ -480,6 +480,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [],
       multipleParams: false,
     },
+    suggest: () => [],
   },
   {
     name: 'join',
