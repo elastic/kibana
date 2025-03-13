@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-const PlaygroundBodySectionStyle = css`
-  display: flex;
-  flex-grow: 1;
-  position: absolute;
-  inset: 0;
-`;
+const PlaygroundBodySectionStyle = css({
+  display: 'flex',
+  flexGrow: 1,
+  position: 'absolute',
+  inset: 0,
+});
 
 export const PlaygroundBodySection = ({
+  color,
   children,
 }: {
+  color?: CSSProperties['backgroundColor'];
   children: React.ReactNode | React.ReactNode[];
 }) => (
   <KibanaPageTemplate.Section
@@ -26,6 +28,7 @@ export const PlaygroundBodySection = ({
     grow
     css={{
       position: 'relative',
+      backgroundColor: color,
     }}
     contentProps={{ css: PlaygroundBodySectionStyle }}
     paddingSize="none"

@@ -29,6 +29,7 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { docLinks } from '../../../common/doc_links';
 import { createQuery } from '../../utils/create_query';
 import { PlaygroundBodySection } from '../playground_body_section';
+import { QueryViewSidebarContainer, QueryViewContainer } from './styles';
 
 const isQueryFieldSelected = (
   queryFields: ChatForm[ChatFormFields.queryFields],
@@ -75,11 +76,7 @@ export const QueryMode: React.FC = () => {
   return (
     <PlaygroundBodySection>
       <EuiFlexGroup>
-        <EuiFlexItem
-          grow={6}
-          className="eui-yScroll"
-          css={{ padding: euiTheme.size.l, paddingRight: 0 }}
-        >
+        <EuiFlexItem grow={6} className="eui-yScroll" css={QueryViewContainer(euiTheme)}>
           <EuiCodeBlock
             language="json"
             fontSize="m"
@@ -91,11 +88,7 @@ export const QueryMode: React.FC = () => {
             {query}
           </EuiCodeBlock>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={3}
-          className="eui-yScroll"
-          css={{ padding: euiTheme.size.l, paddingLeft: 0 }}
-        >
+        <EuiFlexItem grow={3} className="eui-yScroll" css={QueryViewSidebarContainer(euiTheme)}>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiText>
               <h5>
