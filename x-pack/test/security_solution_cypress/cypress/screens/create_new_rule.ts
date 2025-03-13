@@ -108,10 +108,7 @@ export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
 
 export const THREAT_MATCH_QUERY_REQUIRED = 'An indicator index query is required.';
 
-export const DATA_VIEW_COMBO_BOX =
-  '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
-
-export const DATA_VIEW_COMBO_BOX_INPUT = `${DATA_VIEW_COMBO_BOX} input`;
+export const DATA_VIEW_COMBO_BOX = '[data-test-subj="pick-rule-data-source"]';
 
 export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
 
