@@ -298,7 +298,7 @@ export default function ({ getService, getPageObject }) {
         // start by clearing Saved Objects from the .kibana index
         await kibanaServer.savedObjects.cleanStandardList();
         // load some basic log data only if the index doesn't exist
-        esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs')
+        esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs')
       ]);
       // go to the page described by `apps.visualize` in the config
       await PageObjects.common.navigateTo('visualize');
