@@ -11,20 +11,32 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSplitPanel,
-  EuiText,
   EuiHealth,
-  EuiFlexGroup,
-  EuiFlexItem,
   keys,
   useEuiTheme,
+  EuiCodeBlock,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
   type EuiThemeComputed,
+  EuiText,
 } from '@elastic/eui';
 
+// TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
+export interface PreviewContent {
+  id: number;
+  name: string;
+  query: {
+    language: 'esql' | 'kql';
+    query: string;
+  };
+  status: 'success' | 'running' | 'danger'; // status for now matches EuiHealth colors for mocking simplicity
+}
 interface TabPreviewProps {
   children: React.ReactNode;
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
-  tabName: string;
+  previewContent: PreviewContent;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
 }
@@ -33,7 +45,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   children,
   showPreview,
   setShowPreview,
-  tabName,
+  previewContent,
   stopPreviewOnHover,
   previewDelay = 500,
 }) => {
@@ -91,31 +103,56 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
       <span onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         {children}
       </span>
-      {showPreview && (
-        <EuiSplitPanel.Outer grow css={getPreviewContainerCss(euiTheme)}>
-          <EuiSplitPanel.Inner>
-            <EuiText>
-              <p>Tab preview</p>
-            </EuiText>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="s">
-            {/* TODO color should be chosen based on session state */}
-            <EuiHealth color="success" textSize="m">
-              {tabName}
+      <EuiSplitPanel.Outer grow css={getPreviewContainerCss(euiTheme, showPreview)}>
+        <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
+          <EuiCodeBlock
+            language={previewContent.query.language}
+            transparentBackground
+            paddingSize="none"
+          >
+            {previewContent.query.query}
+          </EuiCodeBlock>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner
+          grow={false}
+          color="subdued"
+          paddingSize="none"
+          css={getSplitPanelCss(euiTheme)}
+        >
+          {previewContent.status === 'running' ? (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText>{previewContent.name}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiHealth color={previewContent.status} textSize="m">
+              {previewContent.name}
             </EuiHealth>
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
-      )}
+          )}
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
     </div>
   );
 };
 
-const getPreviewContainerCss = (euiTheme: EuiThemeComputed) => {
+const getPreviewContainerCss = (euiTheme: EuiThemeComputed, showPreview: boolean) => {
   return css`
     position: fixed;
     z-index: 10000;
     margin-top: ${euiTheme.size.xs};
     width: 280px;
-    min-height: 112px;
+    opacity: ${showPreview ? 1 : 0};
+    transition: opacity ${euiTheme.animation.normal} ease;
+  `;
+};
+
+const getSplitPanelCss = (euiTheme: EuiThemeComputed) => {
+  return css`
+    padding-inline: ${euiTheme.size.base};
+    padding-block: ${euiTheme.size.s};
   `;
 };

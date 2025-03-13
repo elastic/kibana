@@ -22,7 +22,40 @@ import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, GetTabMenuItems } from '../../types';
-import { TabPreview } from '../tab_preview';
+import { TabPreview, type PreviewContent } from '../tab_preview';
+
+// TODO: replace with real data when ready
+const TAB_CONTENT_MOCK: PreviewContent[] = [
+  {
+    id: 1,
+    name: 'Tab example',
+    query: {
+      language: 'esql',
+      query:
+        'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    },
+    status: 'success',
+  },
+  {
+    id: 2,
+    name: 'Tab example',
+    query: {
+      language: 'esql',
+      query:
+        'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    },
+    status: 'running',
+  },
+  {
+    id: 3,
+    name: 'Tab example',
+    query: {
+      language: 'kql',
+      query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
+    },
+    status: 'danger',
+  },
+];
 
 export interface TabProps {
   item: TabItem;
@@ -95,12 +128,17 @@ export const Tab: React.FC<TabProps> = ({
     hidePreview();
   }, []);
 
+  const previewContent = {
+    ...TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)],
+    name: item.label,
+  };
+
   return (
     <TabPreview
       showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
-      tabName={item.label}
+      previewContent={previewContent}
     >
       <EuiFlexGroup
         ref={containerRef}
