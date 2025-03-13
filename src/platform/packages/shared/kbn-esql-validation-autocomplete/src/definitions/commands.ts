@@ -208,6 +208,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'expression', type: 'function', optional: true },
       ],
     },
+    suggest: () => [],
   },
   {
     name: 'stats',
@@ -244,6 +245,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     modes: [],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
+    suggest: suggestForStats,
   },
 
   {
