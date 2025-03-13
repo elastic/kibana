@@ -56,7 +56,7 @@ describe('useGetMaintenanceWindow', () => {
     await waitFor(() => expect(mockAddDanger).toBeCalledWith('Unable to get maintenance window.'));
   });
 
-  it('should return object with a hasOldChosenSolutions is false', async () => {
+  it('should return an object where showMultipleSolutionsWarning is false', async () => {
     getMaintenanceWindow.mockResolvedValue({
       categoryIds: ['observability', 'management', 'securitySolution'],
     });
