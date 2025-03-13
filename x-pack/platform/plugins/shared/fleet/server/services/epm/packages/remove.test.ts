@@ -11,7 +11,7 @@ import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../
 import { packagePolicyService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
 
-import { deleteESAsset, removeInstallation } from './remove';
+import { deleteESAssets, removeInstallation } from './remove';
 
 jest.mock('../..', () => {
   return {
@@ -113,14 +113,16 @@ describe('removeInstallation', () => {
   });
 });
 
-describe('deleteESAsset', () => {
+describe('deleteESAssets', () => {
   it('should not delete @custom components template', async () => {
     const esClient = elasticsearchServiceMock.createInternalClient();
-    await deleteESAsset(
-      {
-        id: 'logs@custom',
-        type: ElasticsearchAssetType.componentTemplate,
-      },
+    await deleteESAssets(
+      [
+        {
+          id: 'logs@custom',
+          type: ElasticsearchAssetType.componentTemplate,
+        },
+      ],
       esClient
     );
 
@@ -129,11 +131,13 @@ describe('deleteESAsset', () => {
 
   it('should delete @package components template', async () => {
     const esClient = elasticsearchServiceMock.createInternalClient();
-    await deleteESAsset(
-      {
-        id: 'logs-nginx.access@package',
-        type: ElasticsearchAssetType.componentTemplate,
-      },
+    await deleteESAssets(
+      [
+        {
+          id: 'logs-nginx.access@package',
+          type: ElasticsearchAssetType.componentTemplate,
+        },
+      ],
       esClient
     );
 
