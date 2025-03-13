@@ -92,6 +92,7 @@ export const AvailablePackagesHook = () => {
 };
 
 export { useAuthz } from './hooks/use_authz';
+export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { useLink } from './hooks/use_link';

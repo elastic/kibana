@@ -32,12 +32,12 @@ import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../screens/home';
 
 import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
-import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
+import { useIsGuidedOnboardingActive, useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 
 import {
-  InstallationStatus,
   getLineClampStyles,
+  InstallationStatus,
   shouldShowInstallationStatus,
 } from './installation_status';
 
@@ -174,7 +174,6 @@ export function PackageCard({
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
 
   const onCardClick = () => {
-    debugger;
     if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
         path: url.slice(INTEGRATIONS_BASE_PATH.length),

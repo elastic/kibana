@@ -32,7 +32,8 @@ export const AlertSummaryPage = () => {
     return <LandingPage packages={availableInstalledPackage} />;
   }
 
-  return <Wrapper packages={installedPackages} />;
+  // TODO don't forget to put back installedPackages instead of availableInstalledPackage
+  return <Wrapper packages={availableInstalledPackage} />;
 };
 
 AlertSummaryPage.displayName = 'AlertSummaryPage';

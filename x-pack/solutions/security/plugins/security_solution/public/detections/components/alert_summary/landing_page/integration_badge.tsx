@@ -44,16 +44,9 @@ export const IntegrationBadge = memo(({ integration }: IntegrationProps) => {
       ...(integration.integration ? { integration: integration.integration } : {}),
     });
 
-    console.log('url', url);
-    if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
-      application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-        path: url.slice(INTEGRATIONS_BASE_PATH.length),
-      });
-    } else if (url.startsWith('http') || url.startsWith('https')) {
-      window.open(url, '_blank');
-    } else {
-      application.navigateToUrl(url);
-    }
+    application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+      path: url.slice(INTEGRATIONS_BASE_PATH.length),
+    });
   }, [application, getHref, integration.integration, integration.name, integration.version]);
 
   return (
