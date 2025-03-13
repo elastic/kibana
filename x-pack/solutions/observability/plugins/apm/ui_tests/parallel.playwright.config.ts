@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
 // eslint-disable-next-line import/no-default-export
 export default createPlaywrightConfig({
-  globalSetup: require.resolve('./parallel_tests/global_setup'),
   testDir: './parallel_tests',
   workers: 2,
 });
