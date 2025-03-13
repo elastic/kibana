@@ -7,22 +7,38 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
 import { IngestPipeline as IngestPipelineEditor } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
 
 interface Props {
   fileStatus: FileAnalysis;
+  setPipeline?: (pipeline: string) => void;
+  readonly?: boolean;
   showTitle?: boolean;
 }
 
-export const IngestPipeline: FC<Props> = ({ fileStatus, showTitle = true }) => {
-  const [localPipeline, setLocalPipeline] = useState(
-    JSON.stringify(fileStatus.results!.ingest_pipeline, null, 2)
+export const IngestPipeline: FC<Props> = ({
+  fileStatus,
+  setPipeline,
+  showTitle = true,
+  readonly = false,
+}) => {
+  const [localPipeline, setLocalPipeline] = useState(JSON.stringify(fileStatus.pipeline, null, 2));
+
+  useDebounce(
+    () => {
+      if (setPipeline) {
+        setPipeline(localPipeline);
+      }
+    },
+    500,
+    [localPipeline]
   );
 
   return (
     <IngestPipelineEditor
-      initialized={false}
+      initialized={readonly}
       data={localPipeline}
       onChange={(value) => {
         setLocalPipeline(value);

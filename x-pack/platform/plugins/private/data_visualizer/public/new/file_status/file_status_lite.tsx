@@ -20,22 +20,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileAnalysis } from '../file_manager/file_wrapper';
-import { STATUS, type UploadStatus } from '../file_manager/file_manager';
+import { STATUS } from '../file_manager/file_manager';
 import { FileClashResult } from './file_clash';
 import { UploadProgress } from './progress';
 import { AnalysisSummary } from '../../application/file_data_visualizer/components/analysis_summary';
 import { FileContents } from '../../application/file_data_visualizer/components/file_contents';
 import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
-
-interface Props {
-  uploadStatus: UploadStatus;
-  fileStatus: FileAnalysis;
-  deleteFile: () => void;
-  index: number;
-  showFileContentPreview?: boolean;
-  showFileSummary?: boolean;
-}
+import type { FileStatusProps } from './file_status';
 
 enum TAB {
   SUMMARY,
@@ -45,7 +36,7 @@ enum TAB {
   PIPELINE,
 }
 
-export const FileStatusLite: FC<Props> = ({
+export const FileStatusLite: FC<FileStatusProps> = ({
   fileStatus,
   uploadStatus,
   deleteFile,

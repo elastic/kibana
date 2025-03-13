@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import React from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
@@ -30,8 +29,8 @@ import { IndexInput } from './index_input';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
 import { DataViewIllustration } from './data_view_illustration';
-import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
-// import { useDataVisualizerKibana } from '../application/kibana_context';
+import { useFileUpload } from './use_file_upload';
+import { AdvancedSection } from './advanced_section';
 
 interface Props {
   fileUploadManager: FileUploadManager;
@@ -41,57 +40,20 @@ interface Props {
   onClose?: () => void;
 }
 
-export const FileUploadView: FC<Props> = ({ fileUploadManager, setUploadResults, onClose }) => {
-  // const {
-  //   services: {
-  //     application: { navigateToApp },
-  //   },
-  // } = useDataVisualizerKibana();
-
-  const [indexName, setIndexName] = useState<string>(
-    fileUploadManager.getExistingIndexName() ?? ''
-  );
-  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
-
-  const deleteFile = useCallback(
-    (i: number) => fileUploadManager.removeFile(i),
-    [fileUploadManager]
-  );
-
-  const filesStatus = useObservable(fileUploadManager.fileAnalysisStatus$, []);
-  const uploadStatus = useObservable(
-    fileUploadManager.uploadStatus$,
-    fileUploadManager.uploadStatus$.getValue()
-  );
-  const fileClashes = useMemo(
-    () => uploadStatus.fileClashes.some((f) => f.clash === CLASH_ERROR_TYPE.ERROR),
-    [uploadStatus.fileClashes]
-  );
-
-  useEffect(() => {
-    return () => {
-      fileUploadManager.destroy();
-    };
-  }, [fileUploadManager]);
-
-  const uploadInProgress =
-    uploadStatus.overallImportStatus === STATUS.STARTED ||
-    uploadStatus.overallImportStatus === STATUS.COMPLETED ||
-    uploadStatus.overallImportStatus === STATUS.FAILED;
-
-  const onImportClick = useCallback(() => {
-    fileUploadManager.import(indexName).then((res) => {
-      if (setUploadResults && res) {
-        setUploadResults(res);
-      }
-    });
-  }, [fileUploadManager, indexName, setUploadResults]);
-
-  const canImport = useMemo(() => {
-    return (
-      uploadStatus.analysisOk && indexValidationStatus === STATUS.COMPLETED && indexName !== ''
-    );
-  }, [indexName, indexValidationStatus, uploadStatus.analysisOk]);
+export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
+  const {
+    setIndexName,
+    setIndexValidationStatus,
+    deleteFile,
+    filesStatus,
+    uploadStatus,
+    fileClashes,
+    uploadInProgress,
+    onImportClick,
+    canImport,
+    mappings,
+    settings,
+  } = useFileUpload(fileUploadManager);
 
   return (
     <>
@@ -125,6 +87,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, setUploadResults,
                 deleteFile={() => deleteFile(i)}
                 index={i}
                 lite={false}
+                setPipeline={fileUploadManager.updatePipeline(i)}
               />
             ))}
 
@@ -140,9 +103,18 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, setUploadResults,
         ) : null}
 
         {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
-        filesStatus.length > 0 &&
-        uploadStatus.analysisOk ? (
+        uploadStatus.analysisStatus !== STATUS.FAILED &&
+        filesStatus.length > 0 ? (
           <>
+            <AdvancedSection
+              mappings={mappings.json}
+              setMappings={(m) => fileUploadManager.updateMappings(m)}
+              settings={settings.json}
+              setSettings={(s) => fileUploadManager.updateSettings(s)}
+            />
+
+            <EuiSpacer />
+
             <IndexInput
               setIndexName={setIndexName}
               setIndexValidationStatus={setIndexValidationStatus}

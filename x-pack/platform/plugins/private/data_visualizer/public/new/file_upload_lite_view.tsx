@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import React from 'react';
 import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
@@ -35,8 +34,7 @@ import { IndexInput } from './index_input';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
 import { DataViewIllustration } from './data_view_illustration';
-import { useDataVisualizerKibana } from '../application/kibana_context';
-import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
+import { useFileUpload } from './use_file_upload';
 
 interface Props {
   fileUploadManager: FileUploadManager;
@@ -47,65 +45,19 @@ interface Props {
 }
 
 export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClose }) => {
+  const { flyoutContent, initialIndexName, onUploadComplete } = props;
   const {
-    services: {
-      application: { navigateToApp },
-    },
-  } = useDataVisualizerKibana();
-
-  const { flyoutContent, onUploadComplete, initialIndexName } = props;
-
-  const [indexName, setIndexName] = useState<string>(
-    fileUploadManager.getExistingIndexName() ?? ''
-  );
-  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(
-    fileUploadManager.getExistingIndexName() ? STATUS.COMPLETED : STATUS.NOT_STARTED
-  );
-
-  const deleteFile = useCallback(
-    (i: number) => fileUploadManager.removeFile(i),
-    [fileUploadManager]
-  );
-
-  const filesStatus = useObservable(fileUploadManager.fileAnalysisStatus$, []);
-  const uploadStatus = useObservable(
-    fileUploadManager.uploadStatus$,
-    fileUploadManager.uploadStatus$.getValue()
-  );
-  const fileClashes = useMemo(
-    () => uploadStatus.fileClashes.some((f) => f.clash === CLASH_ERROR_TYPE.ERROR),
-    [uploadStatus.fileClashes]
-  );
-
-  const fullFileUpload = useCallback(
-    () => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' }),
-    [navigateToApp]
-  );
-
-  useEffect(() => {
-    return () => {
-      fileUploadManager.destroy();
-    };
-  }, [fileUploadManager]);
-
-  const uploadInProgress =
-    uploadStatus.overallImportStatus === STATUS.STARTED ||
-    uploadStatus.overallImportStatus === STATUS.COMPLETED ||
-    uploadStatus.overallImportStatus === STATUS.FAILED;
-
-  const onImportClick = useCallback(() => {
-    fileUploadManager.import(indexName).then((res) => {
-      if (onUploadComplete && res) {
-        onUploadComplete(res);
-      }
-    });
-  }, [fileUploadManager, indexName, onUploadComplete]);
-
-  const canImport = useMemo(() => {
-    return (
-      uploadStatus.analysisOk && indexValidationStatus === STATUS.COMPLETED && indexName !== ''
-    );
-  }, [indexName, indexValidationStatus, uploadStatus.analysisOk]);
+    setIndexName,
+    setIndexValidationStatus,
+    deleteFile,
+    filesStatus,
+    uploadStatus,
+    fileClashes,
+    fullFileUpload,
+    uploadInProgress,
+    onImportClick,
+    canImport,
+  } = useFileUpload(fileUploadManager, onUploadComplete);
 
   const existingIndexName = fileUploadManager.getExistingIndexName();
 
@@ -208,7 +160,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
 
           {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
           filesStatus.length > 0 &&
-          uploadStatus.analysisOk ? (
+          uploadStatus.analysisStatus !== STATUS.NOT_STARTED ? (
             <>
               {fileUploadManager.isExistingIndexUpload() === false ? (
                 <IndexInput

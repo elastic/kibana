@@ -12,11 +12,12 @@ import type { FileAnalysis } from '../file_manager/file_wrapper';
 import { FileStatusLite } from './file_status_lite';
 import { FileStatusFull } from './file_status_full';
 
-interface FileStatusProps {
+export interface FileStatusProps {
   uploadStatus: UploadStatus;
   fileStatus: FileAnalysis;
   deleteFile: () => void;
   index: number;
+  setPipeline?: (pipeline: string) => void;
   showFileContentPreview?: boolean;
   showFileSummary?: boolean;
 }
@@ -31,6 +32,7 @@ export const FileStatus: FC<Props> = ({
   index,
   showFileContentPreview,
   showFileSummary,
+  setPipeline,
 }) => {
   const FileStatusComp = lite ? FileStatusLite : FileStatusFull;
   return (
@@ -41,6 +43,7 @@ export const FileStatus: FC<Props> = ({
       index={index}
       showFileContentPreview={showFileContentPreview}
       showFileSummary={showFileSummary}
+      setPipeline={setPipeline}
     />
   );
 };

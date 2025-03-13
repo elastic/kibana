@@ -47,7 +47,7 @@ export const FileDataVisualizer: FC<Props> = ({
     fileUpload,
     fieldFormats,
   };
-  const [mode, setMode] = useState<TEST_MODE>(TEST_MODE.NEW);
+  const [mode /* , setMode*/] = useState<TEST_MODE>(TEST_MODE.NEW);
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;

@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileAnalysis } from '../file_manager/file_wrapper';
-import { STATUS, type UploadStatus } from '../file_manager/file_manager';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { STATUS } from '../file_manager/file_manager';
 import { FileClashResult } from './file_clash';
 import { UploadProgress } from './progress';
 import { AnalysisSummary } from '../../application/file_data_visualizer/components/analysis_summary';
@@ -30,15 +30,7 @@ import { FieldsStatsGrid } from '../../application/common/components/fields_stat
 import { Mappings } from './mappings';
 import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
 import { IngestPipeline } from './pipeline';
-
-interface Props {
-  uploadStatus: UploadStatus;
-  fileStatus: FileAnalysis;
-  deleteFile: () => void;
-  index: number;
-  showFileContentPreview?: boolean;
-  showFileSummary?: boolean;
-}
+import type { FileStatusProps } from './file_status';
 
 enum TAB {
   SUMMARY,
@@ -48,7 +40,13 @@ enum TAB {
   PIPELINE,
 }
 
-export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, index }) => {
+export const FileStatusFull: FC<FileStatusProps> = ({
+  fileStatus,
+  uploadStatus,
+  deleteFile,
+  setPipeline,
+  index,
+}) => {
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
   };
@@ -190,11 +188,19 @@ export const FileStatusFull: FC<Props> = ({ fileStatus, uploadStatus, deleteFile
                 ) : null}
 
                 {selectedTab === TAB.MAPPINGS ? (
-                  <Mappings fileStatus={fileStatus} showTitle={false} />
+                  <Mappings
+                    mappings={fileStatus.results!.mappings as MappingTypeMapping}
+                    showTitle={false}
+                    readonly={true}
+                  />
                 ) : null}
 
                 {selectedTab === TAB.PIPELINE ? (
-                  <IngestPipeline fileStatus={fileStatus} showTitle={false} />
+                  <IngestPipeline
+                    fileStatus={fileStatus}
+                    showTitle={false}
+                    setPipeline={setPipeline}
+                  />
                 ) : null}
               </>
             ) : null}

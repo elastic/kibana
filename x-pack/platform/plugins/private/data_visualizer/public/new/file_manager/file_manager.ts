@@ -47,18 +47,33 @@ export enum STATUS {
   FAILED,
 }
 
+interface Config<T> {
+  json: T;
+  string: string;
+  valid: boolean;
+}
+
+export const emptyConfig = {
+  json: {},
+  string: '',
+  valid: false,
+};
+
 export interface UploadStatus {
-  analysisOk: boolean;
+  analysisStatus: STATUS;
   overallImportStatus: STATUS;
   indexCreated: STATUS;
   pipelineCreated: STATUS;
   modelDeployed: STATUS;
   dataViewCreated: STATUS;
   pipelinesDeleted: STATUS;
-  fileImport: STATUS;
+  // fileImport: STATUS; // is this really the same as overallImportStatus? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   filesStatus: FileAnalysis[];
   fileClashes: FileClash[];
   formatMix: boolean;
+  mappingsJsonValid: boolean;
+  settingsJsonValid: boolean;
+  pipelinesJsonValid: boolean;
   errors: Array<{ title: string; error: any }>;
 }
 
@@ -73,8 +88,16 @@ export class FileUploadManager {
   private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
 
   private mappingsCheckSubscription: Subscription;
-  private settings;
-  private mappings: MappingTypeMapping | null = null;
+  public readonly settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
+    json: {},
+    string: '',
+    valid: false,
+  });
+  public readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping | null>>({
+    json: null,
+    string: '',
+    valid: false,
+  });
   private pipelines: Array<IngestPipeline | undefined> = [];
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
@@ -82,17 +105,20 @@ export class FileUploadManager {
   private commonFileFormat: string | null = null;
 
   public readonly uploadStatus$ = new BehaviorSubject<UploadStatus>({
-    analysisOk: false,
+    analysisStatus: STATUS.NOT_STARTED,
     overallImportStatus: STATUS.NOT_STARTED,
     indexCreated: STATUS.NOT_STARTED,
     pipelineCreated: STATUS.NOT_STARTED,
     modelDeployed: STATUS.NA,
     dataViewCreated: STATUS.NOT_STARTED,
     pipelinesDeleted: STATUS.NOT_STARTED,
-    fileImport: STATUS.NOT_STARTED,
+    // fileImport: STATUS.NOT_STARTED,
     filesStatus: [],
     fileClashes: [],
     formatMix: false,
+    mappingsJsonValid: true,
+    settingsJsonValid: true,
+    pipelinesJsonValid: true,
     errors: [],
   });
   private autoAddSemanticTextField: boolean = false;
@@ -113,7 +139,7 @@ export class FileUploadManager {
     }
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
-    this.settings = indexSettingsOverride ?? {};
+    this.updateSettings(indexSettingsOverride ?? {});
 
     this.mappingsCheckSubscription = combineLatest([
       this.fileAnalysisStatus$,
@@ -126,7 +152,7 @@ export class FileUploadManager {
       if (allFilesAnalyzed && isExistingMappingsReady) {
         this.analysisValid$.next(true);
         const uploadStatus = this.uploadStatus$.getValue();
-        if (uploadStatus.fileImport === STATUS.STARTED) {
+        if (uploadStatus.overallImportStatus === STATUS.STARTED) {
           return;
         }
         if (this.getFiles().length === 0) {
@@ -153,7 +179,7 @@ export class FileUploadManager {
             fileClashes,
           });
         } else if (mappingsOk) {
-          this.mappings = mergedMappings;
+          this.updateMappings(mergedMappings);
           this.pipelines = this.getPipelines();
           this.addSemanticTextField();
           this.setStatus({
@@ -163,7 +189,8 @@ export class FileUploadManager {
 
         this.setStatus({
           fileClashes: getMappingClashInfo(mappingClashes, existingIndexChecks, statuses),
-          analysisOk: mappingsOk && formatsOk,
+          analysisStatus: mappingsOk && formatsOk ? STATUS.COMPLETED : STATUS.FAILED,
+          pipelinesJsonValid: statuses.every((status) => status.pipelineJsonValid),
         });
       }
     });
@@ -182,7 +209,7 @@ export class FileUploadManager {
 
   async addFiles(fileList: FileList) {
     this.setStatus({
-      analysisOk: false,
+      analysisStatus: STATUS.STARTED,
     });
     const promises = Array.from(fileList).map((file) => this.addFile(file));
     await Promise.all(promises);
@@ -203,6 +230,11 @@ export class FileUploadManager {
     this.files$.next(files);
     if (f) {
       f.destroy();
+    }
+    if (files.length === 0) {
+      this.setStatus({
+        analysisStatus: STATUS.NOT_STARTED,
+      });
     }
   }
 
@@ -267,8 +299,83 @@ export class FileUploadManager {
     return files.map((file) => file.getPipeline());
   }
 
+  public updatePipeline(index: number) {
+    return (pipeline: string) => {
+      const files = this.getFiles();
+      files[index].updatePipeline(pipeline);
+      this.files$.next(files); // is this needed?? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    };
+  }
+
+  public getMappings() {
+    return this.mappings$.getValue().json;
+  }
+
+  // public getMappings$() {
+  //   return this.mappings$.asObservable();
+  // }
+
+  public updateMappings(mappings: MappingTypeMapping | string) {
+    this.updateSettingsOrMappings('mappings', mappings);
+  }
+
+  public getSettings() {
+    return this.settings$.getValue();
+  }
+
+  // public getSettings$() {
+  //   return this.settings$.asObservable();
+  // }
+
+  public updateSettings(settings: IndicesIndexSettings | string) {
+    this.updateSettingsOrMappings('settings', settings);
+  }
+
+  private updateSettingsOrMappings(
+    mode: 'settings' | 'mappings',
+    config: IndicesIndexSettings | MappingTypeMapping | string
+  ) {
+    const config$ = mode === 'settings' ? this.settings$ : this.mappings$;
+    const jsonValidKey = mode === 'settings' ? 'settingsJsonValid' : 'mappingsJsonValid';
+    const currentConfig = config$.getValue();
+    if (typeof config === 'string') {
+      try {
+        const json = JSON.parse(config);
+        const currentConfigString = JSON.stringify(currentConfig.json);
+        const incomingConfigString = JSON.stringify(json);
+
+        this.setStatus({
+          [jsonValidKey]: true,
+        });
+
+        if (currentConfigString === incomingConfigString) {
+          return;
+        }
+
+        config$.next({
+          json,
+          string: incomingConfigString,
+          valid: true,
+        });
+      } catch (e) {
+        this.setStatus({
+          [jsonValidKey]: false,
+        });
+        return;
+      }
+    } else {
+      config$.next({
+        json: config,
+        string: '',
+        valid: true,
+      });
+    }
+  }
+
   public async import(indexName: string): Promise<FileUploadResults | null> {
-    if (this.mappings === null || this.pipelines === null || this.commonFileFormat === null) {
+    const mappings = this.getMappings();
+
+    if (mappings === null || this.pipelines === null || this.commonFileFormat === null) {
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
       });
@@ -282,7 +389,7 @@ export class FileUploadManager {
     });
 
     this.importer = await this.fileUpload.importerFactory(this.commonFileFormat, {});
-    this.inferenceId = getInferenceId(this.mappings);
+    this.inferenceId = getInferenceId(mappings);
 
     if (this.inferenceId !== null) {
       this.setStatus({
@@ -311,8 +418,8 @@ export class FileUploadManager {
     try {
       initializeImportResp = await this.importer.initializeImport(
         indexName,
-        this.settings,
-        this.mappings,
+        this.getSettings().json,
+        mappings,
         this.pipelines,
         this.isExistingIndexUpload()
       );
@@ -352,9 +459,9 @@ export class FileUploadManager {
       return null;
     }
 
-    this.setStatus({
-      fileImport: STATUS.STARTED,
-    });
+    // this.setStatus({
+    //   fileImport: STATUS.STARTED,
+    // });
 
     // import data
     const files = this.getFiles();
@@ -363,7 +470,7 @@ export class FileUploadManager {
     try {
       await Promise.all(
         files.map(async (file, i) => {
-          await file.import(indexName, this.mappings!, createdPipelineIds[i] ?? undefined);
+          await file.import(indexName, mappings!, createdPipelineIds[i] ?? undefined);
         })
       );
     } catch (error) {
@@ -381,9 +488,9 @@ export class FileUploadManager {
       return null;
     }
 
-    this.setStatus({
-      fileImport: STATUS.COMPLETED,
-    });
+    // this.setStatus({
+    //   fileImport: STATUS.COMPLETED,
+    // });
 
     if (this.removePipelinesAfterImport) {
       try {
@@ -491,14 +598,15 @@ export class FileUploadManager {
   }
 
   private addSemanticTextField() {
+    const mappings = this.getMappings();
     if (
       this.isTikaFormat() &&
       this.autoAddSemanticTextField &&
       this.autoAddInferenceEndpointName !== null &&
       this.pipelines !== null &&
-      this.mappings !== null
+      mappings !== null
     ) {
-      this.mappings.properties!.content = {
+      mappings.properties!.content = {
         type: 'semantic_text',
         inference_id: this.autoAddInferenceEndpointName,
       };
@@ -536,3 +644,36 @@ export class FileUploadManager {
     }
   }
 }
+
+// function ss(
+//   settings: IndicesIndexSettings | string,
+//   currentSettings: IndicesIndexSettings,
+//   settings$: BehaviorSubject<Config<IndicesIndexSettings>>
+// ) {
+//   if (typeof settings === 'string') {
+//     try {
+//       const json = JSON.parse(settings);
+//       // const currentSettings = this.getSettings();
+//       // compare the stringified versions of the settings to ignore whitespace differences
+//       const tempSettingString = JSON.stringify(currentSettings.json);
+//       const tempIncomingSettingsString = JSON.stringify(json);
+//       if (tempSettingString === tempIncomingSettingsString) {
+//         return;
+//       }
+
+//       settings$.next({
+//         json,
+//         string: settings,
+//         valid: true,
+//       });
+//     } catch (e) {
+//       // do nothing
+//     }
+//   } else {
+//     settings$.next({
+//       json: settings,
+//       string: '',
+//       valid: true,
+//     });
+//   }
+// }
