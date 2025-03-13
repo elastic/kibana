@@ -11,6 +11,7 @@ import React from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
+import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const asyncAction =
   (name: string) =>
@@ -28,9 +29,16 @@ export default {
   },
 } as Meta;
 
+const tabsSizeConfig = {
+  isScrollable: false,
+  regularTabMaxWidth: MAX_TAB_WIDTH,
+  regularTabMinWidth: MIN_TAB_WIDTH,
+};
+
 const TabTemplate: StoryFn<TabProps> = (args) => (
   <Tab
     {...args}
+    tabsSizeConfig={tabsSizeConfig}
     onLabelEdited={asyncAction('onLabelEdited')}
     onSelect={asyncAction('onSelect')}
     onClose={asyncAction('onClose')}
