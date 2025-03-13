@@ -90,7 +90,7 @@ export class PrivilegeMonitoringDataClient {
       });
 
       if (this.apiKeyGenerator) {
-        await this.apiKeyGenerator.generate(); // TODO: need this in a saved object?
+        await this.apiKeyGenerator.generate();
       }
 
       await startPrivilegeMonitoringTask({
@@ -120,7 +120,6 @@ export class PrivilegeMonitoringDataClient {
       await this.engineClient.update({
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
         error: {
-          // TODO: double check this, taken from entity_store_data_client.ts line 480 example.
           message: e.message,
           stack: e.stack,
           action: 'init',
