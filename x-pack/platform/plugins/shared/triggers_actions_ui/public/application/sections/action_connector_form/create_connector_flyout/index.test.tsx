@@ -134,6 +134,25 @@ describe('CreateConnectorFlyout', () => {
     });
   });
 
+  it('does not show the filters after an action type is selected', async () => {
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+      />
+    );
+    await act(() => Promise.resolve());
+
+    await userEvent.click(screen.getByTestId(`${actionTypeModel.id}-card`));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('createConnectorsModalSearch')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('compatibilityFilterBtn')).not.toBeInTheDocument();
+  });
+
   it('does not show the save and test button if the onTestConnector is not provided', async () => {
     const { queryByTestId } = appMockRenderer.render(
       <CreateConnectorFlyout
