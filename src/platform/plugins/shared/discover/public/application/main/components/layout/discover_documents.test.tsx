@@ -30,7 +30,6 @@ import { createCustomizationService } from '../../../../customizations/customiza
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { ProfilesManager } from '../../../../context_awareness';
-import { internalStateActions } from '../../state_management/redux';
 
 const customisationService = createCustomizationService();
 
@@ -53,18 +52,16 @@ async function mountComponent(
   stateContainer.appState.update({
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
-  stateContainer.internalState.dispatch(
-    internalStateActions.setDataRequestParams({
-      timeRangeRelative: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
-      },
-      timeRangeAbsolute: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
-      },
-    })
-  );
+  stateContainer.internalState.transitions.setDataRequestParams({
+    timeRangeRelative: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+    timeRangeAbsolute: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+  });
 
   stateContainer.dataState.data$.documents$ = documents$;
 
