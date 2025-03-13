@@ -48,9 +48,15 @@ function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset 
 }
 
 const listDashboardsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/dashboards',
+  endpoint: 'GET /api/streams/{name}/dashboards 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Get stream dashboards',
+    description:
+      'Fetches all dashboards linked to a stream that are visible to the current user in the current space.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   params: z.object({
     path: z.object({
@@ -90,9 +96,15 @@ const listDashboardsRoute = createServerRoute({
 });
 
 const linkDashboardRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/dashboards/{dashboardId}',
+  endpoint: 'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Link a dashboard to a stream',
+    description:
+      'Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -129,9 +141,15 @@ const linkDashboardRoute = createServerRoute({
 });
 
 const unlinkDashboardRoute = createServerRoute({
-  endpoint: 'DELETE /api/streams/{name}/dashboards/{dashboardId}',
+  endpoint: 'DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Unlink a dashboard from a stream',
+    description:
+      'Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -169,7 +187,7 @@ const unlinkDashboardRoute = createServerRoute({
 });
 
 const suggestDashboardsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/dashboards/_suggestions',
+  endpoint: 'POST /internal/streams/{name}/dashboards/_suggestions',
   options: {
     access: 'internal',
   },
@@ -222,9 +240,15 @@ const dashboardSchema = z.object({
 });
 
 const bulkDashboardsRoute = createServerRoute({
-  endpoint: `POST /api/streams/{name}/dashboards/_bulk`,
+  endpoint: `POST /api/streams/{name}/dashboards/_bulk 2023-10-31`,
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Bulk update dashboards',
+    description:
+      'Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {

@@ -24,11 +24,9 @@ import type { AppMountParameters } from '@kbn/core-application-browser';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { UnifiedTabs } from '@kbn/unified-tabs';
+import { type TabItem, UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
-
-let TMP_COUNTER = 0;
 
 interface UnifiedTabsExampleAppProps {
   services: FieldListSidebarProps['services'];
@@ -44,6 +42,10 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [dataView, setDataView] = useState<DataView | null>();
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
+  const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
+  const [initialItems] = useState<TabItem[]>(() =>
+    Array.from({ length: 7 }, () => getNewTabDefaultProps())
+  );
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
@@ -95,20 +97,10 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
         {dataView ? (
           <div className="eui-fullHeight">
             <UnifiedTabs
-              initialItems={[
-                {
-                  id: 'tab_initial',
-                  label: 'Initial tab',
-                },
-              ]}
+              initialItems={initialItems}
+              maxItemsCount={20}
               onChanged={() => {}}
-              createItem={() => {
-                TMP_COUNTER += 1;
-                return {
-                  id: `tab_${TMP_COUNTER}`,
-                  label: `Tab ${TMP_COUNTER}`,
-                };
-              }}
+              createItem={getNewTabDefaultProps}
               renderContent={({ label }) => {
                 return (
                   <EuiFlexGroup direction="column" gutterSize="none">
