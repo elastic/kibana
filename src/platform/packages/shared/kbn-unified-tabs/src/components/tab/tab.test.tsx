@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
+import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const tabItem = {
   id: 'test-id',
@@ -22,8 +23,8 @@ const tabButtonTestSubj = `unifiedTabs_selectTabBtn_${tabItem.id}`;
 
 const tabsSizeConfig = {
   isScrollable: false,
-  regularTabMaxWidth: 280,
-  regularTabMinWidth: 96,
+  regularTabMaxWidth: MAX_TAB_WIDTH,
+  regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
 describe('Tab', () => {

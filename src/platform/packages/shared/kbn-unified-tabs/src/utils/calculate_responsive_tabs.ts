@@ -8,10 +8,9 @@
  */
 
 import type { TabItem, TabsSizeConfig } from '../types';
+import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../constants';
 
 const PLUS_BUTTON_SPACE = 24 + 8; // button width + gap
-const MAX_TAB_WIDTH = 280;
-const MIN_TAB_WIDTH = 96;
 
 interface GetTabsSizeConfigProps {
   items: TabItem[];

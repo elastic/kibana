@@ -159,7 +159,7 @@ export const useResponsiveTabs = ({
       user-select: none;
       scrollbar-width: none; // hide the scrollbar
       scroll-behavior: smooth;
-      &:::-webkit-scrollbar {
+      &::-webkit-scrollbar {
         display: none;
       }
       transform: translateZ(0);

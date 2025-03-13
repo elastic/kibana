@@ -12,6 +12,7 @@ import type { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
 import { STORYBOOK_TITLE } from './storybook_constants';
+import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const asyncAction =
   (name: string) =>
@@ -31,8 +32,8 @@ export default {
 
 const tabsSizeConfig = {
   isScrollable: false,
-  regularTabMaxWidth: 280,
-  regularTabMinWidth: 96,
+  regularTabMaxWidth: MAX_TAB_WIDTH,
+  regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
 const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (

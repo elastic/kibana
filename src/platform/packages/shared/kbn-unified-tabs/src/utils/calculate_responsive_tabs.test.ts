@@ -9,6 +9,7 @@
 
 import { calculateResponsiveTabs } from './calculate_responsive_tabs';
 import { getNewTabPropsForIndex } from '../hooks/use_new_tab_props';
+import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../constants';
 
 const items = Array.from({ length: 5 }).map((_, i) => getNewTabPropsForIndex(i));
 
@@ -18,8 +19,8 @@ describe('calculateResponsiveTabs', () => {
 
     expect(tabsSizeConfig).toEqual({
       isScrollable: false,
-      regularTabMaxWidth: 280,
-      regularTabMinWidth: 96,
+      regularTabMaxWidth: MAX_TAB_WIDTH,
+      regularTabMinWidth: MIN_TAB_WIDTH,
     });
   });
 
@@ -28,8 +29,8 @@ describe('calculateResponsiveTabs', () => {
 
     expect(tabsSizeConfig).toEqual({
       isScrollable: false,
-      regularTabMaxWidth: 280,
-      regularTabMinWidth: 96,
+      regularTabMaxWidth: MAX_TAB_WIDTH,
+      regularTabMinWidth: MIN_TAB_WIDTH,
     });
   });
 
@@ -39,7 +40,7 @@ describe('calculateResponsiveTabs', () => {
     expect(tabsSizeConfig).toEqual({
       isScrollable: false,
       regularTabMaxWidth: 193.6,
-      regularTabMinWidth: 96,
+      regularTabMinWidth: MIN_TAB_WIDTH,
     });
   });
 
@@ -48,8 +49,8 @@ describe('calculateResponsiveTabs', () => {
 
     expect(tabsSizeConfig).toEqual({
       isScrollable: true,
-      regularTabMaxWidth: 96,
-      regularTabMinWidth: 96,
+      regularTabMaxWidth: MIN_TAB_WIDTH,
+      regularTabMinWidth: MIN_TAB_WIDTH,
     });
   });
 
@@ -61,8 +62,8 @@ describe('calculateResponsiveTabs', () => {
 
     expect(tabsSizeConfig).toEqual({
       isScrollable: false,
-      regularTabMaxWidth: 280,
-      regularTabMinWidth: 96,
+      regularTabMaxWidth: MAX_TAB_WIDTH,
+      regularTabMinWidth: MIN_TAB_WIDTH,
     });
   });
 });
