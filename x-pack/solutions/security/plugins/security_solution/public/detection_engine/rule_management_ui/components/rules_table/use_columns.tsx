@@ -229,7 +229,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
     return <IntegrationsPopover relatedIntegrations={integrations} />;
   },
-  width: '143px',
+  width: '70px',
   truncateText: true,
 };
 
@@ -258,7 +258,7 @@ const MODIFIED_COLUMN: TableColumn = {
       </EuiToolTip>
     );
   },
-  width: '70px',
+  width: '90px',
   truncateText: true,
 };
 

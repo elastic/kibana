@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'unifiedFieldList',
   ]);
+  const dataViews = getService('dataViews');
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -71,6 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the badge only after changes to a persisted saved search', async () => {
+      await dataViews.createFromSearchBar({
+        name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilSearchingHasFinished();
 

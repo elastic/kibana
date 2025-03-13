@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { addSeverityAndEventTypeInBody } from './helpers';
 import {
   D3SecurityRunActionParamsSchema,
