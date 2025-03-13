@@ -12,19 +12,18 @@ import { IngestStreamGetResponse, IngestStreamLifecycleILM } from '@kbn/streams-
 import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 
 import { LocatorPublic } from '@kbn/share-plugin/public';
+import type { StreamDetailsResponse } from '@kbn/streams-plugin/server/routes/streams/crud/route';
 import { IlmLink } from '../../data_management/stream_detail_lifecycle/ilm_link';
 import {
   formatBytes,
   formatIngestionRate,
 } from '../../data_management/stream_detail_lifecycle/helpers/format_bytes';
+import { DataStreamStats } from '../../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
 
 interface StreamStatsPanelProps {
   definition?: IngestStreamGetResponse;
-  dataStreamStats?: {
-    totalDocs?: number;
-    sizeBytes?: number;
-    bytesPerDay?: number;
-  };
+  dataStreamStats?: DataStreamStats;
+  docCount?: StreamDetailsResponse;
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }
 
@@ -95,6 +94,7 @@ function formatNumber(val: number) {
 export function StreamStatsPanel({
   definition,
   dataStreamStats,
+  docCount,
   ilmLocator,
 }: StreamStatsPanelProps) {
   const retentionLabel = i18n.translate('xpack.streams.entityDetailOverview.retention', {
@@ -132,11 +132,15 @@ export function StreamStatsPanel({
           <EuiFlexGroup>
             <StatItem
               label={documentCountLabel}
-              value={dataStreamStats ? formatNumber(dataStreamStats.totalDocs || 0) : '-'}
+              value={docCount ? formatNumber(docCount.details.count || 0) : '-'}
             />
             <StatItem
               label={storageSizeLabel}
-              value={dataStreamStats ? formatBytes(dataStreamStats.sizeBytes || 0) : '-'}
+              value={
+                dataStreamStats && docCount
+                  ? formatBytes(getStorageSizeForTimeRange(dataStreamStats, docCount))
+                  : '-'
+              }
               withBorder
             />
             <StatItem
@@ -149,4 +153,18 @@ export function StreamStatsPanel({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function getStorageSizeForTimeRange(
+  dataStreamStats: DataStreamStats,
+  docCount: StreamDetailsResponse
+) {
+  const storageSize = dataStreamStats.sizeBytes;
+  const totalCount = dataStreamStats.totalDocs;
+  const countForTimeRange = docCount.details.count;
+  if (!storageSize || !totalCount || !countForTimeRange) {
+    return 0;
+  }
+  const bytesPerDoc = totalCount ? storageSize / totalCount : 0;
+  return bytesPerDoc * countForTimeRange;
 }

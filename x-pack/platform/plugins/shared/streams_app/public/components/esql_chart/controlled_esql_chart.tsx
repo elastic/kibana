@@ -62,12 +62,14 @@ export function ControlledEsqlChart<T extends string>({
   metricNames,
   chartType = 'line',
   height,
+  timerange,
 }: {
   id: string;
   result: AbortableAsyncState<UnparsedEsqlResponse>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
   height?: number;
+  timerange?: { start: number; end: number };
 }) {
   const {
     core: { uiSettings },
@@ -99,8 +101,9 @@ export function ControlledEsqlChart<T extends string>({
 
   const xValues = allTimeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
-  const min = Math.min(...xValues);
-  const max = Math.max(...xValues);
+  // todo - pull in time range here
+  const min = timerange?.start ?? Math.min(...xValues);
+  const max = timerange?.end ?? Math.max(...xValues);
 
   const isEmpty = min === 0 && max === 0;
 

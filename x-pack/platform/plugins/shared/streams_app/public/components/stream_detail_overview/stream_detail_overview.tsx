@@ -5,13 +5,12 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { calculateAuto } from '@kbn/calculate-auto';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import React, { useMemo } from 'react';
 import { IngestStreamGetResponse, isWiredStreamDefinition } from '@kbn/streams-schema';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 
+import { computeInterval } from '@kbn/visualization-utils';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -50,6 +49,8 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
     [share.url.locators]
   );
 
+  const bucketSize = useMemo(() => computeInterval(timeRange, data), [data, timeRange]);
+
   const queries = useMemo(() => {
     if (!indexPatterns) {
       return undefined;
@@ -57,17 +58,13 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
 
     const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
-    const bucketSize = Math.round(
-      calculateAuto.atLeast(50, moment.duration(1, 'minute'))!.asSeconds()
-    );
-
-    const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize} seconds)`;
+    const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize})`;
 
     return {
       baseQuery,
       histogramQuery,
     };
-  }, [indexPatterns]);
+  }, [bucketSize, indexPatterns]);
 
   const discoverLink = useMemo(() => {
     if (!discoverLocator || !queries?.baseQuery) {
@@ -195,6 +192,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
           <StreamStatsPanel
             definition={definition}
             dataStreamStats={dataStreamStats.stats}
+            docCount={docCountFetch.value}
             ilmLocator={ilmLocator}
           />
         </EuiFlexItem>
@@ -206,6 +204,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
               <StreamChartPanel
                 histogramQueryFetch={histogramQueryFetch}
                 discoverLink={discoverLink}
+                timerange={{ start, end }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

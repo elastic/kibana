@@ -16,9 +16,17 @@ import { ControlledEsqlChart } from '../../esql_chart/controlled_esql_chart';
 interface StreamChartPanelProps {
   histogramQueryFetch: AbortableAsyncState<UnparsedEsqlResponse | undefined>;
   discoverLink?: string;
+  timerange: {
+    start: number;
+    end: number;
+  };
 }
 
-export function StreamChartPanel({ histogramQueryFetch, discoverLink }: StreamChartPanelProps) {
+export function StreamChartPanel({
+  histogramQueryFetch,
+  discoverLink,
+  timerange,
+}: StreamChartPanelProps) {
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup
@@ -54,6 +62,7 @@ export function StreamChartPanel({ histogramQueryFetch, discoverLink }: StreamCh
             id="entity_log_rate"
             metricNames={['metric']}
             chartType={'bar'}
+            timerange={timerange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
