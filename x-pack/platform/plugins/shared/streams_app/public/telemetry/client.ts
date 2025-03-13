@@ -30,7 +30,7 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_ASSET_CLICK_EVENT_TYPE, params);
   }
 
-  public trackAIGrokSuggestionLatency(
+  public startTrackingAIGrokSuggestionLatency(
     params: Pick<StreamsAIGrokSuggestionLatencyProps, 'name' | 'field' | 'connector_id'>
   ) {
     const start = Date.now();

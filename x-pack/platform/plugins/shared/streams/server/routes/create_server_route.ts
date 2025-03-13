@@ -23,7 +23,7 @@ export const createServerRoute: CreateServerRouteFactory<
     ...config,
     handler: (options) => {
       const { telemetry } = options;
-      const stopTracking = telemetry.startTrackingEndpointLatency({
+      const finishTracking = telemetry.startTrackingEndpointLatency({
         name: get(options, 'params.path.name', '__all__'),
         endpoint: config.endpoint,
       });
@@ -49,7 +49,7 @@ export const createServerRoute: CreateServerRouteFactory<
           }
           throw error;
         })
-        .finally(stopTracking);
+        .finally(finishTracking);
     },
   });
 };

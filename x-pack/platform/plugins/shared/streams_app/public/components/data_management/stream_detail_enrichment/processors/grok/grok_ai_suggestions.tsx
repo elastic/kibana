@@ -186,7 +186,7 @@ function InnerGrokAiSuggestions({
     setSuggestionsLoading(true);
     setSuggestionsError(undefined);
     setSuggestions(undefined);
-    const finish = telemetryClient.trackAIGrokSuggestionLatency({
+    const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
       name: definition.stream.name,
       field: fieldValue,
       connector_id: currentConnector,
@@ -204,7 +204,7 @@ function InnerGrokAiSuggestions({
         },
       })
       .then((response) => {
-        finish(
+        finishTrackingAndReport(
           response.patterns.length || 0,
           response.simulations.map((item) => item.success_rate)
         );
