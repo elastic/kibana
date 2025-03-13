@@ -91,13 +91,13 @@ const addNewCustomFieldToTemplates = ({
         !templateCustomFields.find((templateCustomField) => templateCustomField.key === field.key)
       ) {
         const customFieldFactory = customFieldsBuilderMap[field.type];
-        const { getDefaultValue } = customFieldFactory();
+        const { getDefaultValue, sanitizeTemplateValue = (v) => v } = customFieldFactory();
         const value = getDefaultValue?.() ?? null;
 
         templateCustomFields.push({
           key: field.key,
           type: field.type as CustomFieldTypes,
-          value: field.defaultValue ?? value,
+          value: sanitizeTemplateValue(field.defaultValue ?? value),
         } as CaseUI['customFields'][number]);
       }
     });
