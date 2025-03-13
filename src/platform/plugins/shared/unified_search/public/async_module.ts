@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import './index.scss';
+
 export { fromKueryExpression } from '@kbn/es-query';
 export { setupGetFieldSuggestions } from './autocomplete/providers/kql_query_suggestion/field';
 export { setupGetValueSuggestions } from './autocomplete/providers/kql_query_suggestion/value';

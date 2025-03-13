@@ -30,8 +30,6 @@ import { createUpdateFilterReferencesAction } from './actions/update_filter_refe
 import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
 import { FiltersBuilderLazy } from './filters_builder';
 
-import './index.scss';
-
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
 {
