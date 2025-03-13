@@ -1620,6 +1620,7 @@ describe('create()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -1813,6 +1814,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -2659,6 +2661,7 @@ describe('create()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      solution: 'stack',
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -3133,6 +3136,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3283,6 +3287,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3323,6 +3328,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3417,6 +3423,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3468,6 +3475,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3532,6 +3540,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3614,6 +3623,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3818,6 +3828,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3877,6 +3888,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
