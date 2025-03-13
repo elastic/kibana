@@ -317,6 +317,7 @@ src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
+src/platform/packages/private/kbn-expression-utils @elastic/kibana-presentation
 src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
@@ -1320,8 +1321,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/solutions/observability/plugins/infra/server/utils @elastic/obs-ux-infra_services-team
 /x-pack/test_serverless/functional/test_suites/observability/infra @elastic/obs-ux-infra_services-team
 /x-pack/test/api_integration/services/infraops_source_configuration.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/pull/34916
+/x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ux-infra_services-team # Assigned to this team since it mostly uses infra/APM components
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces @elastic/obs-ux-infra_services-team
-
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/data_quality/ @elastic/obs-ux-logs-team
@@ -1386,6 +1387,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics/ @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
+/x-pack/test/functional/page_objects/alert_controls.ts @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
 /x-pack/test/monitoring_api_integration @elastic/stack-monitoring
@@ -1437,6 +1439,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
 
+# Observability-ui folder level permissions (need to be before individual files inside the folder)
+/x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
+/test/functional/apps/discover/observability @elastic/observability-ui
+
 # obs-ux-logs-team
 /x-pack/test/functional/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality @elastic/obs-ux-logs-team
@@ -1462,9 +1468,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
+/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
+/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 
 # Observability-ui
-/x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
 /x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
 /x-pack/test/functional/page_objects/observability_page.ts @elastic/observability-ui
@@ -1698,6 +1705,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/page_objects/header_page.ts @elastic/appex-qa
 /test/functional/page_objects/error_page.ts @elastic/appex-qa
 /test/functional/page_objects/common_page.ts @elastic/appex-qa
+/test/functional/page_objects/space_settings.ts @elastic/appex-qa
 /test/functional/jest.config.js @elastic/appex-qa
 /test/functional/ftr_provider_context.ts @elastic/appex-qa
 /test/functional/fixtures/es_archiver/README.md @elastic/appex-qa
@@ -1849,6 +1857,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
+/config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core

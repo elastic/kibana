@@ -17,6 +17,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId } from '@kbn/observability-plugin/common';
 import {
   asDuration,
   formatDurationFromTimeUnitChar,
@@ -127,6 +128,7 @@ export function registerTransactionDurationRuleType({
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: APM_SERVER_FEATURE_ID,
+    solution: observabilityFeatureId,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async (
