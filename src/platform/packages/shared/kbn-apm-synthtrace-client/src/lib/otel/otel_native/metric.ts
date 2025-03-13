@@ -8,7 +8,7 @@
  */
 
 import { OtelDocument } from '.';
-import { Serializable } from '../serializable';
+import { Serializable } from '../../serializable';
 
 export interface OtelMetricDocument extends OtelDocument {
   attributes?: {

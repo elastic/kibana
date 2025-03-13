@@ -25,3 +25,25 @@ export const BETA_TOOLTIP = i18n.translate(
       'This functionality is in technical preview and is subject to change. Please use SIEM Migrations with caution in production environments.',
   }
 );
+
+export const TRANSLATED_RULES_EMPTY_PAGE_MESSAGE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.emptyPageMessage',
+  {
+    defaultMessage:
+      'Translate your existing Splunk Rules with Elastic Automatic Migration. Got to SIEM rule migration for step-by-step guidance.',
+  }
+);
+
+export const TRANSLATED_RULES_EMPTY_PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.emptyPageTitle',
+  {
+    defaultMessage: 'No migrations to View',
+  }
+);
+
+export const TRANSLATED_RULES_EMPTY_PAGE_CTA = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.emptyPageCta',
+  {
+    defaultMessage: 'Start SIEM rule Migration',
+  }
+);
