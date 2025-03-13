@@ -17,8 +17,7 @@ import { omit } from 'lodash';
 const Wrapper = ({ children }: React.PropsWithChildren) =>
   React.createElement(WrappedHelper, null, children);
 
-// FLAKY: https://github.com/elastic/kibana/issues/204152
-describe.skip('useMonitorStatusData', () => {
+describe('useMonitorStatusData', () => {
   let dispatchMock: jest.Mock;
   beforeEach(() => {
     dispatchMock = jest.fn();
@@ -91,7 +90,7 @@ describe.skip('useMonitorStatusData', () => {
     await act(async () => {
       result.current.handleResize({ width: 250, height: 800 });
       // this is necessary for debounce to complete
-      await new Promise((r) => setTimeout(r, 510));
+      await new Promise((r) => setTimeout(r, 4100));
     });
     const fetchActions = dispatchMock.mock.calls.filter(
       (args) => args[0].type === 'QUIET GET MONITOR STATUS HEATMAP'
