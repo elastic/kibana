@@ -27,7 +27,7 @@ export async function suggest(
   let insideAssignment = false;
   if (expressionRoot && isAssignment(expressionRoot)) {
     // EVAL foo = <use this as the expression root>
-    expressionRoot = expressionRoot.args[1][0] as ESQLSingleAstItem;
+    expressionRoot = (expressionRoot.args[1] as ESQLSingleAstItem[])[0] as ESQLSingleAstItem;
     if (isMarkerNode(expressionRoot)) {
       expressionRoot = undefined;
     }
