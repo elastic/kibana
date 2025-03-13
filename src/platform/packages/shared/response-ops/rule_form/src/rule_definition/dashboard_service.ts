@@ -26,6 +26,7 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
       const responses = await findDashboardsService.search({
         search: query ? `${query}*` : '',
         size: 1000,
+        options: { spaces: ['*'], fields: ['title', 'description'] },
       });
       return responses.hits;
     },
