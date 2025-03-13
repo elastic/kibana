@@ -108,6 +108,9 @@ export const defaultConfig: StorybookConfig = {
   typescript: {
     reactDocgen: false,
   },
+  core: {
+    disableTelemetry: true,
+  },
   async babel(config: any, options: any) {
     if (!config?.presets) {
       config.presets = [];
