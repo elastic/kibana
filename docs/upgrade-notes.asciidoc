@@ -62,7 +62,8 @@ For Elastic Security release information, refer to {security-guide}/release-note
 * `DELETE /api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
 * `POST api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
 --
-These changes were introduced in {kibana-pull}197422[#197422].
+
+View {kibana-pull}197422[#197422].
 
 *Impact* +
 Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
@@ -182,7 +183,7 @@ All `v1` Kibana security HTTP endpoints have been removed.
 `POST /api/security/v1/saml` has been replaced by POST `/api/security/saml/callback`
 `GET /api/security/v1/me` has been removed with no replacement.
 
-For more information, refer to {kibana-pull}199656[#199656].
+View {kibana-pull}199656[#199656].
 
 *Impact* + 
 Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0.
@@ -201,7 +202,7 @@ Remove references to the `/api/security/v1/me` endpoint from any automations, ap
 *Details* +
 Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure
 that HTTP API integrations with Kibana avoid unexpected breaking changes. 
-Refer to {kibana-pull}193792[#193792].
+View {kibana-pull}193792[#193792].
 
 *Impact* +
 Any HTTP API calls to internal Kibana endpoints will fail with a 400 status code starting
@@ -221,7 +222,7 @@ We would love to discuss your use case.
 [%collapsible]
 ====
 *Details* +
-The get case metrics APIs are now internal. For more information, refer to ({kibana-pull}162506[#162506]).
+The get case metrics APIs are now internal. View {kibana-pull}162506[#162506].
 ====
 
 [discrete]
@@ -230,7 +231,7 @@ The get case metrics APIs are now internal. For more information, refer to ({kib
 [%collapsible]
 ====
 *Details* +
-The project monitor API for Synthetics in Elastic Observability has been removed. For more information, refer to {kibana-pull}155470[#155470].
+The project monitor API for Synthetics in Elastic Observability has been removed. View {kibana-pull}155470[#155470].
 
 *Impact* +
 In 8.8.0 and later, an error appears when you use the project monitor API.
@@ -242,7 +243,7 @@ In 8.8.0 and later, an error appears when you use the project monitor API.
 [%collapsible]
 ====
 *Details* +
-The `/api/fleet/current_upgrades` endpoint has been removed. For more information, refer to {kibana-pull}147616[#147616].
+The `/api/fleet/current_upgrades` endpoint has been removed. View {kibana-pull}147616[#147616].
 
 *Impact* +
 When you upgrade to 8.7.0, use the `api/fleet/agents/action_status` endpoint.
@@ -254,7 +255,7 @@ When you upgrade to 8.7.0, use the `api/fleet/agents/action_status` endpoint.
 [%collapsible]
 ====
 *Details* +
-The `/api/fleet/setup/preconfiguration` API, which was released as generally available by error, has been removed. For more information, refer to {kibana-pull}147199[#147199].
+The `/api/fleet/setup/preconfiguration` API, which was released as generally available by error, has been removed. View {kibana-pull}147199[#147199].
 
 *Impact* +
 Do not use `/api/fleet/setup/preconfiguration`. To manage preconfigured agent policies, use kibana.yml. For more information, check link:https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html#_preconfiguration_settings_for_advanced_use_cases[Preconfigured settings].
@@ -266,7 +267,7 @@ Do not use `/api/fleet/setup/preconfiguration`. To manage preconfigured agent po
 [%collapsible]
 ====
 *Details* +
-To make bulk action responses consistent, returns `actionId` instead of agent ids with `success: True` or `success: False` results. For more information, refer to {kibana-pull}141757[#141757].
+To make bulk action responses consistent, returns `actionId` instead of agent ids with `success: True` or `success: False` results. View {kibana-pull}141757[#141757].
 
 *Impact* +
 When you use `FleetBulkResponse`, you now receive only `actionId` responses.
@@ -286,7 +287,7 @@ On the Logs and Metrics UIs, references to the following API and saved object de
 * `pod`
 * `host`
 
-For more information, refer to {kibana-pull}116821[#116821] and {kibana-pull}115874[#115874].
+View {kibana-pull}116821[#116821] and {kibana-pull}115874[#115874].
 
 *Impact* +
 When you upgrade to 8.0.0, you are unable to use references to the deprecated fields.
@@ -298,7 +299,7 @@ When you upgrade to 8.0.0, you are unable to use references to the deprecated fi
 [%collapsible]
 ====
 *Details* +
-The `/api/settings` REST API has been removed. For more information, refer to {kibana-pull}114730[#114730].
+The `/api/settings` REST API has been removed. View {kibana-pull}114730[#114730].
 
 *Impact* +
 Use `/api/stats`.
@@ -310,7 +311,7 @@ Use `/api/stats`.
 [%collapsible]
 ====
 *Details* +
-`GET /api/status` reports a new and more verbose payload. For more information, refer to {kibana-pull}110830[#110830].
+`GET /api/status` reports a new and more verbose payload. View {kibana-pull}110830[#110830].
 
 *Impact* +
 To retrieve the {kib} status in the previous format, use `GET /api/status?v7format=true`.
@@ -326,7 +327,7 @@ To retrieve the {kib} status in the previous format, use `GET /api/status?v7form
 [%collapsible]
 ====
 *Details* +
-Roles with at least a sub-feature privilege configured will not have access to the cases setting like they had previously. All roles without a sub-feature privilege configured will not be affected. For more information, refer to ({kibana-pull}170635[#170635]).
+Roles with at least a sub-feature privilege configured will not have access to the cases setting like they had previously. All roles without a sub-feature privilege configured will not be affected. View {kibana-pull}170635[#170635].
 ====
 
 [discrete]
@@ -357,7 +358,7 @@ For the full list, refer to {kib-issue}146945[#146945].
 [%collapsible]
 ====
 *Details* +
-The privileges for attaching alerts to cases has changed. For more information, refer to {kibana-pull}147985[#147985].
+The privileges for attaching alerts to cases has changed. View {kibana-pull}147985[#147985].
 
 *Impact* +
 To attach alerts to cases, you must have `Read` access to an {observability} or Security feature that has alerts and `All` access to the **Cases** feature. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/kibana-privileges.html[{kib} privileges] and link:https://www.elastic.co/guide/en/kibana/current/setup-cases.html[Configure access to cases].
@@ -368,7 +369,7 @@ To attach alerts to cases, you must have `Read` access to an {observability} or 
 [%collapsible]
 ====
 *Details* +
-The `monitoring.cluster_alerts.allowedSpaces` setting, which {kib} uses to create Stack Monitoring alerts, has been removed. For more information, refer to {kibana-pull}123229[#123229].
+The `monitoring.cluster_alerts.allowedSpaces` setting, which {kib} uses to create Stack Monitoring alerts, has been removed. View {kibana-pull}123229[#123229].
 
 *Impact* +
 Before you upgrade to 8.0.0, remove `monitoring.cluster_alerts.allowedSpaces` from kibana.yml.
@@ -380,7 +381,7 @@ Before you upgrade to 8.0.0, remove `monitoring.cluster_alerts.allowedSpaces` fr
 [%collapsible]
 ====
 *Details* +
-The `xpack.task_manager.index` setting has been removed. For more information, refer to {kibana-pull}114558[#114558].
+The `xpack.task_manager.index` setting has been removed. View {kibana-pull}114558[#114558].
 
 *Impact* +
 Before you upgrade to 8.0.0, remove `xpack.task_manager.index` from kibana.yml.
@@ -392,7 +393,7 @@ Before you upgrade to 8.0.0, remove `xpack.task_manager.index` from kibana.yml.
 [%collapsible]
 ====
 *Details* +
-The `xpack.actions.enabled` setting has been removed. For more information, refer to {kibana-pull}113461[#113461].
+The `xpack.actions.enabled` setting has been removed. View {kibana-pull}113461[#113461].
 
 *Impact* +
 Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
@@ -457,7 +458,7 @@ To use normal RBAC authorization, edit each affected rule to update the API key.
 [%collapsible]
 ====
 *Details* +
-Filters associated with unknown data views, such as deleted data views, are no longer automatically disabled. For more information, refer to {kibana-pull}139431[#139431].
+Filters associated with unknown data views, such as deleted data views, are no longer automatically disabled. View {kibana-pull}139431[#139431].
 
 *Impact* +
 Filters associated with unknown data views now display a warning message instead of being automatically disabled.
@@ -471,7 +472,7 @@ Filters associated with unknown data views now display a warning message instead
 [%collapsible]
 ====
 *Details* +
-The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). For more information, refer to ({kibana-pull}159041[#159041]).
+The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). View {kibana-pull}159041[#159041].
 ====
 
 [discrete]
@@ -480,7 +481,7 @@ The function `addProcessorDefinition` is removed from the Console plugin start c
 [%collapsible]
 ====
 *Details* +
-The `console.ssl` setting has been removed. For more information, refer to {kibana-pull}123754[#123754].
+The `console.ssl` setting has been removed. View {kibana-pull}123754[#123754].
 
 *Impact* +
 Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
@@ -493,7 +494,7 @@ Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
 [%collapsible]
 ====
 *Details* +
-This change updates all instances of `vulnerability.package` to the ECS standard package fieldset. For more information, refer to ({kibana-pull}164651[#164651]).
+This change updates all instances of `vulnerability.package` to the ECS standard package fieldset. View {kibana-pull}164651[#164651].
 ====
 
 // ESQL
@@ -503,7 +504,7 @@ This change updates all instances of `vulnerability.package` to the ECS standard
 [%collapsible]
 ====
 *Details* +
-The advanced setting which hides {esql} from the UI has been renamed from `discover:enableESQL` to `enableESQL`. It is enabled by default and must be switched off to disable {esql} features from your {kib} applications. For more information, refer to ({kibana-pull}182074[#182074]).
+The advanced setting which hides {esql} from the UI has been renamed from `discover:enableESQL` to `enableESQL`. It is enabled by default and must be switched off to disable {esql} features from your {kib} applications. View {kibana-pull}182074[#182074].
 ====
 
 [discrete]
@@ -512,7 +513,7 @@ The advanced setting which hides {esql} from the UI has been renamed from `disco
 [%collapsible]
 ====
 *Details* +
-These functions have been removed from {esql} queries as they are not supported. Errors would be thrown when trying to use them. For more information, refer to ({kibana-pull}174674[#174674]).
+These functions have been removed from {esql} queries as they are not supported. Errors would be thrown when trying to use them. View {kibana-pull}174674[#174674].
 ====
 
 // Fleet
@@ -522,7 +523,7 @@ These functions have been removed from {esql} queries as they are not supported.
 [%collapsible]
 ====
 *Details* +
-Rate limiting was added to the upload `api/fleet/epm/packages` endpoint. For more information, refer to {kibana-pull}184036[#184036].
+Rate limiting was added to the upload `api/fleet/epm/packages` endpoint. View {kibana-pull}184036[#184036].
 
 *Impact* +
 If you do two or more requests in less than 10 seconds, the subsequent requests fail with `429 Too Many Requests`.
@@ -536,7 +537,7 @@ This change could potentially break automations for users that rely on frequent 
 [%collapsible]
 ====
 *Details* +
-The Kafka output no longer supports conditional topics. For more information, refer to ({kibana-pull}176879[#176879]).
+The Kafka output no longer supports conditional topics. View {kibana-pull}176879[#176879].
 ====
 
 [discrete]
@@ -552,7 +553,7 @@ When cloning a dashboard the cloned panels become entirely independent copies th
 
 For managed content relating to specific visualization editors such as Lens, TSVB, and Maps, the clones retain the original reference configurations. The same applies to editing any saved searches in a managed visualization.
 
-For more information, refer to ({kibana-pull}172393[#172393]).
+View {kibana-pull}172393[#172393].
 ====
 
 [discrete]
@@ -561,7 +562,7 @@ For more information, refer to ({kibana-pull}172393[#172393]).
 [%collapsible]
 ====
 *Details* +
-Improve config output validation to not allow to defining multiple default outputs in {kib} configuration. For more information, refer to ({kibana-pull}167085[#167085]).
+Improve config output validation to not allow to defining multiple default outputs in {kib} configuration. View {kibana-pull}167085[#167085].
 ====
 
 [discrete]
@@ -570,7 +571,7 @@ Improve config output validation to not allow to defining multiple default outpu
 [%collapsible]
 ====
 *Details* +
-The bidirectional foreign key between agent policy and package policy has been removed. For more information, refer to {kibana-pull}138677[#138677].
+The bidirectional foreign key between agent policy and package policy has been removed. View {kibana-pull}138677[#138677].
 
 *Impact* +
 The agent policy saved object no longer includes the `package_policies` field.
@@ -584,7 +585,7 @@ The agent policy saved object no longer includes the `package_policies` field.
 *Details* +
 When you configure `xpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` in kibana.yml, you are unable to update the fields on the Fleet UI.
 
-For more information, refer to {kibana-pull}135669[#135669].
+View {kibana-pull}135669[#135669].
 
 *Impact* +
 To configure `xpack.fleet.agents.fleet_server.hosts` and `xpack.fleet.agents.elasticsearch.hosts` on the Fleet UI, avoid configuring the settings in kibana.yml.
@@ -607,7 +608,7 @@ For package policy upgrades, the packagePolicy `upgrade` endpoint format support
  }
 --
 
-For more information, refer to {kibana-pull}118854[#118854].
+View {kibana-pull}118854[#118854].
 
 *Impact* +
 The endpoint is now split into two separate endpoints:
@@ -634,7 +635,7 @@ The endpoint is now split into two separate endpoints:
 [%collapsible]
 ====
 *Details* +
-During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. For more information, refer to {kibana-pull}180986[#180986].
+During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. View {kibana-pull}180986[#180986].
 ====
 
 [discrete]
@@ -643,7 +644,7 @@ During shutdown, {kib} now waits for all the ongoing requests to complete accord
 [%collapsible]
 ====
 *Details* +
-The `CONFIG_PATH` and `DATA_PATH` environment variables have been removed. For more information, refer to {kibana-pull}111535[#111535].
+The `CONFIG_PATH` and `DATA_PATH` environment variables have been removed. View {kibana-pull}111535[#111535].
 
 *Impact* +
 Replace the `CONFIG_PATH` environment variable with `KBN_PATH_CONF`, and replace `DATA_PATH` with the `path.data` setting.
@@ -655,7 +656,7 @@ Replace the `CONFIG_PATH` environment variable with `KBN_PATH_CONF`, and replace
 [%collapsible]
 ====
 *Details* +
-Support for the `csp.rules` configuration property has been removed. For more information, refer to {kibana-pull}114379[#114379].
+Support for the `csp.rules` configuration property has been removed. View {kibana-pull}114379[#114379].
 
 *Impact* +
 Configuring the default `csp.script_src`, `csp.workers_src`, and `csp.style_src` values is not required.
@@ -682,7 +683,7 @@ Support for the following configuration settings has been removed:
 * `xpack.xpack_main.xpack_api_polling_frequency_millis`
 * `KIBANA_PATH_CONF`
 
-For more information, refer to {kibana-pull}113653[#113653].
+View {kibana-pull}113653[#113653].
 
 *Impact* +
 * The `header` value provided to the `xpack.banners.placement` configuration has been renamed to 'top'
@@ -700,9 +701,9 @@ For more information, refer to {kibana-pull}113653[#113653].
 [%collapsible]
 ====
 *Details* +
-Using `{plugin_name}.enabled` to disable plugins has been removed. Some plugins, such as `telemetry`, `newsfeed`, `reporting`, and the various `vis_type` plugins will continue to support this setting. All other {kib} plugins will not support this setting. Any new plugin will support this setting only when specified in the `configSchema`. For more information, refer to {kibana-pull}113495[#113495].
+Using `{plugin_name}.enabled` to disable plugins has been removed. Some plugins, such as `telemetry`, `newsfeed`, `reporting`, and the various `vis_type` plugins will continue to support this setting. All other {kib} plugins will not support this setting. Any new plugin will support this setting only when specified in the `configSchema`. View {kibana-pull}113495[#113495].
 
-The `xpack.security.enabled` setting has been removed. For more information, refer to {kibana-pull}111681[#111681].
+The `xpack.security.enabled` setting has been removed. View {kibana-pull}111681[#111681].
 
 *Impact* +
 Before you upgrade to 8.0.0:
@@ -717,7 +718,7 @@ Before you upgrade to 8.0.0:
 [%collapsible]
 ====
 *Details* +
-The `plugins.scanDirs` setting and `--plugin-dir` cli option have been removed. For more information, refer to {kibana-pull}113367[#113367].
+The `plugins.scanDirs` setting and `--plugin-dir` cli option have been removed. View {kibana-pull}113367[#113367].
 
 *Impact* +
 Before you upgrade to 8.0.0, remove `plugins.scanDirs` from kibana.yml.
@@ -751,10 +752,10 @@ The legacy `optimize.*` settings have been removed. If your configuration uses t
 * `optimize.profile`
 * `optimize.validateSyntaxOfNodeModules`
 
-For more information, refer to {kibana-pull}113296[#113296].
+View {kibana-pull}113296[#113296].
 
 *Impact* +
-To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. For more details, refer to {kibana-pull}73154[#73154].
+To run the `@kbn/optimizer` separately in development, pass `--no-optimizer` to `yarn start`. View {kibana-pull}73154[#73154].
 ====
 
 [discrete]
@@ -770,7 +771,7 @@ Some of the `savedObjects`, `server`, and `elasticsearch` settings have been rem
 * `elasticsearch.preserveHost`
 * `elasticsearch.startupTimeout`
 
-For more information, refer to {kibana-pull}113173[#113173].
+View {kibana-pull}113173[#113173].
 
 *Impact* +
 Before you upgrade to 8.0.0., remove these settings from kibana.yml.
@@ -782,7 +783,7 @@ Before you upgrade to 8.0.0., remove these settings from kibana.yml.
 [%collapsible]
 ====
 *Details* +
-To start {kib}, you must enable inline scripting in {es}. For more information, refer to {kibana-pull}113068[#113068].
+To start {kib}, you must enable inline scripting in {es}. View {kibana-pull}113068[#113068].
 
 *Impact* +
 Enable {ref}/modules-scripting-security.html[inline scripting].
@@ -794,7 +795,7 @@ Enable {ref}/modules-scripting-security.html[inline scripting].
 [%collapsible]
 ====
 *Details* +
-The `kibana.index`, `xpack.reporting.index`, and `xpack.task_manager.index` settings have been removed. For more information, refer to {kibana-pull}112773[#112773].
+The `kibana.index`, `xpack.reporting.index`, and `xpack.task_manager.index` settings have been removed. View {kibana-pull}112773[#112773].
 
 *Impact* +
 Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<xpack-spaces,spaces>>, export your <<managing-saved-objects, saved objects>> from a tenant into the default space. For more details, refer to link:https://github.com/elastic/kibana/issues/82020[#82020].
@@ -806,7 +807,7 @@ Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<
 [%collapsible]
 ====
 *Details* +
-The logging configuration and log output format has changed. For more information, refer to {kibana-pull}112305[#112305].
+The logging configuration and log output format has changed. View {kibana-pull}112305[#112305].
 
 *Impact* +
 Use the new <<logging-configuration,logging system configuration>>.
@@ -818,7 +819,7 @@ Use the new <<logging-configuration,logging system configuration>>.
 [%collapsible]
 ====
 *Details* +
-The deprecated `kibana.defaultAppId` setting in kibana.yml, which is also available as `kibana_legacy.defaultAppId`, has been removed. For more information, refer to {kibana-pull}109798[#109798].
+The deprecated `kibana.defaultAppId` setting in kibana.yml, which is also available as `kibana_legacy.defaultAppId`, has been removed. View {kibana-pull}109798[#109798].
 
 *Impact* +
 When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To configure the default route for users when they enter a space, use the <<defaultroute,`defaultRoute`>> in *Advanced Settings*.
@@ -830,7 +831,7 @@ When you upgrade, remove `kibana.defaultAppId` from your kibana.yml file. To con
 [%collapsible]
 ====
 *Details* +
-The deprecated `courier:batchSearches` setting in *Advanced Settings* has been removed. For more information, refer to {kibana-pull}109350[#109350].
+The deprecated `courier:batchSearches` setting in *Advanced Settings* has been removed. View {kibana-pull}109350[#109350].
 
 *Impact* +
 When you upgrade, the `courier:batchSearches` setting will no longer be available.
@@ -843,7 +844,7 @@ When you upgrade, the `courier:batchSearches` setting will no longer be availabl
 [%collapsible]
 ====
 *Details* +
-The default values for the session timeout `xpack.security.session.{lifespan|idleTimeout}` settings have changed. For more information, refer to {kibana-pull}106061[#106061]
+The default values for the session timeout `xpack.security.session.{lifespan|idleTimeout}` settings have changed. View {kibana-pull}106061[#106061]
 
 *Impact* +
 The new default values are as follows:
@@ -858,7 +859,7 @@ The new default values are as follows:
 [%collapsible]
 ====
 *Details* +
-Support for configuring {kib} with `0` as the `server.host` has been removed. Please use `0.0.0.0` instead. For more information, refer to {kibana-pull}87114[#87114]
+Support for configuring {kib} with `0` as the `server.host` has been removed. Please use `0.0.0.0` instead. View {kibana-pull}87114[#87114]
 
 *Impact* +
 You are now unable to use `0` as the `server.host`.
@@ -870,7 +871,7 @@ You are now unable to use `0` as the `server.host`.
 [%collapsible]
 ====
 *Details* +
-The `xpack.security.public` and `xpack.security.authProviders` settings have been removed. For more information, refer to {kibana-pull}38657[#38657]
+The `xpack.security.public` and `xpack.security.authProviders` settings have been removed. View {kibana-pull}38657[#38657]
 
 *Impact* +
 Use the `xpack.security.authc.saml.realm` and `xpack.security.authc.providers` settings.
@@ -882,7 +883,7 @@ Use the `xpack.security.authc.saml.realm` and `xpack.security.authc.providers` s
 [%collapsible]
 ====
 *Details* +
-The `logging.useUTC` setting has been removed. For more information, refer to {kibana-pull}22696[#22696]
+The `logging.useUTC` setting has been removed. View {kibana-pull}22696[#22696]
 
 *Impact* +
 The default timezone is UTC. To change the timezone, set `logging.timezone: false` in kibana.yml. Change the timezone when the system, such as a docker container, is configured for a nonlocal timezone.
@@ -896,7 +897,7 @@ The default timezone is UTC. To change the timezone, set `logging.timezone: fals
 [%collapsible]
 ====
 *Details* +
-Time-based interval index patterns were deprecated in 5.x. In 6.x, you could no longer create time-based interval index patterns, but they continued to function as expected. Support for these index patterns has been removed in 8.0. For more information, refer to {kibana-pull}35173[#35173]
+Time-based interval index patterns were deprecated in 5.x. In 6.x, you could no longer create time-based interval index patterns, but they continued to function as expected. Support for these index patterns has been removed in 8.0. View {kibana-pull}35173[#35173]
 
 *Impact* +
 You must migrate your time_based index patterns to a wildcard pattern. For example, logstash-*.
@@ -910,7 +911,7 @@ You must migrate your time_based index patterns to a wildcard pattern. For examp
 [%collapsible]
 ====
 *Details* +
-The deprecated `xpack.infra.sources.default.logAlias` and `xpack.infra.sources.default.logAlias` settings have been removed. For more information, refer to {kibana-pull}115974[#115974].
+The deprecated `xpack.infra.sources.default.logAlias` and `xpack.infra.sources.default.logAlias` settings have been removed. View {kibana-pull}115974[#115974].
 
 *Impact* +
 Before you upgrade, remove the settings from kibana.yml, then configure the settings in <<logs-app,Logs>>.
@@ -922,7 +923,7 @@ Before you upgrade, remove the settings from kibana.yml, then configure the sett
 [%collapsible]
 ====
 *Details* +
-The *Logs* and *Metrics* configurable fields settings have been removed. For more information, refer to {kibana-pull}61302[#61302].
+The *Logs* and *Metrics* configurable fields settings have been removed. View {kibana-pull}61302[#61302].
 
 *Impact* +
 Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS].
@@ -936,7 +937,7 @@ Configure the settings in https://www.elastic.co/guide/en/ecs/current/ecs-refere
 [%collapsible]
 ====
 *Details* +
-APM Node.js and RUM JavaScript anomaly detection job modules have been removed. For more information, refer to {kibana-pull}119945[#119945].
+APM Node.js and RUM JavaScript anomaly detection job modules have been removed. View {kibana-pull}119945[#119945].
 
 *Impact* +
 When you upgrade to 8.0.0, you are unable to create and view the APM Node.js and RUM JavaScript jobs in Machine Learning.
@@ -948,7 +949,7 @@ When you upgrade to 8.0.0, you are unable to create and view the APM Node.js and
 [%collapsible]
 ====
 *Details* +
-Machine learning features are included as base privileges. For more information, refer to {kibana-pull}115444[#115444].
+Machine learning features are included as base privileges. View {kibana-pull}115444[#115444].
 
 *Impact* +
 If you do not want to grant users privileges to machine learning features, update <<xpack-security,*Users* and *Roles*>>.
@@ -962,7 +963,7 @@ If you do not want to grant users privileges to machine learning features, updat
 [%collapsible]
 ====
 *Details* +
-The Osquery {kib} privilege has been updated, so that when the *Privileges for all features level* is set to *All*, this now applies *All* to Osquery privileges as well. Previously, users had to choose the *Customize* option to grant any access to Osquery. For more information, refer to {kibana-pull}130523[#130523].
+The Osquery {kib} privilege has been updated, so that when the *Privileges for all features level* is set to *All*, this now applies *All* to Osquery privileges as well. Previously, users had to choose the *Customize* option to grant any access to Osquery. View {kibana-pull}130523[#130523].
 
 *Impact* +
 This impacts user roles that have *Privileges for all features* set to *All*. After this update, users with this role will have access to the Osquery page in {kib}. However, to use the Osquery feature fully, these requirements remain the same: users also need Read access to the logs-osquery_manager.result* index and the Osquery Manager integration must be deployed to Elastic Agents.
@@ -988,7 +989,7 @@ To complete the migration, re-enable plugins or delete documents from the index 
 [%collapsible]
 ====
 *Details* +
-In {kib} 8.0.0 and later, the legacy format from {kib} 6.x is unsupported. For more information, refer to {kibana-pull}110738[#110738]
+In {kib} 8.0.0 and later, the legacy format from {kib} 6.x is unsupported. View {kibana-pull}110738[#110738]
 
 *Impact* +
 Using the user interface to import saved objects is restricted to `.ndjson` format imports.
@@ -1002,7 +1003,7 @@ Using the user interface to import saved objects is restricted to `.ndjson` form
 [%collapsible]
 ====
 *Details* +
-The legacy audit logger has been removed. For more information, refer to {kibana-pull}116191[#116191].
+The legacy audit logger has been removed. View {kibana-pull}116191[#116191].
 
 *Impact* +
 Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the <<audit-logging-settings, audit logging settings>>.
@@ -1014,7 +1015,7 @@ Audit logs will be written to the default location in the new ECS format. To cha
 [%collapsible]
 ====
 *Details* +
-To provide the maximum level of protection for most installations, the csp.strict config is now enabled by default. Legacy browsers not supported by Kibana, such as Internet Explorer 11, are unable to access {kib} unless explicitly enabled. All browsers officially supported by Kibana do not have this issue. For more information, refer to {kibana-pull}41700[#41700]
+To provide the maximum level of protection for most installations, the csp.strict config is now enabled by default. Legacy browsers not supported by Kibana, such as Internet Explorer 11, are unable to access {kib} unless explicitly enabled. All browsers officially supported by Kibana do not have this issue. View {kibana-pull}41700[#41700]
 
 *Impact* +
 To enable support for legacy browsers, set `csp.strict: false` in kibana.yml. To effectively enforce the security protocol, we strongly discourage disabling `csp.strict` unless it is critical that you support Internet Explorer 11.
@@ -1028,7 +1029,7 @@ To enable support for legacy browsers, set `csp.strict: false` in kibana.yml. To
 [%collapsible]
 ====
 *Details* +
-After you extract an archive, the output directory no longer includes the target platform. For example, `kibana-8.0.0-linux-aarch64.tar.gz` produces a `kibana-8.0.0` folder. For more information, refer to {kibana-pull}93835[#93835].
+After you extract an archive, the output directory no longer includes the target platform. For example, `kibana-8.0.0-linux-aarch64.tar.gz` produces a `kibana-8.0.0` folder. View {kibana-pull}93835[#93835].
 
 *Impact* +
 To use the new folder, update the configuration management tools and automation.
@@ -1040,7 +1041,7 @@ To use the new folder, update the configuration management tools and automation.
 [%collapsible]
 ====
 *Details* +
-The default support for TLS v1.0 and v1.1 has been removed. For more information, refer to {kibana-pull}90511[#90511].
+The default support for TLS v1.0 and v1.1 has been removed. View {kibana-pull}90511[#90511].
 
 *Impact* +
 To enable support, set `--tls-min-1.0` in the `node.options` configuration file. To locate the configuration file, go to the kibana/config folder or any other configuration with the `KBN_PATH_CONF` environment variable. For example, if you are using a Debian-based system, the configuration file is located in /etc/kibana.
@@ -1052,7 +1053,7 @@ To enable support, set `--tls-min-1.0` in the `node.options` configuration file.
 [%collapsible]
 ====
 *Details* +
-All supported operating systems use systemd service files. Any system that doesn’t have `service` aliased to use kibana.service should use `systemctl start kibana.service` instead of `service start kibana`. For more information, refer to {kibana-pull}74424[#74424].
+All supported operating systems use systemd service files. Any system that doesn’t have `service` aliased to use kibana.service should use `systemctl start kibana.service` instead of `service start kibana`. View {kibana-pull}74424[#74424].
 
 *Impact* +
 If your installation uses .deb or .rpm packages with SysV, migrate to systemd.
@@ -1064,7 +1065,7 @@ If your installation uses .deb or .rpm packages with SysV, migrate to systemd.
 [%collapsible]
 ====
 *Details* +
-In previous versions, all events are logged in `json` when `logging.json:true`. With the new logging configuration, you can choose the `json` and pattern output formats with layouts. For more information, refer to {kibana-pull}42353[#42353].
+In previous versions, all events are logged in `json` when `logging.json:true`. With the new logging configuration, you can choose the `json` and pattern output formats with layouts. View {kibana-pull}42353[#42353].
 
 *Impact* +
 To restore the previous behavior, configure the logging format for each custom appender with the `appender.layout property` in kibana.yml. There is no default for custom appenders, and each appender must be configured explicitly.
@@ -1100,7 +1101,7 @@ logging:
 ====
 *Details* +
 The API endpoint for downloading a CSV file from a saved search in the Dashboard application has changed to reflect the fact that this is an internal API. The previous API path of
-`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to {kibana-pull}162288[#162288].
+`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. View {kibana-pull}162288[#162288].
 ====
 
 [discrete]
@@ -1109,7 +1110,7 @@ The API endpoint for downloading a CSV file from a saved search in the Dashboard
 [%collapsible]
 ====
 *Details* +
-CSV reports now use PIT instead of Scroll. Previously generated CSV reports that used an index alias with alias-only privileges, but without privileges on the alias referenced-indices will no longer generate. For more information, refer to {kibana-pull}158338[#158338].
+CSV reports now use PIT instead of Scroll. Previously generated CSV reports that used an index alias with alias-only privileges, but without privileges on the alias referenced-indices will no longer generate. View {kibana-pull}158338[#158338].
 
 *Impact* +
 To generate CSV reports, grant `read` privileges to the underlying indices.
@@ -1121,7 +1122,7 @@ To generate CSV reports, grant `read` privileges to the underlying indices.
 [%collapsible]
 ====
 *Details* +
-The `/api/reporting/generate/csv` endpoint has been removed. For more information, refer to {kibana-pull}121435[#121435].
+The `/api/reporting/generate/csv` endpoint has been removed. View {kibana-pull}121435[#121435].
 
 *Impact* +
 If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatically generate CSV reports.
@@ -1133,7 +1134,7 @@ If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-gene
 [%collapsible]
 ====
 *Details* +
-The POST URLs that you generated in {kib} 6.2.0 no longer work. For more information, refer to {kibana-pull}121369[#121369].
+The POST URLs that you generated in {kib} 6.2.0 no longer work. View {kibana-pull}121369[#121369].
 
 *Impact* +
 {kibana-ref-all}/8.1/automating-report-generation.html[Regenerate the POST URLs] that you use to automatatically generate PDF reports.
@@ -1155,7 +1156,7 @@ The following settings have been removed:
 
 * `xpack.reporting.kibanaApp`
 
-For more information, refer to {kibana-pull}114216[#114216].
+View {kibana-pull}114216[#114216].
 
 *Impact* +
 Before you upgrade to 8.0.0, remove the settings from kibana.yml.
@@ -1167,7 +1168,7 @@ Before you upgrade to 8.0.0, remove the settings from kibana.yml.
 [%collapsible]
 ====
 *Details* +
-*Reporting* is no longer compatible with POST URL snippets generated with {kib} 6.2.0 and earlier. For more information, refer to {kibana-pull}52539[#52539]
+*Reporting* is no longer compatible with POST URL snippets generated with {kib} 6.2.0 and earlier. View {kibana-pull}52539[#52539]
 
 *Impact* +
 If you use POST URL snippets to automatically generate PDF reports, regenerate the POST URL strings.
@@ -1181,7 +1182,7 @@ If you use POST URL snippets to automatically generate PDF reports, regenerate t
 [%collapsible]
 ====
 *Details* +
-In production, you are no longer able to use the `elastic` superuser to authenticate to {es}. For more information, refer to {kibana-pull}122722[#122722].
+In production, you are no longer able to use the `elastic` superuser to authenticate to {es}. View {kibana-pull}122722[#122722].
 
 *Impact* +
 When you configure `elasticsearch.username: elastic`, {kib} fails.
@@ -1195,7 +1196,7 @@ When you configure `elasticsearch.username: elastic`, {kib} fails.
 [%collapsible]
 ====
 *Details* +
-`lens:useFieldExistenceSampling` has been removed from *Advanced Settings*. The setting allowed you to enable document sampling to determine the fields that are displayed in *Lens*. For more information, refer to {kibana-pull}149482[#149482].
+`lens:useFieldExistenceSampling` has been removed from *Advanced Settings*. The setting allowed you to enable document sampling to determine the fields that are displayed in *Lens*. View {kibana-pull}149482[#149482].
 
 *Impact* +
 In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the fields that are displayed in *Lens*.
@@ -1207,7 +1208,7 @@ In 8.1.0 and later, {kib} uses the field caps API, by default, to determine the 
 [%collapsible]
 ====
 *Details* +
-`visualization:visualize:legacyPieChartsLibrary` has been removed from *Advanced Settings*. The setting allowed you to create aggregation-based pie chart visualizations using the legacy charts library. For more information, refer to {kibana-pull}146990[#146990].
+`visualization:visualize:legacyPieChartsLibrary` has been removed from *Advanced Settings*. The setting allowed you to create aggregation-based pie chart visualizations using the legacy charts library. View {kibana-pull}146990[#146990].
 
 *Impact* +
 In 7.14.0 and later, the new aggregation-based pie chart visualization is available by default. For more information, check <<add-aggregation-based-visualization-panels>>.
@@ -1219,7 +1220,7 @@ In 7.14.0 and later, the new aggregation-based pie chart visualization is availa
 [%collapsible]
 ====
 *Details* +
-To configure higher resolution data histogram aggregations without changing the *Advanced Settings*, the default histogram:maxBars setting is now 1000 instead of 100. For more information, refer to {kibana-pull}143081[#143081].
+To configure higher resolution data histogram aggregations without changing the *Advanced Settings*, the default histogram:maxBars setting is now 1000 instead of 100. View {kibana-pull}143081[#143081].
 
 *Impact* +
 For each {kibana-ref}/xpack-spaces.html[space], complete the following to change *histogram:maxBars* to the previous default setting:
@@ -1237,7 +1238,7 @@ For each {kibana-ref}/xpack-spaces.html[space], complete the following to change
 *Details* +
 The legacy implementation of the *Timelion* visualization charts library has been removed. All *Timelion* visualizations now use the elastic-charts library, which was introduced in 7.15.0.
 
-For more information, refer to {kibana-pull}134336[#134336].
+View {kibana-pull}134336[#134336].
 
 *Impact* +
 In 8.4.0 and later, you are unable to configure the *Timelion* legacy charts library advanced setting. For information about visualization Advanced Settings, check link:https://www.elastic.co/guide/en/kibana/8.4/advanced-options.html#kibana-visualization-settings[Visualization].
@@ -1249,7 +1250,7 @@ In 8.4.0 and later, you are unable to configure the *Timelion* legacy charts lib
 [%collapsible]
 ====
 *Details* +
-The experimental `.quandl` and `.graphite` functions and advanced settings are removed from *Timelion*. For more information, check {kibana-pull}129581[#129581].
+The experimental `.quandl` and `.graphite` functions and advanced settings are removed from *Timelion*. View {kibana-pull}129581[#129581].
 
 *Impact* +
 When you use the `vis_type_timelion.graphiteUrls` kibana.yml setting, {kib} successfully starts, but logs a `[WARN ][config.deprecation] You no longer need to configure "vis_type_timelion.graphiteUrls".` warning.
@@ -1263,7 +1264,7 @@ To leave your feedback about the removal of `.quandl` and `.graphite`, go to the
 [%collapsible]
 ====
 *Details* +
-The *Display warnings* option has been removed from the aggregation-based gauge visualization. For more information, refer to {kibana-pull}113516[#113516].
+The *Display warnings* option has been removed from the aggregation-based gauge visualization. View {kibana-pull}113516[#113516].
 
 *Impact* +
 When you create aggregation-based gauge visualizations, the *Display warnings* option is no longer available in *Options > Labels*.
@@ -1293,7 +1294,7 @@ The following deprecated visEditors plugin settings have been removed:
 * `timelion.graphiteUrls`
 * `timelion.ui.enabled`
 
-For more information, refer to {kibana-pull}112643[#112643].
+View {kibana-pull}112643[#112643].
 
 *Impact* +
 Before you upgrade, make the following changes in kibana.yml:
@@ -1320,7 +1321,7 @@ Before you upgrade, make the following changes in kibana.yml:
 [%collapsible]
 ====
 *Details* +
-The *Dimming opacity* setting in *Advanced Settings* has been removed. For more information, refer to {kibana-pull}111704[#111704].
+The *Dimming opacity* setting in *Advanced Settings* has been removed. View {kibana-pull}111704[#111704].
 
 *Impact* +
 When you upgrade to 8.0.0, you are no longer able to configure the dimming opactiy for visualizations.
@@ -1332,7 +1333,7 @@ When you upgrade to 8.0.0, you are no longer able to configure the dimming opact
 [%collapsible]
 ====
 *Details* +
-In *TSVB*, custom Less stylesheets have been removed. For more information, refer to {kibana-pull}110985[#110985].
+In *TSVB*, custom Less stylesheets have been removed. View {kibana-pull}110985[#110985].
 
 *Impact* +
 Existing less stylesheets are automatically converted to CSS stylesheets.
@@ -1344,7 +1345,7 @@ Existing less stylesheets are automatically converted to CSS stylesheets.
 [%collapsible]
 ====
 *Details* +
-In *TSVB*, the *Index pattern selection mode* option has been removed. For more information, refer to {kibana-pull}110571[#110571].
+In *TSVB*, the *Index pattern selection mode* option has been removed. View {kibana-pull}110571[#110571].
 
 *Impact* +
 To use index patterns and {es} indices in *TSVB* visualizations:
@@ -1362,7 +1363,7 @@ To use index patterns and {es} indices in *TSVB* visualizations:
 [%collapsible]
 ====
 *Details* +
-The `map.proxyElasticMapsServiceInMaps` setting has been removed. For more information, refer to {kibana-pull}116184[#116184].
+The `map.proxyElasticMapsServiceInMaps` setting has been removed. View {kibana-pull}116184[#116184].
 
 *Impact* +
 Install the on-prem version of the <<maps-connect-to-ems,Elastic Maps Service>>, which is a Docker service that resides in the Elastic Docker registry, in an accessible location on your internal network. When you complete the installation, update kibana.yml to point to the service.
@@ -1374,7 +1375,7 @@ Install the on-prem version of the <<maps-connect-to-ems,Elastic Maps Service>>,
 [%collapsible]
 ====
 *Details* +
-The deprecated `map.regionmap.*` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}109896[#109896].
+The deprecated `map.regionmap.*` setting in kibana.yml has been removed. View {kibana-pull}109896[#109896].
 
 *Impact* +
 If you have maps that use `map.regionmap` layers:
@@ -1393,7 +1394,7 @@ If you have maps that use `map.regionmap` layers:
 [%collapsible]
 ====
 *Details* +
-The legacy dashboard-only mode has been removed. For more information, refer to {kibana-pull}108103[#108103].
+The legacy dashboard-only mode has been removed. View {kibana-pull}108103[#108103].
 
 *Impact* +
 To grant users access to only dashboards, create a new role, then assign only the *Dashboard* feature privilege. For more information, refer to <<kibana-feature-privileges,{kib} privileges>>.
@@ -1405,7 +1406,7 @@ To grant users access to only dashboards, create a new role, then assign only th
 [%collapsible]
 ====
 *Details* +
-The deprecated `xpack.maps.showMapVisualizationTypes` setting in kibana.yml has been removed. For more information, refer to {kibana-pull}105979[#105979]
+The deprecated `xpack.maps.showMapVisualizationTypes` setting in kibana.yml has been removed. View {kibana-pull}105979[#105979]
 
 *Impact* +
 When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana.yml file.
@@ -1420,7 +1421,7 @@ When you upgrade, remove `xpack.maps.showMapVisualizationTypes` from your kibana
 [%collapsible]
 ====
 *Details* +
-Removes the `apm_user` role. For more information, check {kibana-pull}132790[#132790].
+Removes the `apm_user` role. View {kibana-pull}132790[#132790].
 
 *Impact* +
 The `apm_user` role is replaced with the `viewer` and `editor` built-in roles.
@@ -1447,7 +1448,7 @@ The previous summary transforms summarizing every SLOs won't be used anymore and
 * slo-summary-timeslices-monthly-aligned
 * slo-summary-timeslices-weekly-aligned
 
-Be aware that when installing a new SLO (or after resetting an SLO), we install two transforms (one for the rollup data and one that summarize the rollup data). Do not delete the new `slo-summary-{slo_id}-{slo_revision}` transforms. For more information, refer to ({kibana-pull}172224[#172224]).
+Be aware that when installing a new SLO (or after resetting an SLO), we install two transforms (one for the rollup data and one that summarize the rollup data). Do not delete the new `slo-summary-{slo_id}-{slo_revision}` transforms. View {kibana-pull}172224[#172224].
 ====
 
 [discrete]
@@ -1534,7 +1535,7 @@ DELETE .slo-observability.sli-v1*
 ====
 *Details* +
 The Uptime app now gets hidden from the interface when it doesn't have any data for more than a week. If you have a standalone Heartbeat pushing data to Elasticsearch, the Uptime app is considered active. You can disable this automatic behavior from the advanced settings in Kibana using the **Always show legacy Uptime app** option.
-For synthetic monitoring, we now recommend to use the new Synthetics app. For more information, refer to {kibana-pull}159118[#159118]
+For synthetic monitoring, we now recommend to use the new Synthetics app. View {kibana-pull}159118[#159118]
 ====
 
 [discrete]
@@ -1543,7 +1544,7 @@ For synthetic monitoring, we now recommend to use the new Synthetics app. For mo
 [%collapsible]
 ====
 *Details* +
-Data from browser monitors and monitors of all types created within the Synthetics App or via the Elastic Synthetics Fleet Integration will no longer appear in Uptime. For more information, refer to {kibana-pull}159012[#159012]
+Data from browser monitors and monitors of all types created within the Synthetics App or via the Elastic Synthetics Fleet Integration will no longer appear in Uptime. View {kibana-pull}159012[#159012]
 ====
 
 
@@ -1557,7 +1558,7 @@ Data from browser monitors and monitors of all types created within the Syntheti
 [%collapsible]
 ====
 *Details* +
-Enterprise Search now requires that you enable X-Pack Security. For more information, refer to {kibana-pull}106307[#106307]
+Enterprise Search now requires that you enable X-Pack Security. View {kibana-pull}106307[#106307]
 
 *Impact* +
 Enable X-Pack Security.
@@ -1612,7 +1613,7 @@ Upgrade to use the Risk Engine in all spaces which use the legacy risk scoring m
 [%collapsible]
 ====
 *Details* +
-Converts `filterQuery` to a KQL query string. For more information, refer to ({kibana-pull}161806[#161806]).
+Converts `filterQuery` to a KQL query string. View {kibana-pull}161806[#161806].
 ====
 
 
@@ -1639,7 +1640,7 @@ To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
 [%collapsible]
 ====
 *Details* +
-The PUT endpoint for the agent reassign API is deprecated. For more information, refer to {kibana-pull}152236[#152236].
+The PUT endpoint for the agent reassign API is deprecated. View {kibana-pull}152236[#152236].
 
 *Impact* +
 Use the POST endpoint for the agent reassign API.
@@ -1651,7 +1652,7 @@ Use the POST endpoint for the agent reassign API.
 [%collapsible]
 ====
 *Details* +
-The `total` field in `/agent_status` Fleet API responses is deprecated. For more information, refer to {kibana-pull}151564[#151564].
+The `total` field in `/agent_status` Fleet API responses is deprecated. View {kibana-pull}151564[#151564].
 
 *Impact* +
 The `/agent_status` Fleet API now returns the following statuses:
@@ -1683,7 +1684,7 @@ The following saved objects APIs have been deprecated.
 /api/saved_objects/_bulk_delete
 --
 
-For more information, refer to ({kibana-pull}150267[#150267]).
+View {kibana-pull}150267[#150267].
 
 *Impact* +
 Use dedicated public APIs instead, for example use <<data-views-api>> to manage Data Views.
@@ -1702,7 +1703,7 @@ The Fleet API has been updated to improve consistency:
 * The `response` and `list` properties are renamed to `items` or `item` in some
 responses.
 
-For more information, refer to {kibana-pull}119494[#119494].
+View {kibana-pull}119494[#119494].
 
 *Impact* +
 When you upgrade to 8.0.0, use the following API changes:
@@ -1757,7 +1758,7 @@ The following rule action variables have been deprecated. Use the recommended va
 * spaceId (rule.spaceId)
 * tags (rule.tags)
 
-For more information, refer to ({kibana-pull}161136[#161136]).
+View {kibana-pull}161136[#161136].
 ====
 
 // Discover
@@ -1786,7 +1787,7 @@ The following Task Manager settings are deprecated:
 * `xpack.task_manager.ephemeral_tasks.request_capacity`
 * `xpack.alerting.maxEphemeralActionsPerAlert`
 
-For more information, refer to {kibana-pull}154275[#154275].
+View {kibana-pull}154275[#154275].
 
 *Impact* +
 To improve task execution resiliency, remove the deprecated settings from the `kibana.yml` file. For detailed information, check link:https://www.elastic.co/guide/en/kibana/current/task-manager-settings-kb.html[Task Manager settings in {kib}].
@@ -1798,7 +1799,7 @@ To improve task execution resiliency, remove the deprecated settings from the `k
 [%collapsible]
 ====
 *Details* +
-In kibana.yml, the `xpack.data_enhanced.*` setting is deprecated. For more information, check {kibana-pull}122075[#122075].
+In kibana.yml, the `xpack.data_enhanced.*` setting is deprecated. View {kibana-pull}122075[#122075].
 
 *Impact* +
 Use the `data.*` configuration parameters instead.
@@ -1810,7 +1811,7 @@ Use the `data.*` configuration parameters instead.
 [%collapsible]
 ====
 *Details* +
-The `xpack:default_admin_email` setting for monitoring use has been removed. For more information, refer to {kibana-pull}33603[#33603]
+The `xpack:default_admin_email` setting for monitoring use has been removed. View {kibana-pull}33603[#33603]
 
 *Impact* +
 Use the `xpack.monitoring.clusterAlertsEmail` in kibana.yml.
@@ -1826,7 +1827,7 @@ Use the `xpack.monitoring.clusterAlertsEmail` in kibana.yml.
 *Details* +
 The ability to authenticate interactive users with ApiKey via a web browser has been deprecated, and will be removed in a future version.
 
-For more information, refer to {kibana-pull}136422[#136422].
+View {kibana-pull}136422[#136422].
 
 *Impact* +
 To authenticate interactive users via a web browser, use <<kibana-authentication,another authentication method>>. Use API keys only for programmatic access to {kib} and {es}.
@@ -1838,7 +1839,7 @@ To authenticate interactive users via a web browser, use <<kibana-authentication
 [%collapsible]
 ====
 *Details* +
-The apiKey, including key and ID/key pair, and `elasticsearch_anonymous_user` credential types for anonymous authentication providers are deprecated. For more information, check {kibana-pull}131636[#131636].
+The apiKey, including key and ID/key pair, and `elasticsearch_anonymous_user` credential types for anonymous authentication providers are deprecated. View {kibana-pull}131636[#131636].
 
 *Impact* +
 If you have anonymous authentication provider configured with apiKey or `elasticsearch_anonymous_user` credential types, a deprecation warning appears, even when the provider is not enabled.
@@ -1850,7 +1851,7 @@ If you have anonymous authentication provider configured with apiKey or `elastic
 [%collapsible]
 ====
 *Details* +
-The v1 and v2 job configurations for security_linux and security_windows are deprecated. For more information, check {kibana-pull}131166[#131166].
+The v1 and v2 job configurations for security_linux and security_windows are deprecated. View {kibana-pull}131166[#131166].
 
 *Impact* +
 The following security_linux and security_windows job configurations are updated to v3:
@@ -1912,7 +1913,7 @@ Use Docker to run new versions of Kibana on macOS 86x_64.
 The mechanism of exporting CSV data from a saved search panel in a dashboard has been changed to generate a CSV report, rather than allowing the CSV data to be downloaded
 without creating a report. To preserve the original behavior, it is necessary to update `kibana.yml` with the setting of `xpack.reporting.csv.enablePanelActionDownload:
 true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only; downloading CSV files from other types of dashboard panels is
-unchanged. For more information, refer to {kibana-pull}178159[#178159].
+unchanged. View {kibana-pull}178159[#178159].
 ====
 
 
@@ -1925,7 +1926,7 @@ unchanged. For more information, refer to {kibana-pull}178159[#178159].
 [%collapsible]
 ====
 *Details* +
-The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
+The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. View {kibana-pull}197227[#197227].
 ====
 
 [discrete]
@@ -1934,7 +1935,7 @@ The `metrics:allowCheckingForFailedShards` advanced setting has been removed. Wi
 [%collapsible]
 ====
 *Details* +
-The option to create legacy input controls when creating a new visualization is hidden. For more information, refer to {kibana-pull}156455[#156455]
+The option to create legacy input controls when creating a new visualization is hidden. View {kibana-pull}156455[#156455]
 ====
 
 [discrete]
@@ -1943,7 +1944,7 @@ The option to create legacy input controls when creating a new visualization is 
 [%collapsible]
 ====
 *Details* +
-Legacy felid stats that were previously shown within a popover have been removed. For more information, refer to {kibana-pull}155503[#155503]
+Legacy felid stats that were previously shown within a popover have been removed. View {kibana-pull}155503[#155503]
 ====
 
 [discrete]
@@ -1951,7 +1952,7 @@ Legacy felid stats that were previously shown within a popover have been removed
 [%collapsible]
 ====
 *Details* +
-The input control panels, which allow you to add interactive filters to dashboards, are deprecated. For more information, check {kibana-pull}132562[#132562].
+The input control panels, which allow you to add interactive filters to dashboards, are deprecated. View {kibana-pull}132562[#132562].
 
 *Impact* +
 To add interactive filters to your dashboards, use the link:https://www.elastic.co/guide/en/kibana/8.3/add-controls.html[new controls].
@@ -1963,7 +1964,7 @@ To add interactive filters to your dashboards, use the link:https://www.elastic.
 [%collapsible]
 ====
 *Details* +
-In the *Lens* visualization editor, the *Auto* default for *Legend width* has been deprecated. For more information, check {kibana-pull}130336[#130336].
+In the *Lens* visualization editor, the *Auto* default for *Legend width* has been deprecated. View {kibana-pull}130336[#130336].
 
 *Impact* +
 When you create *Lens* visualization, the default for the *Legend width* is now *Medium*.
@@ -1987,7 +1988,7 @@ Both the Logs Explorer and Logs Stream applications are now deprecated and will 
 [%collapsible]
 ====
 *Details* +
-The Observability AI Assistant specific advanced setting for Logs index patterns `observability:aiAssistantLogsIndexPattern` is deprecated and no longer used. The AI Assistant will now use the existing **Log sources** setting `observability:logSources` instead. For more information, refer to ({kibana-pull}192003[#192003]).
+The Observability AI Assistant specific advanced setting for Logs index patterns `observability:aiAssistantLogsIndexPattern` is deprecated and no longer used. The AI Assistant will now use the existing **Log sources** setting `observability:logSources` instead. View {kibana-pull}192003[#192003].
 ====
 
 [discrete]
@@ -1996,7 +1997,7 @@ The Observability AI Assistant specific advanced setting for Logs index patterns
 [%collapsible]
 ====
 *Details* +
-You can find the Logs Explorer app in the navigation menu under Logs > Explorer, or as a separate tab in Discover. For more information, refer to ({kibana-pull}194519[#194519]).
+You can find the Logs Explorer app in the navigation menu under Logs > Explorer, or as a separate tab in Discover. View {kibana-pull}194519[#194519].
 
 *Impact* +
 You can still show the Logs Stream app again by navigating to Stack Management > Advanced Settings and by enabling the `observability:enableLogsStream` setting.
@@ -2009,7 +2010,7 @@ You can still show the Logs Stream app again by navigating to Stack Management >
 [%collapsible]
 ====
 *Details* +
-The `xpack.apm.autocreateApmIndexPattern` APM setting has been removed. For more information, refer to {kibana-pull}120689[#120689].
+The `xpack.apm.autocreateApmIndexPattern` APM setting has been removed. View {kibana-pull}120689[#120689].
 
 *Impact* +
 To automatically create data views in APM, use `xpack.apm.autoCreateApmDataView`.
@@ -2030,7 +2031,7 @@ The Uptime app is already hidden from Kibana when there is no recent Heartbeat d
 [%collapsible]
 ====
 *Details* +
-Synthetics and Uptime monitor schedules and zip URL fields are deprecated. For more information, refer to {kibana-pull}154010[#154010] and {kibana-pull}154952[#154952].
+Synthetics and Uptime monitor schedules and zip URL fields are deprecated. View {kibana-pull}154010[#154010] and {kibana-pull}154952[#154952].
 
 *Impact* +
 When you create monitors in Uptime Monitor Management and the Synthetics app, unsupported schedules are automatically transferred to the nearest supported schedule. To use zip URLs, use project monitors.
@@ -2042,7 +2043,7 @@ When you create monitors in Uptime Monitor Management and the Synthetics app, un
 [%collapsible]
 ====
 *Details* +
-The Elastic Synthetics integration is deprecated. For more information, refer to {kibana-pull}149506[#149506].
+The Elastic Synthetics integration is deprecated. View {kibana-pull}149506[#149506].
 
 *Impact* +
 To monitor endpoints, pages, and user journeys, go to **{observability}** -> **Synthetics (beta)**.
