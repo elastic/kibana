@@ -10,3 +10,5 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+        - exit_status: 10
+          limit: 0
