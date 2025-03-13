@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSplitPanel,
@@ -23,6 +23,7 @@ interface TabPreviewProps {
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
   stopPreviewOnHover?: boolean;
+  previewDelay?: number;
 }
 
 export const TabPreview: React.FC<TabPreviewProps> = ({
@@ -30,9 +31,10 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   showPreview,
   setShowPreview,
   stopPreviewOnHover,
+  previewDelay = 500,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [previewTimer, setPreviewTimer] = useState<NodeJS.Timeout | null>(null);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -43,7 +45,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
     [setShowPreview]
   );
 
-  // enabling closing the preview with the ESC key without altering the current focus
+  // enables closing the preview with the ESC key without altering the current focus
   useEffect(() => {
     if (showPreview) {
       document.addEventListener('keydown', onKeyDown);
@@ -53,12 +55,36 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [showPreview, onKeyDown]);
 
+  useEffect(() => {
+    return () => {
+      if (previewTimer) {
+        clearTimeout(previewTimer);
+      }
+    };
+  }, [previewTimer]);
+
+  const handleMouseEnter = () => {
+    if (stopPreviewOnHover) return;
+
+    const timer = setTimeout(() => {
+      setShowPreview(true);
+    }, previewDelay);
+
+    setPreviewTimer(timer);
+  };
+
+  const handleMouseLeave = () => {
+    if (previewTimer) {
+      clearTimeout(previewTimer);
+      setPreviewTimer(null);
+    }
+
+    setShowPreview(false);
+  };
+
   return (
-    <div ref={containerRef}>
-      <span
-        onMouseEnter={() => !stopPreviewOnHover && setShowPreview(true)}
-        onMouseLeave={() => setShowPreview(false)}
-      >
+    <div>
+      <span onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         {children}
       </span>
       {showPreview && (
