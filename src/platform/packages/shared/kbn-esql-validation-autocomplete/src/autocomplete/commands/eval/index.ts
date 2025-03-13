@@ -8,6 +8,7 @@
  */
 
 import type { ESQLSingleAstItem } from '@kbn/esql-ast';
+import { isMarkerNode } from '../../../shared/context';
 import { isAssignment, isColumnItem } from '../../../..';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
@@ -27,6 +28,9 @@ export async function suggest(
   if (expressionRoot && isAssignment(expressionRoot)) {
     // EVAL foo = <use this as the expression root>
     expressionRoot = expressionRoot.args[1][0] as ESQLSingleAstItem;
+    if (isMarkerNode(expressionRoot)) {
+      expressionRoot = undefined;
+    }
     insideAssignment = true;
   }
 
@@ -43,7 +47,7 @@ export async function suggest(
   }
 
   if (
-    // don't suggesting finishing characters if incomplete expression
+    // don't suggest finishing characters if incomplete expression
     params.getExpressionType(expressionRoot) !== 'unknown' &&
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression

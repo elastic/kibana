@@ -327,11 +327,12 @@ describe('autocomplete', () => {
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
       'var0 = ',
-      ...getFieldNamesByType('any'),
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
     testSuggestions('FROM index1 | EVAL var0 = f/', [
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
@@ -1036,6 +1037,8 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
+      ', ',
+      '| ',
     ]);
 
     describe('dot-separated field names', () => {

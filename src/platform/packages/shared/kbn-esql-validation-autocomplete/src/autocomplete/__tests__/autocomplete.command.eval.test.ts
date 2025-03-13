@@ -61,6 +61,11 @@ describe('autocomplete.suggest', () => {
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ]);
 
+      await assertSuggestions('from a | eval col0 = /', [
+        ...getFieldNamesByType('any').map((v) => `${v} `),
+        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      ]);
+
       // Re-enable with https://github.com/elastic/kibana/issues/210639
       // await assertSuggestions('from a | eval a=doubleField, /', [
       //   'var0 = ',
