@@ -10,6 +10,8 @@ import { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
@@ -101,4 +103,27 @@ export async function deleteInferenceEndpoint({
   name?: string;
 }) {
   return es.inference.delete({ inference_id: name, force: true });
+}
+
+export async function addSampleDocsToInternalKb(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  sampleDocs: Array<Instruction & { title: string }>
+) {
+  const log = getService('log');
+  const ml = getService('ml');
+  const retry = getService('retry');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
+  await importTinyElserModel(ml);
+  await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+  await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+
+  await observabilityAIAssistantAPIClient.editor({
+    endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+    params: {
+      body: {
+        entries: sampleDocs,
+      },
+    },
+  });
 }

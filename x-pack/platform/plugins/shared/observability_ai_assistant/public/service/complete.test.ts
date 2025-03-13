@@ -39,7 +39,7 @@ const messages: Message[] = [
   },
 ];
 
-const createLlmResponse = (
+export const createLlmResponse = (
   chunks: Array<{ content: string; function_call?: { name: string; arguments: string } }>
 ): StreamingChatResponseEventWithoutError[] => {
   const id = v4();

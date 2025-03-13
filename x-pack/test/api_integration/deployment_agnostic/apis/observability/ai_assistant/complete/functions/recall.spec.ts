@@ -13,13 +13,29 @@ import {
   clearKnowledgeBase,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
-  importTinyElserModel,
-  setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
+  addSampleDocsToInternalKb,
 } from '../../knowledge_base/helpers';
 import { setAdvancedSettings } from '../../utils/advanced_settings';
 
 const customSearchConnectorIndex = 'animals_kb';
+
+const sampleDocsForInternalKb = [
+  {
+    id: 'technical_db_outage_slow_queries',
+    title: 'Database Outage: Slow Query Execution',
+    text: 'At 03:15 AM UTC, the production database experienced a significant outage, leading to slow query execution and increased response times across multiple services. A surge in database load was detected, with 90% of queries exceeding 2 seconds. A detailed log analysis pointed to locking issues within the transaction queue and inefficient index usage.',
+  },
+  {
+    id: 'technical_api_gateway_timeouts',
+    title: 'Service Timeout: API Gateway Bottleneck',
+    text: 'At 10:45 AM UTC, the API Gateway encountered a timeout issue, causing a 500 error for all incoming requests. Detailed traces indicated a significant bottleneck at the gateway level, where requests stalled while waiting for upstream service responses. The upstream service was overwhelmed due to a sudden spike in inbound traffic and failed to release resources promptly.',
+  },
+  {
+    id: 'technical_cache_misses_thirdparty_api',
+    title: 'Cache Misses and Increased Latency: Third-Party API Failure',
+    text: 'At 04:30 PM UTC, a dramatic increase in cache misses and latency was observed. The failure of a third-party API prevented critical data from being cached, leading to unnecessary re-fetching of resources from external sources. This caused significant delays in response times, with up to 10-second delays in some key services.',
+  },
+];
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -28,7 +44,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('recall', function () {
     before(async () => {
-      await addSampleDocsToInternalKb(getService);
+      await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
       await addSampleDocsToCustomIndex(getService);
     });
 
@@ -107,46 +123,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     return body.entries;
   }
-}
-
-async function addSampleDocsToInternalKb(
-  getService: DeploymentAgnosticFtrProviderContext['getService']
-) {
-  const log = getService('log');
-  const ml = getService('ml');
-  const retry = getService('retry');
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-
-  const sampleDocs = [
-    {
-      id: 'technical_db_outage_slow_queries',
-      title: 'Database Outage: Slow Query Execution',
-      text: 'At 03:15 AM UTC, the production database experienced a significant outage, leading to slow query execution and increased response times across multiple services. A surge in database load was detected, with 90% of queries exceeding 2 seconds. A detailed log analysis pointed to locking issues within the transaction queue and inefficient index usage.',
-    },
-    {
-      id: 'technical_api_gateway_timeouts',
-      title: 'Service Timeout: API Gateway Bottleneck',
-      text: 'At 10:45 AM UTC, the API Gateway encountered a timeout issue, causing a 500 error for all incoming requests. Detailed traces indicated a significant bottleneck at the gateway level, where requests stalled while waiting for upstream service responses. The upstream service was overwhelmed due to a sudden spike in inbound traffic and failed to release resources promptly.',
-    },
-    {
-      id: 'technical_cache_misses_thirdparty_api',
-      title: 'Cache Misses and Increased Latency: Third-Party API Failure',
-      text: 'At 04:30 PM UTC, a dramatic increase in cache misses and latency was observed. The failure of a third-party API prevented critical data from being cached, leading to unnecessary re-fetching of resources from external sources. This caused significant delays in response times, with up to 10-second delays in some key services.',
-    },
-  ];
-
-  await importTinyElserModel(ml);
-  await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-  await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
-
-  await observabilityAIAssistantAPIClient.editor({
-    endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
-    params: {
-      body: {
-        entries: sampleDocs,
-      },
-    },
-  });
 }
 
 async function addSampleDocsToCustomIndex(

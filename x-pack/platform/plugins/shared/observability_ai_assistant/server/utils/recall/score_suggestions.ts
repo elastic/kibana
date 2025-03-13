@@ -127,8 +127,8 @@ export async function scoreSuggestions({
   );
 
   const scores = parseSuggestionScores(scoresAsString)
-    // Restore original IDs
-    .map(({ id, score }) => ({ id: shortIdTable.lookup(id)!, score }));
+    // Restore original IDs (added fallback to id for testing purposes)
+    .map(({ id, score }) => ({ id: shortIdTable.lookup(id) || id, score }));
 
   if (scores.length === 0) {
     // seemingly invalid or no scores, return all

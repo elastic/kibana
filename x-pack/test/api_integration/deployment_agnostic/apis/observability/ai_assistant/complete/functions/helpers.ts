@@ -13,6 +13,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../../services/observability_ai_assistant_api';
 
@@ -77,10 +78,12 @@ export async function invokeChatCompleteWithFunctionRequest({
 
 export async function chatComplete({
   userPrompt,
+  screenContexts = [],
   connectorId,
   observabilityAIAssistantAPIClient,
 }: {
   userPrompt: string;
+  screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
   connectorId: string;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
 }) {
@@ -99,7 +102,7 @@ export async function chatComplete({
         ],
         connectorId,
         persist: false,
-        screenContexts: [],
+        screenContexts,
         scopes: ['observability' as const],
       },
     },
