@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { type AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { omit } from 'lodash';
 import { chunk, indexBy, uniq } from 'lodash/fp';
 import pMap from 'p-map';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  AuthenticatedUser,
+} from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 
