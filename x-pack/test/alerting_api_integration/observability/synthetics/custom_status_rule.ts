@@ -43,10 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await server.savedObjects.cleanStandardList();
       await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
-      await esClient.deleteByQuery({
-        index: SYNTHETICS_RULE_ALERT_INDEX,
-        query: { match_all: {} },
-      });
     });
 
     /* 1. create a monitor
