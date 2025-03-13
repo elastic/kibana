@@ -449,7 +449,7 @@ export async function getFieldsOrFunctionsSuggestions(
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
-    literals ? getCompatibleLiterals(commandName, types) : []
+    literals ? getCompatibleLiterals(types) : []
   );
 
   return suggestions;
@@ -608,7 +608,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
       ) {
         suggestions.push(listCompleteItem);
       } else {
-        const finalType = leftArgType || leftArgType || 'any';
+        const finalType = leftArgType || 'any';
         const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
 
         // this is a special case with AND/OR
@@ -671,12 +671,11 @@ export async function getSuggestionsToRightOfOperatorExpression({
   }
   return suggestions.map<SuggestionRawDefinition>((s) => {
     const overlap = getOverlapRange(queryText, s.text);
-    const offset = overlap.start === overlap.end ? 1 : 0;
     return {
       ...s,
       rangeToReplace: {
-        start: overlap.start + offset,
-        end: overlap.end + offset,
+        start: overlap.start,
+        end: overlap.end,
       },
     };
   });
