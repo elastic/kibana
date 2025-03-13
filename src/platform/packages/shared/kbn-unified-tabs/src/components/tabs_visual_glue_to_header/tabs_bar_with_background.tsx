@@ -10,8 +10,8 @@
 import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
-import { euiShadowXSmall, logicalCSS, useEuiTheme } from '@elastic/eui';
-import { zLevels } from './constants';
+import { useEuiTheme } from '@elastic/eui';
+import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
 
 const globalCss = cssString`
   overscroll-behavior: none;
@@ -24,11 +24,11 @@ const globalCss = cssString`
   }
 `;
 
-export interface TabsBarWithTopShadowProps {
+export interface TabsBarWithBackgroundProps {
   children: React.ReactNode;
 }
 
-export const TabsBarWithTopShadow: React.FC<TabsBarWithTopShadowProps> = ({ children }) => {
+export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({ children }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
@@ -42,25 +42,23 @@ export const TabsBarWithTopShadow: React.FC<TabsBarWithTopShadowProps> = ({ chil
 
   return (
     <div
+      // tabs bar background
       css={css`
-        position: relative;
+        background-color: ${euiTheme.colors.lightestShade};
+
+        .kbnBody--hasProjectActionMenu & {
+          margin-top: 1px; // for some reason the header slightly overlaps the tabs bar in a solution view
+        }
       `}
     >
       <div
+        // top shadow for tabs bar
         css={css`
-          position: absolute;
-          width: 100%;
-          height: 0;
-          z-index: ${zLevels.underHeaderShadow};
-          ${logicalCSS('border-bottom', euiTheme.border.thin)}
-          ${euiShadowXSmall(euiThemeContext)}
-
-          .kbnBody--hasProjectActionMenu & {
-            height: 2px;
-          }
+          background: ${getTabsShadowGradient(euiThemeContext)};
         `}
-      />
-      {children}
+      >
+        {children}
+      </div>
     </div>
   );
 };

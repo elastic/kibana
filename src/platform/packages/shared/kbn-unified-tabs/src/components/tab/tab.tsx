@@ -22,7 +22,7 @@ import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems } from '../../types';
-import { TabWithOverflowBackground } from '../tabs_visual_glue_to_header/tab_with_overflow_background';
+import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 
 export interface TabProps {
   item: TabItem;
@@ -152,9 +152,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     </EuiFlexGroup>
   );
 
-  return (
-    <TabWithOverflowBackground isSelected={isSelected}>{mainContent}</TabWithOverflowBackground>
-  );
+  return <TabWithBackground isSelected={isSelected}>{mainContent}</TabWithBackground>;
 };
 
 function getTabContainerCss(
@@ -202,7 +200,6 @@ function getTabContainerCss(
           cursor: pointer;
 
           &:hover {
-            background-color: ${euiTheme.colors.lightShade};
             color: ${euiTheme.colors.text};
         }`}
   `;

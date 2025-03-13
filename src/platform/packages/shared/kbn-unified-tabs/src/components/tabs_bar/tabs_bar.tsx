@@ -15,7 +15,7 @@ import { Tab, type TabProps } from '../tab';
 import type { TabItem } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
-import { TabsBarWithTopShadow } from '../tabs_visual_glue_to_header/tabs_bar_with_top_shadow';
+import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -82,7 +82,6 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       alignItems="center"
       gutterSize="s"
       css={css`
-        background-color: ${euiTheme.colors.lightestShade};
         padding-right: ${euiTheme.size.xs};
       `}
     >
@@ -140,5 +139,5 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     </EuiFlexGroup>
   );
 
-  return <TabsBarWithTopShadow>{mainTabsBarContent}</TabsBarWithTopShadow>;
+  return <TabsBarWithBackground>{mainTabsBarContent}</TabsBarWithBackground>;
 };

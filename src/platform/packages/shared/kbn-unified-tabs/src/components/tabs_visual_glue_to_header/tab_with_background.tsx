@@ -10,18 +10,16 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { zLevels } from './constants';
+import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
 
-export interface TabWithOverflowBackgroundProps {
+export interface TabWithBackgroundProps {
   isSelected: boolean;
   children: React.ReactNode;
 }
 
-export const TabWithOverflowBackground: React.FC<TabWithOverflowBackgroundProps> = ({
-  isSelected,
-  children,
-}) => {
-  const { euiTheme } = useEuiTheme();
+export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({ isSelected, children }) => {
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const selectedTabBackgroundColor = document.querySelector(
     // TODO: listen to chromeStyle changes instead
     '.kbnBody--hasProjectActionMenu'
@@ -32,35 +30,34 @@ export const TabWithOverflowBackground: React.FC<TabWithOverflowBackgroundProps>
   return (
     <div
       css={css`
-        position: relative;
+        background-color: ${isSelected
+          ? selectedTabBackgroundColor
+          : euiTheme.colors.lightestShade};
+        transition: background-color ${euiTheme.animation.fast};
+
+        ${isSelected
+          ? ''
+          : `
+            &:hover {
+              background-color: ${euiTheme.colors.lightShade};
+            }
+        `}
       `}
     >
       <div
         css={css`
-          display: block;
-          position: absolute;
-          top: ${isSelected ? `-${euiTheme.size.xs}` : 0};
-          bottom: 0;
-          right: 0;
-          left: 0;
-          background-color: ${isSelected
-            ? selectedTabBackgroundColor
-            : euiTheme.colors.lightestShade};
+          background: ${isSelected ? 'transparent' : getTabsShadowGradient(euiThemeContext)};
           transition: background-color ${euiTheme.animation.fast};
-          z-index: ${isSelected
-            ? zLevels.aboveHeaderShadowTabBackground
-            : zLevels.belowHeaderShadowTabBackground};
-          border-right: ${euiTheme.border.thin};
-          border-color: ${euiTheme.colors.lightShade};
-        `}
-      />
-      <div
-        css={css`
-          position: relative;
-          z-index: ${zLevels.tabMainContent};
         `}
       >
-        {children}
+        <div
+          css={css`
+            border-right: ${euiTheme.border.thin};
+            border-color: ${euiTheme.colors.lightShade};
+          `}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
