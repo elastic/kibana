@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-oblt';
-
-// eslint-disable-next-line import/no-default-export
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
+export const OPBEANS_END_DATE = '2021-10-10T00:15:00.000Z';
