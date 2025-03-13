@@ -1958,8 +1958,6 @@
       "@kbn/third-party-lens-navigation-prompt-plugin/*": ["x-pack/examples/third_party_lens_navigation_prompt/*"],
       "@kbn/third-party-vis-lens-example-plugin": ["x-pack/examples/third_party_vis_lens_example"],
       "@kbn/third-party-vis-lens-example-plugin/*": ["x-pack/examples/third_party_vis_lens_example/*"],
-      "@kbn/threat-intelligence-plugin": ["x-pack/solutions/security/plugins/threat_intelligence"],
-      "@kbn/threat-intelligence-plugin/*": ["x-pack/solutions/security/plugins/threat_intelligence/*"],
       "@kbn/timelines-plugin": ["x-pack/platform/plugins/shared/timelines"],
       "@kbn/timelines-plugin/*": ["x-pack/platform/plugins/shared/timelines/*"],
       "@kbn/timelion-grammar": ["src/platform/packages/private/kbn-timelion-grammar"],

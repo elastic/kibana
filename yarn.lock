@@ -7773,10 +7773,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/threat-intelligence-plugin@link:x-pack/solutions/security/plugins/threat_intelligence":
-  version "0.0.0"
-  uid ""
-
 "@kbn/timelines-plugin@link:x-pack/platform/plugins/shared/timelines":
   version "0.0.0"
   uid ""

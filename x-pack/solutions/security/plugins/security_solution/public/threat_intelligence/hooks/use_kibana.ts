@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import {
-  context as KibanaContext,
-  KibanaContextProvider,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
-import { Services } from '../types';
+import { useKibana } from '../../common/lib/kibana';
 
-const useTypedKibana = () => useKibana<Services>();
-
-export { KibanaContextProvider, useTypedKibana as useKibana, KibanaContext };
+export { useKibana };
