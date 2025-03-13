@@ -29,8 +29,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await server.savedObjects.cleanStandardList();
-      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
       await ruleHelper.createIndexAction();
+      await esClient.deleteByQuery({
+        index: SYNTHETICS_RULE_ALERT_INDEX,
+        query: { match_all: {} },
+      });
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
@@ -71,14 +74,17 @@ export default function ({ getService }: FtrProviderContext) {
       let monitor: any;
       let docs: any[] = [];
 
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+        await esClient.deleteByQuery({
+          index: SYNTHETICS_RULE_ALERT_INDEX,
+          query: { match_all: {} },
+        });
+      });
+
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor('Monitor check based at ' + moment().format('LLL'));
         expect(monitor).to.have.property('id');
-
-        docs = await ruleHelper.makeSummaries({
-          monitor,
-          downChecks: 5,
-        });
       });
 
       it('creates a custom rule', async () => {
@@ -102,6 +108,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should trigger down alert', async function () {
+        docs = await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 5,
+        });
         const response = await ruleHelper.waitForStatusAlert({
           ruleId,
         });
@@ -190,6 +200,14 @@ export default function ({ getService }: FtrProviderContext) {
     describe('NumberOfChecks - Location threshold = 1 - grouped by location - 2 down locations', () => {
       let ruleId = '';
       let monitor: any;
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+        await esClient.deleteByQuery({
+          index: SYNTHETICS_RULE_ALERT_INDEX,
+          query: { match_all: {} },
+        });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor('Monitor location based at ' + moment().format('LT'));
@@ -282,6 +300,14 @@ export default function ({ getService }: FtrProviderContext) {
       let ruleId = '';
       let monitor: any;
       let docs: any[] = [];
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+        await esClient.deleteByQuery({
+          index: SYNTHETICS_RULE_ALERT_INDEX,
+          query: { match_all: {} },
+        });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor(
@@ -409,6 +435,14 @@ export default function ({ getService }: FtrProviderContext) {
     describe('NumberOfChecks - Location threshold > 1 - ungrouped - 2 down locations', () => {
       let ruleId = '';
       let monitor: any;
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+        await esClient.deleteByQuery({
+          index: SYNTHETICS_RULE_ALERT_INDEX,
+          query: { match_all: {} },
+        });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor(
@@ -701,6 +735,14 @@ export default function ({ getService }: FtrProviderContext) {
       let ruleId = '';
       let monitor: any;
 
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+        await esClient.deleteByQuery({
+          index: SYNTHETICS_RULE_ALERT_INDEX,
+          query: { match_all: {} },
+        });
+      });
+
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor('Monitor time based at ' + moment().format('LT'));
         expect(monitor).to.have.property('id');
@@ -824,6 +866,14 @@ export default function ({ getService }: FtrProviderContext) {
     describe('TimeWindow - Location threshold = 1 - grouped by location - 2 down location', () => {
       let ruleId = '';
       let monitor: any;
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+        await esClient.deleteByQuery({
+          index: SYNTHETICS_RULE_ALERT_INDEX,
+          query: { match_all: {} },
+        });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor(
