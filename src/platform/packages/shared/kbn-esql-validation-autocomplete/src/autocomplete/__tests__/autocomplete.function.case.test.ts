@@ -87,11 +87,7 @@ describe('case', () => {
     await assertSuggestions('from a | eval case( integerField != /)', expectedNumericSuggestions, {
       triggerCharacter: ' ',
     });
-    await assertSuggestions('from a | eval case( integerField != /)', [
-      // Notice no extra space after field name
-      ...getFieldNamesByType('any').map((field) => `${field}`),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, []),
-    ]);
+    await assertSuggestions('from a | eval case( integerField != /)', expectedNumericSuggestions);
   });
 
   test('suggestions for second position', async () => {

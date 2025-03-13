@@ -68,6 +68,7 @@ import {
   getFieldsOrFunctionsSuggestions,
   pushItUpInTheList,
   extractTypeFromASTArg,
+  getSuggestionsToRightOfOperatorExpression,
 } from './helper';
 import {
   FunctionParameter,
@@ -231,10 +232,11 @@ function findNewVariable(variables: Map<string, ESQLVariable[]>) {
 async function getSuggestionsWithinCommandExpression(
   innerText: string,
   commands: ESQLCommand[],
-  {
-    command,
-  }: {
+  astContext: {
     command: ESQLCommand;
+    node?: ESQLAstItem;
+    option?: ESQLCommandOption;
+    containingFunction?: ESQLFunction;
   },
   getSources: () => Promise<ESQLSourceResult[]>,
   getColumnsByType: GetColumnsByTypeFn,
@@ -246,7 +248,7 @@ async function getSuggestionsWithinCommandExpression(
   callbacks?: ESQLCallbacks,
   supportsControls?: boolean
 ) {
-  const commandDef = getCommandDefinition(command.name);
+  const commandDef = getCommandDefinition(astContext.command.name);
 
   // collect all fields + variables to suggest
   const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
@@ -254,9 +256,30 @@ async function getSuggestionsWithinCommandExpression(
 
   const references = { fields: fieldsMap, variables: anyVariables };
 
+  // For now, we don't suggest for expressions within any function besides CASE
+  // e.g. CASE(field != /)
+  //
+  // So, it is handled as a special branch...
+  if (
+    astContext.containingFunction?.name === 'case' &&
+    !Array.isArray(astContext.node) &&
+    astContext.node?.type === 'function' &&
+    astContext.node?.subtype === 'binary-expression'
+  ) {
+    return await getSuggestionsToRightOfOperatorExpression({
+      queryText: innerText,
+      commandName: astContext.command.name,
+      optionName: astContext.option?.name,
+      rootOperator: astContext.node,
+      getExpressionType: (expression) =>
+        getExpressionType(expression, references.fields, references.variables),
+      getColumnsByType,
+    });
+  }
+
   return commandDef.suggest({
     innerText,
-    command,
+    command: astContext.command,
     getColumnsByType,
     getAllColumnNames: () => Array.from(fieldsMap.keys()),
     columnExists: (col: string) => Boolean(getColumnByName(col, references)),
@@ -288,18 +311,6 @@ async function getSuggestionsWithinCommandExpression(
   });
 }
 
-// FOR CASE
-// suggestions.push(
-//   ...(await getSuggestionsToRightOfOperatorExpression({
-//     queryText: innerText,
-//     commandName: command.name,
-//     optionName: option?.name,
-//     rootOperator: nodeArg,
-//     getExpressionType: (expression) =>
-//       getExpressionType(expression, references.fields, references.variables),
-//     getColumnsByType: getFieldsByType,
-//   }))
-// );
 const addCommaIf = (condition: boolean, text: string) => (condition ? `${text},` : text);
 
 async function getFunctionArgsSuggestions(
