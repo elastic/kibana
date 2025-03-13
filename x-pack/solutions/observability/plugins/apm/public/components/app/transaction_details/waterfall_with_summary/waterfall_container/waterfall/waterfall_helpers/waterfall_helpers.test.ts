@@ -776,12 +776,14 @@ describe('waterfall_helpers', () => {
 
   describe('reparentOrphanItems', () => {
     const myTransactionItem = {
+      duration: 150,
       doc: {
         processor: { event: 'transaction' },
         trace: { id: 'myTrace' },
         transaction: {
           id: 'myTransactionId1',
         },
+        timestamp: { us: 1000000000000050 },
       } as WaterfallTransaction,
       docType: 'transaction',
       id: 'myTransactionId1',
@@ -808,14 +810,18 @@ describe('waterfall_helpers', () => {
       expect(reparentOrphanItems([], traceItems, myTransactionItem)).toEqual(traceItems);
     });
 
-    it('should reparent orphan items to root transaction', () => {
+    it('should reparent orphan items to root', () => {
       const traceItems: IWaterfallSpanOrTransaction[] = [
         myTransactionItem,
         {
+          duration: 100,
           doc: {
             processor: { event: 'span' },
             span: {
               id: 'myOrphanSpanId',
+            },
+            timestamp: {
+              us: 1000000000000100,
             },
             parent: {
               id: 'myNotExistingTransactionId1',
@@ -829,10 +835,14 @@ describe('waterfall_helpers', () => {
       expect(reparentOrphanItems(['myOrphanSpanId'], traceItems, myTransactionItem)).toEqual([
         myTransactionItem,
         {
+          duration: 100,
           doc: {
             processor: { event: 'span' },
             span: {
               id: 'myOrphanSpanId',
+            },
+            timestamp: {
+              us: 1000000000000100,
             },
             parent: {
               id: 'myNotExistingTransactionId1',
@@ -840,7 +850,53 @@ describe('waterfall_helpers', () => {
           } as WaterfallSpan,
           docType: 'span',
           id: 'myOrphanSpanId',
-          parentId: 'myTransactionId1',
+          parentId: 'root',
+          isOrphan: true,
+        } as IWaterfallSpan,
+      ]);
+    });
+
+    it('should reparent orphan items to hidden', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        myTransactionItem,
+        {
+          duration: 200,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            timestamp: {
+              us: 1000000000000000,
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myNotExistingTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(reparentOrphanItems(['myOrphanSpanId'], traceItems, myTransactionItem)).toEqual([
+        myTransactionItem,
+        {
+          duration: 200,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            timestamp: {
+              us: 1000000000000000,
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'hidden',
           isOrphan: true,
         } as IWaterfallSpan,
       ]);
@@ -949,7 +1005,7 @@ describe('waterfall_helpers', () => {
           isOpen: true,
         });
 
-        expect(result).toEqual(
+        expect(result?.[0]).toEqual(
           expect.objectContaining({
             item: expect.objectContaining({ id: 'myTransactionId1' }),
             level: 0,
@@ -1042,7 +1098,7 @@ describe('waterfall_helpers', () => {
           },
         });
 
-        expect(result).toEqual(
+        expect(result?.[0]).toEqual(
           expect.objectContaining({
             item: expect.objectContaining({ id: 'myTransactionId1' }),
             level: 0,

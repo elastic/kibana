@@ -253,15 +253,12 @@ export function getOrderedWaterfallItems(
     return [item, ...deepChildren];
   }
 
-  const nonRelatedChildrenToEntryTransaction = Object.entries(childrenByParentId)
-    .filter(
-      ([id, item]) =>
-        id !== entryWaterfallTransaction.id && item[0].parentId !== entryWaterfallTransaction.id
-    )
-    .map(([_, item]) => item)
-    .flat();
+  const nonRelatedChildrenToEntryTransaction = childrenByParentId[ROOT_ID]?.filter(
+    (item) =>
+      item.id !== entryWaterfallTransaction.id && item.parentId !== entryWaterfallTransaction.id
+  );
 
-  if (nonRelatedChildrenToEntryTransaction.length) {
+  if (nonRelatedChildrenToEntryTransaction?.length) {
     // filter out duplicated items
     return [
       ...new Set([
@@ -715,15 +712,13 @@ export const updateTraceTreeNode = ({
         Object.assign(node, updatedNode);
 
         if (updatedNode.expanded && !updatedNode.hasInitializedChildren) {
-          Object.assign(
-            node,
-            buildTree({
-              roots: [node],
-              waterfall,
-              maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
-              path,
-            })
-          );
+          const updatedTree = buildTree({
+            roots: [node],
+            waterfall,
+            maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
+            path,
+          });
+          Object.assign(node, updatedTree[0]);
         }
 
         if (parent) {
