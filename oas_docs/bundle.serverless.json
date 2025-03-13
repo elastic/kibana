@@ -8703,6 +8703,55 @@
                             "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
                             "nullable": true,
                             "type": "string"
+                          },
+                          "secrets": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "ssl": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "key": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "certificate": {
+                                "type": "string"
+                              },
+                              "certificate_authorities": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "key": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
                           }
                         },
                         "required": [
@@ -8807,6 +8856,55 @@
                     "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
                     "nullable": true,
                     "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ssl": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "ssl": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "certificate": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
                   }
                 },
                 "required": [
@@ -8846,6 +8944,55 @@
                           "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
                           "nullable": true,
                           "type": "string"
+                        },
+                        "secrets": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "ssl": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ssl": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "certificate": {
+                              "type": "string"
+                            },
+                            "certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "key": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         }
                       },
                       "required": [
@@ -9015,6 +9162,55 @@
                           "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
                           "nullable": true,
                           "type": "string"
+                        },
+                        "secrets": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "ssl": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ssl": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "certificate": {
+                              "type": "string"
+                            },
+                            "certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "key": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         }
                       },
                       "required": [
@@ -9113,6 +9309,55 @@
                     "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
                     "nullable": true,
                     "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ssl": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "ssl": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "certificate": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
                   }
                 },
                 "required": [
@@ -9152,6 +9397,55 @@
                           "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
                           "nullable": true,
                           "type": "string"
+                        },
+                        "secrets": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "ssl": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "ssl": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "certificate": {
+                              "type": "string"
+                            },
+                            "certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "key": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         }
                       },
                       "required": [
@@ -16374,8 +16668,56 @@
                                 "download": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "secrets": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "ssl": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "key": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "id": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            }
+                                          },
+                                          "required": [
+                                            "key"
+                                          ],
+                                          "type": "object"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "sourceURI": {
                                       "type": "string"
+                                    },
+                                    "ssl": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "certificate": {
+                                          "type": "string"
+                                        },
+                                        "certificate_authorities": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        },
+                                        "key": {
+                                          "type": "string"
+                                        },
+                                        "renegotiation": {
+                                          "type": "string"
+                                        },
+                                        "verification_mode": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
                                     }
                                   },
                                   "required": [
@@ -17292,7 +17634,6 @@
             "name": "page",
             "required": false,
             "schema": {
-              "default": 1,
               "type": "number"
             }
           },
@@ -17366,6 +17707,38 @@
                 "asc",
                 "desc"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "searchAfter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "openPit",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pitId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pitKeepAlive",
+            "required": false,
+            "schema": {
               "type": "string"
             }
           }
@@ -17611,20 +17984,7 @@
                             "type": "number"
                           },
                           "sort": {
-                            "items": {
-                              "anyOf": [
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "enum": [],
-                                  "nullable": true
-                                }
-                              ]
-                            },
+                            "items": {},
                             "type": "array"
                           },
                           "status": {
@@ -17670,6 +18030,13 @@
                                 "output",
                                 "other"
                               ],
+                              "type": "string"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
+                          "upgrade_attempts": {
+                            "items": {
                               "type": "string"
                             },
                             "nullable": true,
@@ -17770,11 +18137,17 @@
                       },
                       "type": "array"
                     },
+                    "nextSearchAfter": {
+                      "type": "string"
+                    },
                     "page": {
                       "type": "number"
                     },
                     "perPage": {
                       "type": "number"
+                    },
+                    "pit": {
+                      "type": "string"
                     },
                     "statusSummary": {
                       "additionalProperties": {
@@ -19658,20 +20031,7 @@
                           "type": "number"
                         },
                         "sort": {
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "enum": [],
-                                "nullable": true
-                              }
-                            ]
-                          },
+                          "items": {},
                           "type": "array"
                         },
                         "status": {
@@ -19717,6 +20077,13 @@
                               "output",
                               "other"
                             ],
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "upgrade_attempts": {
+                          "items": {
                             "type": "string"
                           },
                           "nullable": true,
@@ -20142,20 +20509,7 @@
                           "type": "number"
                         },
                         "sort": {
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "enum": [],
-                                "nullable": true
-                              }
-                            ]
-                          },
+                          "items": {},
                           "type": "array"
                         },
                         "status": {
@@ -20201,6 +20555,13 @@
                               "output",
                               "other"
                             ],
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
+                        "upgrade_attempts": {
+                          "items": {
                             "type": "string"
                           },
                           "nullable": true,
@@ -22296,6 +22657,14 @@
           {
             "in": "query",
             "name": "excludeInstallStatus",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withPackagePoliciesCount",
             "required": false,
             "schema": {
               "type": "boolean"
