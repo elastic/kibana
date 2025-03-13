@@ -13,7 +13,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
-import type { Filter, RangeFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
 import { getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
 
@@ -22,10 +23,6 @@ export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
-  // Need to make this unknown to prevent circular dependencies.
-  // Apps using this property will need to cast to `IEmbeddable`.
-  // TODO: We should consider moving these commonly used types into a separate package to avoid circular dependencies
-  // https://github.com/elastic/kibana/issues/163994
   embeddable?: unknown;
   // controlledBy is an optional key in filter.meta that identifies the owner of a filter
   // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
@@ -109,23 +106,17 @@ export function createFilterAction(
       }
 
       if (timeFieldName) {
-        const { extractTimeFilter } = await import('@kbn/es-query');
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          changeTimeFilter(timeFilter, timeRangeFilter);
+          timeFilter.setTime(convertRangeFilterToTimeRange(timeRangeFilter));
         }
       } else {
         filterManager.addFilters(selectedFilters);
       }
     },
   };
-}
-
-async function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
-  const { convertRangeFilterToTimeRange } = await import('@kbn/es-query');
-  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }

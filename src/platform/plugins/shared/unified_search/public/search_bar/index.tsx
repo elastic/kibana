@@ -13,7 +13,10 @@ import type { SearchBarProps } from './search_bar';
 
 const Fallback = () => <div />;
 
-const LazySearchBar = React.lazy(() => import('./search_bar'));
+const LazySearchBar = React.lazy(async () => {
+  const { SearchBar } = await import('../async_module');
+  return { default: SearchBar };
+});
 const WrappedSearchBar = <QT extends AggregateQuery | Query = Query>(
   props: Omit<SearchBarProps<QT>, 'intl' | 'kibana'>
 ) => (

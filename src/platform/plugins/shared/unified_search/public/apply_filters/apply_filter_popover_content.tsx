@@ -42,9 +42,7 @@ interface State {
   fieldLabel?: string;
 }
 
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default class ApplyFiltersPopoverContent extends Component<Props, State> {
+export class ApplyFiltersPopoverContent extends Component<Props, State> {
   public static defaultProps = {
     filters: [],
   };

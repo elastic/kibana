@@ -25,7 +25,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 
 import { QueryLanguageSwitcher } from './language_switcher';
-import QueryStringInput from './query_string_input';
+import { QueryStringInput } from './query_string_input';
 import { unifiedSearchPluginMock } from '../mocks';
 
 jest.useFakeTimers({ legacyFakeTimers: true });

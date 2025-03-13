@@ -109,7 +109,4 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
   return <>{renderItems()}</>;
 });
 
-const FilterItems = injectI18n(FilterItemsUI);
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FilterItems;
+export const FilterItems = injectI18n(FilterItemsUI);

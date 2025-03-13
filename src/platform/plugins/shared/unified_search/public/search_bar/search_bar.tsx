@@ -41,7 +41,7 @@ import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import { QueryBarTopRow, QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type {
   SuggestionsAbstraction,

@@ -16,7 +16,10 @@ type SubmitFnType = (filters: Filter[]) => void;
 
 const Fallback = () => <div />;
 
-const LazyApplyFiltersPopoverContent = React.lazy(() => import('./apply_filter_popover_content'));
+const LazyApplyFiltersPopoverContent = React.lazy(async () => {
+  const { ApplyFiltersPopoverContent } = await import('../async_module');
+  return { default: ApplyFiltersPopoverContent };
+});
 
 export const applyFiltersPopover = (
   filters: Filter[],
