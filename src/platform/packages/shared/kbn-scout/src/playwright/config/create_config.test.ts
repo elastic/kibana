@@ -64,7 +64,8 @@ describe('createPlaywrightConfig', () => {
     expect(config.timeout).toBe(60000);
     expect(config.expect?.timeout).toBe(10000);
     expect(config.outputDir).toBe('./output/test-artifacts');
-    expect(config.projects![0].name).toEqual('chromium');
+    expect(config.projects).toHaveLength(1);
+    expect(config.projects![0].name).toEqual('local');
   });
 
   it('should return a Playwright configuration with Scout reporters', () => {
@@ -96,12 +97,17 @@ describe('createPlaywrightConfig', () => {
     ]);
   });
 
-  it(`should override 'workers' count in Playwright configuration`, () => {
+  it(`should override 'workers' count and add 'setup' project dependency`, () => {
     const testDir = './my_tests';
     const workers = 2;
 
     const config = createPlaywrightConfig({ testDir, workers });
     expect(config.workers).toBe(workers);
+
+    expect(config.projects).toHaveLength(2);
+    expect(config.projects![0].name).toEqual('setup');
+    expect(config.projects![1].name).toEqual('local');
+    expect(config.projects![1]).toHaveProperty('dependencies', ['setup']);
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {

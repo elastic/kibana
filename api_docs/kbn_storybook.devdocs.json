@@ -444,7 +444,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/storybook",
+        "id": "def-common.DEFAULT_THEME",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "DEFAULT_THEME",
+        "description": [],
+        "signature": [
+          "\"borealis.light\" | \"borealis.dark\" | \"amsterdam.light\" | \"amsterdam.dark\""
+        ],
+        "path": "src/platform/packages/shared/kbn-storybook/src/lib/themes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/storybook",
@@ -759,6 +775,21 @@
             "returnComment": []
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/storybook",
+        "id": "def-common.THEMES",
+        "type": "Object",
+        "tags": [],
+        "label": "THEMES",
+        "description": [],
+        "signature": [
+          "readonly [\"borealis.light\", \"borealis.dark\", \"amsterdam.light\", \"amsterdam.dark\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-storybook/src/lib/themes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
