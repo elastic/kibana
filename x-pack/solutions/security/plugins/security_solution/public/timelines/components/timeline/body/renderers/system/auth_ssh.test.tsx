@@ -5,16 +5,31 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 
 import { AuthSsh } from './auth_ssh';
+import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
+
+jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
 
 describe('AuthSsh', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
         <AuthSsh
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature="[ssh-signature]"
@@ -27,6 +42,7 @@ describe('AuthSsh', () => {
     test('it returns null if sshSignature and sshMethod are both null', () => {
       const wrapper = shallow(
         <AuthSsh
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature={null}
@@ -39,6 +55,7 @@ describe('AuthSsh', () => {
     test('it returns null if sshSignature and sshMethod are both undefined', () => {
       const wrapper = shallow(
         <AuthSsh
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature={undefined}
@@ -51,6 +68,7 @@ describe('AuthSsh', () => {
     test('it returns null if sshSignature is null and sshMethod is undefined', () => {
       const wrapper = shallow(
         <AuthSsh
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature={null}
@@ -63,6 +81,7 @@ describe('AuthSsh', () => {
     test('it returns null if sshSignature is undefined and sshMethod is null', () => {
       const wrapper = shallow(
         <AuthSsh
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature={undefined}
@@ -75,6 +94,7 @@ describe('AuthSsh', () => {
     test('it returns sshSignature if sshMethod is null', () => {
       const wrapper = shallow(
         <AuthSsh
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature="[sshSignature-1]"
@@ -87,6 +107,7 @@ describe('AuthSsh', () => {
     test('it returns sshMethod if sshSignature is null', () => {
       const wrapper = shallow(
         <AuthSsh
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature={null}
@@ -94,6 +115,25 @@ describe('AuthSsh', () => {
         />
       );
       expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshMethod-1]');
+    });
+
+    test('should passing correct scopeId to cell actions', () => {
+      mount(
+        <AuthSsh
+          scopeId="some_scope"
+          contextId="[context-123]"
+          eventId="[event-123]"
+          sshSignature={null}
+          sshMethod="[sshMethod-1]"
+        />
+      );
+
+      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+        {}
+      );
     });
   });
 });
