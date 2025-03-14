@@ -18,8 +18,8 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SortDirection } from '../types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { SortDirection } from '../types';
 
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
@@ -36,7 +36,6 @@ import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenanc
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
 import { useUiSetting } from '../../../utils/kibana_react';
-import { useDeleteMaintenanceWindow } from '../../../hooks/use_delete_maintenance_window';
 
 interface MaintenanceWindowsListProps {
   isLoading: boolean;
