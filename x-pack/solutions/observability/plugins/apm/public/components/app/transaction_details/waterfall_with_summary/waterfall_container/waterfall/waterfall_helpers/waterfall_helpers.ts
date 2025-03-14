@@ -274,7 +274,7 @@ export function getOrderedWaterfallItems(
 function getRootWaterfallTransaction(
   childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>
 ) {
-  const item = first(childrenByParentId.root);
+  const item = first(childrenByParentId[HIDDEN_ID]);
   if (item && item.docType === 'transaction') {
     return item;
   }
