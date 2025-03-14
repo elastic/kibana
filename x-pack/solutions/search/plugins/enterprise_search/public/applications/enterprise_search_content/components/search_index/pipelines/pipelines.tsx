@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { IndexNameLogic } from '@kbn/search-connectors-plugin/public';
 
 import { Status } from '../../../../../../common/types/api';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
@@ -33,6 +32,7 @@ import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
+import { IndexNameLogic } from '../index_name_logic';
 import { SearchIndexTabId } from '../search_index';
 
 import { InferenceErrors } from './inference_errors';
@@ -150,12 +150,7 @@ export const SearchIndexPipelines: React.FC = () => {
                 }
               )}
             </p>
-            <EuiButton
-              data-test-subj="enterpriseSearchSearchIndexPipelinesRevertPipelineToDefaultButton"
-              color="danger"
-              fill
-              onClick={() => revertPipeline({ indexName })}
-            >
+            <EuiButton color="danger" fill onClick={() => revertPipeline({ indexName })}>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
                 {
@@ -173,12 +168,7 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink
-                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutUsingPipelinesInSearchLink"
-                href={docLinks.ingestPipelines}
-                target="_blank"
-                color="subdued"
-              >
+              <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
                   {
@@ -246,12 +236,7 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink
-                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutDeployingMachineLearningModelsInElasticLink"
-                href={docLinks.deployTrainedModels}
-                target="_blank"
-                color="subdued"
-              >
+              <EuiLink href={docLinks.deployTrainedModels} target="_blank" color="subdued">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {

@@ -19,14 +19,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  ConnectorNameAndDescriptionFlyout,
-  ConnectorNameAndDescriptionLogic,
-} from '@kbn/search-connectors-plugin/public';
-
 import { DESCRIPTION_LABEL, NAME_LABEL } from '../../../shared/constants';
 import { isConnectorIndex } from '../../utils/indices';
 
+import { ConnectorNameAndDescriptionFlyout } from './connector/connector_name_and_description/connector_name_and_description_flyout';
+import { ConnectorNameAndDescriptionLogic } from './connector/connector_name_and_description/connector_name_and_description_logic';
 import { OverviewLogic } from './overview.logic';
 
 const EditDescription: React.FC<{

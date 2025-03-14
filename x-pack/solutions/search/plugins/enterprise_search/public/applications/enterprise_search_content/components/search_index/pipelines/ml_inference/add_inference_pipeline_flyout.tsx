@@ -29,13 +29,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexNameLogic, IndexViewLogic } from '@kbn/search-connectors-plugin/public';
-
 import {
   BACK_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
   CONTINUE_BUTTON_LABEL,
 } from '../../../../../shared/constants';
+
+import { IndexNameLogic } from '../../index_name_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
@@ -265,7 +266,6 @@ export const AddInferencePipelineFooter: React.FC<
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchAddInferencePipelineFooterButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
           onClick={onClose}
         >
@@ -276,7 +276,6 @@ export const AddInferencePipelineFooter: React.FC<
       <EuiFlexItem grow={false}>
         {previousStep !== undefined ? (
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchAddInferencePipelineFooterButton"
             flush="both"
             iconType="arrowLeft"
             onClick={() =>
@@ -290,7 +289,6 @@ export const AddInferencePipelineFooter: React.FC<
       <EuiFlexItem grow={false}>
         {nextStep !== undefined ? (
           <EuiButton
-            data-test-subj="enterpriseSearchAddInferencePipelineFooterButton"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
             iconType="arrowRight"
             iconSide="right"
@@ -302,7 +300,6 @@ export const AddInferencePipelineFooter: React.FC<
           </EuiButton>
         ) : attachExistingPipeline ? (
           <EuiButton
-            data-test-subj="enterpriseSearchAddInferencePipelineFooterAttachButton"
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
             disabled={!isContinueButtonEnabled}
@@ -318,7 +315,6 @@ export const AddInferencePipelineFooter: React.FC<
           </EuiButton>
         ) : (
           <EuiButton
-            data-test-subj="enterpriseSearchAddInferencePipelineFooterCreatePipelineButton"
             color="success"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
             disabled={!isContinueButtonEnabled}

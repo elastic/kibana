@@ -15,32 +15,28 @@ import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ElasticsearchViewIndex } from '@kbn/search-connectors';
-
-import {
-  ConnectorSyncRules,
-  ConnectorScheduling,
-  ConnectorConfiguration,
-  SearchIndexDocuments,
-  IndexViewLogic,
-  IndexNameLogic,
-  SearchIndexIndexMappings,
-} from '@kbn/search-connectors-plugin/public';
-
 import { ClientConfigType } from '../../../../../common/types';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
+import { ElasticsearchViewIndex } from '../../types';
 import { isConnectorIndex } from '../../utils/indices';
+import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
 import { getHeaderActions } from '../shared/header_actions/header_actions';
 
+import { ConnectorScheduling } from './connector/connector_scheduling';
+import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
+import { SearchIndexDocuments } from './documents';
 import { IndexError } from './index_error';
+import { SearchIndexIndexMappings } from './index_mappings';
+import { IndexNameLogic } from './index_name_logic';
+import { IndexViewLogic } from './index_view_logic';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 

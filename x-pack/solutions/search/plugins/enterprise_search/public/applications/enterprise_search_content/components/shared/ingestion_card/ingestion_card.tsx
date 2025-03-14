@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 interface IngestionCardProps {
   buttonIcon: IconType;

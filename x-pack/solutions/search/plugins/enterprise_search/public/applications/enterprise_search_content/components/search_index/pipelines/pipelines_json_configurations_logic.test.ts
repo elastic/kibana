@@ -6,10 +6,11 @@
  */
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
-import { IndexNameLogic } from '@kbn/search-connectors-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
+
+import { IndexNameLogic } from '../index_name_logic';
 
 import {
   IndexPipelinesConfigurationsLogic,

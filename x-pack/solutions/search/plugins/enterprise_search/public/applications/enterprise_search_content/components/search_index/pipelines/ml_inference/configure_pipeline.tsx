@@ -23,7 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexViewLogic } from '@kbn/search-connectors-plugin/public';
+import { IndexViewLogic } from '../../index_view_logic';
 
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { ModelSelect } from './model_select';
@@ -94,7 +94,6 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={nameError}
             >
               <EuiFieldText
-                data-test-subj="enterpriseSearchConfigurePipelineFieldText"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
                 disabled={inputsDisabled}
                 fullWidth
