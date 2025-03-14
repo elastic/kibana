@@ -27,7 +27,7 @@ export const mountRedirectApp = (
   { element, apiClient, history, screenshotMode, share }: MountParams
 ) => {
   render(
-    <KibanaRenderContextProvider {...coreStart}>
+    <KibanaRenderContextProvider coreStart={coreStart}>
       <RedirectApp
         apiClient={apiClient}
         history={history}
