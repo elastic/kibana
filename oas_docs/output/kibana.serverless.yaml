@@ -943,6 +943,16 @@ paths:
                     description: The identifier for the user that created the rule.
                     nullable: true
                     type: string
+                  dashboards:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                      required:
+                        - id
+                    type: array
                   enabled:
                     description: Indicates whether you want to run the rule on an interval basis after it is created.
                     type: boolean
@@ -1596,6 +1606,16 @@ paths:
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
+                dashboards:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+                  type: array
                 enabled:
                   default: true
                   description: Indicates whether you want to run the rule on an interval basis after it is created.
@@ -1862,6 +1882,16 @@ paths:
                     description: The identifier for the user that created the rule.
                     nullable: true
                     type: string
+                  dashboards:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                      required:
+                        - id
+                    type: array
                   enabled:
                     description: Indicates whether you want to run the rule on an interval basis after it is created.
                     type: boolean
@@ -2756,6 +2786,16 @@ paths:
                     description: The identifier for the user that created the rule.
                     nullable: true
                     type: string
+                  dashboards:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                      required:
+                        - id
+                    type: array
                   enabled:
                     description: Indicates whether you want to run the rule on an interval basis after it is created.
                     type: boolean
@@ -3925,6 +3965,16 @@ paths:
                     description: The identifier for the user that created the rule.
                     nullable: true
                     type: string
+                  dashboards:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                      required:
+                        - id
+                    type: array
                   enabled:
                     description: Indicates whether you want to run the rule on an interval basis after it is created.
                     type: boolean
