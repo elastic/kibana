@@ -51,6 +51,19 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
     }
   }
 
+  if (serverlessMode === 'security') {
+    // Security specific tier configs
+    const serverlessSecurityTier = getSecurityTierFromCfg(configs);
+    if (serverlessSecurityTier) {
+      configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
+      if (dev && devConfig !== false) {
+        configs.push(
+          resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.dev.yml`)
+        );
+      }
+    }
+  }
+
   return configs.filter(isNotNull);
 }
 
@@ -62,6 +75,18 @@ function getServerlessModeFromCfg(configs) {
   const config = getConfigFromFiles(configs);
 
   return config.serverless;
+}
+
+/** @typedef {'search_ai_lake' | 'essentials' | 'complete'} ServerlessSecurityTier */
+/**
+ * @param {string[]} configs List of configuration file paths
+ * @returns {ServerlessSecurityTier|undefined} The serverless security tier in the summed configs
+ */
+function getSecurityTierFromCfg(configs) {
+  const config = getConfigFromFiles(configs.filter(isNotNull));
+
+  const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
+  return productType?.product_tier;
 }
 
 /**
