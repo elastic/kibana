@@ -20,7 +20,7 @@ interface NameProps {
 const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
   if (rule.status === SiemMigrationStatus.FAILED) {
     return (
-      <EuiText color="danger" size="s">
+      <EuiText data-test-subj="ruleName" color="danger" size="s">
         {rule.original_rule.title}
       </EuiText>
     );
