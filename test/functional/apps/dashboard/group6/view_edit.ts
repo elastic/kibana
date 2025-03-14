@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const security = getService('security');
 
-  // Failing: See https://github.com/elastic/kibana/issues/200748
-  describe.skip('dashboard view edit mode', function viewEditModeTests() {
+  describe('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -154,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('when a panel is added', async function () {
           const originalPanelCount = await dashboard.getPanelCount();
 
-          await dashboardAddPanel.addVisualization('new viz panel');
+          await dashboardAddPanel.addVisualization('Rendering Test: guage');
           await dashboard.clickCancelOutOfEditMode();
 
           const panelCount = await dashboard.getPanelCount();
