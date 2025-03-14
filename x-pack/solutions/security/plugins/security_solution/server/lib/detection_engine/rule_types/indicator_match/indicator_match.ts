@@ -27,6 +27,7 @@ export const indicatorMatchExecutor = async ({
   licensing,
   experimentalFeatures,
   scheduleNotificationResponseActionsService,
+  isLoggedRequestsEnabled,
 }: {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -35,6 +36,7 @@ export const indicatorMatchExecutor = async ({
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   experimentalFeatures: ExperimentalFeatures;
+  isLoggedRequestsEnabled: boolean;
 }) => {
   return withSecuritySpan('indicatorMatchExecutor', async () => {
     return createThreatSignals({
@@ -45,6 +47,7 @@ export const indicatorMatchExecutor = async ({
       licensing,
       experimentalFeatures,
       scheduleNotificationResponseActionsService,
+      isLoggedRequestsEnabled,
     });
   });
 };

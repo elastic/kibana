@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { getEsqlRule, getNewThreatIndicatorRule } from '../../../../objects/rule';
+import { getEsqlRule } from '../../../../objects/rule';
 
 import {
   PREVIEW_LOGGED_REQUEST_DESCRIPTION,
   PREVIEW_LOGGED_REQUEST_CODE_BLOCK,
-  PREVIEW_LOGGED_REQUESTS_CHECKBOX,
-  RULES_CREATION_PREVIEW_REFRESH_BUTTON,
 } from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -59,19 +57,6 @@ describe(
           .contains('ES|QL request to find all matches');
 
         cy.get(PREVIEW_LOGGED_REQUEST_CODE_BLOCK).first().contains(expectedValidEsqlQuery);
-      });
-    });
-
-    describe('does not support preview logged requests', () => {
-      beforeEach(() => {
-        createRule(getNewThreatIndicatorRule()).then((createdRule) => {
-          visitEditRulePage(createdRule.body.id);
-        });
-      });
-
-      it('does not show preview logged requests checkbox fro Indicator Match rule', () => {
-        cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('be.visible');
-        cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('not.exist');
       });
     });
   }

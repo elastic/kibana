@@ -47,6 +47,7 @@ export interface CreateThreatSignalsOptions {
   licensing: LicensingPluginSetup;
   experimentalFeatures: ExperimentalFeatures;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  isLoggedRequestsEnabled: boolean;
 }
 
 export interface CreateThreatSignalOptions {
