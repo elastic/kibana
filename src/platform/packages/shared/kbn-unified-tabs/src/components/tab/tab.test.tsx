@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Tab } from './tab';
+import { Tab, TabProps } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const tabItem = {
@@ -27,6 +27,10 @@ const tabsSizeConfig = {
   regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
+const services: TabProps['services'] = {
+  core: {},
+};
+
 describe('Tab', () => {
   it('renders tab', async () => {
     const onLabelEdited = jest.fn();
@@ -39,6 +43,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={services}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
@@ -81,6 +86,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={services}
         getTabMenuItems={getTabMenuItems}
         onLabelEdited={jest.fn()}
         onSelect={jest.fn()}
@@ -110,6 +116,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={services}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
@@ -143,6 +150,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={services}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}

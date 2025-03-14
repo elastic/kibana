@@ -49,7 +49,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     onClose,
   } = props;
   const { euiTheme } = useEuiTheme();
-  const containerRef = useRef<HTMLDivElement>();
+  const tabRef = useRef<HTMLDivElement | null>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -81,7 +81,7 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   const onClickEvent = useCallback(
     async (event: MouseEvent<HTMLDivElement>) => {
-      if (event.currentTarget === containerRef.current) {
+      if (event.currentTarget === tabRef.current) {
         // if user presses on the space around the buttons, we should still trigger the onSelectEvent
         await onSelectEvent(event);
       }
@@ -91,13 +91,11 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   const mainTabContent = (
     <EuiFlexGroup
-      ref={containerRef}
       alignItems="center"
       direction="row"
       css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
       responsive={false}
       gutterSize="none"
-      onClick={onClickEvent}
     >
       <div css={getTabContentCss()}>
         {isInlineEditActive ? (
@@ -152,11 +150,13 @@ export const Tab: React.FC<TabProps> = (props) => {
   return (
     <TabWithBackground
       {...getTabAttributes(item, tabContentId)}
+      ref={tabRef}
       role="tab"
       aria-selected={isSelected}
       data-test-subj={`unifiedTabs_tab_${item.id}`}
       isSelected={isSelected}
       services={services}
+      onClick={onClickEvent}
     >
       {mainTabContent}
     </TabWithBackground>

@@ -20,49 +20,47 @@ export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
 }
 
-export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({
-  isSelected,
-  services,
-  children,
-  ...otherProps
-}) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-  const { isProjectChromeStyle } = useChromeStyle(services);
+export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgroundProps>(
+  ({ isSelected, services, children, ...otherProps }, ref) => {
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme } = euiThemeContext;
+    const { isProjectChromeStyle } = useChromeStyle(services);
 
-  const selectedTabBackgroundColor = isProjectChromeStyle
-    ? euiTheme.colors.body
-    : euiTheme.colors.emptyShade;
+    const selectedTabBackgroundColor = isProjectChromeStyle
+      ? euiTheme.colors.body
+      : euiTheme.colors.emptyShade;
 
-  return (
-    <div
-      {...otherProps}
-      // tab main background and another background color on hover
-      css={css`
-        display: inline-block;
-        background: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
-        transition: background ${euiTheme.animation.fast};
-        border-right: ${euiTheme.border.thin};
-        border-color: ${euiTheme.colors.lightShade};
+    return (
+      <div
+        {...otherProps}
+        ref={ref}
+        // tab main background and another background color on hover
+        css={css`
+          display: inline-block;
+          background: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
+          transition: background ${euiTheme.animation.fast};
+          border-right: ${euiTheme.border.thin};
+          border-color: ${euiTheme.colors.lightShade};
 
-        ${isSelected
-          ? ''
-          : `
+          ${isSelected
+            ? ''
+            : `
             &:hover {
               background-color: ${euiTheme.colors.lightShade};
             }
         `}
-      `}
-    >
-      <div
-        // a top shadow for an unselected tab to make sure that it stays visible when the tab is hovered
-        css={css`
-          background: ${isSelected ? 'transparent' : getTabsShadowGradient(euiThemeContext)};
-          transition: background ${euiTheme.animation.fast};
         `}
       >
-        {children}
+        <div
+          // a top shadow for an unselected tab to make sure that it stays visible when the tab is hovered
+          css={css`
+            background: ${isSelected ? 'transparent' : getTabsShadowGradient(euiThemeContext)};
+            transition: background ${euiTheme.animation.fast};
+          `}
+        >
+          {children}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
