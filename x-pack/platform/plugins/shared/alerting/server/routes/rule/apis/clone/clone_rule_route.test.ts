@@ -13,7 +13,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule_route';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({

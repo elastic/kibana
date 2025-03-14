@@ -7,14 +7,9 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import {
-  AlertsFilter,
-  DEFAULT_FLAPPING_SETTINGS,
-  MaintenanceWindowStatus,
-  RecoveredActionGroup,
-  RuleAlertData,
-} from '../types';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { AlertsFilter, RuleAlertData } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,
@@ -24,6 +19,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -52,11 +48,12 @@ import {
 import * as LegacyAlertsClientModule from './legacy_alerts_client';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { Alert } from '../alert/alert';
-import { AlertsClient, AlertsClientParams } from './alerts_client';
-import {
+import type { AlertsClientParams } from './alerts_client';
+import { AlertsClient } from './alerts_client';
+import type {
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
-  ProcessAlertsOpts,
+  DetermineDelayedAlertsOpts,
   LogAlertsOpts,
 } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
@@ -75,10 +72,10 @@ import {
   mockAAD,
 } from './alerts_client_fixtures';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 
 const date = '2023-03-28T22:27:28.159Z';
@@ -101,6 +98,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
@@ -172,6 +170,7 @@ const fetchedAlert1 = {
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -203,6 +202,7 @@ const fetchedAlert2 = {
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_INSTANCE_ID]: '2',
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -234,6 +234,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+  [ALERT_PENDING_RECOVERED_COUNT]: 0,
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -267,6 +268,7 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: undefined,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
 
@@ -284,6 +286,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: true,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_PENDING_RECOVERED_COUNT]: 0,
   ...overrides,
 });
 
@@ -317,7 +320,7 @@ const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
 
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
-  let processAlertsOpts: ProcessAlertsOpts;
+  let determineDelayedAlertsOpts: DetermineDelayedAlertsOpts;
   let logAlertsOpts: LogAlertsOpts;
 
   beforeAll(() => {
@@ -369,9 +372,8 @@ describe('Alerts Client', () => {
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
         });
-        processAlertsOpts = {
+        determineDelayedAlertsOpts = {
           ruleRunMetricsStore,
-          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           alertDelay: 0,
         };
         logAlertsOpts = { shouldLogAlerts: false, ruleRunMetricsStore };
@@ -464,7 +466,7 @@ describe('Alerts Client', () => {
         test('should split queries into chunks when there are greater than 10,000 alert UUIDs', async () => {
           mockLegacyAlertsClient.getTrackedAlerts.mockImplementation(() => ({
             active: range(15000).reduce((acc: Record<string, Alert<{}, {}>>, value: number) => {
-              const id: string = `${value}`;
+              const id = `${value}`;
               acc[id] = new Alert(id, {
                 state: { foo: true },
                 meta: {
@@ -553,14 +555,16 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid1 = alertsToReturn['1'].meta?.uuid;
-          const uuid2 = alertsToReturn['2'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta?.uuid;
+          const uuid2 = rawActiveAlerts['2'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -600,14 +604,16 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid1 = alertsToReturn['1'].meta?.uuid;
-          const uuid2 = alertsToReturn['2'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta?.uuid;
+          const uuid2 = rawActiveAlerts['2'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -646,7 +652,9 @@ describe('Alerts Client', () => {
           const alertExecutorService = alertsClient.factory();
           alertExecutorService.create('1').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -694,13 +702,15 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid2 = alertsToReturn['2'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid2 = rawActiveAlerts['2'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -767,13 +777,15 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid2 = alertsToReturn['2'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid2 = rawActiveAlerts['2'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -808,6 +820,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
@@ -894,14 +907,16 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default'); // will be skipped as getProcessedAlerts does not return it
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
           expect(spy).toHaveBeenCalledTimes(5);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
-          expect(spy).toHaveBeenNthCalledWith(2, 'recoveredCurrent');
+          expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
           expect(spy).toHaveBeenNthCalledWith(3, 'new');
 
           expect(logger.error).toHaveBeenCalledWith(
@@ -975,13 +990,15 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid3 = alertsToReturn['3'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid3 = rawActiveAlerts['3'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -1074,13 +1091,15 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid3 = alertsToReturn['3'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid3 = rawActiveAlerts['3'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -1115,6 +1134,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
@@ -1167,6 +1187,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_SEVERITY_IMPROVING]: true,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -1231,13 +1252,15 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid3 = alertsToReturn['3'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid3 = rawActiveAlerts['3'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -1349,13 +1372,15 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid3 = alertsToReturn['3'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid3 = rawActiveAlerts['3'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -1431,7 +1456,9 @@ describe('Alerts Client', () => {
 
           // Report no alerts
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1496,7 +1523,9 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1556,7 +1585,9 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1615,7 +1646,9 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -1701,7 +1734,9 @@ describe('Alerts Client', () => {
           const alertExecutorService = alertsClient.factory();
           alertExecutorService.create('1').scheduleActions('default');
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await expect(alertsClient.persistAlerts()).rejects.toThrowError(
@@ -2523,14 +2558,16 @@ describe('Alerts Client', () => {
             payload: { count: 2, url: `https://url2` },
           });
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
-          const uuid1 = alertsToReturn['1'].meta?.uuid;
-          const uuid2 = alertsToReturn['2'].meta?.uuid;
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta?.uuid;
+          const uuid2 = rawActiveAlerts['2'].meta?.uuid;
 
           expect(clusterClient.bulk).toHaveBeenCalledWith({
             index: '.alerts-test.alerts-default',
@@ -2801,7 +2838,9 @@ describe('Alerts Client', () => {
             payload: { count: 100, url: `https://elastic.co` },
           });
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -2902,7 +2941,9 @@ describe('Alerts Client', () => {
             payload: { count: 100, url: `https://elastic.co` },
           });
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
@@ -2999,7 +3040,9 @@ describe('Alerts Client', () => {
             payload: { count: 100, url: `https://elastic.co` },
           });
 
-          await alertsClient.processAlerts(processAlertsOpts);
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();

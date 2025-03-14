@@ -10,7 +10,7 @@ Although this is not a requirement, we encourage if all new code is developed in
 
 ## Project references [_project_references]
 
-Kibana has crossed the 2m LoC mark. The current situation creates some scaling problems when the default out-of-the-box setup stops working. As a result, developers suffer from slow project compilation and IDE unresponsiveness. As a part of [Developer Experience project](https://github.com/elastic/kibana/projects/63), we are migrating our tooling to use built-in TypeScript features addressing the scaling problems - [project references](https://www.typescriptlang.org/docs/handbook/project-references.md) & [incremental builds](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.md#faster-subsequent-builds-with-the---incremental-flag)
+Kibana has crossed the 2m LoC mark. The current situation creates some scaling problems when the default out-of-the-box setup stops working. As a result, developers suffer from slow project compilation and IDE unresponsiveness. As a part of [Developer Experience project](https://github.com/elastic/kibana/projects/63), we are migrating our tooling to use built-in TypeScript features addressing the scaling problems - [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) & [incremental builds](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#faster-subsequent-builds-with-the---incremental-flag)
 
 In a nutshell - instead of compiling the whole Kibana codebase at once, this setup enforces splitting the code base into independent projects that form a directed acyclic graph (DAG). This allows the TypeScript compiler (`tsc`) to apply several advanced optimizations:
 
@@ -18,7 +18,7 @@ In a nutshell - instead of compiling the whole Kibana codebase at once, this set
 * These generated `d.ts` type declarations are used whenever a referenced project is imported in a depending project
 * This makes it possible to determine which project needs rebuilding when the source code has changed to use a more aggressive caching strategy.
 
-More details are available in the [official docs](https://www.typescriptlang.org/docs/handbook/project-references.md)
+More details are available in the [official docs](https://www.typescriptlang.org/docs/handbook/project-references.html)
 
 
 ### Caveats [_caveats]

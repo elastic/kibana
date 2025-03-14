@@ -7,7 +7,7 @@
 
 import { load } from 'js-yaml';
 
-import type { PackageInstallContext } from '../../../../common/types';
+import type { AssetsMap, PackageInstallContext } from '../../../../common/types';
 import { getAssetsDataFromAssetsMap } from '../packages/assets';
 
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
@@ -310,12 +310,13 @@ function combineFilter(...filters: Array<(path: string) => boolean>) {
 
 export const loadDatastreamsFieldsFromYaml = (
   packageInstallContext: PackageInstallContext,
+  fieldAssetsMap: AssetsMap,
   datasetName?: string
 ): Field[] => {
   // Fetch all field definition files
   const fieldDefinitionFiles = getAssetsDataFromAssetsMap(
     packageInstallContext.packageInfo,
-    packageInstallContext.assetsMap,
+    fieldAssetsMap,
     isFields,
     datasetName
   );
@@ -334,12 +335,13 @@ export const loadDatastreamsFieldsFromYaml = (
 
 export const loadTransformFieldsFromYaml = (
   packageInstallContext: PackageInstallContext,
+  fieldAssetsMap: AssetsMap,
   transformName: string
 ): Field[] => {
   // Fetch all field definition files
   const fieldDefinitionFiles = getAssetsDataFromAssetsMap(
     packageInstallContext.packageInfo,
-    packageInstallContext.assetsMap,
+    fieldAssetsMap,
     combineFilter(isFields, filterForTransformAssets(transformName))
   );
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {

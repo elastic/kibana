@@ -46,7 +46,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
       alertsEvents = getMessageAddedEvents(alertsResponseBody);
     });

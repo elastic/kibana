@@ -12,7 +12,7 @@ import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
-import { createMockStore, kibanaMock } from '../../../common/mock';
+import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { copyTimeline, persistTimeline } from '../../containers/api';
 import { refreshTimelines } from './helpers';
@@ -71,7 +71,14 @@ describe('Timeline save middleware', () => {
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
     expect(startTimelineSavingMock).toHaveBeenCalled();
-    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalled();
+    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeline: expect.objectContaining({
+          dataViewId: mockGlobalState.sourcerer.sourcererScopes.timeline.selectedDataViewId,
+          indexNames: mockGlobalState.sourcerer.sourcererScopes.timeline.selectedPatterns,
+        }),
+      })
+    );
     expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(

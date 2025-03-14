@@ -172,7 +172,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
 
-  const privileges = useMissingRiskEnginePrivileges(['read']);
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   if (!isAuthorized) {
     return null;

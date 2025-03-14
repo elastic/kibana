@@ -12,20 +12,22 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
+import type { DiscoverGridFlyoutProps } from './discover_grid_flyout';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverServices } from '../../build_services';
+import type { DiscoverServices } from '../../build_services';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
-import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+import type { FlyoutCustomization } from '../../customizations';
+import { useDiscoverCustomization } from '../../customizations';
 import { discoverServiceMock } from '../../__mocks__/services';
 
 const mockFlyoutCustomization: FlyoutCustomization = {
