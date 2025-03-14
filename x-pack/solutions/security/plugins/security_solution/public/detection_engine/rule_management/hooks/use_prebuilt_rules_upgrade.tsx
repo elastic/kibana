@@ -398,43 +398,86 @@ function useRulesUpgradeWithDryRun(
         dry_run: true,
         on_conflict: UpgradeConflictResolutionEnum.SKIP,
       });
+      const ruleVersionsWithSolvableConflicts = new Map(
+        dryRunResults.results.skipped
+          .filter(
+            (x) =>
+              x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
+              x.conflict === ThreeWayDiffConflict.SOLVABLE
+          )
+          .map(({ rule_id: ruleId, version, revision }) => [
+            ruleId,
+            { rule_id: ruleId, version, revision },
+          ])
+      );
+      const ruleVersionsWithNonSolvableConflicts = new Map(
+        dryRunResults.results.skipped
+          .filter(
+            (x) =>
+              x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
+              x.conflict === ThreeWayDiffConflict.NON_SOLVABLE
+          )
+          .map(({ rule_id: ruleId, version, revision }) => [
+            ruleId,
+            { rule_id: ruleId, version, revision },
+          ])
+      );
 
-      const numOfRulesWithSolvableConflicts = dryRunResults.results.skipped.filter(
-        (x) =>
-          x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
-          x.conflict === ThreeWayDiffConflict.SOLVABLE
-      ).length;
-      const numOfRulesWithNonSolvableConflicts = dryRunResults.results.skipped.filter(
-        (x) =>
-          x.reason === SkipRuleUpgradeReasonEnum.CONFLICT &&
-          x.conflict === ThreeWayDiffConflict.NON_SOLVABLE
-      ).length;
-
-      if (numOfRulesWithSolvableConflicts === 0 && numOfRulesWithNonSolvableConflicts === 0) {
-        // There are no rule with conflicts
+      if (
+        ruleVersionsWithSolvableConflicts.size === 0 &&
+        ruleVersionsWithNonSolvableConflicts.size === 0
+      ) {
+        // There are no rules with conflicts
         await upgradeRulesRequest({
           ...requestParams,
           on_conflict: UpgradeConflictResolutionEnum.SKIP,
         });
-      } else {
-        const result = await confirmConflictsUpgrade({
-          numOfRulesWithoutConflicts: dryRunResults.results.updated.length,
-          numOfRulesWithSolvableConflicts,
-          numOfRulesWithNonSolvableConflicts,
-        });
 
-        if (!result) {
-          return;
-        }
-
-        await upgradeRulesRequest({
-          ...requestParams,
-          on_conflict:
-            result === ConfirmRulesUpgrade.WithSolvableConflicts
-              ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
-              : UpgradeConflictResolutionEnum.SKIP,
-        });
+        return;
       }
+
+      const confirmationResult = await confirmConflictsUpgrade({
+        numOfRulesWithoutConflicts: dryRunResults.results.updated.length,
+        numOfRulesWithSolvableConflicts: ruleVersionsWithSolvableConflicts.size,
+        numOfRulesWithNonSolvableConflicts: ruleVersionsWithNonSolvableConflicts.size,
+      });
+
+      if (!confirmationResult) {
+        return;
+      }
+
+      const conflictFreeRuleUpgradeSpecifiers =
+        requestParams.mode === 'SPECIFIC_RULES'
+          ? requestParams.rules.filter(
+              ({ rule_id: ruleId }) =>
+                !ruleVersionsWithSolvableConflicts.has(ruleId) &&
+                !ruleVersionsWithNonSolvableConflicts.has(ruleId)
+            )
+          : dryRunResults.results.updated.map(({ rule_id: ruleId, version, revision }) => ({
+              rule_id: ruleId,
+              version,
+              revision,
+            }));
+
+      const solvableConflictRuleUpgradeSpecifiers =
+        requestParams.mode === 'SPECIFIC_RULES'
+          ? requestParams.rules.filter(({ rule_id: ruleId }) =>
+              ruleVersionsWithSolvableConflicts.has(ruleId)
+            )
+          : Array.from(ruleVersionsWithSolvableConflicts.values());
+
+      await upgradeRulesRequest({
+        mode: 'SPECIFIC_RULES',
+        rules:
+          confirmationResult === ConfirmRulesUpgrade.WithSolvableConflicts
+            ? conflictFreeRuleUpgradeSpecifiers.concat(solvableConflictRuleUpgradeSpecifiers)
+            : conflictFreeRuleUpgradeSpecifiers,
+        pick_version: requestParams.pick_version,
+        on_conflict:
+          confirmationResult === ConfirmRulesUpgrade.WithSolvableConflicts
+            ? UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+            : UpgradeConflictResolutionEnum.SKIP,
+      });
     },
     [upgradeRulesRequest, confirmConflictsUpgrade]
   );

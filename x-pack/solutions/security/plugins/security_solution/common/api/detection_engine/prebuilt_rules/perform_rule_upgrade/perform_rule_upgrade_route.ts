@@ -144,12 +144,16 @@ export type RuleUpToDateSkipReason = z.infer<typeof RuleUpToDateSkipReason>;
 export const RuleUpToDateSkipReason = z.object({
   reason: z.literal(SkipRuleUpgradeReasonEnum.RULE_UP_TO_DATE),
   rule_id: z.string(),
+  version: RuleVersion,
+  revision: z.number(),
 });
 
 export type UpgradeConflictSkipReason = z.infer<typeof UpgradeConflictSkipReason>;
 export const UpgradeConflictSkipReason = z.object({
   reason: z.literal(SkipRuleUpgradeReasonEnum.CONFLICT),
   rule_id: z.string(),
+  version: RuleVersion,
+  revision: z.number(),
   conflict: z.nativeEnum(ThreeWayDiffConflict),
 });
 

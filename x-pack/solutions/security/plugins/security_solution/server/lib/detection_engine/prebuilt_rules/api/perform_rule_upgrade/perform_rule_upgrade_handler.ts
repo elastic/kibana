@@ -141,6 +141,8 @@ export const performRuleUpgradeHandler = async (
         if (!targetVersion || targetVersion.version <= currentVersion.version) {
           skippedRules.push({
             rule_id: targetRule.rule_id,
+            version: currentVersion.version,
+            revision: currentVersion.revision,
             reason: SkipRuleUpgradeReasonEnum.RULE_UP_TO_DATE,
           });
           return;
@@ -169,6 +171,8 @@ export const performRuleUpgradeHandler = async (
           if (conflict !== ThreeWayDiffConflict.NONE) {
             skippedRules.push({
               rule_id: targetRule.rule_id,
+              version: currentVersion.version,
+              revision: currentVersion.revision,
               reason: SkipRuleUpgradeReasonEnum.CONFLICT,
               conflict,
             });
