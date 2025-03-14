@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Subject, combineLatestWith } from 'rxjs';
-import type * as H from 'history';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -32,7 +31,6 @@ import type {
   PluginStart,
   SetupPlugins,
   StartPlugins,
-  StartServices,
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
@@ -104,14 +102,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
-      const { renderApp } = await this.lazyApplicationDependencies();
       const [coreStart, startPlugins] = await core.getStartServices();
-
       const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
-      const store = await this.store(coreStart, startPlugins, subPlugins);
+      const [
+        { renderApp },
+        { getSubPluginRoutesByCapabilities },
+        ManagementSettings,
+        { registerActions },
+        store,
+        services,
+      ] = await Promise.all([
+        this.lazyApplicationDependencies(),
+        this.lazyHelpersForRoutes(),
+        this.lazyAssistantSettingsManagement(),
+        this.lazyActions(),
+        this.store(coreStart, startPlugins, subPlugins),
+        this.services.generateServices(coreStart, startPlugins, params),
+      ]);
 
-      const services = await this.services.generateServices(coreStart, startPlugins, params);
-      return { renderApp, subPlugins, store, services };
+      return {
+        getSubPluginRoutesByCapabilities,
+        ManagementSettings,
+        registerActions,
+        renderApp,
+        subPlugins,
+        store,
+        services,
+      };
     };
 
     // register cloud security ui metrics
@@ -127,10 +144,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,
       mount: async (params) => {
-        const { renderApp, services, store, subPlugins } = await mountDependencies(params);
-        const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
+        const {
+          getSubPluginRoutesByCapabilities,
+          registerActions,
+          renderApp,
+          services,
+          store,
+          subPlugins,
+        } = await mountDependencies(params);
 
-        await this.registerActions(store, params.history, core, services);
+        if (!this._actionsRegistered) {
+          this._actionsRegistered = true;
+          registerActions(store, params.history, core, services);
+        }
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
@@ -191,8 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       hideFromSidebar: true,
       order: 1,
       mount: async (params) => {
-        const { renderApp, services, store } = await mountDependencies();
-        const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+        const { ManagementSettings, renderApp, services, store } = await mountDependencies();
 
         return renderApp({
           ...params,
@@ -412,19 +437,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTimelineEmbeddedStore(this._securityStoreForDiscover);
     }
     return this._securityStoreForDiscover;
-  }
-
-  private async registerActions(
-    store: SecurityAppStore,
-    history: H.History,
-    coreSetup: CoreSetup,
-    services: StartServices
-  ) {
-    if (!this._actionsRegistered) {
-      const { registerActions } = await this.lazyActions();
-      registerActions(store, history, coreSetup, services);
-      this._actionsRegistered = true;
-    }
   }
 
   /**

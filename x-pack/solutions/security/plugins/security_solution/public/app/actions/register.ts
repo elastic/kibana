@@ -43,7 +43,7 @@ import { registerDiscoverHistogramActions } from './register_discover_histogram_
 import { createFilterInLensAction } from './filter/lens/filter_in';
 import { createFilterOutLensAction } from './filter/lens/filter_out';
 
-export const registerUIActions = (
+export const registerUIActions = async (
   store: SecurityAppStore,
   history: History,
   coreSetup: CoreSetup,

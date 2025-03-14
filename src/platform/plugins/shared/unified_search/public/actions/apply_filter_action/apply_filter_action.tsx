@@ -19,8 +19,6 @@ import { getIndexPatterns } from '../../services';
 import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../constants';
 
-export type CreateFilterActionArguments = Parameters<typeof createFilterAction>;
-
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
