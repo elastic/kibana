@@ -43,6 +43,11 @@ info:
     label: Feedback
     url: https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
+  - url: http://localhost:5622
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
   - url: https://{kibana_url}
     variables:
       kibana_url:
@@ -254,6 +259,11 @@ tags:
     description: |
       Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
     x-displayName: Streams
+  - name: synthetics
+    x-displayName: Synthetics
+    externalDocs:
+      description: Synthetic monitoring
+      url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
   - name: system
     x-displayName: System
     description: |
@@ -51541,6 +51551,460 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
+  /api/synthetics/monitors:
+    get:
+      description: |
+        Get a list of monitors.
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-synthetic-monitors
+      parameters:
+        - description: Additional filtering criteria.
+          in: query
+          name: filter
+          schema:
+            type: string
+        - description: The locations to filter by.
+          in: query
+          name: locations
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: The monitor types to filter.
+          in: query
+          name: monitorTypes
+          schema:
+            oneOf:
+              - enum:
+                  - browser
+                  - http
+                  - icmp
+                  - tcp
+                type: string
+              - type: array
+        - description: The page number for paginated results.
+          in: query
+          name: page
+          schema:
+            type: integer
+        - description: The number of items to return per page.
+          in: query
+          name: per_page
+          schema:
+            type: integer
+        - description: The projects to filter by.
+          in: query
+          name: projects
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: A free-text query string
+          in: query
+          name: query
+          schema:
+            type: string
+        - description: The schedules to filter by.
+          in: query
+          name: schedules
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - description: The field to sort the results by.
+          in: query
+          name: sortField
+          schema:
+            enum:
+              - name
+              - createdAt
+              - updatedAt
+              - status
+            type: string
+        - description: The sort order.
+          in: query
+          name: sortOrder
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: The status to filter by.
+          in: query
+          name: status
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - description: Tags to filter monitors.
+          in: query
+          name: tags
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSyntheticMonitorsResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`
+                  value: |-
+                    {
+                        "page": 1,
+                        "total": 24,
+                        "monitors": [
+                            {
+                                "type": "icmp",
+                                "enabled": false,
+                                "alert": {
+                                    "status": {
+                                        "enabled": true
+                                    },
+                                    "tls": {
+                                        "enabled": true
+                                    }
+                                },
+                                "schedule": {
+                                    "number": "3",
+                                    "unit": "m"
+                                },
+                                "config_id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "timeout": "16",
+                                "name": "8.8.8.8:80",
+                                "locations": [
+                                    {
+                                        "id": "us_central",
+                                        "label": "North America - US Central",
+                                        "geo": {
+                                            "lat": 41.25,
+                                            "lon": -95.86
+                                        },
+                                        "isServiceManaged": true
+                                    }
+                                ],
+                                "namespace": "default",
+                                "origin": "ui",
+                                "id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "max_attempts": 2,
+                                "wait": "7",
+                                "revision": 3,
+                                "mode": "all",
+                                "ipv4": true,
+                                "ipv6": true,
+                                "created_at": "2023-11-07T09:57:04.152Z",
+                                "updated_at": "2023-12-04T19:19:34.039Z",
+                                "host": "8.8.8.8:80"
+                            }
+                        ],
+                        "absoluteTotal": 24,
+                        "perPage": 10,
+                    }
+              schema:
+                type: object
+          description: Successful request
+      summary: Get monitors
+      tags:
+        - synthetics
+    post:
+      description: |
+        Create a new monitor with the specified attributes. A monitor can be one of the following types: HTTP, TCP, ICMP, or Browser. The required and default fields may vary based on the monitor type.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: post-synthetic-monitors
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postSyntheticMonitorsRequestExample1:
+                description: Create an HTTP monitor to check a website's availability.
+                summary: HTTP monitor
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample2:
+                description: Create a TCP monitor to monitor a server's availability.
+                summary: TCP monitor
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              postSyntheticMonitorsRequestExample3:
+                description: create an ICMP monitor to perform ping checks.
+                summary: ICMP monitor
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample4:
+                description: Create a browser monitor to check a website.
+                summary: Browser monitor
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+            schema:
+              description: |
+                The request body should contain the attributes of the monitor you want to create. The required and default fields differ depending on the monitor type.
+              discriminator:
+                propertyName: type
+              oneOf:
+                - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+        required: true
+      responses:
+        '200':
+          description: Successful request
+      summary: Create a monitor
+      tags:
+        - synthetics
+  /api/synthetics/monitors/_bulk_delete:
+    post:
+      description: |
+        Delete multiple monitors by sending a list of config IDs.
+      operationId: delete-synthetic-monitors
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkDeleteRequestExample1:
+                description: Run `POST /api/synthetics/monitors/_bulk_delete` to delete a list of monitors.
+                value: |-
+                  {
+                    "ids": [
+                      "monitor1-id",
+                      "monitor2-id"
+                    ]
+                  }
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: An array of monitor IDs to delete.
+                  items:
+                    - type: string
+                  type: array
+              required:
+                - ids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteMonitorsResponseExample1:
+                  description: A response from successfully deleting multiple monitors.
+                  value: |-
+                    [
+                      {
+                        "id": "monitor1-id",
+                        "deleted": true
+                      },
+                      {
+                        "id": "monitor2-id",
+                        "deleted": true
+                      }
+                    ]
+              schema:
+                items:
+                  - description: The API response includes information about the deleted monitors.
+                    type: object
+                    properties:
+                      deleted:
+                        description: |
+                          If it is `true`, the monitor was successfully deleted If it is `false`, the monitor was not deleted.
+                        type: boolean
+                      ids:
+                        description: The unique identifier of the deleted monitor.
+                        type: string
+                type: array
+      summary: Delete monitors.
+      tags:
+        - synthetics
+  /api/synthetics/monitors/{config_id}:
+    delete:
+      description: |
+        Delete a monitors from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: delete-synthetic-monitor
+      parameters:
+        - description: The identifier for the monitor that you want to delete.
+          in: path
+          name: config_id
+          required: true
+          schema:
+            type: string
+      summary: Delete a monitor
+      tags:
+        - synthetics
+    get:
+      operationId: get-synthetic-monitor
+      parameters:
+        - description: The ID of the monitor.
+          in: path
+          name: config_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSyntheticMonitorResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors/<config_id>`.
+                  value: |-
+                    {
+                        "type": "http",
+                        "enabled": true,
+                        "alert": {
+                            "status": {
+                                "enabled": true
+                            },
+                            "tls": {
+                                "enabled": true
+                            }
+                        },
+                        "schedule": {
+                            "number": "3",
+                            "unit": "m"
+                        },
+                        "config_id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "timeout": "16",
+                        "name": "am i something",
+                        "locations": [
+                            {
+                                "id": "us_central",
+                                "label": "North America - US Central",
+                                "geo": {
+                                    "lat": 41.25,
+                                    "lon": -95.86
+                                },
+                                "isServiceManaged": true
+                            }
+                        ],
+                        "namespace": "default",
+                        "origin": "ui",
+                        "id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "max_attempts": 2,
+                        "__ui": {
+                            "is_tls_enabled": false
+                        },
+                        "max_redirects": "0",
+                        "response.include_body": "on_error",
+                        "response.include_headers": true,
+                        "check.request.method": "GET",
+                        "mode": "any",
+                        "response.include_body_max_bytes": "1024",
+                        "ipv4": true,
+                        "ipv6": true,
+                        "ssl.verification_mode": "full",
+                        "ssl.supported_protocols": [
+                            "TLSv1.1",
+                            "TLSv1.2",
+                            "TLSv1.3"
+                        ],
+                        "revision": 13,
+                        "created_at": "2023-11-08T08:45:29.334Z",
+                        "updated_at": "2023-12-18T20:31:44.770Z",
+                        "url": "https://fast.com"
+                    }
+              schema:
+                type: object
+        '404':
+          description: If the monitor is not found, the API returns a 404 error.
+      summary: Get a monitor
+      tags:
+        - synthetics
+    put:
+      description: |
+        Update a monitor with the specified attributes. The required and default fields may vary based on the monitor type.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+        You can also partially update a monitor. This will only update the fields that are specified in the request body. All other fields are left unchanged. The specified fields should conform to the monitor type. For example, you can't update the `inline_scipt` field of a HTTP monitor.
+      operationId: put-synthetic-monitor
+      parameters:
+        - description: The identifier for the monitor that you want to update.
+          in: path
+          name: config_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putSyntheticMonitorsRequestExample1:
+                description: Update an HTTP monitor that checks a website's availability.
+                summary: HTTP monitor
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample2:
+                description: Update a TCP monitor that monitors a server's availability.
+                summary: TCP monitor
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              putSyntheticMonitorsRequestExample3:
+                description: Update an ICMP monitor that performs ping checks.
+                summary: ICMP monitor
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample4:
+                description: Update a browser monitor that checks a website.
+                summary: Browser monitor
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+            schema:
+              description: |
+                The request body should contain the attributes of the monitor you want to update. The required and default fields differ depending on the monitor type.
+              discriminator:
+                propertyName: type
+              oneOf:
+                - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+              type: object
+        required: true
+      summary: Update a monitor
+      tags:
+        - synthetics
   /api/task_manager/_health:
     get:
       description: |
@@ -74113,6 +74577,260 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Synthetics_browserMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            ignore_https_errors:
+              default: false
+              description: Ignore HTTPS errors.
+              type: boolean
+            inline_script:
+              description: The inline script.
+              type: string
+            playwright_options:
+              description: Playwright options.
+              type: object
+            screenshots:
+              default: 'on'
+              description: The screenshot option.
+              enum:
+                - 'on'
+                - 'off'
+                - only-on-failure
+              type: string
+            synthetics_args:
+              description: Synthetics agent CLI arguments.
+              type: array
+            type:
+              description: The monitor type.
+              enum:
+                - browser
+              type: string
+          required:
+            - inline_script
+            - type
+    Synthetics_commonMonitorFields:
+      title: Common monitor fields
+      type: object
+      properties:
+        alert:
+          description: |
+            The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.
+          type: object
+        enabled:
+          default: true
+          description: Specify whether the monitor is enabled.
+          type: boolean
+        locations:
+          description: |
+            The location to deploy the monitor.
+            Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
+            To list available locations you can:
+
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Management* and click *Create monitor*. Locations will be listed in *Locations*.
+          externalDocs:
+            url: https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts
+          items:
+            - type: string
+          type: array
+        name:
+          description: The monitor name.
+          type: string
+        namespace:
+          default: default
+          description: |
+            The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`.
+          type: string
+        params:
+          description: The monitor parameters.
+          type: string
+        private_locations:
+          description: |
+            The private locations to which the monitors will be deployed.
+            These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
+            You can specify a private location using the location's name.
+            To list available privalte locations you can:
+
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Settings* and click *Private locationsr*. Private locations will be listed in the table.
+
+            > info
+            > You can provide `locations` or `private_locations` or both. At least one is required.
+          items:
+            - type: string
+          type: array
+        retest_on_failure:
+          default: true
+          description: |
+            Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created and if configured, an alert sent. The monitor will then resume running according to the defined schedule. Using `retest_on_failure` can reduce noise related to transient problems.
+          type: boolean
+        schedule:
+          description: |
+            The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors. The default value is `10` minutes for Browser monitors.
+          type: number
+        service.name:
+          description: The APM service name.
+          type: string
+        tags:
+          description: An array of tags.
+          items:
+            - type: string
+          type: array
+        timeout:
+          default: 16
+          description: |
+            The monitor timeout in seconds. The monitor will fail if it doesn't complete within this time.
+          type: number
+      required:
+        - name
+    Synthetics_httpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalproperties: true
+          type: object
+          properties:
+            check:
+              description: The check request settings.
+              type: objects
+              properties:
+                request:
+                  description: An optional request to send to the remote host.
+                  type: object
+                  properties:
+                    body:
+                      description: Optional request body content.
+                      type: string
+                    headers:
+                      description: |
+                        A dictionary of additional HTTP headers to send. By default, Synthetics will set the User-Agent header to identify itself.
+                      type: object
+                    method:
+                      description: The HTTP method to use.
+                      enum:
+                        - HEAD
+                        - GET
+                        - POST
+                        - OPTIONS
+                      type: string
+                response:
+                  additionalProperties: true
+                  description: The expected response.
+                  type: object
+                  properties:
+                    body:
+                      type: object
+                    headers:
+                      description: A dictionary of expected HTTP headers. If the header is not found, the check fails.
+                      type: object
+            ipv4:
+              default: true
+              description: If `true`, ping using the ipv4 protocol.
+              type: boolean
+            ipv6:
+              default: true
+              description: If `true`, ping using the ipv6 protocol.
+              type: boolean
+            max_redirects:
+              default: 0
+              description: The maximum number of redirects to follow.
+              type: number
+            mode:
+              default: any
+              description: |
+                The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, you should use `all`.
+              enum:
+                - all
+                - any
+              type: string
+            password:
+              description: |
+                The password for authenticating with the server. The credentials are passed with the request.
+              type: string
+            proxy_headers:
+              description: Additional headers to send to proxies during CONNECT requests.
+              type: object
+            proxy_url:
+              description: The URL of the proxy to use for this monitor.
+              type: string
+            response:
+              description: Controls the indexing of the HTTP response body contents to the `http.response.body.contents field`.
+              type: object
+            ssl:
+              description: |
+                The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.
+                    type:
+              type: object
+            type:
+              description: The monitor type.
+              enum:
+                - http
+              type: string
+            url:
+              description: The URL to monitor.
+              type: string
+            username:
+              description: |
+                The username for authenticating with the server. The credentials are passed with the request.
+              type: string
+          required:
+            - type
+            - url
+    Synthetics_icmpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            host:
+              description: The host to ping.
+              type: string
+            type:
+              description: The monitor type.
+              enum:
+                - icmp
+              type: string
+            wait:
+              default: 1
+              description: The wait time in seconds.
+              type: number
+          required:
+            - host
+            - type
+    Synthetics_tcpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            host:
+              description: |
+                The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon, for example "example.com:9200".
+              type: string
+            proxy_url:
+              description: |
+                The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of `socks5://`. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the `proxy_use_local_resolver` option.
+              type: string
+            proxy_use_local_resolver:
+              default: false
+              description: |
+                Specify that hostnames are resolved locally instead of being resolved on the proxy server. If `false`, name resolution occurs on the proxy server.
+              type: boolean
+            ssl:
+              description: |
+                The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.
+              type: object
+            type:
+              description: The monitor type.
+              enum:
+                - tcp
+              type: string
+          required:
+            - host
+            - type
     Task_manager_health_APIs_configuration:
       description: |
         This object summarizes the current configuration of Task Manager. This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
