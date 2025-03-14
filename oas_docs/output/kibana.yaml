@@ -45963,7 +45963,7 @@ paths:
                 ids:
                   description: An array of monitor IDs to delete.
                   items:
-                    - type: string
+                    type: string
                   type: array
               required:
                 - ids
@@ -45988,16 +45988,16 @@ paths:
                     ]
               schema:
                 items:
-                  - description: The API response includes information about the deleted monitors.
-                    type: object
-                    properties:
-                      deleted:
-                        description: |
-                          If it is `true`, the monitor was successfully deleted If it is `false`, the monitor was not deleted.
-                        type: boolean
-                      ids:
-                        description: The unique identifier of the deleted monitor.
-                        type: string
+                  description: The API response includes information about the deleted monitors.
+                  type: object
+                  properties:
+                    deleted:
+                      description: |
+                        If it is `true`, the monitor was successfully deleted If it is `false`, the monitor was not deleted.
+                      type: boolean
+                    ids:
+                      description: The unique identifier of the deleted monitor.
+                      type: string
                 type: array
       summary: Delete monitors
       tags:
@@ -46267,7 +46267,7 @@ paths:
             schema:
               oneOf:
                 - items:
-                    - $ref: '#/components/schemas/Synthetics_parameterRequest'
+                    $ref: '#/components/schemas/Synthetics_parameterRequest'
                   type: array
                 - $ref: '#/components/schemas/Synthetics_parameterRequest'
         description: The request body can contain either a single parameter object or an array of parameter objects.
@@ -46308,7 +46308,7 @@ paths:
               schema:
                 oneOf:
                   - items:
-                      - $ref: '#/components/schemas/Synthetics_postParameterResponse'
+                      $ref: '#/components/schemas/Synthetics_postParameterResponse'
                     type: array
                   - $ref: '#/components/schemas/Synthetics_postParameterResponse'
           description: A successful response.
@@ -46461,7 +46461,7 @@ paths:
                 tags:
                   description: An array of updated tags to categorize the parameter.
                   items:
-                    - type: string
+                    type: string
                   type: array
                 value:
                   description: The updated value associated with the parameter.
@@ -46527,7 +46527,7 @@ paths:
                     ]
               schema:
                 items:
-                  - $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+                  $ref: '#/components/schemas/Synthetics_getPrivateLocation'
                 type: array
           description: A successful response.
       summary: Get private locations
@@ -68656,7 +68656,7 @@ components:
           externalDocs:
             url: https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts
           items:
-            - type: string
+            type: string
           type: array
         name:
           description: The monitor name.
@@ -68682,7 +68682,7 @@ components:
             > info
             > You can provide `locations` or `private_locations` or both. At least one is required.
           items:
-            - type: string
+            type: string
           type: array
         retest_on_failure:
           default: true
@@ -68699,7 +68699,7 @@ components:
         tags:
           description: An array of tags.
           items:
-            - type: string
+            type: string
           type: array
         timeout:
           default: 16
@@ -68726,13 +68726,13 @@ components:
           description: |
             The namespaces associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
           items:
-            - type: string
+            type: string
           type: array
         tags:
           description: |
             An array of tags associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
           items:
-            - type: string
+            type: string
           type: array
         value:
           description: |
