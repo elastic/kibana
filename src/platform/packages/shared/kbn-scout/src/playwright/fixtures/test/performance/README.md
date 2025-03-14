@@ -20,7 +20,7 @@
   - DOM Complexity Metrics (nodesCount, documentsCount)
 
 
-### Uage: capturing JS bundles on page
+### Usage: capturing JS bundles on page
 
 ```ts
 test.describe(

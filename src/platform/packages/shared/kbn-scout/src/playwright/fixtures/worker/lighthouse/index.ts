@@ -8,7 +8,7 @@
  */
 
 import { RunnerResult } from 'lighthouse';
-import { coreWorkerFixtures } from './core_fixtures';
+import { coreWorkerFixtures } from '../core_fixtures';
 
 type OutputMode = 'html' | 'json' | 'csv';
 export interface LighthouseAuditOptions {
@@ -25,7 +25,7 @@ export interface LighthouseFixture {
 
 /**
  * Lighthouse fixture https://developer.chrome.com/docs/lighthouse/overview/
- * It allow to run Lighthouse audits on a given URL
+ * It allows to run Lighthouse audits on a given URL
  */
 export const lighthouseFixture = coreWorkerFixtures.extend<
   { lighthouse: LighthouseFixture },
