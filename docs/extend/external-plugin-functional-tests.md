@@ -12,7 +12,7 @@ Plugins use the `FunctionalTestRunner` by running it out of the {{kib}} repo. En
 
 Every project or plugin should have its own `FunctionalTestRunner` config file. Just like {{kib}}'s, this config file will define all of the test files to load, providers for Services and PageObjects, as well as configuration options for certain services.
 
-To get started copy and paste this example to `test/functional/config.js`:
+To get started copy and paste this example to `src/platform/test/functional/config.js`:
 
 ```js
 import { resolve } from 'path';
@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }) {
 
   // read the {kib} config file so that we can utilize some of
   // its services and PageObjects
-  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'test/functional/config.base.js'));
+  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'src/platform/test/functional/config.base.js'));
 
   return {
     // list paths to the files that contain your plugins tests
@@ -83,4 +83,3 @@ node ../../kibana/scripts/functional_test_runner
 ## Using esArchiver [_using_esarchiver]
 
 We’re working on documentation for this, but for now the best place to look is the original [pull request](https://github.com/elastic/kibana/issues/10359).
-
