@@ -3210,6 +3210,21 @@
                     ],
                     "type": "object"
                   },
+                  "dashboards": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
                   "flapping": {
                     "additionalProperties": false,
                     "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
