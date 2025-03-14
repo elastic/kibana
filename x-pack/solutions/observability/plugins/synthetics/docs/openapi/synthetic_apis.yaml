@@ -488,6 +488,66 @@ paths:
                         "deleted": true
                       }
                     ]
+  /api/synthetics/params:
+    post:
+      summary: Add parameters
+      operationId: post-parameters
+      description: Add one or more parameters to the Synthetics app.
+      tags:
+        - synthetics
+    put:
+      summary: Update a parameter
+      operationId: put-parameter
+      # description: TBD
+      tags:
+        - synthetics
+  /api/synthetics/params/{id}:
+    delete:
+      summary: Delete a parameter
+      operationId: delete-parameter
+      # description: TBD
+      tags:
+        - synthetics
+    get:
+      summary: Get a parameter
+      operationId: get-parameter
+      # description: TBD
+      tags:
+        - synthetics
+  /api/synthetics/params/_bulk_delete:
+    delete:
+      summary: Delete parameters
+      operationId: delete-parameters
+      # description: TBD
+      tags:
+        - synthetics
+  /api/synthetics/private_locations:
+    get:
+      summary: Get private locations
+      operationId: get-private-locations
+      description: >
+        Get a list of private locations.
+      tags:
+        - synthetics
+    post:
+      summary: Create a private location
+      operationId: post-private-location
+      # description: TBD
+      tags:
+        - synthetics
+  /api/synthetics/private_locations/{location_id}:
+    delete:
+      summary: Delete a private location
+      operationId: delete-private-location
+      # description: TBD
+      tags:
+        - synthetics
+    get:
+      summary: Get a private location
+      operationId: get-private-location
+      # description: TBD
+      tags:
+        - synthetics
 components:
   schemas:
     commonMonitorFields:
