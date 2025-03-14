@@ -560,7 +560,7 @@ queue:
         cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
 
         cy.getBySel(SETTINGS_OUTPUTS.SSL_BUTTON).click();
-        cy.get('[placeholder="Specify ssl certificate"]').clear().type('SSL CERTIFICATE');
+        cy.get('[placeholder="Specify SSL certificate"]').clear().type('SSL CERTIFICATE');
         cy.get('[placeholder="Specify certificate key"]').clear().type('SSL KEY');
 
         cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');
