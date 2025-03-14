@@ -23,7 +23,7 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
  * or a no-data message if investigation guide hasn't been set up on the rule
  */
 export const InvestigationGuide: React.FC = () => {
-  const { dataFormattedForFieldBrowser, isPreview } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, isRulePreview } = useDocumentDetailsContext();
 
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
     dataFormattedForFieldBrowser,
@@ -40,7 +40,7 @@ export const InvestigationGuide: React.FC = () => {
   );
 
   const content = useMemo(() => {
-    if (isPreview) {
+    if (isRulePreview) {
       return (
         <EuiCallOut
           iconType="documentation"
@@ -142,7 +142,7 @@ export const InvestigationGuide: React.FC = () => {
         />
       </EuiCallOut>
     );
-  }, [isPreview, loading, hasInvestigationGuide, isLinkEnabled, goToInvestigationsTab]);
+  }, [isRulePreview, loading, hasInvestigationGuide, isLinkEnabled, goToInvestigationsTab]);
 
   return <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>{content}</div>;
 };

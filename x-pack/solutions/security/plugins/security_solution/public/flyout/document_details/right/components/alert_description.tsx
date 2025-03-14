@@ -29,7 +29,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
  */
 export const AlertDescription: FC = () => {
   const { telemetry } = useKibana().services;
-  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, scopeId, isRulePreview } = useDocumentDetailsContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
@@ -64,7 +64,7 @@ export const AlertDescription: FC = () => {
               defaultMessage: 'Show rule summary',
             }
           )}
-          disabled={isEmpty(ruleName) || isEmpty(ruleId) || isPreview}
+          disabled={isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"
@@ -73,7 +73,7 @@ export const AlertDescription: FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [ruleName, openRulePreview, ruleId, isPreview]
+    [ruleName, openRulePreview, ruleId, isRulePreview]
   );
 
   const alertRuleDescription =

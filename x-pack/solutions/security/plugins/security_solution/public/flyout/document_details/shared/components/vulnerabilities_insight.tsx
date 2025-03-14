@@ -70,7 +70,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   openDetailsPanel,
 }) => {
   const renderingId = useGeneratedHtmlId();
-  const { scopeId, isPreview } = useDocumentDetailsContext();
+  const { scopeId, isRulePreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
   const { data } = useVulnerabilitiesPreview({
@@ -158,7 +158,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
             field={'host.name'}
             value={hostName}
             scopeId={scopeId}
-            isPreview={isPreview}
+            isRulePreview={isRulePreview}
             data-test-subj={`${dataTestSubj}-count`}
           >
             <FormattedCount count={totalVulnerabilities} />
@@ -170,7 +170,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
       totalVulnerabilities,
       hostName,
       scopeId,
-      isPreview,
+      isRulePreview,
       dataTestSubj,
       euiTheme.size,
       isNewNavigationEnabled,

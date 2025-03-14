@@ -15,14 +15,14 @@ interface PanelFooterProps {
   /**
    * Boolean that indicates whether flyout is in preview and action should be hidden
    */
-  isPreview: boolean;
+  isRulePreview: boolean;
 }
 
 /**
  * Bottom section of the flyout that contains the take action button
  */
-export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
-  if (isPreview) return null;
+export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
+  if (isRulePreview) return null;
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>

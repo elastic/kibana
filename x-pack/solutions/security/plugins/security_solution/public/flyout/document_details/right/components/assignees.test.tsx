@@ -49,7 +49,7 @@ const renderAssignees = (
   eventId = 'event-1',
   alertAssignees = ['user-id-1'],
   onAssigneesUpdated = jest.fn(),
-  isPreview = false
+  isRulePreview = false
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => alertAssignees.includes(user.uid));
   (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
@@ -62,7 +62,7 @@ const renderAssignees = (
         eventId={eventId}
         assignedUserIds={alertAssignees}
         onAssigneesUpdated={onAssigneesUpdated}
-        isPreview={isPreview}
+        isRulePreview={isRulePreview}
       />
     </TestProviders>
   );

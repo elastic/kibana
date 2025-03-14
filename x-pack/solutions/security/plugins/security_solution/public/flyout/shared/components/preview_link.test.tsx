@@ -151,7 +151,7 @@ describe('<PreviewLink />', () => {
           value={'rule'}
           data-test-subj={'rule-link'}
           scopeId={'scopeId'}
-          isPreview={true}
+          isRulePreview={true}
         />
       </TestProviders>
     );

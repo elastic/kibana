@@ -22,7 +22,7 @@ const ExtendedFlyoutWrapper = styled.div`
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
  */
 export const ResponseDetails: React.FC = () => {
-  const { searchHit, dataAsNestedObject, isPreview } = useDocumentDetailsContext();
+  const { searchHit, dataAsNestedObject, isRulePreview } = useDocumentDetailsContext();
 
   const responseActionsView = useResponseActionsView({
     rawEventData: searchHit,
@@ -31,7 +31,7 @@ export const ResponseDetails: React.FC = () => {
 
   return (
     <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
-      {isPreview ? (
+      {isRulePreview ? (
         <FormattedMessage
           id="xpack.securitySolution.flyout.left.response.previewMessage"
           defaultMessage="Response is not available in alert preview."
