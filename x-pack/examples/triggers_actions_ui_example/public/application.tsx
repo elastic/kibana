@@ -40,6 +40,8 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -60,6 +62,8 @@ export interface TriggersActionsUiExampleComponentParams {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  dashboard: DashboardStart;
+  featureFlags: FeatureFlagsStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -76,6 +80,8 @@ const TriggersActionsUiExampleApp = ({
   unifiedSearch,
   fieldFormats,
   licensing,
+  dashboard,
+  featureFlags,
   ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
@@ -218,6 +224,8 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    dashboard,
+                    featureFlags,
                     ...startServices,
                   }}
                 />
@@ -240,6 +248,8 @@ const TriggersActionsUiExampleApp = ({
                     dataViews,
                     unifiedSearch,
                     settings,
+                    dashboard,
+                    featureFlags,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                     ...startServices,
@@ -287,6 +297,7 @@ export const renderApp = (
               fieldFormats={deps.fieldFormats}
               licensing={deps.licensing}
               fieldsMetadata={deps.fieldsMetadata}
+              dashboard={deps.dashboard}
               {...core}
             />
           </IntlProvider>

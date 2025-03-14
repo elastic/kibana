@@ -39,6 +39,8 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
 export interface AppDependencies {
   analytics: AnalyticsServiceStart;
@@ -70,6 +72,9 @@ export interface AppDependencies {
   settings: SettingsStart;
   contentManagement: ContentManagementPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  dashboard: DashboardStart;
+  featureFlags: FeatureFlagsStart;
+
 }
 
 export const useAppDependencies = () => {
