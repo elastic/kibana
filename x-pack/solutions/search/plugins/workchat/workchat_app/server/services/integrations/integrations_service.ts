@@ -33,9 +33,22 @@ const availableIntegrations: IntegrationModel[] = [
   },
   {
     id: '2',
-    type: IntegrationType.custom,
+    type: IntegrationType.external_server,
     configuration: {
       url: 'http://127.0.0.1:3001/sse',
+    },
+  },
+  {
+    id: '4',
+    type: IntegrationType.index_source,
+    configuration: {
+      index: 'hr-questions',
+      description: 'HR document knowledgebase',
+      fields: {
+        filterFields: [],
+        contextFields: [{ field: 'content' }, { field: 'title' }],
+      },
+      queryTemplate: '{"semantic":{"query":"{query}","field":"content"}}',
     },
   },
 ];

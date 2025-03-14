@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { IntegrationRegistry } from './integration_registry';
-export { IntegrationsService } from './integrations_service';
+export const PLUGIN_ID = 'wciIndexSource';
+export const PLUGIN_NAME = 'wciIndexSource';

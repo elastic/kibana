@@ -10,4 +10,4 @@ module.exports = {
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/wci_salesforce/server'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
-}; 
+};

@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { IntegrationRegistry } from './integration_registry';
-export { IntegrationsService } from './integrations_service';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/wci_external_server/server'],
+  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+};

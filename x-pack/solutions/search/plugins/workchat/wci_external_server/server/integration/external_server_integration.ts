@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import {
   IntegrationType,
   WorkchatIntegrationDefinition,
   WorkChatIntegration,
-  IntegrationContext,
   getClientForExternalServer,
 } from '@kbn/wci-common';
+import { WCIExternalServerConfiguration } from '../types';
 
-export const getCustomIntegrationDefinition = (): WorkchatIntegrationDefinition => {
+export const getExternalServerIntegrationDefinition = ({
+  core,
+  logger,
+}: {
+  core: CoreSetup;
+  logger: Logger;
+}): WorkchatIntegrationDefinition<WCIExternalServerConfiguration> => {
   return {
-    getType: () => IntegrationType.custom,
-    createIntegration: async ({
-      request,
-      configuration,
-    }: IntegrationContext): Promise<WorkChatIntegration> => {
+    getType: () => IntegrationType.external_server,
+    createIntegration: async ({ configuration }): Promise<WorkChatIntegration> => {
       const client = await getClientForExternalServer({ serverUrl: configuration.url });
+
       return {
-        type: IntegrationType.salesforce,
+        type: IntegrationType.external_server,
         client,
       };
     },

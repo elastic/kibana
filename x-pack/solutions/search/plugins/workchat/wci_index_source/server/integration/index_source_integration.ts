@@ -13,26 +13,25 @@ import {
   getClientForInternalServer,
 } from '@kbn/wci-common';
 import { createMcpServer } from './mcp_server';
-import { SalesforceConfiguration } from '../types';
-
-export const getSalesforceIntegrationDefinition = ({
+import { WCIIndexSourceConfiguration } from '../types';
+export const getIndexSourceIntegrationDefinition = ({
   core,
   logger,
 }: {
   core: CoreSetup;
   logger: Logger;
-}): WorkchatIntegrationDefinition<SalesforceConfiguration> => {
+}): WorkchatIntegrationDefinition<WCIIndexSourceConfiguration> => {
   return {
-    getType: () => IntegrationType.salesforce,
+    getType: () => IntegrationType.index_source,
     createIntegration: async ({ request, configuration }): Promise<WorkChatIntegration> => {
       const [coreStart] = await core.getStartServices();
       const elasticsearchClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-      const mcpServer = createMcpServer({ configuration, elasticsearchClient, logger });
+      const mcpServer = await createMcpServer({ configuration, elasticsearchClient, logger });
       const client = await getClientForInternalServer({ server: mcpServer });
 
       return {
-        type: IntegrationType.salesforce,
+        type: IntegrationType.index_source,
         client,
       };
     },

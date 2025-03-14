@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { IntegrationRegistry } from './integration_registry';
-export { IntegrationsService } from './integrations_service';
+export { getExternalServerIntegrationDefinition } from './external_server_integration';

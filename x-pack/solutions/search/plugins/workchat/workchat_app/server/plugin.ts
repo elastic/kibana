@@ -21,7 +21,7 @@ import {
   AgentFactory,
   ChatService,
 } from './services';
-import { IntegrationRegistry, registerInternalIntegrationTypes } from './services/integrations';
+import { IntegrationRegistry } from './services/integrations';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -64,8 +64,6 @@ export class WorkChatAppPlugin
     });
 
     registerTypes({ savedObjects: core.savedObjects });
-
-    registerInternalIntegrationTypes({ registry: this.integrationRegistry });
 
     return {
       integrations: {
