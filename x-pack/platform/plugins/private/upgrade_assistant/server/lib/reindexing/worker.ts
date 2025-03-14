@@ -31,9 +31,9 @@ const PAUSE_WINDOW = POLL_INTERVAL * 4;
  * at least 4 update attempts would happen before hitting the PAUSE_WINDOW threshold.
  */
 const INITIAL_WORKER_PADDING_MS = 1000;
-// Ensure max padding is no more than 1/4 of PAUSE_WINDOW to guarantee multiple updates
-// will happen before operations are considered "stuck"
-const MAX_WORKER_PADDING_MS = Math.min(30000, Math.floor(PAUSE_WINDOW / 4));
+// Maximum worker padding set to POLL_INTERVAL (1/4 of PAUSE_WINDOW) to guarantee multiple
+// updates will happen before operations are considered "stuck"
+const MAX_WORKER_PADDING_MS = POLL_INTERVAL;
 
 /**
  * A singleton worker that will coordinate two polling loops:
