@@ -52005,6 +52005,59 @@ paths:
       summary: Update a monitor
       tags:
         - synthetics
+  /api/synthetics/params:
+    post:
+      description: Add one or more parameters to the Synthetics app.
+      operationId: post-parameters
+      summary: Add parameters
+      tags:
+        - synthetics
+    put:
+      operationId: put-parameter
+      summary: Update a parameter
+      tags:
+        - synthetics
+  /api/synthetics/params/_bulk_delete:
+    delete:
+      operationId: delete-parameters
+      summary: Delete parameters
+      tags:
+        - synthetics
+  /api/synthetics/params/{id}:
+    delete:
+      operationId: delete-parameter
+      summary: Delete a parameter
+      tags:
+        - synthetics
+    get:
+      operationId: get-parameter
+      summary: Get a parameter
+      tags:
+        - synthetics
+  /api/synthetics/private_locations:
+    get:
+      description: |
+        Get a list of private locations.
+      operationId: get-private-locations
+      summary: Get private locations
+      tags:
+        - synthetics
+    post:
+      operationId: post-private-location
+      summary: Create a private location
+      tags:
+        - synthetics
+  /api/synthetics/private_locations/{location_id}:
+    delete:
+      operationId: delete-private-location
+      summary: Delete a private location
+      tags:
+        - synthetics
+    get:
+      operationId: get-private-location
+      summary: Get a private location
+      tags:
+        - synthetics
   /api/task_manager/_health:
     get:
       description: |
