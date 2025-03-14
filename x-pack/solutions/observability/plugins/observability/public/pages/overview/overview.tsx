@@ -54,6 +54,7 @@ export function OverviewPage() {
     observabilityAIAssistant,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
     kibanaVersion,
+    serverless: isServerless,
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -267,11 +268,13 @@ export function OverviewPage() {
       <EuiFlexGroup>
         <EuiFlexItem>
           {/* Resources / What's New sections */}
-          <EuiFlexGroup>
-            <EuiFlexItem grow={4}>
-              {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
+          <EuiFlexGroup direction={'column'}>
+            <EuiFlexItem>
+              {!Boolean(isServerless) && !!newsFeed?.items?.length && (
+                <NewsFeed items={newsFeed.items.slice(0, 3)} />
+              )}
             </EuiFlexItem>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem>
               <Resources />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -21,6 +21,7 @@ export interface ObservabilityStatusContent {
   goToAppTitle: string;
   goToAppLink: string;
   weight: number;
+  showInServerless: boolean;
 }
 
 export const getContent = (
@@ -49,6 +50,7 @@ export const getContent = (
       }),
       goToAppLink: logsLocator.getRedirectUrl({}),
       weight: 1,
+      showInServerless: true,
     },
     {
       id: 'apm',
@@ -69,6 +71,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/apm/services'),
       weight: 3,
+      showInServerless: true,
     },
     {
       id: 'infra_metrics',
@@ -88,6 +91,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/metrics/inventory'),
       weight: 2,
+      showInServerless: true,
     },
     {
       id: 'uptime',
@@ -107,6 +111,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/uptime'),
       weight: 4,
+      showInServerless: false,
     },
     {
       id: 'ux',
@@ -127,6 +132,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/ux'),
       weight: 5,
+      showInServerless: false,
     },
     {
       id: 'alert',
@@ -147,6 +153,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/observability/alerts'),
       weight: 6,
+      showInServerless: false,
     },
   ];
 };

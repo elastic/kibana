@@ -19,20 +19,22 @@ import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 
 export function EmptySections() {
-  const { http, share } = useKibana().services;
+  const { http, share, serverless: isServerless } = useKibana().services;
   const onboardingMetricsHref = share?.url.locators
     .get(OBSERVABILITY_ONBOARDING_LOCATOR)
-    ?.useUrl({ category: 'metrics' });
+    ?.useUrl({ category: 'host' });
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ http, onboardingMetricsHref }).filter(({ id }) => {
-    const app = hasDataMap[id];
-    if (app) {
-      return app.status === FETCH_STATUS.FAILURE || !app.hasData;
-    }
-    return false;
-  });
+  const appEmptySections = getEmptySections({ http, onboardingMetricsHref })
+    .filter(({ id }) => {
+      const app = hasDataMap[id];
+      if (app) {
+        return app.status === FETCH_STATUS.FAILURE || !app.hasData;
+      }
+      return false;
+    })
+    .filter(({ showInServerless }) => !(Boolean(isServerless) && !showInServerless));
   return (
     <EuiFlexItem>
       <EuiSpacer size="s" />
@@ -80,9 +82,10 @@ const getEmptySections = ({
           'Fast, easy, and scalable centralized log monitoring with out-of-the-box support for common data sources.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.logs.link', {
-        defaultMessage: 'Install Filebeat',
+        defaultMessage: 'Add logs',
       }),
       href: http.basePath.prepend('/app/home#/tutorial_directory/logging'),
+      showInServerless: true,
     },
     {
       id: 'apm',
@@ -98,6 +101,7 @@ const getEmptySections = ({
         defaultMessage: 'Install Agent',
       }),
       href: http.basePath.prepend('/app/apm/tutorial'),
+      showInServerless: true,
     },
     {
       id: 'infra_metrics',
@@ -109,9 +113,10 @@ const getEmptySections = ({
         defaultMessage: 'Stream, visualize, and analyze your infrastructure metrics.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.metrics.link', {
-        defaultMessage: 'Install Metricbeat',
+        defaultMessage: 'Add metrics',
       }),
       href: onboardingMetricsHref ?? http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
+      showInServerless: true,
     },
     {
       id: 'uptime',
@@ -126,6 +131,7 @@ const getEmptySections = ({
         defaultMessage: 'Install Heartbeat',
       }),
       href: http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      showInServerless: false,
     },
     {
       id: 'ux',
@@ -141,6 +147,7 @@ const getEmptySections = ({
         defaultMessage: 'Install RUM Agent',
       }),
       href: http.basePath.prepend('/app/apm/tutorial'),
+      showInServerless: false,
     },
     {
       id: 'alert',
@@ -156,6 +163,7 @@ const getEmptySections = ({
         defaultMessage: 'Create rule',
       }),
       href: http.basePath.prepend(paths.observability.rules),
+      showInServerless: true,
     },
     {
       id: 'universal_profiling',
@@ -174,6 +182,7 @@ const getEmptySections = ({
         defaultMessage: 'Install Profiling Host Agent',
       }),
       href: http.basePath.prepend('/app/profiling/add-data-instructions'),
+      showInServerless: false,
     },
   ];
 };
