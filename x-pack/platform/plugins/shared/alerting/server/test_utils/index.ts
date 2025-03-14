@@ -71,6 +71,7 @@ export function generateAlertingConfig(): AlertingConfig {
         },
       },
     },
-    rulesSettings: { cacheInterval: 60000 },
+    rulesSettings: { enabled: true, cacheInterval: 60000 },
+    maintenanceWindow: { enabled: true },
   };
 }
