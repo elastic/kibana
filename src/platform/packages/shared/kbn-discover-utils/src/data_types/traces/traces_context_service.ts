@@ -34,19 +34,17 @@ export const createTracesContextService = async ({
   if (apmSourcesAccess) {
     const indices = await apmSourcesAccess.getApmIndices();
 
-    if (indices) {
-      const { transaction, span } = indices;
+    const { transaction, span } = indices;
 
-      const allIndices = [transaction, span]
-        .flatMap((index) => index.split(','))
-        .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
-      const uniqueIndices = Array.from(new Set(allIndices));
+    const allIndices = [transaction, span]
+      .flatMap((index) => index.split(','))
+      .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
+    const uniqueIndices = Array.from(new Set(allIndices));
 
-      const traces = uniqueIndices.join();
-      const allowedDataSources = [createRegExpPatternFrom(uniqueIndices, 'data')];
+    const traces = uniqueIndices.join();
+    const allowedDataSources = [createRegExpPatternFrom(uniqueIndices, 'data')];
 
-      return getTracesContextService(traces, allowedDataSources);
-    }
+    return getTracesContextService(traces, allowedDataSources);
   }
 
   const traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
