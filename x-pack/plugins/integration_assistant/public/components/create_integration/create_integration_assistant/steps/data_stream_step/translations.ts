@@ -231,6 +231,12 @@ export const GENERATION_ERROR_TRANSLATION: Record<
     defaultMessage:
       'CEF format detected. Please decode the CEF logs into JSON format using filebeat decode_cef processor.',
   }),
+  [GenerationErrorCode.BUILD_INTEGRATION_ERROR]: i18n.translate(
+    'xpack.integrationAssistant.errors.buildIntegrationError',
+    {
+      defaultMessage: 'An error occurred while building the integration package. Please try again.',
+    }
+  ),
   [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) => {
     if (
       attributes.underlyingMessages !== undefined &&
