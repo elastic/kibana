@@ -77,7 +77,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
         const response = await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({ snooze_schedule: SNOOZE_SCHEDULE });
 
         expect(response.statusCode).to.eql(204);
@@ -134,7 +134,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             duration: -1,
@@ -206,7 +206,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       const now = new Date().toISOString();
       const snoozeSeconds = 10;
       const snoozeDuration = snoozeSeconds * 1000;
-      await alertUtils.getSnoozeRequest(createdRule.id).send({
+      await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
         snooze_schedule: {
           duration: snoozeDuration,
           rRule: {
@@ -266,7 +266,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         // Creating 5 snooze schedules, using Promise.all is very flaky, therefore
         // the schedules are being created 1 at a time
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
             snooze_schedule: {
               ...SNOOZE_SCHEDULE,
@@ -275,7 +275,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           })
           .expect(204);
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
             snooze_schedule: {
               ...SNOOZE_SCHEDULE,
@@ -284,17 +284,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           })
           .expect(204);
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
-          .send({
-            snooze_schedule: {
-              ...SNOOZE_SCHEDULE,
-              id: uuidv4(),
-            },
-          })
-          .expect(204);
-
-        await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
             snooze_schedule: {
               ...SNOOZE_SCHEDULE,
@@ -304,7 +294,17 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .expect(204);
 
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: uuidv4(),
+            },
+          })
+          .expect(204);
+
+        await alertUtils
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
             snooze_schedule: {
               ...SNOOZE_SCHEDULE,
@@ -314,7 +314,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .expect(204);
 
         // Adding the 6th snooze schedule, should fail
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             id: uuidv4(),
@@ -376,7 +376,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           duration: 3000,
         };
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: snooze,
         });
 
@@ -422,7 +422,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             id: 'invalid key',
@@ -449,7 +449,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
         await alertUtils
-          .getSnoozeRequest(createdRule.id)
+          .getSnoozeInternalRequest(createdRule.id)
           .send({
             snooze_schedule: {
               ...SNOOZE_SCHEDULE,
@@ -472,7 +472,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             rRule: { ...SNOOZE_SCHEDULE.rRule, tzid: 'invalid' },
@@ -498,7 +498,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             rRule: { ...SNOOZE_SCHEDULE.rRule, byweekday: ['invalid'] },
@@ -521,7 +521,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             rRule: { ...SNOOZE_SCHEDULE.rRule, bymonthday: [35] },
@@ -547,7 +547,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+        const response = await alertUtils.getSnoozeInternalRequest(createdRule.id).send({
           snooze_schedule: {
             ...SNOOZE_SCHEDULE,
             rRule: { ...SNOOZE_SCHEDULE.rRule, bymonth: [14] },
