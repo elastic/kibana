@@ -12,8 +12,8 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { Filter } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { Filter } from '@kbn/es-query';
 
 const getUiSettingsMock = (value: boolean) => {
   return {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';

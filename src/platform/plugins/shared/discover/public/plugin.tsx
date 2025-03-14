@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -38,7 +39,8 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import { DiscoverSingleDocLocatorDefinition } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import { DiscoverAppLocatorDefinition, DiscoverESQLLocatorDefinition } from '../common';
-import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
+import type { DiscoverCustomizationContext } from './customizations';
+import { defaultCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
