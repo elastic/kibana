@@ -129,7 +129,7 @@ export function ProductInterceptDisplayManager({
           inline-size: 360px;
           max-block-size: auto;
           inset-inline-end: ${euiTheme.size.l};
-          inset-block-end: ${euiTheme.size.l};
+          inset-block-end: ${euiTheme.size.xxl};
 
           ${euiCanAnimate} {
             animation: ${euiFlyoutSlideInRight} ${euiTheme.animation.normal}
@@ -189,7 +189,11 @@ export function ProductInterceptDisplayManager({
               <EuiFlexGroup gutterSize="xs">
                 {currentStepIndex === 0 && (
                   <EuiFlexItem>
-                    <EuiButtonEmpty onClick={dismissProductIntercept} color="text">
+                    <EuiButtonEmpty
+                      data-test-subj="productInterceptDismiss"
+                      onClick={dismissProductIntercept}
+                      color="text"
+                    >
                       {i18n.translate('core.notifications.productIntercept.dismiss', {
                         defaultMessage: 'Not now, thanks',
                       })}
@@ -197,7 +201,7 @@ export function ProductInterceptDisplayManager({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem>
-                  <EuiButton onClick={nextStep}>
+                  <EuiButton data-test-subj="productInterceptProgressionButton" onClick={nextStep}>
                     {i18n.translate('core.notifications.productIntercept.nextStep', {
                       defaultMessage: 'Next',
                     })}

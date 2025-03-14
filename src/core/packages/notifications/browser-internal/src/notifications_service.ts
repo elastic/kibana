@@ -20,7 +20,7 @@ import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notificat
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { showErrorDialog, ToastsService } from './toasts';
 import { ProductInterceptService } from './product_intercept_dialog';
-import { NotificationCoordinator, notificationCoordinator } from './notification_coordinator';
+import { Coordinator, notificationCoordinator } from './notification_coordinator';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -42,7 +42,7 @@ export class NotificationsService {
   private readonly productIntercepts: ProductInterceptService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
-  private readonly coordinator = notificationCoordinator.bind(new NotificationCoordinator());
+  private readonly coordinator = notificationCoordinator.bind(new Coordinator({ debug: true }));
 
   constructor() {
     this.toasts = new ToastsService();
