@@ -125,7 +125,7 @@ function throttle<T>(timeout: number) {
 
       const emit = () => {
         if (hasValue) {
-          subscriber.next(latest);
+          subscriber.next(latest!);
           hasValue = false;
           latest = undefined;
         }

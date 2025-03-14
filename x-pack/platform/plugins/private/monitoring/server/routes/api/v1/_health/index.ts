@@ -27,6 +27,12 @@ export function registerV1HealthRoute(server: MonitoringCore) {
   server.route({
     method: 'get',
     path: '/api/monitoring/v1/_health',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       query: validateQuery,
     },
