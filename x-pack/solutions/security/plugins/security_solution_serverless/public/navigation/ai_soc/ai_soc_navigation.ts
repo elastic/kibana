@@ -23,7 +23,7 @@ const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
   return productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
 };
 
-const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
+export const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
   type: 'navGroup',
   id: 'security_solution_ai_nav',
   title: 'AI for SOC',
