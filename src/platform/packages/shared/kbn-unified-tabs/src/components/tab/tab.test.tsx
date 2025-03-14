@@ -45,7 +45,9 @@ describe('Tab', () => {
       />
     );
 
-    expect(screen.getByText(tabItem.label)).toBeInTheDocument();
+    const tabButton = screen.getByTestId(tabButtonTestSubj);
+    expect(tabButton).toBeInTheDocument();
+    expect(tabButton).toHaveTextContent(tabItem.label);
 
     const tab = screen.getByRole('tab');
     expect(tab).toHaveAttribute('id', `tab-${tabItem.id}`);
@@ -54,7 +56,6 @@ describe('Tab', () => {
     expect(onSelect).toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
-    const tabButton = screen.getByTestId(tabButtonTestSubj);
     tabButton.click();
     expect(onSelect).toHaveBeenCalledTimes(2);
 
@@ -117,7 +118,7 @@ describe('Tab', () => {
     );
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByText(tabItem.label));
+    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
     expect(onSelect).toHaveBeenCalled();
     expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
 
@@ -150,7 +151,7 @@ describe('Tab', () => {
     );
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByText(tabItem.label));
+    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
     expect(onSelect).toHaveBeenCalled();
     expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
 
