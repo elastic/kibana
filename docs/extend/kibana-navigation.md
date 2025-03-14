@@ -29,7 +29,7 @@ Assuming you want to link from your app to **Discover**. When building such URL 
 
 To prepend {{kib}}'s `basePath` use [core.http.basePath.prepend](https://github.com/elastic/kibana/tree/master/src/core/packages/http/browser-internal/src/base_path.ts) helper:
 
-```typescript jsx
+```typescript
 const discoverUrl = core.http.basePath.prepend(`/discover`);
 
 console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
@@ -43,14 +43,14 @@ console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
 1. Avoid hardcoding other app’s URL in your app’s code.
 2. Avoid generating other app’s state and serializing it into URL query params.
 
-```typescript jsx
+```typescript
 // Avoid relying on other app's state structure in your app's code:
 const discoverUrlWithSomeState = core.http.basePath.prepend(`/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2020-09-10T11:39:50.203Z',to:'2020-09-10T11:40:20.249Z'))&_a=(columns:!(_source),filters:!(),index:'90943e30-9a47-11e8-b64d-95841ca0b247',interval:auto,query:(language:kuery,query:''),sort:!())`);
 ```
 
 Instead, each app should expose [a locator](https://github.com/elastic/kibana/tree/master/src/platform/plugins/shared/share/common/url_service/locators/README.md). Other apps should use those locators for navigation or URL creation.
 
-```typescript jsx
+```typescript
 // Properly generated URL to *Discover* app. Locator code is owned by *Discover* app and available on *Discover*'s plugin contract.
 const discoverUrl = await plugins.discover.locator.getUrl({filters, timeRange});
 // or directly execute navigation
@@ -93,14 +93,14 @@ Both methods offer customization such as opening the target in a new page, with 
 
 **Rendering a link to a different {{kib}} app on its own would also cause a full page reload:**
 
-```typescript jsx
+```typescript
 const myLink = () =>
   <a href={urlToADashboard}>Go to Dashboard</a>;
 ```
 
 A workaround could be to handle a click, prevent browser navigation and use `core.application.navigateToApp` API:
 
-```typescript jsx
+```typescript
 const MySPALink = () =>
   <a
     href={urlToADashboard}
@@ -115,7 +115,7 @@ const MySPALink = () =>
 
 As it would be too much boilerplate to do this for each {{kib}} link in your app, there is a handy wrapper that helps with it: [RedirectAppLinks](https://github.com/elastic/kibana/tree/master/src/platform/packages/shared/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx).
 
-```typescript jsx
+```typescript
 const MyApp = () =>
   <RedirectAppLinks coreStart={{application: core.application}}>
     {/*...*/}
@@ -130,7 +130,7 @@ There may be cases where you need a full page reload. While rare and should be a
 ::::
 
 
-```typescript jsx
+```typescript
 const MyForcedPageReloadLink = () =>
   <a
     href={urlToSomeSpecialApp}
@@ -161,7 +161,7 @@ This is required to make sure `core` is aware of navigations triggered inside yo
 
 Relative links will be resolved relative to your app’s route (e.g.: `http://localhost5601/app/{{your-app-id}}`) and setting up internal links in your app in SPA friendly way would look something like:
 
-```typescript jsx
+```typescript
 import {Link} from 'react-router-dom';
 
 const MyInternalLink = () => <Link to="/my-other-page"></Link>

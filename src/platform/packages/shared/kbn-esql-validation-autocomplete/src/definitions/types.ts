@@ -14,7 +14,7 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '@kbn/esql-ast';
-import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 import type { ESQLPolicy } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
@@ -272,13 +272,13 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   previousCommands?: ESQLCommand[];
   callbacks?: ESQLCallbacks;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
-) => Promise<SuggestionRawDefinition[]>;
+) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;

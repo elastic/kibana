@@ -39,7 +39,8 @@
       "features",
       "home",
       "spaces",
-      "serverless"
+      "serverless",
+      "share"
     ],
     "requiredBundles": [
       "alerting",

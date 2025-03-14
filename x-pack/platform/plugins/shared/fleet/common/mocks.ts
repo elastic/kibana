@@ -92,6 +92,7 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       addFleetServers: true,
     },
     integrations: {
+      all: true,
       readPackageInfo: true,
       readInstalledPackages: true,
       installPackages: true,
