@@ -48,22 +48,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Verify Installed Node.js Version
-        run: |
-          echo "Node.js version after setup:"
-          node -v
-          which node || echo "Node binary not found"
-          ls -l $(which node) || echo "Node path is incorrect"
-
       - name: Enable Corepack and Install Yarn
         run: |
           corepack enable
           corepack prepare yarn@stable --activate
-          yarn -v || echo "Yarn is still missing"
+          yarn --version || echo "Yarn is still missing"
 
       - name: Ensure Yarn is in PATH
         run: |
-          export PATH=$(yarn global bin):$PATH
+          export PATH="$(yarn global bin):$PATH"
           echo "export PATH=$(yarn global bin):$PATH" >> ~/.bashrc
           source ~/.bashrc
           which yarn || echo "Yarn is still missing"
