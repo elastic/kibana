@@ -41,10 +41,12 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
     sourcePackets,
     sourceIp,
     sourcePort,
+    scopeId,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <SourceDestinationIp
+          scopeId={scopeId}
           contextId={contextId}
           destinationGeoContinentName={destinationGeoContinentName}
           destinationGeoCountryName={destinationGeoCountryName}
@@ -66,6 +68,7 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
       </EuiFlexItem>
 
       <SourceDestinationArrows
+        scopeId={scopeId}
         contextId={contextId}
         destinationBytes={destinationBytes}
         destinationPackets={destinationPackets}
@@ -76,6 +79,7 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
 
       <EuiFlexItem grow={false}>
         <SourceDestinationIp
+          scopeId={scopeId}
           contextId={contextId}
           destinationGeoContinentName={destinationGeoContinentName}
           destinationGeoCountryName={destinationGeoCountryName}
