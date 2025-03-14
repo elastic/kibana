@@ -87,12 +87,11 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
     const integrationsPolicyTemplates = doesPackageHaveIntegrations(pkg)
       ? policyTemplates.map((policyTemplate) => {
           const { name, title, description, icons } = policyTemplate;
-
+          const isPolicyTemplate = isIntegrationPolicyTemplate(policyTemplate);
           const categories =
-            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
-              ? policyTemplate.categories
-              : [];
+            isPolicyTemplate && policyTemplate.categories ? policyTemplate.categories : [];
           const allCategories = [...topCategories, ...categories];
+          console.log('policyTemplate map----', name);
           return {
             ...restOfPackage,
             id: `${restOfPackage.id}-${name}`,
@@ -101,9 +100,12 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             description,
             icons: icons || restOfPackage.icons,
             categories: uniq(allCategories),
+            is_policy_template: isPolicyTemplate,
           };
         })
       : [];
+
+    console.log('integrationsPolicyTemplates----', integrationsPolicyTemplates);
 
     const tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
@@ -135,8 +137,10 @@ export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
+  excludePolicyTemplatesFromInstallationStatus,
 }: {
   prereleaseIntegrationsEnabled: boolean;
+  excludePolicyTemplatesFromInstallationStatus?: boolean;
 }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
 
@@ -194,16 +198,31 @@ export const useAvailablePackages = ({
       preference === 'beats' ? [] : eprIntegrationList,
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
-
+  console.log('eprIntegrationList----', eprIntegrationList?.length);
+  console.log('replacementCustomIntegrations----', replacementCustomIntegrations?.length);
+  console.log('appendCustomIntegrations----', appendCustomIntegrations?.length);
   const cards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
     return eprAndCustomPackages
       .map((item) => {
-        return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
+        return mapToCard({
+          getAbsolutePath,
+          getHref,
+          item,
+          addBasePath,
+          excludePolicyTemplatesFromInstallationStatus,
+        });
       })
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
+  }, [
+    addBasePath,
+    appendCustomIntegrations,
+    getAbsolutePath,
+    getHref,
+    mergedEprPackages,
+    excludePolicyTemplatesFromInstallationStatus,
+  ]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any)
