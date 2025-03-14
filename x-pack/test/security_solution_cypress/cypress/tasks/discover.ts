@@ -76,7 +76,7 @@ export const addDiscoverEsqlQuery = (esqlQuery: string) => {
       selectCurrentDiscoverEsqlQuery();
       return cy.get(DISCOVER_ESQL_EDITABLE_INPUT);
     },
-    ($el) => $el.val() === esqlQuery,
+    ($el) => $el.val() === esqlQuery || $el.val() === esqlQuery.replaceAll(' ', '\u00b7'),
     { delay: 1000, limit: 5 }
   );
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
