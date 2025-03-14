@@ -25,6 +25,7 @@ import type { ActionStatus } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 
 import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
+
 import { ViewAgentsButton } from './view_agents_button';
 
 export const UpgradeInProgressActivityItem: React.FunctionComponent<{
@@ -36,7 +37,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
 }> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents, progress }) => {
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
-
+  const isAutomaticUpgrade = action.is_automatic;
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {
     try {
@@ -128,8 +129,9 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               <EuiFlexItem>
                 <EuiText color="subdued">
                   <p>
-                    Upgraded {progress.actionProgress * 100}% of {progress.totalProgress * 100}% of
-                    chosen total agents
+                    {isAutomaticUpgrade ? 'Automatic' : 'NOT Automatic'} Upgraded{' '}
+                    {(action.nbAgentsAck / action.nbAgentsActioned) * 100}% of the{' '}
+                    {progress.totalProgress * 100}% of agents in the policy
                   </p>
                 </EuiText>
               </EuiFlexItem>

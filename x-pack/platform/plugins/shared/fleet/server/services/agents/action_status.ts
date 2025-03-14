@@ -274,6 +274,8 @@ async function getActions(
           creationTime: source['@timestamp']!,
           nbAgentsFailed: 0,
           hasRolloutPeriod: !!source.rollout_duration_seconds,
+          is_automatic: source.is_automatic,
+          policyId: source.data?.policy_id as string,
         };
       }
 

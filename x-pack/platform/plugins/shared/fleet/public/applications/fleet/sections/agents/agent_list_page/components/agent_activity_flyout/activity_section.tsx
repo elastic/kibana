@@ -42,12 +42,11 @@ export const ActivitySection: React.FunctionComponent<{
   numAgents,
 }) => {
   const [totalAgentsInActions, setTotalAgentsInActions] = useState(0);
-  //TODO: using all the actions ids, get the list of agent ids using the api. That gives you the total count of agents to be upgraded in this section. Then we can track how many have finished of the total. Then, we can compare the total in the actions to the all time total.
+  // gets the total count of agents in all the actions for this section
   useEffect(() => {
     const fetchTotalAgentsInActions = async () => {
       const total = await getTotalAgentsInActions(actions);
-      console.log('the total of agents in all actions is', total);
-      console.log('the total of all agents is', numAgents);
+
       setTotalAgentsInActions(total);
     };
     fetchTotalAgentsInActions();
