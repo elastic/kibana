@@ -125,6 +125,9 @@ src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
+src/core/packages/context-browser @elastic/appex-sharedux
+src/core/packages/context-browser-internal @elastic/appex-sharedux
+src/core/packages/context-browser-mocks @elastic/appex-sharedux
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-mocks @elastic/appex-sharedux
