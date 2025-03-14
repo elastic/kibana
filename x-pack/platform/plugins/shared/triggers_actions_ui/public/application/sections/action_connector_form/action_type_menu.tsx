@@ -6,10 +6,11 @@
  */
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
@@ -27,6 +28,44 @@ interface Props {
   searchValue?: string;
   selectedCategories?: Array<{ label: string; key?: string }>;
 }
+
+interface RegisteredActionType {
+  iconClass: IconType;
+  selectMessage: string;
+  actionType: ActionType;
+  name: string;
+  isExperimental: boolean | undefined;
+}
+
+const filterActionTypes = (
+  actionTypes: RegisteredActionType[],
+  searchValue: string,
+  selectedCategories: Array<{ label: string; key?: string }>
+) => {
+  if (isEmpty(selectedCategories) && isEmpty(searchValue)) {
+    return actionTypes;
+  }
+  return actionTypes.filter((actionType) => {
+    const matchesCategory = actionType.actionType?.supportedFeatureIds.some((featureID) =>
+      selectedCategories.some((category) => category.key?.toLowerCase() === featureID.toLowerCase())
+    );
+    const searchTargets = [actionType.name, actionType.selectMessage, actionType.actionType?.name]
+      .filter(Boolean)
+      .map((text) => text.toLowerCase());
+
+    const matchesSearch = searchTargets.some(
+      (searchTarget) => !isEmpty(searchValue) && searchTarget.includes(searchValue.toLowerCase())
+    );
+    if (isEmpty(searchValue)) {
+      return matchesCategory;
+    }
+
+    if (isEmpty(selectedCategories)) {
+      return matchesSearch;
+    }
+    return matchesCategory && matchesSearch;
+  });
+};
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
@@ -100,33 +139,10 @@ export const ActionTypeMenu = ({
       };
     });
 
-  const filteredConnectors = useMemo(() => {
-    const filterByCategory = selectedCategories.length
-      ? registeredActionTypes.filter((connector) => {
-          const supportedFeatureIds = connector.actionType.supportedFeatureIds.map((feature) =>
-            feature.toLowerCase()
-          );
-          const selected = selectedCategories.map((opt) => opt.key?.toLowerCase() ?? '');
-          return selected.some((opt) =>
-            supportedFeatureIds.some((feature) => feature.includes(opt) || opt.includes(feature))
-          );
-        })
-      : registeredActionTypes;
-
-    const trimmedSearchValue = searchValue.trim().toLowerCase();
-    const filterBySearch = trimmedSearchValue
-      ? filterByCategory.filter((connector) => {
-          const textSearchTargets = [
-            connector.name.toLowerCase(),
-            connector.selectMessage?.toLowerCase(),
-            connector.actionType?.name.toLowerCase(),
-          ];
-          return textSearchTargets.some((text) => text?.includes(trimmedSearchValue));
-        })
-      : filterByCategory;
-
-    return filterBySearch;
-  }, [registeredActionTypes, selectedCategories, searchValue]);
+  const filteredConnectors = useMemo(
+    () => filterActionTypes(registeredActionTypes, searchValue, selectedCategories),
+    [registeredActionTypes, searchValue, selectedCategories]
+  );
 
   const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))

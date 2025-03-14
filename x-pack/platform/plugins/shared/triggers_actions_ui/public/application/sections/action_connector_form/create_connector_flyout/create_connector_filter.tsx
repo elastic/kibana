@@ -23,9 +23,10 @@ import { i18n } from '@kbn/i18n';
 
 export interface CreateConnectorFilterProps {
   categoryOptions: EuiSelectableOption[];
-  selectedCategories: Array<{ label: string; key?: string }>;
+  selectedCategories: Array<{ label: string; key: string }>;
   onSelectCategoryChange: (newOptions: EuiSelectableOption[]) => void;
   featureId?: string;
+  searchValue: string;
   onSearchValueChange: (value: string) => void;
 }
 
@@ -34,14 +35,13 @@ export const CreateConnectorFilter: React.FC<CreateConnectorFilterProps> = ({
   selectedCategories,
   onSelectCategoryChange,
   featureId,
+  searchValue,
   onSearchValueChange,
 }) => {
-  const [searchValue, setSearchValue] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setSearchValue(newValue);
     onSearchValueChange(newValue);
   };
 

@@ -50,6 +50,16 @@ export interface CreateConnectorFlyoutProps {
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
+const availableFeatures = getAllAvailableConnectorFeatures();
+
+const getCategoryOptions = (selectedCategories: Array<{ label: string; key: string }>) => {
+  return Object.values(availableFeatures).map(({ id, name }) => ({
+    label: name,
+    key: id,
+    checked: selectedCategories.some((opt) => opt.key === id) ? 'on' : undefined, // Mark as checked if selected
+  })) as EuiSelectableOption[];
+};
+
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
   featureId,
@@ -69,19 +79,14 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [selectedCategories, setselectedCategories] = useState<
-    Array<{ label: string; key?: string }>
+  const [selectedCategories, setSelectedCategories] = useState<
+    Array<{ label: string; key: string }>
   >([]);
 
-  const categoryOptions: EuiSelectableOption[] = useMemo(() => {
-    const availableFeatures = getAllAvailableConnectorFeatures();
-
-    return Object.values(availableFeatures).map(({ id, name }) => ({
-      label: name,
-      key: id,
-      checked: selectedCategories.some((opt) => opt.key === id) ? 'on' : undefined, // Mark as checked if selected
-    })) as EuiSelectableOption[];
-  }, [selectedCategories]);
+  const categoryOptions: EuiSelectableOption[] = useMemo(
+    () => getCategoryOptions(selectedCategories),
+    [selectedCategories]
+  );
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -223,8 +228,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   const onSelectCategoryChange = (newOptions: EuiSelectableOption[]) => {
-    const selected = newOptions.filter((opt) => opt.checked === 'on');
-    setselectedCategories(selected);
+    const selected = newOptions
+      .filter((opt) => opt.checked === 'on')
+      .map((opt) => ({ label: opt.label, key: opt.key ?? '' }));
+    setSelectedCategories(selected);
   };
 
   useEffect(() => {
@@ -254,6 +261,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               selectedCategories={selectedCategories}
               onSelectCategoryChange={onSelectCategoryChange}
               featureId={featureId}
+              searchValue={searchValue}
               onSearchValueChange={handleSearchValueChange}
             />
             <EuiSpacer size="m" />
