@@ -39,6 +39,7 @@ module.exports = {
           ],
         ]
       : []),
+    require('@kbn/scout-reporting').scoutJestReporter(),
   ],
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]

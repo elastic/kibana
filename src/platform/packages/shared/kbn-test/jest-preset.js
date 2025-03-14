@@ -52,6 +52,7 @@ module.exports = {
           ],
         ]
       : []),
+    require('@kbn/scout-reporting').scoutJestReporter(),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
