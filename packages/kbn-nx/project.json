@@ -1,4 +1,5 @@
 {
+  "_preventUpdate": true,
   "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
   "name": "@kbn/nx",
   "namedInputs": {
@@ -19,6 +20,11 @@
       "outputs": [
         "{projectRoot}/target"
       ]
+    },
+    "generateAllTypecheckConfigs": {
+      "command": "node scripts/type_check.js --configs-only",
+      "cache": false,
+      "inputs": []
     },
     "typecheck_fast": {
       "command": "yarn tsc --build {projectRoot}/tsconfig.type_check.json --pretty",
