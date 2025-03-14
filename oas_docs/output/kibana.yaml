@@ -45376,6 +45376,63 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
+  /api/streams/{name}/content/export:
+    get:
+      description: Exports the content associated to a stream.
+      operationId: get-streams-name-content-export
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Export stream content
+      tags:
+        - streams
+  /api/streams/{name}/content/import:
+    post:
+      description: Links content objects to a stream.
+      operationId: post-streams-name-content-import
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content: {}
+              required:
+                - content
+      responses: {}
+      summary: Import content into a stream
+      tags:
+        - streams
   /api/streams/{name}/dashboards:
     get:
       description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
