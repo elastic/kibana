@@ -9,68 +9,48 @@
 
 import { UserMouseEvent } from './mouse';
 
-const MIN_SPEED = 50;
-const MAX_SPEED = 150;
+const DEADZONE = 0.35; // percent of the distance from the center of the screen on either side of the middle is considered deadzone and will not scroll
+const MAX_DISTANCE = 0.5; // percent of the distance from the center of the screen on either side of the middle is considered max distance and will scroll at max speed
+const PIXELS_PER_SECOND = 10; // how many pixels to scroll per second
 
-let scrollInterval: NodeJS.Timeout | null = null;
+let shouldAutoScroll = false;
+let latestMouseEvent: UserMouseEvent | null = null;
 
-// Automatically scrolls the screen when the user drags or resizes a panel near the top or bottom edge.
-export function handleAutoscroll(e: UserMouseEvent) {
-  const heightPercentage = 100 - ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
-  const atTheTop = window.scrollY <= 0;
-  const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
+export const stopAutoScroll = () => {
+  shouldAutoScroll = false;
+};
 
-  const startScrollingUp = heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
-  const startScrollingDown = heightPercentage > 95 && !atTheBottom;
-  if (startScrollingUp || startScrollingDown) {
-    if (!scrollInterval) {
-      // only start scrolling if it's not already happening
-      scrollInterval = scrollOnInterval(startScrollingUp ? 'up' : 'down');
-    }
-  } else {
-    stopAutoScroll();
-  }
-}
+export const startAutoScroll = () => {
+  if (shouldAutoScroll) return;
+  shouldAutoScroll = true;
 
-function scrollOnInterval(direction: 'up' | 'down') {
-  let count = 0;
-  let currentSpeed = MIN_SPEED;
-  let maxSpeed = MIN_SPEED;
-  let turnAroundPoint: number | undefined;
+  const autoScroll: FrameRequestCallback = (elapsed: number) => {
+    if (!shouldAutoScroll) return;
 
-  scrollInterval = setInterval(() => {
-    /**
-     * Since "smooth" scrolling on an interval is jittery on Chrome, we are manually creating
-     * an "ease" effect via the parabola formula `y = a(x - h)^2 + k`
-     *
-     * Scrolling slowly speeds up as the user drags, and it slows down again as they approach the
-     * top and/or bottom of the screen.
-     */
-    const nearTop = direction === 'up' && scrollY < window.innerHeight;
-    const nearBottom =
-      direction === 'down' &&
-      window.innerHeight + window.scrollY > document.body.scrollHeight - window.innerHeight;
-    if (!turnAroundPoint && (nearTop || nearBottom)) {
-      // reverse the direction of the parabola
-      maxSpeed = currentSpeed;
-      turnAroundPoint = count;
+    if (latestMouseEvent) {
+      const distanceFromCenterOfScreen = window.innerHeight / 2 - latestMouseEvent.clientY;
+      const scrollDirection = distanceFromCenterOfScreen > 0 ? 'up' : 'down';
+      const distanceFromCenterOfScreenPercentage = distanceFromCenterOfScreen / window.innerHeight;
+
+      const scrollSpeedMult = Math.min(
+        1,
+        Math.max(
+          0,
+          (Math.abs(distanceFromCenterOfScreenPercentage) - DEADZONE) / (MAX_DISTANCE - DEADZONE)
+        )
+      );
+
+      const pixelsToScroll = PIXELS_PER_SECOND * scrollSpeedMult * (elapsed / 1000);
+      if (pixelsToScroll > 0) {
+        window.scrollBy({ top: scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll });
+      }
     }
 
-    currentSpeed = turnAroundPoint
-      ? Math.max(-3 * (count - turnAroundPoint) ** 2 + maxSpeed, MIN_SPEED) // slow down fast
-      : Math.min(0.1 * count ** 2 + MIN_SPEED, MAX_SPEED); // speed up slowly
-    window.scrollBy({
-      top: direction === 'down' ? currentSpeed : -currentSpeed,
-    });
+    window.requestAnimationFrame(autoScroll);
+  };
+  window.requestAnimationFrame(autoScroll);
+};
 
-    count++; // increase the counter to increase the time interval used in the parabola formula
-  }, 60);
-  return scrollInterval;
-}
-
-export function stopAutoScroll() {
-  if (scrollInterval) {
-    clearInterval(scrollInterval);
-    scrollInterval = null;
-  }
-}
+export const handleAutoscroll = (e: UserMouseEvent) => {
+  latestMouseEvent = e;
+};
