@@ -79,7 +79,7 @@ export async function fetchEsqlQuery({
   );
 
   if (ruleResultService && duplicateAlertIds.size > 0) {
-    const warning = `Your alerts dont appear to be unique which will delay recovery of your alerts. There are duplicates for alert ID(s): ${Array.from(
+    const warning = `Your alerts do not appear to be unique, which will delay recovery of your alerts. There are duplicates for alert IDs: ${Array.from(
       duplicateAlertIds
     ).join('; ')}`;
     ruleResultService.addLastRunWarning(warning);

@@ -42,13 +42,13 @@ const alertingOptions = [
   {
     id: ALL_DOCUMENTS,
     label: i18n.translate('xpack.stackAlerts.esQuery.ui.allDocumentsLabel', {
-      defaultMessage: 'Create one alert when matches are found',
+      defaultMessage: 'Create an alert if matches are found',
     }),
   },
   {
     id: 'row',
     label: i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowLabel', {
-      defaultMessage: 'Create one alert per row',
+      defaultMessage: 'Create an alert for each row',
     }),
   },
 ];

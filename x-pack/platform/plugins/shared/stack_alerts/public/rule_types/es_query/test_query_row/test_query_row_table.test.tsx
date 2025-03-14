@@ -43,7 +43,7 @@ describe('TestQueryRow', () => {
     expect(result.getAllByTestId('dataGridRowCell')).toHaveLength(2);
     expect(
       result.queryByText(
-        'This table is a preview and only shows data from the top 5 rows returned by the query.'
+        'This table is a preview and shows data from only the top 5 rows returned by the query.'
       )
     ).toBeInTheDocument();
     expect(result.queryAllByTestId('alert-badge')).toHaveLength(0);
