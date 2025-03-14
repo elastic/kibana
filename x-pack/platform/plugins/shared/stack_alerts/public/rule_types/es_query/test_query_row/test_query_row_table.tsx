@@ -75,7 +75,7 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ preview })
         <p>
           {i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryTableNote', {
             defaultMessage:
-              'This table is a preview and only shows data from the top 5 rows returned by the query.',
+              'This table is a preview and shows data from only the top 5 rows returned by the query.',
           })}
         </p>
       </EuiText>
