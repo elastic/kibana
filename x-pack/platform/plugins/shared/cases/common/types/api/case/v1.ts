@@ -28,11 +28,13 @@ import {
   limitedArraySchema,
   NonEmptyString,
   paginationSchema,
+  customFieldListValueSchema,
 } from '../../../schema';
 import {
   CaseCustomFieldToggleRt,
   CustomFieldTextTypeRt,
   CustomFieldNumberTypeRt,
+  CustomFieldListTypeRt,
 } from '../../domain';
 import {
   CaseRt,
@@ -63,10 +65,17 @@ const CaseCustomFieldNumberWithValidationRt = rt.strict({
   value: rt.union([CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'value' }), rt.null]),
 });
 
+const CaseCustomFieldListWithValidationRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldListTypeRt,
+  value: rt.union([customFieldListValueSchema, rt.null]),
+});
+
 const CustomFieldRt = rt.union([
   CaseCustomFieldTextWithValidationRt,
   CaseCustomFieldToggleRt,
   CaseCustomFieldNumberWithValidationRt,
+  CaseCustomFieldListWithValidationRt,
 ]);
 
 export const CaseRequestCustomFieldsRt = limitedArraySchema({

@@ -267,6 +267,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
+  customFieldsConfiguration,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
   const body = {
     ...removeOptionFromFilter({
@@ -286,7 +287,7 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
-    ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...constructCustomFieldsFilter(filterOptions.customFields, customFieldsConfiguration),
     ...queryParams,
   };
 
