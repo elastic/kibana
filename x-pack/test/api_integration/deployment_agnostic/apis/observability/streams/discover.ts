@@ -89,7 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(status).to.eql(200);
 
-      expect(stream.name).to.eql('logs');
+      expect(stream?.name).to.eql('logs');
     });
 
     it('endpoint is returning nothing for regular index', async () => {

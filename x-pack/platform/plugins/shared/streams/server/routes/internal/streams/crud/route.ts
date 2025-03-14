@@ -6,7 +6,7 @@
  */
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { isGroupStreamDefinition } from '@kbn/streams-schema';
+import { StreamDefinition, isGroupStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { createServerRoute } from '../../../create_server_route';
 
