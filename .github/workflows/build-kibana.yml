@@ -68,9 +68,9 @@ jobs:
       - name: Bootstrap Kibana
         run: yarn kbn bootstrap
 
-      - name: Build Only Linux-x86_64 Version
+      - name: Build Only Linux-x86_64 Version (Skip OS Packages)
         run: |
-          yarn build --release --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
+          yarn build --release --skip-os-packages --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
 
       - name: Log in to GitHub Container Registry (GHCR)
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
