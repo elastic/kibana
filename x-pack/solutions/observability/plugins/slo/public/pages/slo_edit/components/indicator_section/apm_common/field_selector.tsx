@@ -62,7 +62,8 @@ export function FieldSelector({
       : []
   ).concat(createOptions(suggestions));
 
-  const isDisabled = name !== 'indicator.params.service' && !serviceName;
+  const specificServiceName = serviceName && serviceName !== '*';
+  const isDisabled = name !== 'indicator.params.service' && !specificServiceName;
 
   return (
     <EuiFlexItem>
