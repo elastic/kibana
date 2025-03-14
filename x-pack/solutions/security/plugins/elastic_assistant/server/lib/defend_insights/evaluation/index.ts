@@ -16,11 +16,16 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/nodes/helpers/prompts/incompatible_antivirus';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
 import { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
 import { DefendInsightsGraphMetadata } from '../../langchain/graphs';
 import { getLlmType } from '../../../routes/utils';
+
+interface ConnectorWithPrompts extends Connector {
+  prompts: DefendInsightsCombinedPrompts;
+}
 
 export const evaluateDefendInsights = async ({
   actionsClient,
@@ -41,7 +46,7 @@ export const evaluateDefendInsights = async ({
   actionsClient: PublicMethodsOf<ActionsClient>;
   defendInsightsGraphs: DefendInsightsGraphMetadata[];
   anonymizationFields?: AnonymizationFieldResponse[];
-  connectors: Connector[];
+  connectors: ConnectorWithPrompts[];
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
@@ -96,6 +101,7 @@ export const evaluateDefendInsights = async ({
         logger,
         size,
         anonymizationFields,
+        prompts: connector.prompts,
       });
 
       return {

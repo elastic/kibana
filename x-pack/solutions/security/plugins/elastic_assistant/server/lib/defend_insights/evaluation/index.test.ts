@@ -55,6 +55,16 @@ describe('evaluateDefendInsights', () => {
         isSystemAction: false,
         config: {},
         secrets: {},
+        prompts: {
+          default: 'default',
+          refine: 'refine',
+          continue: 'continue',
+          group: 'group',
+          events: 'events',
+          eventsId: 'eventsId',
+          eventsEndpointId: 'eventsEndpointId',
+          eventsValue: 'eventsValue',
+        },
       },
     ];
 
@@ -105,6 +115,16 @@ describe('evaluateDefendInsights', () => {
       logger: mockLogger,
       size: 10,
       anonymizationFields: [],
+      prompts: {
+        default: 'default',
+        refine: 'refine',
+        continue: 'continue',
+        group: 'group',
+        events: 'events',
+        eventsId: 'eventsId',
+        eventsEndpointId: 'eventsEndpointId',
+        eventsValue: 'eventsValue',
+      },
     });
 
     expect(runDefendInsightsEvaluations).toHaveBeenCalledWith({
