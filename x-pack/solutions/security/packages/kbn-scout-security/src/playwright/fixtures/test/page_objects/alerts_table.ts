@@ -22,7 +22,16 @@ export class AlertsTablePage {
   }
 
   async expandFirstAlertDetailsFlyout() {
-    await this.page.waitForSelector(`[data-test-subj=${EXPAND_EVENT}]`);
+    const maxAttempts = 100;
+    let attempts = 0;
+
+    while ((await this.expandAlertBtn.count()) === 0) {
+      if (attempts >= maxAttempts) {
+        throw new Error('Timed out waiting for alert buttons to appear');
+      }
+      await this.page.waitForTimeout(100);
+      attempts++;
+    }
     const buttons = await this.expandAlertBtn.all();
     await buttons[0].click();
   }
