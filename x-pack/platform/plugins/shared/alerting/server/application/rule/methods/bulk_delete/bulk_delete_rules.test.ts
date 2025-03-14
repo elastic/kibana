@@ -173,6 +173,7 @@ describe('bulkDelete', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: schema.any(),
       },
