@@ -64,12 +64,11 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedDashboards(selectedOptions);
     dispatch({
-      type: 'setParamsProperty',
+      type: 'setRuleProperty',
       payload: {
         property: 'dashboards',
         value: selectedOptions.map((selectedOption) => ({
           id: selectedOption.value,
-          title: selectedOption.label,
         })),
       },
     });

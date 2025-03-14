@@ -66,6 +66,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   next_run: nextRun,
   alert_delay: alertDelay,
   flapping,
+  dashboards,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -91,6 +92,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(alertDelay ? { alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
   ...rest,
+  dashboards,
 });
 
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({

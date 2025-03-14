@@ -81,5 +81,6 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
+    dashboards: rule.dashboards,
   } as RawRule;
 };

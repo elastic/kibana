@@ -296,4 +296,7 @@ export const rawRuleSchema = schema.object({
   typeVersion: schema.maybe(schema.number()),
   alertDelay: schema.maybe(alertDelaySchema),
   flapping: schema.maybe(schema.nullable(flappingSchema)), // carry over from v2
+  dashboards: schema.maybe(
+    schema.arrayOf(schema.object({ id: schema.string()}))
+  ),
 });

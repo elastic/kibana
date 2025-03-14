@@ -23,6 +23,7 @@ export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'params',
   'alertDelay',
   'flapping',
+  'dashboards'
 ];
 
 export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [

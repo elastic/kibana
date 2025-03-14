@@ -32,6 +32,7 @@ export interface CreateRuleRequestBody<Params extends RuleParamsV1 = never> {
   notify_when?: CreateBodySchema['notify_when'];
   alert_delay?: CreateBodySchema['alert_delay'];
   flapping?: CreateBodySchema['flapping'];
+  dashboards?: CreateBodySchema['dashboards'];
 }
 
 export interface CreateRuleResponse<Params extends RuleParamsV1 = never> {
