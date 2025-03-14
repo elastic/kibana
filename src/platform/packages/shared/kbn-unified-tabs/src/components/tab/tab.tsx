@@ -21,39 +21,27 @@ import {
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import type { TabItem, TabsSizeConfig, GetTabMenuItems, PreviewContentConfig } from '../../types';
+import type { TabItem, TabsSizeConfig, GetTabMenuItems, PreviewQuery } from '../../types';
+
+import { PreviewQueryLanguage, TabStatus } from '../../types';
 import { TabPreview } from '../tab_preview';
 
 // TODO: replace with real data when ready
-const TAB_CONTENT_MOCK: PreviewContentConfig[] = [
+const TAB_CONTENT_MOCK: PreviewQuery[] = [
   {
-    id: 1,
-    name: 'Tab example',
-    query: {
-      language: 'esql',
-      query:
-        'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
-    },
-    status: 'success',
+    language: PreviewQueryLanguage.ESQL,
+    query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    status: TabStatus.SUCCESS,
   },
   {
-    id: 2,
-    name: 'Tab example',
-    query: {
-      language: 'esql',
-      query:
-        'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
-    },
-    status: 'running',
+    language: PreviewQueryLanguage.ESQL,
+    query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    status: TabStatus.RUNNING,
   },
   {
-    id: 3,
-    name: 'Tab example',
-    query: {
-      language: 'kql',
-      query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
-    },
-    status: 'danger',
+    language: PreviewQueryLanguage.KQL,
+    query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
+    status: TabStatus.ERROR,
   },
 ];
 
@@ -130,17 +118,15 @@ export const Tab: React.FC<TabProps> = ({
     hidePreview();
   }, []);
 
-  const previewContent = {
-    ...TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)],
-    name: item.label,
-  };
+  const previewQuery = TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)];
 
   return (
     <TabPreview
       showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
-      previewContent={previewContent}
+      previewQuery={previewQuery}
+      tabItem={item}
     >
       <EuiFlexGroup
         ref={containerRef}

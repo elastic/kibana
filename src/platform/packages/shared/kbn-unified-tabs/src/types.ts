@@ -26,23 +26,23 @@ export interface TabsSizeConfig {
   // TODO: extend with possibly different sizes for pinned tabs
 }
 
-// TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
-export interface PreviewContentConfig {
-  id: number;
-  name: string;
-  query: {
-    language: 'esql' | 'kql';
-    query: string;
-  };
-  status: 'success' | 'running' | 'danger'; // status for now matches EuiHealth colors for mocking simplicity
+// TODO status value for now matches EuiHealth colors for mocking simplicity, adjust when real data is available
+export enum TabStatus {
+  SUCCESS = 'success',
+  RUNNING = 'running',
+  ERROR = 'danger',
 }
-export interface TabPreviewProps {
-  children: React.ReactNode;
-  showPreview: boolean;
-  setShowPreview: (show: boolean) => void;
-  previewContent: PreviewContentConfig;
-  stopPreviewOnHover?: boolean;
-  previewDelay?: number;
+
+export enum PreviewQueryLanguage {
+  ESQL = 'esql',
+  KQL = 'kql',
+}
+
+// TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
+export interface PreviewQuery {
+  language: PreviewQueryLanguage;
+  query: string;
+  status: TabStatus;
 }
 
 export type TabMenuItem = TabMenuItemWithClick | 'divider';

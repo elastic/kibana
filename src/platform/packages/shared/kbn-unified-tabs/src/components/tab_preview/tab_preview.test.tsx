@@ -10,17 +10,21 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TabPreview } from './tab_preview';
-import type { PreviewContentConfig } from '../../types';
+import type { PreviewQuery, TabItem } from '../../types';
+import { PreviewQueryLanguage, TabStatus } from '../../types';
 
-const mockPreviewContent: PreviewContentConfig = {
-  id: 1,
-  name: 'Tab Preview',
-  query: {
-    language: 'esql',
-    query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
-  },
-  status: 'success',
+const previewQuery: PreviewQuery = {
+  language: PreviewQueryLanguage.ESQL,
+  query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+  status: TabStatus.SUCCESS,
 };
+
+const tabItem: TabItem = {
+  id: 'test-id',
+  label: 'test-label',
+};
+
+const previewTestSubj = `unifiedTabs_tabPreview_${tabItem.id}`;
 
 describe('TabPreview', () => {
   it('should call setShowPreview when mouse enters and change opacity after a delay', async () => {
@@ -30,7 +34,8 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        previewContent={mockPreviewContent}
+        previewQuery={previewQuery}
+        tabItem={tabItem}
         stopPreviewOnHover={false}
         previewDelay={0}
       >
@@ -38,7 +43,7 @@ describe('TabPreview', () => {
       </TabPreview>
     );
 
-    const previewContainer = screen.getByTestId(`unifiedTabs_tabPreview_${mockPreviewContent.id}`);
+    const previewContainer = screen.getByTestId(previewTestSubj);
     expect(previewContainer).toBeInTheDocument();
     expect(previewContainer).toHaveStyle('opacity: 0');
 
@@ -57,14 +62,15 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={true}
         setShowPreview={setShowPreview}
-        previewContent={mockPreviewContent}
+        previewQuery={previewQuery}
+        tabItem={tabItem}
         stopPreviewOnHover={false}
       >
         <span>Tab Example</span>
       </TabPreview>
     );
 
-    const previewContainer = screen.getByTestId(`unifiedTabs_tabPreview_${mockPreviewContent.id}`);
+    const previewContainer = screen.getByTestId(previewTestSubj);
     expect(previewContainer).toBeInTheDocument();
     expect(previewContainer).toHaveStyle('opacity: 1');
 
@@ -83,7 +89,8 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        previewContent={mockPreviewContent}
+        previewQuery={previewQuery}
+        tabItem={tabItem}
         stopPreviewOnHover={true}
       >
         <span>Tab Example</span>

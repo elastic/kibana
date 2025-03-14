@@ -25,13 +25,25 @@ import {
 } from '@elastic/eui';
 
 import { PREVIEW_WIDTH } from '../../constants';
-import type { TabPreviewProps } from '../../types';
+import type { PreviewQuery, TabItem } from '../../types';
+import { TabStatus } from '../../types';
+
+interface TabPreviewProps {
+  children: React.ReactNode;
+  showPreview: boolean;
+  setShowPreview: (show: boolean) => void;
+  tabItem: TabItem;
+  previewQuery: PreviewQuery;
+  stopPreviewOnHover?: boolean;
+  previewDelay?: number;
+}
 
 export const TabPreview: React.FC<TabPreviewProps> = ({
   children,
   showPreview,
   setShowPreview,
-  previewContent,
+  tabItem,
+  previewQuery,
   stopPreviewOnHover,
   previewDelay = 500,
 }) => {
@@ -110,15 +122,11 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         <EuiSplitPanel.Outer
           grow
           css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}
-          data-test-subj={`unifiedTabs_tabPreview_${previewContent.id}`}
+          data-test-subj={`unifiedTabs_tabPreview_${tabItem.id}`}
         >
           <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
-            <EuiCodeBlock
-              language={previewContent.query.language}
-              transparentBackground
-              paddingSize="none"
-            >
-              {previewContent.query.query}
+            <EuiCodeBlock language={previewQuery.language} transparentBackground paddingSize="none">
+              {previewQuery.query}
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner
@@ -127,18 +135,18 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
             paddingSize="none"
             css={getSplitPanelCss(euiTheme)}
           >
-            {previewContent.status === 'running' ? (
+            {previewQuery.status === TabStatus.RUNNING ? (
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiText>{previewContent.name}</EuiText>
+                  <EuiText>{tabItem.label}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <EuiHealth color={previewContent.status} textSize="m">
-                {previewContent.name}
+              <EuiHealth color={previewQuery.status} textSize="m">
+                {tabItem.label}
               </EuiHealth>
             )}
           </EuiSplitPanel.Inner>
