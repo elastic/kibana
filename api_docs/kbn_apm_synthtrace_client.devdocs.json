@@ -2863,7 +2863,7 @@
           },
           " extends { '@timestamp'?: number | undefined; }"
         ],
-        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2877,7 +2877,7 @@
             "signature": [
               "{ dataset: string; namespace: string; type: string; } | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2891,7 +2891,7 @@
             "signature": [
               "{ [key: string]: any; 'timestamp.us'?: number | undefined; 'metricset.name'?: string | undefined; } | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2905,7 +2905,7 @@
             "signature": [
               "{ attributes?: OtelSharedResourceAttributes | undefined; dropped_attributes_count?: number | undefined; schema_url?: string | undefined; } | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2919,7 +2919,7 @@
             "signature": [
               "{ attributes?: { 'service.framework.name'?: string | undefined; 'service.framework.version'?: string | undefined; } | undefined; dropped_attributes_count?: number | undefined; name?: string | undefined; } | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2933,7 +2933,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2947,7 +2947,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2961,7 +2961,7 @@
             "signature": [
               "{ id: string; } | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2975,7 +2975,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2989,7 +2989,7 @@
             "signature": [
               "{ id: string; } | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3003,7 +3003,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3017,7 +3017,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3031,7 +3031,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3045,7 +3045,213 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.OtelEdotDocument",
+        "type": "Interface",
+        "tags": [],
+        "label": "OtelEdotDocument",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.OtelEdotDocument",
+            "text": "OtelEdotDocument"
+          },
+          " extends { '@timestamp'?: number | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.data_stream",
+            "type": "Object",
+            "tags": [],
+            "label": "data_stream",
+            "description": [],
+            "signature": [
+              "{ dataset: string; namespace: string; type: string; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; 'timestamp.us'?: number | undefined; 'metricset.name'?: string | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.resource",
+            "type": "Object",
+            "tags": [],
+            "label": "resource",
+            "description": [],
+            "signature": [
+              "{ attributes?: OtelEdotSharedResourceAttributes | undefined; dropped_attributes_count?: number | undefined; schema_url?: string | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.scope",
+            "type": "Object",
+            "tags": [],
+            "label": "scope",
+            "description": [],
+            "signature": [
+              "{ attributes?: { 'service.framework.name'?: string | undefined; 'service.framework.version'?: string | undefined; } | undefined; dropped_attributes_count?: number | undefined; name?: string | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.trace_id",
+            "type": "string",
+            "tags": [],
+            "label": "trace_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.trace",
+            "type": "Object",
+            "tags": [],
+            "label": "trace",
+            "description": [],
+            "signature": [
+              "{ id: string; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.span_id",
+            "type": "string",
+            "tags": [],
+            "label": "span_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.span",
+            "type": "Object",
+            "tags": [],
+            "label": "span",
+            "description": [],
+            "signature": [
+              "{ id: string; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.dropped_attributes_count",
+            "type": "number",
+            "tags": [],
+            "label": "dropped_attributes_count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.dropped_events_count",
+            "type": "number",
+            "tags": [],
+            "label": "dropped_events_count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.dropped_links_count",
+            "type": "number",
+            "tags": [],
+            "label": "dropped_links_count",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelEdotDocument.timestamp_us",
+            "type": "number",
+            "tags": [],
+            "label": "timestamp_us",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4428,7 +4634,7 @@
         "tags": [],
         "label": "otel",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4442,7 +4648,7 @@
             "signature": [
               "(id: string) => Otel"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4454,7 +4660,49 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/index.ts",
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_native/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.otelEdot",
+        "type": "Object",
+        "tags": [],
+        "label": "otelEdot",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.otelEdot.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(id: string) => OtelEdot"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.otelEdot.create.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel/otel_edot/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

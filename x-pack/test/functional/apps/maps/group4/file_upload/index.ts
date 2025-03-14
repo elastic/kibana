@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
+  const browser = getService('browser');
+
   describe('geo file upload', function () {
+    before(async () => {
+      await browser.setWindowSize(1600, 1000);
+    });
+
     loadTestFile(require.resolve('./wizard'));
     loadTestFile(require.resolve('./geojson'));
     loadTestFile(require.resolve('./shapefile'));
