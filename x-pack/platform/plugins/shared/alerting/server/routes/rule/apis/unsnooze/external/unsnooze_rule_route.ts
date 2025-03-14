@@ -28,8 +28,12 @@ export const unsnoozeRuleRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
-        summary: 'Delete a snooze schedule for a rule',
+        summary: 'Delete an existing snooze schedule for a rule',
         tags: ['oas-tag:alerting'],
+        availability: {
+          since: '8.19.0',
+          stability: 'stable',
+        },
       },
       validate: {
         request: {
@@ -57,13 +61,13 @@ export const unsnoozeRuleRoute = (
         const rulesClient = await alertingContext.getRulesClient();
         const { ruleId, scheduleId }: UnsnoozeParams = req.params;
         try {
-          const cuurentRule = await rulesClient.get({ id: ruleId });
+          const currentRule = await rulesClient.get({ id: ruleId });
 
-          if (!cuurentRule.snoozeSchedule?.length) {
+          if (!currentRule.snoozeSchedule?.length) {
             throw Boom.badRequest('Rule has no snooze schedules.');
           }
 
-          const scheduleToUnsnooze = cuurentRule.snoozeSchedule?.find(
+          const scheduleToUnsnooze = currentRule.snoozeSchedule?.find(
             (schedule) => schedule.id === scheduleId
           );
 

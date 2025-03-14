@@ -80,7 +80,10 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         })
         .expect(200);
 
-      const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, snoozeSchedule.id);
+      const response = await alertUtils.getUnsnoozeRequest(
+        createdAlert.id,
+        snoozeSchedule.schedule.id
+      );
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');
@@ -156,9 +159,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, 'random_id');
 
         expect(response.statusCode).to.eql(400);
-        expect(response.body.message).to.eql(
-          'Rule has no snooze schedule with id random_schedule_1.'
-        );
+        expect(response.body.message).to.eql('Rule has no snooze schedule with id random_id.');
       });
     });
   });
