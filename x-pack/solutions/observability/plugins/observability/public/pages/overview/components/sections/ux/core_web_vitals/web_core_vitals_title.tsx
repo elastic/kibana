@@ -30,8 +30,8 @@ const BROWSER_CORE_WEB_VITALS = i18n.translate(
   }
 );
 
-const CORE_VITALS_URL = 'https://web.dev/vitals/';
-const CORE_VITALS_BROWSER_URL = 'https://github.com/GoogleChrome/web-vitals#browser-support';
+const CORE_VITALS_URL = 'https://ela.st/vtls';
+const CORE_VITALS_BROWSER_URL = 'https://ela.st/ch-vtls';
 
 export function WebCoreVitalsTitle({
   loading,
