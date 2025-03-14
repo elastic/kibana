@@ -26,6 +26,7 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
+const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.3';
 
 export const config: PluginConfigDescriptor = {
@@ -228,11 +229,12 @@ export const config: PluginConfigDescriptor = {
             excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
             spec: schema.object(
               {
-                min: schema.maybe(schema.string()),
+                min: schema.string({ defaultValue: REGISTRY_SPEC_MIN_VERSION }),
                 max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
               },
               {
                 defaultValue: {
+                  min: REGISTRY_SPEC_MIN_VERSION,
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },
               }
@@ -256,6 +258,7 @@ export const config: PluginConfigDescriptor = {
               capabilities: [],
               excludePackages: [],
               spec: {
+                min: REGISTRY_SPEC_MIN_VERSION,
                 max: REGISTRY_SPEC_MAX_VERSION,
               },
             },
