@@ -110,7 +110,7 @@ export const CreateIndexCodeView = ({
         </>
       )}
       <EuiFlexGroup>
-        <EuiFlexItem grow={false} css={{ maxWidth: '300px' }}>
+        <EuiFlexItem grow={false} css={{ minWidth: '150px' }}>
           <LanguageSelector
             options={LanguageOptions}
             selectedLanguage={selectedLanguage}

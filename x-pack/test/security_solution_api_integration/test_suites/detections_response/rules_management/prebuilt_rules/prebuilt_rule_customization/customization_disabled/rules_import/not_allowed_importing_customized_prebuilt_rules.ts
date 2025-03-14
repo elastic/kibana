@@ -21,7 +21,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Prebuilt rule import', () => {
+  describe('@ess @serverless @skipInServerlessMKI Prebuilt rule import', function () {
+    this.tags(['skipFIPS']);
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
