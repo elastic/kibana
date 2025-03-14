@@ -7,13 +7,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
