@@ -223,7 +223,7 @@ paths:
                   }
               postSyntheticMonitorsRequestExample3:
                 summary: ICMP monitor
-                description: create an ICMP monitor to perform ping checks.
+                description: Create an ICMP monitor to perform ping checks.
                 value: |-
                   {
                     "type": "icmp",
@@ -426,7 +426,7 @@ paths:
                   }
   /api/synthetics/monitors/_bulk_delete:
     post:
-      summary: Delete monitors.
+      summary: Delete monitors
       operationId: delete-synthetic-monitors
       description: >
         Delete multiple monitors by sending a list of config IDs.
@@ -576,6 +576,7 @@ components:
             The monitor timeout in seconds.
             The monitor will fail if it doesn't complete within this time.
     browserMonitorFields:
+      title: Browser monitor fields
       allOf: # Combines the common fields schema with the browser monitor-specific details
         - $ref: "#/components/schemas/commonMonitorFields"
         - type: object
@@ -611,6 +612,7 @@ components:
               enum:
                 - browser
     httpMonitorFields:
+      title: HTTP monitor fields
       allOf: # Combines the common fields schema with the hTTP monitor-specific details
         - $ref: "#/components/schemas/commonMonitorFields"
         - type: object
@@ -743,6 +745,7 @@ components:
                 The username for authenticating with the server.
                 The credentials are passed with the request.
     tcpMonitorFields:
+      title: TCP monitor fields
       allOf: # Combines the common fields schema with the TCP monitor-specific details
         - $ref: "#/components/schemas/commonMonitorFields"
         - type: object
@@ -791,6 +794,7 @@ components:
               enum:
                 - tcp
     icmpMonitorFields:
+      title: ICMP monitor fields
       allOf: # Combines the common fields schema with the ICMP monitor-specific details
         - $ref: "#/components/schemas/commonMonitorFields"
         - type: object

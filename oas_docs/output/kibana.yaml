@@ -51738,7 +51738,7 @@ paths:
                     "private_locations": ["my_private_location"]
                   }
               postSyntheticMonitorsRequestExample3:
-                description: create an ICMP monitor to perform ping checks.
+                description: Create an ICMP monitor to perform ping checks.
                 summary: ICMP monitor
                 value: |-
                   {
@@ -51834,7 +51834,7 @@ paths:
                         description: The unique identifier of the deleted monitor.
                         type: string
                 type: array
-      summary: Delete monitors.
+      summary: Delete monitors
       tags:
         - synthetics
   /api/synthetics/monitors/{config_id}:
@@ -74612,6 +74612,7 @@ components:
           required:
             - inline_script
             - type
+      title: Browser monitor fields
     Synthetics_commonMonitorFields:
       title: Common monitor fields
       type: object
@@ -74779,6 +74780,7 @@ components:
           required:
             - type
             - url
+      title: HTTP monitor fields
     Synthetics_icmpMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
@@ -74800,6 +74802,7 @@ components:
           required:
             - host
             - type
+      title: ICMP monitor fields
     Synthetics_tcpMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
@@ -74831,6 +74834,7 @@ components:
           required:
             - host
             - type
+      title: TCP monitor fields
     Task_manager_health_APIs_configuration:
       description: |
         This object summarizes the current configuration of Task Manager. This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
