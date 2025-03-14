@@ -227,6 +227,10 @@ tags:
     externalDocs:
       url: https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html
       description: Space overview
+  - name: streams
+    description: |
+      Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+    x-displayName: Streams
   - name: system
     x-displayName: System
     description: |
@@ -1803,6 +1807,166 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createEsQueryEsqlRuleRequest:
+                description: |
+                  Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL) to define its query and a server log connector to send notifications.
+                summary: Elasticsearch query rule (ES|QL)
+                value:
+                  actions:
+                    - frequency:
+                        notify_when: onActiveAlert
+                        summary: false
+                      group: query matched
+                      id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+                      params:
+                        level: info
+                        message: |-
+                          Elasticsearch query rule '{{rule.name}}' is active:
+                          - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+                  consumer: stackAlerts
+                  name: my Elasticsearch query ESQL rule
+                  params:
+                    esqlQuery:
+                      esql: FROM kibana_sample_data_logs | KEEP bytes, clientip, host, geo.dest | where geo.dest != "GB" | STATS sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | SORT sumbytes desc | LIMIT 10
+                    searchType: esqlQuery
+                    size: 0
+                    threshold:
+                      - 0
+                    thresholdComparator: '>'
+                    timeField: '@timestamp'
+                    timeWindowSize: 1
+                    timeWindowUnit: d
+                  rule_type_id: .es-query
+                  schedule:
+                    interval: 1d
+              createEsQueryKqlRuleRequest:
+                description: Create an Elasticsearch query rule that uses Kibana query language (KQL).
+                summary: Elasticsearch query rule (KQL)
+                value:
+                  consumer: alerts
+                  name: my Elasticsearch query KQL rule
+                  params:
+                    aggType: count
+                    excludeHitsFromPreviousRun: true
+                    groupBy: all
+                    searchConfiguration:
+                      index: 90943e30-9a47-11e8-b64d-95841ca0b247
+                      query:
+                        language: kuery
+                        query: '""geo.src : "US" ""'
+                    searchType: searchSource
+                    size: 100
+                    threshold:
+                      - 1000
+                    thresholdComparator: '>'
+                    timeWindowSize: 5
+                    timeWindowUnit: m
+                  rule_type_id: .es-query
+                  schedule:
+                    interval: 1m
+              createEsQueryRuleRequest:
+                description: |
+                  Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
+                summary: Elasticsearch query rule (DSL)
+                value:
+                  actions:
+                    - frequency:
+                        notify_when: onThrottleInterval
+                        summary: true
+                        throttle: 1d
+                      group: query matched
+                      id: fdbece50-406c-11ee-850e-c71febc4ca7f
+                      params:
+                        level: info
+                        message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
+                    - frequency:
+                        notify_when: onActionGroupChange
+                        summary: false
+                      group: recovered
+                      id: fdbece50-406c-11ee-850e-c71febc4ca7f
+                      params:
+                        level: info
+                        message: Recovered
+                  consumer: alerts
+                  name: my Elasticsearch query rule
+                  params:
+                    esQuery: '"""{"query":{"match_all" : {}}}"""'
+                    index:
+                      - kibana_sample_data_logs
+                    size: 100
+                    threshold:
+                      - 100
+                    thresholdComparator: '>'
+                    timeField: '@timestamp'
+                    timeWindowSize: 1
+                    timeWindowUnit: d
+                  rule_type_id: .es-query
+                  schedule:
+                    interval: 1d
+              createIndexThresholdRuleRequest:
+                description: |
+                  Create an index threshold rule that uses a server log connector to send notifications when the threshold is met.
+                summary: Index threshold rule
+                value:
+                  actions:
+                    - frequency:
+                        notify_when: onActionGroupChange
+                        summary: false
+                      group: threshold met
+                      id: 48de3460-f401-11ed-9f8e-399c75a2deeb
+                      params:
+                        level: info
+                        message: |-
+                          Rule '{{rule.name}}' is active for group '{{context.group}}':
+
+                          - Value: {{context.value}}
+                          - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
+                          - Timestamp: {{context.date}}
+                  alert_delay:
+                    active: 3
+                  consumer: alerts
+                  name: my rule
+                  params:
+                    aggField: sheet.version
+                    aggType: avg
+                    groupBy: top
+                    index:
+                      - .test-index
+                    termField: name.keyword
+                    termSize: 6
+                    threshold:
+                      - 1000
+                    thresholdComparator: '>'
+                    timeField: '@timestamp'
+                    timeWindowSize: 5
+                    timeWindowUnit: m
+                  rule_type_id: .index-threshold
+                  schedule:
+                    interval: 1m
+                  tags:
+                    - cpu
+              createTrackingContainmentRuleRequest:
+                description: |
+                  Create a tracking containment rule that checks when an entity is contained or no longer contained within a boundary.
+                summary: Tracking containment rule
+                value:
+                  consumer: alerts
+                  name: my tracking rule
+                  params:
+                    boundaryGeoField: location
+                    boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
+                    boundaryIndexTitle: boundary*
+                    boundaryNameField: name
+                    boundaryType: entireIndex
+                    dateField": '@timestamp'
+                    entity: agent.keyword
+                    geoField: geo.coordinates
+                    index: kibana_sample_data_logs
+                    indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
+                  rule_type_id: .geo-containment
+                  schedule:
+                    interval: 1h
             schema:
               additionalProperties: false
               type: object
@@ -2034,21 +2198,292 @@ paths:
                 - rule_type_id
                 - consumer
                 - schedule
-            examples:
-              createEsQueryEsqlRuleRequest:
-                $ref: '#/components/examples/create_es_query_esql_rule_request'
-              createEsQueryRuleRequest:
-                $ref: '#/components/examples/create_es_query_rule_request'
-              createEsQueryKqlRuleRequest:
-                $ref: '#/components/examples/create_es_query_kql_rule_request'
-              createIndexThresholdRuleRequest:
-                $ref: '#/components/examples/create_index_threshold_rule_request'
-              createTrackingContainmentRuleRequest:
-                $ref: '#/components/examples/create_tracking_containment_rule_request'
       responses:
         '200':
           content:
             application/json:
+              examples:
+                createEsQueryEsqlRuleResponse:
+                  description: The response for successfully creating an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).
+                  summary: Elasticsearch query rule (ES|QL)
+                  value:
+                    actions:
+                      - connector_type_id: .server-log
+                        frequency:
+                          notify_when: onActiveAlert
+                          summary: false
+                          throttle: null
+                        group: query matched
+                        id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+                        params:
+                          level: info
+                          message: |-
+                            Elasticsearch query rule '{{rule.name}}' is active:
+                            - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+                        uuid: bfe370a3-531b-4855-bbe6-ad739f578844
+                    api_key_created_by_user: false
+                    api_key_owner: elastic
+                    consumer: stackAlerts
+                    created_at: '2023-11-01T19:00:10.453Z'
+                    created_by: elastic
+                    enabled: true
+                    execution_status:
+                      last_execution_date: '2023-11-01T19:00:10.453Z'
+                      status: pending
+                    id: e0d62360-78e8-11ee-9177-f7d404c8c945
+                    mute_all: false
+                    muted_alert_ids: []
+                    name: my Elasticsearch query ESQL rule
+                    notify_when: null
+                    params:
+                      aggType: count
+                      esqlQuery:
+                        esql: FROM kibana_sample_data_logs | keep bytes, clientip, host, geo.dest | WHERE geo.dest != "GB" | stats sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | sort sumbytes desc | limit 10
+                      excludeHitsFromPreviousRun": true,
+                      groupBy: all
+                      searchType: esqlQuery
+                      size: 0
+                      threshold:
+                        - 0
+                      thresholdComparator: '>'
+                      timeField: '@timestamp'
+                      timeWindowSize: 1
+                      timeWindowUnit: d
+                    revision: 0
+                    rule_type_id: .es-query
+                    running: false
+                    schedule:
+                      interval: 1d
+                    scheduled_task_id: e0d62360-78e8-11ee-9177-f7d404c8c945
+                    tags: []
+                    throttle: null
+                    updated_at: '2023-11-01T19:00:10.453Z'
+                    updated_by: elastic",
+                createEsQueryKqlRuleResponse:
+                  description: The response for successfully creating an Elasticsearch query rule that uses Kibana query language (KQL).
+                  summary: Elasticsearch query rule (KQL)
+                  value:
+                    actions: []
+                    api_key_created_by_user: false
+                    api_key_owner: elastic
+                    consumer: alerts
+                    created_at: '2023-07-14T20:24:50.729Z'
+                    created_by: elastic
+                    enabled: true
+                    execution_status:
+                      last_execution_date: '2023-07-14T20:24:50.729Z'
+                      status: pending
+                    id: 7bd506d0-2284-11ee-8fad-6101956ced88
+                    mute_all: false
+                    muted_alert_ids: []
+                    name: my Elasticsearch query KQL rule"
+                    notify_when: null
+                    params:
+                      aggType: count
+                      excludeHitsFromPreviousRun: true
+                      groupBy: all
+                      searchConfiguration:
+                        index: 90943e30-9a47-11e8-b64d-95841ca0b247
+                        query:
+                          language: kuery
+                          query: '""geo.src : "US" ""'
+                      searchType: searchSource
+                      size: 100
+                      threshold:
+                        - 1000
+                      thresholdComparator: '>'
+                      timeWindowSize: 5
+                      timeWindowUnit: m
+                    revision: 0
+                    rule_type_id: .es-query
+                    running: false
+                    schedule:
+                      interval: 1m
+                    scheduled_task_id: 7bd506d0-2284-11ee-8fad-6101956ced88
+                    tags: []
+                    throttle: null
+                    updated_at: '2023-07-14T20:24:50.729Z'
+                    updated_by: elastic
+                createEsQueryRuleResponse:
+                  description: The response for successfully creating an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL).
+                  summary: Elasticsearch query rule (DSL)
+                  value:
+                    actions:
+                      - connector_type_id: .server-log
+                        frequency:
+                          notify_when: onThrottleInterval
+                          summary: true
+                          throttle: 1d
+                        group: query matched
+                        id: fdbece50-406c-11ee-850e-c71febc4ca7f
+                        params:
+                          level: info
+                          message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
+                        uuid: 53f3c2a3-e5d0-4cfa-af3b-6f0881385e78
+                      - connector_type_id: .server-log
+                        frequency:
+                          notify_when: onActionGroupChange
+                          summary: false
+                          throttle: null
+                        group: recovered
+                        id: fdbece50-406c-11ee-850e-c71febc4ca7f
+                        params:
+                          level: info
+                          message: Recovered
+                        uuid: 2324e45b-c0df-45c7-9d70-4993e30be758
+                    api_key_created_by_user: false
+                    api_key_owner: elastic
+                    consumer: alerts
+                    created_at: '2023-08-22T00:03:38.263Z'
+                    created_by: elastic
+                    enabled: true
+                    execution_status:
+                      last_execution_date: '2023-08-22T00:03:38.263Z'
+                      status: pending
+                    id: 58148c70-407f-11ee-850e-c71febc4ca7f
+                    mute_all: false
+                    muted_alert_ids: []
+                    name: my Elasticsearch query rule
+                    notify_when: null
+                    params:
+                      aggType: count
+                      esQuery: '"""{"query":{"match_all" : {}}}"""'
+                      excludeHitsFromPreviousRun: true
+                      groupBy: all
+                      index:
+                        - kibana_sample_data_logs
+                      searchType: esQuery
+                      size: 100
+                      threshold:
+                        - 100
+                      thresholdComparator: '>'
+                      timeField: '@timestamp'
+                      timeWindowSize: 1
+                      timeWindowUnit: d
+                    revision: 0
+                    rule_type_id: .es-query
+                    running: false
+                    schedule:
+                      interval: 1d
+                    scheduled_task_id: 58148c70-407f-11ee-850e-c71febc4ca7f
+                    tags: []
+                    throttle: null
+                    updated_at: '2023-08-22T00:03:38.263Z'
+                    updated_by: elastic
+                createIndexThresholdRuleResponse:
+                  description: The response for successfully creating an index threshold rule.
+                  summary: Index threshold rule
+                  value:
+                    actions:
+                      - connector_type_id: .server-log
+                        frequency:
+                          notify_when: onActionGroupChange
+                          summary: false
+                          throttle: null
+                        group: threshold met
+                        id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+                        params:
+                          level: info
+                          message: |-
+                            Rule {{rule.name}} is active for group {{context.group} :
+
+                            - Value: {{context.value}}
+                            - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
+                            - Timestamp: {{context.date}}
+                        uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
+                    alert_delay:
+                      active: 3
+                    api_key_created_by_user: false
+                    api_key_owner: elastic
+                    consumer: alerts
+                    created_at: '2022-06-08T17:20:31.632Z'
+                    created_by: elastic
+                    enabled: true
+                    execution_status:
+                      last_execution_date: '2022-06-08T17:20:31.632Z'
+                      status: pending
+                    id: 41893910-6bca-11eb-9e0d-85d233e3ee35
+                    mute_all: false
+                    muted_alert_ids: []
+                    name: my rule
+                    notify_when: null
+                    params:
+                      aggField: sheet.version
+                      aggType: avg
+                      groupBy: top
+                      index:
+                        - .test-index
+                      termField: name.keyword
+                      termSize: 6
+                      threshold:
+                        - 1000
+                      thresholdComparator: '>'
+                      timeField: '@timestamp'
+                      timeWindowSize: 5
+                      timeWindowUnit: m
+                    revision: 0
+                    rule_type_id: .index-threshold
+                    running: false
+                    schedule:
+                      interval: 1m
+                    scheduled_task_id: 425b0800-6bca-11eb-9e0d-85d233e3ee35
+                    tags:
+                      - cpu
+                    throttle: null
+                    updated_at: '2022-06-08T17:20:31.632Z'
+                    updated_by: elastic
+                createTrackingContainmentRuleResponse:
+                  description: The response for successfully creating a tracking containment rule.
+                  summary: Tracking containment rule
+                  value:
+                    actions: []
+                    api_key_created_by_user: false
+                    api_key_owner: elastic
+                    consumer: alerts
+                    created_at: '2024-02-14T19:52:55.920Z'
+                    created_by: elastic
+                    enabled: true
+                    execution_status:
+                      last_duration: 74
+                      last_execution_date: '2024-02-15T03:25:38.125Z'
+                      status: ok
+                    id: b6883f9d-5f70-4758-a66e-369d7c26012f
+                    last_run:
+                      alerts_count:
+                        active: 0
+                        ignored: 0
+                        new: 0
+                        recovered: 0
+                      outcome: succeeded
+                      outcome_msg: null
+                      outcome_order: 0
+                      warning: null
+                    mute_all: false
+                    muted_alert_ids: []
+                    name: my tracking rule
+                    next_run: '2024-02-15T03:26:38.033Z'
+                    notify_when: null
+                    params:
+                      boundaryGeoField: location
+                      boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
+                      boundaryIndexTitle: boundary*
+                      boundaryNameField: name
+                      boundaryType: entireIndex
+                      dateField: '@timestamp'
+                      entity: agent.keyword
+                      geoField: geo.coordinates
+                      index: kibana_sample_data_logs
+                      indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
+                    revision: 1
+                    rule_type_id: .geo-containment
+                    running: false
+                    schedule:
+                      interval: 1h
+                    scheduled_task_id: b6883f9d-5f70-4758-a66e-369d7c26012f
+                    tags: []
+                    throttle: null
+                    updated_at: '2024-02-15T03:24:32.574Z'
+                    updated_by: elastic
               schema:
                 additionalProperties: false
                 type: object
@@ -2692,17 +3127,6 @@ paths:
                   - muted_alert_ids
                   - execution_status
                   - revision
-              examples:
-                createEsQueryEsqlRuleResponse:
-                  $ref: '#/components/examples/create_es_query_esql_rule_response'
-                createEsQueryRuleResponse:
-                  $ref: '#/components/examples/create_es_query_rule_response'
-                createEsQueryKqlRuleResponse:
-                  $ref: '#/components/examples/create_es_query_kql_rule_response'
-                createIndexThresholdRuleResponse:
-                  $ref: '#/components/examples/create_index_threshold_rule_response'
-                createTrackingContainmentRuleResponse:
-                  $ref: '#/components/examples/create_tracking_containment_rule_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -2732,6 +3156,43 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateRuleRequest:
+                description: Update an index threshold rule that uses a server log connector to send notifications when the threshold is met.
+                summary: Index threshold rule
+                value:
+                  actions:
+                    - frequency:
+                        notify_when: onActionGroupChange
+                        summary: false
+                      group: threshold met
+                      id: 96b668d0-a1b6-11ed-afdf-d39a49596974
+                      params:
+                        level: info
+                        message: |-
+                          Rule {{rule.name}} is active for group {{context.group}}:
+
+                          - Value: {{context.value}}
+                          - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
+                          - Timestamp: {{context.date}}
+                  name: new name
+                  params:
+                    aggField: sheet.version
+                    aggType: avg
+                    groupBy: top
+                    index:
+                      - .updated-index
+                    termField: name.keyword
+                    termSize: 6
+                    threshold:
+                      - 1000
+                    thresholdComparator: '>'
+                    timeField: '@timestamp'
+                    timeWindowSize: 5
+                    timeWindowUnit: m
+                  schedule:
+                    interval: 1m
+                  tags: []
             schema:
               additionalProperties: false
               type: object
@@ -2935,13 +3396,80 @@ paths:
               required:
                 - name
                 - schedule
-            examples:
-              updateRuleRequest:
-                $ref: '#/components/examples/update_rule_request'
       responses:
         '200':
           content:
             application/json:
+              examples:
+                updateRuleResponse:
+                  description: The response for successfully updating an index threshold rule.
+                  summary: Index threshold rule
+                  value:
+                    actions:
+                      - connector_type_id: .server-log
+                        frequency:
+                          notify_when: onActionGroupChange
+                          summary: false
+                          throttle: null
+                        group: threshold met
+                        id: 96b668d0-a1b6-11ed-afdf-d39a49596974
+                        params:
+                          level: info
+                          message: |-
+                            Rule {{rule.name}} is active for group {{context.group}}:
+
+                            - Value: {{context.value}}
+                            - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
+                            - Timestamp: {{context.date}
+                        uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
+                    api_key_created_by_user: false
+                    api_key_owner: elastic
+                    consumer: alerts
+                    created_at: '2024-03-26T23:13:20.985Z'
+                    created_by: elastic
+                    enabled: true
+                    execution_status:
+                      last_duration: 52
+                      last_execution_date: '2024-03-26T23:22:51.390Z'
+                      status: ok
+                    id: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+                    last_run:
+                      alerts_count:
+                        active: 0
+                        ignored: 0
+                        new: 0
+                        recovered: 0
+                      outcome: succeeded
+                      outcome_msg: null
+                      warning: null
+                    mute_all: false
+                    muted_alert_ids: []
+                    name: new name
+                    next_run: '2024-03-26T23:23:51.316Z'
+                    params:
+                      aggField: sheet.version
+                      aggType: avg
+                      groupBy: top
+                      index:
+                        - .updated-index
+                      termField: name.keyword
+                      termSize: 6
+                      threshold:
+                        - 1000
+                      thresholdComparator: '>'
+                      timeField: '@timestamp'
+                      timeWindowSize: 5
+                      timeWindowUnit: m
+                    revision: 1
+                    rule_type_id: .index-threshold
+                    running: false
+                    schedule:
+                      interval: 1m
+                    scheduled_task_id: 4c5eda00-e74f-11ec-b72f-5b18752ff9ea
+                    tags: []
+                    throttle: null
+                    updated_at: '2024-03-26T23:22:59.949Z'
+                    updated_by: elastic
               schema:
                 additionalProperties: false
                 type: object
@@ -3585,9 +4113,6 @@ paths:
                   - muted_alert_ids
                   - execution_status
                   - revision
-              examples:
-                updateRuleResponse:
-                  $ref: '#/components/examples/update_rule_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -3757,6 +4282,176 @@ paths:
         '409':
           description: Indicates that the rule has already been updated by another user.
       summary: Update the API key for a rule
+      tags:
+        - alerting
+  /api/alerting/rule/{id}/snooze_schedule:
+    post:
+      description: When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.
+      operationId: post-alerting-rule-id-snooze-schedule
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Identifier of the rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                schedule:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    custom:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        duration:
+                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                          type: string
+                        recurring:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            end:
+                              description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                              type: string
+                            every:
+                              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                              type: string
+                            occurrences:
+                              description: The total number of recurrences of the schedule.
+                              minimum: 1
+                              type: number
+                            onMonth:
+                              description: The specific months for a recurring schedule. Valid values are 1-12.
+                              items:
+                                maximum: 12
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onMonthDay:
+                              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                              items:
+                                maximum: 31
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onWeekDay:
+                              description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                              items:
+                                type: string
+                              minItems: 1
+                              type: array
+                        start:
+                          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                          type: string
+                        timezone:
+                          description: The timezone of the schedule. The default timezone is UTC.
+                          type: string
+                      required:
+                        - start
+                        - duration
+              required:
+                - schedule
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  body:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      schedule:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          custom:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              duration:
+                                description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                                type: string
+                              recurring:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  end:
+                                    description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                                    type: string
+                                  every:
+                                    description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                                    type: string
+                                  occurrences:
+                                    description: The total number of recurrences of the schedule.
+                                    minimum: 1
+                                    type: number
+                                  onMonth:
+                                    description: The specific months for a recurring schedule. Valid values are 1-12.
+                                    items:
+                                      maximum: 12
+                                      minimum: 1
+                                      type: number
+                                    minItems: 1
+                                    type: array
+                                  onMonthDay:
+                                    description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                                    items:
+                                      maximum: 31
+                                      minimum: 1
+                                      type: number
+                                    minItems: 1
+                                    type: array
+                                  onWeekDay:
+                                    description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                                    items:
+                                      type: string
+                                    minItems: 1
+                                    type: array
+                              start:
+                                description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                                type: string
+                              timezone:
+                                description: The timezone of the schedule. The default timezone is UTC.
+                                type: string
+                            required:
+                              - start
+                              - duration
+                          id:
+                            description: Identifier of the snooze schedule.
+                            type: string
+                        required:
+                          - id
+                    required:
+                      - schedule
+                required:
+                  - body
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given id does not exist.
+      summary: Schedule a snooze for the rule
       tags:
         - alerting
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
@@ -3932,6 +4627,203 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                findConditionalActionRulesResponse:
+                  description: A response that contains information about an index threshold rule.
+                  summary: Index threshold rule
+                  value:
+                    data:
+                      - actions:
+                          - frequency:
+                              notify_when: onActionGroupChange
+                              summary: false
+                              throttle: null
+                            group: threshold met
+                            id: 9dca3e00-74f5-11ed-9801-35303b735aef
+                            params:
+                              connector_type_id: .server-log
+                              level: info
+                              message: |-
+                                Rule {{rule.name}} is active for group {{context.group}}:
+
+                                - Value: {{context.value}}
+                                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
+                                - Timestamp: {{context.date}}
+                            uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+                        api_key_created_by_user: false
+                        api_key_owner: elastic
+                        consumer: alerts
+                        created_at: '2022-12-05T23:40:33.132Z'
+                        created_by: elastic
+                        enabled: true
+                        execution_status:
+                          last_duration: 48
+                          last_execution_date: '2022-12-06T01:44:23.983Z'
+                          status: ok
+                        id: 3583a470-74f6-11ed-9801-35303b735aef
+                        last_run:
+                          alerts_count:
+                            active: 0
+                            ignored: 0
+                            new: 0
+                            recovered: 0
+                          outcome: succeeded
+                          outcome_msg: null
+                          warning: null
+                        mute_all: false
+                        muted_alert_ids: []
+                        name: my alert
+                        next_run: '2022-12-06T01:45:23.912Z'
+                        params:
+                          aggField: sheet.version
+                          aggType: avg
+                          groupBy: top
+                          index:
+                            - test-index
+                          termField: name.keyword
+                          termSize: 6
+                          threshold:
+                            - 1000
+                          thresholdComparator: '>'
+                          timeField: '@timestamp'
+                          timeWindowSize: 5
+                          timeWindowUnit: m
+                        revision: 1
+                        rule_type_id: .index-threshold
+                        schedule:
+                          interval: 1m
+                        scheduled_task_id: 3583a470-74f6-11ed-9801-35303b735aef
+                        tags:
+                          - cpu
+                        throttle: null
+                        updated_at: '2022-12-05T23:40:33.132Z'
+                        updated_by: elastic
+                    page: 1
+                    per_page: 10
+                    total: 1
+                findRulesResponse:
+                  description: A response that contains information about a security rule that has conditional actions.
+                  summary: Security rule
+                  value:
+                    data:
+                      - actions:
+                          - alerts_filter:
+                              query:
+                                filters:
+                                  - $state:
+                                      store: appState
+                                    meta:
+                                      alias: null
+                                      disabled: false
+                                      field: client.geo.region_iso_code
+                                      index: c4bdca79-e69e-4d80-82a1-e5192c621bea
+                                      key: client.geo.region_iso_code
+                                      negate: false
+                                      params:
+                                        query: CA-QC
+                                        type: phrase
+                                    query:
+                                      match_phrase:
+                                        client.geo.region_iso_code: CA-QC
+                                kql: ''
+                              timeframe:
+                                days:
+                                  - 7
+                                hours:
+                                  end: '17:00'
+                                  start: '08:00'
+                                timezone: UTC
+                            connector_type_id: .index
+                            frequency:
+                              notify_when: onActiveAlert
+                              summary: true
+                              throttle: null
+                            group: default
+                            id: 49eae970-f401-11ed-9f8e-399c75a2deeb
+                            params:
+                              documents:
+                                - alert_id:
+                                    '[object Object]': null
+                                  context_message:
+                                    '[object Object]': null
+                                  rule_id:
+                                    '[object Object]': null
+                                  rule_name:
+                                    '[object Object]': null
+                            uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+                        api_key_created_by_user: false
+                        api_key_owner: elastic
+                        consumer: siem
+                        created_at: '2023-05-16T15:50:28.358Z'
+                        created_by: elastic
+                        enabled: true
+                        execution_status:
+                          last_duration: 166
+                          last_execution_date: '2023-05-16T20:26:49.590Z'
+                          status: ok
+                        id: 6107a8f0-f401-11ed-9f8e-399c75a2deeb
+                        last_run:
+                          alerts_count:
+                            active: 0
+                            ignored: 0
+                            new: 0
+                            recovered: 0
+                          outcome: succeeded
+                          outcome_msg:
+                            - Rule execution completed successfully
+                          outcome_order: 0
+                          warning: null
+                        mute_all: false
+                        muted_alert_ids: []
+                        name: security_rule
+                        next_run: '2023-05-16T20:27:49.507Z'
+                        notify_when: null
+                        params:
+                          author: []
+                          description: A security threshold rule.
+                          exceptionsList: []
+                          falsePositives: []
+                          filters: []
+                          from: now-3660s
+                          immutable: false
+                          index:
+                            - kibana_sample_data_logs
+                          language: kuery
+                          license: ''
+                          maxSignals: 100
+                          meta:
+                            from: 1h
+                            kibana_siem_app_url: https://localhost:5601/app/security
+                          outputIndex: ''
+                          query: '*'
+                          references: []
+                          riskScore: 21
+                          riskScoreMapping: []
+                          ruleId: an_internal_rule_id
+                          severity: low
+                          severityMapping: []
+                          threat: []
+                          threshold:
+                            cardinality: []
+                            field:
+                              - bytes
+                            value: 1
+                          to: now
+                          type: threshold
+                          version: 1
+                        revision: 1
+                        rule_type_id: siem.thresholdRule
+                        running: false
+                        schedule:
+                          interval: 1m
+                        scheduled_task_id: 6107a8f0-f401-11ed-9f8e-399c75a2deeb
+                        tags: []
+                        throttle: null
+                        updated_at: '2023-05-16T20:25:42.559Z'
+                        updated_by: elastic
+                    page: 1
+                    per_page: 10
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -4575,11 +5467,6 @@ paths:
                   - muted_alert_ids
                   - execution_status
                   - revision
-              examples:
-                findRulesResponse:
-                  $ref: '#/components/examples/find_rules_response'
-                findConditionalActionRulesResponse:
-                  $ref: '#/components/examples/find_rules_response_conditional_action'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -9856,177 +10743,6 @@ paths:
                   - $ref: '#/components/schemas/Security_Detections_API_BulkExportActionResponse'
           description: OK
       summary: Apply a bulk action to detection rules
-      tags:
-        - Security Detections API
-  /api/detection_engine/rules/_bulk_create:
-    post:
-      deprecated: true
-      description: Create new detection rules in bulk.
-      operationId: BulkCreateRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/Security_Detections_API_RuleCreateProps'
-              type: array
-        description: A JSON array of rules, where each rule contains the required fields.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_BulkCrudRulesResponse'
-          description: Indicates a successful call.
-      summary: Create multiple detection rules
-      tags:
-        - Security Detections API
-  /api/detection_engine/rules/_bulk_delete:
-    delete:
-      deprecated: true
-      description: Delete detection rules in bulk.
-      operationId: BulkDeleteRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                type: object
-                properties:
-                  id:
-                    $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
-                  rule_id:
-                    $ref: '#/components/schemas/Security_Detections_API_RuleSignatureId'
-              type: array
-        description: A JSON array of `id` or `rule_id` fields of the rules you want to delete.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_BulkCrudRulesResponse'
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
-                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
-          description: Invalid input data response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
-          description: Unsuccessful authentication response
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
-          description: Internal server error response
-      summary: Delete multiple detection rules
-      tags:
-        - Security Detections API
-    post:
-      deprecated: true
-      description: Deletes multiple rules.
-      operationId: BulkDeleteRulesPost
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                type: object
-                properties:
-                  id:
-                    $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
-                  rule_id:
-                    $ref: '#/components/schemas/Security_Detections_API_RuleSignatureId'
-              type: array
-        description: A JSON array of `id` or `rule_id` fields of the rules you want to delete.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_BulkCrudRulesResponse'
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
-                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
-          description: Invalid input data response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
-          description: Unsuccessful authentication response
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
-          description: Internal server error response
-      summary: Delete multiple detection rules
-      tags:
-        - Security Detections API
-  /api/detection_engine/rules/_bulk_update:
-    patch:
-      deprecated: true
-      description: Update specific fields of existing detection rules using the `rule_id` or `id` field.
-      operationId: BulkPatchRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/Security_Detections_API_RulePatchProps'
-              type: array
-        description: A JSON array of rules, where each rule contains the required fields.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_BulkCrudRulesResponse'
-          description: Indicates a successful call.
-      summary: Patch multiple detection rules
-      tags:
-        - Security Detections API
-    put:
-      deprecated: true
-      description: |
-        Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
-        > info
-        > You cannot modify the `id` or `rule_id` values.
-      operationId: BulkUpdateRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/Security_Detections_API_RuleUpdateProps'
-              type: array
-        description: A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Detections_API_BulkCrudRulesResponse'
-          description: Indicates a successful call.
-      summary: Update multiple detection rules
       tags:
         - Security Detections API
   /api/detection_engine/rules/_export:
@@ -43446,6 +44162,2097 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
+  /api/streams:
+    get:
+      description: Fetches list of all streams
+      operationId: get-streams
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream list
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/_disable:
+    post:
+      description: Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.
+      operationId: post-streams-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Disable streams
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/_enable:
+    post:
+      description: Enables wired streams
+      operationId: post-streams-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Enable streams
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/_resync:
+    post:
+      description: Resyncs all streams, making sure that Elasticsearch assets are up to date
+      operationId: post-streams-resync
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Resync streams
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}:
+    delete:
+      description: Deletes a stream definition and the underlying data stream
+      operationId: delete-streams-name
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Delete a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    get:
+      description: Fetches a stream definition and associated dashboards
+      operationId: get-streams-name
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Creates or updates a stream definition. Classic streams can not be created through this API, only updated
+      operationId: put-streams-name
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - anyOf:
+                    - allOf:
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                minLength: 1
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                ingest:
+                                  allOf:
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          anyOf:
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                dsl:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    data_retention:
+                                                      minLength: 1
+                                                      type: string
+                                              required:
+                                                - dsl
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                ilm:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    policy:
+                                                      minLength: 1
+                                                      type: string
+                                                  required:
+                                                    - policy
+                                              required:
+                                                - ilm
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                inherit:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - inherit
+                                        processing:
+                                          items:
+                                            anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  grok:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern_definitions:
+                                                            additionalProperties:
+                                                              type: string
+                                                            type: object
+                                                          patterns:
+                                                            items:
+                                                              minLength: 1
+                                                              type: string
+                                                            minItems: 1
+                                                            type: array
+                                                        required:
+                                                          - field
+                                                          - patterns
+                                                required:
+                                                  - grok
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  dissect:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          append_separator:
+                                                            minLength: 1
+                                                            type: string
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - pattern
+                                                required:
+                                                  - dissect
+                                          type: array
+                                      required:
+                                        - lifecycle
+                                        - processing
+                                    - type: object
+                                      properties:
+                                        wired:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            fields:
+                                              additionalProperties:
+                                                allOf:
+                                                  - additionalProperties:
+                                                      anyOf:
+                                                        - anyOf:
+                                                            - type: string
+                                                            - type: number
+                                                            - type: boolean
+                                                            - enum:
+                                                                - 'null'
+                                                              nullable: true
+                                                            - not: {}
+                                                        - items:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                              - enum:
+                                                                  - 'null'
+                                                                nullable: true
+                                                              - not: {}
+                                                          type: array
+                                                        - {}
+                                                    type: object
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          format:
+                                                            minLength: 1
+                                                            type: string
+                                                          type:
+                                                            enum:
+                                                              - keyword
+                                                              - match_only_text
+                                                              - long
+                                                              - double
+                                                              - date
+                                                              - boolean
+                                                              - ip
+                                                            type: string
+                                                        required:
+                                                          - type
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          type:
+                                                            enum:
+                                                              - system
+                                                            type: string
+                                                        required:
+                                                          - type
+                                              type: object
+                                            routing:
+                                              items:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  destination:
+                                                    minLength: 1
+                                                    type: string
+                                                  if:
+                                                    anyOf:
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              operator:
+                                                                enum:
+                                                                  - exists
+                                                                  - notExists
+                                                                type: string
+                                                            required:
+                                                              - field
+                                                              - operator
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              operator:
+                                                                enum:
+                                                                  - eq
+                                                                  - neq
+                                                                  - lt
+                                                                  - lte
+                                                                  - gt
+                                                                  - gte
+                                                                  - contains
+                                                                  - startsWith
+                                                                  - endsWith
+                                                                type: string
+                                                              value:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                            required:
+                                                              - field
+                                                              - operator
+                                                              - value
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          and:
+                                                            items: {}
+                                                            type: array
+                                                        required:
+                                                          - and
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          or:
+                                                            items: {}
+                                                            type: array
+                                                        required:
+                                                          - or
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          never:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties: {}
+                                                        required:
+                                                          - never
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          always:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties: {}
+                                                        required:
+                                                          - always
+                                                required:
+                                                  - destination
+                                                  - if
+                                              type: array
+                                          required:
+                                            - fields
+                                            - routing
+                                      required:
+                                        - wired
+                              required:
+                                - ingest
+                          required:
+                            - stream
+                    - allOf:
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                minLength: 1
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                ingest:
+                                  allOf:
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          anyOf:
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                dsl:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    data_retention:
+                                                      minLength: 1
+                                                      type: string
+                                              required:
+                                                - dsl
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                ilm:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    policy:
+                                                      minLength: 1
+                                                      type: string
+                                                  required:
+                                                    - policy
+                                              required:
+                                                - ilm
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                inherit:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - inherit
+                                        processing:
+                                          items:
+                                            anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  grok:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern_definitions:
+                                                            additionalProperties:
+                                                              type: string
+                                                            type: object
+                                                          patterns:
+                                                            items:
+                                                              minLength: 1
+                                                              type: string
+                                                            minItems: 1
+                                                            type: array
+                                                        required:
+                                                          - field
+                                                          - patterns
+                                                required:
+                                                  - grok
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  dissect:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          append_separator:
+                                                            minLength: 1
+                                                            type: string
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - pattern
+                                                required:
+                                                  - dissect
+                                          type: array
+                                      required:
+                                        - lifecycle
+                                        - processing
+                                    - type: object
+                                      properties:
+                                        unwired:
+                                          additionalProperties: false
+                                          type: object
+                                          properties: {}
+                                      required:
+                                        - unwired
+                              required:
+                                - ingest
+                          required:
+                            - stream
+                - allOf:
+                    - type: object
+                      properties:
+                        dashboards:
+                          items:
+                            minLength: 1
+                            type: string
+                          type: array
+                      required:
+                        - dashboards
+                    - type: object
+                      properties:
+                        stream:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            group:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                description:
+                                  type: string
+                                members:
+                                  items:
+                                    minLength: 1
+                                    type: string
+                                  type: array
+                              required:
+                                - members
+                          required:
+                            - group
+                      required:
+                        - stream
+      responses: {}
+      summary: Create or update a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/_fork:
+    post:
+      description: Forks a wired stream and creates a child stream
+      operationId: post-streams-name-fork
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                if:
+                  anyOf:
+                    - anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            field:
+                              minLength: 1
+                              type: string
+                            operator:
+                              enum:
+                                - exists
+                                - notExists
+                              type: string
+                          required:
+                            - field
+                            - operator
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            field:
+                              minLength: 1
+                              type: string
+                            operator:
+                              enum:
+                                - eq
+                                - neq
+                                - lt
+                                - lte
+                                - gt
+                                - gte
+                                - contains
+                                - startsWith
+                                - endsWith
+                              type: string
+                            value:
+                              anyOf:
+                                - type: string
+                                - type: number
+                                - type: boolean
+                          required:
+                            - field
+                            - operator
+                            - value
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        and:
+                          items: {}
+                          type: array
+                      required:
+                        - and
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        or:
+                          items: {}
+                          type: array
+                      required:
+                        - or
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        never:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - never
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        always:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - always
+                stream:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+              required:
+                - stream
+                - if
+      responses: {}
+      summary: Fork a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/_group:
+    get:
+      description: Fetches the group settings of a group stream definition
+      operationId: get-streams-name-group
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get group stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Upserts the group settings of a group stream definition
+      operationId: put-streams-name-group
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                group:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    members:
+                      items:
+                        minLength: 1
+                        type: string
+                      type: array
+                  required:
+                    - members
+              required:
+                - group
+      responses: {}
+      summary: Upsert group stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/_ingest:
+    get:
+      description: Fetches the ingest settings of an ingest stream definition
+      operationId: get-streams-name-ingest
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get ingest stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Upserts the ingest settings of an ingest stream definition
+      operationId: put-streams-name-ingest
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    ingest:
+                      allOf:
+                        - type: object
+                          properties:
+                            lifecycle:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    dsl:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        data_retention:
+                                          minLength: 1
+                                          type: string
+                                  required:
+                                    - dsl
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    ilm:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        policy:
+                                          minLength: 1
+                                          type: string
+                                      required:
+                                        - policy
+                                  required:
+                                    - ilm
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                            processing:
+                              items:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      grok:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern_definitions:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              patterns:
+                                                items:
+                                                  minLength: 1
+                                                  type: string
+                                                minItems: 1
+                                                type: array
+                                            required:
+                                              - field
+                                              - patterns
+                                    required:
+                                      - grok
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      dissect:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              append_separator:
+                                                minLength: 1
+                                                type: string
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - field
+                                              - pattern
+                                    required:
+                                      - dissect
+                              type: array
+                          required:
+                            - lifecycle
+                            - processing
+                        - type: object
+                          properties:
+                            wired:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                fields:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
+                                routing:
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      destination:
+                                        minLength: 1
+                                        type: string
+                                      if:
+                                        anyOf:
+                                          - anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  operator:
+                                                    enum:
+                                                      - exists
+                                                      - notExists
+                                                    type: string
+                                                required:
+                                                  - field
+                                                  - operator
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  operator:
+                                                    enum:
+                                                      - eq
+                                                      - neq
+                                                      - lt
+                                                      - lte
+                                                      - gt
+                                                      - gte
+                                                      - contains
+                                                      - startsWith
+                                                      - endsWith
+                                                    type: string
+                                                  value:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                required:
+                                                  - field
+                                                  - operator
+                                                  - value
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              and:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - and
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              or:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - or
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              never:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - never
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              always:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - always
+                                    required:
+                                      - destination
+                                      - if
+                                  type: array
+                              required:
+                                - fields
+                                - routing
+                          required:
+                            - wired
+                  required:
+                    - ingest
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    ingest:
+                      allOf:
+                        - type: object
+                          properties:
+                            lifecycle:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    dsl:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        data_retention:
+                                          minLength: 1
+                                          type: string
+                                  required:
+                                    - dsl
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    ilm:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        policy:
+                                          minLength: 1
+                                          type: string
+                                      required:
+                                        - policy
+                                  required:
+                                    - ilm
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                            processing:
+                              items:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      grok:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern_definitions:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              patterns:
+                                                items:
+                                                  minLength: 1
+                                                  type: string
+                                                minItems: 1
+                                                type: array
+                                            required:
+                                              - field
+                                              - patterns
+                                    required:
+                                      - grok
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      dissect:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              append_separator:
+                                                minLength: 1
+                                                type: string
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - field
+                                              - pattern
+                                    required:
+                                      - dissect
+                              type: array
+                          required:
+                            - lifecycle
+                            - processing
+                        - type: object
+                          properties:
+                            unwired:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
+                          required:
+                            - unwired
+                  required:
+                    - ingest
+      responses: {}
+      summary: Update ingest stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/dashboards:
+    get:
+      description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
+      operationId: get-streams-name-dashboards
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream dashboards
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/dashboards/_bulk:
+    post:
+      description: Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.
+      operationId: post-streams-name-dashboards-bulk
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                operations:
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          index:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                            required:
+                              - id
+                        required:
+                          - index
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          delete:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                            required:
+                              - id
+                        required:
+                          - delete
+                  type: array
+              required:
+                - operations
+      responses: {}
+      summary: Bulk update dashboards
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/dashboards/{dashboardId}:
+    delete:
+      description: Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.
+      operationId: delete-streams-name-dashboards-dashboardid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: dashboardId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Unlink a dashboard from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.
+      operationId: put-streams-name-dashboards-dashboardid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: dashboardId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Link a dashboard to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
   /api/timeline:
     delete:
       description: Delete one or more Timelines or Timeline templates.
@@ -48135,747 +50942,6 @@ components:
           referenced_by_count: 2
           is_missing_secrets: false
           is_system_action: false
-    update_rule_request:
-      summary: Index threshold rule
-      description: Update an index threshold rule that uses a server log connector to send notifications when the threshold is met.
-      value:
-        actions:
-          - frequency:
-              summary: false
-              notify_when: onActionGroupChange
-            group: threshold met
-            id: 96b668d0-a1b6-11ed-afdf-d39a49596974
-            params:
-              level: info
-              message: |-
-                Rule {{rule.name}} is active for group {{context.group}}:
-
-                - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
-                - Timestamp: {{context.date}}
-        params:
-          aggField: sheet.version
-          aggType: avg
-          index:
-            - .updated-index
-          groupBy: top
-          termField: name.keyword
-          termSize: 6
-          threshold:
-            - 1000
-          thresholdComparator: '>'
-          timeField: '@timestamp'
-          timeWindowSize: 5
-          timeWindowUnit: m
-        name: new name
-        schedule:
-          interval: 1m
-        tags: []
-    update_rule_response:
-      summary: Index threshold rule
-      description: The response for successfully updating an index threshold rule.
-      value:
-        id: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
-        consumer: alerts
-        tags: []
-        name: new name
-        enabled: true
-        throttle: null
-        revision: 1
-        running: false
-        schedule:
-          interval: 1m
-        params:
-          index:
-            - .updated-index
-          timeField: '@timestamp'
-          groupBy: top
-          aggType: avg
-          timeWindowSize: 5
-          timeWindowUnit: m
-          thresholdComparator: '>'
-          threshold:
-            - 1000
-          aggField: sheet.version
-          termField: name.keyword
-          termSize: 6
-        api_key_owner: elastic
-        created_by: elastic
-        updated_by: elastic
-        rule_type_id: .index-threshold
-        scheduled_task_id: 4c5eda00-e74f-11ec-b72f-5b18752ff9ea
-        created_at: '2024-03-26T23:13:20.985Z'
-        updated_at: '2024-03-26T23:22:59.949Z'
-        mute_all: false
-        muted_alert_ids: []
-        execution_status:
-          status: ok
-          last_execution_date: '2024-03-26T23:22:51.390Z'
-          last_duration: 52
-        actions:
-          - group: threshold met
-            params:
-              level: info
-              message: |-
-                Rule {{rule.name}} is active for group {{context.group}}:
-
-                - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
-                - Timestamp: {{context.date}
-            id: 96b668d0-a1b6-11ed-afdf-d39a49596974
-            uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
-            connector_type_id: .server-log
-            frequency:
-              summary: false
-              throttle: null
-              notify_when: onActionGroupChange
-        last_run:
-          alerts_count:
-            new: 0
-            ignored: 0
-            recovered: 0
-            active: 0
-          outcome_msg: null
-          warning: null
-          outcome: succeeded
-        next_run: '2024-03-26T23:23:51.316Z'
-        api_key_created_by_user: false
-    create_es_query_esql_rule_request:
-      summary: Elasticsearch query rule (ES|QL)
-      description: |
-        Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL) to define its query and a server log connector to send notifications.
-      value:
-        name: my Elasticsearch query ESQL rule
-        params:
-          searchType: esqlQuery
-          esqlQuery:
-            esql: FROM kibana_sample_data_logs | KEEP bytes, clientip, host, geo.dest | where geo.dest != "GB" | STATS sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | SORT sumbytes desc | LIMIT 10
-          timeField: '@timestamp'
-          timeWindowSize: 1
-          timeWindowUnit: d
-          size: 0
-          thresholdComparator: '>'
-          threshold:
-            - 0
-        consumer: stackAlerts
-        rule_type_id: .es-query
-        schedule:
-          interval: 1d
-        actions:
-          - group: query matched
-            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
-            params:
-              level: info
-              message: |-
-                Elasticsearch query rule '{{rule.name}}' is active:
-                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
-            frequency:
-              summary: false
-              notify_when: onActiveAlert
-    create_es_query_rule_request:
-      summary: Elasticsearch query rule (DSL)
-      description: |
-        Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
-      value:
-        actions:
-          - group: query matched
-            params:
-              level: info
-              message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
-            id: fdbece50-406c-11ee-850e-c71febc4ca7f
-            frequency:
-              throttle: 1d
-              summary: true
-              notify_when: onThrottleInterval
-          - group: recovered
-            params:
-              level: info
-              message: Recovered
-            id: fdbece50-406c-11ee-850e-c71febc4ca7f
-            frequency:
-              summary: false
-              notify_when: onActionGroupChange
-        consumer: alerts
-        name: my Elasticsearch query rule
-        params:
-          esQuery: '"""{"query":{"match_all" : {}}}"""'
-          index:
-            - kibana_sample_data_logs
-          size: 100
-          threshold:
-            - 100
-          thresholdComparator: '>'
-          timeField: '@timestamp'
-          timeWindowSize: 1
-          timeWindowUnit: d
-        rule_type_id: .es-query
-        schedule:
-          interval: 1d
-    create_es_query_kql_rule_request:
-      summary: Elasticsearch query rule (KQL)
-      description: Create an Elasticsearch query rule that uses Kibana query language (KQL).
-      value:
-        consumer: alerts
-        name: my Elasticsearch query KQL rule
-        params:
-          aggType: count
-          excludeHitsFromPreviousRun: true
-          groupBy: all
-          searchConfiguration:
-            query:
-              query: '""geo.src : "US" ""'
-              language: kuery
-            index: 90943e30-9a47-11e8-b64d-95841ca0b247
-          searchType: searchSource
-          size: 100
-          threshold:
-            - 1000
-          thresholdComparator: '>'
-          timeWindowSize: 5
-          timeWindowUnit: m
-        rule_type_id: .es-query
-        schedule:
-          interval: 1m
-    create_index_threshold_rule_request:
-      summary: Index threshold rule
-      description: |
-        Create an index threshold rule that uses a server log connector to send notifications when the threshold is met.
-      value:
-        actions:
-          - id: 48de3460-f401-11ed-9f8e-399c75a2deeb
-            frequency:
-              notify_when: onActionGroupChange
-              summary: false
-            group: threshold met
-            params:
-              level: info
-              message: |-
-                Rule '{{rule.name}}' is active for group '{{context.group}}':
-
-                - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
-                - Timestamp: {{context.date}}
-        alert_delay:
-          active: 3
-        consumer: alerts
-        name: my rule
-        params:
-          aggType: avg
-          termSize: 6
-          thresholdComparator: '>'
-          timeWindowSize: 5
-          timeWindowUnit: m
-          groupBy: top
-          threshold:
-            - 1000
-          index:
-            - .test-index
-          timeField: '@timestamp'
-          aggField: sheet.version
-          termField: name.keyword
-        rule_type_id: .index-threshold
-        schedule:
-          interval: 1m
-        tags:
-          - cpu
-    create_tracking_containment_rule_request:
-      summary: Tracking containment rule
-      description: |
-        Create a tracking containment rule that checks when an entity is contained or no longer contained within a boundary.
-      value:
-        consumer: alerts
-        name: my tracking rule
-        params:
-          index: kibana_sample_data_logs
-          dateField": '@timestamp'
-          geoField: geo.coordinates
-          entity: agent.keyword
-          boundaryType: entireIndex
-          boundaryIndexTitle: boundary*
-          boundaryGeoField: location
-          boundaryNameField: name
-          indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
-          boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
-        rule_type_id: .geo-containment
-        schedule:
-          interval: 1h
-    create_es_query_esql_rule_response:
-      summary: Elasticsearch query rule (ES|QL)
-      description: The response for successfully creating an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).
-      value:
-        id: e0d62360-78e8-11ee-9177-f7d404c8c945
-        enabled: true
-        name: my Elasticsearch query ESQL rule
-        tags: []
-        rule_type_id: .es-query
-        consumer: stackAlerts
-        schedule:
-          interval: 1d
-        actions:
-          - group: query matched
-            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
-            params:
-              level: info
-              message: |-
-                Elasticsearch query rule '{{rule.name}}' is active:
-                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
-            connector_type_id: .server-log
-            frequency:
-              summary: false
-              notify_when: onActiveAlert
-              throttle: null
-            uuid: bfe370a3-531b-4855-bbe6-ad739f578844
-        params:
-          searchType: esqlQuery
-          esqlQuery:
-            esql: FROM kibana_sample_data_logs | keep bytes, clientip, host, geo.dest | WHERE geo.dest != "GB" | stats sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | sort sumbytes desc | limit 10
-          timeField: '@timestamp'
-          timeWindowSize: 1
-          timeWindowUnit: d
-          size: 0
-          thresholdComparator: '>'
-          threshold:
-            - 0
-          excludeHitsFromPreviousRun": true,
-          aggType: count
-          groupBy: all
-        scheduled_task_id: e0d62360-78e8-11ee-9177-f7d404c8c945
-        created_by: elastic
-        updated_by: elastic",
-        created_at: '2023-11-01T19:00:10.453Z'
-        updated_at: '2023-11-01T19:00:10.453Z'
-        api_key_owner: elastic
-        api_key_created_by_user: false
-        throttle: null
-        mute_all: false
-        notify_when: null
-        muted_alert_ids: []
-        execution_status:
-          status: pending
-          last_execution_date: '2023-11-01T19:00:10.453Z'
-        revision: 0
-        running: false
-    create_es_query_rule_response:
-      summary: Elasticsearch query rule (DSL)
-      description: The response for successfully creating an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL).
-      value:
-        id: 58148c70-407f-11ee-850e-c71febc4ca7f
-        enabled: true
-        name: my Elasticsearch query rule
-        tags: []
-        rule_type_id: .es-query
-        consumer: alerts
-        schedule:
-          interval: 1d
-        actions:
-          - group: query matched
-            id: fdbece50-406c-11ee-850e-c71febc4ca7f
-            params:
-              level: info
-              message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
-            connector_type_id: .server-log
-            frequency:
-              summary: true
-              notify_when: onThrottleInterval
-              throttle: 1d
-            uuid: 53f3c2a3-e5d0-4cfa-af3b-6f0881385e78
-          - group: recovered
-            id: fdbece50-406c-11ee-850e-c71febc4ca7f
-            params:
-              level: info
-              message: Recovered
-            connector_type_id: .server-log
-            frequency:
-              summary: false
-              notify_when: onActionGroupChange
-              throttle: null
-            uuid: 2324e45b-c0df-45c7-9d70-4993e30be758
-        params:
-          thresholdComparator: '>'
-          timeWindowSize: 1
-          timeWindowUnit: d
-          threshold:
-            - 100
-          size: 100
-          timeField: '@timestamp'
-          index:
-            - kibana_sample_data_logs
-          esQuery: '"""{"query":{"match_all" : {}}}"""'
-          excludeHitsFromPreviousRun: true
-          aggType: count
-          groupBy: all
-          searchType: esQuery
-        scheduled_task_id: 58148c70-407f-11ee-850e-c71febc4ca7f
-        created_by: elastic
-        updated_by: elastic
-        created_at: '2023-08-22T00:03:38.263Z'
-        updated_at: '2023-08-22T00:03:38.263Z'
-        api_key_owner: elastic
-        api_key_created_by_user: false
-        throttle: null
-        mute_all: false
-        notify_when: null
-        muted_alert_ids: []
-        execution_status:
-          status: pending
-          last_execution_date: '2023-08-22T00:03:38.263Z'
-        revision: 0
-        running: false
-    create_es_query_kql_rule_response:
-      summary: Elasticsearch query rule (KQL)
-      description: The response for successfully creating an Elasticsearch query rule that uses Kibana query language (KQL).
-      value:
-        id: 7bd506d0-2284-11ee-8fad-6101956ced88
-        enabled: true
-        name: my Elasticsearch query KQL rule"
-        tags: []
-        rule_type_id: .es-query
-        consumer: alerts
-        schedule:
-          interval: 1m
-        actions: []
-        params:
-          searchConfiguration:
-            query:
-              query: '""geo.src : "US" ""'
-              language: kuery
-            index: 90943e30-9a47-11e8-b64d-95841ca0b247
-          searchType: searchSource
-          timeWindowSize: 5
-          timeWindowUnit: m
-          threshold:
-            - 1000
-          thresholdComparator: '>'
-          size: 100
-          aggType: count
-          groupBy: all
-          excludeHitsFromPreviousRun: true
-        created_by: elastic
-        updated_by: elastic
-        created_at: '2023-07-14T20:24:50.729Z'
-        updated_at: '2023-07-14T20:24:50.729Z'
-        api_key_owner: elastic
-        api_key_created_by_user: false
-        throttle: null
-        notify_when: null
-        mute_all: false
-        muted_alert_ids: []
-        scheduled_task_id: 7bd506d0-2284-11ee-8fad-6101956ced88
-        execution_status:
-          status: pending
-          last_execution_date: '2023-07-14T20:24:50.729Z'
-        revision: 0
-        running: false
-    create_index_threshold_rule_response:
-      summary: Index threshold rule
-      description: The response for successfully creating an index threshold rule.
-      value:
-        actions:
-          - group: threshold met
-            id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
-            uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
-            connector_type_id: .server-log
-            frequency:
-              notify_when: onActionGroupChange
-              summary: false
-              throttle: null
-            params:
-              level: info
-              message: |-
-                Rule {{rule.name}} is active for group {{context.group} :
-
-                - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
-                - Timestamp: {{context.date}}
-        alert_delay:
-          active: 3
-        api_key_created_by_user: false
-        api_key_owner: elastic
-        consumer: alerts
-        created_at: '2022-06-08T17:20:31.632Z'
-        created_by: elastic
-        enabled: true
-        execution_status:
-          last_execution_date: '2022-06-08T17:20:31.632Z'
-          status: pending
-        id: 41893910-6bca-11eb-9e0d-85d233e3ee35
-        muted_alert_ids: []
-        mute_all: false
-        name: my rule
-        notify_when: null
-        params:
-          aggType: avg
-          termSize: 6
-          thresholdComparator: '>'
-          timeWindowSize: 5
-          timeWindowUnit: m
-          groupBy: top
-          threshold:
-            - 1000
-          index:
-            - .test-index
-          timeField: '@timestamp'
-          aggField: sheet.version
-          termField: name.keyword
-        revision: 0
-        rule_type_id: .index-threshold
-        running: false
-        schedule:
-          interval: 1m
-        scheduled_task_id: 425b0800-6bca-11eb-9e0d-85d233e3ee35
-        tags:
-          - cpu
-        throttle: null
-        updated_at: '2022-06-08T17:20:31.632Z'
-        updated_by: elastic
-    create_tracking_containment_rule_response:
-      summary: Tracking containment rule
-      description: The response for successfully creating a tracking containment rule.
-      value:
-        id: b6883f9d-5f70-4758-a66e-369d7c26012f
-        name: my tracking rule
-        tags: []
-        enabled: true
-        consumer: alerts
-        throttle: null
-        revision: 1
-        running: false
-        schedule:
-          interval: 1h
-        params:
-          index: kibana_sample_data_logs
-          dateField: '@timestamp'
-          geoField: geo.coordinates
-          entity: agent.keyword
-          boundaryType: entireIndex
-          boundaryIndexTitle: boundary*
-          boundaryGeoField: location
-          boundaryNameField: name
-          indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
-          boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
-        rule_type_id: .geo-containment
-        created_by: elastic
-        updated_by: elastic
-        created_at: '2024-02-14T19:52:55.920Z'
-        updated_at: '2024-02-15T03:24:32.574Z'
-        api_key_owner: elastic
-        notify_when: null
-        mute_all: false
-        muted_alert_ids: []
-        scheduled_task_id: b6883f9d-5f70-4758-a66e-369d7c26012f
-        execution_status:
-          status: ok
-          last_execution_date: '2024-02-15T03:25:38.125Z'
-          last_duration: 74
-        actions: []
-        last_run:
-          alerts_count:
-            active: 0
-            new: 0
-            recovered: 0
-            ignored: 0
-          outcome_msg: null
-          outcome_order: 0
-          outcome: succeeded
-          warning: null
-        next_run: '2024-02-15T03:26:38.033Z'
-        api_key_created_by_user: false
-    find_rules_response:
-      summary: Index threshold rule
-      description: A response that contains information about an index threshold rule.
-      value:
-        page: 1
-        total: 1
-        per_page: 10
-        data:
-          - id: 3583a470-74f6-11ed-9801-35303b735aef
-            consumer: alerts
-            tags:
-              - cpu
-            name: my alert
-            enabled: true
-            throttle: null
-            schedule:
-              interval: 1m
-            params:
-              aggType: avg
-              termSize: 6
-              thresholdComparator: '>'
-              timeWindowSize: 5
-              timeWindowUnit: m
-              groupBy: top
-              threshold:
-                - 1000
-              index:
-                - test-index
-              timeField: '@timestamp'
-              aggField: sheet.version
-              termField: name.keyword
-            revision: 1
-            rule_type_id: .index-threshold
-            created_by: elastic
-            updated_by: elastic
-            created_at: '2022-12-05T23:40:33.132Z'
-            updated_at: '2022-12-05T23:40:33.132Z'
-            api_key_owner: elastic
-            mute_all: false
-            muted_alert_ids: []
-            scheduled_task_id: 3583a470-74f6-11ed-9801-35303b735aef
-            execution_status:
-              status: ok
-              last_execution_date: '2022-12-06T01:44:23.983Z'
-              last_duration: 48
-            actions:
-              - id: 9dca3e00-74f5-11ed-9801-35303b735aef
-                group: threshold met
-                uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
-                params:
-                  level: info
-                  message: |-
-                    Rule {{rule.name}} is active for group {{context.group}}:
-
-                    - Value: {{context.value}}
-                    - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
-                    - Timestamp: {{context.date}}
-                  connector_type_id: .server-log
-                frequency:
-                  summary: false
-                  notify_when: onActionGroupChange
-                  throttle: null
-            last_run:
-              alerts_count:
-                new: 0
-                ignored: 0
-                recovered: 0
-                active: 0
-              outcome_msg: null
-              warning: null
-              outcome: succeeded
-            next_run: '2022-12-06T01:45:23.912Z'
-            api_key_created_by_user: false
-    find_rules_response_conditional_action:
-      summary: Security rule
-      description: A response that contains information about a security rule that has conditional actions.
-      value:
-        page: 1
-        total: 1
-        per_page: 10
-        data:
-          - id: 6107a8f0-f401-11ed-9f8e-399c75a2deeb
-            name: security_rule
-            consumer: siem
-            enabled: true
-            tags: []
-            throttle: null
-            revision: 1
-            running: false
-            schedule:
-              interval: 1m
-            params:
-              author: []
-              description: A security threshold rule.
-              ruleId: an_internal_rule_id
-              falsePositives: []
-              from: now-3660s
-              immutable: false
-              license: ''
-              outputIndex: ''
-              meta:
-                from: 1h
-                kibana_siem_app_url: https://localhost:5601/app/security
-              maxSignals: 100
-              riskScore: 21
-              riskScoreMapping: []
-              severity: low
-              severityMapping: []
-              threat: []
-              to: now
-              references: []
-              version: 1
-              exceptionsList: []
-              type: threshold
-              language: kuery
-              index:
-                - kibana_sample_data_logs
-              query: '*'
-              filters: []
-              threshold:
-                field:
-                  - bytes
-                value: 1
-                cardinality: []
-            rule_type_id: siem.thresholdRule
-            created_by: elastic
-            updated_by: elastic
-            created_at: '2023-05-16T15:50:28.358Z'
-            updated_at: '2023-05-16T20:25:42.559Z'
-            api_key_owner: elastic
-            notify_when: null
-            mute_all: false
-            muted_alert_ids: []
-            scheduled_task_id: 6107a8f0-f401-11ed-9f8e-399c75a2deeb
-            execution_status:
-              status: ok
-              last_execution_date: '2023-05-16T20:26:49.590Z'
-              last_duration: 166
-            actions:
-              - group: default
-                id: 49eae970-f401-11ed-9f8e-399c75a2deeb
-                params:
-                  documents:
-                    - rule_id:
-                        '[object Object]': null
-                      rule_name:
-                        '[object Object]': null
-                      alert_id:
-                        '[object Object]': null
-                      context_message:
-                        '[object Object]': null
-                connector_type_id: .index
-                frequency:
-                  summary: true
-                  notify_when: onActiveAlert
-                  throttle: null
-                uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
-                alerts_filter:
-                  timeframe:
-                    days:
-                      - 7
-                    timezone: UTC
-                    hours:
-                      start: '08:00'
-                      end: '17:00'
-                  query:
-                    kql: ''
-                    filters:
-                      - meta:
-                          disabled: false
-                          negate: false
-                          alias: null
-                          index: c4bdca79-e69e-4d80-82a1-e5192c621bea
-                          key: client.geo.region_iso_code
-                          field: client.geo.region_iso_code
-                          params:
-                            query: CA-QC
-                            type: phrase
-                        $state:
-                          store: appState
-                        query:
-                          match_phrase:
-                            client.geo.region_iso_code: CA-QC
-            last_run:
-              alerts_count:
-                new: 0
-                ignored: 0
-                recovered: 0
-                active: 0
-              outcome_msg:
-                - Rule execution completed successfully
-              outcome_order: 0
-              warning: null
-              outcome: succeeded
-            next_run: '2023-05-16T20:27:49.507Z'
-            api_key_created_by_user: false
     get_roles_response1:
       summary: Get all role details
       value:
@@ -54243,12 +56309,6 @@ components:
       required:
         - id
         - skip_reason
-    Security_Detections_API_BulkCrudRulesResponse:
-      items:
-        oneOf:
-          - $ref: '#/components/schemas/Security_Detections_API_RuleResponse'
-          - $ref: '#/components/schemas/Security_Detections_API_ErrorSchema'
-      type: array
     Security_Detections_API_BulkDeleteRules:
       type: object
       properties:
