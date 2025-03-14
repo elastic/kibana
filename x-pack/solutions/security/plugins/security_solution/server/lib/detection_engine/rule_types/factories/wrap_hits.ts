@@ -15,6 +15,15 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 
+/**
+ * wrapHits is responsible for turning source events into alerts. Since we copy the source data into the alert, we are
+ * effectively "wrapping" the source hits by adding alert metadata to them in `kibana.alert.*` fields and
+ * generating an _id for the alert,
+ * @param sharedParams SecuritySharedParams passed in from the common security rule wrapper logic
+ * @param events Source events to turn into alerts
+ * @param buildReasonMessage Function to generate the reason message based on source data
+ * @returns Alerts ready to index
+ */
 export const wrapHits = (
   sharedParams: SecuritySharedParams,
   events: Array<estypes.SearchHit<SignalSource>>,
