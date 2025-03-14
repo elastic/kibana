@@ -6,6 +6,7 @@
  */
 
 import { createSLOParamsSchema } from '@kbn/slo-schema';
+import { SavedObjectsClient } from '@kbn/core/server';
 import {
   CreateSLO,
   DefaultSummaryTransformManager,
@@ -17,6 +18,7 @@ import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { getSpaceId } from './utils/get_space_id';
+import { KibanaSavedObjectsSLOValidator } from '../../services/slo_validator';
 
 export const inspectSLORoute = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_inspect',
@@ -39,7 +41,12 @@ export const inspectSLORoute = createSloServerRoute({
     const esClient = core.elasticsearch.client.asCurrentUser;
     const username = core.security.authc.getCurrentUser()?.username!;
     const soClient = core.savedObjects.client;
+    const [coreStart] = await corePlugins.getStartServices();
+    const internalSoClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const validator = new KibanaSavedObjectsSLOValidator(internalSoClient);
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
 
     const transformGenerators = createTransformGenerators(
@@ -62,6 +69,7 @@ export const inspectSLORoute = createSloServerRoute({
       esClient,
       scopedClusterClient,
       repository,
+      validator,
       transformManager,
       summaryTransformManager,
       logger,
