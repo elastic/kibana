@@ -810,7 +810,7 @@ describe('waterfall_helpers', () => {
       expect(reparentOrphanItems([], traceItems, myTransactionItem)).toEqual(traceItems);
     });
 
-    it('should reparent orphan items to root', () => {
+    it('should reparent orphan items to root if transaction starts after or the duration is shorter than entry transaction', () => {
       const traceItems: IWaterfallSpanOrTransaction[] = [
         myTransactionItem,
         {
@@ -856,7 +856,7 @@ describe('waterfall_helpers', () => {
       ]);
     });
 
-    it('should reparent orphan items to hidden', () => {
+    it('should reparent orphan items to hidden if transaction starts before or the duration is longer than entry transaction', () => {
       const traceItems: IWaterfallSpanOrTransaction[] = [
         myTransactionItem,
         {
@@ -993,8 +993,84 @@ describe('waterfall_helpers', () => {
       hasInitializedChildren: true,
     };
 
+    const secondaryTree: IWaterfallNode = {
+      id: 'myOrphanSpanId',
+      item: {
+        docType: 'span',
+        doc: {
+          agent: { name: 'ruby' },
+          parent: { id: 'myNotExistingTransactionId1' },
+          processor: { event: 'span' },
+          trace: { id: 'myOrphanSpanId' },
+          service: { name: 'opbeans-ruby' },
+          transaction: { id: 'myOrphanSpanId' },
+          span: {
+            duration: { us: 100 },
+            name: 'SELECT FROM product',
+            id: 'myOrphanSpanId',
+            type: 'request',
+          },
+          timestamp: { us: 1549324795827910 },
+        },
+        id: 'myOrphanSpanId',
+        parentId: 'root',
+        duration: 100,
+        offset: 0,
+        skew: 0,
+        legendValues: { serviceName: 'opbeans-ruby', spanType: '' },
+        color: '',
+        spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
+        isOrphan: true,
+      },
+      children: [],
+      level: 0,
+      expanded: true,
+      childrenToLoad: 0,
+      hasInitializedChildren: true,
+    };
+
+    const hitsWithMultipleRoots = [
+      ...hits,
+      {
+        parent: { id: 'myNotExistingTransactionId1' },
+        processor: { event: 'span' },
+        trace: { id: 'myOrphanSpanId' },
+        service: { name: 'opbeans-ruby' },
+        transaction: { id: 'myOrphanSpanId' },
+        span: {
+          duration: { us: 100 },
+          name: 'SELECT FROM product',
+          id: 'myOrphanSpanId',
+          type: 'request',
+        },
+        timestamp: { us: 1549324795827910 },
+      } as Span,
+    ];
+
+    const waterfallWithMultipleRoots = getWaterfall({
+      traceItems: {
+        traceDocs: hitsWithMultipleRoots,
+        errorDocs,
+        exceedsMax: false,
+        spanLinksCountById: {},
+        traceDocsTotal: hitsWithMultipleRoots.length,
+        maxTraceItems: 5000,
+      },
+      entryTransaction: {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1',
+        },
+        timestamp: { us: 1549324795784006 },
+      } as Transaction,
+    });
+
     describe('buildTraceTree', () => {
-      it('should build the trace tree correctly', () => {
+      it('should build the trace tree correctly if we only have one root', () => {
         const result = buildTraceTree({
           waterfall,
           path: {
@@ -1025,12 +1101,52 @@ describe('waterfall_helpers', () => {
           })
         );
       });
+      it('should build the trace tree correctly if we have multiple roots', () => {
+        const result = buildTraceTree({
+          waterfall: waterfallWithMultipleRoots,
+          path: {
+            criticalPathSegmentsById: {},
+            showCriticalPath: false,
+          },
+          maxLevelOpen: 1,
+          isOpen: true,
+        });
+
+        expect(result).toHaveLength(2);
+        expect(result?.[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myTransactionId1' }),
+            level: 0,
+            expanded: true,
+            hasInitializedChildren: true,
+          })
+        );
+        expect(result?.[0]?.children[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'mySpanIdD' }),
+            level: 1,
+            expanded: false,
+            childrenToLoad: 1,
+            children: [],
+            hasInitializedChildren: false,
+          })
+        );
+        expect(result?.[1]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myOrphanSpanId', parentId: 'root' }),
+            level: 0,
+            expanded: true,
+            hasInitializedChildren: true,
+          })
+        );
+      });
     });
 
     describe('convertTreeToList', () => {
-      it('should convert the trace tree to a list correctly', () => {
+      it('should convert a single trace tree to a list correctly', () => {
         const result = convertTreeToList([tree]);
 
+        expect(result).toHaveLength(2);
         expect(result).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
@@ -1046,6 +1162,36 @@ describe('waterfall_helpers', () => {
               expanded: false,
               hasInitializedChildren: false,
               childrenToLoad: 1,
+            }),
+          ])
+        );
+      });
+
+      it('should convert multiple trace trees to a list correctly', () => {
+        const result = convertTreeToList([tree, secondaryTree]);
+
+        expect(result).toHaveLength(3);
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              item: expect.objectContaining({ id: 'myTransactionId1' }),
+              level: 0,
+              expanded: true,
+              hasInitializedChildren: true,
+              childrenToLoad: 1,
+            }),
+            expect.objectContaining({
+              item: expect.objectContaining({ id: 'mySpanIdD' }),
+              level: 1,
+              expanded: false,
+              hasInitializedChildren: false,
+              childrenToLoad: 1,
+            }),
+            expect.objectContaining({
+              item: expect.objectContaining({ id: 'myOrphanSpanId', parentId: 'root' }),
+              level: 0,
+              expanded: true,
+              hasInitializedChildren: true,
             }),
           ])
         );
@@ -1089,15 +1235,15 @@ describe('waterfall_helpers', () => {
         };
 
         const result = updateTraceTreeNode({
-          roots: [tree],
+          roots: [tree, secondaryTree],
           updatedNode,
-          waterfall,
+          waterfall: waterfallWithMultipleRoots,
           path: {
             criticalPathSegmentsById: {},
             showCriticalPath: false,
           },
         });
-
+        expect(result).toHaveLength(2);
         expect(result?.[0]).toEqual(
           expect.objectContaining({
             item: expect.objectContaining({ id: 'myTransactionId1' }),
@@ -1122,6 +1268,15 @@ describe('waterfall_helpers', () => {
             level: 2,
             expanded: false,
             hasInitializedChildren: false,
+          })
+        );
+
+        expect(result?.[1]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myOrphanSpanId', parentId: 'root' }),
+            level: 0,
+            expanded: true,
+            hasInitializedChildren: true,
           })
         );
       });
