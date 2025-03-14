@@ -25,36 +25,27 @@ jobs:
           git log --oneline -1
 
       - name: Read Node.js Version from .node-version
-        run: |
-          NODE_VERSION=$(cat .node-version | tr -d '[:space:]')
-          echo "Using Node.js version: $NODE_VERSION"
-          echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
+        id: node_version
+        run: echo "NODE_VERSION=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
 
-      - name: Remove Any Existing Node.js Versions
-        run: |
-          sudo apt-get remove --purge -y nodejs npm
-          sudo rm -rf /usr/local/lib/node_modules
-          sudo rm -rf /usr/local/bin/node
-          sudo rm -rf /usr/local/include/node
-          sudo rm -rf /usr/local/share/man/man1/node.1
-          sudo rm -rf /usr/local/lib/node
-          sudo rm -rf ~/.npm
-          sudo rm -rf ~/.nvm
-          echo "Node.js is now removed"
-
-      - name: Install Correct Node.js Version
+      - name: Set up Node.js (DO NOT REMOVE EXISTING NODEJS)
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Enable Corepack and Install Yarn
+      - name: Install Dependencies (RESTORED FROM OLD WORKING VERSION)
+        run: |
+          sudo apt update
+          sudo apt install -y tar gzip build-essential python3
+
+      - name: Enable Corepack and Install Yarn (FIX)
         run: |
           corepack enable
           corepack prepare yarn@stable --activate
-          yarn --version || echo "Yarn is still missing"
+          yarn -v || echo "Yarn is still missing"
 
-      - name: Ensure Yarn is in PATH
+      - name: Ensure Yarn is in PATH (FIX)
         run: |
           export PATH="$(yarn global bin):$PATH"
           echo "export PATH=$(yarn global bin):$PATH" >> ~/.bashrc
