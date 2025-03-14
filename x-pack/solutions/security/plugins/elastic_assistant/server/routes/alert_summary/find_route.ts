@@ -27,7 +27,7 @@ import { performChecks } from '../helpers';
 export const findAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .get({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
       security: {
         authz: {
@@ -37,7 +37,7 @@ export const findAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindAlertSummaryRequestQuery),

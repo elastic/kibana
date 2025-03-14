@@ -113,7 +113,7 @@ const buildBulkResponse = (
 export const bulkAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
       security: {
         authz: {
@@ -128,7 +128,7 @@ export const bulkAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformAlertSummaryBulkActionRequestBody),
