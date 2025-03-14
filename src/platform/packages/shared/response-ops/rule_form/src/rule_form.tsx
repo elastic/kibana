@@ -181,6 +181,8 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    dashboard,
+    featureFlags,
     isServerless,
     id,
     ruleTypeId,
