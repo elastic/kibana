@@ -1,7 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { applyAiSocNavigation, aiGroup } from './ai_soc_navigation';
 import { alertSummaryLink } from './links';
-import { filterFromWhitelist } from './utils';
 import { ProductLine } from '../../../common/product';
+import * as utils from './utils'; // We'll spy on the named export from here
+import type { WritableDraft } from 'immer/dist/internal';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  NodeDefinition,
+} from '@kbn/core-chrome-browser';
 
 const nonAiProduct = { product_line: 'other' };
 const aiProduct = { product_line: ProductLine.aiSoc };
@@ -71,7 +84,7 @@ const getSampleDraft = () => ({
 });
 
 describe('applyAiSocNavigation', () => {
-  let draft: any;
+  let draft: WritableDraft<NavigationTreeDefinition<AppDeepLinkId>>;
 
   beforeEach(() => {
     draft = getSampleDraft();
@@ -95,8 +108,8 @@ describe('applyAiSocNavigation', () => {
     beforeEach(() => {
       // Spy on filterFromWhitelist so we can control the filter result
       filterSpy = jest
-        .spyOn(require('./utils'), 'filterFromWhitelist')
-        .mockImplementation((children: any[], _whitelist: string[]) => {
+        .spyOn(utils, 'filterFromWhitelist')
+        .mockImplementation((nodes: Array<NodeDefinition<AppDeepLinkId>>, _whitelist: string[]) => {
           // Simulate that the filter keeps only alertSummaryLink
           return [alertSummaryLink];
         });
