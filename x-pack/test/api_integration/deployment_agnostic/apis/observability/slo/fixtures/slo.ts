@@ -6,7 +6,7 @@
  */
 
 import { CreateSLOInput } from '@kbn/slo-schema';
-import { SpaceCreate } from '@kbn/test-suites-xpack/common/services/spaces';
+import { SpaceCreate } from '../../../../../../common/services/spaces';
 
 export const DEFAULT_SLO: CreateSLOInput = {
   name: 'Test SLO for api integration',
