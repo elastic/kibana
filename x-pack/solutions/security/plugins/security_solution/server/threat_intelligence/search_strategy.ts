@@ -7,10 +7,14 @@
 
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { ISearchRequestParams, IEsSearchRequest } from '@kbn/search-types';
-import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { map } from 'rxjs';
-import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../common/constants';
-import { RawIndicatorFieldId } from '../common/types/indicator';
+import {
+  BARCHART_AGGREGATION_NAME,
+  FactoryQueryType,
+} from '../../common/threat_intelligence/constants';
+import { RawIndicatorFieldId } from '../../common/threat_intelligence/types/indicator';
 import { calculateBarchartColumnTimeInterval } from './utils/calculate_barchart_time_interval';
 import { createRuntimeMappings } from './utils/get_indicator_query_params';
 
