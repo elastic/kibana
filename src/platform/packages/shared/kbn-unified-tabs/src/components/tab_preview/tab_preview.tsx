@@ -107,7 +107,11 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         {children}
       </span>
       <EuiPortal>
-        <EuiSplitPanel.Outer grow css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}>
+        <EuiSplitPanel.Outer
+          grow
+          css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}
+          data-test-subj={`unifiedTabs_tabPreview_${previewContent.id}`}
+        >
           <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
             <EuiCodeBlock
               language={previewContent.query.language}
