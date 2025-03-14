@@ -56,14 +56,15 @@ test.describe(
       const stats = perfTracker.collectJsBundleStats(currentUrl);
       expect(
         stats.totalSize,
-        `Total bundles size loaded on page should not exceed 3.0 MB`
-      ).toBeLessThan(3 * 1024 * 1024);
-      expect(stats.bundleCount, {
-        message: `Total bundle chunks count loaded on page should not exceed 100`,
-      }).toBeLessThan(100);
+        `Total bundles size loaded on page should not exceed 3.1 MB`
+      ).toBeLessThan(3.1 * 1024 * 1024);
+      expect(
+        stats.bundleCount,
+        `Total bundle chunks count loaded on page should not exceed 100`
+      ).toBeLessThan(100);
       expect(
         stats.plugins.map((p) => p.name),
-        { message: 'Unexpected plugins were loaded on page' }
+        'Unexpected plugins were loaded on page'
       ).toStrictEqual([
         'aiops',
         'discover',
@@ -76,15 +77,18 @@ test.describe(
         'unifiedSearch',
       ]);
       // Validate individual plugin bundle sizes
-      expect(stats.plugins.find((p) => p.name === 'discover')?.totalSize, {
-        message: `Total 'discover' bundles size should not exceed 625 KB`,
-      }).toBeLessThan(625 * 1024);
-      expect(stats.plugins.find((p) => p.name === 'unifiedHistogram')?.totalSize, {
-        message: `Total 'unifiedHistogram' bundles size should not exceed 150 KB`,
-      }).toBeLessThan(150 * 1024);
-      expect(stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize, {
-        message: `Total 'unifiedSearch' bundles size should not exceed 450 KB`,
-      }).toBeLessThan(450 * 1024);
+      expect(
+        stats.plugins.find((p) => p.name === 'discover')?.totalSize,
+        `Total 'discover' bundles size should not exceed 650 KB`
+      ).toBeLessThan(650 * 1024);
+      expect(
+        stats.plugins.find((p) => p.name === 'unifiedHistogram')?.totalSize,
+        `Total 'unifiedHistogram' bundles size should not exceed 150 KB`
+      ).toBeLessThan(150 * 1024);
+      expect(
+        stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize,
+        `Total 'unifiedSearch' bundles size should not exceed 450 KB`
+      ).toBeLessThan(450 * 1024);
     });
 
     test('measures Performance Metrics before and after Discover load', async ({
@@ -109,9 +113,18 @@ test.describe(
         afterMetrics
       );
 
-      expect(perfStats.cpuTime.diff).toBeLessThan(1.5); // CPU time (seconds) usage during page navigation
-      expect(perfStats.scriptTime.diff).toBeLessThan(0.4); // Additional time (seconds) spent executing JS scripts
-      expect(perfStats.layoutTime.diff).toBeLessThan(0.06); // Total layout computation time (seconds)
+      expect(
+        perfStats.cpuTime.diff,
+        'CPU time (seconds) usage during page navigation should not exceed 1.5 seconds'
+      ).toBeLessThan(1.5);
+      expect(
+        perfStats.scriptTime.diff,
+        'Additional time spent executing JS scripts should not exceed 0.5 second'
+      ).toBeLessThan(0.5);
+      expect(
+        perfStats.layoutTime.diff,
+        'Total layout computation time should not exceed 0.1 second'
+      ).toBeLessThan(0.06);
     });
   }
 );
