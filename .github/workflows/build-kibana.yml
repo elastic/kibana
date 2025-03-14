@@ -16,14 +16,19 @@ jobs:
       - name: Checkout Repository and Ensure Correct Branch
         uses: actions/checkout@v4
         with:
-          ref: openai_pki_connector_8_15
+          ref: openai_pki_connector_8_15  # Ensure we are on the right branch
+
+      - name: Verify Git Branch Being Used
+        run: |
+          echo "Currently checked out branch:"
+          git branch --show-current
+          git log --oneline -1
 
       - name: Read Node.js Version from .node-version
-        id: node_version
-        run: echo "NODE_VERSION=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
-
-      - name: Debug Node.js Version Read from File
-        run: echo "Node.js Version from .node-version: ${{ env.NODE_VERSION }}"
+        run: |
+          NODE_VERSION=$(cat .node-version | tr -d '[:space:]')
+          echo "Using Node.js version: $NODE_VERSION"
+          echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
 
       - name: Remove Any Existing Node.js Versions
         run: |
