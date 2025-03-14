@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationSummary } from '../conversations';
+import type { Agent } from '../agents';
 
-export interface ListConversationResponse {
-  conversations: ConversationSummary[];
+export interface ListAgentResponse {
+  agents: Agent[];
 }
 
-export type GetConversationResponse = Conversation;
+export type GetAgentResponse = Agent;
