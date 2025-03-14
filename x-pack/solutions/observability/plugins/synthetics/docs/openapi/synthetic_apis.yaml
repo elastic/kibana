@@ -445,7 +445,7 @@ paths:
                   description: An array of monitor IDs to delete.
                   type: array
                   items:
-                    - type: string
+                    type: string
             examples:
               bulkDeleteRequestExample1:
                 description: Run `POST /api/synthetics/monitors/_bulk_delete` to delete a list of monitors. 
@@ -463,17 +463,17 @@ paths:
               schema:
                 type: array
                 items:
-                  - type: object
-                    description: The API response includes information about the deleted monitors.
-                    properties:
-                      deleted:
-                        type: boolean
-                        description: >
-                          If it is `true`, the monitor was successfully deleted
-                          If it is `false`, the monitor was not deleted.
-                      ids:
-                        type: string
-                        description: The unique identifier of the deleted monitor.
+                  type: object
+                  description: The API response includes information about the deleted monitors.
+                  properties:
+                    deleted:
+                      type: boolean
+                      description: >
+                        If it is `true`, the monitor was successfully deleted
+                        If it is `false`, the monitor was not deleted.
+                    ids:
+                      type: string
+                      description: The unique identifier of the deleted monitor.
               examples:
                 deleteMonitorsResponseExample1:
                   description: A response from successfully deleting multiple monitors.
@@ -567,7 +567,7 @@ paths:
               oneOf:
                 - type: array
                   items:
-                    - $ref: "#/components/schemas/parameterRequest"
+                    $ref: "#/components/schemas/parameterRequest"
                 - $ref: "#/components/schemas/parameterRequest"
             examples:
               postParametersRequestExample1:
@@ -602,10 +602,10 @@ paths:
             application/json:
               schema:
                 oneOf:
-                - type: array
-                  items:
-                    - $ref: "#/components/schemas/postParameterResponse"
-                - $ref: "#/components/schemas/postParameterResponse"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/postParameterResponse"
+                  - $ref: "#/components/schemas/postParameterResponse"
               examples:
                 postParametersResponseExample1:
                   summary: Single parameter
@@ -726,7 +726,7 @@ paths:
                   type: array
                   description: An array of updated tags to categorize the parameter.
                   items:
-                    - type: string
+                    type: string
                 value:
                   type: string
                   description: The updated value associated with the parameter.
@@ -830,7 +830,7 @@ paths:
               schema:
                 type: array
                 items:
-                  - $ref: "#/components/schemas/getPrivateLocation"
+                  $ref: "#/components/schemas/getPrivateLocation"
               examples:
                 getPrivateLocationsResponseExample1:
                   value: |-
@@ -1019,7 +1019,7 @@ components:
         locations:
           type: array
           items:
-            - type: string
+            type: string
           description: |
             The location to deploy the monitor.
             Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
@@ -1045,7 +1045,7 @@ components:
         private_locations:
           type: array
           items:
-            - type: string
+            type: string
           description: |
             The private locations to which the monitors will be deployed.
             These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
@@ -1078,7 +1078,7 @@ components:
         tags:
           type: array
           items:
-            - type: string
+            type: string
           description: An array of tags.
         timeout:
           type: number
@@ -1345,14 +1345,14 @@ components:
         namespaces:
           type: array
           items:
-            - type: string
+            type: string
           description: >
             The namespaces associated with the parameter.
             It is included in the response if the user has read-only permissions to the Synthetics app.
         tags:
           type: array
           items:
-            - type: string
+            type: string
           description: >
             An array of tags associated with the parameter.
             It is included in the response if the user has read-only permissions to the Synthetics app.
