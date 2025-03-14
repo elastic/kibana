@@ -19,7 +19,7 @@ import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
 const exportContentRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/content/_export',
+  endpoint: 'GET /api/streams/{name}/content/export',
   options: {
     access: 'internal',
   },
@@ -75,7 +75,7 @@ const exportContentRoute = createServerRoute({
 });
 
 const importContentRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/content/_import',
+  endpoint: 'POST /api/streams/{name}/content/import',
   options: {
     access: 'internal',
     body: {
