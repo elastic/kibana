@@ -57,14 +57,18 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
       changedOption: EuiSelectableOption
     ) => {
       setItems(options);
-      const existingFilters = filterManager.getFilters();
-      const newFilters: Filter[] = updateFiltersArray(
-        existingFilters,
-        'kibana.alert.rule.name',
-        changedOption.label,
-        changedOption.checked === 'on'
-      );
-      filterManager.setFilters(newFilters);
+
+      const ruleName = changedOption.key;
+      if (ruleName) {
+        const existingFilters = filterManager.getFilters();
+        const newFilters: Filter[] = updateFiltersArray(
+          existingFilters,
+          'kibana.alert.rule.name',
+          ruleName,
+          changedOption.checked === 'on'
+        );
+        filterManager.setFilters(newFilters);
+      }
     },
     [filterManager]
   );

@@ -5,28 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import React, { memo, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import { useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import { useFindRulesQuery } from '../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SourceFilterButton } from './sources_filter_button';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { inputsActions } from '../../../../common/store/inputs';
-import { formatDate } from '../../../../common/components/super_date_picker';
-
-const defaultQuery: Query = {
-  language: 'kuery',
-  query: '',
-};
-const defaultTimeRange = {
-  from: 'now/d',
-  to: 'now/d',
-};
 
 export interface SearchBarSectionProps {
   /**
@@ -37,112 +25,49 @@ export interface SearchBarSectionProps {
    *
    */
   packages: PackageListItem[];
-  /**
-   * TEMP: for demo purposes ONLY, toggles between old and unified components
-   */
-  showUnifiedComponents: boolean;
 }
 
 /**
  *
  */
-export const SearchBarSection = memo(
-  ({ dataView, packages, showUnifiedComponents }: SearchBarSectionProps) => {
-    const dispatch = useDispatch();
-    const [dateRange, setDateRange] = useState<TimeRange>(defaultTimeRange);
-    const [query, setQuery] = useState<Query>(defaultQuery);
+export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionProps) => {
+  const { data, isLoading } = useFindRulesQuery({});
 
-    const onQuerySubmit = useCallback(
-      (
-        {
-          dateRange: dr,
-          query: qr,
-        }: {
-          dateRange: TimeRange;
-          query?: Query | AggregateQuery | undefined;
-        },
-        isUpdate?: boolean
-      ) => {
-        setDateRange(dr);
-        const { from, to } = dr;
-        const isQuickSelection = from.includes('now') || to.includes('now');
-        const absoluteFrom = formatDate(from);
-        const absoluteTo = formatDate(to, { roundUp: true });
-        if (isQuickSelection) {
-          const actionPayload = {
-            id: InputsModelId.global,
-            fromStr: from,
-            toStr: to,
-            from: absoluteFrom,
-            to: absoluteTo,
-          };
-          if (from === to) {
-            dispatch(inputsActions.setAbsoluteRangeDatePicker(actionPayload));
-          } else {
-            dispatch(inputsActions.setRelativeRangeDatePicker(actionPayload));
-          }
-        } else {
-          dispatch(
-            inputsActions.setAbsoluteRangeDatePicker({
-              id: InputsModelId.global,
-              from: formatDate(from),
-              to: formatDate(to),
-            })
-          );
-        }
+  const sources: EuiSelectableOption[] = useMemo(
+    () =>
+      packages.map((p: PackageListItem) => {
+        const matchingRule = (data?.rules || []).find((r: RuleResponse) =>
+          r.related_integrations.map((ri) => ri.package).includes(p.name)
+        );
 
-        if (qr != null) {
-          setQuery(qr);
-          dispatch(
-            inputsActions.setFilterQuery({
-              id: InputsModelId.global,
-              ...qr,
-            })
-          );
-        }
-      },
-      [dispatch]
-    );
-
-    const sources: EuiSelectableOption[] = useMemo(
-      () =>
-        packages.map((relatedIntegration: PackageListItem) => ({
-          label: relatedIntegration.title,
+        return {
+          label: p.title,
+          key: matchingRule?.name,
           checked: 'on',
-        })),
-      [packages]
-    );
+        };
+      }),
+    [data?.rules, packages]
+  );
 
-    return (
-      <>
-        <EuiFlexGroup gutterSize="none" alignItems="center">
-          <EuiFlexItem grow={false}>
+  return (
+    <>
+      <EuiFlexGroup gutterSize="none" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSkeletonRectangle isLoading={isLoading} width="120px" height="40px">
             <SourceFilterButton sources={sources} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {showUnifiedComponents ? (
-              <SearchBar
-                dateRangeFrom={dateRange.from}
-                dateRangeTo={dateRange.to}
-                indexPatterns={[dataView]}
-                onQuerySubmit={onQuerySubmit}
-                query={query}
-                showFilterBar={false}
-                showQueryMenu={false}
-              />
-            ) : (
-              <SiemSearchBar
-                hideFilterBar
-                hideQueryMenu
-                id={InputsModelId.global}
-                sourcererDataView={dataView.toSpec()}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
-);
+          </EuiSkeletonRectangle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SiemSearchBar
+            hideFilterBar
+            hideQueryMenu
+            id={InputsModelId.global}
+            sourcererDataView={dataView.toSpec()}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+});
 
 SearchBarSection.displayName = 'SearchBarSection';

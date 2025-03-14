@@ -6,15 +6,35 @@
  */
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { SearchHit } from '../../../common/search_strategy';
+import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useEventDetails } from '../document_details/shared/hooks/use_event_details';
 import type { AIForSOCDetailsProps } from './types';
 import { FlyoutError } from '../shared/components/flyout_error';
 
 export interface AIForSOCDetailsContext {
-  doc: DataTableRecord;
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Id of the document
+   */
+  eventId: string;
+  /**
+   * Retrieves searchHit values for the provided field
+   */
+  getFieldsData: GetFieldsData;
+  /**
+   * Name of the index used in the parent's page
+   */
+  indexName: string;
+  /**
+   * The actual raw document object
+   */
+  searchHit: SearchHit;
 }
 
 /**
@@ -29,29 +49,41 @@ export type AIForSOCDetailsProviderProps = {
   children: React.ReactNode;
 } & Partial<AIForSOCDetailsProps['params']>;
 
-export const AIForSOCDetailsProvider = memo(({ doc, children }: AIForSOCDetailsProviderProps) => {
-  const { dataFormattedForFieldBrowser } = useEventDetails({
-    eventId: doc?.id,
-    indexName: doc?.raw._index,
-  });
-  const contextValue = useMemo(
-    () => ({
-      dataFormattedForFieldBrowser,
-      doc,
-    }),
-    [dataFormattedForFieldBrowser, doc]
-  );
+export const AIForSOCDetailsProvider = memo(
+  ({ eventId, indexName, children }: AIForSOCDetailsProviderProps) => {
+    const { dataFormattedForFieldBrowser, getFieldsData, loading, searchHit } = useEventDetails({
+      eventId,
+      indexName,
+    });
+    const contextValue = useMemo(
+      () =>
+        dataFormattedForFieldBrowser && eventId && indexName && searchHit
+          ? {
+              dataFormattedForFieldBrowser,
+              eventId,
+              getFieldsData,
+              indexName,
+              searchHit,
+            }
+          : undefined,
+      [dataFormattedForFieldBrowser, eventId, getFieldsData, indexName, searchHit]
+    );
 
-  if (!contextValue || !contextValue.doc) {
-    return <FlyoutError />;
+    if (loading) {
+      return <FlyoutLoading />;
+    }
+
+    if (!contextValue) {
+      return <FlyoutError />;
+    }
+
+    return (
+      <AIForSOCDetailsContext.Provider value={contextValue}>
+        {children}
+      </AIForSOCDetailsContext.Provider>
+    );
   }
-
-  return (
-    <AIForSOCDetailsContext.Provider value={contextValue}>
-      {children}
-    </AIForSOCDetailsContext.Provider>
-  );
-});
+);
 
 AIForSOCDetailsProvider.displayName = 'AIForSOCDetailsProvider';
 

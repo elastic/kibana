@@ -7,7 +7,6 @@
 
 import React, { memo, useEffect, useState } from 'react';
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiHorizontalRule,
   EuiSkeletonLoading,
@@ -39,7 +38,6 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
   const { data } = useKibana().services;
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
-  const [showUnifiedComponents, setShowUnifiedComponents] = useState<boolean>(false); // TODO TEMP: for demo purposes ONLY, toggles between old and unified components
 
   useEffect(() => {
     let dv: DataView;
@@ -59,46 +57,37 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
   }, [data.dataViews]);
 
   return (
-    <>
-      <EuiButton onClick={() => setShowUnifiedComponents((t) => !t)}>
-        {showUnifiedComponents ? 'Show old components' : 'Show unified components'}
-      </EuiButton>
-      <EuiSkeletonLoading
-        isLoading={loading}
-        loadingContent={
-          <>
-            <EuiSkeletonRectangle height={50} width="100%" />
-            <EuiHorizontalRule />
-            <EuiSkeletonRectangle height={50} width="100%" />
-            <EuiSpacer />
-            <EuiSkeletonRectangle height={275} width="100%" />
-            <EuiSpacer />
-            <EuiSkeletonRectangle height={600} width="100%" />
-          </>
-        }
-        loadedContent={
-          <>
-            {!dataView || !dataView.id ? (
-              <EuiEmptyPrompt iconType="error" color="danger" title={<h2>{DATAVIEW_ERROR}</h2>} />
-            ) : (
-              <>
-                <IntegrationSection packages={packages} />
-                <EuiHorizontalRule />
-                <SearchBarSection
-                  dataView={dataView}
-                  packages={packages}
-                  showUnifiedComponents={showUnifiedComponents}
-                />
-                <EuiSpacer />
-                <KPIsSection dataView={dataView} />
-                <EuiSpacer />
-                <TableSection dataView={dataView} showUnifiedComponents={showUnifiedComponents} />
-              </>
-            )}
-          </>
-        }
-      />
-    </>
+    <EuiSkeletonLoading
+      isLoading={loading}
+      loadingContent={
+        <>
+          <EuiSkeletonRectangle height={50} width="100%" />
+          <EuiHorizontalRule />
+          <EuiSkeletonRectangle height={50} width="100%" />
+          <EuiSpacer />
+          <EuiSkeletonRectangle height={275} width="100%" />
+          <EuiSpacer />
+          <EuiSkeletonRectangle height={600} width="100%" />
+        </>
+      }
+      loadedContent={
+        <>
+          {!dataView || !dataView.id ? (
+            <EuiEmptyPrompt iconType="error" color="danger" title={<h2>{DATAVIEW_ERROR}</h2>} />
+          ) : (
+            <>
+              <IntegrationSection packages={packages} />
+              <EuiHorizontalRule />
+              <SearchBarSection dataView={dataView} packages={packages} />
+              <EuiSpacer />
+              <KPIsSection dataView={dataView} />
+              <EuiSpacer />
+              <TableSection dataView={dataView} />
+            </>
+          )}
+        </>
+      }
+    />
   );
 });
 

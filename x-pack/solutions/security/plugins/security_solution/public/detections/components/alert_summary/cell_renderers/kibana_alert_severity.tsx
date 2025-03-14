@@ -13,7 +13,7 @@ export interface KibanaAlertSeverityCellRendererProps {
   /**
    *
    */
-  value: string | string[];
+  value: string;
 }
 
 /**
@@ -22,10 +22,9 @@ export interface KibanaAlertSeverityCellRendererProps {
 export const KibanaAlertSeverityCellRenderer = memo(
   ({ value }: KibanaAlertSeverityCellRendererProps) => {
     const { euiTheme } = useEuiTheme();
-    const displayValue: string = useMemo(() => (Array.isArray(value) ? value[0] : value), [value]);
-    const color = useMemo(() => getSeverityColor(displayValue, euiTheme), [displayValue, euiTheme]);
+    const color = useMemo(() => getSeverityColor(value, euiTheme), [value, euiTheme]);
 
-    return <>{value && <EuiBadge color={color}>{displayValue}</EuiBadge>}</>;
+    return <>{value && <EuiBadge color={color}>{value}</EuiBadge>}</>;
   }
 );
 

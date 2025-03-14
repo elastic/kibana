@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { JsonValue } from '@kbn/utility-types';
 
 const field = 'related_integrations';
 const subField = 'package';
@@ -14,7 +15,7 @@ export interface KibanaAlertSeverityCellRendererProps {
   /**
    *
    */
-  value: string | string[];
+  value: Record<string, string | JsonValue[]>;
 }
 
 /**
@@ -23,12 +24,7 @@ export interface KibanaAlertSeverityCellRendererProps {
 export const KibanaAlertRelatedIntegrationCellRenderer = memo(
   ({ value }: KibanaAlertSeverityCellRendererProps) => {
     const displayValue: string = useMemo(() => {
-      const stringValue = Array.isArray(value) ? value[0] : value;
-      // const displayJSON = JSON.parse(stringValue);
-      // if (!displayJSON) return '';
-
-      // const relatedIntegration = displayJSON[field];
-      const relatedIntegration = stringValue[field];
+      const relatedIntegration = value[field];
       if (!relatedIntegration) return '';
 
       const relatedIntegrationName = relatedIntegration[subField];

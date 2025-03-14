@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 export const FilterIn = true;
 export const FilterOut = false;
@@ -94,6 +94,6 @@ export const updateFiltersArray = (
   );
 
   return shouldRemoveFilter(filter, filterType)
-    ? [...existingFilters.filter((f: Filter) => f !== filter), newFilter]
+    ? existingFilters.filter((f: Filter) => f !== filter)
     : [...existingFilters, newFilter];
 };

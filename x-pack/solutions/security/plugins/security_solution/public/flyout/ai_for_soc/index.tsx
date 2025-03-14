@@ -8,13 +8,14 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { PromptContext } from '@kbn/elastic-assistant';
 import {
   AlertSummary,
-  SuggestedPrompts,
   AttackDiscoveryWidget,
   Conversations,
+  SuggestedPrompts,
 } from '@kbn/elastic-assistant';
-import type { PromptContext } from '@kbn/elastic-assistant';
+import { getField } from '../document_details/shared/utils';
 import { getRawData } from '../../assistant/helpers';
 import { useAIForSOCDetailsContext } from './context';
 import { FlyoutBody } from '../shared/components/flyout_body';
@@ -28,7 +29,8 @@ import { FlyoutHeader } from '../shared/components/flyout_header';
  * Panel to be displayed in the document details expandable flyout right section
  */
 export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() => {
-  const { doc, dataFormattedForFieldBrowser } = useAIForSOCDetailsContext();
+  const { eventId, getFieldsData, dataFormattedForFieldBrowser } = useAIForSOCDetailsContext();
+
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
@@ -41,17 +43,13 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     suggestedUserPrompt: '_suggestedUserPrompt',
     tooltip: '_tooltip',
   };
+
   const ruleName = useMemo(
-    () =>
-      // @ts-ignore anyone have advice for this type?
-      doc?.flattened?.['kibana.alert.rule.name']?.[0] ?? doc?.raw?._source?.message?.[0] ?? 'Alert',
-    [doc?.flattened, doc?.raw?._source?.message]
+    () => getField(getFieldsData('kibana.alert.rule.name')) || '',
+    [getFieldsData]
   );
-  const timestamp = useMemo(
-    // @ts-ignore anyone have advice for this type?
-    () => doc?.flattened?.['@timestamp']?.[0] ?? doc?.raw?._source?.timestamp ?? '',
-    [doc?.flattened, doc?.raw?._source?.timestamp]
-  );
+  const timestamp = useMemo(() => getField(getFieldsData('@timestamp')) || '', [getFieldsData]);
+
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
@@ -66,10 +64,10 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
           </EuiFlexItem>
           <EuiFlexItem>{'Highlighted fields'}</EuiFlexItem>
           <EuiFlexItem>
-            <AttackDiscoveryWidget id={doc.id} />
+            <AttackDiscoveryWidget id={eventId} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <Conversations id={doc.id} />
+            <Conversations id={eventId} />
           </EuiFlexItem>
           <EuiFlexItem>
             <SuggestedPrompts
