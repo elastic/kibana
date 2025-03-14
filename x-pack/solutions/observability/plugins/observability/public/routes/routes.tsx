@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { AnnotationsPage } from '../pages/annotations/annotations';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
@@ -144,7 +147,11 @@ export const routes = {
   },
   [ALERT_DETAIL_PATH]: {
     handler: () => {
-      return <AlertDetails />;
+      return (
+        <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
+          <AlertDetails />
+        </QueryClientProvider>
+      );
     },
     params: {},
     exact: true,

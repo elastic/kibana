@@ -68,6 +68,7 @@ export interface SearchAlertsParams {
    * The page size to fetch
    */
   pageSize: number;
+  aggs?: any;
 }
 
 export interface SearchAlertsResult {
@@ -92,6 +93,7 @@ export const searchAlerts = ({
   runtimeMappings,
   pageIndex,
   pageSize,
+  aggs,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -104,6 +106,7 @@ export const searchAlerts = ({
           pagination: { pageIndex, pageSize },
           sort,
           runtimeMappings,
+          aggs,
         },
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
