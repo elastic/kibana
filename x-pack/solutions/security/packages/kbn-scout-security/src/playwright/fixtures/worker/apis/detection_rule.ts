@@ -26,18 +26,17 @@ export const createDetectionRuleFixture = async ({
   log: ScoutLogger;
   scoutSpace?: ScoutSpaceParallelFixture;
 }) => {
+  const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
+
   const detectionRuleHelper: DetectionRuleFixture = {
     createCustomQueryRule: async (body = CUSTOM_QUERY_RULE) => {
       await measurePerformanceAsync(
         log,
         'security.detectionRule.createCustomQueryRule',
         async () => {
-          const path = scoutSpace?.id
-            ? `/s/${scoutSpace?.id}${DETECTION_ENGINE_RULES_URL}`
-            : DETECTION_ENGINE_RULES_URL;
           await kbnClient.request({
             method: 'POST',
-            path,
+            path: `${basePath}${DETECTION_ENGINE_RULES_URL}`,
             body,
           });
         }
@@ -46,12 +45,9 @@ export const createDetectionRuleFixture = async ({
 
     deleteAll: async () => {
       await measurePerformanceAsync(log, 'security.detectionRule.deleteAll', async () => {
-        const path = scoutSpace?.id
-          ? `/s/${scoutSpace?.id}${DETECTION_ENGINE_RULES_BULK_ACTION}`
-          : DETECTION_ENGINE_RULES_BULK_ACTION;
         await kbnClient.request({
           method: 'POST',
-          path,
+          path: `${basePath}${DETECTION_ENGINE_RULES_BULK_ACTION}`,
           body: {
             query: '',
             action: 'delete',
