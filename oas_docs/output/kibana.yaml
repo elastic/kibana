@@ -11123,7 +11123,7 @@ paths:
                     id: 7d2f5ed8-6c05-44ab-81ce-9160ae147057
                     name: Updated Google Workspace Suspended User Account Renewed
                     risk_score: 21
-                    severity: critical
+                    severity: low
                     tags:
                       - new_tag
                     type: query
@@ -11131,7 +11131,7 @@ paths:
                     id: 43b2dc3b-4f21-4a10-95e2-0dbc19e6e974
                     name: Updated AWS Redshift Cluster Creation
                     risk_score: 21
-                    severity: medium
+                    severity: low
                     tags:
                       - new_tag
                     type: query
