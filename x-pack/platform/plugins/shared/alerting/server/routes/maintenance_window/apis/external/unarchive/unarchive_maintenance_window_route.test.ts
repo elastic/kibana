@@ -10,7 +10,7 @@ import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
-import { archiveMaintenanceWindowRoute } from './archive_maintenance_window_route';
+import { unarchiveMaintenanceWindowRoute } from './unarchive_maintenance_window_route';
 import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
@@ -29,16 +29,16 @@ const mockMaintenanceWindow = {
   id: 'test-id',
 };
 
-describe('archiveMaintenanceWindowRoute', () => {
+describe('unarchiveMaintenanceWindowRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  test('should archive the maintenance window', async () => {
+  test('should unarchive the maintenance window', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    archiveMaintenanceWindowRoute(router, licenseState);
+    unarchiveMaintenanceWindowRoute(router, licenseState);
 
     maintenanceWindowClient.archive.mockResolvedValueOnce(mockMaintenanceWindow);
     const [config, handler] = router.post.mock.calls[0];
@@ -51,11 +51,11 @@ describe('archiveMaintenanceWindowRoute', () => {
       }
     );
 
-    expect(config.path).toEqual('/api/alerting/maintenance_window/{id}/_archive');
+    expect(config.path).toEqual('/api/alerting/maintenance_window/{id}/_unarchive');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
-        "summary": "Archives a maintenance window by ID.",
+        "summary": "Unarchives a maintenance window by ID.",
       }
     `);
 
@@ -73,7 +73,7 @@ describe('archiveMaintenanceWindowRoute', () => {
 
     expect(maintenanceWindowClient.archive).toHaveBeenLastCalledWith({
       id: 'test-id',
-      archive: true,
+      archive: false,
     });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),
@@ -84,7 +84,7 @@ describe('archiveMaintenanceWindowRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    archiveMaintenanceWindowRoute(router, licenseState);
+    unarchiveMaintenanceWindowRoute(router, licenseState);
 
     maintenanceWindowClient.archive.mockResolvedValueOnce(mockMaintenanceWindow);
     const [, handler] = router.post.mock.calls[0];
@@ -104,7 +104,7 @@ describe('archiveMaintenanceWindowRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    archiveMaintenanceWindowRoute(router, licenseState);
+    unarchiveMaintenanceWindowRoute(router, licenseState);
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
@@ -125,7 +125,7 @@ describe('archiveMaintenanceWindowRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    archiveMaintenanceWindowRoute(router, licenseState);
+    unarchiveMaintenanceWindowRoute(router, licenseState);
 
     (licenseState.ensureLicenseForMaintenanceWindow as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');

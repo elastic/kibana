@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  archiveMaintenanceWindowRequestBodySchema,
-  archiveMaintenanceWindowRequestParamsSchema,
-} from './v1';
+export { archiveMaintenanceWindowRequestParamsSchema } from './v1';

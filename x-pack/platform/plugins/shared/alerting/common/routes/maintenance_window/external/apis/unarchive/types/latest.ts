@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type { ArchiveMaintenanceWindowRequestParams, ArchiveMaintenanceWindowResponse } from './v1';
+export type {
+  UnarchiveMaintenanceWindowRequestParams,
+  UnarchiveMaintenanceWindowResponse,
+} from './v1';

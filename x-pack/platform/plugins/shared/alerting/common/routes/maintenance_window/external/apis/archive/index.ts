@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-export {
-  archiveMaintenanceWindowRequestBodySchema,
-  archiveMaintenanceWindowRequestParamsSchema,
-} from './schemas/latest';
+export { archiveMaintenanceWindowRequestParamsSchema } from './schemas/latest';
 export type {
-  ArchiveMaintenanceWindowRequestBody,
   ArchiveMaintenanceWindowRequestParams,
   ArchiveMaintenanceWindowResponse,
 } from './types/latest';
 
-export {
-  archiveMaintenanceWindowRequestBodySchema as archiveMaintenanceWindowRequestBodySchemaV1,
-  archiveMaintenanceWindowRequestParamsSchema as archiveMaintenanceWindowRequestParamsSchemaV1,
-} from './schemas/v1';
+export { archiveMaintenanceWindowRequestParamsSchema as archiveMaintenanceWindowRequestParamsSchemaV1 } from './schemas/v1';
 
 export type {
-  ArchiveMaintenanceWindowRequestBody as ArchiveMaintenanceWindowRequestBodyV1,
   ArchiveMaintenanceWindowRequestParams as ArchiveMaintenanceWindowRequestParamsV1,
   ArchiveMaintenanceWindowResponse as ArchiveMaintenanceWindowResponseV1,
 } from './types/latest';

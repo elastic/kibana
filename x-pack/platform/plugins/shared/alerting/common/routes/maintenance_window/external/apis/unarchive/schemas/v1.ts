@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const archiveMaintenanceWindowRequestParamsSchema = schema.object({
+export const unarchiveMaintenanceWindowRequestParamsSchema = schema.object({
   id: schema.string({
     meta: {
-      description: 'The identifier for the maintenance window to be archived.',
+      description: 'The identifier for the maintenance window to be unarchived.',
     },
   }),
 });

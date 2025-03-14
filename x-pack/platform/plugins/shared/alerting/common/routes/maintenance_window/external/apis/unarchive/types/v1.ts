@@ -7,12 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { MaintenanceWindowResponseV1 } from '../../../response';
-import type { archiveMaintenanceWindowRequestParamsSchemaV1 } from '..';
+import { unarchiveMaintenanceWindowRequestParamsSchemaV1 } from '..';
 
-export type ArchiveMaintenanceWindowRequestParams = TypeOf<
-  typeof archiveMaintenanceWindowRequestParamsSchemaV1
+export type UnarchiveMaintenanceWindowRequestParams = TypeOf<
+  typeof unarchiveMaintenanceWindowRequestParamsSchemaV1
 >;
 
-export interface ArchiveMaintenanceWindowResponse {
+export interface UnarchiveMaintenanceWindowResponse {
   body: MaintenanceWindowResponseV1;
 }

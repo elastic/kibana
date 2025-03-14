@@ -12,11 +12,11 @@ import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function archiveMaintenanceWindowTests({ getService }: FtrProviderContext) {
+export default function unarchiveMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('archiveMaintenanceWindow', () => {
+  describe('unarchiveMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',
@@ -30,7 +30,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle archive maintenance window request appropriately', async () => {
+        it('should handle unarchive maintenance window request appropriately', async () => {
           const { body: createdMaintenanceWindow } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
             .set('kbn-xsrf', 'foo')
@@ -48,7 +48,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
             .post(
               `${getUrlPrefix(space.id)}/api/alerting/maintenance_window/${
                 createdMaintenanceWindow.id
-              }/_archive`
+              }/_unarchive`
             )
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
@@ -62,7 +62,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `API [POST /api/alerting/maintenance_window/${createdMaintenanceWindow.id}/_archive] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
+                message: `API [POST /api/alerting/maintenance_window/${createdMaintenanceWindow.id}/_unarchive] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
                 statusCode: 403,
               });
               break;

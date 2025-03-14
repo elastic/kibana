@@ -9,27 +9,27 @@ import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { ARCHIVE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
+import { UNARCHIVE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type {
-  ArchiveMaintenanceWindowRequestParamsV1,
-  ArchiveMaintenanceWindowResponseV1,
-} from '../../../../../../common/routes/maintenance_window/external/apis/archive';
-import { archiveMaintenanceWindowRequestParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/archive';
+  UnarchiveMaintenanceWindowRequestParamsV1,
+  UnarchiveMaintenanceWindowResponseV1,
+} from '../../../../../../common/routes/maintenance_window/external/apis/unarchive';
+import { unarchiveMaintenanceWindowRequestParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/unarchive';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 
-export const archiveMaintenanceWindowRoute = (
+export const unarchiveMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: ARCHIVE_MAINTENANCE_WINDOW_API_PATH,
+      path: UNARCHIVE_MAINTENANCE_WINDOW_API_PATH,
       validate: {
         request: {
-          params: archiveMaintenanceWindowRequestParamsSchemaV1,
+          params: unarchiveMaintenanceWindowRequestParamsSchemaV1,
         },
         response: {
           200: {
@@ -54,23 +54,23 @@ export const archiveMaintenanceWindowRoute = (
       },
       options: {
         access: 'public',
-        summary: 'Archives a maintenance window by ID.',
+        summary: 'Unarchives a maintenance window by ID.',
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
-        const params: ArchiveMaintenanceWindowRequestParamsV1 = req.params;
+        const params: UnarchiveMaintenanceWindowRequestParamsV1 = req.params;
 
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
         const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.archive({
           id: params.id,
-          archive: true,
+          archive: false,
         });
 
-        const response: ArchiveMaintenanceWindowResponseV1 = {
+        const response: UnarchiveMaintenanceWindowResponseV1 = {
           body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
         };
 
