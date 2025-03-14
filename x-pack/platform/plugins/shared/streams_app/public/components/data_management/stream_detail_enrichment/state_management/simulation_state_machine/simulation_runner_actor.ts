@@ -23,7 +23,7 @@ export function createSimulationRunnerActor({
   streamsRepositoryClient,
 }: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
   return fromPromise<Simulation, SimulationRunnerInput>(({ input, signal }) =>
-    streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
+    streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
       signal,
       params: {
         path: { name: input.streamName },
