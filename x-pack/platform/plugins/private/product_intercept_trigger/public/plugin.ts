@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { CoreStart, Plugin } from '@kbn/core/public';
+import { EuiText } from '@elastic/eui';
 import { NPSScoreInput } from './components';
 
 export class ProductInterceptPublicPlugin implements Plugin {
@@ -35,12 +36,16 @@ export class ProductInterceptPublicPlugin implements Plugin {
                 steps: [
                   {
                     id: 'hello',
-                    title: `Hello (${String(response.runs + runCount)})`,
-                    content: 'hello',
+                    title: `Help us improve Kibana (${String(response.runs + runCount)})`,
+                    content: React.createElement(
+                      EuiText,
+                      {},
+                      "We'd love your feedback to make Kibana even better. It will take 10 seconds only."
+                    ),
                   },
                   {
                     id: 'satisfaction',
-                    title: `Overall, how satisfied or dissatisfied are you with Kibana?`,
+                    title: 'Overall, how satisfied or dissatisfied are you with Kibana?',
                     content: React.createElement(NPSScoreInput, {
                       onSelectionChange: () => {
                         // do something with the selection

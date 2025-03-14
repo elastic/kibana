@@ -15,7 +15,7 @@ import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
 import type { NotificationCoordinatorPublicImpl } from '../../notification_coordinator';
 import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
-import { ProductInterceptDialogManager } from './component/product_intercept_dialog_manager';
+import { ProductInterceptDisplayManager } from './component/product_intercept_dialog_manager';
 
 interface ProductInterceptServiceSetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -63,7 +63,7 @@ export class ProductInterceptDialogService {
 
     render(
       rendering.addContext(
-        <ProductInterceptDialogManager
+        <ProductInterceptDisplayManager
           {...{
             productIntercepts$,
             ackProductIntercept,
