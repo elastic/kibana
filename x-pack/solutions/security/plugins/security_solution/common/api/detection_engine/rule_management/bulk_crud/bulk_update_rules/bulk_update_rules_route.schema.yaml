@@ -36,17 +36,22 @@ paths:
             examples:
               example1:
                 value:
-                  - threat:
-                      - framework: MITRE ATT&CK
-                        tactic:
-                        id: TA0001
-                        reference: https://attack.mitre.org/tactics/TA0001
-                        name: Initial Access
-                        technique:
-                          - id: T1193
-                            name: Spearphishing Attachment
-                            reference: https://attack.mitre.org/techniques/T1193
-                    rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: "7d2f5ed8-6c05-44ab-81ce-9160ae147057"
+                    name: "Updated Google Workspace Suspended User Account Renewed"
+                    tags:
+                      - "new_tag"
+                    description: "Detects when a previously suspended user's account is renewed in Google Workspace. An adversary may renew a suspended user account to maintain access to the Google Workspace organization with a valid account."
+                    risk_score: 21
+                    severity: "critical"
+                    type: "query"
+                  - id: "43b2dc3b-4f21-4a10-95e2-0dbc19e6e974"
+                    name: "Updated AWS Redshift Cluster Creation"
+                    tags:
+                      - "new_tag"
+                    description: "Identifies the creation of an Amazon Redshift cluster. Unexpected creation of this cluster by a non-administrative user may indicate a permission or role issue with current users. If unexpected, the resource may not properly be configured and could introduce security vulnerabilities."
+                    risk_score: 21
+                    severity: "medium"
+                    type: "query"
       responses:
         200:
           description: Indicates a successful call.
