@@ -75,11 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
       const downloadedModels = body.filter((v: any) => v.state !== 'notDownloaded');
 
       downloadedModels.forEach((model: any) => {
-        if (ml.api.isInternalModelId(model.model_id)) {
-          expect(model.spaces).to.eql(['*']);
-        } else {
-          expect(model.spaces).to.eql(['default']);
-        }
+        const expectedSpaces = ml.api.isInternalModelId(model.model_id) ? ['*'] : ['default'];
+        expect(model.spaces).to.eql(expectedSpaces);
       });
     });
 
