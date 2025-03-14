@@ -11,13 +11,18 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Header } from './header';
-import { ChatFormFields, PlaygroundPageMode } from '../types';
+import { ChatFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 
+const mockUsePlaygroundParameters = jest.fn();
+
 jest.mock('../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({}),
+}));
+jest.mock('../hooks/use_playground_parameters', () => ({
+  usePlaygroundParameters: () => mockUsePlaygroundParameters(),
 }));
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
@@ -63,15 +68,14 @@ const MockChatForm = ({
 
 describe('Header', () => {
   it('renders correctly', () => {
+    mockUsePlaygroundParameters.mockReturnValue({
+      pageMode: PlaygroundPageMode.chat,
+      viewMode: PlaygroundViewMode.preview,
+    });
     render(
       <IntlProvider locale="en">
         <MockChatForm handleSubmit={() => {}}>
-          <Header
-            selectedMode={PlaygroundPageMode.chat}
-            onModeChange={() => {}}
-            selectedPageMode={PlaygroundPageMode.chat}
-            onSelectPageModeChange={() => {}}
-          />
+          <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
         </MockChatForm>
       </IntlProvider>
     );
@@ -81,15 +85,14 @@ describe('Header', () => {
   });
 
   it('renders correctly with preview mode', () => {
+    mockUsePlaygroundParameters.mockReturnValue({
+      pageMode: PlaygroundPageMode.search,
+      viewMode: PlaygroundViewMode.preview,
+    });
     render(
       <IntlProvider locale="en">
         <MockChatForm handleSubmit={() => {}}>
-          <Header
-            selectedMode="chat"
-            onModeChange={() => {}}
-            selectedPageMode={PlaygroundPageMode.search}
-            onSelectPageModeChange={() => {}}
-          />
+          <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
         </MockChatForm>
       </IntlProvider>
     );

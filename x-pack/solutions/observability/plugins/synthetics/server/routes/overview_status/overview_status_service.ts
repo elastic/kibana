@@ -12,10 +12,7 @@ import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMonitorFilters, OverviewStatusQuery } from '../common';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { RouteContext } from '../types';
 import {
@@ -47,13 +44,7 @@ export class OverviewStatusService {
   ) {}
 
   async getOverviewStatus() {
-    const { request } = this.routeContext;
-    const queryParams = request.query as OverviewStatusQuery;
-
-    this.filterData = await getMonitorFilters({
-      ...queryParams,
-      context: this.routeContext,
-    });
+    this.filterData = await getMonitorFilters(this.routeContext);
 
     const [allConfigs, statusResult] = await Promise.all([
       this.getMonitorConfigs(),
@@ -312,7 +303,7 @@ export class OverviewStatusService {
   }
 
   async getMonitorConfigs() {
-    const { savedObjectsClient, request } = this.routeContext;
+    const { request } = this.routeContext;
     const { query, showFromAllSpaces } = request.query || {};
     /**
      * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
@@ -323,8 +314,7 @@ export class OverviewStatusService {
 
     const { filtersStr } = this.filterData;
 
-    return await getAllMonitors({
-      soClient: savedObjectsClient,
+    return await this.routeContext.monitorConfigRepository.getAll({
       showFromAllSpaces,
       search: query ? `${query}*` : '',
       filter: filtersStr,

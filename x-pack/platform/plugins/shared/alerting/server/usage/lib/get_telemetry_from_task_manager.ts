@@ -11,7 +11,7 @@ import type {
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseAndLogError } from './parse_and_log_error';
