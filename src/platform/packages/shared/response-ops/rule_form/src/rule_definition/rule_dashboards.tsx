@@ -98,7 +98,7 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
     if (isLinkedDashboardsEnabled) {
       loadDashboards();
     }
-  }, [loadDashboards]);
+  }, [isLinkedDashboardsEnabled, loadDashboards]);
 
   return (
     <>
