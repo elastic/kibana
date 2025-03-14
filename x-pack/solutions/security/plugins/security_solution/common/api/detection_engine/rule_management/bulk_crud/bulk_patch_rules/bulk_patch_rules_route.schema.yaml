@@ -10,7 +10,15 @@ paths:
       summary: Patch multiple detection rules
       operationId: BulkPatchRules
       deprecated: true
-      description: Update specific fields of existing detection rules using the `rule_id` or `id` field.
+      description: |
+        Update specific fields of existing detection rules using the `rule_id` or `id` field.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       tags:
         - Bulk API
       requestBody:
@@ -22,6 +30,22 @@ paths:
               type: array
               items:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RulePatchProps'
+            examples:
+              example1:
+                value:
+                  - threat:
+                      - framework: MITRE ATT&CK
+                        tactic:
+                        id: TA0001
+                        reference: https://attack.mitre.org/tactics/TA0001
+                        name: Initial Access
+                        technique:
+                          - id: T1193
+                            name: Spearphishing Attachment
+                            reference: https://attack.mitre.org/techniques/T1193
+                    rule_id: process_started_by_ms_office_program_possible_payload
+                  - name: New name
+                    id: 56b22b65-173e-4a5b-b27a-82599cb1433e
       responses:
         200:
           description: Indicates a successful call.
