@@ -13,7 +13,7 @@ import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import type { ApmIndexSettingsResponse } from './get_apm_indices';
 import { getApmIndexSettings } from './get_apm_indices';
 
-// TODO: Deprecate and remove these API routes
+// TODO: Deprecate and remove these API routes. https://github.com/elastic/kibana/issues/214570
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-index-settings',
@@ -28,7 +28,7 @@ const apmIndexSettingsRoute = createApmServerRoute({
   },
 });
 
-// TODO: Deprecate and remove these API routes
+// TODO: Deprecate and remove these API routes. https://github.com/elastic/kibana/issues/214570
 // get apm indices configuration object
 const apmIndicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-indices',
@@ -42,7 +42,7 @@ type SaveApmIndicesBodySchema = {
   [Property in keyof APMIndices]: t.StringC;
 };
 
-// TODO: Deprecate and remove these API routes
+// TODO: Deprecate and remove these API routes. https://github.com/elastic/kibana/issues/214570
 // save ui indices
 const saveApmIndicesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/apm-indices/save',

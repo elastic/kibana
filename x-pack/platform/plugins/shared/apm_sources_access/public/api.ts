@@ -8,7 +8,7 @@
 import { HttpStart } from '@kbn/core/public';
 import type { APIEndpoint, APIReturnType } from '../server';
 
-interface ApiOptions {
+export interface SourcesApiOptions {
   body?: unknown;
   signal?: AbortSignal;
 }
@@ -16,12 +16,12 @@ interface ApiOptions {
 export const callSourcesAPI = <T extends APIEndpoint>(
   http: HttpStart,
   pathname: T,
-  { body, signal }: ApiOptions
+  options?: SourcesApiOptions
 ): Promise<APIReturnType<T>> => {
   const [method, path] = pathname.split(' ');
 
   return http[method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch'](path, {
-    body: body != null ? JSON.stringify(body) : undefined,
-    signal,
+    body: options?.body != null ? JSON.stringify(options.body) : undefined,
+    signal: options?.signal,
   });
 };

@@ -12,13 +12,13 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { registerRoutes } from '@kbn/server-route-repository';
 import type { APMSourcesAccessConfig } from '../common/config_schema';
 
 import {
   apmIndicesSavedObjectDefinition,
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
-import { registerRoutes } from './register_routes';
 import { apmSourcesSettingsRouteRepository } from './routes';
 
 /**
@@ -35,12 +35,10 @@ export class ApmSourcesAccessPlugin
 {
   public config: APMSourcesAccessConfig;
   public logger: Logger;
-  private readonly kibanaVersion: string;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<APMSourcesAccessConfig>();
     this.logger = initContext.logger.get();
-    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   getApmIndices = async (savedObjectsClient: SavedObjectsClientContract) => {
@@ -62,13 +60,11 @@ export class ApmSourcesAccessPlugin
     };
 
     registerRoutes({
-      core: {
-        setup: core,
-      },
+      core,
       logger: this.logger,
       repository: apmSourcesSettingsRouteRepository,
-      plugin: services,
-      kibanaVersion: this.kibanaVersion,
+      runDevModeChecks: false,
+      dependencies: { sources: services },
     });
 
     // expose

@@ -21,5 +21,4 @@ export type { ApmSourceAccessPluginStart, ApmSourceAccessPluginSetup };
 
 export type { APMIndices } from '../common/config_schema';
 
-export { useSourcesAPIFetcher } from './hooks';
-export { callSourcesAPI } from './api';
+export { callSourcesAPI, type SourcesApiOptions } from './api';

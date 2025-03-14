@@ -5,28 +5,14 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CustomRequestHandlerContext,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { getApmIndicesSavedObject } from '../saved_objects/apm_indices';
 import type { ApmSourcesAccessPlugin } from '../plugin';
 import type { APMIndices } from '..';
 
-export interface APMSourcesRouteHandlerResources {
-  request: KibanaRequest;
-  context: CustomRequestHandlerContext<{}>;
-  params: {
-    query: {
-      _inspect: boolean;
-    };
-  };
-  logger: Logger;
-  plugin: ReturnType<ApmSourcesAccessPlugin['setup']>;
-  core: APMSourcesCore;
-  kibanaVersion: string;
+export interface APMSourcesRouteHandlerResources extends DefaultRouteHandlerResources {
+  sources: ReturnType<ApmSourcesAccessPlugin['setup']>;
 }
 
 export interface APMSourcesCore {
@@ -42,19 +28,19 @@ export interface ApmIndexSettingsResponse {
 }
 
 export async function getApmIndices({
-  plugin,
+  sources,
   context,
 }: APMSourcesRouteHandlerResources): Promise<APMIndices> {
   const coreContext = await context.core;
 
-  return await plugin.getApmIndices(coreContext.savedObjects.client);
+  return await sources.getApmIndices(coreContext.savedObjects.client);
 }
 
 export async function getApmIndexSettings({
-  plugin,
+  sources,
   context,
 }: APMSourcesRouteHandlerResources): Promise<ApmIndexSettingsResponse> {
-  const { apmIndicesFromConfigFile } = plugin;
+  const { apmIndicesFromConfigFile } = sources;
 
   const coreContext = await context.core;
   const apmIndicesSavedObject = await getApmIndicesSavedObject(coreContext.savedObjects.client);

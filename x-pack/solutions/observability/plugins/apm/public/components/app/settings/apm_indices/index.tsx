@@ -23,13 +23,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HttpStart } from '@kbn/core/public';
-import { useSourcesAPIFetcher, callSourcesAPI } from '@kbn/apm-sources-access-plugin/public';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 
-const APM_INDEX_LABELS = [
+const APM_INDEX_LABELS: ReadonlyArray<{ configurationName: keyof APMIndices; label: string }> = [
   {
     configurationName: 'error',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
@@ -62,21 +61,6 @@ const APM_INDEX_LABELS = [
   },
 ];
 
-async function saveApmIndices({
-  http,
-  apmIndices,
-}: {
-  http: HttpStart;
-  apmIndices: Record<string, string>;
-}) {
-  await callSourcesAPI(http, 'POST /internal/apm-sources/settings/apm-indices/save', {
-    body: apmIndices,
-  });
-
-  // Reload window to update APM data view with new indices
-  window.location.reload();
-}
-
 // avoid infinite loop by initializing the state outside the component
 const INITIAL_STATE = { apmIndexSettings: [] };
 
@@ -90,12 +74,13 @@ export function ApmIndices() {
     application.capabilities.apm['settings:save'] &&
     application.capabilities.savedObjectsManagement.edit;
 
-  const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
+  const [apmIndices, setApmIndices] = useState<Partial<Record<keyof APMIndices, string>>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, refetch } = useSourcesAPIFetcher({
-    pathname: 'GET /internal/apm-sources/settings/apm-index-settings',
-  });
+  const { data = INITIAL_STATE, refetch } = useFetcher(
+    (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
+    [services.apmSourcesAccess]
+  );
 
   const { data: space } = useFetcher(() => {
     return services.spaces?.getActiveSpace();
@@ -108,7 +93,7 @@ export function ApmIndices() {
           ...acc,
           [configurationName]: savedValue,
         }),
-        {}
+        {} as APMIndices
       )
     );
   }, [data]);
@@ -119,7 +104,7 @@ export function ApmIndices() {
     event.preventDefault();
     setIsSaving(true);
     try {
-      await saveApmIndices({ http: core.http, apmIndices });
+      await services.apmSourcesAccess.saveApmIndices({ body: apmIndices });
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.succeeded.title', {
           defaultMessage: 'Indices applied',
@@ -129,6 +114,8 @@ export function ApmIndices() {
             'The indices changes were successfully applied. These changes are reflected immediately in the APM UI',
         }),
       });
+      // Defer reload once the UI has finished rendering
+      setTimeout(() => window.location.reload());
     } catch (error: any) {
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.failed.title', {
@@ -139,8 +126,9 @@ export function ApmIndices() {
           values: { errorMessage: error.message },
         }),
       });
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   const handleChangeIndexConfigurationEvent = async (
@@ -204,7 +192,7 @@ export function ApmIndices() {
                 ({ configurationName: configName }) => configName === configurationName
               );
               const defaultValue = matchedConfiguration ? matchedConfiguration.defaultValue : '';
-              const savedUiIndexValue = apmIndices[configurationName] || '';
+              const savedUiIndexValue = apmIndices[configurationName];
               return (
                 <EuiFormRow
                   key={configurationName}
