@@ -8,7 +8,7 @@
 import type { EcsEvent } from '@kbn/core/server';
 import type { AuditEvent } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
-import { ReadOperations, WriteOperations } from '..';
+import { ReadOperations, WriteOperations } from '../authorization/types';
 
 export enum AlertAuditAction {
   GET = 'alert_get',
