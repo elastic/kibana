@@ -19,7 +19,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
 import type { NotificationCoordinatorPublicImpl } from '../../notification_coordinator';
 import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
-import { ProductInterceptDialogManager } from './component/product_intercept_dialog_manager';
+import { ProductInterceptDisplayManager } from './component/product_intercept_dialog_manager';
 
 interface ProductInterceptServiceSetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -69,7 +69,7 @@ export class ProductInterceptDialogService {
 
     render(
       <KibanaRenderContextProvider {...startDeps}>
-        <ProductInterceptDialogManager
+        <ProductInterceptDisplayManager
           {...{
             productIntercepts$,
             ackProductIntercept,

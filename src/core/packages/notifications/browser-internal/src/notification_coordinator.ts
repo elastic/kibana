@@ -57,7 +57,7 @@ export class NotificationCoordinator {
    * @param $ - Observable to be controlled
    * @param cond - Condition under which updates from the provided observable should be emitted
    */
-  public optInToCoordination<T>(
+  public optInToCoordination<T extends unknown[]>(
     registrar: string,
     $: Rx.Observable<T>,
     cond: Parameters<
@@ -70,7 +70,7 @@ export class NotificationCoordinator {
     const shared$ = $.pipe(
       Rx.share(),
       Rx.tap((value) => {
-        if (Array.isArray(value) && !value.length) {
+        if (!value.length) {
           const lock = this.coordinationLock$.getValue();
           if (lock.locked && lock.controller === registrar) {
             this.releaseCoordinationLock(registrar);
@@ -85,7 +85,7 @@ export class NotificationCoordinator {
     ).pipe(
       Rx.mergeMap((x) => x),
       Rx.tap((value) => {
-        if (Array.isArray(value) && value.length) {
+        if (value.length) {
           this.acquireCoordinationLock(registrar);
         }
       })
@@ -95,7 +95,7 @@ export class NotificationCoordinator {
 
 export function notificationCoordinator(this: NotificationCoordinator, registrar: string) {
   return {
-    optInToCoordination: <T>(
+    optInToCoordination: <T extends unknown[]>(
       ...args: Parameters<typeof this.optInToCoordination<T>> extends [infer Head, ...infer Tail]
         ? Tail
         : unknown

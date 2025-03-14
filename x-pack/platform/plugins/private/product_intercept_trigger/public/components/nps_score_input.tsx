@@ -15,6 +15,10 @@ import {
 } from '@elastic/eui';
 
 interface SecondStepProps {
+  /**
+   * default value here is 5
+   */
+  upperBound?: number;
   lowerBoundHelpText?: string;
   upperBoundHelpText?: string;
   onSelectionChange?: EuiButtonGroupProps['onChange'];
@@ -24,8 +28,9 @@ export function NPSScoreInput({
   onSelectionChange,
   lowerBoundHelpText,
   upperBoundHelpText,
+  upperBound = 5,
 }: SecondStepProps) {
-  const options: EuiButtonGroupProps['options'] = Array.from({ length: 5 }, (_, i) => ({
+  const options: EuiButtonGroupProps['options'] = Array.from({ length: upperBound }, (_, i) => ({
     id: `${i + 1}`,
     label: `${i + 1}`,
   }));
