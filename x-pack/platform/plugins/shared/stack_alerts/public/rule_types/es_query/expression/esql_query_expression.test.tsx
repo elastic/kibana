@@ -106,7 +106,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
           }}
           setRuleParams={() => {}}
           setRuleProperty={() => {}}
-          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
           data={dataMock}
           dataViews={dataViewMock}
           defaultActionGroupId=""
@@ -134,7 +134,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -167,7 +167,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -212,7 +212,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -260,7 +260,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={{ ...defaultEsqlQueryExpressionParams, groupBy: 'row' }}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -292,7 +292,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
