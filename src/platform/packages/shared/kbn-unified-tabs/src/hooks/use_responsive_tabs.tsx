@@ -163,6 +163,7 @@ export const useResponsiveTabs = ({
       &::-webkit-scrollbar {
         display: none;
       }
+      transform: translateZ(0);
       ${overflowGradient}
     `;
   }, [scrollState, euiTheme.size.s]);

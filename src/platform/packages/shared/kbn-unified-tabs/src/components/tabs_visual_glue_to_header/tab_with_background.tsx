@@ -29,11 +29,14 @@ export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({ isSelected
 
   return (
     <div
+      // tab main background and another background color on hover
       css={css`
         background-color: ${isSelected
           ? selectedTabBackgroundColor
           : euiTheme.colors.lightestShade};
         transition: background-color ${euiTheme.animation.fast};
+        border-right: ${euiTheme.border.thin};
+        border-color: ${euiTheme.colors.lightShade};
 
         ${isSelected
           ? ''
@@ -45,19 +48,13 @@ export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({ isSelected
       `}
     >
       <div
+        // a top shadow for an unselected tab to make sure that it stays visible when the tab is hovered
         css={css`
           background: ${isSelected ? 'transparent' : getTabsShadowGradient(euiThemeContext)};
           transition: background-color ${euiTheme.animation.fast};
         `}
       >
-        <div
-          css={css`
-            border-right: ${euiTheme.border.thin};
-            border-color: ${euiTheme.colors.lightShade};
-          `}
-        >
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   );

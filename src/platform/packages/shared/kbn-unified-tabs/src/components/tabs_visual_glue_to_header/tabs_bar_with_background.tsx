@@ -44,7 +44,7 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({ ch
     <div
       // tabs bar background
       css={css`
-        background-color: ${euiTheme.colors.lightestShade};
+        background: ${euiTheme.colors.lightestShade};
 
         .kbnBody--hasProjectActionMenu & {
           margin-top: 1px; // for some reason the header slightly overlaps the tabs bar in a solution view
