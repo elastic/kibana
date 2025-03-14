@@ -201,7 +201,7 @@ function createOrUpdateConfig(
   const name = projectConfig.name;
   const projectExists = fs.existsSync(targetPath);
   if (projectExists) {
-    if (update) {
+    if (update && !fs.readFileSync(targetPath).includes('_preventUpdate')) {
       if (dryRun) {
         log.info(`Would update ${name} project configuration.`);
       } else {

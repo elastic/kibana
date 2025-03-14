@@ -51,6 +51,13 @@
       "options": {},
       "cache": true
     },
+    "typecheck_fast": {
+      "dependsOn": ["^@kbn/nx", "^typecheck_fast", "@kbn/nx:generateAllTypecheckConfigs"],
+      "inputs": ["src", "^src", "global:tsConfigs", "^global:tsConfigs"],
+      "outputs": ["{projectRoot}/target"],
+      "options": {},
+      "cache": true
+    },
     "jest": {
       "executor": "@nx/jest:jest",
       "inputs": ["src", "global:ignoreConfigs"],

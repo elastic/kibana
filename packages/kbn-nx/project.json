@@ -9,11 +9,6 @@
     ]
   },
   "targets": {
-    "generateAllTypecheckConfigs": {
-      "command": "node scripts/type_check.js --configs-only",
-      "cache": false,
-      "inputs": []
-    },
     "typecheck": {
       "inputs": [
         "src",
@@ -25,18 +20,20 @@
         "{projectRoot}/target"
       ]
     },
+    "typecheck_fast": {
+      "command": "yarn tsc --build {projectRoot}/tsconfig.type_check.json --pretty",
+      "options": {
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8096"
+        }
+      }
+    },
     "jest": {
       "options": {
         "jestConfig": "{projectRoot}/jest.config.js"
       }
     },
-    "lint": {},
-    "noop": {
-      "executor": "@kbn/nx:noop",
-      "options": {
-        "commands": []
-      }
-    }
+    "lint": {}
   },
   "projectType": "library",
   "sourceRoot": "packages/kbn-nx"

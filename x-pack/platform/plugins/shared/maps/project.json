@@ -3,6 +3,7 @@
   "name": "@kbn/maps-plugin",
   "namedInputs": {
     "src": [
+      "{projectRoot}/*.ts",
       "{projectRoot}/common/**/*",
       "{projectRoot}/public/**/*",
       "{projectRoot}/server/**/*",
@@ -23,6 +24,14 @@
       "outputs": [
         "{projectRoot}/target"
       ]
+    },
+    "typecheck_fast": {
+      "command": "yarn tsc --build {projectRoot}/tsconfig.type_check.json --pretty",
+      "options": {
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8096"
+        }
+      }
     },
     "jest": {
       "options": {

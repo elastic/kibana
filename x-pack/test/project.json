@@ -31,6 +31,14 @@
         "{projectRoot}/target"
       ]
     },
+    "typecheck_fast": {
+      "command": "yarn tsc --build {projectRoot}/tsconfig.type_check.json --pretty",
+      "options": {
+        "env": {
+          "NODE_OPTIONS": "--max-old-space-size=8096"
+        }
+      }
+    },
     "lint": {}
   },
   "projectType": "library",
