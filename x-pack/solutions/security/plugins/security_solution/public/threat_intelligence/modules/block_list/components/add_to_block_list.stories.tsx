@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { SecuritySolutionContext } from '../../../containers/security_solution_context';
-import { SecuritySolutionPluginContext } from '../../..';
+import type { SecuritySolutionPluginContext } from '../../..';
 import { getSecuritySolutionContextMock } from '../../../mocks/mock_security_context';
 import { AddToBlockListContextMenu } from './add_to_block_list';
 import { BlockListProvider } from '../../indicators/containers/block_list_provider';

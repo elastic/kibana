@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { ComponentStory } from '@storybook/react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { mockUiSettingsService } from '../../../../mocks/mock_kibana_ui_settings_service';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/types/indicator';
+import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 
 export default {

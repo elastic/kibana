@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
-import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import type { VFC } from 'react';
+import React from 'react';
+import type { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { FieldBrowser } from '@kbn/response-ops-alerts-fields-browser';
 
 export interface IndicatorsFieldBrowserProps {

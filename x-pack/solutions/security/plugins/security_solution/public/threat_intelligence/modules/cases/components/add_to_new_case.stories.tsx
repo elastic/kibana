@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { AddToNewCase } from './add_to_new_case';
 import { StoryProvidersComponent } from '../../../mocks/story_providers';
