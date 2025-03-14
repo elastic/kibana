@@ -30,7 +30,7 @@ jobs:
           echo "Using Node.js version: $NODE_VERSION"
           echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
 
-      - name: **Force Remove Any Existing Node.js Versions**
+      - name: Remove Any Existing Node.js Versions
         run: |
           sudo apt-get remove --purge -y nodejs npm
           sudo rm -rf /usr/local/lib/node_modules
