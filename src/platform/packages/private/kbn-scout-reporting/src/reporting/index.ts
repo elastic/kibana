@@ -8,7 +8,9 @@
  */
 
 import type { ReporterDescription } from 'playwright/test';
+import type { Config } from '@jest/types';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
+import { ScoutJestReporterOptions } from './jest/options';
 import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
 export * from './report';
@@ -29,4 +31,16 @@ export const scoutFailedTestsReporter = (
   return SCOUT_REPORTER_ENABLED
     ? ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options]
     : ['null'];
+};
+
+// Jest event-based reporting
+export const scoutJestReporter = (
+  options?: ScoutJestReporterOptions
+): string | Config.ReporterConfig => {
+  return SCOUT_REPORTER_ENABLED
+    ? [
+        '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
+        { ...options },
+      ]
+    : 'base';
 };
