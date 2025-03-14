@@ -30,6 +30,7 @@ interface Props {
   popoverContent?: React.ReactElement;
   isLoading: boolean;
   calloutId: string;
+  hideThisContent: string;
 }
 
 export function TryItButton({
@@ -40,6 +41,7 @@ export function TryItButton({
   promoLabel,
   isLoading,
   calloutId,
+  hideThisContent,
 }: Props) {
   const [showTryCallout, setShowFastFilterTryCallout] = useLocalStorage(`apm.${calloutId}`, true);
   const { core } = useApmPluginContext();
@@ -168,7 +170,7 @@ export function TryItButton({
   function HideThisButton() {
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Hide this">
+        <EuiToolTip content={hideThisContent}>
           <EuiButtonIcon
             data-test-subj="apmHideThisButtonButton"
             iconType="cross"

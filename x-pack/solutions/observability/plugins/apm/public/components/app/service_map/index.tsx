@@ -226,10 +226,10 @@ export function ServiceMap({
           isFeatureEnabled={isServiceMapV2Enabled}
           linkLabel={
             isServiceMapV2Enabled
-              ? i18n.translate('xpack.apm.serviceList.disableFastFilter', {
+              ? i18n.translate('xpack.apm.serviceMap.disableServiceMapApiV2', {
                   defaultMessage: 'Disable the new service map API',
                 })
-              : i18n.translate('xpack.apm.serviceList.enableFastFilter', {
+              : i18n.translate('xpack.apm.serviceMap.enableServiceMapApiV2', {
                   defaultMessage: 'Enable the new service map API',
                 })
           }
@@ -240,12 +240,16 @@ export function ServiceMap({
           popoverContent={
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.serviceList.turnOffFastFilter', {
+                {i18n.translate('xpack.apm.serviceMap.serviceMapApiV2PopoverContent', {
                   defaultMessage: 'The new service map API is faster, try it out!',
                 })}
               </EuiFlexItem>
             </EuiFlexGroup>
           }
+          hideThisContent={i18n.translate('xpack.apm.serviceMap.hideThisContent', {
+            defaultMessage:
+              'Hide this. The setting can be enabled or disabled in Advanced Settings.',
+          })}
           calloutId="showServiceMapV2Callout"
         />
       </EuiFlexGroup>
