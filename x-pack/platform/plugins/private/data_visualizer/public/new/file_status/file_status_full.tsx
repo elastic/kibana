@@ -11,16 +11,15 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiHorizontalRule,
   EuiTab,
   EuiTabs,
+  EuiAccordion,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { STATUS } from '../file_manager/file_manager';
 import { FileClashResult } from './file_clash';
 import { UploadProgress } from './progress';
@@ -28,7 +27,7 @@ import { AnalysisSummary } from '../../application/file_data_visualizer/componen
 import { FileContents } from '../../application/file_data_visualizer/components/file_contents';
 import { FieldsStatsGrid } from '../../application/common/components/fields_stats_grid';
 import { Mappings } from './mappings';
-import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
+// import { CLASH_ERROR_TYPE } from '../file_manager/merge_tools';
 import { IngestPipeline } from './pipeline';
 import type { FileStatusProps } from './file_status';
 
@@ -51,159 +50,141 @@ export const FileStatusFull: FC<FileStatusProps> = ({
     clash: false,
   };
 
-  const [expanded, setExpanded] = useState(false);
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.SUMMARY);
 
   const importStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
     uploadStatus.overallImportStatus === STATUS.COMPLETED;
 
-  const panelColor =
-    fileClash.clash === CLASH_ERROR_TYPE.ERROR
-      ? 'danger'
-      : fileClash.clash === CLASH_ERROR_TYPE.WARNING
-      ? 'warning'
-      : 'transparent';
+  const buttonCss = css`
+    &:hover {
+      text-decoration: none;
+    }
+  `;
 
   return (
     <>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="s" color={panelColor}>
+      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
         {importStarted ? (
           <UploadProgress fileStatus={fileStatus} />
         ) : (
           <>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
+            <EuiAccordion
+              id="accordion1"
+              buttonProps={{ css: buttonCss }}
+              buttonContent={
+                <>
+                  <EuiText size="xs">
+                    <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
+                    <span>{fileStatus.fileSize}</span>
+                  </EuiText>
+
+                  <FileClashResult fileClash={fileClash} />
+                </>
+              }
+              extraAction={
                 <EuiButtonIcon
-                  iconType={expanded ? 'arrowDown' : 'arrowRight'}
-                  aria-label="expand"
-                  onClick={() => setExpanded(!expanded)}
+                  onClick={deleteFile}
+                  iconType="trash"
+                  size="xs"
+                  color="danger"
+                  aria-label={i18n.translate('xpack.dataVisualizer.file.fileStatus.deleteFile', {
+                    defaultMessage: 'Remove file',
+                  })}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="none" alignItems="center">
-                  <EuiFlexItem grow={8}>
-                    <EuiText size="xs">
-                      <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
-                      <span>{fileStatus.fileSize}</span>
-                    </EuiText>
-                  </EuiFlexItem>
+              }
+              paddingSize="s"
+            >
+              {fileStatus.results ? (
+                <>
+                  <EuiTabs size="s">
+                    <EuiTab
+                      isSelected={selectedTab === TAB.SUMMARY}
+                      onClick={() => setSelectedTab(TAB.SUMMARY)}
+                      data-test-subj="mlNodesOverviewPanelDetailsTab"
+                    >
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.summaryTabTitle"
+                        defaultMessage="Summary"
+                      />
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={selectedTab === TAB.STATS}
+                      onClick={() => setSelectedTab(TAB.STATS)}
+                      data-test-subj="mlNodesOverviewPanelMemoryTab"
+                    >
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.statsTabTitle"
+                        defaultMessage="Stats"
+                      />
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={selectedTab === TAB.CONTENT}
+                      onClick={() => setSelectedTab(TAB.CONTENT)}
+                      data-test-subj="mlNodesOverviewPanelMemoryTab"
+                    >
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
+                        defaultMessage="Content"
+                      />
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={selectedTab === TAB.MAPPINGS}
+                      onClick={() => setSelectedTab(TAB.MAPPINGS)}
+                      data-test-subj="mlNodesOverviewPanelMemoryTab"
+                    >
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.mappingsTabTitle"
+                        defaultMessage="Mappings"
+                      />
+                    </EuiTab>
+                    <EuiTab
+                      isSelected={selectedTab === TAB.PIPELINE}
+                      onClick={() => setSelectedTab(TAB.PIPELINE)}
+                      data-test-subj="mlNodesOverviewPanelMemoryTab"
+                    >
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.pipelineTabTitle"
+                        defaultMessage="Pipeline"
+                      />
+                    </EuiTab>
+                  </EuiTabs>
+                  <EuiSpacer size="s" />
 
-                  <EuiFlexItem grow={2}>
-                    <EuiFlexGroup gutterSize="none">
-                      <EuiFlexItem grow={true} />
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          onClick={deleteFile}
-                          iconType="trash"
-                          size="xs"
-                          color="danger"
-                          aria-label={i18n.translate(
-                            'xpack.dataVisualizer.file.fileStatus.deleteFile',
-                            {
-                              defaultMessage: 'Remove file',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                  {selectedTab === TAB.SUMMARY ? (
+                    <AnalysisSummary results={fileStatus.results!} showTitle={false} />
+                  ) : null}
 
-            <FileClashResult fileClash={fileClash} />
+                  {selectedTab === TAB.STATS ? (
+                    <FieldsStatsGrid results={fileStatus.results!} />
+                  ) : null}
 
-            {expanded ? (
-              <>
-                <EuiHorizontalRule margin="s" />
-                <EuiTabs size="s">
-                  <EuiTab
-                    isSelected={selectedTab === TAB.SUMMARY}
-                    onClick={() => setSelectedTab(TAB.SUMMARY)}
-                    data-test-subj="mlNodesOverviewPanelDetailsTab"
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.fileStatus.summaryTabTitle"
-                      defaultMessage="Summary"
+                  {selectedTab === TAB.CONTENT ? (
+                    <FileContents
+                      fileContents={fileStatus.fileContents}
+                      results={fileStatus.results!}
+                      showTitle={false}
                     />
-                  </EuiTab>
-                  <EuiTab
-                    isSelected={selectedTab === TAB.STATS}
-                    onClick={() => setSelectedTab(TAB.STATS)}
-                    data-test-subj="mlNodesOverviewPanelMemoryTab"
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.fileStatus.statsTabTitle"
-                      defaultMessage="Stats"
+                  ) : null}
+
+                  {selectedTab === TAB.MAPPINGS ? (
+                    <Mappings
+                      mappings={fileStatus.results!.mappings as MappingTypeMapping}
+                      showTitle={false}
+                      readonly={true}
                     />
-                  </EuiTab>
-                  <EuiTab
-                    isSelected={selectedTab === TAB.CONTENT}
-                    onClick={() => setSelectedTab(TAB.CONTENT)}
-                    data-test-subj="mlNodesOverviewPanelMemoryTab"
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
-                      defaultMessage="Content"
+                  ) : null}
+
+                  {selectedTab === TAB.PIPELINE ? (
+                    <IngestPipeline
+                      fileStatus={fileStatus}
+                      showTitle={false}
+                      setPipeline={setPipeline}
                     />
-                  </EuiTab>
-                  <EuiTab
-                    isSelected={selectedTab === TAB.MAPPINGS}
-                    onClick={() => setSelectedTab(TAB.MAPPINGS)}
-                    data-test-subj="mlNodesOverviewPanelMemoryTab"
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.fileStatus.mappingsTabTitle"
-                      defaultMessage="Mappings"
-                    />
-                  </EuiTab>
-                  <EuiTab
-                    isSelected={selectedTab === TAB.PIPELINE}
-                    onClick={() => setSelectedTab(TAB.PIPELINE)}
-                    data-test-subj="mlNodesOverviewPanelMemoryTab"
-                  >
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.fileStatus.pipelineTabTitle"
-                      defaultMessage="Pipeline"
-                    />
-                  </EuiTab>
-                </EuiTabs>
-                <EuiSpacer size="s" />
-
-                {selectedTab === TAB.SUMMARY ? (
-                  <AnalysisSummary results={fileStatus.results!} showTitle={false} />
-                ) : null}
-
-                {selectedTab === TAB.STATS ? (
-                  <FieldsStatsGrid results={fileStatus.results!} />
-                ) : null}
-
-                {selectedTab === TAB.CONTENT ? (
-                  <FileContents
-                    fileContents={fileStatus.fileContents}
-                    results={fileStatus.results!}
-                    showTitle={false}
-                  />
-                ) : null}
-
-                {selectedTab === TAB.MAPPINGS ? (
-                  <Mappings
-                    mappings={fileStatus.results!.mappings as MappingTypeMapping}
-                    showTitle={false}
-                    readonly={true}
-                  />
-                ) : null}
-
-                {selectedTab === TAB.PIPELINE ? (
-                  <IngestPipeline
-                    fileStatus={fileStatus}
-                    showTitle={false}
-                    setPipeline={setPipeline}
-                  />
-                ) : null}
-              </>
-            ) : null}
+                  ) : null}
+                </>
+              ) : null}
+            </EuiAccordion>
           </>
         )}
       </EuiPanel>

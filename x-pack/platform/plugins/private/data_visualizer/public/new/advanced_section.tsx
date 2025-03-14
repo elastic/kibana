@@ -17,7 +17,7 @@ import { Settings } from './file_status/settings';
 
 interface Props {
   mappings: MappingTypeMapping | null;
-  setMappings: (mappings: MappingTypeMapping) => void;
+  setMappings: (mappings: string) => void;
   settings: IndicesIndexSettings;
   setSettings: (settings: string) => void;
 }
