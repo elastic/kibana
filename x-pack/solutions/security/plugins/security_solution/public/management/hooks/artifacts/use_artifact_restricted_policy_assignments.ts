@@ -12,7 +12,7 @@ import { useBulkFetchFleetIntegrationPolicies } from '../policy/use_bulk_fetch_f
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getPolicyIdsFromArtifact } from '../../../../common/endpoint/service/artifacts';
 
-interface ArtifactRestrictedPolicyAssignments {
+export interface ArtifactRestrictedPolicyAssignments {
   isLoading: boolean;
   /** The list of policy IDs assigned to the artifact that are NOT currently accessible in active space */
   policyIds: string[];
@@ -20,7 +20,7 @@ interface ArtifactRestrictedPolicyAssignments {
 
 /**
  * Given an artifact item, hook will calculate if any of the policies assigned to it
- * are restricted (not accessible by the current users) in the active space.
+ * are restricted (not accessible by the current user) in the active space.
  *
  * NOTE: this hook's logic is executed at most once per artifact
  *
