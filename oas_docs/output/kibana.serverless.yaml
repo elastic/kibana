@@ -2552,6 +2552,16 @@ paths:
                       type: number
                   required:
                     - active
+                dashboards:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+                  type: array
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
