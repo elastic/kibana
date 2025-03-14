@@ -46,7 +46,7 @@ export const useSchemaFields = ({
     refresh: refreshUnmappedFields,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/schema/unmapped_fields', {
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/schema/unmapped_fields', {
         signal,
         params: {
           path: {
@@ -63,7 +63,7 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
+        format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
         status: 'inherited',
@@ -74,7 +74,7 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
+        format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: definition.stream.name,
         status: 'mapped',
@@ -110,7 +110,7 @@ export const useSchemaFields = ({
           throw new Error('The field is not different, hence updating is not necessary.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
           signal: abortController.signal,
           params: {
             path: {
@@ -162,7 +162,7 @@ export const useSchemaFields = ({
           throw new Error('The field is not mapped, hence it cannot be unmapped.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
           signal: abortController.signal,
           params: {
             path: {
