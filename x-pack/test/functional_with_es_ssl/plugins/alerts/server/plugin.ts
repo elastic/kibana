@@ -29,6 +29,7 @@ export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
   },
   category: 'kibana',
   producer: 'alerts',
+  solution: 'stack',
   validate: {
     params: { validate: (params) => params },
   },
@@ -58,6 +59,7 @@ export const alwaysFiringAlertType: RuleType<
   defaultActionGroupId: 'default',
   category: 'kibana',
   producer: 'alerts',
+  solution: 'stack',
   minimumLicenseRequired: 'basic',
   isExportable: true,
   async executor(alertExecutorOptions) {
@@ -93,6 +95,7 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   ],
   category: 'kibana',
   producer: 'alerts',
+  solution: 'stack',
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
   isExportable: true,

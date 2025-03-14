@@ -63,7 +63,10 @@ export const useDebounceWithOptions = (
   );
 };
 
-const quotedWarningMessageRegexp = /"(.*?)"/g;
+// Quotes can be used as separators for multiple warnings unless
+// they are escaped with backslashes. This regexp will match any
+// quoted string that is not escaped.
+const quotedWarningMessageRegexp = /"(?:[^"\\]*(?:\\.[^"\\]*)*)"/g;
 
 export const parseWarning = (warning: string): MonacoMessage[] => {
   if (quotedWarningMessageRegexp.test(warning)) {
@@ -71,7 +74,8 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
     if (matches) {
       return matches.map((message) => {
         // start extracting the quoted message and with few default positioning
-        let warningMessage = message.replace(/"/g, '');
+        // replaces the quotes only if they are not escaped
+        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
         let startColumn = 1;
         let startLineNumber = 1;
         // initialize the length to 10 in case no error word found
@@ -317,6 +321,9 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
     .monaco-hover {
       display: block !important;
+    }
+    .hover-row.status-bar {
+      display: none;
     }
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};

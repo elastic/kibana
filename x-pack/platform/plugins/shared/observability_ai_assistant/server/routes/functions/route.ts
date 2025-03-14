@@ -53,7 +53,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const client = await service.getClient({ request });
 
-    const [functionClient, userInstructions] = await Promise.all([
+    const [functionClient, kbUserInstructions] = await Promise.all([
       service.getFunctionClient({
         signal: controller.signal,
         resources,
@@ -73,8 +73,8 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
         applicationInstructions: functionClient.getInstructions(),
-        userInstructions,
-        adHocInstructions: functionClient.getAdhocInstructions(),
+        kbUserInstructions,
+        apiUserInstructions: [],
         availableFunctionNames,
       }),
     };
