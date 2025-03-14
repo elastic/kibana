@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import {
   DISCOVER_ADD_FILTER,
   DISCOVER_CONTAINER,
@@ -67,9 +68,17 @@ export const selectCurrentDiscoverEsqlQuery = (
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {
-  // ESQL input uses the monaco editor which doesn't allow for traditional input updates
-  selectCurrentDiscoverEsqlQuery(DISCOVER_ESQL_EDITABLE_INPUT);
-  fillEsqlQueryBar(esqlQuery);
+  recurse(
+    () => {
+      // ESQL input uses the monaco editor which doesn't allow for traditional input updates
+      selectCurrentDiscoverEsqlQuery(DISCOVER_ESQL_EDITABLE_INPUT);
+      fillEsqlQueryBar(esqlQuery);
+      selectCurrentDiscoverEsqlQuery();
+      return cy.get(DISCOVER_ESQL_EDITABLE_INPUT);
+    },
+    ($el) => $el.val() === esqlQuery,
+    { delay: 1000, limit: 5 }
+  );
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
