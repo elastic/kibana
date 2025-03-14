@@ -604,7 +604,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
       nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
-      anomalyMigrationGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/master/migrating-9.0.html#breaking_90_anomaly_detection_results`,
+      anomalyMigrationGuide: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/9.0/upgrading-elastic-stack.html#anomaly-detection-results-migration`,
     },
     transforms: {
       guide: isServerless
