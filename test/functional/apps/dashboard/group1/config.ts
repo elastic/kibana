@@ -13,6 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
 
   return {
+    // adding a comment to trigge a PR
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
   };
