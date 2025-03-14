@@ -3,10 +3,10 @@ name: Build and Publish Kibana to GHCR
 on:
   push:
     branches:
-      - openai_pki_connector_8_15
+      - openai_pki_connector_8_15  # Only runs on your development branch
   pull_request:
     branches:
-      - openai_pki_connector_8_15
+      - openai_pki_connector_8_15  # Runs on PRs within your fork only
 
 jobs:
   build:
@@ -15,14 +15,24 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: openai_pki_connector_8_15
+
+      - name: Print Currently Checked Out Branch
+        run: |
+          echo "Currently checked out branch:"
+          git branch --show-current
+          git log --oneline -1
 
       - name: Read Node.js Version from .node-version
         id: node_version
-        run: echo "NODE_VERSION=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
+        run: |
+          NODE_VERSION=$(cat .node-version | tr -d '[:space:]')
+          echo "Using Node.js version: $NODE_VERSION"
+          echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
 
-      - name: Set up Node.js and Yarn
+      - name: Force Remove Any Existing Node.js Versions
+        run: sudo apt-get remove --purge -y nodejs npm || true
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -37,16 +47,24 @@ jobs:
         run: yarn kbn bootstrap
 
       - name: Build Kibana (Only for Linux x86_64)
-        run: |
-          yarn build --release --skip-os-packages --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
+        run: yarn build --release --linux
+
+      - name: List all files in build directory (Debugging)
+        run: ls -R build/
 
       - name: Locate Dockerfile
         run: |
-          if [ -f build/default/Dockerfile ]; then
+          if [ -f build/kibana/Dockerfile ]; then
+            echo "Using Dockerfile at build/kibana/Dockerfile"
+            echo "DOCKERFILE_PATH=build/kibana/Dockerfile" >> $GITHUB_ENV
+          elif [ -f build/default/Dockerfile ]; then
             echo "Using Dockerfile at build/default/Dockerfile"
             echo "DOCKERFILE_PATH=build/default/Dockerfile" >> $GITHUB_ENV
+          elif [ -f build/kibana-docker/Dockerfile ]; then
+            echo "Using Dockerfile at build/kibana-docker/Dockerfile"
+            echo "DOCKERFILE_PATH=build/kibana-docker/Dockerfile" >> $GITHUB_ENV
           else
-            echo "ERROR: Dockerfile not found in expected location!"
+            echo "ERROR: Dockerfile not found in expected locations!"
             exit 1
           fi
 
@@ -55,7 +73,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15 -f ${{ env.DOCKERFILE_PATH }} .
+          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15 -f $DOCKERFILE_PATH .
 
       - name: Push Docker Image to GHCR
         run: |
