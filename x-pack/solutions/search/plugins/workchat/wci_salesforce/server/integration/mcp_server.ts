@@ -9,7 +9,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { caseRetrieval } from './tools';
-import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol';
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -73,25 +72,27 @@ export function createMcpServer({
 
   server.tool(
     'case_retrieval',
-    'Search and filter through Salesforce cases',
-    { query: z.string() },
-    async ({ query }) => {
-      logger.info(`Searching cases for ${query}`);
+    'Use this tool to retrieve Salesforce cases from an Elasticsearch index and if provided a priority then add that to the query string',
+    { indexName: z.string().describe('name of the Elasticsearch index'),
+      id: z.string().optional().describe('id of the case'),
+      size: z.number().optional().describe('how many documents the elasticsearch API call should return'),
+      owner: z.string().optional().describe('owner of the case'),
+      priority: z.string().optional().describe('priority of the case'),
+      closed: z.boolean().optional().describe('whether the case is closed or not'),
+      caseNumber: z.string().optional().describe('the case number'),
+      createdAfter: z.string().optional().describe('the latest date if the user enters a date range'),
+      createdBefore: z.string().optional().describe('the eariler date if the user enters a date range'),
+      semanticQuery: z.string().optional().describe('if the user is looking for something specific about the content of the case')
+     },
+    async ({ indexName, id, size, owner, priority, closed, caseNumber, createdAfter, createdBefore, semanticQuery }) => {
+      logger.info(`Searching cases in ${indexName}}`);
 
-
-      const response = await caseRetrieval(elasticsearchClient, 'support_cases1"');
+      const response = await caseRetrieval(logger, indexName, id, size, owner, priority, closed, caseNumber, createdAfter, createdBefore, semanticQuery );
       
       return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(response),
-          },
-        ],
+        content: response
       };
     }
   );
-
-
   return server;
 }

@@ -50,4 +50,5 @@ export interface SearchParams {
   export interface QueryResult {
     type: "text";
     text: string;
+    [key: string]: unknown;
 }
