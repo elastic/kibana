@@ -49,10 +49,12 @@ type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
 
 interface WiredIngestUpsertRequest {
   ingest: WiredIngest;
+  description?: string;
 }
 
 interface UnwiredIngestUpsertRequest {
   ingest: UnwiredIngest;
+  description?: string;
 }
 
 type IngestUpsertRequest = WiredIngestUpsertRequest | UnwiredIngestUpsertRequest;

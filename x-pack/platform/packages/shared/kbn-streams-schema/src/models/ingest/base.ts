@@ -31,10 +31,12 @@ interface UnwiredIngest extends IngestBase {
 
 interface WiredStreamDefinitionBase {
   ingest: WiredIngest;
+  description?: string;
 }
 
 interface UnwiredStreamDefinitionBase {
   ingest: UnwiredIngest;
+  description?: string;
 }
 
 interface WiredStreamDefinition extends StreamDefinitionBase {
@@ -71,10 +73,12 @@ const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
 
 const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.object({
   ingest: unwiredIngestSchema,
+  description: z.string().optional(),
 });
 
 const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.object({
   ingest: wiredIngestSchema,
+  description: z.string().optional(),
 });
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
