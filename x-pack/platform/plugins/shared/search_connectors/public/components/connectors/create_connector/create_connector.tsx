@@ -85,7 +85,7 @@ export const CreateConnector: React.FC = () => {
       {
         children: null,
         status: stepStates.start,
-        title: i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+        title: i18n.translate('xpack.searchConnectorscreateConnector.startStep.startLabel', {
           defaultMessage: 'Start',
         }),
       },
@@ -95,7 +95,7 @@ export const CreateConnector: React.FC = () => {
               children: null,
               status: stepStates.deployment,
               title: i18n.translate(
-                'xpack.enterpriseSearch.createConnector.deploymentStep.deploymentLabel',
+                'xpack.searchConnectorscreateConnector.deploymentStep.deploymentLabel',
                 { defaultMessage: 'Deployment' }
               ),
             },
@@ -105,7 +105,7 @@ export const CreateConnector: React.FC = () => {
         children: null,
         status: stepStates.configure,
         title: i18n.translate(
-          'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+          'xpack.searchConnectorscreateConnector.configurationStep.configurationLabel',
           { defaultMessage: 'Configuration' }
         ),
       },
@@ -113,7 +113,7 @@ export const CreateConnector: React.FC = () => {
       {
         children: null,
         status: stepStates.finish,
-        title: i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
+        title: i18n.translate('xpack.searchConnectorscreateConnector.finishUpStep.finishUpLabel', {
           defaultMessage: 'Finish up',
         }),
       },
@@ -124,7 +124,7 @@ export const CreateConnector: React.FC = () => {
     configure: (
       <ConfigurationStep
         title={i18n.translate(
-          'xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel',
+          'xpack.searchConnectorscreateConnector.configurationStep.configurationLabel',
           { defaultMessage: 'Configuration' }
         )}
         setCurrentStep={setCurrentStep}
@@ -133,14 +133,14 @@ export const CreateConnector: React.FC = () => {
     deployment: <DeploymentStep setCurrentStep={setCurrentStep} />,
     finish: (
       <FinishUpStep
-        title={i18n.translate('xpack.enterpriseSearch.createConnector.finishUpStep.finishUpLabel', {
+        title={i18n.translate('xpack.searchConnectorscreateConnector.finishUpStep.finishUpLabel', {
           defaultMessage: 'Finish up',
         })}
       />
     ),
     start: (
       <StartStep
-        title={i18n.translate('xpack.enterpriseSearch.createConnector.startStep.startLabel', {
+        title={i18n.translate('xpack.searchConnectorscreateConnector.startStep.startLabel', {
           defaultMessage: 'Start',
         })}
         selfManagePreference={selfManagePreference}
@@ -155,13 +155,13 @@ export const CreateConnector: React.FC = () => {
 
   useUnsavedChangesPrompt({
     cancelButtonText: i18n.translate(
-      'xpack.enterpriseSearch.createConnector.unsavedPrompt.cancel',
+      'xpack.searchConnectorscreateConnector.unsavedPrompt.cancel',
       {
         defaultMessage: 'Continue setup',
       }
     ),
     confirmButtonText: i18n.translate(
-      'xpack.enterpriseSearch.createConnector.unsavedPrompt.confirm',
+      'xpack.searchConnectorscreateConnector.unsavedPrompt.confirm',
       {
         defaultMessage: 'Leave the page',
       }
@@ -169,13 +169,13 @@ export const CreateConnector: React.FC = () => {
     hasUnsavedChanges: isFormDirty,
     history: history as ScopedHistory,
     http: http!,
-    messageText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
+    messageText: i18n.translate('xpack.searchConnectorscreateConnector.unsavedPrompt.body', {
       defaultMessage:
         'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
     }),
     navigateToUrl: application!.navigateToUrl,
     openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
-    titleText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.title', {
+    titleText: i18n.translate('xpack.searchConnectorscreateConnector.unsavedPrompt.title', {
       defaultMessage: 'Your connector is not fully configured',
     }),
   });
@@ -183,10 +183,10 @@ export const CreateConnector: React.FC = () => {
   return (
     <KibanaPageTemplate
       pageHeader={{
-        description: i18n.translate('xpack.enterpriseSearch.createConnector.description', {
+        description: i18n.translate('xpack.searchConnectorscreateConnector.description', {
           defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
         }),
-        pageTitle: i18n.translate('xpack.enterpriseSearch.createConnector..title', {
+        pageTitle: i18n.translate('xpack.searchConnectorscreateConnector..title', {
           defaultMessage: 'Create a connector',
         }),
       }}
@@ -233,7 +233,7 @@ export const CreateConnector: React.FC = () => {
                       {'Elastic '}
                       {selectedConnector?.name}
                       {i18n.translate(
-                        'xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel',
+                        'xpack.searchConnectorscreateConnector.connectorDocsLinkLabel',
                         { defaultMessage: ' connector reference' }
                       )}
                     </EuiLink>
@@ -246,7 +246,7 @@ export const CreateConnector: React.FC = () => {
               <>
                 <EuiFormRow
                   label={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.euiFormRow.connectorLabel',
+                    'xpack.searchConnectorscreateConnector.euiFormRow.connectorLabel',
                     { defaultMessage: 'Connector' }
                   )}
                 >
@@ -276,13 +276,13 @@ export const CreateConnector: React.FC = () => {
                 <EuiBadge color="hollow">
                   {selfManagePreference === 'selfManaged'
                     ? i18n.translate(
-                        'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
+                        'xpack.searchConnectorscreateConnector.badgeType.selfManaged',
                         {
                           defaultMessage: 'Self-managed',
                         }
                       )
                     : i18n.translate(
-                        'xpack.enterpriseSearch.createConnector.badgeType.ElasticManaged',
+                        'xpack.searchConnectorscreateConnector.badgeType.ElasticManaged',
                         {
                           defaultMessage: 'Elastic managed',
                         }

@@ -21,6 +21,7 @@ import {
   INDEX_DOCUMENTS_META_DEFAULT,
 } from '@kbn/search-index-documents';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Status } from '../../../common/types/api';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 
@@ -39,8 +40,11 @@ const DEFAULT_PAGINATION = {
 };
 
 export const SearchIndexDocuments: React.FC = () => {
+  const {
+    services: { http },
+  } = useKibana();
   const { indexName } = useValues(IndexNameLogic);
-  const { ingestionMethod, hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
+  const { ingestionMethod, hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic({ http }));
   const [selectedIndexType, setSelectedIndexType] =
     useState<AccessControlSelectorOption['value']>('content-index');
   const indexToShow =
@@ -74,6 +78,7 @@ export const SearchIndexDocuments: React.FC = () => {
         pageSize: pagination.pageSize ?? 10,
       },
       query: searchQuery,
+      http,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexToShow, pagination, searchQuery]);
@@ -81,7 +86,7 @@ export const SearchIndexDocuments: React.FC = () => {
   useEffect(() => {
     setSearchQuery('');
     setPagination(DEFAULT_PAGINATION);
-    getMappings({ indexName: indexToShow });
+    getMappings({ indexName: indexToShow, http });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexToShow]);
   return (
@@ -94,13 +99,13 @@ export const SearchIndexDocuments: React.FC = () => {
             <EuiCallOut
               size="m"
               title={i18n.translate(
-                'xpack.enterpriseSearch.content.searchIndex.documents.noIndex.title',
+                'xpack.searchConnectorscontent.searchIndex.documents.noIndex.title',
                 { defaultMessage: 'Access Control Index not found' }
               )}
               iconType="iInCircle"
             >
               <p>
-                {i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noIndex', {
+                {i18n.translate('xpack.searchConnectorscontent.searchIndex.documents.noIndex', {
                   defaultMessage:
                     "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
                 })}
@@ -109,7 +114,7 @@ export const SearchIndexDocuments: React.FC = () => {
           )}
           {!isAccessControlIndexNotFound &&
             docs.length === 0 &&
-            i18n.translate('xpack.enterpriseSearch.content.searchIndex.documents.noMappings', {
+            i18n.translate('xpack.searchConnectorscontent.searchIndex.documents.noMappings', {
               defaultMessage: 'No documents found for index',
             })}
           {!isAccessControlIndexNotFound && docs.length > 0 && (

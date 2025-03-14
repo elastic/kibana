@@ -28,7 +28,7 @@ export const ConnectorDetailRouter: React.FC = () => {
   useEffect(() => {
     const unmountName = IndexNameLogic.mount();
     const unmountView = ConnectorViewLogic({ http }).mount();
-    const unmountIndexView = IndexViewLogic.mount();
+    const unmountIndexView = IndexViewLogic({ http }).mount();
     return () => {
       unmountName();
       unmountView();
@@ -38,8 +38,9 @@ export const ConnectorDetailRouter: React.FC = () => {
   }, []);
   const { setIndexName } = useActions(IndexNameLogic);
   const { connector } = useValues(ConnectorViewLogic({ http }));
-  const { startFetchIndexPoll, stopFetchIndexPoll, resetFetchIndexApi } =
-    useActions(IndexViewLogic);
+  const { startFetchIndexPoll, stopFetchIndexPoll, resetFetchIndexApi } = useActions(
+    IndexViewLogic({ http })
+  );
   const indexName = connector?.index_name || '';
   useEffect(() => {
     setIndexName(indexName);

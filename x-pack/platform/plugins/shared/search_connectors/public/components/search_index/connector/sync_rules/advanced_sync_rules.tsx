@@ -15,17 +15,21 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isAdvancedSyncRuleSnippetEmpty } from '../../../../utils/sync_rules_helpers';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
 export const AdvancedSyncRules: React.FC = () => {
   const {
+    services: { http },
+  } = useKibana();
+  const {
     hasJsonValidationError: hasError,
     localAdvancedSnippet,
     advancedSnippet,
-  } = useValues(ConnectorFilteringLogic);
-  const { setLocalAdvancedSnippet } = useActions(ConnectorFilteringLogic);
+  } = useValues(ConnectorFilteringLogic({ http }));
+  const { setLocalAdvancedSnippet } = useActions(ConnectorFilteringLogic({ http }));
   const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
   const isLocalSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(localAdvancedSnippet);
 
@@ -33,7 +37,7 @@ export const AdvancedSyncRules: React.FC = () => {
     <>
       <EuiFormRow
         label={i18n.translate(
-          'xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.title',
+          'xpack.searchConnectorscontent.indices.connector.syncRules.advancedRules.title',
           {
             defaultMessage: 'Advanced rules',
           }
@@ -42,7 +46,7 @@ export const AdvancedSyncRules: React.FC = () => {
         error={
           hasError
             ? i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.error',
+                'xpack.searchConnectorscontent.indices.connector.syncRules.advancedRules.error',
                 {
                   defaultMessage: 'JSON format is invalid',
                 }
@@ -71,14 +75,14 @@ export const AdvancedSyncRules: React.FC = () => {
       {(!isAdvancedSnippetEmpty || !isLocalSnippetEmpty) && (
         <EuiCallOut
           title={i18n.translate(
-            'xpack.enterpriseSearch.content.index.connector.syncRules.advancedTabCallout.title',
+            'xpack.searchConnectorscontent.index.connector.syncRules.advancedTabCallout.title',
             { defaultMessage: 'Configuration warning' }
           )}
           color="warning"
         >
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.editSyncRulesFlyout.advancedTablCallout.description"
+              id="xpack.searchConnectors.editSyncRulesFlyout.advancedTablCallout.description"
               defaultMessage="This advanced sync rule might override some configuration fields."
             />
           </p>

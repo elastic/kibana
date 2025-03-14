@@ -34,13 +34,13 @@ interface IndexSelectorProps {
 export const DEFAULT_INDEX_SELECTOR_OPTIONS: AccessControlSelectorOption[] = [
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.description',
+      'xpack.searchConnectorscontent.searchIndex.documents.selector.contentIndex.description',
       {
         defaultMessage: 'Browse documents ingested by content syncs',
       }
     ),
     title: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndex.title',
+      'xpack.searchConnectorscontent.searchIndex.documents.selector.contentIndex.title',
       {
         defaultMessage: 'Content index',
       }
@@ -49,13 +49,13 @@ export const DEFAULT_INDEX_SELECTOR_OPTIONS: AccessControlSelectorOption[] = [
   },
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.description',
+      'xpack.searchConnectorscontent.searchIndex.documents.selector.accessControl.description',
       {
         defaultMessage: 'Browse access control lists ingested by access control syncs',
       }
     ),
     title: i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControl.title',
+      'xpack.searchConnectorscontent.searchIndex.documents.selector.accessControl.title',
       {
         defaultMessage: 'Access control index',
       }

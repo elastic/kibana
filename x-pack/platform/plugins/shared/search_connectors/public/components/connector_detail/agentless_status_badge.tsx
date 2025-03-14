@@ -23,7 +23,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color="warning" {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.unhealthyStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.unhealthyStatusText"
             defaultMessage="Unhealthy"
           />
         </EuiBadge>
@@ -32,7 +32,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color={euiVars.euiColorDarkShade} {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.inactiveStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.inactiveStatusText"
             defaultMessage="Inactive"
           />
         </EuiBadge>
@@ -41,7 +41,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color="default" {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.offlineStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.offlineStatusText"
             defaultMessage="Offline"
           />
         </EuiBadge>
@@ -50,7 +50,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color="default" {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.uninstalledStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.uninstalledStatusText"
             defaultMessage="Uninstalled"
           />
         </EuiBadge>
@@ -59,7 +59,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color="warning" {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.orphanedStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.orphanedStatusText"
             defaultMessage="Orphaned"
           />
         </EuiBadge>
@@ -71,7 +71,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color="primary" {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.updatingStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.updatingStatusText"
             defaultMessage="Updating"
           />
         </EuiBadge>
@@ -80,7 +80,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color={euiVars.euiColorDisabled} {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.unenrolledStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.unenrolledStatusText"
             defaultMessage="Unenrolled"
           />
         </EuiBadge>
@@ -89,7 +89,7 @@ export const AgentlessConnectorStatusBadge = ({
       return (
         <EuiBadge color="success" {...restOfProps}>
           <FormattedMessage
-            id="xpack.enterpriseSearch.connectors.elasticManaged.agentHealth.healthyStatusText"
+            id="xpack.searchConnectors.connectors.elasticManaged.agentHealth.healthyStatusText"
             defaultMessage="Healthy"
           />
         </EuiBadge>

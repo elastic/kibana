@@ -8,88 +8,88 @@
 import { i18n } from '@kbn/i18n';
 
 export const MANAGE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.manageButtonLabel',
+  'xpack.searchConnectorsactions.manageButtonLabel',
   { defaultMessage: 'Manage' }
 );
 
-export const EDIT_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.editButtonLabel', {
+export const EDIT_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.editButtonLabel', {
   defaultMessage: 'Edit',
 });
 
 export const DELETE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.deleteButtonLabel',
+  'xpack.searchConnectorsactions.deleteButtonLabel',
   { defaultMessage: 'Delete' }
 );
 
-export const COMING_SOON_LABEL = i18n.translate('xpack.enterpriseSearch.comingSoonLabel', {
+export const COMING_SOON_LABEL = i18n.translate('xpack.searchConnectorscomingSoonLabel', {
   defaultMessage: 'Coming soon',
 });
 
-export const LEARN_MORE_LINK = i18n.translate('xpack.enterpriseSearch.learnMore.link', {
+export const LEARN_MORE_LINK = i18n.translate('xpack.searchConnectorslearnMore.link', {
   defaultMessage: 'Learn more',
 });
 
 export const UPDATE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.updateButtonLabel',
+  'xpack.searchConnectorsactions.updateButtonLabel',
   { defaultMessage: 'Update' }
 );
 
-export const SAVE_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.saveButtonLabel', {
+export const SAVE_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.saveButtonLabel', {
   defaultMessage: 'Save',
 });
 
 export const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.cancelButtonLabel',
+  'xpack.searchConnectorsactions.cancelButtonLabel',
   { defaultMessage: 'Cancel' }
 );
 
 export const START_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.startButtonLabel',
+  'xpack.searchConnectorsactions.startButtonLabel',
   { defaultMessage: 'Start' }
 );
 
 export const CONTINUE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.continueButtonLabel',
+  'xpack.searchConnectorsactions.continueButtonLabel',
   { defaultMessage: 'Continue' }
 );
 
-export const BACK_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.backButtonLabel', {
+export const BACK_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.backButtonLabel', {
   defaultMessage: 'Back',
 });
 
-export const NEXT_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.nextButtonLabel', {
+export const NEXT_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.nextButtonLabel', {
   defaultMessage: 'Next',
 });
 
 export const CLOSE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.closeButtonLabel',
+  'xpack.searchConnectorsactions.closeButtonLabel',
   { defaultMessage: 'Close' }
 );
 
 export const RESET_DEFAULT_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.actions.resetDefaultButtonLabel',
+  'xpack.searchConnectorsactions.resetDefaultButtonLabel',
   { defaultMessage: 'Reset to default' }
 );
 
-export const VIEW_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.viewButtonLabel', {
+export const VIEW_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.viewButtonLabel', {
   defaultMessage: 'View',
 });
 
 export const CONNECTOR_CLIENT_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.connectorClientLabel',
+  'xpack.searchConnectorsconnectorClientLabel',
   {
     defaultMessage: 'Self-managed',
   }
 );
 
-export const NAME_LABEL = i18n.translate('xpack.enterpriseSearch.nameLabel', {
+export const NAME_LABEL = i18n.translate('xpack.searchConnectorsnameLabel', {
   defaultMessage: 'Name',
 });
 
-export const DESCRIPTION_LABEL = i18n.translate('xpack.enterpriseSearch.descriptionLabel', {
+export const DESCRIPTION_LABEL = i18n.translate('xpack.searchConnectorsdescriptionLabel', {
   defaultMessage: 'Description',
 });
 
-export const OPTIONAL_LABEL = i18n.translate('xpack.enterpriseSearch.optionalLabel', {
+export const OPTIONAL_LABEL = i18n.translate('xpack.searchConnectorsoptionalLabel', {
   defaultMessage: 'Optional',
 });

@@ -45,14 +45,14 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
     syncJobToCancel,
     selectedSyncJobCategory,
     syncTriggeredLocally,
-  } = useValues(SyncJobsViewLogic);
+  } = useValues(SyncJobsViewLogic({ http }));
   const {
     setConnectorId,
     fetchSyncJobs,
     cancelSyncJob,
     setCancelSyncJob,
     setSelectedSyncJobCategory,
-  } = useActions(SyncJobsViewLogic);
+  } = useActions(SyncJobsViewLogic({ http }));
 
   useEffect(() => {
     setConnectorId(connector.id);
@@ -98,14 +98,14 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                 indexSelectorOptions={[
                   {
                     description: i18n.translate(
-                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.description',
+                      'xpack.searchConnectorscontent.searchIndex.documents.selector.contentIndexSync.description',
                       {
                         defaultMessage: 'Browse content sync history',
                       }
                     ),
                     error: errorOnContentSync,
                     title: i18n.translate(
-                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.title',
+                      'xpack.searchConnectorscontent.searchIndex.documents.selector.contentIndexSync.title',
                       {
                         defaultMessage: 'Content syncs',
                       }
@@ -114,14 +114,14 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                   },
                   {
                     description: i18n.translate(
-                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControlSync.description',
+                      'xpack.searchConnectorscontent.searchIndex.documents.selector.accessControlSync.description',
                       {
                         defaultMessage: 'Browse access control sync history',
                       }
                     ),
                     error: errorOnAccessSync,
                     title: i18n.translate(
-                      'xpack.enterpriseSearch.content.searchIndex.documents.selectorSync.accessControl.title',
+                      'xpack.searchConnectorscontent.searchIndex.documents.selectorSync.accessControl.title',
                       {
                         defaultMessage: 'Access control syncs',
                       }
@@ -136,7 +136,7 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                 content={
                   <p>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.accessControlIndexSelector.p.accessControlSyncsAreLabel',
+                      'xpack.searchConnectorsaccessControlIndexSelector.p.accessControlSyncsAreLabel',
                       {
                         defaultMessage:
                           'Access control syncs keep permissions information up to date for document level security (DLS)',

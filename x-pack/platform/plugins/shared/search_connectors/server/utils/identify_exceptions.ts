@@ -90,7 +90,7 @@ export function getErrorMessage(payload?: unknown): string {
     return JSON.stringify(payload);
   } catch (error) {
     // If all else fails, we return a generic error
-    return i18n.translate('xpack.enterpriseSearch.server.errorIdentifyingException', {
+    return i18n.translate('xpack.searchConnectorsserver.errorIdentifyingException', {
       defaultMessage: 'Internal server error: could not parse error message',
     });
   }

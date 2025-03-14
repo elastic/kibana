@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Connector } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   ConnectorNameAndDescriptionApiLogic,
   PutConnectorNameAndDescriptionArgs,
@@ -35,9 +36,18 @@ interface ConnectorNameAndDescriptionValues {
   status: Status;
 }
 
+export interface ConnectorNameAndDescriptionLogicProps {
+  http?: HttpSetup;
+}
+
 export const ConnectorNameAndDescriptionLogic = kea<
-  MakeLogicType<ConnectorNameAndDescriptionValues, ConnectorNameAndDescriptionActions>
+  MakeLogicType<
+    ConnectorNameAndDescriptionValues,
+    ConnectorNameAndDescriptionActions,
+    ConnectorNameAndDescriptionLogicProps
+  >
 >({
+  key: (props) => props.http,
   actions: {
     saveNameAndDescription: (nameAndDescription) => nameAndDescription,
     setConnector: (connector) => connector,
@@ -46,13 +56,14 @@ export const ConnectorNameAndDescriptionLogic = kea<
     actions: [ConnectorNameAndDescriptionApiLogic, ['makeRequest', 'apiSuccess', 'apiError']],
     values: [ConnectorNameAndDescriptionApiLogic, ['status']],
   },
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     saveNameAndDescription: ({ name, description }) => {
       if (values.connector) {
         actions.makeRequest({
           connectorId: values.connector.id,
           description,
           name,
+          http: props.http,
         });
       }
     },

@@ -16,6 +16,7 @@ import {
   FilteringValidationState,
 } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import { Status } from '../../../../../common/types/api';
 import {
   ConnectorFilteringApiLogic,
@@ -101,9 +102,14 @@ function createDefaultRule(order: number): FilteringRule {
   };
 }
 
+export interface ConnectorFilteringLogicProps {
+  http?: HttpSetup;
+}
+
 export const ConnectorFilteringLogic = kea<
-  MakeLogicType<ConnectorFilteringValues, ConnectorFilteringActions>
+  MakeLogicType<ConnectorFilteringValues, ConnectorFilteringActions, ConnectorFilteringLogicProps>
 >({
+  key: (props) => props.http,
   actions: {
     addFilteringRule: (filteringRule) => filteringRule,
     applyDraft: true,
@@ -144,11 +150,12 @@ export const ConnectorFilteringLogic = kea<
         isConnectorIndex(values.index) ? values.index.connector.filtering[0] : null
       ),
   }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     applyDraft: () => {
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({
           connectorId: values.index.connector.id,
+          http: props.http,
         });
       }
     },
@@ -168,6 +175,7 @@ export const ConnectorFilteringLogic = kea<
           advancedSnippet: values.localAdvancedSnippet ?? '',
           connectorId: values.index.connector.id,
           filteringRules: values.localFilteringRules ?? [],
+          http: props.http,
         });
       }
     },

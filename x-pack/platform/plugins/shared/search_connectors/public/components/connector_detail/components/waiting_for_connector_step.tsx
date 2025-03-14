@@ -28,7 +28,7 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
       <EuiCallOut
         color="warning"
         title={i18n.translate(
-          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.title',
+          'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.waitingForConnector.callout.title',
           {
             defaultMessage: 'Waiting for your connector',
           }
@@ -36,7 +36,7 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
         iconType="iInCircle"
       >
         {i18n.translate(
-          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.description',
+          'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.waitingForConnector.callout.description',
           {
             defaultMessage:
               'Your connector has not connected to Search. Troubleshoot your configuration and refresh the page.',
@@ -56,7 +56,7 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
               isLoading={isLoading}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.button.label',
+                'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.waitingForConnector.callout.button.label',
                 {
                   defaultMessage: 'Recheck now',
                 }
@@ -73,7 +73,7 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
                 onClick={() => {}}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.finishLaterButton.label',
+                  'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.waitingForConnector.callout.finishLaterButton.label',
                   {
                     defaultMessage: 'Finish deployment later',
                   }

@@ -39,7 +39,7 @@ export const ConvertConnector: React.FC = () => {
           <EuiTitle size="s">
             <h3>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.title',
+                'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.convertConnector.title',
                 {
                   defaultMessage: 'Self-manage this connector',
                 }
@@ -51,7 +51,7 @@ export const ConvertConnector: React.FC = () => {
       <EuiSpacer size="l" />
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.description"
+          id="xpack.searchConnectors.content.indices.configurationConnector.nativeConnector.convertConnector.description"
           defaultMessage="Want to self-host this connector? Convert it to a {link}, to be managed on your own infrastructure. You'll need to convert this connector if you want to customize the code using our Python framework."
           values={{
             link: (
@@ -61,7 +61,7 @@ export const ConvertConnector: React.FC = () => {
                 target="_blank"
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.linkTitle',
+                  'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.convertConnector.linkTitle',
                   { defaultMessage: 'self-managed connector' }
                 )}
               </EuiLink>
@@ -74,7 +74,7 @@ export const ConvertConnector: React.FC = () => {
           onClick={() => showModal()}
         >
           {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.buttonTitle',
+            'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.convertConnector.buttonTitle',
             { defaultMessage: 'Convert connector' }
           )}
         </EuiButton>

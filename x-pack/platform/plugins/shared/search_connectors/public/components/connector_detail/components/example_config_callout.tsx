@@ -17,7 +17,7 @@ export const ExampleConfigCallout: React.FC = () => (
       iconType="iInCircle"
       color="warning"
       title={i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
+        'xpack.searchConnectorscontent.connectors.overview.connectorUnsupportedCallOut.title',
         {
           defaultMessage: 'Example connector',
         }
@@ -26,7 +26,7 @@ export const ExampleConfigCallout: React.FC = () => (
       <EuiSpacer size="s" />
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
+          id="xpack.searchConnectors.content.connectors.overview.connectorUnsupportedCallOut.description"
           defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
         />
       </EuiText>

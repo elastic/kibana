@@ -19,6 +19,7 @@ import {
   ElasticsearchViewIndex,
 } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   StartAccessControlSyncApiLogic,
   StartAccessControlSyncArgs,
@@ -114,7 +115,14 @@ export interface IndexViewValues {
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
 }
 
-export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
+export interface IndexViewLogicProps {
+  http?: HttpSetup;
+}
+
+export const IndexViewLogic = kea<
+  MakeLogicType<IndexViewValues, IndexViewActions, IndexViewLogicProps>
+>({
+  key: (props) => props.http,
   actions: {
     fetchIndex: true,
     recheckIndex: true,
@@ -164,17 +172,17 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       actions.resetFetchIndexApi();
     },
   }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     fetchIndex: () => {
       const { indexName } = IndexNameLogic.values;
-      actions.makeFetchIndexRequest({ indexName });
+      actions.makeFetchIndexRequest({ indexName, http: props.http });
     },
     fetchIndexApiSuccess: () => {
       if (values.recheckIndexLoading) {
         actions.resetRecheckIndexLoading();
         flashSuccessToast(
           i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndex.index.recheckSuccess.message',
+            'xpack.searchConnectorscontent.searchIndex.index.recheckSuccess.message',
             {
               defaultMessage: 'Your connector has been rechecked.',
             }
@@ -190,6 +198,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       if (isConnectorIndex(values.fetchIndexApiData) && values.hasDocumentLevelSecurityFeature) {
         actions.makeStartAccessControlSyncRequest({
           connectorId: values.fetchIndexApiData.connector.id,
+          http: props.http,
         });
       }
     },
@@ -197,12 +206,16 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       if (isConnectorIndex(values.fetchIndexApiData) && values.hasIncrementalSyncFeature) {
         actions.makeStartIncrementalSyncRequest({
           connectorId: values.fetchIndexApiData.connector.id,
+          http: props.http,
         });
       }
     },
     startSync: () => {
       if (isConnectorIndex(values.fetchIndexApiData)) {
-        actions.makeStartSyncRequest({ connectorId: values.fetchIndexApiData.connector.id });
+        actions.makeStartSyncRequest({
+          connectorId: values.fetchIndexApiData.connector.id,
+          http: props.http,
+        });
       }
     },
     updateConfigurationApiSuccess: ({ configuration }) => {

@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Connector } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   AttachIndexApiLogic,
   AttachIndexApiLogicActions,
@@ -52,7 +53,13 @@ export interface AttachIndexValues {
   isLoading: boolean;
 }
 
-export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndexActions>>({
+export interface AttachIndexLogicProps {
+  http?: HttpSetup;
+}
+
+export const AttachIndexLogic = kea<
+  MakeLogicType<AttachIndexValues, AttachIndexActions, AttachIndexLogicProps>
+>({
   key: (props) => props.http,
   actions: {
     checkIndexExists: ({ indexName }) => ({
@@ -93,20 +100,20 @@ export const AttachIndexLogic = kea<MakeLogicType<AttachIndexValues, AttachIndex
     ],
     keys: [ConnectorViewLogic, ['http']],
   },
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     attachIndexApiSuccess: () => {
       if (values.connector) {
-        actions.fetchConnector({ connectorId: values.connector.id });
+        actions.fetchConnector({ connectorId: values.connector.id, http: props.http });
       }
     },
     checkIndexExists: async ({ indexName }, breakpoint) => {
       await breakpoint(200);
-      actions.callCheckIndexExists({ indexName });
+      actions.callCheckIndexExists({ indexName, http: props.http });
     },
     createIndexApiSuccess: async ({ indexName }, breakpoint) => {
       if (values.connector) {
         await breakpoint(500);
-        actions.attachIndex({ connectorId: values.connector?.id, indexName });
+        actions.attachIndex({ connectorId: values.connector?.id, indexName, http: props.http });
       }
     },
   }),

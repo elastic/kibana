@@ -157,7 +157,7 @@ export const ConnectorViewLogic = kea<
       GetConnectorAgentlessPolicyApiLogic,
       ['data as connectorAgentlessPolicy', 'status as getConnectorAgentlessPolicyStatus'],
     ],
-    keys: [CachedFetchConnectorByIdApiLogic, ['http']],
+    keys: [CachedFetchConnectorByIdApiLogic, ['http'], ConnectorNameAndDescriptionLogic],
   },
   events: ({ actions, values }) => ({
     beforeUnmount: () => {

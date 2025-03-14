@@ -96,11 +96,11 @@ export const NativeConnectorConfiguration: React.FC = () => {
               <EuiBadge color="hollow">
                 {connector.is_native
                   ? i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.nativeConnector',
+                      'xpack.searchConnectorscontent.connector_detail.configurationConnector.badgeType.nativeConnector',
                       { defaultMessage: 'Elastic managed connector' }
                     )
                   : i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.connectorClient',
+                      'xpack.searchConnectorscontent.connector_detail.configurationConnector.badgeType.connectorClient',
                       { defaultMessage: 'Self-managed connector' }
                     )}
               </EuiBadge>
@@ -115,7 +115,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 <EuiTitle size="s">
                   <h3>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.configuration.title',
+                      'xpack.searchConnectorscontent.connector_detail.nativeConfigurationConnector.configuration.title',
                       { defaultMessage: 'Configuration' }
                     )}
                   </h3>

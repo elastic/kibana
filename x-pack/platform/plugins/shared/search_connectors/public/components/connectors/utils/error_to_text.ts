@@ -15,7 +15,7 @@ export const errorToText = (error?: HttpError): string | undefined => {
   }
   if (error.body?.attributes?.error_code === ErrorCode.INDEX_ALREADY_EXISTS) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.indexAlreadyExists',
+      'xpack.searchConnectorscontent.newIndex.steps.buildConnector.error.indexAlreadyExists',
       {
         defaultMessage: 'This index already exists',
       }
@@ -23,7 +23,7 @@ export const errorToText = (error?: HttpError): string | undefined => {
   }
   if (error.body?.attributes?.error_code === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.connectorAlreadyExists',
+      'xpack.searchConnectorscontent.newIndex.steps.buildConnector.error.connectorAlreadyExists',
       {
         defaultMessage: 'A connector for this index already exists',
       }
@@ -31,7 +31,7 @@ export const errorToText = (error?: HttpError): string | undefined => {
   }
   if (error.body?.attributes?.error_code === ErrorCode.CRAWLER_ALREADY_EXISTS) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.connectorAlreadyExists',
+      'xpack.searchConnectorscontent.newIndex.steps.buildConnector.error.connectorAlreadyExists',
       {
         defaultMessage: 'A connector for this index already exists',
       }
@@ -39,14 +39,14 @@ export const errorToText = (error?: HttpError): string | undefined => {
   }
   if (error?.body?.statusCode === 403) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.unauthorizedError',
+      'xpack.searchConnectorscontent.newIndex.steps.buildConnector.error.unauthorizedError',
       {
         defaultMessage: 'You are not authorized to create this connector',
       }
     );
   } else
     return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.genericError',
+      'xpack.searchConnectorscontent.newIndex.steps.buildConnector.error.genericError',
       {
         defaultMessage: 'We were not able to create your index',
       }

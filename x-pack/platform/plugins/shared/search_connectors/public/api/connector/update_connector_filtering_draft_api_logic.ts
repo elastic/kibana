@@ -43,7 +43,7 @@ export const ConnectorFilteringDraftApiLogic = createApiLogic(
   {
     showSuccessFlashFn: () =>
       i18n.translate(
-        'xpack.enterpriseSearch.content.index.connector.syncRules.successToastDraft.title',
+        'xpack.searchConnectorscontent.index.connector.syncRules.successToastDraft.title',
         { defaultMessage: 'Draft rules saved' }
       ),
   }

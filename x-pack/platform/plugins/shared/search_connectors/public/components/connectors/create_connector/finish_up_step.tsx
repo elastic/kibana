@@ -52,9 +52,9 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
 
   const [showNext, setShowNext] = useState(false);
 
-  const { isWaitingForSync, isSyncing: isSyncingProp } = useValues(IndexViewLogic);
+  const { isWaitingForSync, isSyncing: isSyncingProp } = useValues(IndexViewLogic({ http }));
   const { connector } = useValues(ConnectorViewLogic({ http }));
-  const { startSync } = useActions(SyncsLogic);
+  const { startSync } = useActions(SyncsLogic({ http }));
 
   const isSyncing = isWaitingForSync || isSyncingProp;
 
@@ -91,7 +91,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                   <EuiFlexItem>
                     <EuiText size="xs">
                       {i18n.translate(
-                        'xpack.enterpriseSearch.createConnector.finishUpStep.syncingDataTextLabel',
+                        'xpack.searchConnectorscreateConnector.finishUpStep.syncingDataTextLabel',
                         {
                           defaultMessage: 'Syncing data',
                         }
@@ -117,11 +117,11 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     icon={<EuiIcon size="xxl" type="machineLearningApp" />}
                     titleSize="s"
                     title={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.chatWithYourDataLabel',
+                      'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.chatWithYourDataLabel',
                       { defaultMessage: 'Chat with your data' }
                     )}
                     description={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.chatWithYourDataDescriptionl',
+                      'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.chatWithYourDataDescriptionl',
                       {
                         defaultMessage:
                           'Combine your data with the power of LLMs for retrieval augmented generation (RAG)',
@@ -132,13 +132,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         <EuiButton
                           data-test-subj="enterpriseSearchFinishUpStepStartSearchPlaygroundButton"
                           aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.startSearchPlaygroundLabel',
+                            'xpack.searchConnectorscreateConnector.finishUpStep.euiButton.startSearchPlaygroundLabel',
                             { defaultMessage: 'Start Search Playground' }
                           )}
                           onClick={onStartPlaygroundClick}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.startSearchPlaygroundButtonLabel',
+                            'xpack.searchConnectorscreateConnector.finishUpStep.startSearchPlaygroundButtonLabel',
                             { defaultMessage: 'Start Search Playground' }
                           )}
                         </EuiButton>
@@ -150,7 +150,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           iconType="refresh"
                           isLoading={isSyncing}
                           aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.firstSyncDataLabel',
+                            'xpack.searchConnectorscreateConnector.finishUpStep.euiButton.firstSyncDataLabel',
                             { defaultMessage: 'First sync data' }
                           )}
                           onClick={() => {
@@ -169,11 +169,11 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     icon={<EuiIcon size="xxl" type="discoverApp" />}
                     titleSize="s"
                     title={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.exploreYourDataLabel',
+                      'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.exploreYourDataLabel',
                       { defaultMessage: 'Explore your data' }
                     )}
                     description={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.exploreYourDataDescription',
+                      'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.exploreYourDataDescription',
                       {
                         defaultMessage:
                           'See your connector documents or make a data view to explore them',
@@ -184,7 +184,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         <EuiButton
                           data-test-subj="enterpriseSearchFinishUpStepViewInDiscoverButton"
                           aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.finishUpStep.euiButton.viewInDiscoverLabel',
+                            'xpack.searchConnectorsfinishUpStep.euiButton.viewInDiscoverLabel',
                             { defaultMessage: 'View in Discover' }
                           )}
                           onClick={() => {
@@ -198,7 +198,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           }}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.viewInDiscoverButtonLabel',
+                            'xpack.searchConnectorscreateConnector.finishUpStep.viewInDiscoverButtonLabel',
                             { defaultMessage: 'View in Discover' }
                           )}
                         </EuiButton>
@@ -210,7 +210,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           iconType="refresh"
                           isLoading={isSyncing}
                           aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.firstSyncDataLabel',
+                            'xpack.searchConnectorscreateConnector.finishUpStep.euiButton.firstSyncDataLabel',
                             { defaultMessage: 'First sync data' }
                           )}
                           onClick={() => {
@@ -229,11 +229,11 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     icon={<EuiIcon size="xxl" type={connectorLogo} />}
                     titleSize="s"
                     title={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.manageYourConnectorLabel',
+                      'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.manageYourConnectorLabel',
                       { defaultMessage: 'Manage your connector' }
                     )}
                     description={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.manageYourConnectorDescription',
+                      'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.manageYourConnectorDescription',
                       {
                         defaultMessage:
                           'Now you can manage your connector, schedule a sync and much more',
@@ -258,7 +258,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             }}
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.createConnector.finishUpStep.manageConnectorButtonLabel',
+                              'xpack.searchConnectorscreateConnector.finishUpStep.manageConnectorButtonLabel',
                               { defaultMessage: 'Manage connector' }
                             )}
                           </EuiButton>
@@ -273,7 +273,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
             <EuiTitle size="s">
               <h3>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.createConnector.finishUpStep.h3.queryYourDataLabel',
+                  'xpack.searchConnectorscreateConnector.finishUpStep.h3.queryYourDataLabel',
                   {
                     defaultMessage: 'Query your data',
                   }
@@ -295,12 +295,12 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     />
                   }
                   title={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.queryWithLanguageClientsLabel',
+                    'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.queryWithLanguageClientsLabel',
                     { defaultMessage: 'Query with language clients' }
                   )}
                   titleSize="xs"
                   description={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.queryWithLanguageClientsLDescription',
+                    'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.queryWithLanguageClientsLDescription',
                     {
                       defaultMessage:
                         'Use your favorite language client to query your data in your app',
@@ -327,12 +327,12 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                     />
                   }
                   title={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.devToolsLabel',
+                    'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.devToolsLabel',
                     { defaultMessage: 'Dev tools' }
                   )}
                   titleSize="xs"
                   description={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.devToolsDescription',
+                    'xpack.searchConnectorscreateConnector.finishUpStep.euiCard.devToolsDescription',
                     {
                       defaultMessage:
                         'Tools for interacting with your data, such as console, profiler, Grok debugger and more',

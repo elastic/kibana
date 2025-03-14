@@ -48,8 +48,8 @@ export const ConnectorConfiguration: React.FC = () => {
   } = useKibana();
   const { connector, updateConnectorConfigurationStatus } = useValues(ConnectorViewLogic({ http }));
   const { connectorTypes: connectors, hasPlatinumLicense } = useAppContext();
-  const { isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
-  const { advancedSnippet } = useValues(ConnectorFilteringLogic);
+  const { isSyncing, isWaitingForSync } = useValues(IndexViewLogic({ http }));
+  const { advancedSnippet } = useValues(ConnectorFilteringLogic({ http }));
 
   const NATIVE_CONNECTORS = useMemo(
     () => connectors.filter(({ isNative }) => isNative),
@@ -100,11 +100,11 @@ export const ConnectorConfiguration: React.FC = () => {
               <EuiBadge color="hollow">
                 {connector.is_native
                   ? i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.nativeConnector',
+                      'xpack.searchConnectorscontent.connector_detail.configurationConnector.badgeType.nativeConnector',
                       { defaultMessage: 'Elastic managed connector' }
                     )
                   : i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.connectorClient',
+                      'xpack.searchConnectorscontent.connector_detail.configurationConnector.badgeType.connectorClient',
                       { defaultMessage: 'Self-managed connector' }
                     )}
               </EuiBadge>
@@ -121,7 +121,7 @@ export const ConnectorConfiguration: React.FC = () => {
                 <EuiTitle size="s">
                   <h3>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.configuration.title',
+                      'xpack.searchConnectorscontent.connector_detail.configurationConnector.configuration.title',
                       { defaultMessage: 'Configuration' }
                     )}
                   </h3>
@@ -139,6 +139,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         updateConnectorConfiguration({
                           configuration,
                           connectorId: connector.id,
+                          http,
                         })
                       }
                       subscriptionLink={docLinks.licenseManagement}

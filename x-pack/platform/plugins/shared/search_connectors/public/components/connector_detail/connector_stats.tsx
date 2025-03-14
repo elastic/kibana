@@ -78,35 +78,35 @@ export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) =>
 };
 
 const seeDocumentsLabel = i18n.translate(
-  'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
+  'xpack.searchConnectors.connectorStats.seeDocumentsTextLabel',
   {
     defaultMessage: 'See documents',
   }
 );
 
 const pipelinesLabel = i18n.translate(
-  'xpack.enterpriseSearch.connectors.connectorStats.managePipelines',
+  'xpack.searchConnectors.connectorStats.managePipelines',
   {
     defaultMessage: 'Manage pipelines',
   }
 );
 
 const configureLabel = i18n.translate(
-  'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
+  'xpack.searchConnectors.connectorStats.configureLink',
   {
     defaultMessage: 'Configure',
   }
 );
 
 const noAgentLabel = i18n.translate(
-  'xpack.enterpriseSearch.connectors.connectorStats.noAgentFound',
+  'xpack.searchConnectors.connectorStats.noAgentFound',
   {
     defaultMessage: 'No agent found',
   }
 );
 
 const noPolicyLabel = i18n.translate(
-  'xpack.enterpriseSearch.connectors.connectorStats.noPolicyFound',
+  'xpack.searchConnectors.connectorStats.noPolicyFound',
   {
     defaultMessage: 'No policy found',
   }
@@ -181,7 +181,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
       <EuiFlexItem>
         <StatCard
           title={i18n.translate(
-            'xpack.enterpriseSearch.connectors.connectorStats.h4.connectorLabel',
+            'xpack.searchConnectors.connectorStats.h4.connectorLabel',
             {
               defaultMessage: 'Connector',
             }
@@ -217,7 +217,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
                       <FormattedMessage
-                        id="xpack.enterpriseSearch.connectors.connectorStats.connectorIdLabel"
+                        id="xpack.searchConnectors.connectors.connectorStats.connectorIdLabel"
                         defaultMessage="ID: {connectorId}"
                         values={{
                           connectorId: <EuiCode>{connector.id}</EuiCode>,
@@ -233,7 +233,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                           color="text"
                           iconType="copyClipboard"
                           aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.connectors.connectorStats.copyConnectorIdButton',
+                            'xpack.searchConnectors.connectorStats.copyConnectorIdButton',
                             {
                               defaultMessage: 'Copy Connector ID',
                             }
@@ -278,7 +278,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <StatCard
-          title={i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.indexTitle', {
+          title={i18n.translate('xpack.searchConnectors.connectorStats.indexTitle', {
             defaultMessage: 'Attached index',
           })}
           content={
@@ -292,7 +292,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                     {/* TODO: Are we not getting the real Index health status?  */}
                     <EuiHealth color="success">
                       <EuiText size="s">
-                        {i18n.translate('xpack.enterpriseSearch.content.conectors.indexHealth', {
+                        {i18n.translate('xpack.searchConnectorscontent.conectors.indexHealth', {
                           defaultMessage: 'Healthy',
                         })}
                       </EuiText>
@@ -302,7 +302,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               ) : (
                 <EuiText size="s" color="warning">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.connectors.connectorStats.indexDoesntExistLabel',
+                    'xpack.searchConnectors.connectorStats.indexDoesntExistLabel',
                     {
                       defaultMessage: "Index doesn't exist",
                     }
@@ -311,7 +311,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               )
             ) : (
               <EuiText size="s" color="danger">
-                {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndexLabel', {
+                {i18n.translate('xpack.searchConnectors.connectorStats.noIndexLabel', {
                   defaultMessage: 'No index attached yet',
                 })}
               </EuiText>
@@ -328,7 +328,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                     <EuiText size="s">
                       <p>
                         {i18n.translate(
-                          'xpack.enterpriseSearch.connectors.connectorStats.p.DocumentsLabel',
+                          'xpack.searchConnectors.connectorStats.p.DocumentsLabel',
                           {
                             defaultMessage: '{documentAmount} Documents',
                             values: {
@@ -359,7 +359,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <StatCard
-          title={i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.pipelinesTitle', {
+          title={i18n.translate('xpack.searchConnectors.connectorStats.pipelinesTitle', {
             defaultMessage: 'Pipelines',
           })}
           content={
@@ -370,7 +370,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noPipelineText', {
+              i18n.translate('xpack.searchConnectors.connectorStats.noPipelineText', {
                 defaultMessage: 'None',
               })
             )
@@ -397,7 +397,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
         <EuiFlexItem>
           <StatCard
             title={i18n.translate(
-              'xpack.enterpriseSearch.connectors.connectorStats.integrationTitle',
+              'xpack.searchConnectors.connectorStats.integrationTitle',
               {
                 defaultMessage: 'Integration',
               }
@@ -433,7 +433,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   <EuiButtonEmpty
                     data-test-subj="connectorStatsViewLogsButton"
                     aria-label={i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                      'xpack.searchConnectors.connectorStats.viewLogsButtonLabel',
                       { defaultMessage: 'View logs' }
                     )}
                     disabled={!agentlessAgentExists}
@@ -443,7 +443,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                     }}
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                      'xpack.searchConnectors.connectorStats.viewLogsButtonLabel',
                       { defaultMessage: 'View logs' }
                     )}
                   </EuiButtonEmpty>
@@ -460,7 +460,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       )}
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.connectors.connectorStats.hostOverview',
+                        'xpack.searchConnectors.connectorStats.hostOverview',
                         {
                           defaultMessage: 'Host overview',
                         }
@@ -480,7 +480,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       )}
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.connectors.connectorStats.managePolicy',
+                        'xpack.searchConnectors.connectorStats.managePolicy',
                         {
                           defaultMessage: 'Manage policy',
                         }

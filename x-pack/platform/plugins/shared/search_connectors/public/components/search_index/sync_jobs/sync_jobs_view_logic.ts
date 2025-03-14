@@ -70,10 +70,16 @@ export interface SyncJobsViewValues {
   syncJobsPagination: Pagination;
   syncJobsStatus: Status;
   syncTriggeredLocally: boolean;
+}
+
+export interface SyncJobsViewProps {
   http?: HttpSetup;
 }
 
-export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsViewActions>>({
+export const SyncJobsViewLogic = kea<
+  MakeLogicType<SyncJobsViewValues, SyncJobsViewActions, SyncJobsViewProps>
+>({
+  key: (props) => props.http,
   actions: {
     refetchSyncJobs: true,
     setCancelSyncJob: (syncJobId) => ({ syncJobId: syncJobId ?? null }),
@@ -113,7 +119,7 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
       ['status as cancelSyncJobStatus'],
     ],
   },
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     cancelSyncError: async (_, breakpoint) => {
       actions.resetCancelSyncJobApi();
       await breakpoint(UI_REFRESH_INTERVAL);
@@ -147,7 +153,7 @@ export const SyncJobsViewLogic = kea<MakeLogicType<SyncJobsViewValues, SyncJobsV
           from: values.syncJobsPagination.pageIndex * (values.syncJobsPagination.pageSize || 0),
           size: values.syncJobsPagination.pageSize ?? 10,
           type: values.selectedSyncJobCategory,
-          http: values.http,
+          http: props.http,
         });
       }
     },

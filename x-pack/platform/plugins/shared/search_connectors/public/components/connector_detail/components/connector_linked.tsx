@@ -14,7 +14,7 @@ export const ConnectorLinked: React.FC = () => {
     <EuiCallOut
       color="success"
       title={i18n.translate(
-        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.connectorLinked.callout.title',
+        'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.connectorLinked.callout.title',
         {
           defaultMessage: 'Connector connected',
         }
@@ -22,7 +22,7 @@ export const ConnectorLinked: React.FC = () => {
       iconType="check"
     >
       {i18n.translate(
-        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.connectorLinked.callout.description',
+        'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.connectorLinked.callout.description',
         {
           defaultMessage: 'Congratulations. Looks like your connector is deployed and connected.',
         }

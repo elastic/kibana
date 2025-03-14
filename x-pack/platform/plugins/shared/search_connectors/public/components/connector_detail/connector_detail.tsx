@@ -61,7 +61,7 @@ export const ConnectorDetail: React.FC = () => {
   }>();
 
   const {
-    plugins: { guidedOnboarding },
+    plugins: { guidedOnboarding, share },
   } = useAppContext();
 
   useEffect(() => {
@@ -81,18 +81,20 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.OVERVIEW,
       isSelected: tabId === ConnectorDetailTabId.OVERVIEW,
       label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.overviewTabLabel',
+        'xpack.searchConnectorscontent.connectors.connectorDetail.overviewTabLabel',
         {
           defaultMessage: 'Overview',
         }
       ),
-      onClick: () =>
+      onClick: () => {
+        const url = share?.url.locators.get('CONNECTORS_ENDPOINTS')?.getUrl({});
         application?.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+          `${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
             connectorId,
             tabId: ConnectorDetailTabId.OVERVIEW,
-          })
-        ),
+          })}`
+        );
+      },
     },
     {
       content: <SearchIndexDocuments />,
@@ -100,18 +102,23 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.DOCUMENTS,
       isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
       label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.documentsTabLabel',
+        'xpack.searchConnectorscontent.connectors.connectorDetail.documentsTabLabel',
         {
           defaultMessage: 'Documents',
         }
       ),
-      onClick: () =>
-        application?.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+      onClick: () => {
+        const url = share?.url.locators.get('CONNECTORS_ENDPOINTS');
+        url?.navigate(
+          {
+
+          }
+          `${url}${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
             connectorId,
             tabId: ConnectorDetailTabId.DOCUMENTS,
-          })
-        ),
+          })}`
+        );
+      },
     },
     {
       content: <SearchIndexIndexMappings />,
@@ -119,7 +126,7 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.INDEX_MAPPINGS,
       isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
       label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
+        'xpack.searchConnectorscontent.connectors.connectorDetail.indexMappingsTabLabel',
         {
           defaultMessage: 'Mappings',
         }
@@ -143,7 +150,7 @@ export const ConnectorDetail: React.FC = () => {
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorDetail.syncRulesTabLabel',
+              'xpack.searchConnectorscontent.connectors.connectorDetail.syncRulesTabLabel',
               {
                 defaultMessage: 'Sync rules',
               }
@@ -164,7 +171,7 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.schedulingTabLabel',
+        'xpack.searchConnectorscontent.connectors.connectorDetail.schedulingTabLabel',
         {
           defaultMessage: 'Scheduling',
         }
@@ -186,7 +193,7 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.CONFIGURATION,
       isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
       label: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
+        'xpack.searchConnectorscontent.connectors.connectorDetail.configurationTabLabel',
         {
           defaultMessage: 'Configuration',
         }
@@ -207,7 +214,7 @@ export const ConnectorDetail: React.FC = () => {
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
-      'xpack.enterpriseSearch.content.connectors.connectorDetail.pipelinesTabLabel',
+      'xpack.searchConnectorscontent.connectors.connectorDetail.pipelinesTabLabel',
       {
         defaultMessage: 'Pipelines',
       }

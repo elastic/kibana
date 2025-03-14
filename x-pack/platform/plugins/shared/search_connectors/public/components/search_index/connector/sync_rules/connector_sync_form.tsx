@@ -13,19 +13,25 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiForm } from '@
 
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 
 export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const { saveDraftFilteringRules, setIsEditing } = useActions(ConnectorFilteringLogic);
-  const { hasJsonValidationError, isEditing, isLoading } = useValues(ConnectorFilteringLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { saveDraftFilteringRules, setIsEditing } = useActions(ConnectorFilteringLogic({ http }));
+  const { hasJsonValidationError, isEditing, isLoading } = useValues(
+    ConnectorFilteringLogic({ http })
+  );
 
   return (
     <EuiFlexGroup direction="column">
       <UnsavedChangesPrompt
         hasUnsavedChanges={isEditing}
         messageText={i18n.translate(
-          'xpack.enterpriseSearch.index.connector.syncRules.unsavedChanges',
+          'xpack.searchConnectorsindex.connector.syncRules.unsavedChanges',
           {
             defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
           }
@@ -45,7 +51,7 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
                 }}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.index.connector.syncRules.cancelEditingFilteringDraft',
+                  'xpack.searchConnectorsindex.connector.syncRules.cancelEditingFilteringDraft',
                   {
                     defaultMessage: 'Cancel',
                   }
@@ -61,7 +67,7 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
               onClick={saveDraftFilteringRules}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.syncRules.validateDraftTitle',
+                'xpack.searchConnectorsindex.connector.syncRules.validateDraftTitle',
                 {
                   defaultMessage: 'Save and validate draft',
                 }

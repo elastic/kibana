@@ -34,7 +34,7 @@ interface Options {
 }
 
 export const defaultErrorMessage: string = i18n.translate(
-  'xpack.enterpriseSearch.shared.flashMessages.defaultErrorMessage',
+  'xpack.searchConnectorsshared.flashMessages.defaultErrorMessage',
   {
     defaultMessage: 'An unexpected error occurred',
   }

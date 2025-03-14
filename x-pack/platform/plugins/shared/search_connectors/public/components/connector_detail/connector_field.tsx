@@ -14,6 +14,7 @@ import { EuiFlexItem, EuiInlineEditText, EuiInlineEditTitle } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { Connector } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
 interface ConnectorFieldProps {
@@ -23,13 +24,20 @@ interface ConnectorFieldProps {
 }
 
 export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field, isTitle }) => {
+  const {
+    services: { http },
+  } = useKibana();
   const [value, setValue] = useState<string | null>(connector[field]);
   const [resolverObject, setResolverObject] = useState({
     rej: () => {},
     res: () => {},
   });
-  const { saveNameAndDescription, setConnector } = useActions(ConnectorNameAndDescriptionLogic);
-  const { status, isLoading, isFailed, isSuccess } = useValues(ConnectorNameAndDescriptionLogic);
+  const { saveNameAndDescription, setConnector } = useActions(
+    ConnectorNameAndDescriptionLogic({ http })
+  );
+  const { status, isLoading, isFailed, isSuccess } = useValues(
+    ConnectorNameAndDescriptionLogic({ http })
+  );
 
   useEffect(() => {
     setConnector(connector);
@@ -70,13 +78,13 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
     <EuiFlexItem grow={false}>
       <Component
         inputAriaLabel={i18n.translate(
-          `xpack.enterpriseSearch.content.connectors.nameAndDescription.${field}.ariaLabel`,
+          `xpack.searchConnectorscontent.connectors.nameAndDescription.${field}.ariaLabel`,
           {
             defaultMessage: `Edit connector ${field}`,
           }
         )}
         placeholder={i18n.translate(
-          `xpack.enterpriseSearch.content.connectors.nameAndDescription.${field}.placeholder`,
+          `xpack.searchConnectorscontent.connectors.nameAndDescription.${field}.placeholder`,
           {
             defaultMessage: field === 'name' ? 'Add a name to your connector' : 'Add a description',
           }
@@ -93,7 +101,7 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
               ? {
                   error: [
                     i18n.translate(
-                      'xpack.enterpriseSearch.content.nameAndDescription.name.error.empty',
+                      'xpack.searchConnectorscontent.nameAndDescription.name.error.empty',
                       { defaultMessage: 'Connector name cannot be empty' }
                     ),
                   ],

@@ -34,7 +34,7 @@ export const ConnectorDetailOverview: React.FC = () => {
   const {
     services: { http },
   } = useKibana();
-  const { indexData } = useValues(IndexViewLogic);
+  const { indexData } = useValues(IndexViewLogic({ http }));
   const { connector, error, connectorAgentlessPolicy } = useValues(ConnectorViewLogic({ http }));
 
   const { showModal } = useActions(ConvertConnectorLogic({ http }));
@@ -50,7 +50,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               iconType="iInCircle"
               color="warning"
               title={i18n.translate(
-                'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
+                'xpack.searchConnectorscontent.connectors.overview.connectorUnsupportedCallOut.title',
                 {
                   defaultMessage: 'Example connector',
                 }
@@ -59,7 +59,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               <EuiSpacer size="s" />
               <EuiText size="s">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
+                  id="xpack.searchConnectors.content.connectors.overview.connectorUnsupportedCallOut.description"
                   defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
                 />
               </EuiText>
@@ -75,7 +75,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="warning"
             color="warning"
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
+              'xpack.searchConnectorscontent.connectors.overview.nativeCloudCallout.title',
               {
                 defaultMessage: 'Elastic managed connectors are no longer supported',
               }
@@ -85,7 +85,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
+                  id="xpack.searchConnectors.content.connectors.overview.nativeCloudCallout.content"
                   defaultMessage="Elastic managed connectors are no longer supported. Convert it to a {link} to continue using it."
                   values={{
                     link: (
@@ -96,7 +96,7 @@ export const ConnectorDetailOverview: React.FC = () => {
                         target="_blank"
                       >
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
+                          'xpack.searchConnectorscontent.connectors.overview.nativeCloudCallout.connectorClient',
                           { defaultMessage: 'self-managed connector' }
                         )}
                       </EuiLink>
@@ -113,7 +113,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               onClick={() => showModal()}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
+                'xpack.searchConnectorscontent.indices.connectors.overview.convertConnector.buttonLabel',
                 { defaultMessage: 'Convert connector' }
               )}
             </EuiButton>
@@ -127,7 +127,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="warning"
             color="danger"
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.overview.connectorErrorCallOut.title',
+              'xpack.searchConnectorscontent.connectors.overview.connectorErrorCallOut.title',
               {
                 defaultMessage: 'Your connector has reported an error',
               }
@@ -145,7 +145,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="iInCircle"
             color="warning"
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.title',
+              'xpack.searchConnectorscontent.connectors.overview.connectorNoIndexCallOut.title',
               {
                 defaultMessage: 'Connector has no attached index',
               }
@@ -154,7 +154,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate(
-                'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.description',
+                'xpack.searchConnectorscontent.connectors.overview.connectorNoIndexCallOut.description',
                 {
                   defaultMessage:
                     "You won't be able to start syncing content until your connector is attached to an index.",
@@ -171,7 +171,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               })}#attachIndexBox`}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.connectors.overview.connectorNoIndexCallOut.buttonLabel',
+                'xpack.searchConnectorscontent.connectors.overview.connectorNoIndexCallOut.buttonLabel',
                 {
                   defaultMessage: 'Attach index',
                 }
@@ -186,7 +186,7 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiCallOut
             iconType="iInCircle"
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.overview.connectorIndexDoesntExistCallOut.title',
+              'xpack.searchConnectorscontent.connectors.overview.connectorIndexDoesntExistCallOut.title',
               {
                 defaultMessage: "Attached index doesn't exist",
               }
@@ -195,7 +195,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.connectors.overview.connectorIndexDoesntExistCallOut.description"
+                id="xpack.searchConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.description"
                 defaultMessage="The connector will create the index on its next sync, or you can manually create the index {indexName} with your desired settings and mappings."
                 values={{
                   indexName: <EuiCode>{connector.index_name}</EuiCode>,

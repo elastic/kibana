@@ -66,7 +66,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
       {isSyncing && <EuiProgress size="xs" position="absolute" />}
       <EuiTitle size="s">
         <h3>
-          {i18n.translate('xpack.enterpriseSearch.whatsNextBox.whatsNextPanelLabel', {
+          {i18n.translate('xpack.searchConnectorswhatsNextBox.whatsNextPanelLabel', {
             defaultMessage: "What's next?",
           })}
         </h3>
@@ -74,7 +74,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
       <EuiSpacer />
       <EuiText>
         <p>
-          {i18n.translate('xpack.enterpriseSearch.whatsNextBox.whatsNextPanelDescription', {
+          {i18n.translate('xpack.searchConnectorswhatsNextBox.whatsNextPanelDescription', {
             defaultMessage:
               'You can manually sync your data, schedule a recurring sync or see your documents.',
           })}
@@ -90,7 +90,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
             onClick={onStartPlaygroundClick}
           >
             <FormattedMessage
-              id="xpack.enterpriseSearch.whatsNextBox.searchPlaygroundButtonLabel"
+              id="xpack.searchConnectors.whatsNextBox.searchPlaygroundButtonLabel"
               defaultMessage="Search Playground"
             />
           </EuiButton>
@@ -106,7 +106,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
             })}`}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.schedule.button.label',
+              'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.schedule.button.label',
               {
                 defaultMessage: 'Set schedule and sync',
               }

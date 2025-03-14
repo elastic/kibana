@@ -35,7 +35,7 @@ export const ConnectorType: React.FC<ConnectorTypeProps> = ({ serviceType }) => 
         <EuiText size="s">
           <p>
             {serviceType === CRAWLER_SERVICE_TYPE
-              ? i18n.translate('xpack.enterpriseSearch.content.connectors.connectorType.crawler', {
+              ? i18n.translate('xpack.searchConnectorscontent.connectors.connectorType.crawler', {
                   defaultMessage: 'Web crawler',
                 })
               : connector?.name ?? '-'}

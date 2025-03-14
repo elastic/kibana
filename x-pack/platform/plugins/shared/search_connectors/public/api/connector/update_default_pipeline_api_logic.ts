@@ -30,7 +30,7 @@ export const UpdateDefaultPipelineApiLogic = createApiLogic(
   updateDefaultPipeline,
   {
     showSuccessFlashFn: () =>
-      i18n.translate('xpack.enterpriseSearch.content.indices.defaultPipelines.successToast.title', {
+      i18n.translate('xpack.searchConnectorscontent.indices.defaultPipelines.successToast.title', {
         defaultMessage: 'Default pipeline successfully updated',
       }),
   }

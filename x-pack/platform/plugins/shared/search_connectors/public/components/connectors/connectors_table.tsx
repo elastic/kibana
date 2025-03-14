@@ -73,7 +73,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ? [
           {
             name: i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorTable.columns.connectorName',
+              'xpack.searchConnectorscontent.connectors.connectorTable.columns.connectorName',
               {
                 defaultMessage: 'Connector name',
               }
@@ -91,7 +91,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       : []),
     {
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.indexName',
+        'xpack.searchConnectorscontent.connectors.connectorTable.columns.indexName',
         {
           defaultMessage: 'Index name',
         }
@@ -111,7 +111,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
     {
       field: 'docsCount',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.docsCount',
+        'xpack.searchConnectorscontent.connectors.connectorTable.columns.docsCount',
         {
           defaultMessage: 'Docs count',
         }
@@ -123,7 +123,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           {
             field: 'service_type',
             name: i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorTable.columns.type',
+              'xpack.searchConnectorscontent.connectors.connectorTable.columns.type',
               {
                 defaultMessage: 'Connector type',
               }
@@ -136,7 +136,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       : []),
     {
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.status',
+        'xpack.searchConnectorscontent.connectors.connectorTable.columns.status',
         {
           defaultMessage: 'Ingestion status',
         }
@@ -156,7 +156,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           isPrimary: false,
           name: (connector) =>
             i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorTable.column.actions.deleteIndex',
+              'xpack.searchConnectorscontent.connectors.connectorTable.column.actions.deleteIndex',
               {
                 defaultMessage: 'Delete connector {connectorName}',
                 values: { connectorName: connector.name },
@@ -170,11 +170,11 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         {
           description: isCrawler
             ? i18n.translate(
-                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewCrawler',
+                'xpack.searchConnectorscontent.connectors.connectorTable.columns.actions.viewCrawler',
                 { defaultMessage: 'View this crawler' }
               )
             : i18n.translate(
-                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
+                'xpack.searchConnectorscontent.connectors.connectorTable.columns.actions.viewIndex',
                 { defaultMessage: 'View this connector' }
               ),
           enabled: (connector) => !!connector.index_name,
@@ -182,7 +182,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           isPrimary: false,
           name: (connector) =>
             i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.connectorsTable.columns.actions.viewIndex.caption',
+              'xpack.searchConnectorscontent.connectors.connectorsTable.columns.actions.viewIndex.caption',
               {
                 defaultMessage: 'View index {connectorName}',
                 values: {
@@ -212,7 +212,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         },
       ],
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions',
+        'xpack.searchConnectorscontent.connectors.connectorTable.columns.actions',
         {
           defaultMessage: 'Actions',
         }
@@ -229,13 +229,13 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           onChange={onChange}
           tableLayout="fixed"
           tableCaption={i18n.translate(
-            'xpack.enterpriseSearch.connectorsTable.table.availableConnectorsTableCaption',
+            'xpack.searchConnectorsTable.table.availableConnectorsTableCaption',
             { defaultMessage: 'Available connectors table' }
           )}
           loading={isLoading}
           noItemsMessage={
             <EuiText aria-live="polite" size="s">
-              {i18n.translate('xpack.enterpriseSearch.connectorsTable.table.noResultsMessage', {
+              {i18n.translate('xpack.searchConnectorsTable.table.noResultsMessage', {
                 defaultMessage: 'No connectors found',
               })}
             </EuiText>

@@ -38,17 +38,23 @@ import { SelfManagedWebCrawlerEmptyPrompt } from './self_managed_web_crawler_emp
 import { handlePageChange } from './utils';
 import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../routes';
 import { LEARN_MORE_LINK } from './translations';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
+import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 
 export const connectorsBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
-    defaultMessage: 'Connectors',
-  }),
+  {
+    text: i18n.translate('xpack.searchConnectorscontent.connectors.breadcrumb', {
+      defaultMessage: 'Search Connectors',
+    }),
+  },
 ];
 
 export const crawlersBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.content.crawlers.breadcrumb', {
-    defaultMessage: 'Web Crawlers',
-  }),
+  {
+    text: i18n.translate('xpack.searchConnectorscontent.crawlers.breadcrumb', {
+      defaultMessage: 'Web Crawlers',
+    }),
+  },
 ];
 
 export interface ConnectorsProps {
@@ -61,6 +67,10 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
   const [searchQuery, setSearchValue] = useState('');
   const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
+  const {
+    services: { chrome, appParams },
+  } = useKibanaContextForPlugin();
+  useBreadcrumbs(!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs, appParams, chrome);
 
   const {
     services: { application, http },
@@ -81,21 +91,20 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     <CreateConnector />
   ) : (
     <KibanaPageTemplate
-      // pageChrome={!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs}
       // isLoading={isLoading}
       pageHeader={{
         pageTitle: !isCrawler
-          ? i18n.translate('xpack.enterpriseSearch.connectors.title', {
+          ? i18n.translate('xpack.searchConnectors.title', {
               defaultMessage: 'Elasticsearch connectors',
             })
-          : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
+          : i18n.translate('xpack.searchConnectorscrawlers.title', {
               defaultMessage: 'Elastic Web Crawler',
             }),
         description: [
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.webcrawlers.headerContent"
+                id="xpack.searchConnectors.webcrawlers.headerContent"
                 defaultMessage="Discover extract and index searchable content from websites and knowledge bases {learnMoreLink}"
                 values={{
                   learnMoreLink: (
@@ -139,7 +148,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                     }}
                   >
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
+                      id="xpack.searchConnectors.connectors.newConnectorButtonLabel"
                       defaultMessage="New Connector"
                     />
                   </EuiButton>
@@ -151,7 +160,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                   data-test-subj="entSearchContent-searchIndices-defaultSettings"
                   onClick={() => setShowDefaultSettingsFlyout(true)}
                 >
-                  {i18n.translate('xpack.enterpriseSearch.content.searchIndices.defaultSettings', {
+                  {i18n.translate('xpack.searchConnectorscontent.searchIndices.defaultSettings', {
                     defaultMessage: 'Default settings',
                   })}
                 </EuiButton>,
@@ -192,12 +201,12 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                   <h2>
                     {!isCrawler ? (
                       <FormattedMessage
-                        id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
+                        id="xpack.searchConnectors.connectorsTable.h2.availableConnectorsLabel"
                         defaultMessage="Available connectors"
                       />
                     ) : (
                       <FormattedMessage
-                        id="xpack.enterpriseSearch.connectorsTable.h2.availableCrawlersLabel"
+                        id="xpack.searchConnectors.connectorsTable.h2.availableCrawlersLabel"
                         defaultMessage="Available web crawlers"
                       />
                     )}
@@ -211,22 +220,22 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
                     incremental: true,
                     placeholder: !isCrawler
                       ? i18n.translate(
-                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsPlaceholder',
+                          'xpack.searchConnectorsTable.euiSearchBar.filterConnectorsPlaceholder',
                           { defaultMessage: 'Filter connectors' }
                         )
                       : i18n.translate(
-                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersPlaceholder',
+                          'xpack.searchConnectorsTable.euiSearchBar.filterCrawlersPlaceholder',
                           { defaultMessage: 'Filter web crawlers' }
                         ),
                   }}
                   aria-label={
                     !isCrawler
                       ? i18n.translate(
-                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
+                          'xpack.searchConnectorsTable.euiSearchBar.filterConnectorsLabel',
                           { defaultMessage: 'Filter connectors' }
                         )
                       : i18n.translate(
-                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersLabel',
+                          'xpack.searchConnectorsTable.euiSearchBar.filterCrawlersLabel',
                           { defaultMessage: 'Filter web crawlers' }
                         )
                   }

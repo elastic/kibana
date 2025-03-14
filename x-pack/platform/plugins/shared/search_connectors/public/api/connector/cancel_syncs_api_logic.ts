@@ -21,7 +21,7 @@ export const cancelSyncs = async ({ connectorId, http }: CancelSyncsApiArgs) => 
 
 export const CancelSyncsApiLogic = createApiLogic(['cancel_syncs_api_logic'], cancelSyncs, {
   showSuccessFlashFn: () =>
-    i18n.translate('xpack.enterpriseSearch.content.searchIndex.cancelSyncs.successMessage', {
+    i18n.translate('xpack.searchConnectorscontent.searchIndex.cancelSyncs.successMessage', {
       defaultMessage: 'Successfully canceled syncs',
     }),
 });

@@ -46,7 +46,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
   const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { hasAdvancedFilteringFeature } = useValues(ConnectorViewLogic({ http }));
-  const { advancedSnippet } = useValues(ConnectorFilteringLogic);
+  const { advancedSnippet } = useValues(ConnectorFilteringLogic({ http }));
   const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
 
   return (
@@ -74,7 +74,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
               target="_blank"
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
+                'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
                 {
                   defaultMessage: '{name} authentication',
                   values: {
@@ -92,14 +92,14 @@ export const NativeConnectorConfigurationConfig: React.FC<
           <EuiSpacer size="l" />
           <EuiCallOut
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
+              'xpack.searchConnectorscontent.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
               { defaultMessage: 'Configuration warning' }
             )}
             iconType="iInCircle"
             color="warning"
           >
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+              id="xpack.searchConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
               defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
               values={{
                 advancedSyncRulesDocs: (
@@ -110,7 +110,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
                     target="_blank"
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                      'xpack.searchConnectorscontent.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
                       { defaultMessage: 'Advanced Sync Rules' }
                     )}
                   </EuiLink>

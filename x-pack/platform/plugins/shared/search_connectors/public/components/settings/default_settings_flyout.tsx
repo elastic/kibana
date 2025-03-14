@@ -38,11 +38,11 @@ export interface DefaultSettingsFlyoutProps {
 
 const Callout = (
   <EuiCallOut
-    title={i18n.translate('xpack.enterpriseSearch.defaultSettingsFlyout.callout.title', {
+    title={i18n.translate('xpack.searchConnectorsdefaultSettingsFlyout.callout.title', {
       defaultMessage: 'Individual settings management',
     })}
   >
-    {i18n.translate('xpack.enterpriseSearch.defaultSettingsFlyout.callout.body', {
+    {i18n.translate('xpack.searchConnectorsdefaultSettingsFlyout.callout.body', {
       defaultMessage:
         'You can also enable or disable this feature for a specific index on the index’s configuration page.',
     })}
@@ -67,7 +67,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
         <EuiTitle>
           <h4>
             {i18n.translate(
-              'xpack.enterpriseSearch.defaultSettingsFlyout.h2.defaultSettingsLabel',
+              'xpack.searchConnectorsdefaultSettingsFlyout.h2.defaultSettingsLabel',
               { defaultMessage: 'Default Settings' }
             )}
           </h4>
@@ -77,7 +77,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.defaultSettingsFlyout.body.description.label"
+              id="xpack.searchConnectors.defaultSettingsFlyout.body.description.label"
               defaultMessage="These settings apply to all new Elasticsearch indices created by Search ingestion mechanisms. For API ingest-based indices, remember to include the pipeline when you ingest documents. These features are powered by {link}"
               values={{
                 link: (
@@ -89,7 +89,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                     ref={firstFocusInFlyoutRef}
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.defaultSettingsFlyout.body.description.ingestPipelinesLink.link',
+                      'xpack.searchConnectorsdefaultSettingsFlyout.body.description.ingestPipelinesLink.link',
                       {
                         defaultMessage: 'ingest pipelines',
                       }
@@ -103,13 +103,13 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
         <EuiSpacer />
         <SettingsPanel
           description={i18n.translate(
-            'xpack.enterpriseSearch.content.settings.contentExtraction.description',
+            'xpack.searchConnectorscontent.settings.contentExtraction.description',
             {
               defaultMessage:
                 'Extract searchable content from binary files, like PDFs and Word documents.',
             }
           )}
-          label={i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.label', {
+          label={i18n.translate('xpack.searchConnectorscontent.settings.contactExtraction.label', {
             defaultMessage: 'Content extraction',
           })}
           onChange={() =>
@@ -118,7 +118,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
               extract_binary_content: !pipelineState.extract_binary_content,
             })
           }
-          title={i18n.translate('xpack.enterpriseSearch.content.settings.contentExtraction.title', {
+          title={i18n.translate('xpack.searchConnectorscontent.settings.contentExtraction.title', {
             defaultMessage: 'Deployment wide content extraction',
           })}
           value={extractBinaryContent}
@@ -126,14 +126,14 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
         <EuiSpacer size="s" />
         <SettingsPanel
           description={i18n.translate(
-            'xpack.enterpriseSearch.content.settings.whiteSpaceReduction.description',
+            'xpack.searchConnectorscontent.settings.whiteSpaceReduction.description',
             {
               defaultMessage:
                 'Whitespace reduction will strip your full-text content of whitespace by default.',
             }
           )}
           label={i18n.translate(
-            'xpack.enterpriseSearch.content.settings.whitespaceReduction.label',
+            'xpack.searchConnectorscontent.settings.whitespaceReduction.label',
             {
               defaultMessage: 'Whitespace reduction',
             }
@@ -145,7 +145,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
             })
           }
           title={i18n.translate(
-            'xpack.enterpriseSearch.content.settings.whitespaceReduction.deploymentHeaderTitle',
+            'xpack.searchConnectorscontent.settings.whitespaceReduction.deploymentHeaderTitle',
             {
               defaultMessage: 'Deployment wide whitespace reduction',
             }
@@ -155,13 +155,13 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
         <EuiSpacer size="s" />
         <SettingsPanel
           description={i18n.translate(
-            'xpack.enterpriseSearch.content.settings.mlInference.description',
+            'xpack.searchConnectorscontent.settings.mlInference.description',
             {
               defaultMessage:
                 'ML Inference Pipelines will run as part of your pipelines. You will have to configure processors for each index individually on its pipelines page.',
             }
           )}
-          label={i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.label', {
+          label={i18n.translate('xpack.searchConnectorscontent.settings.mlInference.label', {
             defaultMessage: 'ML Inference',
           })}
           link={
@@ -171,7 +171,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
               href={docLinks.mlDocumentEnrichment}
               target="_blank"
             >
-              {i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.link', {
+              {i18n.translate('xpack.searchConnectorscontent.settings.mlInference.link', {
                 defaultMessage: 'Learn more about document enrichment with ML',
               })}
             </EuiLink>
@@ -183,7 +183,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
             })
           }
           title={i18n.translate(
-            'xpack.enterpriseSearch.content.settings.mlInference.deploymentHeaderTitle',
+            'xpack.searchConnectorscontent.settings.mlInference.deploymentHeaderTitle',
             {
               defaultMessage: 'Deployment wide ML Inference Pipelines extraction',
             }
@@ -198,7 +198,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
               onClick={() => closeFlyout()}
               data-test-subj={'entSearchContentSettingsCancelButtonButton'}
             >
-              {i18n.translate('xpack.enterpriseSearch.content.settings.cancelButtonLabel', {
+              {i18n.translate('xpack.searchConnectorscontent.settings.cancelButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
@@ -216,7 +216,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   }}
                   data-test-subj={'entSearchContentSettingsResetButton'}
                 >
-                  {i18n.translate('xpack.enterpriseSearch.content.settings.resetButtonLabel', {
+                  {i18n.translate('xpack.searchConnectorscontent.settings.resetButtonLabel', {
                     defaultMessage: 'Reset',
                   })}
                 </EuiButton>
@@ -233,7 +233,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   }}
                   data-test-subj={'entSearchContentSettingsSaveButton'}
                 >
-                  {i18n.translate('xpack.enterpriseSearch.content.settings.saveButtonLabel', {
+                  {i18n.translate('xpack.searchConnectorscontent.settings.saveButtonLabel', {
                     defaultMessage: 'Save',
                   })}
                 </EuiButton>

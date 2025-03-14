@@ -46,7 +46,7 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
         <EuiTitle size="m">
           <h3>
             {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.title',
+              'xpack.searchConnectorscontent.indices.configurationConnector.nameAndDescriptionFlyout.title',
               {
                 defaultMessage: 'Describe this crawler',
               }
@@ -59,7 +59,7 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
         <EuiFormRow>
           <EuiText size="s">
             {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.description',
+              'xpack.searchConnectorscontent.indices.configurationConnector.nameAndDescriptionFlyout.description',
               {
                 defaultMessage:
                   'By naming and describing this connector your colleagues and wider team will know what this connector is meant for.',
@@ -84,7 +84,7 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiButton isLoading={status === Status.LOADING} fill onClick={saveNameAndDescription}>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.saveButtonLabel',
+                'xpack.searchConnectorscontent.indices.configurationConnector.nameAndDescriptionFlyout.saveButtonLabel',
                 {
                   defaultMessage: 'Save name and description',
                 }

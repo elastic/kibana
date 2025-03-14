@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Connector } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   CancelSyncsApiArgs,
   CancelSyncsApiLogic,
@@ -46,7 +47,12 @@ export interface SyncsLogicActions {
   startSync(connector?: Connector): { connector: Connector };
 }
 
-export const SyncsLogic = kea<MakeLogicType<{}, SyncsLogicActions>>({
+export interface SyncsLogicProps {
+  http?: HttpSetup;
+}
+
+export const SyncsLogic = kea<MakeLogicType<{}, SyncsLogicActions, SyncsLogicProps>>({
+  key: (props) => props.http,
   actions: {
     cancelSyncs: (connector?: Connector) => ({ connector }),
     startAccessControlSync: (connector?: Connector) => ({ connector }),
@@ -69,25 +75,25 @@ export const SyncsLogic = kea<MakeLogicType<{}, SyncsLogicActions>>({
       ['makeRequest as makeStartSyncRequest'],
     ],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, props }) => ({
     cancelSyncs: ({ connector }) => {
       if (connector?.id) {
-        actions.makeCancelSyncsRequest({ connectorId: connector.id });
+        actions.makeCancelSyncsRequest({ connectorId: connector.id, http: props.http });
       }
     },
     startAccessControlSync: ({ connector }) => {
       if (connector?.id && hasDocumentLevelSecurityFeature(connector)) {
-        actions.makeStartAccessControlSyncRequest({ connectorId: connector.id });
+        actions.makeStartAccessControlSyncRequest({ connectorId: connector.id, http: props.http });
       }
     },
     startIncrementalSync: ({ connector }) => {
       if (connector?.id && hasIncrementalSyncFeature(connector)) {
-        actions.makeStartIncrementalSyncRequest({ connectorId: connector.id });
+        actions.makeStartIncrementalSyncRequest({ connectorId: connector.id, http: props.http });
       }
     },
     startSync: ({ connector }) => {
       if (connector?.id) {
-        actions.makeStartSyncRequest({ connectorId: connector.id });
+        actions.makeStartSyncRequest({ connectorId: connector.id, http: props.http });
       }
     },
   }),

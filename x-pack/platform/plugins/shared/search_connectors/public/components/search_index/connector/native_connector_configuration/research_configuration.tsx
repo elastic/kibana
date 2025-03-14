@@ -25,7 +25,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.enterpriseSearch.researchConfiguration.euiText.checkRequirementsLabel"
+          id="xpack.searchConnectors.researchConfiguration.euiText.checkRequirementsLabel"
           defaultMessage="Check Requirements"
         />
       }
@@ -36,7 +36,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.researchConfiguration.p.referToTheDocumentationLabel"
+                id="xpack.searchConnectors.researchConfiguration.p.referToTheDocumentationLabel"
                 defaultMessage="Refer to the documentation for this connector to learn about prerequisites for connecting to {serviceType} and configuration requirements."
                 values={{
                   serviceType: name,
@@ -53,7 +53,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
               href={docsUrl}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
+                'xpack.searchConnectorscontent.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
                 {
                   defaultMessage: 'Documentation',
                 }
@@ -68,7 +68,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
                 href={externalDocsUrl}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+                  'xpack.searchConnectorscontent.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
                   {
                     defaultMessage: '{name} documentation',
                     values: { name },

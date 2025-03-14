@@ -41,10 +41,11 @@ export const ConnectorSyncRules: React.FC = () => {
   const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } = useValues(
     ConnectorViewLogic({ http })
   );
-  const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =
-    useActions(ConnectorFilteringLogic);
+  const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } = useActions(
+    ConnectorFilteringLogic({ http })
+  );
   const { advancedSnippet, draftErrors, draftState, filteringRules, hasDraft, isEditing } =
-    useValues(ConnectorFilteringLogic);
+    useValues(ConnectorFilteringLogic({ http }));
 
   const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
 
@@ -76,7 +77,7 @@ export const ConnectorSyncRules: React.FC = () => {
             <EuiFlexItem>
               <EuiText size="s">
                 <p>
-                  {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.description', {
+                  {i18n.translate('xpack.searchConnectorsindex.connector.syncRules.description', {
                     defaultMessage: `Include or exclude high level items, file types and (file or folder) paths to
                     synchronize from {indexName}. Everything is included by default. Each document is
                     tested against the rules below and the first rule that matches will be applied.`,
@@ -94,7 +95,7 @@ export const ConnectorSyncRules: React.FC = () => {
                     target="_blank"
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.index.connector.syncRules.syncRulesLabel',
+                      'xpack.searchConnectorsindex.connector.syncRules.syncRulesLabel',
                       {
                         defaultMessage: 'Learn more about sync rules',
                       }
@@ -112,13 +113,13 @@ export const ConnectorSyncRules: React.FC = () => {
               >
                 {hasDraft
                   ? i18n.translate(
-                      'xpack.enterpriseSearch.index.connector.syncRules.editFilterRulesTitle',
+                      'xpack.searchConnectorsindex.connector.syncRules.editFilterRulesTitle',
                       {
                         defaultMessage: 'Edit sync rules',
                       }
                     )
                   : i18n.translate(
-                      'xpack.enterpriseSearch.index.connector.syncRules.draftNewFilterRulesTitle',
+                      'xpack.searchConnectorsindex.connector.syncRules.draftNewFilterRulesTitle',
                       {
                         defaultMessage: 'Draft new sync rules',
                       }
@@ -135,7 +136,7 @@ export const ConnectorSyncRules: React.FC = () => {
                   <EuiTitle size="s">
                     <h3>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesTitle',
+                        'xpack.searchConnectorscontent.index.connector.syncRules.basicRulesTitle',
                         {
                           defaultMessage: 'Basic rules',
                         }
@@ -146,7 +147,7 @@ export const ConnectorSyncRules: React.FC = () => {
                   <EuiText size="s">
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription',
+                        'xpack.searchConnectorscontent.index.connector.syncRules.basicRulesDescription',
                         {
                           defaultMessage:
                             'These rules apply to documents during the integration filtering phase.',
@@ -168,7 +169,7 @@ export const ConnectorSyncRules: React.FC = () => {
                   <EuiTitle size="s">
                     <h3>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesTitle',
+                        'xpack.searchConnectorscontent.index.connector.syncRules.advancedRulesTitle',
                         {
                           defaultMessage: 'Advanced rules',
                         }
@@ -179,7 +180,7 @@ export const ConnectorSyncRules: React.FC = () => {
                   <EuiText size="s">
                     <p>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersDescription',
+                        'xpack.searchConnectorscontent.index.connector.syncRules.advancedFiltersDescription',
                         {
                           defaultMessage:
                             'These rules apply before the data is obtained from the data source.',
@@ -195,7 +196,7 @@ export const ConnectorSyncRules: React.FC = () => {
                         target="_blank"
                       >
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersLinkTitle',
+                          'xpack.searchConnectorscontent.index.connector.syncRules.advancedFiltersLinkTitle',
                           {
                             defaultMessage: 'Learn more about advanced sync rules.',
                           }
@@ -210,7 +211,7 @@ export const ConnectorSyncRules: React.FC = () => {
                 <EuiFlexItem>
                   <EuiCallOut
                     title={i18n.translate(
-                      'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutTitle',
+                      'xpack.searchConnectorscontent.index.connector.syncRules.advancedRulesCalloutTitle',
                       { defaultMessage: 'Configuration' }
                     )}
                     color="warning"
@@ -219,7 +220,7 @@ export const ConnectorSyncRules: React.FC = () => {
                     <EuiText size="s">
                       <p>
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutDescription',
+                          'xpack.searchConnectorscontent.index.connector.syncRules.advancedRulesCalloutDescription',
                           {
                             defaultMessage:
                               'This advanced sync rule might override some configuration fields.',

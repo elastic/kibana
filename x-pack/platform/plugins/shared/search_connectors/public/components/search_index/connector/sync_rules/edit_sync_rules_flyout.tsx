@@ -62,7 +62,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
             ),
             id: FilteringTabs.BASIC,
             name: i18n.translate(
-              'xpack.enterpriseSearch.content.index.connector.syncRules.basicTabTitle',
+              'xpack.searchConnectorscontent.index.connector.syncRules.basicTabTitle',
               {
                 defaultMessage: 'Basic rules',
               }
@@ -80,7 +80,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
             ),
             id: FilteringTabs.ADVANCED,
             name: i18n.translate(
-              'xpack.enterpriseSearch.content.index.connector.syncRules.advancedTabTitle',
+              'xpack.searchConnectorscontent.index.connector.syncRules.advancedTabTitle',
               {
                 defaultMessage: 'Advanced rules',
               }
@@ -96,7 +96,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
         <EuiTitle size="m">
           <h2 id="rulesFlyout">
             {i18n.translate(
-              'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.title',
+              'xpack.searchConnectorscontent.index.connector.syncRules.flyout.title',
               {
                 defaultMessage: 'Draft rules',
               }
@@ -106,7 +106,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
         <EuiSpacer />
         <EuiText size="s">
           {i18n.translate(
-            'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.description',
+            'xpack.searchConnectorscontent.index.connector.syncRules.flyout.description',
             {
               defaultMessage: 'Plan and edit rules here before applying them to the next sync.',
             }
@@ -120,7 +120,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
                 <EuiCallOut
                   color="danger"
                   title={i18n.translate(
-                    'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.errorTitle',
+                    'xpack.searchConnectorscontent.index.connector.syncRules.flyout.errorTitle',
                     {
                       defaultMessage:
                         'Sync {idsLength, plural, one {rule} other {rules}} {ids} {idsLength, plural, one {is} other {are}} invalid.',

@@ -20,6 +20,10 @@ export const encodePathParams = (pathParams: PathParams) => {
 };
 
 export const generateEncodedPath = (path: string, pathParams: PathParams) => {
+ /* const url = application?.getUrlForApp('management', {
+                          path: `/data/search_connectors`,
+                        });
+                        application?.navigateToUrl(`${url}${NEW_INDEX_SELECT_CONNECTOR_PATH}`);*/
   return generatePath(path, encodePathParams(pathParams));
 };
 

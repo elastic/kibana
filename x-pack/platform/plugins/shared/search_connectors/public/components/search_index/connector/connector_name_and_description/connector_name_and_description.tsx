@@ -20,6 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';
 
@@ -28,7 +29,10 @@ import { ConnectorNameAndDescriptionLogic } from './connector_name_and_descripti
 import { DESCRIPTION_LABEL, EDIT_BUTTON_LABEL, NAME_LABEL } from '../../../connectors/translations';
 
 export const ConnectorNameAndDescription: React.FC = () => {
-  const { index } = useValues(IndexViewLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { index } = useValues(IndexViewLogic({ http }));
   const {
     isEditing,
     nameAndDescription: { name, description },
@@ -44,7 +48,7 @@ export const ConnectorNameAndDescription: React.FC = () => {
       <EuiFlexItem>
         <EuiText size="s">
           {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionForm.description',
+            'xpack.searchConnectorscontent.indices.configurationConnector.nameAndDescriptionForm.description',
             {
               defaultMessage:
                 'By naming and describing this connector your colleagues and wider team will know what this connector is meant for.',

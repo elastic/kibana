@@ -37,7 +37,7 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
           }}
         >
           {i18n.translate(
-            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.generateApiKey.button.label',
+            'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.generateApiKey.button.label',
             {
               defaultMessage: 'Generate configuration',
             }

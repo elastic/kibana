@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { IngestionStatus } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
@@ -31,7 +32,7 @@ const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestion
   <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
     <EuiStat
       titleSize="s"
-      description={i18n.translate('xpack.enterpriseSearch.connector.ingestionStatus.title', {
+      description={i18n.translate('xpack.searchConnectorsconnector.ingestionStatus.title', {
         defaultMessage: 'Ingestion status',
       })}
       title={ingestionStatusToText(ingestionStatus)}
@@ -40,7 +41,10 @@ const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestion
 );
 
 export const ConnectorOverviewPanels: React.FC = () => {
-  const { ingestionStatus, index } = useValues(IndexViewLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { ingestionStatus, index } = useValues(IndexViewLogic({ http }));
 
   return isConnectorIndex(index) ? (
     <EuiFlexGroup>
@@ -50,7 +54,7 @@ export const ConnectorOverviewPanels: React.FC = () => {
             data-test-subj="entSearchContent-indexOverview-totalStats-documentCount"
             titleSize="s"
             description={i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
+              'xpack.searchConnectorscontent.searchIndex.totalStats.documentCountCardLabel',
               {
                 defaultMessage: 'Document count',
               }

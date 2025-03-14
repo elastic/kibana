@@ -53,7 +53,7 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({ setCurrentStep }
           <EuiText color={isNextStepEnabled ? 'default' : 'subdued'}>
             <h3>
               {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.title',
+                'xpack.searchConnectorscreateConnector.DeploymentStep.Configuration.title',
                 {
                   defaultMessage: 'Configuration',
                 }
@@ -64,7 +64,7 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({ setCurrentStep }
           <EuiText color={isNextStepEnabled ? 'default' : 'subdued'} size="s">
             <p>
               {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.description',
+                'xpack.searchConnectorscreateConnector.DeploymentStep.Configuration.description',
                 {
                   defaultMessage: 'Now configure your Elastic crawler and sync the data.',
                 }

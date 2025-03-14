@@ -16,14 +16,14 @@ import { docLinks } from '../../shared/doc_links';
 export const AdvancedConfigOverrideCallout: React.FC = () => (
   <EuiCallOut
     title={i18n.translate(
-      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
+      'xpack.searchConnectorscontent.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
       { defaultMessage: 'Configuration warning' }
     )}
     iconType="iInCircle"
     color="warning"
   >
     <FormattedMessage
-      id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+      id="xpack.searchConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
       defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
       values={{
         advancedSyncRulesDocs: (
@@ -34,7 +34,7 @@ export const AdvancedConfigOverrideCallout: React.FC = () => (
             target="_blank"
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+              'xpack.searchConnectorscontent.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
               { defaultMessage: 'Advanced Sync Rules' }
             )}
           </EuiLink>

@@ -30,7 +30,7 @@ export const deleteIndex = async ({
 
 export const DeleteIndexApiLogic = createApiLogic(['delete_index_api_logic'], deleteIndex, {
   showSuccessFlashFn: ({ indexName }) =>
-    i18n.translate('xpack.enterpriseSearch.content.indices.deleteIndex.successToast.title', {
+    i18n.translate('xpack.searchConnectorscontent.indices.deleteIndex.successToast.title', {
       defaultMessage:
         'Your index {indexName} and any associated ingestion configurations were successfully deleted',
       values: {

@@ -46,7 +46,7 @@ const ConfirmModal: React.FC<{
 }> = ({ onCancel, onConfirm }) => (
   <EuiConfirmModal
     title={i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.title',
+      'xpack.searchConnectorscontent.indices.configurationConnector.apiKey.confirmModal.title',
       {
         defaultMessage: 'Generate an Elasticsearch API key',
       }
@@ -54,13 +54,13 @@ const ConfirmModal: React.FC<{
     onCancel={onCancel}
     onConfirm={onConfirm}
     cancelButtonText={i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.cancelButton.label',
+      'xpack.searchConnectorscontent.indices.configurationConnector.apiKey.confirmModal.cancelButton.label',
       {
         defaultMessage: 'Cancel',
       }
     )}
     confirmButtonText={i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.confirmButton.label',
+      'xpack.searchConnectorscontent.indices.configurationConnector.apiKey.confirmModal.confirmButton.label',
       {
         defaultMessage: 'Generate API key',
       }
@@ -68,7 +68,7 @@ const ConfirmModal: React.FC<{
     defaultFocusedButton="confirm"
   >
     {i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.description',
+      'xpack.searchConnectorscontent.indices.configurationConnector.apiKey.confirmModal.description',
       {
         defaultMessage:
           'Generating a new API key will invalidate the previous key. Are you sure you want to generate a new API key? This can not be undone.',
@@ -113,7 +113,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                 <EuiText size="s">
                   <p>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.connectorDeployment.connectorCreatedFlexItemLabel',
+                      'xpack.searchConnectorsconnectorDeployment.connectorCreatedFlexItemLabel',
                       { defaultMessage: 'Connector created' }
                     )}
                   </p>
@@ -159,7 +159,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                       iconType="copyClipboard"
                       onClick={copy}
                       aria-label={i18n.translate(
-                        'xpack.enterpriseSearch.connectorDeployment.copyConnectorId',
+                        'xpack.searchConnectorsconnectorDeployment.copyConnectorId',
                         { defaultMessage: 'Copy connector ID' }
                       )}
                     />
@@ -175,7 +175,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.connectorDeployment.indexCreatedFlexItemLabel',
+                  'xpack.searchConnectorsconnectorDeployment.indexCreatedFlexItemLabel',
                   { defaultMessage: 'Index created' }
                 )}
               </EuiFlexItem>
@@ -196,7 +196,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.connectorDeployment.apiKeyCreatedFlexItemLabel',
+                      'xpack.searchConnectorsconnectorDeployment.apiKeyCreatedFlexItemLabel',
                       { defaultMessage: 'API key created' }
                     )}
                     {apiKey?.encoded && ` *`}
@@ -238,7 +238,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                                   onClick={refreshButtonClick}
                                   disabled={!connector.index_name}
                                   aria-label={i18n.translate(
-                                    'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
+                                    'xpack.searchConnectorsconnectorDeployment.refreshAPIKey',
                                     { defaultMessage: 'Refresh an Elasticsearch API key' }
                                   )}
                                 />
@@ -251,7 +251,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                                 iconType="copyClipboard"
                                 onClick={copy}
                                 aria-label={i18n.translate(
-                                  'xpack.enterpriseSearch.connectorDeployment.copyIndexName',
+                                  'xpack.searchConnectorsconnectorDeployment.copyIndexName',
                                   { defaultMessage: 'Copy index name' }
                                 )}
                               />
@@ -286,7 +286,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               color="success"
               size="s"
               title={i18n.translate(
-                'xpack.enterpriseSearch.connectorDeployment.generatedConfigCallout',
+                'xpack.searchConnectorsconnectorDeployment.generatedConfigCallout',
                 {
                   defaultMessage: `You'll only see this API key once, so save it somewhere safe. We don't store your API keys, so if you lose a key you'll need to generate a replacement`,
                 }

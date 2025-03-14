@@ -30,7 +30,7 @@ export const EditSyncRulesTab: FC<
                 onClick={revertAction}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.revertButtonTitle',
+                  'xpack.searchConnectorscontent.index.connector.syncRules.flyout.revertButtonTitle',
                   {
                     defaultMessage: 'Revert to active rules',
                   }

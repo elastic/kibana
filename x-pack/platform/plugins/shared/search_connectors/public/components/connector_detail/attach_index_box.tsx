@@ -29,20 +29,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Connector, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AttachIndexLogic } from './attach_index_logic';
 import { Status } from '../../../common/types/api';
 import { FetchAvailableIndicesAPILogic } from '../../api/index/fetch_available_indices_api_logic';
 import { formatApiName } from '../../utils/format_api_name';
 
 const CREATE_NEW_INDEX_GROUP_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.attachIndexBox.optionsGroup.createNewIndex',
+  'xpack.searchConnectorsattachIndexBox.optionsGroup.createNewIndex',
   {
     defaultMessage: 'Create new index',
   }
 );
 
 const SELECT_EXISTING_INDEX_GROUP_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.attachIndexBox.optionsGroup.selectExistingIndex',
+  'xpack.searchConnectorsattachIndexBox.optionsGroup.selectExistingIndex',
   {
     defaultMessage: 'Select existing index',
   }
@@ -53,15 +54,20 @@ export interface AttachIndexBoxProps {
 }
 
 export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => {
+  const {
+    services: { http },
+  } = useKibana();
   const { indexName } = useParams<{ indexName: string }>();
-  const { createIndex, attachIndex, setConnector, checkIndexExists } = useActions(AttachIndexLogic);
+  const { createIndex, attachIndex, setConnector, checkIndexExists } = useActions(
+    AttachIndexLogic({ http })
+  );
   const {
     isLoading: isSaveLoading,
     isExistLoading,
     indexExists,
     createApiError,
     attachApiError,
-  } = useValues(AttachIndexLogic);
+  } = useValues(AttachIndexLogic({ http }));
 
   const { makeRequest } = useActions(FetchAvailableIndicesAPILogic);
   const { data, status } = useValues(FetchAvailableIndicesAPILogic);
@@ -212,7 +218,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   const error =
     !!query && indexExists[query.searchValue]
       ? i18n.translate(
-          'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexErrorTextLabel',
+          'xpack.searchConnectorsattachIndexBox.euiFormRow.associatedIndexErrorTextLabel',
           {
             defaultMessage:
               "You can't create a new index using an existing index name. Choose an existing index or create a new index with a new name.",
@@ -229,7 +235,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     <EuiPanel hasShadow={false} hasBorder id="attachIndexBox">
       <EuiTitle size="s">
         <h4>
-          {i18n.translate('xpack.enterpriseSearch.attachIndexBox.h4.attachAnIndexLabel', {
+          {i18n.translate('xpack.searchConnectorsattachIndexBox.h4.attachAnIndexLabel', {
             defaultMessage: 'Attach an index',
           })}
         </h4>
@@ -237,7 +243,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       <EuiSpacer />
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.enterpriseSearch.attachIndexBox.thisIndexWillHoldTextLabel"
+          id="xpack.searchConnectors.attachIndexBox.thisIndexWillHoldTextLabel"
           defaultMessage="This index will hold your data source content, and is optimized with default field mappings
           for relevant search experiences. Give your index a unique name and optionally set a default
           language analyzer for the index."
@@ -248,20 +254,20 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexLabel',
+              'xpack.searchConnectorsattachIndexBox.euiFormRow.associatedIndexLabel',
               { defaultMessage: 'Associated index' }
             )}
             helpText={
               connector.is_native
                 ? i18n.translate(
-                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedManagedConnectorIndexHelpTextLabel',
+                    'xpack.searchConnectorsattachIndexBox.euiFormRow.associatedManagedConnectorIndexHelpTextLabel',
                     {
                       defaultMessage:
                         'Managed connector indices must be prefixed. Use an existing index or create a new one.',
                     }
                   )
                 : i18n.translate(
-                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
+                    'xpack.searchConnectorsattachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
                     { defaultMessage: 'You can use an existing index or create a new one.' }
                   )
             }
@@ -270,11 +276,11 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           >
             <EuiComboBox
               placeholder={i18n.translate(
-                'xpack.enterpriseSearch.attachIndexBox.euiFormRow.indexSelector.placeholder',
+                'xpack.searchConnectorsattachIndexBox.euiFormRow.indexSelector.placeholder',
                 { defaultMessage: 'Select or create an index' }
               )}
               customOptionText={i18n.translate(
-                'xpack.enterpriseSearch.attachIndexBox.euiFormRow.indexSelector.customOption',
+                'xpack.searchConnectorsattachIndexBox.euiFormRow.indexSelector.customOption',
                 {
                   defaultMessage: 'Create index {searchValue}',
                   values: { searchValue: prefixConnectorIndex('{searchValue}') },
@@ -337,7 +343,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
             }
             isLoading={isSaveLoading}
           >
-            {i18n.translate('xpack.enterpriseSearch.attachIndexBox.saveConfigurationButtonLabel', {
+            {i18n.translate('xpack.searchConnectorsattachIndexBox.saveConfigurationButtonLabel', {
               defaultMessage: 'Save configuration',
             })}
           </EuiButton>
@@ -353,7 +359,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
             </EuiFlexItem>
             <EuiText>
               <p>
-                {i18n.translate('xpack.enterpriseSearch.attachIndexBox.orPanelLabel', {
+                {i18n.translate('xpack.searchConnectorsattachIndexBox.orPanelLabel', {
                   defaultMessage: 'OR',
                 })}
               </p>
@@ -379,7 +385,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 disabled={indexExists[sanitizedName]}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel',
+                  'xpack.searchConnectorsattachIndexBox.createSameIndexButtonLabel',
                   {
                     defaultMessage: 'Create and attach an index named {indexName}',
                     values: { indexName: sanitizedName },
@@ -388,7 +394,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               </EuiButton>
               {indexExists[sanitizedName] && (
                 <EuiText size="xs">
-                  {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
+                  {i18n.translate('xpack.searchConnectorsattachIndexBox.indexNameExistsError', {
                     defaultMessage: 'Index with name {indexName} already exists',
                     values: { indexName: sanitizedName },
                   })}

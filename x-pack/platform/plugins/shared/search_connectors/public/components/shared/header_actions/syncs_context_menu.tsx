@@ -43,13 +43,16 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
     services: { http },
   } = useKibana();
   const { isAgentlessEnabled } = useAppContext();
-  const { ingestionStatus, isCanceling, isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
+  const { ingestionStatus, isCanceling, isSyncing, isWaitingForSync } = useValues(
+    IndexViewLogic({ http })
+  );
   const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } = useValues(
     ConnectorViewLogic({ http })
   );
   const { status } = useValues(CancelSyncsApiLogic);
-  const { startSync, startIncrementalSync, startAccessControlSync, cancelSyncs } =
-    useActions(SyncsLogic);
+  const { startSync, startIncrementalSync, startAccessControlSync, cancelSyncs } = useActions(
+    SyncsLogic({ http })
+  );
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -58,18 +61,18 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
   const getSyncButtonText = () => {
     if (isWaitingForSync) {
       return i18n.translate(
-        'xpack.enterpriseSearch.content.index.syncButton.waitingForSync.label',
+        'xpack.searchConnectorscontent.index.syncButton.waitingForSync.label',
         {
           defaultMessage: 'Waiting for sync',
         }
       );
     }
     if (isSyncing && connector?.status !== ConnectorStatus.ERROR) {
-      return i18n.translate('xpack.enterpriseSearch.content.index.syncButton.syncing.label', {
+      return i18n.translate('xpack.searchConnectorscontent.index.syncButton.syncing.label', {
         defaultMessage: 'Syncing',
       });
     }
-    return i18n.translate('xpack.enterpriseSearch.content.index.syncButton.label', {
+    return i18n.translate('xpack.searchConnectorscontent.index.syncButton.label', {
       defaultMessage: 'Sync',
     });
   };
@@ -99,7 +102,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
                 'data-test-subj': `entSearchContent-connector-header-sync-startSync`,
                 disabled: isSyncsDisabled,
                 icon: 'play',
-                name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullSync', {
+                name: i18n.translate('xpack.searchConnectorsindex.header.more.fullSync', {
                   defaultMessage: 'Full Content',
                 }),
                 onClick: () => {
@@ -116,7 +119,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
                 'data-test-subj': `entSearchContent-connector-header-sync-more-incrementalSync`,
                 disabled: isSyncsDisabled,
                 icon: 'play',
-                name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
+                name: i18n.translate('xpack.searchConnectorsindex.header.more.incrementalSync', {
                   defaultMessage: 'Incremental Content',
                 }),
                 onClick: () => {
@@ -136,7 +139,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
                   isSyncsDisabled || !connector?.configuration.use_document_level_security?.value
                 ),
                 icon: 'play',
-                name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
+                name: i18n.translate('xpack.searchConnectorsindex.header.more.accessControlSync', {
                   defaultMessage: 'Access Control',
                 }),
                 onClick: () => {
@@ -155,7 +158,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
           name: (
             <EuiText color="danger" size="s">
               <p>
-                {i18n.translate('xpack.enterpriseSearch.index.header.cancelSyncsTitle', {
+                {i18n.translate('xpack.searchConnectorsindex.header.cancelSyncsTitle', {
                   defaultMessage: 'Cancel Syncs',
                 })}
               </p>

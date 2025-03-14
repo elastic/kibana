@@ -30,6 +30,7 @@ import {
   FilteringRuleRuleValues,
 } from '@kbn/search-connectors';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
@@ -39,8 +40,11 @@ import {
   InlineEditableTableProps,
 } from '../../../shared/tables/inline_editable_table/inline_editable_table_logic';
 import { InlineEditableTable } from '../../../shared/tables/inline_editable_table';
-import { FormErrors, InlineEditableTableColumn } from '../../../shared/tables/inline_editable_table/types';
 import { ItemWithAnID } from '../../../shared/types';
+import {
+  FormErrors,
+  InlineEditableTableColumn,
+} from '../../../shared/tables/inline_editable_table/types';
 
 const instanceId = 'FilteringRulesTable';
 
@@ -52,7 +56,7 @@ function validateItem(filteringRule: FilteringRule): FormErrors {
     } catch {
       return {
         value: i18n.translate(
-          'xpack.enterpriseSearch.content.index.connector.filteringRules.regExError',
+          'xpack.searchConnectorscontent.index.connector.filteringRules.regExError',
           { defaultMessage: 'Value should be a regular expression' }
         ),
       };
@@ -62,21 +66,24 @@ function validateItem(filteringRule: FilteringRule): FormErrors {
 }
 
 export const SyncRulesTable: React.FC = () => {
-  const { editableFilteringRules } = useValues(ConnectorFilteringLogic);
-  const { indexName } = useValues(IndexViewLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { editableFilteringRules } = useValues(ConnectorFilteringLogic({ http }));
+  const { indexName } = useValues(IndexViewLogic({ http }));
   const { addFilteringRule, deleteFilteringRule, reorderFilteringRules, updateFilteringRule } =
-    useActions(ConnectorFilteringLogic);
+    useActions(ConnectorFilteringLogic({ http }));
 
   const description = (
     <EuiText size="s" color="default">
-      {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.description', {
+      {i18n.translate('xpack.searchConnectorscontent.index.connector.syncRules.description', {
         defaultMessage:
           'Add a sync rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of sync rules in the listed order.',
         values: { indexName },
       })}
       <EuiSpacer />
       <EuiLink href={docLinks.syncRules} external target="_blank">
-        {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.link', {
+        {i18n.translate('xpack.searchConnectorscontent.index.connector.syncRules.link', {
           defaultMessage: 'Learn more about customizing your sync rules.',
         })}
       </EuiLink>
@@ -103,7 +110,7 @@ export const SyncRulesTable: React.FC = () => {
         />
       ),
       field: 'policy',
-      name: i18n.translate('xpack.enterpriseSearch.index.connector.rule.basicTable.policyTitle', {
+      name: i18n.translate('xpack.searchConnectorsindex.connector.rule.basicTable.policyTitle', {
         defaultMessage: 'Policy',
       }),
       render: (indexingRule: any) => (
@@ -120,7 +127,7 @@ export const SyncRulesTable: React.FC = () => {
       ),
       field: 'field',
       name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.fieldTitle',
+        'xpack.searchConnectorsindex.connector.syncRules.basicTable.fieldTitle',
         { defaultMessage: 'Field' }
       ),
       render: (rule: any) => (
@@ -143,7 +150,7 @@ export const SyncRulesTable: React.FC = () => {
       ),
       field: 'rule',
       name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.ruleTitle',
+        'xpack.searchConnectorsindex.connector.syncRules.basicTable.ruleTitle',
         { defaultMessage: 'Rule' }
       ),
       render: (rule: any) => <EuiText size="s">{filteringRuleToText(rule.rule)}</EuiText>,
@@ -158,7 +165,7 @@ export const SyncRulesTable: React.FC = () => {
       ),
       field: 'value',
       name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.valueTitle',
+        'xpack.searchConnectorsindex.connector.syncRules.basicTable.valueTitle',
         {
           defaultMessage: 'Value',
         }
@@ -174,7 +181,7 @@ export const SyncRulesTable: React.FC = () => {
   return (
     <InlineEditableTable
       addButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.index.connector.syncRules.table.addRuleLabel',
+        'xpack.searchConnectorscontent.index.connector.syncRules.table.addRuleLabel',
         { defaultMessage: 'Add sync rule' }
       )}
       columns={columns}
@@ -214,7 +221,7 @@ export const SyncRulesTable: React.FC = () => {
       bottomRows={[
         <EuiText size="s">
           {i18n.translate(
-            'xpack.enterpriseSearch.content.sources.basicRulesTable.includeEverythingMessage',
+            'xpack.searchConnectorscontent.sources.basicRulesTable.includeEverythingMessage',
             {
               defaultMessage: 'Include everything else from this source',
             }

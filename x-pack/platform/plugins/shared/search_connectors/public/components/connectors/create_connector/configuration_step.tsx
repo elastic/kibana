@@ -80,7 +80,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.title',
+                    'xpack.searchConnectorscreateConnector.configurationStep.agentlessDeploymentNotReadyCallOut.title',
                     {
                       defaultMessage: 'Provisioning infrastructure',
                     }
@@ -92,7 +92,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
             <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
+                'xpack.searchConnectorscreateConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
                 {
                   defaultMessage:
                     'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
@@ -131,7 +131,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
             <EuiText>
               <h3>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.createConnector.configurationStep.h4.finishUpLabel',
+                  'xpack.searchConnectorscreateConnector.configurationStep.h4.finishUpLabel',
                   {
                     defaultMessage: 'Finish up',
                   }
@@ -142,7 +142,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
             <EuiText color={isNextStepEnabled ? 'default' : 'subdued'} size="s">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.createConnector.configurationStep.p.description',
+                  'xpack.searchConnectorscreateConnector.configurationStep.p.description',
                   {
                     defaultMessage:
                       'You can manually sync your data, schedule a recurring sync or manage your domains.',
@@ -157,25 +157,25 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
               onClick={async () => {
                 if (isFormEditing) {
                   const confirmResponse = await overlays?.openConfirm(
-                    i18n.translate('xpack.enterpriseSearch.configureConnector.unsavedPrompt.body', {
+                    i18n.translate('xpack.searchConnectorsconfigureConnector.unsavedPrompt.body', {
                       defaultMessage:
                         'You are still editing connector configuration, are you sure you want to continue without saving? You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
                     }),
                     {
                       title: i18n.translate(
-                        'xpack.enterpriseSearch.configureConnector.unsavedPrompt.title',
+                        'xpack.searchConnectorsconfigureConnector.unsavedPrompt.title',
                         {
                           defaultMessage: 'Connector configuration is not saved',
                         }
                       ),
                       cancelButtonText: i18n.translate(
-                        'xpack.enterpriseSearch.configureConnector.unsavedPrompt.cancel',
+                        'xpack.searchConnectorsconfigureConnector.unsavedPrompt.cancel',
                         {
                           defaultMessage: 'Continue setup',
                         }
                       ),
                       confirmButtonText: i18n.translate(
-                        'xpack.enterpriseSearch.configureConnector.unsavedPrompt.confirm',
+                        'xpack.searchConnectorsconfigureConnector.unsavedPrompt.confirm',
                         {
                           defaultMessage: 'Leave the page',
                         }

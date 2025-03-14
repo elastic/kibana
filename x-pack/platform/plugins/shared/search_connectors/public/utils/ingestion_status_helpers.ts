@@ -11,30 +11,30 @@ import { IngestionStatus } from '@kbn/search-connectors';
 export function ingestionStatusToText(ingestionStatus: IngestionStatus): string {
   if (ingestionStatus === IngestionStatus.CONNECTED) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
+      'xpack.searchConnectorscontent.searchIndices.ingestionStatus.connected.label',
       { defaultMessage: 'Connected' }
     );
   }
   if (ingestionStatus === IngestionStatus.ERROR) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connectorError.label',
+      'xpack.searchConnectorscontent.searchIndices.ingestionStatus.connectorError.label',
       { defaultMessage: 'Connector failure' }
     );
   }
   if (ingestionStatus === IngestionStatus.SYNC_ERROR) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.syncError.label',
+      'xpack.searchConnectorscontent.searchIndices.ingestionStatus.syncError.label',
       { defaultMessage: 'Sync failure' }
     );
   }
   if (ingestionStatus === IngestionStatus.CONFIGURED) {
     return i18n.translate(
-      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.configured.label',
+      'xpack.searchConnectorscontent.searchIndices.ingestionStatus.configured.label',
       { defaultMessage: 'Configured' }
     );
   }
   return i18n.translate(
-    'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
+    'xpack.searchConnectorscontent.searchIndices.ingestionStatus.incomplete.label',
     { defaultMessage: 'Incomplete' }
   );
 }

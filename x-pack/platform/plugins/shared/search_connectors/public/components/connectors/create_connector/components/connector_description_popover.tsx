@@ -26,7 +26,7 @@ import { useAppContext } from '../../../../app_context';
 const nativePopoverPanels = [
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.native.chooseADataSourceLabel',
+      'xpack.searchConnectorsconnectorDescriptionPopover.connectorDescriptionBadge.native.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
     icons: [<EuiIcon size="l" type="documents" />],
@@ -34,7 +34,7 @@ const nativePopoverPanels = [
   },
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
+      'xpack.searchConnectorsconnectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
       { defaultMessage: 'Configure your connector using our Kibana UI' }
     ),
     icons: [<EuiIcon size="l" type="plugs" />, <EuiIcon size="l" type="logoElastic" />],
@@ -45,7 +45,7 @@ const nativePopoverPanels = [
 const connectorClientPopoverPanels = [
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.client.chooseADataSourceLabel',
+      'xpack.searchConnectorsconnectorDescriptionPopover.connectorDescriptionBadge.client.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
     icons: [<EuiIcon size="l" type="documents" />],
@@ -53,7 +53,7 @@ const connectorClientPopoverPanels = [
   },
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.client.configureConnectorLabel',
+      'xpack.searchConnectorsconnectorDescriptionPopover.connectorDescriptionBadge.client.configureConnectorLabel',
       {
         defaultMessage:
           'Deploy connector code on your own infrastructure by running from source or using Docker',
@@ -68,7 +68,7 @@ const connectorClientPopoverPanels = [
   },
   {
     description: i18n.translate(
-      'xpack.enterpriseSearch.connectorDescriptionPopover.connectorDescriptionBadge.client.enterDetailsLabel',
+      'xpack.searchConnectorsconnectorDescriptionPopover.connectorDescriptionBadge.client.enterDetailsLabel',
       {
         defaultMessage: 'Enter access and connection details for your data source',
       }
@@ -104,7 +104,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
       anchorPosition="upCenter"
       button={
         <EuiButtonIcon
-          aria-label={i18n.translate('xpack.enterpriseSearch.createConnector.iInCircle', {
+          aria-label={i18n.translate('xpack.searchConnectorscreateConnector.iInCircle', {
             defaultMessage: 'More information',
           })}
           data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
@@ -133,14 +133,14 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                     title={
                       showIsOnlySelfManaged
                         ? i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
+                            'xpack.searchConnectorscreateConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
                             {
                               defaultMessage:
                                 'This connector is not available as an Elastic-managed Connector',
                             }
                           )
                         : i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isRunningLocallyTitle',
+                            'xpack.searchConnectorscreateConnector.connectorDescriptionBadge.isRunningLocallyTitle',
                             {
                               defaultMessage:
                                 'Elastic managed connectors are only available in Elastic Cloud',
@@ -162,7 +162,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
               <EuiFlexItem>
                 <EuiCallOut
                   title={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
+                    'xpack.searchConnectorscreateConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
                     {
                       defaultMessage: 'Elastic managed Connector are no longer supported',
                     }
@@ -216,7 +216,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                 <EuiText textAlign="center">
                   <h3>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.learnMore',
+                      'xpack.searchConnectorscreateConnector.connectorDescriptionBadge.learnMore',
                       { defaultMessage: 'Explore Elastic Cloud with your 14-day free trial' }
                     )}
                   </h3>
@@ -225,7 +225,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
               <EuiFlexItem grow>
                 <EuiText size="s" textAlign="center" color="subdued">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.learnMore',
+                    'xpack.searchConnectorscreateConnector.connectorDescriptionBadge.learnMore',
                     {
                       defaultMessage:
                         'Take advantage of Elastic managed connectors and generative AI capabilities to address search challenges across your organization in real time, at scale.',
@@ -239,7 +239,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                   href="https://cloud.elastic.co/registration?onboarding_token=connectors"
                   target="_blank"
                 >
-                  {i18n.translate('xpack.enterpriseSearch.createConnector.startTrialButtonLabel', {
+                  {i18n.translate('xpack.searchConnectorscreateConnector.startTrialButtonLabel', {
                     defaultMessage: 'Start free trial',
                   })}
                 </EuiButton>
