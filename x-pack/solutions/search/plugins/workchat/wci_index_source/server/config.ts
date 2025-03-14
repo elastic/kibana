@@ -17,4 +17,4 @@ export type WCIIndexSourceConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<WCIIndexSourceConfig> = {
   exposeToBrowser: {},
   schema: configSchema,
-}; 
+};

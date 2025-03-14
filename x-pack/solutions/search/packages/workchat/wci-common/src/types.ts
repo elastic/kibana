@@ -17,7 +17,9 @@ import type { IntegrationType } from './constants';
  * of all things related to this integration type, such as being
  * able to create an actual integration instance.
  */
-export interface WorkchatIntegrationDefinition<T extends IntegrationConfiguration = IntegrationConfiguration> {
+export interface WorkchatIntegrationDefinition<
+  T extends IntegrationConfiguration = IntegrationConfiguration
+> {
   /**
    * Returns the type of integration.
    */

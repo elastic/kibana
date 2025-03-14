@@ -14,4 +14,4 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new WCIExternalServerPlugin(initializerContext);
 };
 
-export type { WCIExternalServerPluginSetup, WCIExternalServerPluginStart } from './types'; 
+export type { WCIExternalServerPluginSetup, WCIExternalServerPluginStart } from './types';

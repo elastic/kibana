@@ -15,6 +15,8 @@ import { JSONRPCMessage, JSONRPCMessageSchema } from '@modelcontextprotocol/sdk/
  * TODO: remove this once figured out how to import the auth package
  */
 
+// @eslint-disable-file
+
 export class SseError extends Error {
   constructor(
     public readonly code: number | undefined,

@@ -74,7 +74,6 @@ export const useChat = ({
 
       events$.subscribe({
         next: (event) => {
-
           // if (event.type !== 'message_chunk') {
           //   console.log('*** event', event);
           // }

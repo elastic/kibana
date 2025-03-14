@@ -22,4 +22,4 @@ export const plugin: PluginInitializer<
   return new WCIExternalServerPlugin(context);
 };
 
-export type { WCIExternalServerPluginSetup, WCIExternalServerPluginStart } from './types'; 
+export type { WCIExternalServerPluginSetup, WCIExternalServerPluginStart } from './types';

@@ -23,9 +23,7 @@ export const getExternalServerIntegrationDefinition = ({
 }): WorkchatIntegrationDefinition<WCIExternalServerConfiguration> => {
   return {
     getType: () => IntegrationType.external_server,
-    createIntegration: async ({
-      configuration,
-    }): Promise<WorkChatIntegration> => {
+    createIntegration: async ({ configuration }): Promise<WorkChatIntegration> => {
       const client = await getClientForExternalServer({ serverUrl: configuration.url });
 
       return {
@@ -34,4 +32,4 @@ export const getExternalServerIntegrationDefinition = ({
       };
     },
   };
-}; 
+};

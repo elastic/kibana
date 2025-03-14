@@ -6,4 +6,4 @@
  */
 
 export const PLUGIN_ID = 'wciExternalServer';
-export const PLUGIN_NAME = 'wciExternalServer'; 
+export const PLUGIN_NAME = 'wciExternalServer';

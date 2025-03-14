@@ -23,10 +23,7 @@ export const getIndexSourceIntegrationDefinition = ({
 }): WorkchatIntegrationDefinition<WCIIndexSourceConfiguration> => {
   return {
     getType: () => IntegrationType.index_source,
-    createIntegration: async ({
-      request,
-      configuration,
-    }): Promise<WorkChatIntegration> => {
+    createIntegration: async ({ request, configuration }): Promise<WorkChatIntegration> => {
       const [coreStart] = await core.getStartServices();
       const elasticsearchClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 

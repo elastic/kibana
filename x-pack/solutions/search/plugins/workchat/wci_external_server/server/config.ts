@@ -17,4 +17,4 @@ export type WCIExternalServerConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<WCIExternalServerConfig> = {
   exposeToBrowser: {},
   schema: configSchema,
-}; 
+};

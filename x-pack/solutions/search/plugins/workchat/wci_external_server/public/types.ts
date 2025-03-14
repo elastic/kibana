@@ -15,4 +15,4 @@ export interface WCIExternalServerPluginStart {}
 export interface WCIExternalServerPluginSetupDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIExternalServerPluginStartDependencies {} 
+export interface WCIExternalServerPluginStartDependencies {}

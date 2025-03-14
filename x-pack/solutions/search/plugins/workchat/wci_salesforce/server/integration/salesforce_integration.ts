@@ -24,10 +24,7 @@ export const getSalesforceIntegrationDefinition = ({
 }): WorkchatIntegrationDefinition<SalesforceConfiguration> => {
   return {
     getType: () => IntegrationType.salesforce,
-    createIntegration: async ({
-      request,
-      configuration,
-    }): Promise<WorkChatIntegration> => {
+    createIntegration: async ({ request, configuration }): Promise<WorkChatIntegration> => {
       const [coreStart] = await core.getStartServices();
       const elasticsearchClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 

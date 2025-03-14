@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getExternalServerIntegrationDefinition } from './external_server_integration'; 
+export { getExternalServerIntegrationDefinition } from './external_server_integration';

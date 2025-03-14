@@ -6,4 +6,4 @@
  */
 
 export const PLUGIN_ID = 'wciIndexSource';
-export const PLUGIN_NAME = 'wciIndexSource'; 
+export const PLUGIN_NAME = 'wciIndexSource';

@@ -28,7 +28,7 @@ export interface WCIIndexSourceConfiguration extends IntegrationConfiguration {
     contextFields: WCIIndexSourceContextField[];
   };
   queryTemplate: string;
-};
+}
 
 export interface WCIIndexSourceFilterField {
   field: string;

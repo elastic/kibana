@@ -42,18 +42,15 @@ const availableIntegrations: IntegrationModel[] = [
     id: '4',
     type: IntegrationType.index_source,
     configuration: {
-      index: "hr-questions",
-      description: "HR document knowledgebase",
+      index: 'hr-questions',
+      description: 'HR document knowledgebase',
       fields: {
         filterFields: [],
-        contextFields: [
-          { field: "content"},
-          { field: "title" },
-        ]
+        contextFields: [{ field: 'content' }, { field: 'title' }],
       },
-      queryTemplate: '{"semantic":{"query":"{query}","field":"content"}}'
-    }
-  }
+      queryTemplate: '{"semantic":{"query":"{query}","field":"content"}}',
+    },
+  },
 ];
 
 export class IntegrationsService {

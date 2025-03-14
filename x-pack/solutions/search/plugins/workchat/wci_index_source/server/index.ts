@@ -14,4 +14,4 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new WCIIndexSourcePlugin(initializerContext);
 };
 
-export type { WCIIndexSourcePluginSetup, WCIIndexSourcePluginStart } from './types'; 
+export type { WCIIndexSourcePluginSetup, WCIIndexSourcePluginStart } from './types';

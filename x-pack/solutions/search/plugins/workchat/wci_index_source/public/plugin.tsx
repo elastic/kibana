@@ -38,4 +38,4 @@ export class WCIIndexSourcePlugin
   }
 
   public stop() {}
-} 
+}

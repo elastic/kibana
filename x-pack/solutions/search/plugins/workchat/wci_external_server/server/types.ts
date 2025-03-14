@@ -23,4 +23,4 @@ export interface WCIExternalServerPluginStartDependencies {}
 export interface WCIExternalServerConfiguration extends IntegrationConfiguration {
   url: string;
   description: string;
-} 
+}

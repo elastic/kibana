@@ -22,4 +22,4 @@ export const plugin: PluginInitializer<
   return new WCIIndexSourcePlugin(context);
 };
 
-export type { WCIIndexSourcePluginSetup, WCIIndexSourcePluginStart } from './types'; 
+export type { WCIIndexSourcePluginSetup, WCIIndexSourcePluginStart } from './types';
