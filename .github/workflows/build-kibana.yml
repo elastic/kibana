@@ -46,8 +46,14 @@ jobs:
       - name: Bootstrap Kibana
         run: yarn kbn bootstrap
 
-      - name: Build Kibana (Only for Linux x86_64)
-        run: yarn build --release --linux
+      - name: Build Kibana (Only Required Artifacts)
+        run: yarn build --release --skip-archives --skip-os-packages --skip-cdn-assets
+
+      - name: Keep Only Linux x86_64 Tarball
+        run: |
+          mkdir -p target
+          mv build/default/kibana-*-linux-x86_64.tar.gz target/
+          ls -lh target/
 
       - name: List all files in build directory (Debugging)
         run: ls -R build/
