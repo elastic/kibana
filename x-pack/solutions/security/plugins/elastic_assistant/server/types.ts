@@ -152,6 +152,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
@@ -177,6 +178,7 @@ export type GetElser = () => Promise<string> | never;
 
 export interface AssistantResourceNames {
   componentTemplate: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
@@ -185,6 +187,7 @@ export interface AssistantResourceNames {
     defendInsights: string;
   };
   indexTemplate: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
@@ -193,6 +196,7 @@ export interface AssistantResourceNames {
     defendInsights: string;
   };
   aliases: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
@@ -201,6 +205,7 @@ export interface AssistantResourceNames {
     defendInsights: string;
   };
   indexPatterns: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
