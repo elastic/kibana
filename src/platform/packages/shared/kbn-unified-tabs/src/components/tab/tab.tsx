@@ -157,7 +157,11 @@ export const Tab: React.FC<TabProps> = ({
       >
         <div css={getTabContentCss()}>
           {isInlineEditActive ? (
-            <EditTabLabel item={item} onLabelEdited={onLabelEdited} onExit={handleDoubleClick} />
+            <EditTabLabel
+              item={item}
+              onLabelEdited={onLabelEdited}
+              onExit={() => setIsInlineEditActive(false)}
+            />
           ) : (
             <>
               <button
@@ -168,7 +172,7 @@ export const Tab: React.FC<TabProps> = ({
                 title={item.label}
                 type="button"
                 onClick={onSelectEvent}
-                onDoubleClick={() => setIsInlineEditActive(true)}
+                onDoubleClick={handleDoubleClick}
               >
                 <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                   {item.label}
