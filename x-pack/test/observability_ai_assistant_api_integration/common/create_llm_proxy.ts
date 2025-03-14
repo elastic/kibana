@@ -42,6 +42,11 @@ export interface RelevantField {
   name: string;
 }
 
+export interface KnowledgeBaseDocument {
+  id: string;
+  text: string;
+}
+
 export interface LlmResponseSimulator {
   requestBody: ChatCompletionStreamParams;
   status: (code: number) => void;
@@ -219,6 +224,30 @@ export class LlmProxy {
     };
   }
 
+  interceptScoreToolChoice(log: ToolingLog) {
+    let documents: KnowledgeBaseDocument[] = [];
+
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'score',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
+      arguments: (requestBody) => {
+        documents = extractDocumentsFromMessage(last(requestBody.messages)?.content as string, log);
+        const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
+
+        return JSON.stringify({ scores });
+      },
+    });
+
+    return {
+      simulator,
+      getDocuments: async () => {
+        await simulator;
+        return documents;
+      },
+    };
+  }
+
   interceptTitle(title: string) {
     return this.interceptWithFunctionRequest({
       name: TITLE_CONVERSATION_FUNCTION_NAME,
@@ -354,4 +383,32 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
 
 function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
+}
+
+function extractDocumentsFromMessage(content: string, log: ToolingLog): any[] {
+  const startIndex = content.indexOf('Documents:\n');
+
+  if (startIndex === -1) {
+    log.error('Documents section not found in content.');
+    return [];
+  }
+
+  const documentSection = content.substring(startIndex + 'Documents:\n'.length).trim();
+
+  const startBracketIndex = documentSection.indexOf('[');
+  const endBracketIndex = documentSection.lastIndexOf(']');
+
+  if (startBracketIndex === -1 || endBracketIndex === -1 || endBracketIndex < startBracketIndex) {
+    log.error('Malformed documents array in content.');
+    return [];
+  }
+
+  const documentsString = documentSection.substring(startBracketIndex, endBracketIndex + 1).trim();
+
+  try {
+    return JSON.parse(documentsString);
+  } catch (error) {
+    log.error(`Error parsing documents: ${error}`);
+    return [];
+  }
 }

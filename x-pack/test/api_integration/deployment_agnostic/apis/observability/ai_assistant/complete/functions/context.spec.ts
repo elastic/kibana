@@ -17,6 +17,7 @@ import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/se
 import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/recall_and_score';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
+  KnowledgeBaseDocument,
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
@@ -77,6 +78,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let llmProxy: LlmProxy;
     let connectorId: string;
     let messageAddedEvents: MessageAddEvent[];
+    let getDocuments: () => Promise<KnowledgeBaseDocument[]>;
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
@@ -86,11 +88,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
-      void llmProxy.interceptWithFunctionRequest({
-        name: CONTEXT_FUNCTION_NAME,
-        arguments: () => JSON.stringify({}),
-        when: () => true,
-      });
+      ({ getDocuments } = llmProxy.interceptScoreToolChoice(log));
 
       void llmProxy.interceptConversation('Your favourite color is blue.');
 
@@ -153,6 +151,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(firstRequestBody.tools?.length).to.be(1);
           expect(first(firstRequestBody.tools)?.function.name).to.be('score');
         });
+
+        it('sends the correct documents to the LLM', async () => {
+          const extractedDocs = await getDocuments();
+          const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
+          const actualTexts = extractedDocs.map((doc) => doc.text).sort();
+
+          expect(actualTexts).to.eql(expectedTexts);
+        });
       });
 
       describe('The second request - Sending the user prompt', () => {
@@ -187,6 +193,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             // @ts-expect-error
             secondRequestBody.messages[2].tool_calls[0].id
           );
+        });
+
+        it('sends the knowledge base entries to the LLM', () => {
+          const content = last(secondRequestBody.messages)?.content as string;
+          const parsedContent = JSON.parse(content);
+          const learnings = parsedContent.learnings;
+
+          const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
+          const actualTexts = learnings.map((learning: KnowledgeBaseEntry) => learning.text).sort();
+
+          expect(actualTexts).to.eql(expectedTexts);
         });
       });
 
