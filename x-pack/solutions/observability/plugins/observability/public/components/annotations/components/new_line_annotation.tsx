@@ -12,9 +12,9 @@ import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
-import { AnnotationIcon } from './annotation_icon';
+import { AnnotationIcon } from '.';
 import { AnnotationTooltip } from './annotation_tooltip';
-import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function NewLineAnnotation({
   slo,

@@ -4475,16 +4475,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredIngestStreamEffectiveLifecycle",
-            "text": "WiredIngestStreamEffectiveLifecycle"
+            "section": "def-common.UnwiredIngestStreamEffectiveLifecycle",
+            "text": "UnwiredIngestStreamEffectiveLifecycle"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredIngestStreamEffectiveLifecycle",
-            "text": "UnwiredIngestStreamEffectiveLifecycle"
+            "section": "def-common.WiredIngestStreamEffectiveLifecycle",
+            "text": "WiredIngestStreamEffectiveLifecycle"
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
