@@ -33,7 +33,7 @@ export type TabMenuItem = TabMenuItemWithClick | 'divider';
 export type GetTabMenuItems = (item: TabItem) => TabMenuItem[];
 
 export interface TabsServices {
-  core?: {
+  core: {
     chrome?: CoreStart['chrome'];
   };
 }
