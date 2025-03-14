@@ -345,9 +345,9 @@
     "enabled": false,
     "logs": [],
     "reason": {
-      "indexPatternExists": false,
+      "indexPatternExists": true,
       "indexPatternInTimeRangeExists": false,
-      "typeExistsAtAnyTime": false,
+      "typeExistsAtAnyTime": true,
       "typeExists": false,
       "usingStructuredLogs": false,
       "clusterExists": false,

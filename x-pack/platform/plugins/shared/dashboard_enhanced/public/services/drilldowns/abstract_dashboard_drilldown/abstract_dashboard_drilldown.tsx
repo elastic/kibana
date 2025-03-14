@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaLocation } from '@kbn/share-plugin/public';
+import type { KibanaLocation, SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   AdvancedUiActionsStart,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
@@ -16,6 +15,7 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
@@ -24,7 +24,7 @@ export interface Params {
   start: StartServicesGetter<{
     uiActionsEnhanced: AdvancedUiActionsStart;
     data: DataPublicPluginStart;
-    dashboard: DashboardStart;
+    share: SharePluginStart;
   }>;
 }
 
@@ -87,7 +87,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   protected get locator() {
-    const locator = this.params.start().plugins.dashboard.locator;
+    const locator = this.params.start().plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
     if (!locator) throw new Error('Dashboard locator is required for dashboard drilldown.');
     return locator;
   }

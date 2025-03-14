@@ -10,13 +10,14 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
-import { FetchDeps } from './fetch_all';
+import type { FetchDeps } from './fetch_all';
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
