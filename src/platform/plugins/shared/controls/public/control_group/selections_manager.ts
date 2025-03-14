@@ -22,8 +22,8 @@ import { ControlGroupApi } from './types';
 export function initSelectionsManager(
   controlGroupApi: Pick<ControlGroupApi, 'autoApplySelections$' | 'children$' | 'untilInitialized'>
 ) {
-  const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
-  const unpublishedFilters$ = new BehaviorSubject<Filter[] | undefined>([]);
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const unpublishedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unpublishedTimeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const hasUnappliedSelections$ = new BehaviorSubject(false);

@@ -37,7 +37,7 @@ export function ObservabilityAlertSearchBar({
   showFilterBar = false,
   controlConfigs,
   filters = EMPTY_FILTERS,
-  filterControls = EMPTY_FILTERS,
+  filterControls,
   savedQuery,
   setSavedQuery,
   kuery,
@@ -82,7 +82,7 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
-          filters: [...filters, ...filterControls, ...defaultFilters],
+          filters: [...filters, ...(filterControls ?? []), ...defaultFilters],
           config: getEsQueryConfig(uiSettings),
         })
       );
