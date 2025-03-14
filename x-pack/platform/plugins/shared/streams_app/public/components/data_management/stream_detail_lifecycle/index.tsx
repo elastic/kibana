@@ -146,7 +146,7 @@ export function StreamDetailLifecycle({
         },
       } as IngestUpsertRequest;
 
-      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest', {
+      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
         params: {
           path: { name: definition.stream.name },
           body: request,

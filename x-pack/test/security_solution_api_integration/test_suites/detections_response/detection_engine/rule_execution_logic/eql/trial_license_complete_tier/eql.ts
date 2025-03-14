@@ -247,7 +247,8 @@ export default ({ getService }: FtrProviderContext) => {
       ).eql(1);
     });
 
-    it('parses shard failures for EQL event query', async () => {
+    // Failing: See https://github.com/elastic/kibana/issues/209024
+    it.skip('parses shard failures for EQL event query', async () => {
       await esArchiver.load(packetBeatPath);
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*', 'packetbeat-*']),

@@ -8,13 +8,13 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { downloadSourceService } from '../../services';
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, DownloadSource } from '../../types';
 import { FleetError, DownloadSourceNotFound } from '../../errors';
 
-export const getSourceUriForAgentPolicy = async (
+export const getDownloadSourceForAgentPolicy = async (
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy
-) => {
+): Promise<DownloadSource> => {
   const defaultDownloadSourceId = await downloadSourceService.getDefaultDownloadSourceId(soClient);
 
   if (!defaultDownloadSourceId) {
@@ -25,5 +25,5 @@ export const getSourceUriForAgentPolicy = async (
   if (!downloadSource) {
     throw new DownloadSourceNotFound(`Download source host not found ${downloadSourceId}`);
   }
-  return { host: downloadSource.host, proxy_id: downloadSource.proxy_id };
+  return downloadSource;
 };
