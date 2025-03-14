@@ -283,7 +283,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<PassThrough> {
-    const { signal, timeout, ...rest } = body;
+    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
 
     const res = (await this.streamApi(
       {
@@ -315,7 +315,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     tokenCountStream: Stream<ChatCompletionChunk>;
   }> {
     try {
-      const { signal, timeout, ...rest } = body;
+      const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
@@ -353,7 +353,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
-    const { signal, timeout, ...rest } = body;
+    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
     const res = await this.runApi(
       { body: JSON.stringify(rest), signal, timeout },
       connectorUsageCollector
