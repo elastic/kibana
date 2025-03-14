@@ -119,9 +119,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
         if (isKibanaResponse(result)) {
           if (result.status >= 500) {
-            logger.error(`HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+            logger.error(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
           } else if (result.status >= 400) {
-            logger.debug(`HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+            logger.debug(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
           }
 
           return result;
@@ -161,9 +161,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         }
 
         if (opts.statusCode >= 500) {
-          logger.error(error);
+          logger.error(() => error);
         } else {
-          logger.debug(error);
+          logger.debug(() => error);
         }
 
         return response.custom(opts);
