@@ -48,7 +48,7 @@ const alertingOptions = [
   {
     id: 'row',
     label: i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowLabel', {
-      defaultMessage: 'Create one alert per row',
+      defaultMessage: 'Create an alert for each row',
     }),
   },
 ];
