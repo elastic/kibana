@@ -17,8 +17,9 @@ import { ReindexService, reindexServiceFactory } from './reindex_service';
 import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
 
 const POLL_INTERVAL = 30000;
+const PAUSE_THRESHOLD_MULTIPLIER = 4;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
-const PAUSE_WINDOW = POLL_INTERVAL * 4;
+const PAUSE_WINDOW = POLL_INTERVAL * PAUSE_THRESHOLD_MULTIPLIER;
 
 /**
  * Initial worker padding to avoid CPU bottlenecks when running the worker loop.
@@ -33,7 +34,7 @@ const PAUSE_WINDOW = POLL_INTERVAL * 4;
 const INITIAL_WORKER_PADDING_MS = 1000;
 // Maximum worker padding set to POLL_INTERVAL (1/4 of PAUSE_WINDOW) to guarantee multiple
 // updates will happen before operations are considered "stuck"
-const MAX_WORKER_PADDING_MS = POLL_INTERVAL;
+const MAX_WORKER_PADDING_MS = Math.floor(PAUSE_WINDOW / PAUSE_THRESHOLD_MULTIPLIER);
 
 /**
  * A singleton worker that will coordinate two polling loops:
