@@ -49,10 +49,6 @@ import type {
   EntityManagerServerPluginStart,
 } from '@kbn/entityManager-plugin/server';
 import type {
-  LogsDataAccessPluginSetup,
-  LogsDataAccessPluginStart,
-} from '@kbn/logs-data-access-plugin/server';
-import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
@@ -60,6 +56,14 @@ import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import type {
+  DataDefinitionRegistryServerSetup,
+  DataDefinitionRegistryServerStart,
+} from '@kbn/data-definition-registry-plugin/server';
+import type {
+  LogsDataAccessPluginStart,
+  LogsDataAccessPluginSetup,
+} from '@kbn/logs-data-access-plugin/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -77,8 +81,8 @@ export interface APMPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
-  logsDataAccess: LogsDataAccessPluginSetup;
   entityManager: EntityManagerServerPluginSetup;
+  logsDataAccess: LogsDataAccessPluginSetup;
   // optional dependencies
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   actions?: ActionsPlugin['setup'];
@@ -93,6 +97,7 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
+  dataDefinitionRegistry?: DataDefinitionRegistryServerSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -105,8 +110,8 @@ export interface APMPluginStartDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
-  logsDataAccess: LogsDataAccessPluginStart;
   entityManager: EntityManagerServerPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
   // optional dependencies
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   actions?: ActionsPlugin['start'];
@@ -121,4 +126,5 @@ export interface APMPluginStartDependencies {
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  dataDefinitionRegistry?: DataDefinitionRegistryServerStart;
 }

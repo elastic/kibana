@@ -6,7 +6,7 @@
  */
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import { formatValueForKql } from '@kbn/observability-utils-common/es/format_value_for_kql';
-import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import type { TruncatedDocumentAnalysis } from '@kbn/genai-utils-common/src/data_analysis/types';
 import { ShortIdTable } from '@kbn/observability-utils-common/llm/short_id_table';
 import {
   P_VALUE_SIGNIFICANCE_HIGH,

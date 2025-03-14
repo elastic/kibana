@@ -34,6 +34,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/shared-ux-table-persist",
+    "@kbn/data-definition-registry-plugin",
     "@kbn/esql-types"
   ],
   "exclude": [

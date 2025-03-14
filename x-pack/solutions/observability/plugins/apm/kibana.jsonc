@@ -62,6 +62,7 @@
       "profilingDataAccess",
       "cases",
       "observabilityAIAssistant",
+      "dataDefinitionRegistry",
       "share"
     ],
     "requiredBundles": [

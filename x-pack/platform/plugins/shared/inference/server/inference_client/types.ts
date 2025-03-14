@@ -33,6 +33,10 @@ export interface InferenceClient {
    * Non-inference connectors will throw an error.
    */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  /**
+   * `getConnectors` returns all inference connectors.
+   */
+  getConnectors: () => Promise<InferenceConnector[]>;
 }
 
 /**
@@ -55,4 +59,8 @@ export interface BoundInferenceClient {
    * Non-inference connectors will throw an error.
    */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  /**
+   * `getConnectors` returns all inference connectors.
+   */
+  getConnectors: () => Promise<InferenceConnector[]>;
 }

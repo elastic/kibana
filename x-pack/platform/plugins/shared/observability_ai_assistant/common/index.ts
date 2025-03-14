@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type { Message, Conversation, KnowledgeBaseEntry, ConversationCreateRequest } from './types';
+export type {
+  Message,
+  MessageAttachment,
+  Conversation,
+  KnowledgeBaseEntry,
+  ConversationCreateRequest,
+} from './types';
 export { KnowledgeBaseEntryRole, MessageRole, ConversationAccess } from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
 export { FunctionVisibility } from './functions/function_visibility';

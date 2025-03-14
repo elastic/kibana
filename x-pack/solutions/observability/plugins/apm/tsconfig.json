@@ -132,6 +132,7 @@
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
     "@kbn/entityManager-plugin",
+    "@kbn/data-definition-registry-plugin",
     "@kbn/core-http-server-utils",
     "@kbn/key-value-metadata-table",
     "@kbn/event-stacktrace",

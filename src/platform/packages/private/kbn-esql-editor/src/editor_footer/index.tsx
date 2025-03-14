@@ -24,12 +24,14 @@ import {
   LanguageDocumentationFlyout,
 } from '@kbn/language-documentation';
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
+import { TimeRange } from '@kbn/es-query';
 import { type MonacoMessage } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
 import type { ESQLEditorDeps } from '../types';
+import { EsqlSuggestedQueries } from './esql_suggested_queries';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -60,6 +62,7 @@ interface EditorFooterProps {
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   displayDocumentationAsFlyout?: boolean;
+  timeRange?: TimeRange;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -85,6 +88,7 @@ export const EditorFooter = memo(function EditorFooter({
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
+  timeRange,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -224,6 +228,16 @@ export const EditorFooter = memo(function EditorFooter({
                   onErrorClick={onErrorClick}
                 />
               )}
+              {kibana.services.dataDefinitionRegistry ? (
+                <EsqlSuggestedQueries
+                  dataDefinitionRegistry={kibana.services.dataDefinitionRegistry}
+                  query={code}
+                  timeRange={timeRange}
+                  onQueryClick={(query) => {
+                    onUpdateAndSubmit(query);
+                  }}
+                />
+              ) : undefined}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

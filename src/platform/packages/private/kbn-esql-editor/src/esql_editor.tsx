@@ -34,6 +34,10 @@ import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import {
+  getIndexPatternFromESQLQuery,
+  getKqlFromESQLQuery,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -98,6 +102,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  timeRange,
   disableAutoFocus,
   onSaveControl,
   onCancelControl,
@@ -120,6 +125,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     core,
     fieldsMetadata,
     uiSettings,
+    dataDefinitionRegistry,
     uiActions,
     data,
   } = kibana.services;
@@ -148,6 +154,8 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -180,6 +188,29 @@ export const ESQLEditor = memo(function ESQLEditor({
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
     }
   }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
+
+  const onQueryAutocompleteRef = useRef<() => void>();
+
+  onQueryAutocompleteRef.current = () => {
+    if (dataDefinitionRegistry) {
+      setIsSuggestionLoading(true);
+      dataDefinitionRegistry
+        .suggestQuery({
+          start: timeRange?.from ?? 'now-15m',
+          end: timeRange?.to ?? 'now',
+          query: code,
+          signal: abortController.signal,
+          index: getIndexPatternFromESQLQuery(code),
+          kuery: getKqlFromESQLQuery(code),
+        })
+        .then((nextQuery) => {
+          onQueryUpdate(nextQuery);
+        })
+        .finally(() => {
+          setIsSuggestionLoading(false);
+        });
+    }
+  };
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -695,7 +726,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         bottom: 8,
       },
       quickSuggestions: true,
-      readOnly: isDisabled,
+      readOnly: isDisabled || isSuggestionLoading,
       renderLineHighlight: 'line',
       renderLineHighlightOnlyWhenFocus: true,
       scrollbar: {
@@ -813,6 +844,14 @@ export const ESQLEditor = memo(function ESQLEditor({
                       onCommentLine
                     );
 
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Backslash,
+                      () => {
+                        onQueryAutocompleteRef.current?.();
+                      }
+                    );
+
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
@@ -879,6 +918,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+        timeRange={timeRange}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

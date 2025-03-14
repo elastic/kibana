@@ -45,6 +45,10 @@ export class ChatFunctionClient {
   constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContextRequest[]) {
     const allData = compact(screenContexts.flatMap((context) => context.data));
 
+    const allScreenContextInstructions = compact(
+      screenContexts.flatMap((context) => (context.instructions ? [context.instructions] : []))
+    );
+
     this.actions = compact(screenContexts.flatMap((context) => context.actions));
 
     if (allData.length) {
@@ -83,6 +87,10 @@ export class ChatFunctionClient {
             )}`
           : undefined
       );
+
+      if (allScreenContextInstructions.length) {
+        this.registerInstruction(...allScreenContextInstructions);
+      }
     }
 
     this.actions.forEach((action) => {

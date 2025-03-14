@@ -26,6 +26,7 @@ import {
 } from './triggers/update_esql_query/update_esql_query_trigger';
 import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
+import type { DataDefinitionRegistryPublicStart } from '../../../../../../x-pack/plugins/data_definition_registry/public';
 import { JoinIndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
@@ -42,6 +43,7 @@ interface EsqlPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  dataDefinitionRegistry?: DataDefinitionRegistryPublicStart;
 }
 
 export interface EsqlPluginStart {
@@ -70,6 +72,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldsMetadata,
       usageCollection,
+      dataDefinitionRegistry,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
@@ -124,7 +127,8 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       this.indexManagement,
       fieldsMetadata,
-      usageCollection
+      usageCollection,
+      dataDefinitionRegistry
     );
 
     return start;

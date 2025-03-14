@@ -25,6 +25,8 @@
     "@kbn/inference-common",
     "@kbn/observability-ai-common",
     "@kbn/observability-utils-server",
+    "@kbn/genai-utils-common",
+    "@kbn/genai-utils-server",
     "@kbn/traced-es-client",
   ]
 }

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, keys } from '@elastic/eui';
 import {
   type Message,
   MessageRole,
@@ -27,6 +27,7 @@ export interface PromptEditorProps {
   initialRole?: Message['message']['role'];
   initialFunctionCall?: Message['message']['function_call'];
   initialContent?: Message['message']['content'];
+  initialAttachments?: Message['message']['attachments'];
   onChangeHeight: (height: number) => void;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onSubmit: (message: Message) => void;
@@ -39,6 +40,7 @@ export function PromptEditor({
   initialRole,
   initialFunctionCall,
   initialContent,
+  initialAttachments,
   onChangeHeight,
   onSendTelemetry,
   onSubmit,
@@ -58,6 +60,7 @@ export function PromptEditor({
     ? {
         role: initialRole,
         content: initialContent ?? '',
+        attachments: initialAttachments,
         ...(initialFunctionCall ? { function_call: initialFunctionCall } : {}),
       }
     : undefined;
@@ -80,7 +83,12 @@ export function PromptEditor({
   }, [innerMessage?.function_call?.arguments, innerMessage?.function_call?.name]);
 
   const handleChangeMessageInner = (newInnerMessage: Message['message']) => {
-    setInnerMessage(newInnerMessage);
+    setInnerMessage((prev) => {
+      return {
+        ...prev!,
+        ...newInnerMessage,
+      };
+    });
   };
 
   const handleSelectFunction = (func: string | undefined) => {
@@ -157,63 +165,100 @@ export function PromptEditor({
     } else if (containerRef.current) {
       onChangeHeight(containerRef.current.clientHeight);
     }
-  }, [hidden, onChangeHeight]);
+  }, [hidden, onChangeHeight, innerMessage?.attachments]);
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" ref={containerRef}>
-      <EuiFlexItem grow={false}>
-        <FunctionListPopover
-          mode={mode}
-          selectedFunctionName={innerMessage?.function_call?.name}
-          onSelectFunction={handleSelectFunction}
-          disabled={loading || disabled}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {mode === 'function' && innerMessage?.function_call?.name ? (
-          <PromptEditorFunction
-            functionName={innerMessage.function_call.name}
-            functionPayload={innerMessage.function_call.arguments}
-            onChange={handleChangeMessageInner}
-            onFocus={() => setHasFocus(true)}
-            onBlur={() => setHasFocus(false)}
+    <EuiFlexGroup direction="column" gutterSize="m" ref={containerRef}>
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <FunctionListPopover
+            mode={mode}
+            selectedFunctionName={innerMessage?.function_call?.name}
+            onSelectFunction={handleSelectFunction}
+            disabled={loading || disabled}
           />
-        ) : (
-          <PromptEditorNaturalLanguage
-            disabled={disabled}
-            prompt={innerMessage?.content}
-            lastUsedPrompts={lastUsedPrompts}
-            onChange={handleChangeMessageInner}
-            onChangeHeight={onChangeHeight}
-            onFocus={() => setHasFocus(true)}
-            onBlur={() => setHasFocus(false)}
-          />
-        )}
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
-          aria-label={i18n.translate(
-            'xpack.aiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
-            { defaultMessage: 'Submit' }
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {mode === 'function' && innerMessage?.function_call?.name ? (
+            <PromptEditorFunction
+              functionName={innerMessage.function_call.name}
+              functionPayload={innerMessage.function_call.arguments}
+              onChange={handleChangeMessageInner}
+              onFocus={() => setHasFocus(true)}
+              onBlur={() => setHasFocus(false)}
+            />
+          ) : (
+            <PromptEditorNaturalLanguage
+              disabled={disabled}
+              prompt={innerMessage?.content}
+              lastUsedPrompts={lastUsedPrompts}
+              onChange={handleChangeMessageInner}
+              onChangeHeight={() => onChangeHeight(containerRef?.current?.clientHeight ?? 0)}
+              onFocus={() => setHasFocus(true)}
+              onBlur={() => setHasFocus(false)}
+              onAttachmentAdd={(attachment) => {
+                setInnerMessage((prev) => {
+                  return {
+                    role: MessageRole.User,
+                    content: '',
+                    ...prev,
+                    attachments: (prev?.attachments ?? []).concat(attachment),
+                  };
+                });
+              }}
+            />
           )}
-          disabled={loading || disabled || invalid}
-          display={
-            mode === 'function'
-              ? innerMessage?.function_call?.name
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantChatPromptEditorButtonIcon"
+            aria-label={i18n.translate(
+              'xpack.aiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
+              { defaultMessage: 'Submit' }
+            )}
+            disabled={loading || disabled || invalid}
+            display={
+              mode === 'function'
+                ? innerMessage?.function_call?.name
+                  ? 'fill'
+                  : 'base'
+                : innerMessage?.content
                 ? 'fill'
                 : 'base'
-              : innerMessage?.content
-              ? 'fill'
-              : 'base'
-          }
-          iconType="kqlFunction"
-          isLoading={loading}
-          size="m"
-          onClick={handleSubmit}
-        />
-      </EuiFlexItem>
+            }
+            iconType="kqlFunction"
+            isLoading={loading}
+            size="m"
+            onClick={handleSubmit}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {!!innerMessage?.attachments?.length ? (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {innerMessage.attachments.map((attachment) => {
+            return (
+              <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+                <EuiButtonIcon
+                  iconType="crossInCircle"
+                  size="xs"
+                  onClick={() => {
+                    setInnerMessage((prev) => {
+                      return {
+                        ...prev!,
+                        attachments: prev!.attachments!.filter(
+                          (prevAttachment) => prevAttachment !== attachment
+                        ),
+                      };
+                    });
+                  }}
+                />
+                <EuiText size="xs">{attachment.title}</EuiText>
+              </EuiFlexGroup>
+            );
+          })}
+        </EuiFlexGroup>
+      ) : null}
     </EuiFlexGroup>
   );
 }

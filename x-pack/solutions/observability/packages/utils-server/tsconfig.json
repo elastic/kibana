@@ -25,5 +25,6 @@
     "@kbn/rule-data-utils",
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/calculate-auto",
+    "@kbn/genai-utils-common",
   ]
 }

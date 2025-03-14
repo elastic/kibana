@@ -33,6 +33,7 @@ import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_globa
 import type { APMRouteHandlerResources } from './routes/apm_routes/register_apm_server_routes';
 import { registerRoutes } from './routes/apm_routes/register_apm_server_routes';
 import { getAlertDetailsContextHandler } from './routes/assistant_functions/get_observability_alert_details_context';
+import { registerDataDefinitions } from './data_definitions';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
@@ -187,6 +188,11 @@ export class APMPlugin
         alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
       });
     }
+
+    registerDataDefinitions({
+      plugins,
+      coreSetup: core,
+    });
 
     registerFleetPolicyCallbacks({
       logger: this.logger,

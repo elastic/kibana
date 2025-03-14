@@ -9,6 +9,7 @@ import {
   AssistantMessage,
   Message as InferenceMessage,
   MessageRole as InferenceMessageRole,
+  MessageContentImage,
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
@@ -83,7 +84,21 @@ export function convertMessagesForInference(
     if (isUserMessage) {
       inferenceMessages.push({
         role: InferenceMessageRole.User,
-        content: message.message.content ?? '',
+        content: [
+          {
+            type: 'text',
+            text: message.message.content ?? '',
+          },
+          ...(message.message.attachments || []).map((attachment) => {
+            return {
+              type: 'image',
+              source: {
+                data: attachment.source.data,
+                mimeType: attachment.source.mimeType,
+              },
+            } satisfies MessageContentImage;
+          }),
+        ],
       });
       return;
     }
