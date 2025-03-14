@@ -12,6 +12,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { cloneDeep } from 'lodash';
 
 import {
   computeIsESQLQueryAggregating,
@@ -24,7 +25,7 @@ import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { createEnrichEventsFunction } from '../utils/enrichments';
-import { rowToDocument, mergeEsqlResultInSource } from './utils';
+import { rowToDocument, mergeEsqlResultInSource, getMvExpandUsage } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -142,7 +143,6 @@ export const esqlExecutor = async ({
           // slicing already processed results in previous iterations
           .slice(size - tuple.maxSignals)
           .map((row) => rowToDocument(response.columns, row));
-
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -158,12 +158,20 @@ export const esqlExecutor = async ({
           licensing,
         });
 
+        const { expandedFieldsInResponse: expandedFields, hasMvExpand } = getMvExpandUsage(
+          response.columns,
+          completeRule.ruleParams.query
+        );
+
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
           const { _id, _version, _index, ...esqlResult } = document;
 
           const sourceDocument = _id ? sourceDocuments[_id] : undefined;
+          // when mv_expand command present we must clone source, since the reference will be used multiple times
+          const source = hasMvExpand ? cloneDeep(sourceDocument?._source) : sourceDocument?._source;
+
           return {
-            _source: mergeEsqlResultInSource(sourceDocument?._source, esqlResult),
+            _source: mergeEsqlResultInSource(source, esqlResult),
             fields: sourceDocument?.fields,
             _id: _id ?? '',
             _index: _index || sourceDocument?._index || '',
@@ -177,6 +185,7 @@ export const esqlExecutor = async ({
               sharedParams,
               events,
               isRuleAggregating,
+              expandedFields,
             });
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({

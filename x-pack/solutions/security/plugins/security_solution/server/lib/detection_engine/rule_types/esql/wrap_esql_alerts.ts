@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { uniqBy } from 'lodash';
 
 import type {
   BaseFieldsLatest,
@@ -21,10 +22,12 @@ export const wrapEsqlAlerts = ({
   sharedParams,
   events,
   isRuleAggregating,
+  expandedFields,
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
+  expandedFields?: string[];
 }): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest>>((event, i) => {
     const id = generateAlertId({
@@ -34,6 +37,7 @@ export const wrapEsqlAlerts = ({
       tuple: sharedParams.tuple,
       isRuleAggregating,
       index: i,
+      expandedFields,
     });
 
     const baseAlert: BaseFieldsLatest = transformHitToAlert({
@@ -47,11 +51,9 @@ export const wrapEsqlAlerts = ({
     return {
       _id: id,
       _index: event._index ?? '',
-      _source: {
-        ...baseAlert,
-      },
+      _source: baseAlert,
     };
   });
 
-  return wrapped;
+  return uniqBy(wrapped, (alert) => alert._id);
 };
