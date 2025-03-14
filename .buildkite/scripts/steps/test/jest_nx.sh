@@ -9,4 +9,4 @@ is_test_execution_step
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Jest (with NX)'
-.buildkite/scripts/steps/test/jest_parallel_nx.sh jest.config.js
+.buildkite/scripts/steps/test/jest_nx_parallel.sh jest.config.js
