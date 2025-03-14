@@ -190,5 +190,6 @@
     "@kbn/response-ops-rule-params",
     "@kbn/scout-info",
     "@kbn/inference-common",
+    "@kbn/test-suites-xpack",
   ]
 }
