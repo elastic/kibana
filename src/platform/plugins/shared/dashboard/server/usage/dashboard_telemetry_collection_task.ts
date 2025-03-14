@@ -127,7 +127,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
           index: dashboardIndex,
           ignore_unavailable: true,
           filter_path: ['hits.hits', '_scroll_id'],
-          body: { query: { bool: { filter: { term: { type: 'dashboard' } } } } },
+          query: { bool: { filter: { term: { type: 'dashboard' } } } },
           scroll: '30s',
         };
 

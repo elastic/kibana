@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
-// TODO: Remove when all usages have been migrated to non-body
-import { SearchRequest as SearchRequestWithBodyKey } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Field, QueryDslFieldAndFormat } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   InferSearchResponseOf,
   AggregateOf as AggregationResultOf,
@@ -25,7 +22,7 @@ import {
 
 export type ESFilter = estypes.QueryDslQueryContainer;
 // For now, we also accept with body to unblock the migration to without body.
-export type ESSearchRequest = estypes.SearchRequest | SearchRequestWithBodyKey;
+export type ESSearchRequest = estypes.SearchRequest;
 export type AggregationOptionsByType = Required<estypes.AggregationsAggregationContainer>;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be
@@ -46,7 +43,7 @@ export type ESSearchResponse<
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
 // `fields` parameter from a search request (estypes.SearchRequest)
-export type SearchField = QueryDslFieldAndFormat | Field;
+export type SearchField = estypes.QueryDslFieldAndFormat | estypes.Field;
 
 export type {
   InferSearchResponseOf,

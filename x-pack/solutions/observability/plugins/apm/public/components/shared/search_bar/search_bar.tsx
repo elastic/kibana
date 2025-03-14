@@ -7,7 +7,7 @@
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';

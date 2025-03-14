@@ -109,7 +109,7 @@ export const createStubClient = (
 
         return { statusCode: 404 };
       }),
-      updateAliases: sinon.spy(async ({ body }) => {
+      updateAliases: sinon.spy(async (body) => {
         body.actions.forEach(
           ({ add: { index, alias } }: { add: { index: string; alias: string } }) => {
             if (!existingIndices.includes(index)) {

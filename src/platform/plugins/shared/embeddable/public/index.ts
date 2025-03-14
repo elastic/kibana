@@ -31,7 +31,6 @@ export {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from './ui_actions/triggers';
-export { ViewMode } from '../common/types';
 export type {
   CellValueContext,
   ChartActionContext,

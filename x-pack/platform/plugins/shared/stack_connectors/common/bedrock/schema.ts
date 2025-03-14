@@ -56,6 +56,18 @@ export const BedrockToolChoiceSchema = schema.object({
   name: schema.maybe(schema.string()),
 });
 
+export const BedrockUsageSchema = schema.maybe(
+  schema.object(
+    {
+      input_tokens: schema.number(),
+      output_tokens: schema.number(),
+      // added with Sonnet 3.7
+      cache_creation_input_tokens: schema.maybe(schema.number()),
+    },
+    { unknowns: 'allow' }
+  )
+);
+
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(BedrockMessageSchema),
   model: schema.maybe(schema.string()),
@@ -82,12 +94,7 @@ export const InvokeAIActionParamsSchema = schema.object({
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
-  usage: schema.maybe(
-    schema.object({
-      input_tokens: schema.number(),
-      output_tokens: schema.number(),
-    })
-  ),
+  usage: BedrockUsageSchema,
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
@@ -125,10 +132,7 @@ export const InvokeAIRawActionResponseSchema = schema.object({}, { unknowns: 'al
 export const RunApiLatestResponseSchema = schema.object(
   {
     stop_reason: schema.maybe(schema.string()),
-    usage: schema.object({
-      input_tokens: schema.number(),
-      output_tokens: schema.number(),
-    }),
+    usage: BedrockUsageSchema,
     content: schema.arrayOf(
       schema.object(
         { type: schema.string(), text: schema.maybe(schema.string()) },
@@ -143,12 +147,7 @@ export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),
     stop_reason: schema.maybe(schema.string()),
-    usage: schema.maybe(
-      schema.object({
-        input_tokens: schema.number(),
-        output_tokens: schema.number(),
-      })
-    ),
+    usage: BedrockUsageSchema,
   },
   { unknowns: 'ignore' }
 );

@@ -20,6 +20,7 @@
     "@kbn/crypto-browser",
     "@kbn/data-view-utils",
     "@kbn/esql-ast",
+    "@kbn/esql-types",
     "@kbn/search-types",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
@@ -27,6 +28,5 @@
     "@kbn/i18n",
     "@kbn/datemath",
     "@kbn/es-query",
-    "@kbn/esql-validation-autocomplete"
   ]
 }

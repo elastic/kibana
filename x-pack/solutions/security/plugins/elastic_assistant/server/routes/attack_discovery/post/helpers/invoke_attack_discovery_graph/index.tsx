@@ -83,9 +83,13 @@ export const invokeAttackDiscoveryGraph = async ({
     connectorId: apiConfig.connectorId,
     llmType,
     logger,
+    model,
     temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_attack_discovery',
+    },
   });
 
   if (llm == null) {
@@ -126,6 +130,7 @@ export const invokeAttackDiscoveryGraph = async ({
       tags,
     }
   );
+
   const {
     attackDiscoveries,
     anonymizedAlerts,

@@ -8,8 +8,7 @@
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ getService, getPageObject }: FtrProviderContext) => {
-  const common = getPageObject('common');
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -17,6 +16,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
   const find = getService('find');
   const logger = getService('log');
   const retry = getService('retry');
+  const pageObjects = getPageObjects(['common', 'header']);
 
   describe('Custom threshold preview chart', () => {
     const observability = getService('observability');
@@ -34,6 +34,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         logger,
       });
       await observability.alerts.common.navigateToRulesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -46,7 +47,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
       await observability.alerts.rulesPage.clickOnCustomThresholdRule();
-      await common.sleep(1000);
+      await pageObjects.common.sleep(1000);
       expect(await find.existsByCssSelector('[data-rendering-count="2"]')).toBe(true);
     });
 

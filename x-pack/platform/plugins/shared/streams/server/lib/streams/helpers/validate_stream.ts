@@ -91,11 +91,11 @@ export function validateStreamChildrenChanges(
   currentStreamDefinition: WiredStreamDefinition,
   nextStreamDefinition: WiredStreamDefinition
 ) {
-  const existingChildren = currentStreamDefinition.ingest.routing.map(
+  const existingChildren = currentStreamDefinition.ingest.wired.routing.map(
     (routingDefinition) => routingDefinition.destination
   );
 
-  const nextChildren = nextStreamDefinition.ingest.routing.map(
+  const nextChildren = nextStreamDefinition.ingest.wired.routing.map(
     (routingDefinition) => routingDefinition.destination
   );
 

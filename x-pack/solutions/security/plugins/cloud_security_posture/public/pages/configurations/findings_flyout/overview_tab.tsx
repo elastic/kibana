@@ -21,16 +21,18 @@ import { i18n } from '@kbn/i18n';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CSP_MOMENT_FORMAT,
+  INTERNAL_FEATURE_FLAGS,
 } from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
-import { getVendorName } from '../../../common/utils/get_vendor_name';
-import { truthy } from '../../../../common/utils/helpers';
-import { CSP_MOMENT_FORMAT } from '../../../common/constants';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
-import { useKibana } from '../../../common/hooks/use_kibana';
+import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import {
   BenchmarkIcons,
   CodeBlock,
@@ -187,7 +189,7 @@ export const OverviewTab = ({
   data: CspFinding;
   ruleFlyoutLink?: string;
 }) => {
-  const { discover } = useKibana().services;
+  const { discover } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
   const cdrMisconfigurationsDataView = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
 
   // link will navigate to our dataview in discover, filtered by the data source of the finding

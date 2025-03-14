@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import rawExpect from 'expect';
 import expect from '@kbn/expect';
 import {
   IngestStreamEffectiveLifecycle,
@@ -15,7 +16,13 @@ import {
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
-import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  putStream,
+  getStream,
+  getIlmStats,
+} from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -75,19 +82,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    describe('Wired streams', () => {
-      const wiredPutBody: IngestStreamUpsertRequest = {
-        stream: {
-          ingest: {
-            lifecycle: { inherit: {} },
-            routing: [],
-            processing: [],
-            wired: { fields: {} },
-          },
+    const wiredPutBody: IngestStreamUpsertRequest = {
+      stream: {
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: [],
+          wired: { fields: {}, routing: [] },
         },
-        dashboards: [],
-      };
+      },
+      dashboards: [],
+    };
 
+    describe('Wired streams update', () => {
       it('updates lifecycle', async () => {
         const rootDefinition = await getStream(apiClient, 'logs');
 
@@ -152,7 +158,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
-              routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
+              wired: {
+                fields: {},
+                routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
+              },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
           },
@@ -196,7 +205,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
-              routing: [{ destination: 'logs.10d.20d.inherits', if: { never: {} } }],
+              wired: {
+                fields: {},
+                routing: [{ destination: 'logs.10d.20d.inherits', if: { never: {} } }],
+              },
             },
           },
         });
@@ -259,7 +271,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
-                routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
+                wired: {
+                  fields: {},
+                  routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
+                },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
@@ -278,7 +293,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
-                routing: [],
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
@@ -292,7 +306,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
-                routing: [],
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
                 lifecycle: { dsl: { data_retention: '7d' } },
               },
             },
@@ -308,7 +325,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
-                routing: [],
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
                 lifecycle: { dsl: { data_retention: '7d' } },
               },
             },
@@ -322,7 +342,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
-                routing: [],
+                wired: {
+                  routing: [],
+                  fields: {},
+                },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
@@ -333,12 +356,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    describe('Unwired streams', () => {
+    describe('Unwired streams update', () => {
       const unwiredPutBody: IngestStreamUpsertRequest = {
         stream: {
           ingest: {
             lifecycle: { inherit: {} },
-            routing: [],
             processing: [],
             unwired: {},
           },
@@ -428,6 +450,96 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           await clean();
+        });
+      }
+    });
+
+    describe('ilm stats', () => {
+      it('is not enabled for streams with dsl', async () => {
+        const indexName = 'logs.dslnostats';
+        await putStream(apiClient, indexName, {
+          dashboards: [],
+          stream: {
+            ingest: {
+              ...wiredPutBody.stream.ingest,
+              wired: {
+                fields: {},
+                routing: [],
+              },
+              lifecycle: { dsl: { data_retention: '1d' } },
+            },
+          },
+        });
+        await getIlmStats(apiClient, indexName, 400);
+      });
+
+      if (!isServerless) {
+        it('returns not found when the policy does not exist', async () => {
+          const indexName = 'logs.ilmpolicydontexists';
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+                lifecycle: { ilm: { policy: 'this-stream-policy-does-not-exist' } },
+              },
+            },
+          });
+          await getIlmStats(apiClient, indexName, 404);
+        });
+
+        it('returns the effective ilm phases', async () => {
+          const indexName = 'logs.ilmwithphases';
+          const policyName = 'streams_ilm_hotwarmdelete';
+          await esClient.ilm.putLifecycle({
+            name: policyName,
+            policy: {
+              phases: {
+                hot: { actions: { rollover: { max_age: '30m' } } },
+                warm: { min_age: '5d', actions: {} },
+                delete: { min_age: '10d', actions: {} },
+              },
+            },
+          });
+
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+                lifecycle: { ilm: { policy: policyName } },
+              },
+            },
+          });
+
+          const stats = await getIlmStats(apiClient, indexName, 200);
+          rawExpect(stats).toEqual({
+            phases: {
+              hot: {
+                name: 'hot',
+                size_in_bytes: rawExpect.any(Number),
+                rollover: { max_age: '30m' },
+                min_age: '0ms',
+              },
+              warm: {
+                name: 'warm',
+                min_age: '5d',
+                size_in_bytes: rawExpect.any(Number),
+              },
+              delete: {
+                name: 'delete',
+                min_age: '10d',
+              },
+            },
+          });
         });
       }
     });

@@ -53,7 +53,6 @@ export default function searchSolutionNavigation({
         { id: 'Build', label: 'Build' },
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search Applications' },
-        { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'GettingStarted', label: 'Getting started' },
@@ -90,11 +89,6 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.expectNavItemActive('SearchApplications');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Search Applications');
-      // > BehavioralAnalytics
-      await searchClassicNavigation.clickNavItem('BehavioralAnalytics');
-      await searchClassicNavigation.expectNavItemActive('BehavioralAnalytics');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Behavioral Analytics');
 
       // Check Relevance
       // > InferenceEndpoints

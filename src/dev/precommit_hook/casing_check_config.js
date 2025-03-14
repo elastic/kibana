@@ -102,6 +102,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'packages/*',
   'x-pack',
   'x-pack/packages/*',
+  'src/dev/packages/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
   'src/platform/packages/shared/*',

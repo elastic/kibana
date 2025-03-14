@@ -110,6 +110,7 @@ export function runCli() {
         node: esUrl,
         tls: esCa ? { ca: esCa } : undefined,
         Connection: HttpConnection,
+        requestTimeout: 30_000,
       });
       addCleanupTask(() => client.close());
 

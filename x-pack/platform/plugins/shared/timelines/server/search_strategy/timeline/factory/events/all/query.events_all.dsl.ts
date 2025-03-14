@@ -66,33 +66,31 @@ export const buildTimelineEventsAllQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: {
-        producers: {
-          terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
-        },
+    aggregations: {
+      producers: {
+        terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
       },
-      query: {
-        bool: {
-          filter,
-        },
-      },
-      runtime_mappings: runtimeMappings,
-      from: activePage * querySize,
-      size: querySize,
-      track_total_hits: true,
-      sort: getSortField(sort),
-      fields: [
-        'signal.*',
-        'kibana.alert.*',
-        ...fields,
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      _source: false,
     },
+    query: {
+      bool: {
+        filter,
+      },
+    },
+    runtime_mappings: runtimeMappings,
+    from: activePage * querySize,
+    size: querySize,
+    track_total_hits: true,
+    sort: getSortField(sort),
+    fields: [
+      'signal.*',
+      'kibana.alert.*',
+      ...fields,
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    _source: false,
   };
 
   return dslQuery;

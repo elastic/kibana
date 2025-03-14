@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteMethod } from '@kbn/core/server';
 import { VersionedRouteConfig } from '@kbn/core-http-server';

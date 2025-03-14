@@ -10,7 +10,7 @@ import { mergeMap, map, filter, switchMap, catchError } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { AggregationResultOf } from '@kbn/es-types';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';

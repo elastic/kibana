@@ -11,8 +11,8 @@ import {
   ToolOptions,
   Message,
   withoutOutputUpdateEvents,
-  FunctionCallingMode,
   ChatCompleteMetadata,
+  ChatCompleteOptions,
 } from '@kbn/inference-common';
 import { InferenceClient } from '../../..';
 import { requestDocumentationSchema } from './shared';
@@ -23,6 +23,8 @@ export const requestDocumentation = ({
   messages,
   connectorId,
   functionCalling,
+  maxRetries,
+  retryConfiguration,
   metadata,
   toolOptions: { tools, toolChoice },
 }: {
@@ -30,10 +32,9 @@ export const requestDocumentation = ({
   system: string;
   messages: Message[];
   connectorId: string;
-  functionCalling?: FunctionCallingMode;
   metadata?: ChatCompleteMetadata;
   toolOptions: ToolOptions;
-}) => {
+} & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
   const hasTools = !isEmpty(tools) && toolChoice !== ToolChoiceType.none;
 
   return outputApi({
@@ -41,6 +42,8 @@ export const requestDocumentation = ({
     connectorId,
     stream: true,
     functionCalling,
+    maxRetries,
+    retryConfiguration,
     metadata,
     system,
     previousMessages: messages,

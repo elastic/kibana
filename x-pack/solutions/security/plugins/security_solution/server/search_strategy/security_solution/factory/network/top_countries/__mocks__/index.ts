@@ -70,42 +70,40 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignore_unavailable: true,
-          body: {
-            aggregations: {
-              top_countries_count: { cardinality: { field: 'destination.geo.country_iso_code' } },
-              destination: {
-                terms: {
-                  field: 'destination.geo.country_iso_code',
-                  size: 10,
-                  order: { bytes_in: 'desc' },
-                },
-                aggs: {
-                  bytes_in: { sum: { field: 'source.bytes' } },
-                  bytes_out: { sum: { field: 'destination.bytes' } },
-                  flows: { cardinality: { field: 'network.community_id' } },
-                  source_ips: { cardinality: { field: 'source.ip' } },
-                  destination_ips: { cardinality: { field: 'destination.ip' } },
-                },
+          aggregations: {
+            top_countries_count: { cardinality: { field: 'destination.geo.country_iso_code' } },
+            destination: {
+              terms: {
+                field: 'destination.geo.country_iso_code',
+                size: 10,
+                order: { bytes_in: 'desc' },
+              },
+              aggs: {
+                bytes_in: { sum: { field: 'source.bytes' } },
+                bytes_out: { sum: { field: 'destination.bytes' } },
+                flows: { cardinality: { field: 'network.community_id' } },
+                source_ips: { cardinality: { field: 'source.ip' } },
+                destination_ips: { cardinality: { field: 'destination.ip' } },
               },
             },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T09:58:58.637Z',
-                        lte: '2020-09-14T09:58:58.637Z',
-                        format: 'strict_date_optional_time',
-                      },
+          },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T09:58:58.637Z',
+                      lte: '2020-09-14T09:58:58.637Z',
+                      format: 'strict_date_optional_time',
                     },
                   },
-                ],
-              },
+                },
+              ],
             },
-            size: 0,
           },
+          size: 0,
           track_total_hits: false,
         },
         null,
@@ -130,37 +128,35 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignore_unavailable: true,
-  body: {
-    aggregations: {
-      top_countries_count: { cardinality: { field: 'destination.geo.country_iso_code' } },
-      destination: {
-        terms: { field: 'destination.geo.country_iso_code', size: 10, order: { bytes_in: 'desc' } },
-        aggs: {
-          bytes_in: { sum: { field: 'source.bytes' } },
-          bytes_out: { sum: { field: 'destination.bytes' } },
-          flows: { cardinality: { field: 'network.community_id' } },
-          source_ips: { cardinality: { field: 'source.ip' } },
-          destination_ips: { cardinality: { field: 'destination.ip' } },
-        },
+  aggregations: {
+    top_countries_count: { cardinality: { field: 'destination.geo.country_iso_code' } },
+    destination: {
+      terms: { field: 'destination.geo.country_iso_code', size: 10, order: { bytes_in: 'desc' } },
+      aggs: {
+        bytes_in: { sum: { field: 'source.bytes' } },
+        bytes_out: { sum: { field: 'destination.bytes' } },
+        flows: { cardinality: { field: 'network.community_id' } },
+        source_ips: { cardinality: { field: 'source.ip' } },
+        destination_ips: { cardinality: { field: 'destination.ip' } },
       },
     },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-13T09:58:58.637Z',
-                lte: '2020-09-14T09:58:58.637Z',
-                format: 'strict_date_optional_time',
-              },
+  },
+  query: {
+    bool: {
+      filter: [
+        { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-09-13T09:58:58.637Z',
+              lte: '2020-09-14T09:58:58.637Z',
+              format: 'strict_date_optional_time',
             },
           },
-        ],
-      },
+        },
+      ],
     },
-    size: 0,
   },
+  size: 0,
   track_total_hits: false,
 };

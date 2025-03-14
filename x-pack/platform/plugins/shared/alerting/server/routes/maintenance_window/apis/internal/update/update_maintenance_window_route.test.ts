@@ -14,7 +14,7 @@ import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import { transformUpdateBody } from './transforms';
 import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
-import { UpdateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/internal/apis/update';
+import type { UpdateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/internal/apis/update';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 

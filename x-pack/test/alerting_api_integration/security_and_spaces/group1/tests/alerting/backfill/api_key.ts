@@ -61,10 +61,8 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     async function getApiKeysPendingInvalidation() {
       const result = await es.search({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-        body: {
-          query: {
-            term: { type: 'api_key_pending_invalidation' },
-          },
+        query: {
+          term: { type: 'api_key_pending_invalidation' },
         },
       });
       return result.hits.hits.map((hit) => hit._source);

@@ -20,6 +20,7 @@ paths-ignore:
   - '**/kbn-scout-*'
   - '**/mocks.*'
   - '**/mocks/**'
+  - '**/stub/**'
   - '**/scripts/**'
   - '**/storybook/**'
   - '**/test_helpers/**'

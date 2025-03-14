@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
 
   // Failing: See https://github.com/elastic/kibana/issues/168991
-  describe.skip('Findings Page - Alerts', function () {
+  describe('Findings Page - Alerts', function () {
     this.tags(['cloud_security_posture_findings_alerts']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -161,6 +161,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await latestFindingsTable.openFlyoutAt(0);
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
 
+        const toastMessageElement = await toasts.getElementByIndex();
+        expect(toastMessageElement).to.be.ok();
+        const toastMessageTitle = await toastMessageElement.findByTestSubject(
+          'csp:toast-success-title'
+        );
+
+        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
         ).to.be('0 alerts');
@@ -169,20 +177,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
         ).to.be('1 detection rule');
 
-        const toastMessageElement = await toasts.getElementByIndex();
-        expect(toastMessageElement).to.be.ok();
-
-        const toastMessageTitle = await toastMessageElement.findByTestSubject(
-          'csp:toast-success-title'
-        );
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
-
         await testSubjects.click('csp:toast-success-link');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
-        const rulePageTitle = await testSubjects.find('header-page-title');
-        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        await retry.try(async () => {
+          const rulePageTitle = await testSubjects.find('header-page-title');
+          expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        });
       });
+
       it('Creates a detection rule from the Alerts section and navigates to rule page', async () => {
         await latestFindingsTable.openFlyoutAt(0);
         const flyout = await misconfigurationsFlyout.getElement();
@@ -191,6 +194,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await flyout.findByTestSubject('csp:findings-flyout-create-detection-rule-link')
         ).click();
 
+        const toastMessage = await toasts.getElementByIndex();
+        expect(toastMessage).to.be.ok();
+
+        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
+        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
         ).to.be('0 alerts');
@@ -199,21 +208,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
         ).to.be('1 detection rule');
 
-        const toastMessage = await toasts.getElementByIndex();
-        expect(toastMessage).to.be.ok();
-
-        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
-
         await testSubjects.click('csp:toast-success-link');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        const rulePageTitle = await testSubjects.find('header-page-title');
         // Rule page title is not immediately available, so we need to retry until it is
         await retry.try(async () => {
+          const rulePageTitle = await testSubjects.find('header-page-title');
           expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
         });
       });
     });
+
     describe('Rule details', () => {
       it('The rule page contains the expected matching data', async () => {
         await latestFindingsTable.openFlyoutAt(0);
@@ -233,6 +237,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await referenceUrls.getVisibleText()).to.contain('https://elastic.co/rules/1.1');
       });
     });
+
     describe('Navigation', () => {
       it('Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter', async () => {
         await latestFindingsTable.openFlyoutAt(0);

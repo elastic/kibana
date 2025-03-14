@@ -20,9 +20,7 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
     const esResponse = await esClient.search<SearchTelemetry>(
       {
         index: searchIndex,
-        body: {
-          query: { term: { type: { value: 'search-telemetry' } } },
-        },
+        query: { term: { type: { value: 'search-telemetry' } } },
       },
       { ignore: [404] }
     );

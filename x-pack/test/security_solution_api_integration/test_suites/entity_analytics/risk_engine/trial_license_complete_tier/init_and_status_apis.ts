@@ -676,57 +676,53 @@ export default ({ getService }: FtrProviderContext) => {
 
         await es.cluster.putComponentTemplate({
           name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },
               },
             },
-            version: 1,
           },
+          version: 1,
         });
 
         // Call an API to put the index template
 
         await es.indices.putIndexTemplate({
           name: indexTemplateName,
-          body: {
-            index_patterns: [indexTemplateName],
-            composed_of: [componentTemplateName],
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          index_patterns: [indexTemplateName],
+          composed_of: [componentTemplateName],
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },

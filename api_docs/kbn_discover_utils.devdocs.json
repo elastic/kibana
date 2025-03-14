@@ -2029,6 +2029,60 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getTraceDocumentOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "getTraceDocumentOverview",
+        "description": [],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TraceDocumentOverview",
+            "text": "TraceDocumentOverview"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTraceDocumentOverview.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getVisibleColumns",
         "type": "Function",
         "tags": [],
@@ -2474,7 +2528,7 @@
                 "section": "def-common.AppMenuControlOnClickParams",
                 "text": "AppMenuControlOnClickParams"
               },
-              ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"memory\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"section\" | \"image\" | \"stop\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"brush\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"contrast\" | \"contrastHigh\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createGenericJob\" | \"createGeoJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"percent\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plugs\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"temperature\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"web\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
+              ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"section\" | \"image\" | \"stop\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"brush\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"contrast\" | \"contrastHigh\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createGenericJob\" | \"createGeoJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"memory\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"percent\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plugs\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"temperature\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"web\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
             "deprecated": false,
@@ -3967,6 +4021,368 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ServiceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServiceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ServiceFields.service.name",
+            "type": "string",
+            "tags": [],
+            "label": "'service.name'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ServiceFields.service.environment",
+            "type": "string",
+            "tags": [],
+            "label": "'service.environment'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ServiceFields.agent.name",
+            "type": "string",
+            "tags": [],
+            "label": "'agent.name'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SpanTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpanTraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.name",
+            "type": "string",
+            "tags": [],
+            "label": "'span.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.action",
+            "type": "string",
+            "tags": [],
+            "label": "'span.action'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.duration.us",
+            "type": "number",
+            "tags": [],
+            "label": "'span.duration.us'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.type",
+            "type": "string",
+            "tags": [],
+            "label": "'span.type'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.subtype",
+            "type": "string",
+            "tags": [],
+            "label": "'span.subtype'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.destination.service.resource",
+            "type": "string",
+            "tags": [],
+            "label": "'span.destination.service.resource'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TraceDocumentOverview",
+        "type": "Interface",
+        "tags": [],
+        "label": "TraceDocumentOverview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TraceDocumentOverview",
+            "text": "TraceDocumentOverview"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ServiceFields",
+            "text": "ServiceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TransactionTraceFields",
+            "text": "TransactionTraceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SpanTraceFields",
+            "text": "SpanTraceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.UserAgentTraceFields",
+            "text": "UserAgentTraceFields"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "'@timestamp'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.trace.id",
+            "type": "string",
+            "tags": [],
+            "label": "'trace.id'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.parent.id",
+            "type": "string",
+            "tags": [],
+            "label": "'parent.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.http.response.status_code",
+            "type": "number",
+            "tags": [],
+            "label": "'http.response.status_code'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceDocumentOverview.processor.event",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "'processor.event'",
+            "description": [],
+            "signature": [
+              "\"transaction\" | \"span\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TransactionTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "TransactionTraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TransactionTraceFields.transaction.id",
+            "type": "string",
+            "tags": [],
+            "label": "'transaction.id'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TransactionTraceFields.transaction.name",
+            "type": "string",
+            "tags": [],
+            "label": "'transaction.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TransactionTraceFields.transaction.duration.us",
+            "type": "number",
+            "tags": [],
+            "label": "'transaction.duration.us'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.UserAgentTraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserAgentTraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.UserAgentTraceFields.user_agent.name",
+            "type": "string",
+            "tags": [],
+            "label": "'user_agent.name'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.UserAgentTraceFields.user_agent.version",
+            "type": "string",
+            "tags": [],
+            "label": "'user_agent.version'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -4197,7 +4613,7 @@
             "section": "def-common.AppMenuControlOnClickParams",
             "text": "AppMenuControlOnClickParams"
           },
-          ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"memory\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"section\" | \"image\" | \"stop\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"brush\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"contrast\" | \"contrastHigh\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createGenericJob\" | \"createGeoJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"percent\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plugs\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"temperature\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"web\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
+          ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"section\" | \"image\" | \"stop\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"brush\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"contrast\" | \"contrastHigh\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createGenericJob\" | \"createGeoJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"memory\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"percent\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plugs\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"temperature\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"web\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
@@ -4806,6 +5222,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.FILTER_OUT_EXACT_FIELDS_FOR_CONTENT",
+        "type": "Array",
+        "tags": [],
+        "label": "FILTER_OUT_EXACT_FIELDS_FOR_CONTENT",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT",
         "type": "Array",
         "tags": [],
@@ -4860,6 +5291,21 @@
         "description": [],
         "signature": [
           "\"host.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.HTTP_RESPONSE_STATUS_CODE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "HTTP_RESPONSE_STATUS_CODE_FIELD",
+        "description": [],
+        "signature": [
+          "\"http.response.status_code\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -5078,6 +5524,36 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.PARENT_ID_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "PARENT_ID_FIELD",
+        "description": [],
+        "signature": [
+          "\"parent.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.PROCESSOR_EVENT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "PROCESSOR_EVENT_FIELD",
+        "description": [],
+        "signature": [
+          "\"processor.event\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.RESOURCE_FIELD",
         "type": "string",
         "tags": [],
@@ -5222,6 +5698,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SERVICE_ENVIRONMENT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_ENVIRONMENT_FIELD",
+        "description": [],
+        "signature": [
+          "\"service.environment\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.SERVICE_NAME_FIELD",
         "type": "string",
         "tags": [],
@@ -5326,6 +5817,36 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_ACTION_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_ACTION_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.action\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_DESTINATION_SERVICE_RESOURCE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DESTINATION_SERVICE_RESOURCE_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.destination.service.resource\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.SPAN_DURATION_FIELD",
         "type": "string",
         "tags": [],
@@ -5348,6 +5869,36 @@
         "description": [],
         "signature": [
           "\"span.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_SUBTYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_SUBTYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.subtype\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_TYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_TYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.type\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -5401,6 +5952,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRANSACTION_ID_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_ID_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.TRANSACTION_NAME_FIELD",
         "type": "string",
         "tags": [],
@@ -5408,6 +5974,36 @@
         "description": [],
         "signature": [
           "\"transaction.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.USER_AGENT_NAME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_NAME_FIELD",
+        "description": [],
+        "signature": [
+          "\"user_agent.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.USER_AGENT_VERSION_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_VERSION_FIELD",
+        "description": [],
+        "signature": [
+          "\"user_agent.version\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,

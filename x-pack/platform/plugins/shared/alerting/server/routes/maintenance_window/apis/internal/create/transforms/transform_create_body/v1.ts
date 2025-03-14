@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CreateMaintenanceWindowRequestBodyV1 } from '../../../../../../../../common/routes/maintenance_window/internal/apis/create';
-import { CreateMaintenanceWindowParams } from '../../../../../../../application/maintenance_window/methods/create/types';
+import type { CreateMaintenanceWindowRequestBodyV1 } from '../../../../../../../../common/routes/maintenance_window/internal/apis/create';
+import type { CreateMaintenanceWindowParams } from '../../../../../../../application/maintenance_window/methods/create/types';
 
 export const transformCreateBody = (
   createBody: CreateMaintenanceWindowRequestBodyV1

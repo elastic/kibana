@@ -116,6 +116,7 @@ const getServerlessESClient = ({ port }: { port: number }) => {
   return new Client({
     node: `http://localhost:${port}`,
     Connection: HttpConnection,
+    requestTimeout: 30_000,
     auth: { ...systemIndicesSuperuser },
   });
 };

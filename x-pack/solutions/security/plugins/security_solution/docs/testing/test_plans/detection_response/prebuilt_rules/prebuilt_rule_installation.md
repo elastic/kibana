@@ -2,6 +2,9 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
+
 ## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
@@ -20,11 +23,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
-  - [User stories](#user-stories)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
-  - [Functional requirements](#functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Rule installation notifications on the Rule Management page](#rule-installation-notifications-on-the-rule-management-page)
     - [**Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**](#scenario-user-is-not-notified-when-no-prebuilt-rules-are-installed-and-there-are-no-prebuilt-rules-assets)
@@ -63,34 +66,46 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules: Milestone 2](https://github.com/elastic/kibana/issues/174167)
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 
-### User stories
-
-**Prebuilt rule installation workflow:**
-
-- User can install single prebuilt rules one-by-one from the Rule Installation page.
-- User can install multiple prebuilt rules in bulk from the Rule Installation page.
-- User can install all available prebuilt rules in bulk from the Rule Installation page.
-- User can preview properties of a prebuilt rule before installing it.
-
 ### Terminology
 
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **CTA to install prebuilt rules**: a link button with a counter on the Rule Management page.
 - **CTA to upgrade prebuilt rules**: a tab with a counter on the Rule Management page.
 
+## Requirements
+
 ### Assumptions
+
+Assumptions about test environments and scenarios outlined in this test plan.
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
-### Non-functional requirements
+### Technical requirements
 
-- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
+Non-functional requirements for the functionality outlined in this test plan.
 
-### Functional requirements
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
 
-- Users should be able to install prebuilt rules on the `Basic` license and higher.
-- User should be able to install prebuilt rules with and without previewing what exactly they would install (rule properties).
-- If user chooses to preview a prebuilt rule to be installed/upgraded, we currently show this preview in a flyout.
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
+
+User stories for the main rule installation features:
+
+- User can install single prebuilt rules one-by-one from the Rule Installation page.
+- User can install multiple prebuilt rules in bulk from the Rule Installation page.
+- User can install all available prebuilt rules in bulk from the Rule Installation page.
+- User can preview properties of a prebuilt rule before installing it.
+
+User stories for licensing and RBAC:
+
+- User can install prebuilt rules on the `Basic` license and higher.
+
+Previewing properties of a prebuilt rule before installing it:
+
+- If user chooses to preview a prebuilt rule to be installed, we currently show this preview in a flyout.
 - In the prebuilt rule preview a tab that doesn't have any sections should not be displayed and a section that doesn't have any properties also should not be displayed.
 
 Examples of rule properties we show in the prebuilt rule preview flyout:

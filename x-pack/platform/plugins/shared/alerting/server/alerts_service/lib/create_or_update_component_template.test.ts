@@ -8,12 +8,13 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const ComponentTemplate = {
+const ComponentTemplate: ClusterPutComponentTemplateRequest = {
   name: 'test-mappings',
   _meta: {
     managed: true,

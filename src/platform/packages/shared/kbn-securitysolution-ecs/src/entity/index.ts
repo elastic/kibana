@@ -11,6 +11,9 @@
 export interface EntityEcs {
   id: string;
   name: string;
-  type: 'universal' | 'user' | 'host' | 'service';
-  timestamp: Date;
+  type: 'container' | 'user' | 'host' | 'service';
+  tags: string[];
+  labels: Record<string, string>;
+  criticality: 'low_impact' | 'medium_impact' | 'high_impact' | 'extreme_impact' | 'unassigned';
+  category: string;
 }

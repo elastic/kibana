@@ -40,10 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Search Applications product card visible',
           async () => await testSubjects.exists('enterpriseSearchApplicationsProductCard')
         );
-        await retry.waitFor(
-          'Behavioral Analytics product card visible',
-          async () => await testSubjects.exists('enterpriseSearchAnalyticsProductCard')
-        );
         await a11y.testAppSnapshot();
       });
     });
