@@ -29,7 +29,7 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
     {
       name: 'Time',
       render: (item: BreakdownItem) => (
-        <EuiBadge style={{ backgroundColor: item.color }}>
+        <EuiBadge color={item.color}>
           <span>{item.key.endsWith('_count') ? item.time : nsToPretty(item.time, 1)}</span>
         </EuiBadge>
       ),
