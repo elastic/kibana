@@ -1,14 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
-  "name": "@kbn/cloud-defend-plugin",
+  "name": "@kbn/expression-utils",
   "namedInputs": {
     "src": [
-      "{projectRoot}/common/**/*",
-      "{projectRoot}/public/**/*",
-      "{projectRoot}/server/**/*",
-      "{workspaceRoot}/typings/**/*",
-      "{projectRoot}/public/**/*.json",
-      "{projectRoot}/server/**/*.json",
+      "{projectRoot}/**/*.ts",
       "!{projectRoot}/target/**/*"
     ]
   },
@@ -31,6 +26,6 @@
     },
     "lint": {}
   },
-  "projectType": "application",
-  "sourceRoot": "x-pack/solutions/security/plugins/cloud_defend"
+  "projectType": "library",
+  "sourceRoot": "src/platform/packages/private/kbn-expression-utils"
 }
