@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { MaintenanceWindowResponseV1 } from '../../../response';
 
-import { getParamsSchemaV1 } from '..';
+import type { getParamsSchemaV1 } from '..';
 
 export type GetMaintenanceWindowRequestParams = TypeOf<typeof getParamsSchemaV1>;
 

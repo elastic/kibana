@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { MaintenanceWindowResponseV1 } from '../../../response';
-import {
+import type { MaintenanceWindowResponseV1 } from '../../../response';
+import type {
   archiveMaintenanceWindowRequestBodySchemaV1,
   archiveMaintenanceWindowRequestParamsSchemaV1,
 } from '..';
