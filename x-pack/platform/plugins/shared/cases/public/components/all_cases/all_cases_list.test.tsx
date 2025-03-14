@@ -200,9 +200,11 @@ describe('AllCasesListGeneric', () => {
 
     const createdAtColumn = screen.getAllByTestId('case-table-column-createdAt')[0];
 
-    within(createdAtColumn).getByText(
-      removeMsFromDate(useGetCasesMockState.data.cases[0].createdAt)
-    );
+    expect(
+      within(createdAtColumn).getByText(
+        removeMsFromDate(useGetCasesMockState.data.cases[0].createdAt)
+      )
+    ).toBeInTheDocument();
 
     expect(await screen.findByTestId('case-table-case-count')).toHaveTextContent(
       `Showing 10 of ${useGetCasesMockState.data.total} cases`
