@@ -112,7 +112,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 }
 
 describe('QueryBarTopRowTopRow', () => {
-  const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
+  const QUERY_INPUT_SELECTOR = 'QueryStringInput';
   const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
   const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
   const CANCEL_BUTTON_SELECTOR = '[data-test-subj="queryCancelButton"]';

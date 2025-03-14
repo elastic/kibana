@@ -197,7 +197,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
+    const instance = component.find('QueryStringInput').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -338,7 +338,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
+    const instance = component.find('QueryStringInput').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -415,7 +415,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
+    const instance = component.find('QueryStringInput').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     input!.value = 'foo\u00A0bar';
