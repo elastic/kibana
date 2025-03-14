@@ -189,14 +189,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         </SecretFormRow>
       )}
       <EuiSpacer size="m" />
-      <SSLFormSection
-        type={inputs.typeInput.value as FormType}
-        inputs={inputs}
-        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
-        isConvertedToSecret={isConvertedToSecret.sslKey}
-        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
-      />
-      <EuiSpacer size="m" />
       <EuiCallOut
         title={
           <FormattedMessage
@@ -213,6 +205,14 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
 }`}
         </EuiCodeBlock>
       </EuiCallOut>
+      <EuiSpacer size="m" />
+      <SSLFormSection
+        type={inputs.typeInput.value as FormType}
+        inputs={inputs}
+        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+        isConvertedToSecret={isConvertedToSecret.sslKey}
+        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+      />
       <EuiSpacer size="m" />
       {enableSyncIntegrationsOnRemote ? (
         <>
