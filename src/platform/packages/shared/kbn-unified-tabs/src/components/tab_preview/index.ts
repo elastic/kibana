@@ -8,4 +8,3 @@
  */
 
 export { TabPreview } from './tab_preview';
-export type { PreviewContent } from './tab_preview';
