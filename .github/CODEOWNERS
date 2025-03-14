@@ -706,52 +706,51 @@ src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
-src/platform/test
-src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
-src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
-src/platform/test/common/plugins/newsfeed @elastic/kibana-core
-src/platform/test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
-src/platform/test/health_gateway/plugins/status @elastic/kibana-core
-src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
-src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
-src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_app_status @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_history_block @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_http @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_a @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_appleave @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_b @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_chromeless @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_deep_links @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_deprecations @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_execution_context @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_static_assets @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
-src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
-src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
-src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
-src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
-src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
-src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
-src/platform/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/saved_objects_hidden_type @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/session_notifications @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/telemetry @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/usage_collection @elastic/kibana-core
-src/platform/test/server_integration/plugins/status_plugin_a @elastic/kibana-core
-src/platform/test/server_integration/plugins/status_plugin_b @elastic/kibana-core
+src/platform/testanalytics/plugins/analytics_ftr_helpers @elastic/kibana-core
+src/platform/testanalytics/plugins/analytics_plugin_a @elastic/kibana-core
+src/platform/testcommon/plugins/newsfeed @elastic/kibana-core
+src/platform/testcommon/plugins/otel_metrics @elastic/obs-ux-infra_services-team
+src/platform/testhealth_gateway/plugins/status @elastic/kibana-core
+src/platform/testinteractive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
+src/platform/testinterpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
+src/platform/testnode_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
+src/platform/testplugin_functional/plugins/app_link_test @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_app_status @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_dynamic_resolving_a @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_dynamic_resolving_b @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_history_block @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_http @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_a @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_appleave @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_b @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_chromeless @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_deep_links @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_deprecations @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_execution_context @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_route_timeouts @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_plugin_static_assets @elastic/kibana-core
+src/platform/testplugin_functional/plugins/core_provider_plugin @elastic/kibana-core
+src/platform/testplugin_functional/plugins/data_search @elastic/kibana-data-discovery
+src/platform/testplugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
+src/platform/testplugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
+src/platform/testplugin_functional/plugins/hardening @elastic/kibana-security
+src/platform/testplugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
+src/platform/testplugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
+src/platform/testplugin_functional/plugins/kbn_top_nav @elastic/kibana-core
+src/platform/testplugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
+src/platform/testplugin_functional/plugins/management_test_plugin @elastic/kibana-management
+src/platform/testplugin_functional/plugins/rendering_plugin @elastic/kibana-core
+src/platform/testplugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
+src/platform/testplugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
+src/platform/testplugin_functional/plugins/saved_objects_hidden_from_http_apis_type @elastic/kibana-core
+src/platform/testplugin_functional/plugins/saved_objects_hidden_type @elastic/kibana-core
+src/platform/testplugin_functional/plugins/session_notifications @elastic/kibana-core
+src/platform/testplugin_functional/plugins/telemetry @elastic/kibana-core
+src/platform/testplugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
+src/platform/testplugin_functional/plugins/usage_collection @elastic/kibana-core
+src/platform/testserver_integration/plugins/status_plugin_a @elastic/kibana-core
+src/platform/testserver_integration/plugins/status_plugin_b @elastic/kibana-core
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
@@ -805,6 +804,7 @@ x-pack/platform/packages/private/security/authorization_core @elastic/kibana-sec
 x-pack/platform/packages/private/security/authorization_core_common @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
+x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
@@ -1079,61 +1079,79 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 
 
 # Data Discovery
-src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
-src/platform/test/accessibility/apps/discover.ts @elastic/kibana-data-discovery
-src/platform/test/api_integration/apis/data_view_field_editor @elastic/kibana-data-discovery
-src/platform/test/api_integration/apis/data_views @elastic/kibana-data-discovery
-src/platform/test/api_integration/apis/kql_telemetry @elastic/kibana-data-discovery
-src/platform/test/api_integration/apis/saved_queries @elastic/kibana-data-discovery
-src/platform/test/api_integration/apis/scripts @elastic/kibana-data-discovery
-src/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
-src/platform/test/api_integration/fixtures/es_archiver/index_patterns @elastic/kibana-data-discovery
-src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns @elastic/kibana-data-discovery
-src/platform/test/examples/data_view_field_editor_example @elastic/kibana-data-discovery
-src/platform/test/examples/discover_customization_examples @elastic/kibana-data-discovery
-src/platform/test/examples/field_formats @elastic/kibana-data-discovery
-src/platform/test/examples/partial_results @elastic/kibana-data-discovery
-src/platform/test/examples/search @elastic/kibana-data-discovery
-src/platform/test/examples/unified_field_list_examples @elastic/kibana-data-discovery
-src/platform/test/functional/apps/context @elastic/kibana-data-discovery
-src/platform/test/functional/apps/discover @elastic/kibana-data-discovery
-src/platform/test/functional/apps/management/ccs_compatibility/_data_views_ccs.ts @elastic/kibana-data-discovery
-src/platform/test/functional/apps/management/data_views @elastic/kibana-data-discovery
-src/platform/test/functional/firefox/discover.config.ts @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/es_archiver/alias @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/es_archiver/date_n* @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/es_archiver/discover @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/es_archiver/hamlet @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L30
-src/platform/test/functional/fixtures/es_archiver/huge_fields @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/es_archiver/large_fields @elastic/kibana-data-discovery # Assigned per only use: src/platform/test/functional/apps/management/data_views/_test_huge_fields.ts
-src/platform/test/functional/fixtures/es_archiver/makelogs @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/es_archiver/message_with_newline @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/classic/_doc_table_newline.ts#L24
-src/platform/test/functional/fixtures/es_archiver/unmapped_fields @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L26
-src/platform/test/functional/fixtures/kbn_archiver/date_* @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/kbn_archiver/date_nested.json @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/kbn_archiver/discover.json @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield.json @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field.json @elastic/kibana-data-discovery
-src/platform/test/functional/fixtures/kbn_archiver/message_with_newline.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/classic/_doc_table_newline.ts#L26
-src/platform/test/functional/fixtures/kbn_archiver/testlargestring.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L28
-src/platform/test/functional/fixtures/kbn_archiver/unmapped_fields.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L28
-src/platform/test/functional/page_objects/context_page.ts @elastic/kibana-data-discovery
-src/platform/test/functional/page_objects/discover_page.ts @elastic/kibana-data-discovery
-src/platform/test/functional/services/data_views.ts @elastic/kibana-data-discovery
-src/platform/test/functional/services/saved_objects_finder.ts @elastic/kibana-data-discovery
-src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
-src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
-src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
-/x-pack/test_serverless/api_integration/test_suites/common/data_view_field_editor @elastic/kibana-data-discovery
+/x-pack/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/makelogs @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/large_fields @elastic/kibana-data-discovery # Assigned per only use: test/functional/apps/management/data_views/_test_huge_fields.ts
+/x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/discover/async_scripted_fields.ts#L35
+/x-pack/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/unmapped_fields.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L28
+/src/platform/test/functional/fixtures/kbn_archiver/testlargestring.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L28
+/src/platform/test/functional/fixtures/kbn_archiver/message_with_newline.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/classic/_doc_table_newline.ts#L26
+/src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field.json @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield.json @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/discover.json @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/date_nested.json @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/kbn_archiver/date_* @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/unmapped_fields @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L26
+/src/platform/test/functional/fixtures/es_archiver/message_with_newline @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/classic/_doc_table_newline.ts#L24
+/src/platform/test/functional/fixtures/es_archiver/hamlet @elastic/kibana-data-discovery # Assigned per the only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L30
+/src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns @elastic/kibana-data-discovery
+/src/platform/test/api_integration/fixtures/es_archiver/index_patterns @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/alias @elastic/kibana-data-discovery
+/src/platform/test/functional/page_objects/context_page.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/services/data_views.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/services/saved_objects_finder.ts @elastic/kibana-data-discovery
+/src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
+/src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
+/src/platform/test/functional/page_objects/discover_page.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/huge_fields @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/date_n* @elastic/kibana-data-discovery
+/src/platform/test/functional/firefox/discover.config.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/fixtures/es_archiver/discover @elastic/kibana-data-discovery
+/src/platform/test/api_integration/apis/saved_queries @elastic/kibana-data-discovery
+/x-pack/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
+/x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/security/config.examples.ts   @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/security/config.examples.context_awareness.ts @elastic/kibana-data-discovery
+/src/platform/test/accessibility/apps/discover.ts @elastic/kibana-data-discovery
+/src/platform/test/api_integration/apis/data_views @elastic/kibana-data-discovery
+/src/platform/test/api_integration/apis/data_view_field_editor @elastic/kibana-data-discovery
+/src/platform/test/api_integration/apis/kql_telemetry @elastic/kibana-data-discovery
+/src/platform/test/api_integration/apis/scripts @elastic/kibana-data-discovery
+/src/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
+/src/platform/test/examples/data_view_field_editor_example @elastic/kibana-data-discovery
+/src/platform/test/examples/discover_customization_examples @elastic/kibana-data-discovery
+/src/platform/test/examples/field_formats @elastic/kibana-data-discovery
+/src/platform/test/examples/partial_results @elastic/kibana-data-discovery
+/src/platform/test/examples/search @elastic/kibana-data-discovery
+/src/platform/test/examples/unified_field_list_examples @elastic/kibana-data-discovery
+/src/platform/test/examples/unified_tabs_examples @elastic/kibana-data-discovery
+/src/platform/test/functional/apps/context @elastic/kibana-data-discovery
+/src/platform/test/functional/apps/discover @elastic/kibana-data-discovery
+/src/platform/test/functional/apps/management/ccs_compatibility/_data_views_ccs.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/apps/management/data_views @elastic/kibana-data-discovery
+/src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
+/x-pack/test/accessibility/apps/group3/search_sessions.ts @elastic/kibana-data-discovery
+/x-pack/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
+/x-pack/test/api_integration/apis/search @elastic/kibana-data-discovery
+/x-pack/test/examples/search_examples @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
+/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/discover @elastic/kibana-data-discovery
+/x-pack/test/search_sessions_integration @elastic/kibana-data-discovery
+/x-pack/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery
+/x-pack/test/stack_functional_integration/apps/management/_index_pattern_create.js @elastic/kibana-data-discovery
+/x-pack/test/upgrade/apps/discover @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/data_views @elastic/kibana-data-discovery
+/x-pack/test_serverless/api_integration/test_suites/common/data_view_field_editor @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/kql_telemetry @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/scripts_tests @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_oss @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_xpack @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/context @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/discover @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/discover_ml_uptime/discover @elastic/kibana-data-discovery
@@ -1145,24 +1163,7 @@ src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-data
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/test_suites/security/config.examples.context_awareness.ts @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/test_suites/security/config.examples.ts   @elastic/kibana-data-discovery
-/x-pack/test/accessibility/apps/group3/search_sessions.ts @elastic/kibana-data-discovery
-/x-pack/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
-/x-pack/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
-/x-pack/test/api_integration/apis/search @elastic/kibana-data-discovery
-/x-pack/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
-/x-pack/test/examples/search_examples @elastic/kibana-data-discovery
-/x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/discover @elastic/kibana-data-discovery
-/x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
-/x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
-/x-pack/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
-/x-pack/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
-/x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/discover/async_scripted_fields.ts#L35
-/x-pack/test/search_sessions_integration @elastic/kibana-data-discovery
-/x-pack/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery
-/x-pack/test/stack_functional_integration/apps/management/_index_pattern_create.js @elastic/kibana-data-discovery
-/x-pack/test/upgrade/apps/discover @elastic/kibana-data-discovery
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
@@ -1441,7 +1442,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 /x-pack/test_serverless/functional/test_suites/observability @elastic/observability-ui
-/test/functional/apps/discover/observability @elastic/observability-ui
+/src/platform/test/functional/apps/discover/observability @elastic/observability-ui
 
 # obs-ux-logs-team
 /x-pack/test/functional/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
@@ -1468,8 +1469,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
-/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
-/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
+/src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
+/src/platform/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 
 # Observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
@@ -1700,6 +1701,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /src/platform/test/functional/services/data_grid.ts @elastic/appex-qa
 /src/platform/test/functional/services/combo_box.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/unified_field_list.ts @elastic/appex-qa
+/src/platform/test/functional/page_objects/unified_tabs.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/time_picker.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/index.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/header_page.ts @elastic/appex-qa
@@ -2069,7 +2071,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_search/ @elastic/search-kibana
 
 # Management Experience - Deployment Management
-/src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: src/platform/test/functional/apps/management/_import_objects.ts && src/platform/test/functional/apps/management/data_views/_scripted_fields_filter.ts
+/src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
 /x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json @elastic/kibana-management
 /x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-core
 /x-pack/test/functional/services/ace_editor.js @elastic/kibana-management
@@ -2694,7 +2696,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_selection.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/common/spaces/index.ts @elastic/appex-sharedux
 packages/react @elastic/appex-sharedux
-src/platform/test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
+src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
