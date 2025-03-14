@@ -30,6 +30,7 @@ import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import {
   RULE_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  AlertingServerStart,
 } from '@kbn/alerting-plugin/server';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AlertingEventLogger } from '@kbn/alerting-plugin/server/lib/alerting_event_logger/alerting_event_logger';
@@ -41,6 +42,7 @@ export function defineRoutes(
   core: CoreSetup<FixtureStartDeps>,
   taskManagerStart: Promise<TaskManagerStartContract>,
   notificationsStart: Promise<NotificationsPluginStart>,
+  alertingStart: Promise<AlertingServerStart>,
   { logger, eventLogger }: { logger: Logger; eventLogger: IEventLogger }
 ) {
   const router = core.http.createRouter();
@@ -770,9 +772,10 @@ export function defineRoutes(
     }
   );
 
-  router.get(
+  // Remove when we have real routes
+  router.post(
     {
-      path: '/api/alerts_fixture/get_alert_deletion_preview',
+      path: '/api/alerts_fixture/preview_alert_deletion',
       validate: {
         body: schema.object({
           isActiveAlertsDeletionEnabled: schema.boolean(),
@@ -788,16 +791,40 @@ export function defineRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> => {
-      const [, { eventLog }] = await core.getStartServices();
-      const eventLogClient = eventLog.getClient(req);
-      const {
-        params: { id, type },
-        query,
-      } = req;
+      const [, { spaces }] = await core.getStartServices();
+      const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+      const alerting = await alertingStart;
 
       try {
+        const result = await alerting.previewAlertDeletion(req.body, spaceId);
         return res.ok({
-          body: await eventLogClient.findEventsBySavedObjectIds(type, [id], query),
+          body: { numAlertsDeleted: result },
+        });
+      } catch (err) {
+        return res.notFound();
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/schedule_alert_deletion',
+      validate: {
+        body: schema.object({
+          spaceIds: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const alerting = await alertingStart;
+        const result = await alerting.scheduleAlertDeletion(req.body.spaceIds);
+        return res.ok({
+          body: { result },
         });
       } catch (err) {
         return res.notFound();

@@ -46,3 +46,10 @@ export { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
 export type { GetAlertIndicesAlias } from './create_get_alert_indices_alias';
 export { getEsRequestTimeout } from './get_es_request_timeout';
 export { spaceIdToNamespace } from './space_id_to_namespace';
+export type { AlertAuditEventParams } from './alert_audit_events';
+export {
+  AlertAuditAction,
+  operationAlertAuditActionMap,
+  alertAuditEvent,
+  alertAuditSystemEvent,
+} from './alert_audit_events';

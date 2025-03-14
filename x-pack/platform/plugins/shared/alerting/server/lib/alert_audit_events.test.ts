@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertAuditAction, alertAuditEvent } from './audit_events';
+import { AlertAuditAction, alertAuditEvent } from './alert_audit_events';
 
 describe('#alertAuditEvent', () => {
   test('creates event with `unknown` outcome', () => {

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type {
+  AuditLogger,
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  Logger,
+} from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsUtils } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -15,17 +20,24 @@ import type {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { millisToNanos } from '@kbn/event-log-plugin/server';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { omitBy } from 'lodash';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SearchResponse,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { GetAlertIndicesAlias } from '../lib';
-import { spaceIdToNamespace } from '../lib';
+import { AlertAuditAction, alertAuditSystemEvent, spaceIdToNamespace } from '../lib';
 import type { RuleTypeRegistry, RulesSettingsAlertDeletionProperties } from '../types';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 export const ALERT_DELETION_TASK_TYPE = 'alert-deletion';
+
+const PAGE_SIZE = 1000;
+const MAX_ALERTS_TO_DELETE = 10000;
 
 const allowedAppCategories = [
   DEFAULT_APP_CATEGORIES.security.id,
@@ -33,6 +45,7 @@ const allowedAppCategories = [
   DEFAULT_APP_CATEGORIES.observability.id,
 ];
 interface ConstructorOpts {
+  auditLogger?: AuditLogger;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   eventLogger: IEventLogger;
   getAlertIndicesAlias: GetAlertIndicesAlias;
@@ -44,13 +57,14 @@ interface ConstructorOpts {
   taskManagerStartPromise: Promise<TaskManagerStartContract>;
 }
 
-interface ActiveAlertFilteredSource {
+interface AlertFilteredSource {
   [ALERT_INSTANCE_ID]: string;
   [ALERT_RULE_UUID]: string;
   [SPACE_IDS]: string;
 }
 
 export class AlertDeletionClient {
+  private auditLogger?: AuditLogger;
   private logger: Logger;
   private eventLogger: IEventLogger;
   private elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -61,6 +75,7 @@ export class AlertDeletionClient {
   private readonly taskManagerStartPromise: Promise<TaskManagerStartContract>;
 
   constructor(opts: ConstructorOpts) {
+    this.auditLogger = opts.auditLogger;
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
     this.eventLogger = opts.eventLogger;
     this.getAlertIndicesAlias = opts.getAlertIndicesAlias;
@@ -238,7 +253,6 @@ export class AlertDeletionClient {
     spaceId: string,
     abortController: AbortController
   ): Promise<{ numAlertsDeleted: number; errors?: string[] }> {
-    const esClient = await this.elasticsearchClientPromise;
     const taskManager = await this.taskManagerStartPromise;
 
     const {
@@ -276,43 +290,15 @@ export class AlertDeletionClient {
       const activeAlertsQuery = getActiveAlertsQuery(activeAlertsDeletionThreshold, spaceId);
 
       try {
-        const searchResponse = await esClient.search<ActiveAlertFilteredSource>(
-          {
-            index: indices,
-            query: activeAlertsQuery,
-            _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID],
-          },
-          { signal: abortController.signal }
-        );
+        const {
+          numAlertsDeleted: numActiveAlertsDeleted,
+          taskIds,
+          alertUuidsToClear,
+          errors: activeAlertDeletionErrors,
+        } = await this.deleteAlertsForQuery(indices, activeAlertsQuery, abortController);
 
-        // bulk delete the alert documents by id
-        const bulkDeleteRequest = [];
-        for (const alert of searchResponse.hits.hits) {
-          bulkDeleteRequest.push({ delete: { _index: alert._index, _id: alert._id } });
-        }
-        const bulkDeleteResponse = await esClient.bulk(
-          { operations: bulkDeleteRequest },
-          { signal: abortController.signal }
-        );
-
-        // update the task state for only alerts that were successfully deleted
-        const taskIds = new Set<string>();
-        const alertUuidsToClear: string[] = [];
-        bulkDeleteResponse.items.forEach((item, index) => {
-          const alertUuid = searchResponse.hits.hits[index]._id;
-          if (item.delete?.result === 'deleted') {
-            numAlertsDeleted++;
-
-            const ruleId = searchResponse.hits.hits[index]._source?.[ALERT_RULE_UUID];
-            if (ruleId) {
-              taskIds.add(`task:${ruleId}`);
-            }
-
-            alertUuidsToClear.push(alertUuid!);
-          } else {
-            errors.push(`Error deleting alert "${alertUuid!}" - ${item.delete?.error?.reason}`);
-          }
-        });
+        numAlertsDeleted += numActiveAlertsDeleted;
+        errors.push(...activeAlertDeletionErrors);
 
         await taskManager.bulkUpdateState(Array.from(taskIds), (state) => {
           try {
@@ -338,11 +324,10 @@ export class AlertDeletionClient {
       const inactiveAlertsQuery = getInactiveAlertsQuery(inactiveAlertsDeletionThreshold, spaceId);
 
       try {
-        const dbqResponse = await esClient.deleteByQuery(
-          { index: indices, query: inactiveAlertsQuery },
-          { signal: abortController.signal }
-        );
-        numAlertsDeleted += dbqResponse.deleted ?? 0;
+        const { numAlertsDeleted: numInactiveAlertsDeleted, errors: inactiveAlertDeletionErrors } =
+          await this.deleteAlertsForQuery(indices, inactiveAlertsQuery, abortController);
+        numAlertsDeleted += numInactiveAlertsDeleted;
+        errors.push(...inactiveAlertDeletionErrors);
       } catch (err) {
         const errMessage = `Error deleting inactive alerts: ${err.message}`;
         this.logger.error(errMessage, { error: { stack_trace: err.stack } });
@@ -351,6 +336,115 @@ export class AlertDeletionClient {
     }
 
     return { numAlertsDeleted, ...(errors.length > 0 ? { errors } : {}) };
+  }
+
+  private async deleteAlertsForQuery(
+    indices: string[],
+    query: QueryDslQueryContainer,
+    abortController: AbortController
+  ) {
+    const esClient = await this.elasticsearchClientPromise;
+
+    let numAlertsDeleted = 0;
+    let pitId: string | undefined | null = null;
+    let searchAfter: SortResults | null | undefined = null;
+    const errors: string[] = [];
+    const taskIds = new Set<string>();
+    const alertUuidsToClear: string[] = [];
+
+    do {
+      if (!pitId) {
+        const pitResponse = await esClient.openPointInTime({
+          index: indices,
+          keep_alive: '1m',
+        });
+        pitId = pitResponse.id;
+      }
+
+      try {
+        // query for alerts to delete, sorted to return oldest first
+        const searchResponse: SearchResponse<AlertFilteredSource> = await esClient.search(
+          {
+            index: indices,
+            query,
+            size: PAGE_SIZE,
+            sort: [{ [TIMESTAMP]: 'asc' }],
+            pit: { id: pitId, keep_alive: '1m' },
+            _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
+            ...(searchAfter ? { search_after: searchAfter } : {}),
+          },
+          { signal: abortController.signal }
+        );
+
+        if (searchResponse.hits.hits.length === 0) {
+          searchAfter = null;
+        } else {
+          const numResults = searchResponse.hits.hits.length;
+          searchAfter = searchResponse.hits.hits[numResults - 1].sort;
+
+          // bulk delete the alert documents by id
+          const bulkDeleteRequest = [];
+          for (const alert of searchResponse.hits.hits) {
+            bulkDeleteRequest.push({ delete: { _index: alert._index, _id: alert._id } });
+          }
+          const bulkDeleteResponse = await esClient.bulk(
+            { operations: bulkDeleteRequest },
+            { signal: abortController.signal }
+          );
+
+          // iterate and audit log each alert by ID
+          bulkDeleteResponse.items.forEach((item, index) => {
+            const alertUuid = searchResponse.hits.hits[index]._id;
+            if (item.delete?.result === 'deleted') {
+              numAlertsDeleted++;
+
+              const ruleId = searchResponse.hits.hits[index]._source?.[ALERT_RULE_UUID];
+              if (ruleId) {
+                taskIds.add(`task:${ruleId}`);
+              }
+
+              alertUuidsToClear.push(alertUuid!);
+
+              this.auditLogger?.log(
+                alertAuditSystemEvent({
+                  action: AlertAuditAction.DELETE,
+                  id: alertUuid,
+                  outcome: 'success',
+                })
+              );
+            } else {
+              this.auditLogger?.log(
+                alertAuditSystemEvent({
+                  action: AlertAuditAction.DELETE,
+                  id: alertUuid,
+                  outcome: 'failure',
+                  error: new Error(item.delete?.error?.reason),
+                })
+              );
+              errors.push(`Error deleting alert "${alertUuid!}" - ${item.delete?.error?.reason}`);
+            }
+          });
+        }
+      } catch (err) {
+        if (pitId) {
+          await esClient.closePointInTime({ id: pitId });
+          pitId = null;
+        }
+        throw err;
+      }
+    } while (searchAfter != null && numAlertsDeleted < MAX_ALERTS_TO_DELETE);
+
+    try {
+      if (pitId) {
+        await esClient.closePointInTime({ id: pitId });
+      }
+    } catch (closeErr) {
+      this.logger.error(
+        `Failed to close point in time during alert deletion task: ${closeErr.message}`
+      );
+    }
+
+    return { numAlertsDeleted, taskIds, alertUuidsToClear, errors };
   }
 
   private logSuccessfulDeletion(runDate: Date, numDeleted: number, spaceIds: string[]) {

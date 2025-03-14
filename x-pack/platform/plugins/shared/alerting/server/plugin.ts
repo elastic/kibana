@@ -353,6 +353,7 @@ export class AlertingPlugin {
     this.ruleTypeRegistry = ruleTypeRegistry;
 
     this.alertDeletionClient = new AlertDeletionClient({
+      auditLogger: plugins.security?.audit.withoutRequest,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
