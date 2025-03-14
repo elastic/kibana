@@ -32,7 +32,7 @@ type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
   protected _updated_definition: TDefinition;
   protected dependencies: StreamDependencies;
-  protected changeStatus: StreamChangeStatus = 'unchanged';
+  protected changeStatus: StreamChangeStatus = 'unchanged'; // I'd like this to be private so that the subclasses don't need to manage it but they still have changes where they don't auto change
 
   constructor(definition: TDefinition, dependencies: StreamDependencies) {
     this._updated_definition = definition;
@@ -43,6 +43,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return this._updated_definition;
   }
 
+  // This needs a new return shape to bubble up status information
   async applyChange(
     change: StreamChange,
     desiredState: State,

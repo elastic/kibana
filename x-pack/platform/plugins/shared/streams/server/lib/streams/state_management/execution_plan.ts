@@ -32,7 +32,6 @@ import {
   upsertIngestPipeline,
 } from '../ingest_pipelines/manage_ingest_pipelines';
 
-// A bunch of types to model based on Joe's list
 interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
   request: ClusterPutComponentTemplateRequest;
@@ -156,11 +155,11 @@ export class ExecutionPlan {
 
   plan(elasticsearchActions: ElasticsearchAction[]) {
     this.actionsByType = groupBy(elasticsearchActions, 'type') as ActionsByType;
+
+    // Merge append_to_ingest_pipeline and upsert_ingest_pipelines where needed, special case to support classic streams
   }
 
   async execute() {
-    // Unpack actions by type
-
     const {
       upsert_component_template,
       upsert_index_template,
@@ -180,7 +179,8 @@ export class ExecutionPlan {
     assertEmptyObject(rest);
 
     // This graph is parallelizing as much as possible
-    // It's important we don't changes too early, otherwise things can break halfway through
+    // It's important we don't make changes too early, otherwise things can break halfway through
+    // such as leading to data loss if routing changes too early
 
     await Promise.all([
       this.upsertComponentTemplates(upsert_component_template as UpsertComponentTemplateAction[]),

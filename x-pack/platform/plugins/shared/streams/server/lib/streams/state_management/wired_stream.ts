@@ -91,8 +91,8 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     this._routingChanged =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        this._updated_definition.ingest.routing,
-        startingStateStreamDefinition.ingest.routing
+        this._updated_definition.ingest.wired.routing,
+        startingStateStreamDefinition.ingest.wired.routing
       );
 
     this._processingChanged =
@@ -122,14 +122,14 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
-              routing: [
-                {
-                  destination: this._updated_definition.name,
-                  if: { never: {} },
-                },
-              ],
               wired: {
                 fields: {},
+                routing: [
+                  {
+                    destination: this._updated_definition.name,
+                    if: { never: {} },
+                  },
+                ],
               },
             },
           },
@@ -141,7 +141,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       // if the parent hasn't changed already, ensure it has the correct routing
       // if it has changed, the routing will be updated in the parent's upsert
       if (!parentStream.hasChanged()) {
-        const currentParentRouting = parentStream.definition.ingest.routing;
+        const currentParentRouting = parentStream.definition.ingest.wired.routing;
         const hasChild = currentParentRouting.some(
           (routing) => routing.destination === this._updated_definition.name
         );
@@ -155,13 +155,16 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
                 name: parentId,
                 ingest: {
                   ...parentStream.definition.ingest,
-                  routing: [
-                    ...currentParentRouting,
-                    {
-                      destination: this._updated_definition.name,
-                      if: { never: {} },
-                    },
-                  ],
+                  wired: {
+                    ...parentStream.definition.ingest.wired,
+                    routing: [
+                      ...currentParentRouting,
+                      {
+                        destination: this._updated_definition.name,
+                        if: { never: {} },
+                      },
+                    ],
+                  },
                 },
               },
             },
@@ -189,7 +192,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       // if the parent hasn't changed already, ensure it has the correct routing
       // if it has changed, the routing will be updated in the parent's upsert
       if (!parentStream.hasChanged()) {
-        const currentParentRouting = parentStream.definition.ingest.routing;
+        const currentParentRouting = parentStream.definition.ingest.wired.routing;
         const hasChild = currentParentRouting.some(
           (routing) => routing.destination === this._updated_definition.name
         );
@@ -203,9 +206,12 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
                 name: parentId,
                 ingest: {
                   ...parentStream.definition.ingest,
-                  routing: parentStream.definition.ingest.routing.filter(
-                    (routing) => routing.destination !== this._updated_definition.name
-                  ),
+                  wired: {
+                    ...parentStream.definition.ingest.wired,
+                    routing: parentStream.definition.ingest.wired.routing.filter(
+                      (routing) => routing.destination !== this._updated_definition.name
+                    ),
+                  },
                 },
               },
             },
@@ -215,7 +221,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     }
 
     cascadingChanges.push(
-      ...this.definition.ingest.routing.map((routing) => ({
+      ...this.definition.ingest.wired.routing.map((routing) => ({
         target: routing.destination,
         type: 'delete' as const,
       }))
@@ -265,7 +271,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
 
     // validate routing
     const children: Set<string> = new Set();
-    for (const routing of this._updated_definition.ingest.routing) {
+    for (const routing of this._updated_definition.ingest.wired.routing) {
       if (children.has(routing.destination)) {
         return {
           isValid: false,

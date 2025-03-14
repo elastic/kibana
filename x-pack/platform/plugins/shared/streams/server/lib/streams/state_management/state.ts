@@ -115,7 +115,6 @@ export class State {
         streamFromDefinition(definition, dependencies)
       );
 
-      // State might need to be enriched with more information about these stream instances, like their existing ES resources
       return new State(streams, dependencies);
     } catch (error) {
       throw new Error(`Failed to load current Streams state due to: ${error.message}`);
@@ -161,7 +160,7 @@ export class State {
       }
       currentCascadingChanges = newCascadingChanges;
       if (++iterationCounter > 100) {
-        throw new Error('Excessive cascading changes');
+        throw new Error('Excessive cascading changes'); // Include the last round of changes to highlight what lead to the excess?
       }
     }
   }
