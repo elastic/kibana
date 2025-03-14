@@ -274,10 +274,10 @@ export class AlertingPlugin {
       };
     });
 
-    if (this.config.rulesSettings?.enabled) {
+    if (this.config.rulesSettings.enabled) {
       plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
     }
-    if (this.config.maintenanceWindow?.enabled) {
+    if (this.config.maintenanceWindow.enabled) {
       plugins.features.registerKibanaFeature(maintenanceWindowFeature);
     }
 
