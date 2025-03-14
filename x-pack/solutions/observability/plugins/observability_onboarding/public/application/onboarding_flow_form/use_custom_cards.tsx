@@ -285,7 +285,7 @@ export function useCustomCards(
           src: 'logoUptime',
         },
       ],
-      url: getUrlForApp?.('synthetics') ?? '',
+      url: `${getUrlForApp?.('synthetics')}/add-monitor`,
       version: '',
       integration: '',
     },
