@@ -22,6 +22,7 @@ export {
   getIndexPatternFromFilter,
 } from './query';
 
+export { convertIntervalToEsInterval } from '../common/search/aggs/buckets/lib/time_buckets/calc_es_interval';
 /**
  * Exporters (CSV)
  */

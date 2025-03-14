@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import querystring from 'querystring';
-import rison from '@kbn/rison';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
-  datasetQualityUrlSchemaV1,
   datasetQualityDetailsUrlSchemaV1,
+  datasetQualityUrlSchemaV1,
 } from '@kbn/data-quality-plugin/common';
 import {
-  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+  DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+  DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
+import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import rison from '@kbn/rison';
+import querystring from 'querystring';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -37,8 +37,8 @@ const defaultDetailsPageState: datasetQualityDetailsUrlSchemaV1.UrlSchema = {
       page: 0,
       rowsPerPage: 10,
       sort: {
-        field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
-        direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+        field: DEFAULT_QUALITY_ISSUE_SORT_FIELD,
+        direction: DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
       },
     },
   },
@@ -70,6 +70,18 @@ const texts = {
   services: 'Services',
   hosts: 'Hosts',
   degradedDocs: 'Degraded docs',
+  datasetNameColumn: 'Data set name',
+  datasetNamespaceColumn: 'Namespace',
+  datasetTypeColumn: 'Type',
+  datasetSizeColumn: 'Size',
+  datasetQualityColumn: 'Data set quality',
+  datasetDegradedDocsColumn: 'Degraded docs (%)',
+  datasetFailedDocsColumn: 'Failed docs (%)',
+  datasetLastActivityColumn: 'Last activity',
+  datasetActionsColumn: 'Actions',
+  datasetIssueColumn: 'Issue',
+  datasetDocsCountColumn: 'Docs count',
+  datasetLastOccurrenceColumn: 'Last Occurrence',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -95,7 +107,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFiltersContainer: 'datasetQualityFiltersContainer',
     datasetQualityExpandButton: 'datasetQualityExpandButton',
     datasetQualityDetailsDegradedFieldsExpandButton:
-      'datasetQualityDetailsDegradedFieldsExpandButton',
+      'datasetQualityDetailsQualityIssuesExpandButton',
     datasetQualityDetailsDegradedFieldFlyout: 'datasetQualityDetailsDegradedFieldFlyout',
     datasetDetailsContainer: 'datasetDetailsContainer',
     datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
@@ -198,7 +210,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
-      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
+      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`, {
+        timeout: 5 * 1000, // Increasing timeout since tests were flaky
+      });
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
@@ -302,21 +316,27 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetsTable();
       return this.parseTable(table, [
-        '0',
-        'Data Set Name',
-        'Namespace',
-        'Size',
-        'Data Set Quality',
-        'Degraded Docs (%)',
-        'Last Activity',
-        'Actions',
+        texts.datasetNameColumn,
+        texts.datasetNamespaceColumn,
+        texts.datasetTypeColumn,
+        texts.datasetSizeColumn,
+        texts.datasetQualityColumn,
+        texts.datasetDegradedDocsColumn,
+        texts.datasetFailedDocsColumn,
+        texts.datasetLastActivityColumn,
+        texts.datasetActionsColumn,
       ]);
     },
 
     async parseDegradedFieldTable() {
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
-      return this.parseTable(table, ['0', 'Field', 'Docs count', 'Last Occurrence']);
+      return this.parseTable(table, [
+        '0',
+        texts.datasetIssueColumn,
+        texts.datasetDocsCountColumn,
+        texts.datasetLastOccurrenceColumn,
+      ]);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -435,9 +455,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async openDegradedFieldFlyout(fieldName: string) {
       await this.waitUntilTableLoaded();
       const cols = await this.parseDegradedFieldTable();
-      const fieldNameCol = cols.Field;
+      const fieldNameCol = cols.Issue;
       const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
-      const testDatasetRowIndex = fieldNameColCellTexts.findIndex((dName) => dName === fieldName);
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
+        (dName) => dName === `${fieldName} field ignored`
+      );
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);
 

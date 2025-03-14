@@ -26,7 +26,7 @@ jest.mock('../utils/get_series_params', () => ({
 }));
 
 jest.mock('@kbn/visualizations-plugin/public', () => ({
-  convertToLensModule: Promise.resolve({
+  getConvertToLensModule: async () => ({
     getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
     createStaticValueColumn: jest.fn(() => mockCreateStaticValueColumn()),
   }),

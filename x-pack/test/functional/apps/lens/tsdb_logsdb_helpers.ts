@@ -309,7 +309,9 @@ export const getDocsGenerator =
     const result = await es.bulk(
       {
         index: esIndex,
-        body: docs.map((d) => `{"${isStream ? 'create' : 'index'}": {}}\n${JSON.stringify(d)}\n`),
+        operations: docs.map(
+          (d) => `{"${isStream ? 'create' : 'index'}": {}}\n${JSON.stringify(d)}\n`
+        ),
       },
       { meta: true }
     );

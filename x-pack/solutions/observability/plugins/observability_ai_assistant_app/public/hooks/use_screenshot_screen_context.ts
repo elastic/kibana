@@ -43,6 +43,7 @@ export function useScreenshotScreenContext() {
                   connectorId,
                   scopes: service.getScopes(),
                   signal,
+                  systemMessage: '',
                   messages: [
                     {
                       '@timestamp': new Date().toISOString(),

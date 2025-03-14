@@ -75,6 +75,25 @@ function getStatusComponent({
           />
         </EuiBadge>
       );
+    case 'uninstalled':
+      return (
+        <EuiBadge color="default" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.uninstalledStatusText"
+            defaultMessage="Uninstalled"
+          />
+        </EuiBadge>
+      );
+    case 'orphaned':
+      return (
+        <EuiBadge color="warning" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.orphanedStatusText"
+            defaultMessage="Orphaned"
+          />
+        </EuiBadge>
+      );
+
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
@@ -185,15 +204,24 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
       >
         {isStuckInUpdating(agent) && !fromDetails ? (
           <div className="eui-textNoWrap">
-            {getStatusComponent({ status: agent.status, ...restOfProps })}
+            {getStatusComponent({
+              status: agent.status,
+              ...restOfProps,
+            })}
             &nbsp;
             <EuiIcon type="warning" color="warning" />
           </div>
         ) : (
           <>
-            {getStatusComponent({ status: agent.status, ...restOfProps })}
+            {getStatusComponent({
+              status: agent.status,
+              ...restOfProps,
+            })}
             {previousToOfflineStatus
-              ? getStatusComponent({ status: previousToOfflineStatus, ...restOfProps })
+              ? getStatusComponent({
+                  status: previousToOfflineStatus,
+                  ...restOfProps,
+                })
               : null}
           </>
         )}

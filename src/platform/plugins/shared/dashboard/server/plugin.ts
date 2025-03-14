@@ -47,6 +47,7 @@ interface StartDeps {
 export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
+  private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -64,7 +65,7 @@ export class DashboardPlugin
       })
     );
 
-    plugins.contentManagement.register({
+    const { contentClient } = plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
@@ -74,6 +75,7 @@ export class DashboardPlugin
         latest: LATEST_VERSION,
       },
     });
+    this.contentClient = contentClient;
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -103,7 +105,7 @@ export class DashboardPlugin
         {
           domainId: 'dashboard',
           // makes sure that only users with read/all access to dashboard app can access the routes
-          routeTags: ['access:dashboardUsageStats'],
+          routePrivileges: ['dashboardUsageStats'],
         }
       );
     }
@@ -136,7 +138,9 @@ export class DashboardPlugin
         });
     }
 
-    return {};
+    return {
+      contentClient: this.contentClient,
+    };
   }
 
   public stop() {}

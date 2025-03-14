@@ -30,7 +30,7 @@ export function getDefaultAsyncSubmitParams(
        */
       disableSearchSessions: true,
     }),
-  };
+  } as Pick<SqlQueryRequest, 'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'>;
 }
 
 /**

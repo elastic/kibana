@@ -11,23 +11,24 @@ import { ConfigType } from '.';
 
 export const registerEnterpriseSearchIntegrations = (
   config: ConfigType,
-  customIntegrations: CustomIntegrationsPluginSetup
+  customIntegrations: CustomIntegrationsPluginSetup,
+  crawlerAssetBasePath: string
 ) => {
   if (config.hasWebCrawler) {
     customIntegrations.registerCustomIntegration({
       id: 'web_crawler',
       title: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerName', {
-        defaultMessage: 'Web crawler',
+        defaultMessage: 'Web Crawler',
       }),
       description: i18n.translate('xpack.enterpriseSearch.integrations.webCrawlerDescription', {
         defaultMessage: 'Add search to your website with the web crawler.',
       }),
       categories: ['search', 'web', 'elastic_stack', 'crawler'],
-      uiInternalPath: '/app/elasticsearch/content/crawlers/new_crawler',
+      uiInternalPath: '/app/elasticsearch/content/crawlers',
       icons: [
         {
-          type: 'eui',
-          src: 'logoEnterpriseSearch',
+          type: 'svg',
+          src: crawlerAssetBasePath,
         },
       ],
       shipper: 'search',
@@ -48,7 +49,7 @@ export const registerEnterpriseSearchIntegrations = (
     icons: [
       {
         type: 'eui',
-        src: 'logoEnterpriseSearch',
+        src: 'logoElasticsearch',
       },
     ],
     shipper: 'search',

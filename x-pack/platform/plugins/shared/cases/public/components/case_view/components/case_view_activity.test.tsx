@@ -38,7 +38,7 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
+import { AttachmentType, ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
@@ -147,6 +147,8 @@ const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
 
+const localStorageKey = `${basicCase.owner}.cases.userActivity.sortOrder`;
+
 describe('Case View Page activity tab', () => {
   let appMockRender: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -216,6 +218,8 @@ describe('Case View Page activity tab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+
+    localStorage.clear();
 
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
@@ -391,6 +395,29 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
+  it('should save sortOrder in localstorage', async () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+        observableTypes: [],
+      },
+    });
+
+    appMockRender.render(
+      <CaseViewActivity
+        {...caseProps}
+        caseData={{
+          ...caseProps.caseData,
+          customFields: [customFieldsMock[1]],
+        }}
+      />
+    );
+
+    await userEvent.selectOptions(await screen.findByTestId('user-actions-sort-select'), 'desc');
+
+    expect(localStorage.getItem(localStorageKey)).toBe('"desc"');
+  });
+
   describe('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -543,6 +570,14 @@ describe('Case View Page activity tab', () => {
       });
 
       it('renders the user action users correctly', async () => {
+        const commentUpdate = getUserAction('comment', 'update', {
+          createdBy: {
+            ...caseUsers.participants[1].user,
+            fullName: caseUsers.participants[1].user.full_name,
+            profileUid: caseUsers.participants[1].uid,
+          },
+        });
+
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
           data: {
@@ -555,13 +590,7 @@ describe('Case View Page activity tab', () => {
                   profileUid: caseUsers.participants[0].uid,
                 },
               }),
-              getUserAction('comment', 'update', {
-                createdBy: {
-                  ...caseUsers.participants[1].user,
-                  fullName: caseUsers.participants[1].user.full_name,
-                  profileUid: caseUsers.participants[1].uid,
-                },
-              }),
+              commentUpdate,
               getUserAction('description', 'update', {
                 createdBy: {
                   ...caseUsers.participants[2].user,
@@ -584,6 +613,25 @@ describe('Case View Page activity tab', () => {
                 },
               }),
             ],
+            latestAttachments:
+              commentUpdate.type === 'comment' &&
+              commentUpdate.payload.comment?.type === AttachmentType.user
+                ? [
+                    {
+                      comment: commentUpdate.payload.comment.comment,
+                      createdAt: commentUpdate.createdAt,
+                      createdBy: commentUpdate.createdBy,
+                      id: commentUpdate.commentId,
+                      owner: commentUpdate.owner,
+                      pushed_at: null,
+                      pushed_by: null,
+                      type: 'user',
+                      updated_at: null,
+                      updated_by: null,
+                      version: commentUpdate.version,
+                    },
+                  ]
+                : [],
           },
         });
 

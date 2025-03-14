@@ -6,25 +6,37 @@
  */
 
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
-import { CoreSetup } from '@kbn/core-lifecycle-browser';
-import { createStatusOverviewPanelAction } from './create_stats_overview_panel_action';
-import { createMonitorsOverviewPanelAction } from './create_monitors_overview_panel_action';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
+import { CoreStart } from '@kbn/core/public';
+import { ClientPluginsStart } from '../../../plugin';
+import {
+  ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID,
+  ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
+} from './constants';
 
 export const registerSyntheticsUiActions = async (
-  core: CoreSetup<ClientPluginsStart, unknown>,
-  pluginsSetup: ClientPluginsSetup
+  coreStart: CoreStart,
+  pluginsStart: ClientPluginsStart
 ) => {
-  const { uiActions, cloud, serverless } = pluginsSetup;
-
-  // Initialize actions
-  const addStatsOverviewPanelAction = createStatusOverviewPanelAction(core.getStartServices);
-  const addMonitorsOverviewPanelAction = createMonitorsOverviewPanelAction(core.getStartServices);
+  const { uiActions, cloud, serverless } = pluginsStart;
 
   // Assign triggers
   // Only register these actions in stateful kibana, and the serverless observability project
   if (Boolean((serverless && cloud?.serverless.projectType === 'observability') || !serverless)) {
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addStatsOverviewPanelAction);
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addMonitorsOverviewPanelAction);
+    uiActions.addTriggerActionAsync(
+      ADD_PANEL_TRIGGER,
+      ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
+      async () => {
+        const { createStatusOverviewPanelAction } = await import('./add_panel_actions_module');
+        return createStatusOverviewPanelAction(coreStart, pluginsStart);
+      }
+    );
+    uiActions.addTriggerActionAsync(
+      ADD_PANEL_TRIGGER,
+      ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID,
+      async () => {
+        const { createMonitorsOverviewPanelAction } = await import('./add_panel_actions_module');
+        return createMonitorsOverviewPanelAction(coreStart, pluginsStart);
+      }
+    );
   }
 };

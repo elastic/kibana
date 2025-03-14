@@ -12,15 +12,14 @@ import type {
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import { EuiBadgeGroup, EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 
-import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI, SimilarCaseUI } from '../../../common/ui/types';
 import { getEmptyCellValue } from '../empty_value';
 import { CaseDetailsLink } from '../links';
 import { TruncatedText } from '../truncated_text';
-import { severities } from '../severity/config';
+import { SeverityHealth } from '../severity/config';
 import { useCasesColumnsConfiguration } from '../all_cases/use_cases_columns_configuration';
 import * as i18n from './translations';
 
@@ -48,13 +47,14 @@ export interface UseSimilarCasesColumnsReturnValue {
 
 export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(false);
+
   const columns: SimilarCasesColumns[] = useMemo(
     () => [
       {
         field: casesColumnsConfig.title.field,
         name: casesColumnsConfig.title.name,
         sortable: false,
-        render: (title: string, theCase: SimilarCaseUI) => {
+        render: (_title: string, theCase: SimilarCaseUI) => {
           if (theCase.id != null && theCase.title != null) {
             const caseDetailsLinkComponent = (
               <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
@@ -157,14 +157,11 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         sortable: false,
         render: (severity: CaseUI['severity']) => {
           if (severity != null) {
-            const severityData = severities[severity ?? CaseSeverity.LOW];
             return (
-              <EuiHealth
+              <SeverityHealth
                 data-test-subj={`similar-cases-table-column-severity-${severity}`}
-                color={severityData.color}
-              >
-                {severityData.label}
-              </EuiHealth>
+                severity={severity}
+              />
             );
           }
           return getEmptyCellValue();
@@ -175,16 +172,74 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         field: SIMILARITIES_FIELD,
         name: i18n.SIMILARITY_REASON,
         sortable: false,
-        render: (similarities: SimilarCaseUI['similarities'], theCase: SimilarCaseUI) => {
-          if (theCase.id != null && theCase.title != null) {
-            return similarities.observables.map((similarity) => similarity.value).join(', ');
+        render: (similarities: SimilarCaseUI['similarities']) => {
+          const similarObservableValues = similarities.observables.map(
+            (similarity) => `${similarity.typeLabel}:${similarity.value}`
+          );
+
+          if (similarObservableValues.length > 0) {
+            const clampedBadges = (
+              <EuiBadgeGroup
+                data-test-subj="similar-cases-table-column-similarities"
+                css={getLineClampedCss}
+                gutterSize="xs"
+              >
+                {similarObservableValues.map((similarValue: string) => (
+                  <EuiBadge
+                    css={css`
+                      max-width: 100px;
+                    `}
+                    color="hollow"
+                    key={`${similarValue}`}
+                    data-test-subj={`similar-cases-table-column-similarities-${similarValue}`}
+                  >
+                    {similarValue}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            );
+
+            const unclampedBadges = (
+              <EuiBadgeGroup data-test-subj="similar-cases-table-column-similarities">
+                {similarObservableValues.map((similarValue: string) => (
+                  <EuiBadge
+                    color="hollow"
+                    key={`${similarValue}`}
+                    data-test-subj={`similar-cases-table-column-similarities-${similarValue}`}
+                  >
+                    {similarValue}
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            );
+
+            return (
+              <EuiToolTip
+                data-test-subj="similar-cases-table-column-similarities-tooltip"
+                position="left"
+                content={unclampedBadges}
+              >
+                {clampedBadges}
+              </EuiToolTip>
+            );
           }
           return getEmptyCellValue();
         },
         width: '20%',
       },
     ],
-    [casesColumnsConfig]
+    [
+      casesColumnsConfig.category.field,
+      casesColumnsConfig.category.name,
+      casesColumnsConfig.severity.field,
+      casesColumnsConfig.severity.name,
+      casesColumnsConfig.status.field,
+      casesColumnsConfig.status.name,
+      casesColumnsConfig.tags.field,
+      casesColumnsConfig.tags.name,
+      casesColumnsConfig.title.field,
+      casesColumnsConfig.title.name,
+    ]
   );
 
   return { columns, rowHeader: casesColumnsConfig.title.field };

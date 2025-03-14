@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { from, map, shareReplay } from 'rxjs';
 import { createIndexPatternMatcher } from './create_index_pattern_matcher';

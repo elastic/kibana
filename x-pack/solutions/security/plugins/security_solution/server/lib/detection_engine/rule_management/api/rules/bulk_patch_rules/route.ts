@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { DocLinksServiceSetup, IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+} from '../../../../../../../common/constants';
 import {
   BulkPatchRulesRequestBody,
   BulkCrudRulesResponse,
@@ -28,7 +31,13 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
  *
  * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
-export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const bulkPatchRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  docLinks: DocLinksServiceSetup
+) => {
+  const securityDocLinks = docLinks.links.securitySolution;
+
   router.versioned
     .patch({
       access: 'public',
@@ -50,6 +59,17 @@ export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger
         validate: {
           request: {
             body: buildRouteValidationWithZod(BulkPatchRulesRequestBody),
+          },
+        },
+        options: {
+          deprecated: {
+            documentationUrl: securityDocLinks.legacyRuleManagementBulkApiDeprecations,
+            severity: 'warning',
+            reason: {
+              type: 'migrate',
+              newApiMethod: 'POST',
+              newApiPath: DETECTION_ENGINE_RULES_BULK_ACTION,
+            },
           },
         },
       },

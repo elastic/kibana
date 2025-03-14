@@ -10,14 +10,14 @@
 import React, { ChangeEvent, FormEvent } from 'react';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
-import { ReactWrapper } from 'enzyme';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ComponentType, ReactWrapper, mount } from 'enzyme';
 import { GroupEditorControls } from './group_editor_controls';
-import { EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
+import { EuiTextAreaProps, EuiTextProps, EuiThemeProvider } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@elastic/eui', () => {
   return {
@@ -53,8 +53,17 @@ describe('event annotation group editor', () => {
   beforeEach(async () => {
     updateMock = jest.fn();
     setSelectedAnnotationMock = jest.fn();
+    const wrappingComponent: React.FC<{
+      children: React.ReactNode;
+    }> = ({ children }) => {
+      return (
+        <EuiThemeProvider>
+          <I18nProvider>{children}</I18nProvider>
+        </EuiThemeProvider>
+      );
+    };
 
-    wrapper = mountWithIntl(
+    wrapper = mount(
       <GroupEditorControls
         group={group}
         update={updateMock}
@@ -72,7 +81,10 @@ describe('event annotation group editor', () => {
         queryInputServices={{} as QueryInputServices}
         showValidation={false}
         isAdHocDataView={() => false}
-      />
+      />,
+      {
+        wrappingComponent: wrappingComponent as ComponentType<{}>,
+      }
     );
 
     await act(async () => {

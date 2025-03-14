@@ -25,9 +25,15 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareTabsContext();
 
-  const { allowEmbed, objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
+  const { allowEmbed, objectTypeMeta, onClose, shareMenuItems, anchorElement, disabledShareUrl } =
+    shareContext;
 
-  const tabs: Array<IModalTabDeclaration<any>> = [linkTab];
+  const tabs: Array<IModalTabDeclaration<any>> = [];
+
+  // do not show the link tab if the share url is disabled
+  if (!disabledShareUrl) {
+    tabs.push(linkTab);
+  }
 
   const enabledItems = shareMenuItems.filter(({ shareMenuItem }) => !shareMenuItem?.disabled);
 
@@ -40,15 +46,15 @@ export const ShareMenuTabs = () => {
     tabs.push(embedTab);
   }
 
-  return (
+  return Boolean(tabs.length) ? (
     <TabbedModal
       tabs={tabs}
       modalWidth={498}
       onClose={onClose}
       modalTitle={objectTypeMeta.title}
-      defaultSelectedTabId="link"
+      defaultSelectedTabId={tabs[0].id}
       anchorElement={anchorElement}
       data-test-subj="shareContextModal"
     />
-  );
+  ) : null;
 };

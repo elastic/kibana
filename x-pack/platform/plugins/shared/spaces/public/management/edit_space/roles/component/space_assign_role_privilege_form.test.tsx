@@ -113,6 +113,7 @@ const renderPrivilegeRolesForm = ({
               fetchRolesError: false,
             },
             invokeClient: spacesClientsInvocatorMock,
+            enableSecurityLink: '',
           }}
         >
           <PrivilegesRolesForm

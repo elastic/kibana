@@ -46,10 +46,14 @@ export function useMLModelNotificationToasts() {
   const showErrorToasts = (error: ErrorType) => {
     const errorObj = extractErrorProperties(error);
     return toasts.addError(new MLRequestFailure(errorObj, error), {
-      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle', {
+      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.inferenceErrorTitle', {
         defaultMessage: 'Model deployment failed',
       }),
     });
   };
-  return { showSuccessToasts, showErrorToasts, showSuccessfullyDeployedToast };
+  return {
+    showSuccessToasts,
+    showErrorToasts,
+    showSuccessfullyDeployedToast,
+  };
 }

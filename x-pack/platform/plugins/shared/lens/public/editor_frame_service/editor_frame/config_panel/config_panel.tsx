@@ -165,7 +165,7 @@ export function LayerPanels(
   );
 
   const onRemoveLayer = useCallback(
-    (layerToRemoveId: string) => {
+    async (layerToRemoveId: string) => {
       const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerToRemoveId];
       const datasourceId = datasourcePublicAPI?.datasourceId;
 
@@ -173,7 +173,7 @@ export function LayerPanels(
         const layerDatasource = datasourceMap[datasourceId];
         const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
         const trigger = props.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-        const action = props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+        const action = await props.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
         action?.execute({
           trigger,
@@ -264,6 +264,11 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+              attributes={props.attributes}
+              data={props.data}
+              setCurrentAttributes={props.setCurrentAttributes}
+              updateSuggestion={props.updateSuggestion}
+              dataLoading$={props.dataLoading$}
               onDropToDimension={handleDimensionDrop}
               registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
@@ -327,6 +332,9 @@ export function LayerPanels(
               }}
               toggleFullscreen={toggleFullscreen}
               indexPatternService={indexPatternService}
+              panelId={props.panelId}
+              parentApi={props.parentApi}
+              closeFlyout={props.closeFlyout}
             />
           )
         );

@@ -22,7 +22,7 @@
         "tags": [],
         "label": "statusServiceMock",
         "description": [],
-        "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+        "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<StatusServiceContract>"
             ],
-            "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+            "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
               "StatusServiceSetup",
               ">"
             ],
-            "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+            "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +72,7 @@
               "InternalStatusServiceSetup",
               ">"
             ],
-            "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+            "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

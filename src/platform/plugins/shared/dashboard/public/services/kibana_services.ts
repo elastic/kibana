@@ -28,7 +28,6 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import type { DashboardStartDependencies } from '../plugin';
 
@@ -51,7 +50,6 @@ export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
-export let visualizationsService: VisualizationsStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -75,7 +73,6 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   uiActionsService = deps.uiActions;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
-  visualizationsService = deps.visualizations;
 
   servicesReady$.next(true);
 };

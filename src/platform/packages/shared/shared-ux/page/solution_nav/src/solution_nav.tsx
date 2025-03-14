@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './solution_nav.scss';
-
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
+import React, { FC, useState, useMemo, useEffect } from 'react';
+
 import {
   EuiAvatarProps,
   EuiCollapsibleNavGroup,
@@ -28,6 +28,9 @@ import {
   useEuiTheme,
   useEuiThemeCSSVariables,
   EuiPageSidebar,
+  useEuiOverflowScroll,
+  useEuiMinBreakpoint,
+  euiCanAnimate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -105,6 +108,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   canBeCollapsed = true,
   ...rest
 }) => {
+  const { euiTheme } = useEuiTheme();
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
@@ -131,12 +135,18 @@ export const SolutionNav: FC<SolutionNavProps> = ({
       size="xs"
       id={headingID}
       data-test-subj={headingProps?.['data-test-subj']}
-      className="kbnSolutionNav__title"
+      css={css`
+        display: inline-flex;
+        align-items: center;
+      `}
     >
       <HeadingElement>
         {icon && (
           <KibanaSolutionAvatar
-            className="kbnSolutionNav__titleAvatar"
+            css={css`
+              margin-right: ${euiTheme.size.m};
+              align-self: flex-start;
+            `}
             iconType={icon}
             name={name}
           />
@@ -180,7 +190,6 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     );
   }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
-  const { euiTheme } = useEuiTheme();
   const navWidth = useMemo(() => {
     if (isLargerBreakpoint) {
       return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
@@ -206,12 +215,34 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     });
   }, [navWidth, setGlobalCSSVariables]);
 
+  const styles = {
+    solutionNav: css`
+      display: flex;
+      flex-direction: column;
+
+      ${useEuiOverflowScroll('y')};
+
+      ${useEuiMinBreakpoint('m')} {
+        width: ${FLYOUT_SIZE_CSS};
+        padding: ${euiTheme.size.l};
+      }
+    `,
+    solutionNavHidden: css`
+      pointer-events: none;
+      opacity: 0;
+
+      ${euiCanAnimate} {
+        transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+      }
+    `,
+  };
   return (
     <>
       {isSmallerBreakpoint && (
         // @ts-expect-error Mismatch in collapsible vs unconllapsible props
         <EuiCollapsibleNavGroup
           className={sideNavClasses}
+          css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
           paddingSize="none"
           background="none"
           title={titleText}
@@ -234,10 +265,21 @@ export const SolutionNav: FC<SolutionNavProps> = ({
               side="left"
               size={FLYOUT_SIZE}
               closeButtonPosition={closeFlyoutButtonPosition}
-              className="kbnSolutionNav__flyout"
+              css={css`
+                // Put the page background color in the flyout version too
+                background-color: ${euiTheme.colors.backgroundBasePlain};
+
+                .kbnSolutionNav {
+                  flex: auto; // Override default EuiPageSideBar flex CSS when in a flyout
+                }
+              `}
               hideCloseButton={!canBeCollapsed}
             >
-              <EuiPageSidebar className={sideNavClasses} hasEmbellish={true}>
+              <EuiPageSidebar
+                className={sideNavClasses}
+                css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
+                hasEmbellish={true}
+              >
                 {titleText}
                 <EuiSpacer size="l" />
                 {sideNavContent}
@@ -251,7 +293,10 @@ export const SolutionNav: FC<SolutionNavProps> = ({
       )}
       {isLargerBreakpoint && (
         <>
-          <div className={sideNavClasses}>
+          <div
+            css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
+            className={sideNavClasses}
+          >
             {titleText}
             <EuiSpacer size="l" />
             {sideNavContent}

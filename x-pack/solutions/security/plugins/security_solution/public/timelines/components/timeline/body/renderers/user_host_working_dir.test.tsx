@@ -240,7 +240,6 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain="[user-domain-123]"
               userName={undefined}
               hostName={undefined}
@@ -260,7 +259,6 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain="[user-domain-123]"
               userDomainField="overridden.field.name"
               userName={undefined}
@@ -283,7 +281,6 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain={undefined}
               userName="[user-name-123]"
               hostName={undefined}
@@ -303,7 +300,6 @@ describe('UserHostWorkingDir', () => {
             <UserHostWorkingDir
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain={undefined}
               userName="[user-name-123]"
               userNameField="overridden.field.name"

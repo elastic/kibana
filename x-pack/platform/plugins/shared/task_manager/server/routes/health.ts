@@ -148,7 +148,11 @@ export function healthRoute(params: HealthRouteParams): {
         },
       },
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
-      // options: { tags: ['access:taskManager'] },
+      // security: {
+      //   authz: {
+      //     requiredPrivileges: ['taskManager'],
+      //   },
+      // },
       validate: false,
       options: {
         access: 'public',
@@ -167,15 +171,13 @@ export function healthRoute(params: HealthRouteParams): {
         const hasPrivilegesResponse = await clusterClient
           .asScoped(req)
           .asCurrentUser.security.hasPrivileges({
-            body: {
-              application: [
-                {
-                  application: `kibana-${kibanaIndexName}`,
-                  resources: ['*'],
-                  privileges: [`api:${kibanaVersion}:taskManager`],
-                },
-              ],
-            },
+            application: [
+              {
+                application: `kibana-${kibanaIndexName}`,
+                resources: ['*'],
+                privileges: [`api:${kibanaVersion}:taskManager`],
+              },
+            ],
           });
 
         // Keep track of total access vs admin access

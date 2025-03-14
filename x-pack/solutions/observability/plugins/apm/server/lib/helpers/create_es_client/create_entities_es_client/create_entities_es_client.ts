@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { entitiesAliasPattern, ENTITY_LATEST, ENTITY_HISTORY } from '@kbn/entities-schema';
@@ -110,9 +111,7 @@ export async function createEntitiesESClient({
               index: [SERVICE_ENTITIES_LATEST_ALIAS],
               ignore_unavailable: true,
             },
-            {
-              ...params.body,
-            },
+            params,
           ];
 
           return searchParams;

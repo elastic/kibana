@@ -17,7 +17,7 @@ import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n-re
 import * as React from 'react';
 import { Unit } from '@kbn/datemath';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogTextSeparator } from './log_text_separator';
 import { extendDatemath } from '../../../utils/datemath';
 
@@ -98,16 +98,16 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
   }
 }
 
-const LoadingItemViewExtra = euiStyled(EuiFlexGroup)`
+const LoadingItemViewExtra = styled(EuiFlexGroup)`
   height: 40px;
 `;
 
-const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
-  padding-left: ${(props) => props.theme.eui.euiSizeS};
+const ProgressEntryWrapper = styled.div<{ position: Position }>`
+  padding-left: ${(props) => props.theme.euiTheme.size.s};
   padding-top: ${(props) =>
-    props.position === 'start' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
+    props.position === 'start' ? props.theme.euiTheme.size.l : props.theme.euiTheme.size.m};
   padding-bottom: ${(props) =>
-    props.position === 'end' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
+    props.position === 'end' ? props.theme.euiTheme.size.l : props.theme.euiTheme.size.m};
 `;
 
 type ProgressMessageProps = Pick<

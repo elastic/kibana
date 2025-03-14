@@ -80,7 +80,17 @@ describe('Custom Links', () => {
       expect(wrapper.find('EuiLink').first().prop('href')).toEqual(
         `/ip/${encodeURIComponent(ipv4)}/source/events`
       );
-      expect(wrapper.text()).toEqual(`${ipv4}${ipv4a}`);
+      expect(wrapper.text()).toEqual(`${ipv4}, ${ipv4a}`);
+      expect(wrapper.find('EuiLink').last().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4a)}/source/events`
+      );
+    });
+    test('can handle a string array of ips', () => {
+      const wrapper = mount(<NetworkDetailsLink ip={`${ipv4},   ${ipv4a}`} />);
+      expect(wrapper.find('EuiLink').first().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4)}/source/events`
+      );
+      expect(wrapper.text()).toEqual(`${ipv4}, ${ipv4a}`);
       expect(wrapper.find('EuiLink').last().prop('href')).toEqual(
         `/ip/${encodeURIComponent(ipv4a)}/source/events`
       );

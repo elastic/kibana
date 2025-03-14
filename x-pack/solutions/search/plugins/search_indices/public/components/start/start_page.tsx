@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingLogo } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
@@ -25,7 +25,7 @@ const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
 });
 
 export const ElasticsearchStartPage = () => {
-  const { console: consolePlugin } = useKibana().services;
+  const { console: consolePlugin, history, searchNavigation } = useKibana().services;
   const {
     data: indicesData,
     isInitialLoading,
@@ -42,11 +42,12 @@ export const ElasticsearchStartPage = () => {
   useIndicesRedirect(indicesData);
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
       data-test-subj="elasticsearchStartPage"
       grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
@@ -56,6 +57,6 @@ export const ElasticsearchStartPage = () => {
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

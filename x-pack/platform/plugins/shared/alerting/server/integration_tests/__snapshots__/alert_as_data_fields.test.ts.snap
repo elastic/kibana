@@ -1010,6 +1010,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -1413,6 +1418,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -2113,6 +2133,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -2516,6 +2541,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -3216,6 +3256,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -3619,6 +3664,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -4319,6 +4379,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -4722,6 +4787,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -5422,6 +5502,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -5825,6 +5910,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -6531,6 +6631,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -6934,6 +7039,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -7634,6 +7754,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -8037,6 +8162,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",
@@ -8737,6 +8877,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -9140,6 +9285,21 @@ Object {
       "array": false,
       "required": false,
       "type": "version",
+    },
+    "service.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "service.risk.calculated_score_norm": Object {
+      "array": false,
+      "required": false,
+      "type": "float",
     },
     "signal.ancestors.depth": Object {
       "path": "kibana.alert.ancestors.depth",

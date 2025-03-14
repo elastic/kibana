@@ -12,7 +12,7 @@ import {
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess @serverless @serverlessQA Entity Analytics - Asset Criticality CSV upload', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Analytics - Asset Criticality CSV upload', () => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
@@ -104,12 +104,12 @@ export default ({ getService }: FtrProviderContext) => {
         {
           index: 1,
           message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
         },
         {
           index: 2,
           message:
-            'Invalid entity type "invalid_entity", expected to be one of: user, host, service, universal',
+            'Invalid entity type "invalid_entity", expected to be one of: user, host, service',
         },
         {
           index: 3,
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         {
           index: 2,
           message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
         },
       ]);
 

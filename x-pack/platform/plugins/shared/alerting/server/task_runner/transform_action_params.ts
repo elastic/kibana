@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { ActionContextVariables, SummaryActionContextVariables } from '@kbn/alerting-types';
-import { AADAlert } from '@kbn/alerts-as-data-utils';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { ActionContextVariables, SummaryActionContextVariables } from '@kbn/alerting-types';
+import type { AADAlert } from '@kbn/alerts-as-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
-import {
+import type {
   RuleActionParams,
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
-  SanitizedRule,
 } from '../types';
+import type { ActionSchedulerRule } from './action_scheduler/types';
 
 export interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
@@ -146,7 +146,7 @@ export function transformSummaryActionParams({
   kibanaBaseUrl,
 }: {
   alerts: SummarizedAlertsWithAll;
-  rule: SanitizedRule<RuleTypeParams>;
+  rule: ActionSchedulerRule<RuleTypeParams>;
   ruleTypeId: string;
   actionsPlugin: ActionsPluginStartContract;
   actionId: string;

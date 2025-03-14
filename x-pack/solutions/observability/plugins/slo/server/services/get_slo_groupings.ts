@@ -8,7 +8,7 @@
 import { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_VALUE, GetSLOGroupingsParams, GetSLOGroupingsResponse } from '@kbn/slo-schema';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
 import { SLODefinition, SLOSettings } from '../domain/models';
 import { SloDefinitionClient } from './slo_definition_client';
 
@@ -52,8 +52,8 @@ export class GetSLOGroupings {
       }
     >({
       index: params.remoteName
-        ? `${params.remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_NAME}`
-        : SLO_SUMMARY_DESTINATION_INDEX_NAME,
+        ? `${params.remoteName}:${SUMMARY_DESTINATION_INDEX_NAME}`
+        : SUMMARY_DESTINATION_INDEX_NAME,
       ...generateQuery(slo, params, this.sloSettings),
     });
 

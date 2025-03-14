@@ -218,7 +218,7 @@ export function jobsProvider(
 
     const body = await mlClient.stopDatafeed({
       datafeed_id: datafeedId,
-      body: { force: true },
+      force: true,
     });
     if (body.stopped !== true) {
       return { success: false };
@@ -682,17 +682,14 @@ export function jobsProvider(
         results[job.job_id] = { job: { success: false }, datafeed: { success: false } };
 
         try {
-          await mlClient.putJob({ job_id: job.job_id, body: job });
+          await mlClient.putJob(job);
           results[job.job_id].job = { success: true };
         } catch (error) {
           results[job.job_id].job = { success: false, error: error.body ?? error };
         }
 
         try {
-          await mlClient.putDatafeed(
-            { datafeed_id: datafeed.datafeed_id, body: datafeed },
-            authHeader
-          );
+          await mlClient.putDatafeed(datafeed, authHeader);
           results[job.job_id].datafeed = { success: true };
         } catch (error) {
           results[job.job_id].datafeed = { success: false, error: error.body ?? error };

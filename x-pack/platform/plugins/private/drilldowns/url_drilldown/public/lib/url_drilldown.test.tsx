@@ -62,7 +62,7 @@ const mockEmbeddableApi = {
     filters$: new BehaviorSubject([]),
     query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
-    viewMode: new BehaviorSubject('edit'),
+    viewMode$: new BehaviorSubject('edit'),
   },
 };
 
@@ -200,7 +200,7 @@ describe('UrlDrilldown', () => {
     });
 
     test('compatible in view mode if url is valid', async () => {
-      mockEmbeddableApi.parentApi.viewMode.next('view');
+      mockEmbeddableApi.parentApi.viewMode$.next('view');
 
       const config: Config = {
         url: {
@@ -222,7 +222,7 @@ describe('UrlDrilldown', () => {
     });
 
     test('not compatible in view mode if url is invalid', async () => {
-      mockEmbeddableApi.parentApi.viewMode.next('view');
+      mockEmbeddableApi.parentApi.viewMode$.next('view');
       const config: Config = {
         url: {
           template: `https://elasti.co/?{{event.value}}&{{rison context.panel.somethingFake}}`,
@@ -242,7 +242,7 @@ describe('UrlDrilldown', () => {
     });
 
     test('not compatible in view mode if external URL is denied', async () => {
-      mockEmbeddableApi.parentApi.viewMode.next('view');
+      mockEmbeddableApi.parentApi.viewMode$.next('view');
       const drilldown1 = createDrilldown(true);
       const drilldown2 = createDrilldown(false);
       const config: Config = {
@@ -359,9 +359,9 @@ describe('UrlDrilldown', () => {
 
   describe('variables', () => {
     const embeddable1 = {
-      dataViews: new BehaviorSubject([{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }]),
-      panelTitle: new BehaviorSubject('The Title'),
-      savedObjectId: new BehaviorSubject('SAVED_OBJECT_IDxx'),
+      dataViews$: new BehaviorSubject([{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }]),
+      title$: new BehaviorSubject('The Title'),
+      savedObjectId$: new BehaviorSubject('SAVED_OBJECT_IDxx'),
       uuid: 'test',
     };
     const data = {
@@ -373,7 +373,7 @@ describe('UrlDrilldown', () => {
     };
 
     const embeddable2 = {
-      dataViews: new BehaviorSubject([
+      dataViews$: new BehaviorSubject([
         { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
         { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
       ]),
@@ -393,8 +393,8 @@ describe('UrlDrilldown', () => {
         }),
         timeRange$: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
       },
-      panelTitle: new BehaviorSubject('The Title'),
-      savedObjectId: new BehaviorSubject('SAVED_OBJECT_ID'),
+      title$: new BehaviorSubject('The Title'),
+      savedObjectId$: new BehaviorSubject('SAVED_OBJECT_ID'),
       uuid: 'the-id',
     };
 

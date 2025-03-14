@@ -34,7 +34,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     api.invalidSelections$,
     api.fieldFormatter
   );
-  const defaultPanelTitle = useStateFromPublishingSubject(api.defaultPanelTitle);
+  const defaultPanelTitle = useStateFromPublishingSubject(api.defaultTitle$);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {

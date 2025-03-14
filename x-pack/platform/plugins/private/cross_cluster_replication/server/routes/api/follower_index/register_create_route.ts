@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { CcrFollowRequest } from '@elastic/elasticsearch/lib/api/types';
 import { serializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
 import { FollowerIndex } from '../../../../common/types';
 import { addBasePath } from '../../../services';
@@ -56,9 +57,9 @@ export const registerCreateRoute = ({
 
       try {
         const responseBody = await client.asCurrentUser.ccr.follow({
+          ...body,
           index: name,
-          body,
-        });
+        } as CcrFollowRequest);
 
         return response.ok({
           body: responseBody,

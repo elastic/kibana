@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
+import fetchMock from 'fetch-mock';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { first } from 'rxjs';
@@ -215,7 +214,7 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should not set kbn-system-request header when asSystemRequest: false', async () => {
@@ -225,7 +224,7 @@ describe('Fetch', () => {
         asSystemRequest: false,
       });
 
-      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+      expect(fetchMock.lastOptions()!.headers?.['kbn-system-request']).toBeUndefined();
     });
 
     it('should set kbn-system-request header when asSystemRequest: true', async () => {
@@ -338,7 +337,7 @@ describe('Fetch', () => {
 
       const lastCall = fetchMock.lastCall();
 
-      expect(lastCall!.request.credentials).toBe('same-origin');
+      expect(lastCall!.request!.credentials).toBe('same-origin');
       expect(lastCall![1]).toMatchObject({
         method: 'GET',
         headers: {
@@ -754,7 +753,7 @@ describe('Fetch', () => {
       expect(createRequest.mock.calls[0][0].path).toContain('/my/route');
       expect(createRequest.mock.calls[1][0].path).toContain('/api/alpha');
       expect(createRequest.mock.calls[2][0].path).toContain('/api/beta');
-      expect(fetchMock.lastCall()!.request.url).toContain('/api/gamma');
+      expect(fetchMock.lastCall()!.request!.url).toContain('/api/gamma');
     });
 
     it('should accumulate response information', async () => {

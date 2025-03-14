@@ -27,6 +27,7 @@ function getExpressionForLayer(
       idMapper[col.fieldName].push({
         id: col.columnId,
         label: col.customLabel ? col.label : col.fieldName,
+        variable: col?.variable,
       } as OriginalColumn);
     } else {
       idMapper = {
@@ -35,6 +36,7 @@ function getExpressionForLayer(
           {
             id: col.columnId,
             label: col.customLabel ? col.label : col.fieldName,
+            variable: col?.variable,
           } as OriginalColumn,
         ],
       };
@@ -120,6 +122,7 @@ function getExpressionForLayer(
           function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(idMapper)],
+            isTextBased: [true],
           },
         },
         ...formatterOverrides,

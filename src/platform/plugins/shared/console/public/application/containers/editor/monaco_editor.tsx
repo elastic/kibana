@@ -83,6 +83,10 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     await actionsProvider.current?.sendRequests(dispatch, context);
   }, [dispatch, context]);
 
+  const isKbnRequestSelectedCallback = useCallback(async () => {
+    return actionsProvider.current!.isKbnRequestSelected();
+  }, []);
+
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, isDevMode);
@@ -195,6 +199,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}
+            getIsKbnRequestSelected={isKbnRequestSelectedCallback}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

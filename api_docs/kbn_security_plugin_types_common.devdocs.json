@@ -326,7 +326,7 @@
         "tags": [],
         "label": "BaseApiKey",
         "description": [
-          "\nFixing up `estypes.SecurityApiKey` type since some fields are marked as optional even though they are guaranteed to be returned.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
+          "\nFixing up `estypes.SecurityApiKey` type since some fields are marked as optional even though they are guaranteed to be returned.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated to make `role_descriptors` required."
         ],
         "signature": [
           {
@@ -343,53 +343,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "@kbn/security-plugin-types-common",
-            "id": "def-common.BaseApiKey.username",
-            "type": "string",
-            "tags": [],
-            "label": "username",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-plugin-types-common",
-            "id": "def-common.BaseApiKey.realm",
-            "type": "string",
-            "tags": [],
-            "label": "realm",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-plugin-types-common",
-            "id": "def-common.BaseApiKey.creation",
-            "type": "number",
-            "tags": [],
-            "label": "creation",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-plugin-types-common",
-            "id": "def-common.BaseApiKey.metadata",
-            "type": "Object",
-            "tags": [],
-            "label": "metadata",
-            "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
-            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "@kbn/security-plugin-types-common",
             "id": "def-common.BaseApiKey.role_descriptors",
@@ -569,14 +522,15 @@
             "section": "def-common.ManagedApiKey",
             "text": "ManagedApiKey"
           },
-          " extends ",
+          " extends Omit<",
           {
             "pluginId": "@kbn/security-plugin-types-common",
             "scope": "common",
             "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
             "section": "def-common.BaseApiKey",
             "text": "BaseApiKey"
-          }
+          },
+          ", \"type\">"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
         "deprecated": false,
@@ -585,14 +539,72 @@
           {
             "parentPluginId": "@kbn/security-plugin-types-common",
             "id": "def-common.ManagedApiKey.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"managed\""
+              "\"managed\" | ",
+              "SecurityApiKeyType"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.QueryRolesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryRolesResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.QueryRolesResult.roles",
+            "type": "Array",
+            "tags": [],
+            "label": "roles",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.QueryRolesResult.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.QueryRolesResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1064,12 +1076,12 @@
           {
             "parentPluginId": "@kbn/security-plugin-types-common",
             "id": "def-common.RoleRemoteClusterPrivilege.clusters",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "clusters",
             "description": [],
             "signature": [
-              "string[]"
+              "string | string[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -1083,7 +1095,14 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "string[]"
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RemoteClusterPrivilege",
+                "text": "RemoteClusterPrivilege"
+              },
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -1910,7 +1929,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiOperation",
+        "type": "Enum",
+        "tags": [],
+        "label": "ApiOperation",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/security-plugin-types-common",
@@ -2023,6 +2055,36 @@
           "SuccessQueryApiKeyResult | ErrorQueryApiKeyResult"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.QueryRolesRole",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryRolesRole",
+        "description": [],
+        "signature": [
+          "SecurityQueryRoleQueryRole"
+        ],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RemoteClusterPrivilege",
+        "type": "Type",
+        "tags": [],
+        "label": "RemoteClusterPrivilege",
+        "description": [],
+        "signature": [
+          "\"monitor_enrich\" | \"monitor_stats\""
+        ],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

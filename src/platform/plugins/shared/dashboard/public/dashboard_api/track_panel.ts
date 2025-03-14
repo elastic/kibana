@@ -25,7 +25,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
   }
 
   return {
-    expandedPanelId: expandedPanelId$,
+    expandedPanelId$,
     expandPanel: (panelId: string) => {
       const isPanelExpanded = panelId === expandedPanelId$.value;
 
@@ -36,9 +36,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       }
 
       setExpandedPanelId(panelId);
-      if (window.scrollY > 0) {
-        scrollPosition = window.scrollY;
-      }
+      scrollPosition = window.scrollY;
     },
     focusedPanelId$,
     highlightPanelId$,
@@ -63,17 +61,12 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
 
       untilEmbeddableLoaded(id).then(() => {
         setScrollToPanelId(undefined);
-        if (scrollPosition) {
-          panelRef.ontransitionend = () => {
-            // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
-            // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
-            window.scrollTo({ top: scrollPosition });
-            scrollPosition = undefined;
-            panelRef.ontransitionend = null;
-          };
-          return;
+        if (scrollPosition !== undefined) {
+          window.scrollTo({ top: scrollPosition });
+          scrollPosition = undefined;
+        } else {
+          panelRef.scrollIntoView({ block: 'start' });
         }
-        panelRef.scrollIntoView({ block: 'start' });
       });
     },
     scrollToTop: () => {

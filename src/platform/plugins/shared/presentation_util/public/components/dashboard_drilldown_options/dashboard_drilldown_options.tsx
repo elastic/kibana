@@ -24,7 +24,7 @@ export const DashboardDrilldownOptionsComponent = ({
 }: DashboardDrilldownOptionsProps) => {
   return (
     <>
-      <EuiFormRow>
+      <EuiFormRow data-test-subj="dashboardDrillDownOptions">
         <div>
           <EuiSwitch
             compressed

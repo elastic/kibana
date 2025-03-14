@@ -15,23 +15,15 @@ import {
 import { closeAllToasts } from '../../tasks/toasts';
 import { login, ROLE } from '../../tasks/login';
 
-// Unskip when defendInsights assistant feature is enabled by default
-describe.skip(
+describe(
   'When defining a kibana role for Endpoint security access',
   {
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['defendInsights'])}`,
-        ],
-      },
-    },
     tags: '@ess',
   },
   () => {
     const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
       return cy
-        .get('#featurePrivilegeControls_siem')
+        .get('#featurePrivilegeControls_siemV2')
         .findByTestSubj('mutexSubFeaturePrivilegeControl')
         .closest('.euiFlexGroup');
     };

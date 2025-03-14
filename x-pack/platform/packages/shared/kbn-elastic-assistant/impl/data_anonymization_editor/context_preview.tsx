@@ -10,7 +10,6 @@ import { EuiText } from '@elastic/eui';
 import { getAnonymizedValue } from '@kbn/elastic-assistant-common';
 import { getAnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_data';
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import styled from '@emotion/styled';
@@ -18,10 +17,11 @@ import { SelectedPromptContext } from '../assistant/prompt_context/types';
 
 const Strong = styled.strong<{ showRealValues: boolean }>`
   color: ${(props) =>
-    props.showRealValues ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorAccent};
+    props.showRealValues
+      ? props.theme.euiTheme.colors.textPrimary
+      : props.theme.euiTheme.colors.textAccent};
   cursor: pointer;
 `;
-
 export interface Props {
   selectedPromptContext: SelectedPromptContext;
   showRealValues: boolean;

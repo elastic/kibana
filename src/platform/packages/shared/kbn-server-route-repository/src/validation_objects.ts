@@ -8,11 +8,12 @@
  */
 
 import { z } from '@kbn/zod';
+import { PassThroughAny } from '@kbn/zod-helpers';
 
 export const passThroughValidationObject = {
-  body: z.any(),
-  params: z.any(),
-  query: z.any(),
+  body: PassThroughAny,
+  params: PassThroughAny,
+  query: PassThroughAny,
 };
 
 export const noParamsValidationObject = {

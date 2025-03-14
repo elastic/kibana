@@ -7,7 +7,7 @@
 
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { useIsPrebuiltRulesCustomizationEnabled } from './use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 
 /**
  * Gets the default index pattern for cases when rule has neither index patterns or data view.
@@ -15,9 +15,9 @@ import { useIsPrebuiltRulesCustomizationEnabled } from './use_is_prebuilt_rules_
  */
 export function useDefaultIndexPattern(): string[] {
   const { services } = useKibana();
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
 
-  return isPrebuiltRulesCustomizationEnabled
+  return isRulesCustomizationEnabled
     ? services.settings.client.get(DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN)
     : [];
 }

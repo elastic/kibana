@@ -9,7 +9,7 @@ import { forEach, keys, sortBy, reduce, size } from 'lodash';
 import { flatMap, flow, groupBy, values as valuesFP, map, pickBy } from 'lodash/fp';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export type FieldCapsList = FieldCapsResponse['fields'];
@@ -119,14 +119,12 @@ export async function getIndices(dataClient: IScopedClusterClient, pattern: stri
   const response = await dataClient.asCurrentUser.search<unknown, { indices: IndicesAggs }>(
     {
       index: pattern,
-      body: {
-        size: 0,
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: limit,
-            },
+      size: 0,
+      aggs: {
+        indices: {
+          terms: {
+            field: '_index',
+            size: limit,
           },
         },
       },

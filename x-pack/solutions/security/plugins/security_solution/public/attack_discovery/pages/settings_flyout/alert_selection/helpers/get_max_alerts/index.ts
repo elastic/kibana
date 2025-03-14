@@ -11,10 +11,9 @@ import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
  * ensures maxAlerts is a positive number, otherwise returns the default value
  */
 export const getMaxAlerts = (maxAlerts: string): number => {
-  const defaultMaxAlerts = Number(DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS);
   const numericMaxAlerts = Number(maxAlerts);
 
   const isMaxAlertsValid = Number.isInteger(numericMaxAlerts) && numericMaxAlerts > 0;
 
-  return isMaxAlertsValid ? numericMaxAlerts : defaultMaxAlerts;
+  return isMaxAlertsValid ? numericMaxAlerts : DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS;
 };

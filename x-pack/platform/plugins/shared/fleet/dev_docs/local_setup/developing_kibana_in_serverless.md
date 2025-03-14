@@ -5,6 +5,7 @@ Fleet is enabled for the observability and security serverless project types.
 To run Elasticsearch and Kibana in serverless mode, the relevant commands are:
 
 For the observability project type:
+
 ```bash
 # Start Elasticsearch in serverless mode as an observability project
 yarn es serverless --projectType=oblt --kill
@@ -53,6 +54,7 @@ The `kibana.dev.yml` settings should be mostly the same as for stateful mode. Th
 As noted above, the base path should not be set (`server.basePath` setting).
 
 To enroll agents with a standalone Fleet Server set:
+
 ```yaml
 xpack.fleet.internal.fleetServerStandalone: true
 ```
@@ -82,7 +84,7 @@ xpack.fleet.outputs:
 
 In serverless mode, Fleet Server runs in standalone mode. Unless you are [simultaneously developing Kibana and Fleet Server](./developing_kibana_and_fleet_server.mddeveloping_), it is easier to run Fleet Server as a Docker container.
 
-The Kibana's dev utils package defines a hard-coded [Fleet Server service token](ttps://github.com/elastic/kibana/blob/92b6fd64cd58fd62f69898c222e86409d5f15b60/packages/kbn-dev-utils/src/dev_service_account.ts#L21-L25) and fingerprint of the ca.crt certificate.
+The Kibana's dev utils package defines a hard-coded [Fleet Server service token](ttps://github.com/elastic/kibana/blob/92b6fd64cd58fd62f69898c222e86409d5f15b60/src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts#L21-L25) and fingerprint of the ca.crt certificate.
 
 Running a standalone Fleet Server:
 
@@ -103,7 +105,7 @@ docker run \
     -e FLEET_ENROLL=1 \
     -e FLEET_ENROLLMENT_TOKEN=<enrollment_token>== \
     -e FLEET_INSECURE=1 \
-    --rm docker.elastic.co/beats/elastic-agent:<version>
+    --rm docker.elastic.co/elastic-agent/elastic-agent:<version>
 ```
 
 ## Troubleshooting

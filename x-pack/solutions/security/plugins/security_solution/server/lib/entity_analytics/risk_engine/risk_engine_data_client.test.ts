@@ -209,18 +209,12 @@ describe('RiskEngineDataClient', () => {
       let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
       let initRiskScore: jest.SpyInstance;
       let enableRiskEngineMock: jest.SpyInstance;
-      let disableLegacyRiskEngineMock: jest.SpyInstance;
 
       beforeEach(() => {
         initRiskScore = jest.spyOn(RiskScoreDataClient.prototype, 'init');
         enableRiskEngineMock = jest.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
-        disableLegacyRiskEngineMock = jest.spyOn(
-          RiskEngineDataClient.prototype,
-          'disableLegacyRiskEngine'
-        );
 
         mockTaskManagerStart = taskManagerMock.createStart();
-        disableLegacyRiskEngineMock.mockImplementation(() => Promise.resolve(true));
 
         initRiskScore.mockImplementation(() => {
           return Promise.resolve();
@@ -238,7 +232,6 @@ describe('RiskEngineDataClient', () => {
       afterEach(() => {
         initRiskScore.mockReset();
         enableRiskEngineMock.mockReset();
-        disableLegacyRiskEngineMock.mockReset();
       });
 
       it('success', async () => {
@@ -250,46 +243,6 @@ describe('RiskEngineDataClient', () => {
 
         expect(initResult).toEqual({
           errors: [],
-          legacyRiskEngineDisabled: true,
-          riskEngineConfigurationCreated: true,
-          riskEngineEnabled: true,
-          riskEngineResourcesInstalled: true,
-        });
-      });
-
-      it('should catch error for disableLegacyRiskEngine, but continue', async () => {
-        disableLegacyRiskEngineMock.mockImplementation(() => {
-          throw new Error('Error disableLegacyRiskEngineMock');
-        });
-        const initResult = await riskEngineDataClient.init({
-          namespace: 'default',
-          taskManager: mockTaskManagerStart,
-          riskScoreDataClient: riskScoreDataClientMock.create(),
-        });
-
-        expect(initResult).toEqual({
-          errors: ['Error disableLegacyRiskEngineMock'],
-          legacyRiskEngineDisabled: false,
-          riskEngineConfigurationCreated: true,
-          riskEngineEnabled: true,
-          riskEngineResourcesInstalled: true,
-        });
-      });
-
-      it('should catch error for resource init', async () => {
-        disableLegacyRiskEngineMock.mockImplementationOnce(() => {
-          throw new Error('Error disableLegacyRiskEngineMock');
-        });
-
-        const initResult = await riskEngineDataClient.init({
-          namespace: 'default',
-          taskManager: mockTaskManagerStart,
-          riskScoreDataClient: riskScoreDataClientMock.create(),
-        });
-
-        expect(initResult).toEqual({
-          errors: ['Error disableLegacyRiskEngineMock'],
-          legacyRiskEngineDisabled: false,
           riskEngineConfigurationCreated: true,
           riskEngineEnabled: true,
           riskEngineResourcesInstalled: true,
@@ -310,7 +263,6 @@ describe('RiskEngineDataClient', () => {
 
         expect(initResult).toEqual({
           errors: ['Error riskScoreDataClient'],
-          legacyRiskEngineDisabled: true,
           riskEngineConfigurationCreated: false,
           riskEngineEnabled: false,
           riskEngineResourcesInstalled: false,
@@ -330,7 +282,6 @@ describe('RiskEngineDataClient', () => {
 
         expect(initResult).toEqual({
           errors: ['Error initSavedObjects'],
-          legacyRiskEngineDisabled: true,
           riskEngineConfigurationCreated: false,
           riskEngineEnabled: false,
           riskEngineResourcesInstalled: true,
@@ -350,7 +301,6 @@ describe('RiskEngineDataClient', () => {
 
         expect(initResult).toEqual({
           errors: ['Error enableRiskEngineMock'],
-          legacyRiskEngineDisabled: true,
           riskEngineConfigurationCreated: true,
           riskEngineEnabled: false,
           riskEngineResourcesInstalled: true,

@@ -415,10 +415,10 @@ export const fleetGetAgentStatusHttpMock =
       id: 'agentStatus',
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       method: 'get',
-      handler: () => {
+      handler: (): GetAgentStatusResponse => {
         return {
           results: {
-            total: 50,
+            active: 50,
             inactive: 5,
             online: 40,
             error: 0,
@@ -426,6 +426,8 @@ export const fleetGetAgentStatusHttpMock =
             updating: 0,
             other: 0,
             events: 0,
+            unenrolled: 0,
+            all: 0,
           },
         };
       },

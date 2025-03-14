@@ -22,7 +22,7 @@
         "tags": [],
         "label": "loggingServiceMock",
         "description": [],
-        "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
+        "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<LoggingServiceContract>"
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
               "LoggingServiceSetup",
               ">"
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +72,7 @@
               "InternalLoggingServicePreboot",
               ">"
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -90,7 +90,7 @@
               "InternalLoggingServicePreboot",
               ">"
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -106,7 +106,7 @@
         "tags": [],
         "label": "loggingSystemMock",
         "description": [],
-        "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
+        "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,7 +122,7 @@
               "ILoggingSystem",
               ">"
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -196,7 +196,7 @@
               },
               " | undefined])[]; }"
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -217,7 +217,7 @@
                     "text": "LoggerFactory"
                   }
                 ],
-                "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
+                "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -241,7 +241,7 @@
               },
               ") => void"
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -262,7 +262,7 @@
                     "text": "LoggerFactory"
                   }
                 ],
-                "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
+                "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -285,7 +285,7 @@
                 "text": "MockedLogger"
               }
             ],
-            "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

@@ -91,54 +91,52 @@ async function getElasticServiceNodes({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        nodes: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            size: 10000,
-            missing: SERVICE_NODE_NAME_MISSING,
+    },
+    aggs: {
+      nodes: {
+        terms: {
+          field: SERVICE_NODE_NAME,
+          size: 10000,
+          missing: SERVICE_NODE_NAME_MISSING,
+        },
+        aggs: {
+          latest: {
+            top_metrics: {
+              metrics: asMutableArray([{ field: HOST_NAME }] as const),
+              sort: {
+                '@timestamp': 'desc' as const,
+              },
+            },
           },
-          aggs: {
-            latest: {
-              top_metrics: {
-                metrics: asMutableArray([{ field: HOST_NAME }] as const),
-                sort: {
-                  '@timestamp': 'desc' as const,
-                },
-              },
+          cpu: {
+            avg: {
+              field: METRIC_PROCESS_CPU_PERCENT,
             },
-            cpu: {
-              avg: {
-                field: METRIC_PROCESS_CPU_PERCENT,
-              },
+          },
+          heapMemory: {
+            avg: {
+              field: METRIC_JAVA_HEAP_MEMORY_USED,
             },
-            heapMemory: {
-              avg: {
-                field: METRIC_JAVA_HEAP_MEMORY_USED,
-              },
+          },
+          nonHeapMemory: {
+            avg: {
+              field: METRIC_JAVA_NON_HEAP_MEMORY_USED,
             },
-            nonHeapMemory: {
-              avg: {
-                field: METRIC_JAVA_NON_HEAP_MEMORY_USED,
-              },
-            },
-            threadCount: {
-              max: {
-                field: METRIC_JAVA_THREAD_COUNT,
-              },
+          },
+          threadCount: {
+            max: {
+              field: METRIC_JAVA_THREAD_COUNT,
             },
           },
         },
@@ -189,68 +187,66 @@ async function getOTelServiceNodes({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        nodes: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            size: 10000,
-            missing: SERVICE_NODE_NAME_MISSING,
+    },
+    aggs: {
+      nodes: {
+        terms: {
+          field: SERVICE_NODE_NAME,
+          size: 10000,
+          missing: SERVICE_NODE_NAME_MISSING,
+        },
+        aggs: {
+          latest: {
+            top_metrics: {
+              metrics: asMutableArray([{ field: HOST_NAME }] as const),
+              sort: {
+                '@timestamp': 'desc' as const,
+              },
+            },
           },
-          aggs: {
-            latest: {
-              top_metrics: {
-                metrics: asMutableArray([{ field: HOST_NAME }] as const),
-                sort: {
-                  '@timestamp': 'desc' as const,
+          cpu: {
+            avg: {
+              field: METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
+            },
+          },
+          heapMemory: {
+            filter: {
+              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP },
+            },
+            aggs: {
+              usage: {
+                avg: {
+                  field: METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
                 },
               },
             },
-            cpu: {
-              avg: {
-                field: METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
-              },
+          },
+          nonHeapMemory: {
+            filter: {
+              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP },
             },
-            heapMemory: {
-              filter: {
-                term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP },
-              },
-              aggs: {
-                usage: {
-                  avg: {
-                    field: METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
-                  },
+            aggs: {
+              usage: {
+                avg: {
+                  field: METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
                 },
               },
             },
-            nonHeapMemory: {
-              filter: {
-                term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP },
-              },
-              aggs: {
-                usage: {
-                  avg: {
-                    field: METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
-                  },
-                },
-              },
-            },
-            threadCount: {
-              max: {
-                field: METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
-              },
+          },
+          threadCount: {
+            max: {
+              field: METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
             },
           },
         },

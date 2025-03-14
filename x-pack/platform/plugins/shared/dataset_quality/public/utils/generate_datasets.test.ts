@@ -74,17 +74,26 @@ describe('generateDatasets', () => {
 
   const degradedDocs = [
     {
-      dataset: 'logs-system.application-default',
-      count: 0,
-    },
-    {
       dataset: 'logs-synth-default',
       count: 6,
     },
   ];
 
-  it('merges integrations information with dataStreamStats and degradedDocs', () => {
-    const datasets = generateDatasets(dataStreamStats, degradedDocs, integrations, totalDocs);
+  const failedDocs = [
+    {
+      dataset: 'logs-system.application-default',
+      count: 2,
+    },
+  ];
+
+  it('merges integrations information with dataStreamStats, degradedDocs and failedDocs', () => {
+    const datasets = generateDatasets(
+      dataStreamStats,
+      degradedDocs,
+      failedDocs,
+      integrations,
+      totalDocs
+    );
 
     expect(datasets).toEqual([
       {
@@ -101,11 +110,15 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
         },
-        docsInTimeRange: 100,
-        quality: 'good',
+        docsInTimeRange: 102,
+        quality: 'degraded',
         degradedDocs: {
           percentage: 0,
           count: 0,
+        },
+        failedDocs: {
+          percentage: 1.9607843137254901,
+          count: 2,
         },
       },
       {
@@ -128,6 +141,10 @@ describe('generateDatasets', () => {
           count: 6,
           percentage: 6,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
       },
     ]);
   });
@@ -136,6 +153,7 @@ describe('generateDatasets', () => {
     const datasets = generateDatasets(
       dataStreamStats,
       degradedDocs,
+      failedDocs,
       integrations,
       DEFAULT_DICTIONARY_TYPE
     );
@@ -155,11 +173,15 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
         },
-        docsInTimeRange: 0,
-        quality: 'good',
+        docsInTimeRange: 2,
+        quality: 'poor',
         degradedDocs: {
           percentage: 0,
           count: 0,
+        },
+        failedDocs: {
+          percentage: 100,
+          count: 2,
         },
       },
       {
@@ -182,12 +204,16 @@ describe('generateDatasets', () => {
           count: 6,
           percentage: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
       },
     ]);
   });
 
   it('merges integrations information with degradedDocs', () => {
-    const datasets = generateDatasets([], degradedDocs, integrations, totalDocs);
+    const datasets = generateDatasets([], degradedDocs, [], integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
@@ -205,6 +231,10 @@ describe('generateDatasets', () => {
         docsInTimeRange: 100,
         quality: 'good',
         degradedDocs: {
+          percentage: 0,
+          count: 0,
+        },
+        failedDocs: {
           percentage: 0,
           count: 0,
         },
@@ -227,12 +257,16 @@ describe('generateDatasets', () => {
           count: 6,
           percentage: 6,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
       },
     ]);
   });
 
   it('merges integrations information with degradedDocs and totalDocs', () => {
-    const datasets = generateDatasets([], degradedDocs, integrations, {
+    const datasets = generateDatasets([], degradedDocs, [], integrations, {
       ...totalDocs,
       logs: [...totalDocs.logs, { dataset: 'logs-another-default', count: 100 }],
     });
@@ -256,6 +290,10 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
       },
       {
         name: 'synth',
@@ -274,6 +312,10 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 6,
           percentage: 6,
+        },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
         },
       },
       {
@@ -294,12 +336,16 @@ describe('generateDatasets', () => {
           percentage: 0,
           count: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
       },
     ]);
   });
 
   it('merges integrations information with dataStreamStats', () => {
-    const datasets = generateDatasets(dataStreamStats, [], integrations, totalDocs);
+    const datasets = generateDatasets(dataStreamStats, [], [], integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
@@ -322,6 +368,10 @@ describe('generateDatasets', () => {
           count: 0,
           percentage: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
       },
       {
         name: 'synth',
@@ -343,6 +393,10 @@ describe('generateDatasets', () => {
           count: 0,
           percentage: 0,
         },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
+        },
       },
     ]);
   });
@@ -360,7 +414,7 @@ describe('generateDatasets', () => {
       },
     };
 
-    const datasets = generateDatasets([nonDefaultDataset], [], integrations, totalDocs);
+    const datasets = generateDatasets([nonDefaultDataset], [], [], integrations, totalDocs);
 
     expect(datasets).toEqual([
       {
@@ -382,6 +436,10 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 0,
           percentage: 0,
+        },
+        failedDocs: {
+          percentage: 0,
+          count: 0,
         },
       },
     ]);

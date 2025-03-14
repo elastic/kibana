@@ -31,7 +31,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   eventIsPinned,
   timelineType,
 }) => {
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { timelinePrivileges } = useUserPrivileges();
   const tooltipContent = useMemo(
     () =>
       getPinTooltip({
@@ -51,7 +51,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
             ariaLabel={ariaLabel}
             allowUnpinning={!eventHasNotes(noteIds)}
             data-test-subj="pin-event"
-            isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+            isDisabled={timelinePrivileges.crud === false}
             isAlert={isAlert}
             onClick={onPinClicked}
             pinned={eventIsPinned}

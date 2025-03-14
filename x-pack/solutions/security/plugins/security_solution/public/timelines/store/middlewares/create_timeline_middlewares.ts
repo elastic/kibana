@@ -12,13 +12,17 @@ import { favoriteTimelineMiddleware } from './timeline_favorite';
 import { addNoteToTimelineMiddleware } from './timeline_note';
 import { addPinnedEventToTimelineMiddleware } from './timeline_pinned_event';
 import { saveTimelineMiddleware } from './timeline_save';
+import { timelinePrivilegesMiddleware } from './timeline_privileges';
+import { timelineLocalStorageMiddleware } from './timeline_localstorage';
 
 export function createTimelineMiddlewares(kibana: CoreStart) {
   return [
+    timelinePrivilegesMiddleware(kibana),
     timelineChangedMiddleware,
     favoriteTimelineMiddleware(kibana),
     addNoteToTimelineMiddleware(kibana),
     addPinnedEventToTimelineMiddleware(kibana),
     saveTimelineMiddleware(kibana),
+    timelineLocalStorageMiddleware,
   ];
 }

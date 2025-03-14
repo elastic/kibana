@@ -28,7 +28,7 @@ export const Overview = () => {
         <li>
           <strong>Action</strong> is a{' '}
           <EuiLink
-            href="https://github.com/elastic/kibana/blob/main/src/plugins/ui_actions/public/actions/action.ts"
+            href="https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/ui_actions/public/actions/action.ts"
             target="_blank"
           >
             class

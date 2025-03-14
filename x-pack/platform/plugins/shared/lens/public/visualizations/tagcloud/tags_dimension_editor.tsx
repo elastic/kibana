@@ -65,7 +65,7 @@ export function TagsDimensionEditor({
     state.colorMapping
   );
   const table = frame.activeData?.[state.layerId];
-  const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
+  const splitCategories = getColorCategories(table?.rows, state.tagAccessor);
 
   const setColorMapping = useCallback(
     (colorMapping?: ColorMapping.Config) => {

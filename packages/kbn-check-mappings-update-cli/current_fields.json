@@ -321,6 +321,7 @@
     "filter",
     "indexPattern",
     "status",
+    "timestampField",
     "type"
   ],
   "epm-packages": [
@@ -481,6 +482,7 @@
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
+    "agentless",
     "data_output_id",
     "description",
     "download_source_id",
@@ -498,6 +500,7 @@
     "name",
     "namespace",
     "overrides",
+    "required_versions",
     "revision",
     "schema_version",
     "status",
@@ -601,6 +604,7 @@
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
+    "agentless",
     "data_output_id",
     "description",
     "download_source_id",
@@ -621,6 +625,7 @@
     "name",
     "namespace",
     "overrides",
+    "required_versions",
     "revision",
     "schema_version",
     "status",
@@ -912,6 +917,15 @@
     "username"
   ],
   "search-telemetry": [],
+  "security-ai-prompt": [
+    "description",
+    "model",
+    "prompt",
+    "prompt.default",
+    "promptGroupId",
+    "promptId",
+    "provider"
+  ],
   "security-rule": [
     "rule_id",
     "version"

@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
+  const obsAssistantConversationsGlobalSearchEntry = 'Observability AI Assistant / Conversations';
 
   describe('ai assistant privileges', () => {
     describe('all privileges', () => {
@@ -51,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows AI Assistant conversations link in search', async () => {
         await PageObjects.navigationalSearch.searchFor('observability ai assistant');
         const results = await PageObjects.navigationalSearch.getDisplayedResults();
-        expect(results[0].label).to.eql('Observability AI Assistant / Conversations');
+        expect(results[0].label).to.eql(obsAssistantConversationsGlobalSearchEntry);
       });
       describe('with no connector setup', () => {
         before(async () => {
@@ -118,13 +119,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // need some obs app or obs menu wont show where we can click on AI Assistant
           infrastructure: ['all'],
         });
-      });
-      it('shows no AI Assistant link in solution nav', async () => {
         // navigate to an observability app so the left side o11y menu shows up
         await PageObjects.common.navigateToUrl('infraOps', '', {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
+      });
+      it('shows no AI Assistant link in solution nav', async () => {
         await testSubjects.missingOrFail(ui.pages.links.solutionMenuLink);
       });
       it('shows no AI Assistant button in global nav', async () => {
@@ -133,7 +134,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows no AI Assistant conversations link in global search', async () => {
         await PageObjects.navigationalSearch.searchFor('observability ai assistant');
         const results = await PageObjects.navigationalSearch.getDisplayedResults();
-        expect(results.length).to.eql(0);
+        const aiAssistantConversationsEntry = results.some(
+          ({ label }) => label === obsAssistantConversationsGlobalSearchEntry
+        );
+        expect(aiAssistantConversationsEntry).to.be(false);
       });
       it('cannot navigate to AI Assistant page', async () => {
         await PageObjects.common.navigateToUrl('obsAIAssistant', '', {

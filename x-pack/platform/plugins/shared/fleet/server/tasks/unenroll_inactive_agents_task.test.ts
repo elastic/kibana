@@ -162,12 +162,8 @@ describe('UnenrollInactiveAgentsTask', () => {
     });
 
     it('Should exit if there are no agents policies with unenroll_timeout set', async () => {
-      mockAgentPolicyService.list.mockResolvedValue({
-        items: [],
-        total: 0,
-        page: 1,
-        perPage: 1,
-      });
+      mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([]);
+      await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
     });
 
@@ -175,7 +171,55 @@ describe('UnenrollInactiveAgentsTask', () => {
       mockedGetAgentsByKuery.mockResolvedValue({
         agents: [],
       } as any);
+      await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
+    });
+
+    it('Should process agent policies in batches', async () => {
+      const firstAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-1' })];
+      const secondAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-2' })];
+      mockAgentPolicyService.fetchAllAgentPolicies = jest.fn().mockResolvedValue(
+        jest.fn(async function* () {
+          yield firstAgentPoliciesBatch;
+          yield secondAgentPoliciesBatch;
+        })()
+      );
+      const secondAgentPoliciesBatchAgents = [
+        {
+          id: 'agent-21',
+          policy_id: 'agent-policy-2',
+          status: 'inactive',
+        },
+        {
+          id: 'agent-22',
+          policy_id: 'agent-policy-2',
+          status: 'inactive',
+        },
+        {
+          id: 'agent-23',
+          policy_id: 'agent-policy-2',
+          status: 'active',
+        },
+      ];
+      mockedGetAgentsByKuery
+        .mockResolvedValueOnce({
+          agents: [],
+        } as any)
+        .mockResolvedValueOnce({
+          agents: secondAgentPoliciesBatchAgents,
+        } as any);
+
+      await runTask();
+      expect(mockedUnenrollBatch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        secondAgentPoliciesBatchAgents,
+        {
+          force: true,
+          revoke: true,
+          actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
+        }
+      );
     });
   });
 });

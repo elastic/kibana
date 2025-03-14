@@ -38,20 +38,18 @@ export async function getSpan({
       apm: {
         events: [ProcessorEvent.span],
       },
-      body: {
-        track_total_hits: false,
-        size: 1,
-        terminate_after: 1,
-        fields: ['*'],
-        _source: [SPAN_STACKTRACE],
-        query: {
-          bool: {
-            filter: asMutableArray([
-              { term: { [SPAN_ID]: spanId } },
-              ...termQuery(TRACE_ID, traceId),
-              ...rangeQuery(start, end),
-            ]),
-          },
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      fields: ['*'],
+      _source: [SPAN_STACKTRACE],
+      query: {
+        bool: {
+          filter: asMutableArray([
+            { term: { [SPAN_ID]: spanId } },
+            ...termQuery(TRACE_ID, traceId),
+            ...rangeQuery(start, end),
+          ]),
         },
       },
     }),

@@ -17,6 +17,9 @@ export {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_REST_VERSION,
   EMS_APP_NAME,
+  // these two variables should not be exported after Borealis is the only theme
+  EMS_DARKMAP_BOREALIS_ID,
+  EMS_ROADMAP_BOREALIS_DESATURATED_ID,
 } from './ems_defaults';
 
 export { EMSSettings } from './ems_settings';

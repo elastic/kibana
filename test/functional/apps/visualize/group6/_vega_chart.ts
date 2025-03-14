@@ -53,6 +53,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('vega chart', () => {
+      it('code-editor correct syntax highlight langs', async () => {
+        const hasRequiredLanguages = await browser.execute(() => {
+          const langs: Array<{ id: string }> =
+            // @ts-ignore
+            window.MonacoEnvironment?.monaco?.languages?.getLanguages() ?? [];
+          return langs.some((l) => l?.id === 'hjson') && langs.some((l) => l?.id === 'xjson');
+        });
+        expect(hasRequiredLanguages).to.be(true);
+      });
+
       describe('initial render', () => {
         it('should have some initial vega spec text', async function () {
           const vegaSpec = await vegaChart.getSpec();

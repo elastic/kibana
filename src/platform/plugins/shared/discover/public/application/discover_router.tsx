@@ -10,48 +10,28 @@
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
-import { History } from 'history';
+import type { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
 import type { ExperimentalFeatures } from '../../server/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
-import { DiscoverServices } from '../build_services';
+import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
 
 export type DiscoverRouterProps = Omit<DiscoverRoutesProps, 'customizationContext'> & {
-  customizationContext$: Observable<DiscoverCustomizationContext>;
+  customizationContext: DiscoverCustomizationContext;
 };
 
-export const DiscoverRouter = ({
-  customizationContext$,
-  services,
-  history,
-  ...routeProps
-}: DiscoverRouterProps) => {
-  const customizationContext = useObservable(customizationContext$);
-
-  // The Discover state is not reactive, so we must avoid initialization before
-  // the first value is emitted
-  if (customizationContext == null) {
-    return null;
-  }
-
+export const DiscoverRouter = ({ services, history, ...routeProps }: DiscoverRouterProps) => {
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <DiscoverRoutes
-            customizationContext={customizationContext}
-            services={services}
-            history={history}
-            {...routeProps}
-          />
+          <DiscoverRoutes services={services} history={history} {...routeProps} />
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>

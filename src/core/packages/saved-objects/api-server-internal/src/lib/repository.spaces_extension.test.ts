@@ -18,7 +18,7 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -234,7 +234,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
               id: `${
                 currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
               }${type}:${id}`,
-              body: expect.objectContaining(
+              document: expect.objectContaining(
                 currentSpace.expectedNamespace
                   ? {
                       namespace: currentSpace.expectedNamespace,
@@ -274,7 +274,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           expect(client.create).toHaveBeenCalledWith(
             expect.objectContaining({
               id: expect.stringMatching(regex),
-              body: expect.objectContaining(
+              document: expect.objectContaining(
                 currentSpace.expectedNamespace
                   ? {
                       namespace: currentSpace.expectedNamespace,
@@ -379,18 +379,16 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           expect(client.mget).toHaveBeenCalledTimes(1);
           expect(client.mget).toHaveBeenCalledWith(
             expect.objectContaining({
-              body: expect.objectContaining({
-                docs: expect.arrayContaining([
-                  expect.objectContaining({
-                    _id: `${
-                      currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
-                    }${obj1.type}:${obj1.id}`,
-                  }),
-                  expect.objectContaining({
-                    _id: `${obj2.type}:${obj2.id}`,
-                  }),
-                ]),
-              }),
+              docs: expect.arrayContaining([
+                expect.objectContaining({
+                  _id: `${
+                    currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+                  }${obj1.type}:${obj1.id}`,
+                }),
+                expect.objectContaining({
+                  _id: `${obj2.type}:${obj2.id}`,
+                }),
+              ]),
             }),
             { ignore: [404], meta: true }
           );
@@ -570,18 +568,16 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           expect(client.mget).toHaveBeenCalledTimes(1);
           expect(client.mget).toHaveBeenCalledWith(
             expect.objectContaining({
-              body: expect.objectContaining({
-                docs: expect.arrayContaining([
-                  expect.objectContaining({
-                    _id: `${
-                      currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
-                    }${obj1.type}:${obj1.id}`,
-                  }),
-                  expect.objectContaining({
-                    _id: `${obj2.type}:${obj2.id}`,
-                  }),
-                ]),
-              }),
+              docs: expect.arrayContaining([
+                expect.objectContaining({
+                  _id: `${
+                    currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+                  }${obj1.type}:${obj1.id}`,
+                }),
+                expect.objectContaining({
+                  _id: `${obj2.type}:${obj2.id}`,
+                }),
+              ]),
             }),
             { ignore: [404], meta: true }
           );
@@ -638,7 +634,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           expect(client.bulk).toHaveBeenCalledTimes(1);
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({
-              body: expect.arrayContaining([
+              operations: expect.arrayContaining([
                 expect.objectContaining({
                   create: expect.objectContaining({
                     _id: `${
@@ -696,7 +692,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           expect(client.bulk).toHaveBeenCalledTimes(1);
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({
-              body: expect.arrayContaining([
+              operations: expect.arrayContaining([
                 expect.objectContaining({
                   index: expect.objectContaining({
                     _id: `${
@@ -855,7 +851,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           expect(client.bulk).toHaveBeenCalledTimes(1);
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({
-              body: expect.arrayContaining([
+              operations: expect.arrayContaining([
                 expect.objectContaining({
                   delete: expect.objectContaining({
                     _id: `${

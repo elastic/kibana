@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'elastic-apm-node';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataDefinitionRegistryRequestHandlerContext } from '.';
 import type { DataDefinitionRegistry } from '../data_definition_registry/types';
 import type {

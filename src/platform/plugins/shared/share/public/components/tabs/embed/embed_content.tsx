@@ -15,11 +15,15 @@ import {
   EuiSpacer,
   EuiText,
   EuiFlexItem,
-  EuiCopy,
+  EuiSwitch,
+  type EuiSwitchEvent,
+  EuiToolTip,
+  EuiIcon,
+  copyToClipboard,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
@@ -33,6 +37,9 @@ type EmbedProps = Pick<
   | 'embedUrlParamExtensions'
   | 'objectType'
   | 'isDirty'
+  | 'allowShortUrl'
+  | 'anonymousAccess'
+  | 'urlService'
 > & {
   objectConfig?: ShareContextObjectTypeConfig;
 };
@@ -43,27 +50,55 @@ interface UrlParams {
   };
 }
 
-export enum ExportUrlAsType {
-  EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
-  EXPORT_URL_AS_SNAPSHOT = 'snapshot',
-}
-
 export const EmbedContent = ({
   embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
+  shareableUrlLocatorParams,
   objectType,
   objectConfig = {},
   isDirty,
+  allowShortUrl,
+  urlService,
+  anonymousAccess,
 }: EmbedProps) => {
-  const isMounted = useMountedState();
-  const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
-  const [useShortUrl] = useState<boolean>(true);
-  const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT);
-  const [url, setUrl] = useState<string>('');
-  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
-  const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
-  const [usePublicUrl] = useState<boolean>(false);
+  const urlParamsRef = useRef<UrlParams | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [snapshotUrl, setSnapshotUrl] = useState<string>('');
+  const [isTextCopied, setTextCopied] = useState(false);
+  const urlToCopy = useRef<string | undefined>(undefined);
+  const [anonymousAccessParameters, setAnonymousAccessParameters] =
+    useState<AnonymousAccessState['accessURLParameters']>(null);
+  const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
+  const [showPublicUrlSwitch, setShowPublicUrlSwitch] = useState(false);
+  const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const { draftModeCallOut: DraftModeCallout, computeAnonymousCapabilities } = objectConfig;
+
+  useEffect(() => {
+    if (computeAnonymousCapabilities && anonymousAccess) {
+      const resolveAnonymousAccessClaims = async () => {
+        try {
+          const [state, capabilities] = await Promise.all([
+            anonymousAccess.getState(),
+            anonymousAccess.getCapabilities(),
+          ]);
+
+          if (state?.isEnabled) {
+            setAnonymousAccessParameters(state?.accessURLParameters);
+
+            if (capabilities) {
+              setShowPublicUrlSwitch(computeAnonymousCapabilities?.(capabilities));
+            }
+          }
+        } catch {
+          //
+        }
+      };
+
+      resolveAnonymousAccessClaims();
+    }
+  }, [anonymousAccess, computeAnonymousCapabilities]);
 
   const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
     const embedParam = '?embed=true';
@@ -76,55 +111,43 @@ export const EmbedContent = ({
     return `${tempUrl}${embedParam}`;
   }, []);
 
-  const getUrlParamExtensions = useCallback(
-    (tempUrl: string): string => {
-      return urlParams
-        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
-            const urlParam = urlParams[key];
-            return urlParam
-              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-                  const isQueryParamEnabled = urlParam[queryParam];
-                  return isQueryParamEnabled
-                    ? queryAccumulator + `&${queryParam}=true`
-                    : queryAccumulator;
-                }, urlAccumulator)
-              : urlAccumulator;
-          }, tempUrl)
-        : tempUrl;
-    },
-    [urlParams]
-  );
+  const getUrlParamExtensions = useCallback((tempUrl: string): string => {
+    const urlWithUpdatedParams = urlParamsRef.current
+      ? Object.keys(urlParamsRef.current).reduce((urlAccumulator, key) => {
+          const urlParam = urlParamsRef.current?.[key];
+          return urlParam
+            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                const isQueryParamEnabled = urlParam[queryParam];
+                return isQueryParamEnabled
+                  ? queryAccumulator + `&${queryParam}=true`
+                  : queryAccumulator;
+              }, urlAccumulator)
+            : urlAccumulator;
+        }, tempUrl)
+      : tempUrl;
+
+    return urlWithUpdatedParams;
+  }, []);
 
   const updateUrlParams = useCallback(
-    (tempUrl: string) => {
-      tempUrl = makeUrlEmbeddable(tempUrl);
-      tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
-      return tempUrl;
-    },
-    [makeUrlEmbeddable, getUrlParamExtensions, urlParams]
+    (url: string) => getUrlParamExtensions(makeUrlEmbeddable(url)),
+    [makeUrlEmbeddable, getUrlParamExtensions]
   );
 
-  const getSnapshotUrl = useCallback(
-    (forSavedObject?: boolean) => {
-      let tempUrl = '';
-      if (forSavedObject && shareableUrlForSavedObject) {
-        tempUrl = shareableUrlForSavedObject;
-      }
-      if (!tempUrl) {
-        tempUrl = shareableUrl || window.location.href;
-      }
-      return updateUrlParams(tempUrl);
-    },
-    [shareableUrl, shareableUrlForSavedObject, updateUrlParams]
+  useEffect(
+    () => setSnapshotUrl(updateUrlParams(shareableUrl || window.location.href)),
+    [shareableUrl, updateUrlParams]
   );
 
   const getSavedObjectUrl = useCallback(() => {
-    const tempUrl = getSnapshotUrl(true);
+    const tempUrl = shareableUrlForSavedObject
+      ? updateUrlParams(shareableUrlForSavedObject)
+      : snapshotUrl;
 
     const parsedUrl = parseUrl(tempUrl);
 
     if (!parsedUrl || !parsedUrl.hash) {
-      return;
+      return tempUrl;
     }
 
     // Get the application route, after the hash, and remove the #.
@@ -146,7 +169,18 @@ export const EmbedContent = ({
     });
 
     return updateUrlParams(formattedUrl);
-  }, [getSnapshotUrl, updateUrlParams]);
+  }, [shareableUrlForSavedObject, snapshotUrl, updateUrlParams]);
+
+  const createShortUrl = useCallback(async () => {
+    const shortUrlService = urlService.shortUrls.get(null);
+
+    if (shareableUrlLocatorParams) {
+      const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
+      return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+    } else {
+      return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
+    }
+  }, [shareableUrlLocatorParams, snapshotUrl, urlService.shortUrls]);
 
   const addUrlAnonymousAccessParameters = useCallback(
     (tempUrl: string): string => {
@@ -165,53 +199,41 @@ export const EmbedContent = ({
     [anonymousAccessParameters, usePublicUrl]
   );
 
-  const makeIframeTag = (tempUrl: string) => {
-    if (!tempUrl) {
-      return;
-    }
+  const getEmbedLink = useCallback(async () => {
+    const embedUrl = addUrlAnonymousAccessParameters(
+      !isDirty ? getSavedObjectUrl() : allowShortUrl ? await createShortUrl() : snapshotUrl
+    );
 
-    return `<iframe src="${tempUrl}" height="600" width="800"></iframe>`;
-  };
-
-  const setUrlHelper = useCallback(() => {
-    let tempUrl: string | undefined;
-
-    if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      tempUrl = getSavedObjectUrl();
-    } else if (useShortUrl && shortUrlCache) {
-      tempUrl = shortUrlCache;
-    } else {
-      tempUrl = getSnapshotUrl();
-    }
-
-    if (tempUrl) {
-      tempUrl = addUrlAnonymousAccessParameters(tempUrl!);
-    }
-
-    tempUrl = makeIframeTag(tempUrl!);
-
-    setUrl(tempUrl!);
+    return `<iframe src="${embedUrl}" height="600" width="800"></iframe>`;
   }, [
     addUrlAnonymousAccessParameters,
-    exportUrlAs,
+    allowShortUrl,
+    createShortUrl,
     getSavedObjectUrl,
-    getSnapshotUrl,
-    shortUrlCache,
-    useShortUrl,
+    isDirty,
+    snapshotUrl,
   ]);
 
-  const resetUrl = useCallback(() => {
-    if (isMounted()) {
-      setShortUrlCache(undefined);
-      setUrlHelper();
-    }
-  }, [isMounted, setUrlHelper]);
+  const copyUrlHelper = useCallback(async () => {
+    setIsLoading(true);
 
-  useEffect(() => {
-    setUrlHelper();
-    getUrlParamExtensions(url);
-    window.addEventListener('hashchange', resetUrl, false);
-  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url]);
+    urlToCopy.current = await getEmbedLink();
+
+    copyToClipboard(urlToCopy.current!);
+    setTextCopied(() => {
+      if (copiedTextToolTipCleanupIdRef.current) {
+        clearTimeout(copiedTextToolTipCleanupIdRef.current);
+      }
+
+      // set up timer to revert copied state to false after specified duration
+      copiedTextToolTipCleanupIdRef.current = setTimeout(() => setTextCopied(false), 1000);
+
+      // set copied state to true for now
+      return true;
+    });
+
+    setIsLoading(false);
+  }, [getEmbedLink]);
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {
@@ -221,8 +243,7 @@ export const EmbedContent = ({
     const setParamValue =
       (paramName: string) =>
       (values: { [queryParam: string]: boolean } = {}): void => {
-        setUrlParams({ ...urlParams, [paramName]: { ...values } });
-        setUrlHelper();
+        urlParamsRef.current = { ...urlParamsRef.current, [paramName]: { ...values } };
       };
 
     return (
@@ -233,6 +254,38 @@ export const EmbedContent = ({
           </EuiFormRow>
         ))}
       </React.Fragment>
+    );
+  };
+
+  const renderPublicUrlOptionsSwitch = () => {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="share.embed.publicUrlOptionsSwitch.label"
+                defaultMessage="Allow public access"
+              />
+            }
+            checked={usePublicUrl}
+            onChange={(e: EuiSwitchEvent) => setUsePublicUrl(e.target.checked)}
+            data-test-subj="embedPublicUrlOptionsSwitch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="share.embed.publicUrlOptionsSwitch.tooltip"
+                defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
+              />
+            }
+          >
+            <EuiIcon type="questionInCircle" />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -250,8 +303,6 @@ export const EmbedContent = ({
       />
     );
 
-  const { draftModeCallOut: DraftModeCallout } = objectConfig;
-
   return (
     <>
       <EuiForm>
@@ -267,22 +318,30 @@ export const EmbedContent = ({
         <EuiSpacer />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <React.Fragment>
+          {showPublicUrlSwitch ? renderPublicUrlOptionsSwitch() : null}
+        </React.Fragment>
         <EuiFlexItem grow={false}>
-          <EuiCopy textToCopy={url}>
-            {(copy) => (
-              <EuiButton
-                data-test-subj="copyEmbedUrlButton"
-                onClick={copy}
-                data-share-url={url}
-                fill
-              >
-                <FormattedMessage
-                  id="share.link.copyEmbedCodeButton"
-                  defaultMessage="Copy embed code"
-                />
-              </EuiButton>
-            )}
-          </EuiCopy>
+          <EuiToolTip
+            content={
+              isTextCopied
+                ? i18n.translate('share.embed.copied', { defaultMessage: 'Link copied' })
+                : null
+            }
+          >
+            <EuiButton
+              fill
+              data-test-subj="copyEmbedUrlButton"
+              onClick={copyUrlHelper}
+              data-share-url={urlToCopy.current}
+              isLoading={isLoading}
+            >
+              <FormattedMessage
+                id="share.embed.copyEmbedCodeButton"
+                defaultMessage="Copy embed code"
+              />
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

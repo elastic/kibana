@@ -10,8 +10,12 @@
 import { monaco } from './monaco_imports';
 import type { LangModuleType, CustomLangModuleType } from './types';
 
-export function registerLanguage(language: LangModuleType | CustomLangModuleType) {
+export function registerLanguage(language: LangModuleType | CustomLangModuleType, force = false) {
   const { ID, lexerRules, languageConfiguration, foldingRangeProvider } = language;
+
+  if (!force && monaco.languages.getLanguages().some((lang) => lang.id === ID)) {
+    return;
+  }
 
   monaco.languages.register({ id: ID });
 
@@ -33,7 +37,7 @@ export function registerLanguage(language: LangModuleType | CustomLangModuleType
     }
 
     if ('onLanguage' in language) {
-      await language.onLanguage();
+      await language.onLanguage?.();
     }
   });
 }

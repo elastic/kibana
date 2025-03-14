@@ -33,7 +33,7 @@ export class FleetManager extends Manager {
           this.requestOptions
         );
         const serviceToken = response.data.value;
-        const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+        const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestVersion()}`;
         this.log.info(artifact);
 
         // default fleet server policy no longer created by default

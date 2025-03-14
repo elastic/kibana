@@ -24,6 +24,14 @@ export type {
 } from './schema/vulnerabilities/csp_vulnerability_finding';
 export type { BenchmarksCisId } from './types/benchmark';
 export type { VulnSeverity } from './types/vulnerabilities';
+export type { BenchmarkId, BenchmarkName } from './types/types_old';
+export type {
+  CspNavigationItem,
+  CspPageNavigationItem,
+  CspBenchmarksPage,
+  CloudSecurityPosturePageId,
+} from './types/navigation';
+export type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 export * from './constants';
 export {
   extractErrorMessage,
@@ -33,4 +41,10 @@ export {
   buildVulnerabilityEntityFlyoutPreviewQuery,
 } from './utils/helpers';
 export { getAbbreviatedNumber } from './utils/get_abbreviated_number';
+export { createDetectionRule } from './rules/create_detection_rule';
 export { UiMetricService } from './utils/ui_metrics';
+export {
+  generateBenchmarkRuleTags,
+  getFindingsDetectionRuleSearchTags,
+} from './rules/detection_rules';
+export type { RuleResponse } from './rules/rule';

@@ -56,7 +56,7 @@ describe('dataViews$', () => {
 
   test('Should emit when data view added', async () => {
     const dataViewApi = initializeDataViews(createMapStore());
-    const subscription = dataViewApi.dataViews.pipe(skip(1)).subscribe(onEmitMock);
+    const subscription = dataViewApi.dataViews$.pipe(skip(1)).subscribe(onEmitMock);
 
     dataViewApi.setLayerList([
       createLayerDescriptor({
@@ -85,7 +85,7 @@ describe('dataViews$', () => {
         geoFieldType: ES_GEO_FIELD_TYPE.GEO_POINT,
       }),
     ]);
-    const subscription = dataViewApi.dataViews.pipe(skip(1)).subscribe(onEmitMock);
+    const subscription = dataViewApi.dataViews$.pipe(skip(1)).subscribe(onEmitMock);
 
     dataViewApi.setLayerList([]);
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -111,7 +111,7 @@ describe('dataViews$', () => {
     ]);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    const subscription = dataViewApi.dataViews.pipe(skip(1)).subscribe(onEmitMock);
+    const subscription = dataViewApi.dataViews$.pipe(skip(1)).subscribe(onEmitMock);
 
     dataViewApi.setLayerList([
       createLayerDescriptor({

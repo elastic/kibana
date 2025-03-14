@@ -44,7 +44,7 @@ describe('LinkContent', () => {
 
   let urlService: BrowserUrlService;
 
-  // @ts-expect-error there is a type because we override the shortUrls implementation
+  // @ts-expect-error there is a type error because we override the shortUrls implementation
   // eslint-disable-next-line prefer-const
   ({ service: urlService } = urlServiceTestSetup({
     shortUrls: ({ locators }) =>
@@ -102,7 +102,7 @@ describe('LinkContent', () => {
 
     await user.click(copyButton);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(copyButton.getAttribute('data-share-url')).toBe(shareableUrl);
     });
   });

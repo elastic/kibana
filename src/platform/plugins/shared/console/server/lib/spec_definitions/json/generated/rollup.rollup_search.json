@@ -15,7 +15,7 @@
     "patterns": [
       "{index}/_rollup_search"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-search.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/rollup-search.html",
     "availability": {
       "stack": true,
       "serverless": false

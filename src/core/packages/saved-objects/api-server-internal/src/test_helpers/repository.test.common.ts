@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Payload } from 'elastic-apm-node';
@@ -313,7 +313,7 @@ export const setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess = (
 ) => {
   mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
     (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => {
-      return Promise.resolve(params.objects);
+      return Promise.resolve(params.objects.map(({ name, ...rest }) => ({ ...rest })));
     }
   );
 };

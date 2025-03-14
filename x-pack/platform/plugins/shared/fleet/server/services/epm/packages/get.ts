@@ -38,6 +38,7 @@ import type {
   InstalledPackage,
   PackageSpecManifest,
   AssetsMap,
+  PackagePolicyAssetsMap,
 } from '../../../../common/types';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -67,7 +68,7 @@ import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
-
+import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
 
 import { createInstallableFrom } from '.';
@@ -76,6 +77,8 @@ import {
   setPackageAssetsMapCache,
   getPackageInfoCache,
   setPackageInfoCache,
+  getAgentTemplateAssetsMapCache,
+  setAgentTemplateAssetsMapCache,
 } from './cache';
 
 export { getFile } from '../registry';
@@ -311,7 +314,7 @@ export async function getPackageSavedObjects(
   return result;
 }
 
-async function getInstalledPackageSavedObjects(
+export async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {
@@ -715,15 +718,23 @@ export async function getInstalledPackageWithAssets(options: {
   pkgName: string;
   logger?: Logger;
   ignoreUnverified?: boolean;
+  assetsFilter?: (path: string) => boolean;
 }) {
   const installation = await getInstallation(options);
   if (!installation) {
     return;
   }
+  const assetsReference =
+    (typeof options.assetsFilter !== 'undefined'
+      ? installation.package_assets?.filter(({ path }) =>
+          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
+        )
+      : installation.package_assets) ?? [];
+
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    installation.package_assets ?? [],
+    assetsReference,
     options.savedObjectsClient
   );
 
@@ -797,6 +808,59 @@ export async function getPackageAssetsMap({
     return assetsMap;
   } catch (error) {
     logger.warn(`getPackageAssetsMap error: ${error}`);
+    throw error;
+  }
+}
+
+/**
+ * Return assets agent template assets map for package policies operation
+ */
+export async function getAgentTemplateAssetsMap({
+  savedObjectsClient,
+  packageInfo,
+  logger,
+  ignoreUnverified,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  packageInfo: PackageInfo;
+  logger: Logger;
+  ignoreUnverified?: boolean;
+}): Promise<PackagePolicyAssetsMap> {
+  const cache = getAgentTemplateAssetsMapCache(packageInfo.name, packageInfo.version);
+  if (cache) {
+    return cache;
+  }
+  const assetsFilter = (path: string) =>
+    filterAssetPathForParseAndVerifyArchive(path) || !!path.match(/\/agent\/.*\.hbs/);
+  const installedPackageWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName: packageInfo.name,
+    logger,
+    assetsFilter,
+  });
+
+  try {
+    let assetsMap: PackagePolicyAssetsMap | undefined;
+    if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
+      // Try to get from registry
+      const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
+        ignoreUnverified,
+        useStreaming: true,
+      });
+      assetsMap = new Map() as PackagePolicyAssetsMap;
+      await pkg.archiveIterator.traverseEntries(async (entry) => {
+        if (entry.buffer) {
+          assetsMap!.set(entry.path, entry.buffer);
+        }
+      }, assetsFilter);
+    } else {
+      assetsMap = installedPackageWithAssets.assetsMap as PackagePolicyAssetsMap;
+    }
+    setAgentTemplateAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
+
+    return assetsMap as PackagePolicyAssetsMap;
+  } catch (error) {
+    logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
     throw error;
   }
 }

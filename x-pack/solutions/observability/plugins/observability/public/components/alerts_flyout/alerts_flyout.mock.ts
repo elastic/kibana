@@ -24,6 +24,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import type { Alert } from '@kbn/alerting-types';
 
 const createDates = (start: string, duration: number, isEnd?: boolean) => {
   const started = new Date(start);
@@ -79,7 +80,7 @@ export const apmAlertResponseExample = [
     'processor.event': ['error'],
     ...createDates('2021-04-12T13:09:30.441Z', 2419005000, true),
   },
-];
+] as unknown as Alert[];
 
 export const dynamicIndexPattern = {
   fields: [

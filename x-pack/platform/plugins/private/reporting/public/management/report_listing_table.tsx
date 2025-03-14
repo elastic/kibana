@@ -26,7 +26,7 @@ import { ListingPropsInternal } from '.';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from './components';
-import { guessAppIconTypeFromObjectType } from './utils';
+import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from './utils';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -235,7 +235,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
                 type={guessAppIconTypeFromObjectType(job.objectType)}
                 size="s"
                 data-test-subj="reportJobType"
-                content={job.objectType}
+                content={getDisplayNameFromObjectType(job.objectType)}
               />
             </div>
           );

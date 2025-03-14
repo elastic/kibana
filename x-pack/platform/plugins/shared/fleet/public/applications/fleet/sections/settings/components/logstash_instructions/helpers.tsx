@@ -13,11 +13,11 @@ export function getLogstashPipeline(apiKey?: string) {
   return `input {
   elastic_agent {
     port => 5044
-    ssl => true
+    ssl_enabled => true
     ssl_certificate_authorities => ["<ca_path>"]
     ssl_certificate => "<server_cert_path>"
     ssl_key => "<server_cert_key_in_pkcs8>"
-    ssl_verify_mode => "force_peer"
+    ssl_client_authentication => "required"
   }
 }
 
@@ -26,8 +26,8 @@ output {
     hosts => "<es_host>"
     api_key => "<api_key>"
     data_stream => true
-    ssl => true
-    # cacert => "<elasticsearch_ca_path>"
+    ssl_enabled => true
+    # ssl_certificate_authorities => "<elasticsearch_ca_path>"
   }
 }`.replace('<api_key>', apiKey || '<api_key>');
 }

@@ -14,8 +14,9 @@ import type {
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
@@ -37,17 +38,13 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     includeLegacyData?: boolean;
   } & ({ events: ProcessorEvent[] } | { sources: ApmDataSource[] });
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 export type APMLogEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 type APMEventWrapper<T> = Omit<T, 'index'> & {
@@ -174,15 +171,13 @@ export class APMEventClient {
     const searchParams = {
       ...omit(params, 'apm', 'body'),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter: filters,
-            must: compact([params.body.query]),
-          },
+      query: {
+        bool: {
+          filter: filters,
+          must: compact([params.query]),
         },
       },
+      body: params.body,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
@@ -213,13 +208,11 @@ export class APMEventClient {
     const searchParams = {
       ...omit(params, 'body'),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter,
-            must: compact([params.body.query]),
-          },
+      body: params.body,
+      query: {
+        bool: {
+          filter,
+          must: compact([params.query]),
         },
       },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
@@ -264,10 +257,10 @@ export class APMEventClient {
           },
           {
             ...omit(params, 'apm', 'body'),
-            ...params.body,
+            body: params.body,
             query: {
               bool: {
-                filter: compact([params.body.query, ...filters]),
+                filter: compact([params.query, ...filters]),
               },
             },
           },

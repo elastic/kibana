@@ -34,11 +34,6 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
       label="Annotation"
     />
   }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   placement="bottom"
   style={
@@ -135,11 +130,6 @@ exports[`XYChart component annotations should render grouped line annotations pr
       isHorizontal={true}
     />
   }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   placement="bottom"
   style={
@@ -192,11 +182,6 @@ exports[`XYChart component annotations should render grouped line annotations wi
         }
       }
       hasReducedPadding={true}
-      isHorizontal={true}
-    />
-  }
-  markerBody={
-    <MarkerBody
       isHorizontal={true}
     />
   }
@@ -634,12 +619,12 @@ exports[`XYChart component it renders area 1`] = `
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -649,7 +634,7 @@ exports[`XYChart component it renders area 1`] = `
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -665,7 +650,7 @@ exports[`XYChart component it renders area 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -693,7 +678,7 @@ exports[`XYChart component it renders area 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -703,7 +688,7 @@ exports[`XYChart component it renders area 1`] = `
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -722,14 +707,14 @@ exports[`XYChart component it renders area 1`] = `
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -766,16 +751,16 @@ exports[`XYChart component it renders area 1`] = `
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -806,7 +791,7 @@ exports[`XYChart component it renders area 1`] = `
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -814,7 +799,7 @@ exports[`XYChart component it renders area 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -823,21 +808,22 @@ exports[`XYChart component it renders area 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -890,23 +876,23 @@ exports[`XYChart component it renders area 1`] = `
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -925,12 +911,12 @@ exports[`XYChart component it renders area 1`] = `
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -942,11 +928,11 @@ exports[`XYChart component it renders area 1`] = `
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -957,7 +943,7 @@ exports[`XYChart component it renders area 1`] = `
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -1023,15 +1009,15 @@ exports[`XYChart component it renders area 1`] = `
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -1041,7 +1027,7 @@ exports[`XYChart component it renders area 1`] = `
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -1058,7 +1044,7 @@ exports[`XYChart component it renders area 1`] = `
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -1074,7 +1060,7 @@ exports[`XYChart component it renders area 1`] = `
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -1086,7 +1072,7 @@ exports[`XYChart component it renders area 1`] = `
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -1139,7 +1125,15 @@ exports[`XYChart component it renders area 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -2196,12 +2190,12 @@ exports[`XYChart component it renders bar 1`] = `
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -2211,7 +2205,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -2227,7 +2221,7 @@ exports[`XYChart component it renders bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2255,7 +2249,7 @@ exports[`XYChart component it renders bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2265,7 +2259,7 @@ exports[`XYChart component it renders bar 1`] = `
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -2284,14 +2278,14 @@ exports[`XYChart component it renders bar 1`] = `
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -2328,16 +2322,16 @@ exports[`XYChart component it renders bar 1`] = `
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -2368,7 +2362,7 @@ exports[`XYChart component it renders bar 1`] = `
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -2376,7 +2370,7 @@ exports[`XYChart component it renders bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -2385,21 +2379,22 @@ exports[`XYChart component it renders bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -2452,23 +2447,23 @@ exports[`XYChart component it renders bar 1`] = `
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -2487,12 +2482,12 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -2504,11 +2499,11 @@ exports[`XYChart component it renders bar 1`] = `
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -2519,7 +2514,7 @@ exports[`XYChart component it renders bar 1`] = `
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -2585,15 +2580,15 @@ exports[`XYChart component it renders bar 1`] = `
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -2603,7 +2598,7 @@ exports[`XYChart component it renders bar 1`] = `
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -2620,7 +2615,7 @@ exports[`XYChart component it renders bar 1`] = `
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -2636,7 +2631,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -2648,7 +2643,7 @@ exports[`XYChart component it renders bar 1`] = `
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -2701,7 +2696,15 @@ exports[`XYChart component it renders bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -3758,12 +3761,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -3773,7 +3776,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -3789,7 +3792,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -3817,7 +3820,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -3827,7 +3830,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -3846,14 +3849,14 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -3890,16 +3893,16 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -3930,7 +3933,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -3938,7 +3941,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -3947,21 +3950,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -4014,23 +4018,23 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -4049,12 +4053,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -4066,11 +4070,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -4081,7 +4085,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -4147,15 +4151,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -4165,7 +4169,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -4182,7 +4186,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -4198,7 +4202,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -4210,7 +4214,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -4263,7 +4267,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -5320,12 +5332,12 @@ exports[`XYChart component it renders line 1`] = `
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -5335,7 +5347,7 @@ exports[`XYChart component it renders line 1`] = `
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -5351,7 +5363,7 @@ exports[`XYChart component it renders line 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5379,7 +5391,7 @@ exports[`XYChart component it renders line 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5389,7 +5401,7 @@ exports[`XYChart component it renders line 1`] = `
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -5408,14 +5420,14 @@ exports[`XYChart component it renders line 1`] = `
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -5452,16 +5464,16 @@ exports[`XYChart component it renders line 1`] = `
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -5492,7 +5504,7 @@ exports[`XYChart component it renders line 1`] = `
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -5500,7 +5512,7 @@ exports[`XYChart component it renders line 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -5509,21 +5521,22 @@ exports[`XYChart component it renders line 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -5576,23 +5589,23 @@ exports[`XYChart component it renders line 1`] = `
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -5611,12 +5624,12 @@ exports[`XYChart component it renders line 1`] = `
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -5628,11 +5641,11 @@ exports[`XYChart component it renders line 1`] = `
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -5643,7 +5656,7 @@ exports[`XYChart component it renders line 1`] = `
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -5709,15 +5722,15 @@ exports[`XYChart component it renders line 1`] = `
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -5727,7 +5740,7 @@ exports[`XYChart component it renders line 1`] = `
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -5744,7 +5757,7 @@ exports[`XYChart component it renders line 1`] = `
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -5760,7 +5773,7 @@ exports[`XYChart component it renders line 1`] = `
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -5772,7 +5785,7 @@ exports[`XYChart component it renders line 1`] = `
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -5825,7 +5838,15 @@ exports[`XYChart component it renders line 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -6882,12 +6903,12 @@ exports[`XYChart component it renders stacked area 1`] = `
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -6897,7 +6918,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -6913,7 +6934,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -6941,7 +6962,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -6951,7 +6972,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -6970,14 +6991,14 @@ exports[`XYChart component it renders stacked area 1`] = `
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -7014,16 +7035,16 @@ exports[`XYChart component it renders stacked area 1`] = `
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -7054,7 +7075,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -7062,7 +7083,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -7071,21 +7092,22 @@ exports[`XYChart component it renders stacked area 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -7138,23 +7160,23 @@ exports[`XYChart component it renders stacked area 1`] = `
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -7173,12 +7195,12 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -7190,11 +7212,11 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -7205,7 +7227,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -7271,15 +7293,15 @@ exports[`XYChart component it renders stacked area 1`] = `
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -7289,7 +7311,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -7306,7 +7328,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -7322,7 +7344,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -7334,7 +7356,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -7387,7 +7409,15 @@ exports[`XYChart component it renders stacked area 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -8444,12 +8474,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -8459,7 +8489,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -8475,7 +8505,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -8503,7 +8533,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -8513,7 +8543,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -8532,14 +8562,14 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -8576,16 +8606,16 @@ exports[`XYChart component it renders stacked bar 1`] = `
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -8616,7 +8646,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -8624,7 +8654,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -8633,21 +8663,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -8700,23 +8731,23 @@ exports[`XYChart component it renders stacked bar 1`] = `
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -8735,12 +8766,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -8752,11 +8783,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -8767,7 +8798,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -8833,15 +8864,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -8851,7 +8882,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -8868,7 +8899,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -8884,7 +8915,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -8896,7 +8927,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -8949,7 +8980,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -10006,12 +10045,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -10021,7 +10060,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -10037,7 +10076,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -10065,7 +10104,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -10075,7 +10114,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -10094,14 +10133,14 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -10138,16 +10177,16 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -10178,7 +10217,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -10186,7 +10225,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -10195,21 +10234,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -10262,23 +10302,23 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -10297,12 +10337,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -10314,11 +10354,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -10329,7 +10369,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -10395,15 +10435,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -10413,7 +10453,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -10430,7 +10470,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -10446,7 +10486,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -10458,7 +10498,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -10511,7 +10551,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -11598,12 +11646,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -11613,7 +11661,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -11629,7 +11677,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -11657,7 +11705,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -11667,7 +11715,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -11686,14 +11734,14 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -11730,16 +11778,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -11770,7 +11818,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -11778,7 +11826,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -11787,21 +11835,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -11854,23 +11903,23 @@ exports[`XYChart component split chart should render split chart if both, splitR
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -11889,12 +11938,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -11906,11 +11955,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -11921,7 +11970,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -11987,15 +12036,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -12005,7 +12054,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -12022,7 +12071,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -12038,7 +12087,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -12050,7 +12099,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -12103,7 +12152,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -13398,12 +13455,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -13413,7 +13470,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -13429,7 +13486,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -13457,7 +13514,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -13467,7 +13524,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -13486,14 +13543,14 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -13530,16 +13587,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -13570,7 +13627,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -13578,7 +13635,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -13587,21 +13644,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -13654,23 +13712,23 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -13689,12 +13747,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -13706,11 +13764,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -13721,7 +13779,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -13787,15 +13845,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -13805,7 +13863,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -13822,7 +13880,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -13838,7 +13896,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -13850,7 +13908,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -13903,7 +13961,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -15191,12 +15257,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
             "axes": Object {
               "axisLine": Object {
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": true,
               },
               "axisPanelTitle": Object {
-                "fill": "#333",
+                "fill": "#1D2A3E",
                 "fontFamily": "sans-serif",
                 "fontSize": 10,
                 "padding": Object {
@@ -15206,7 +15272,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "visible": true,
               },
               "axisTitle": Object {
-                "fill": "#343741",
+                "fill": "#1D2A3E",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "padding": Object {
@@ -15222,7 +15288,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -15250,7 +15316,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#E9EDF3",
+                  "stroke": "#E3E8F2",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -15260,7 +15326,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "horizontal": "near",
                   "vertical": "near",
                 },
-                "fill": "#646a77",
+                "fill": "#516381",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 10,
                 "fontStyle": "normal",
@@ -15279,14 +15345,14 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "tickLine": Object {
                 "padding": 10,
                 "size": 10,
-                "stroke": "#eaedf3",
+                "stroke": "#E3E8F2",
                 "strokeWidth": 1,
                 "visible": false,
               },
             },
             "background": Object {
-              "color": "#FFF",
-              "fallbackColor": "#FFF",
+              "color": "#FFFFFF",
+              "fallbackColor": "#FFFFFF",
             },
             "barSeriesStyle": Object {
               "displayValue": Object {
@@ -15323,16 +15389,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
             "bulletGraph": Object {
               "angularTickLabelPadding": 10,
-              "barBackground": "#343741",
-              "border": "#EDF0F5",
+              "barBackground": "#1D2A3E",
+              "border": "#E3E8F2",
               "colorBands": Array [
                 "#AA87D1",
                 "#D9C6EF",
               ],
-              "fallbackBandColor": "#98A2B3",
+              "fallbackBandColor": "#ECF1F9",
               "minHeight": 64,
               "nonFiniteText": "N/A",
-              "textColor": "#343741",
+              "textColor": "#1D2A3E",
             },
             "chartMargins": Object {
               "bottom": 0,
@@ -15363,7 +15429,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
             "crosshair": Object {
               "band": Object {
-                "fill": "#F1F4FA",
+                "fill": "rgba(23 80 186 / 0.04)",
                 "visible": true,
               },
               "crossLine": Object {
@@ -15371,7 +15437,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -15380,21 +15446,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   4,
                   4,
                 ],
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 1,
                 "visible": true,
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "#BC1E70",
               "navigation": Object {
-                "buttonBackgroundColor": "#CCE4F5",
-                "buttonDisabledBackgroundColor": "#D3DAE626",
-                "buttonDisabledTextColor": "#A2ABBA",
-                "buttonTextColor": "#0061A6",
-                "textColor": "#343741",
+                "buttonBackgroundColor": "#0B64DD",
+                "buttonDisabledBackgroundColor": "#ECF1F9",
+                "buttonDisabledTextColor": "#798EAF",
+                "buttonTextColor": "#FFFFFF",
+                "textColor": "#111C2C",
               },
-              "scrollbarThumb": "#343741",
-              "scrollbarTrack": "#D3DAE6",
+              "scrollbarThumb": "#8E9FBC",
+              "scrollbarTrack": "#ECF1F9",
             },
             "goal": Object {
               "arcBoxSamplePitch": 0.08726646259971647,
@@ -15447,23 +15514,23 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             },
             "heatmap": Object {
               "brushArea": Object {
-                "stroke": "#69707D",
+                "stroke": "#CAD3E2",
                 "strokeWidth": 2,
                 "visible": true,
               },
               "brushMask": Object {
-                "fill": "#73737380",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": true,
               },
               "brushTool": Object {
-                "fill": "gray",
+                "fill": "rgba(255 255 255 / 0.7)",
                 "visible": false,
               },
               "cell": Object {
                 "align": "center",
                 "border": Object {
-                  "stroke": "gray",
-                  "strokeWidth": 1,
+                  "stroke": "#E3E8F2",
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -15482,12 +15549,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "grid": Object {
                 "stroke": Object {
-                  "color": "gray",
+                  "color": "#E3E8F2",
                   "width": 1,
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -15499,11 +15566,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "top": 5,
                 },
                 "rotation": 0,
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -15514,7 +15581,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "right": 5,
                   "top": 5,
                 },
-                "textColor": "black",
+                "textColor": "#516381",
                 "visible": true,
                 "width": "auto",
               },
@@ -15580,15 +15647,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
-              "barBackground": "#EDF0F5",
-              "border": "#EDF0F5",
+              "barBackground": "#ECF1F9",
+              "border": "#E3E8F2",
               "emptyBackground": "transparent",
               "iconAlign": "right",
               "minHeight": 64,
               "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "textDarkColor": "#343741",
-              "textLightColor": "#E0E5EE",
+              "textDarkColor": "#111C2C",
+              "textLightColor": "#E3E8F2",
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuesTextAlign": "right",
@@ -15598,7 +15665,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -15615,7 +15682,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -15631,7 +15698,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "radiusPadding": 10,
                 "spacing": 2,
                 "stemAngle": 0.7853981633974483,
-                "textColor": "#343741",
+                "textColor": "#1D2A3E",
                 "valueFont": Object {
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -15643,7 +15710,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "minFontSize": 8,
               "outerSizeRatio": 1,
               "radialPadding": 0.017453292519943295,
-              "sectorLineStroke": "#FFF",
+              "sectorLineStroke": "#FFFFFF",
               "sectorLineWidth": 1.5,
             },
             "rectAnnotation": Object {
@@ -15696,7 +15763,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />

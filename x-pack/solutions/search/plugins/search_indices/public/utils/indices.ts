@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+
+import type { IconColor } from '@elastic/eui';
+
 // see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html for the current rules
 
 export function isValidIndexName(name: string) {
@@ -44,3 +48,19 @@ export function getFirstNewIndexName(startingIndexNames: string[], currentIndexN
   }
   return undefined;
 }
+
+export type HealthStatusStrings = 'red' | 'green' | 'yellow' | 'unavailable';
+export const healthColorsMap: Record<HealthStatusStrings, IconColor> = {
+  red: 'danger',
+  green: 'success',
+  yellow: 'warning',
+  unavailable: '',
+};
+
+export const normalizeHealth = (health: HealthStatusStrings | HealthStatus): HealthStatusStrings =>
+  health.toLowerCase() as HealthStatusStrings;
+export const indexHealthToHealthColor = (
+  health: HealthStatus | 'unavailable' = 'unavailable'
+): IconColor => {
+  return healthColorsMap[normalizeHealth(health)] ?? healthColorsMap.unavailable;
+};

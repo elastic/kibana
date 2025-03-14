@@ -43,7 +43,7 @@
           ">], unknown>; } & ",
           "IContextContainer"
         ],
-        "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+        "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -57,7 +57,7 @@
         "tags": [],
         "label": "contextMock",
         "description": [],
-        "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+        "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,15 +70,9 @@
             "description": [],
             "signature": [
               "(mockContext?: any) => ",
-              {
-                "pluginId": "@kbn/core-http-context-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpContextServerMocksPluginApi",
-                "section": "def-server.ContextContainerMock",
-                "text": "ContextContainerMock"
-              }
+              "ContextContainerMock"
             ],
-            "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+            "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -93,7 +87,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
+                "path": "src/core/packages/http/context-server-mocks/src/context_container.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -109,7 +103,7 @@
         "tags": [],
         "label": "contextServiceMock",
         "description": [],
-        "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+        "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -123,7 +117,7 @@
             "signature": [
               "() => jest.Mocked<ContextServiceContract>"
             ],
-            "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+            "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -141,7 +135,7 @@
               "InternalContextSetup",
               ">"
             ],
-            "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+            "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -156,7 +150,7 @@
                 "signature": [
                   "{}"
                 ],
-                "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+                "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -174,7 +168,7 @@
               "InternalContextSetup",
               ">"
             ],
-            "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+            "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -189,7 +183,7 @@
                 "signature": [
                   "{}"
                 ],
-                "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
+                "path": "src/core/packages/http/context-server-mocks/src/context_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

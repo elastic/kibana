@@ -12,7 +12,6 @@ import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   ACTIVE_NOW_LABEL,
   ALERTS_LABEL,
-  ALL_ALERT_COLOR,
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './constants';
 import { AlertItem } from './alert_item';
@@ -34,14 +33,14 @@ export const AlertCounts = ({ activeAlertCount, recoveredAlertCount, handleClick
       <AlertItem
         label={ALERTS_LABEL}
         count={activeAlertCount + recoveredAlertCount}
-        color={ALL_ALERT_COLOR}
+        color={euiTheme.colors.vis.euiColorVis0}
         data-test-subj={TOTAL_ALERT_COUNT_DATA_TEST_SUBJ}
         handleClick={handleClick}
       />
       <AlertItem
         label={ACTIVE_NOW_LABEL}
         count={activeAlertCount}
-        color={activeAlertCount > 0 ? euiTheme.colors.dangerText : euiTheme.colors.successText}
+        color={activeAlertCount > 0 ? euiTheme.colors.textDanger : euiTheme.colors.textSuccess}
         alertType={ALERT_STATUS_ACTIVE}
         handleClick={handleClick}
         showWarningIcon={true}

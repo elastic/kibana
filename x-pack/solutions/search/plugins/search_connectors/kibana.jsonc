@@ -22,6 +22,8 @@
       "taskManager",
       "fleet"
     ],
-    "optionalPlugins": []
+    "optionalPlugins": [
+      "cloud"
+    ]
   }
 }

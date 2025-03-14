@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
-import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -77,13 +76,19 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ indices, searchApps, collections }) => {
+      map(({ searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                    );
+                  },
                   link: 'enterpriseSearch',
                 },
                 {
@@ -116,27 +121,16 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
                       getIsActive: ({ pathNameSerialized, prepend }) => {
-                        const someSubItemSelected = indices?.some((index) =>
-                          index.items?.some((item) => item.isSelected)
-                        );
-
-                        if (someSubItemSelected) return false;
-
                         return (
-                          pathNameSerialized ===
-                          prepend(`/app/elasticsearch/content${SEARCH_INDICES_PATH}`)
+                          pathNameSerialized.startsWith(
+                            prepend('/app/management/data/index_management/')
+                          ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
                         );
                       },
-                      link: 'enterpriseSearchContent:searchIndices',
-                      renderAs: 'item',
-                      ...(indices
-                        ? {
-                            children: indices.map(euiItemTypeToNodeDefinition),
-                            isCollapsible: false,
-                            renderAs: 'accordion',
-                          }
-                        : {}),
+                      link: 'management:index_management',
                     },
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },
@@ -192,6 +186,12 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchAnalytics',
                       renderAs: 'item',
+                      sideNavStatus: collections?.some((collection) =>
+                        collection.items?.some((item) => item.isSelected)
+                      )
+                        ? 'visible'
+                        : 'hidden',
+
                       ...(collections
                         ? {
                             children: collections.map(euiItemTypeToNodeDefinition),
@@ -312,12 +312,15 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                  link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
                     defaultMessage: 'Stack Management',
                   }),
+                },
+                {
+                  id: 'monitoring',
+                  link: 'monitoring',
                 },
               ],
               icon: 'gear',

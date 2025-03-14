@@ -6,9 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../../translations';
 
 interface MetaInfoDetailsProps {
@@ -18,11 +17,13 @@ interface MetaInfoDetailsProps {
   dataTestSubj?: string;
 }
 
-const euiBadgeFontFamily = css`
-  font-family: ${euiThemeVars.euiFontFamily};
-`;
 export const MetaInfoDetails = memo<MetaInfoDetailsProps>(
   ({ label, lastUpdate, lastUpdateValue, dataTestSubj }) => {
+    const { euiTheme } = useEuiTheme();
+    const euiBadgeFontFamily = css`
+      font-family: ${euiTheme.font.family};
+    `;
+
     return (
       <EuiFlexGroup
         data-test-subj={`${dataTestSubj || ''}metaInfoDetails`}

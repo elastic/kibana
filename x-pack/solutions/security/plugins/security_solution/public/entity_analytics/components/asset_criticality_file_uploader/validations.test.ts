@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { mockGlobalState } from '../../../common/mock';
 import { validateParsedContent, validateFile } from './validations';
 
 const formatBytes = (bytes: number) => bytes.toString();
 
+const experimentalFeatures = mockGlobalState.app.enableExperimental;
+
 describe('validateParsedContent', () => {
   it('should return empty arrays when data is empty', () => {
-    const result = validateParsedContent([]);
+    const result = validateParsedContent([], experimentalFeatures);
 
     expect(result).toEqual({
       valid: [],
@@ -27,7 +30,7 @@ describe('validateParsedContent', () => {
       ['host', 'host-1', 'low_impact'], // valid
     ];
 
-    const result = validateParsedContent(data);
+    const result = validateParsedContent(data, experimentalFeatures);
 
     expect(result).toEqual({
       valid: [data[2]],
@@ -35,7 +38,7 @@ describe('validateParsedContent', () => {
       errors: [
         {
           message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
           index: 1,
         },
         {

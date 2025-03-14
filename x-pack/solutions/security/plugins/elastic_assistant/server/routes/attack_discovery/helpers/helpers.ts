@@ -21,6 +21,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 
+import dateMath from '@kbn/datemath';
 import {
   ATTACK_DISCOVERY_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
@@ -135,9 +136,12 @@ export const updateAttackDiscoveries = async ({
   attackDiscoveryId,
   authenticatedUser,
   dataClient,
+  hasFilter,
+  end,
   latestReplacements,
   logger,
   size,
+  start,
   startTime,
   telemetry,
 }: {
@@ -147,9 +151,14 @@ export const updateAttackDiscoveries = async ({
   attackDiscoveryId: string;
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
+  end?: string;
+  hasFilter: boolean;
   latestReplacements: Replacements;
   logger: Logger;
   size: number;
+  // start of attack discovery time range
+  start?: string;
+  // start time of attack discovery
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
 }) => {
@@ -185,6 +194,8 @@ export const updateAttackDiscoveries = async ({
       attackDiscoveryUpdateProps: updateProps,
       authenticatedUser,
     });
+    const { dateRangeDuration, isDefaultDateRange } = getTimeRangeDuration({ start, end });
+
     telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
       actionTypeId: apiConfig.actionTypeId,
       alertsContextCount: updateProps.alertsContextCount,
@@ -195,8 +206,11 @@ export const updateAttackDiscoveries = async ({
           )
         ).length ?? 0,
       configuredAlertsCount: size,
+      dateRangeDuration,
       discoveriesGenerated: updateProps.attackDiscoveries?.length ?? 0,
       durationMs,
+      hasFilter,
+      isDefaultDateRange,
       model: apiConfig.model,
       provider: apiConfig.provider,
     });
@@ -265,4 +279,41 @@ export const getAttackDiscoveryStats = async ({
       connectorId: ad.apiConfig.connectorId,
     };
   });
+};
+
+const getTimeRangeDuration = ({
+  start,
+  end,
+}: {
+  start?: string;
+  end?: string;
+}): {
+  dateRangeDuration: number;
+  isDefaultDateRange: boolean;
+} => {
+  if (start && end) {
+    const forceNow = moment().toDate();
+    const dateStart = dateMath.parse(start, {
+      roundUp: false,
+      momentInstance: moment,
+      forceNow,
+    });
+    const dateEnd = dateMath.parse(end, {
+      roundUp: false,
+      momentInstance: moment,
+      forceNow,
+    });
+    if (dateStart && dateEnd) {
+      const dateRangeDuration = moment.duration(dateEnd.diff(dateStart)).asHours();
+      return {
+        dateRangeDuration,
+        isDefaultDateRange: end === 'now' && start === 'now-24h',
+      };
+    }
+  }
+  return {
+    // start and/or end undefined, return 0 hours
+    dateRangeDuration: 0,
+    isDefaultDateRange: false,
+  };
 };

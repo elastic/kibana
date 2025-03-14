@@ -7,7 +7,7 @@
 
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { ApiOperation } from '@kbn/security-plugin-types-server';
+import { ApiOperation } from '@kbn/security-plugin-types-common';
 
 import { getReplacedByForPrivilege, privilegesFactory } from './privileges';
 import { licenseMock } from '../__fixtures__/licensing.mock';
@@ -554,6 +554,7 @@ describe('features', () => {
         'getRuleExecutionKPI',
         'getBackfill',
         'findBackfill',
+        'findGaps',
       ],
       ...[
         'create',
@@ -575,6 +576,7 @@ describe('features', () => {
         'runSoon',
         'scheduleBackfill',
         'deleteBackfill',
+        'fillGaps',
       ],
     ];
 

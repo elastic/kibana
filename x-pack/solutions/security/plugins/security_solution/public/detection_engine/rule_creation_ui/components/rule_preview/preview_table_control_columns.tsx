@@ -63,6 +63,7 @@ const PreviewActionsComponent: React.FC<ActionProps> = ({
               iconType="expand"
               onClick={onEventDetailsPanelOpened}
               size="s"
+              color="text"
             />
           </EuiToolTip>
         </EventsTdContent>

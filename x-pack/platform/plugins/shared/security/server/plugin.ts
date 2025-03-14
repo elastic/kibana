@@ -296,6 +296,8 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       getCurrentUser,
+      getTypeRegistry: () =>
+        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getTypeRegistry()),
     });
 
     setupSavedObjects({

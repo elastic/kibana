@@ -22,7 +22,7 @@
         "tags": [],
         "label": "metricsServiceMock",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+        "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<MetricsServiceContract>"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
               "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +72,7 @@
               "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -90,7 +90,7 @@
               "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -108,7 +108,7 @@
               "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -125,7 +125,7 @@
               "() => ",
               "EventLoopDelaysMonitor"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -141,7 +141,7 @@
         "tags": [],
         "label": "sampleEsClientMetrics",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+        "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -152,7 +152,7 @@
             "tags": [],
             "label": "totalActiveSockets",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,7 +163,7 @@
             "tags": [],
             "label": "totalIdleSockets",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,7 +174,7 @@
             "tags": [],
             "label": "totalQueuedRequests",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false
           }

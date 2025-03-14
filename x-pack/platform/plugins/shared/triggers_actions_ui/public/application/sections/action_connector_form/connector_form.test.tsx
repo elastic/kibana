@@ -102,21 +102,21 @@ describe('ConnectorForm', () => {
       />
     );
 
-    expect(result.getByTestId('nameInput')).toBeInTheDocument();
+    expect(await result.findByTestId('nameInput')).toBeInTheDocument();
 
     await act(async () => {
       const submit = onChange.mock.calls[0][0].submit;
       await submit();
     });
 
-    await waitFor(() => expect(onChange).toHaveBeenCalled());
-
-    expect(onChange).toHaveBeenCalledWith({
-      isSubmitted: false,
-      isSubmitting: false,
-      isValid: false,
-      preSubmitValidator: expect.anything(),
-      submit: expect.anything(),
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        isSubmitted: true,
+        isSubmitting: false,
+        isValid: false,
+        preSubmitValidator: expect.anything(),
+        submit: expect.anything(),
+      });
     });
   });
 

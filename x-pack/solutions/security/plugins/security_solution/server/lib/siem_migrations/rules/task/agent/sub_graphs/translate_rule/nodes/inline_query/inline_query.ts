@@ -11,7 +11,7 @@ import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
 import type { GraphNode } from '../../../../types';
 import { REPLACE_QUERY_RESOURCE_PROMPT, getResourcesContext } from './prompts';
-import { cleanMarkdown } from '../../../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetInlineQueryNodeParams {
   model: ChatModel;
@@ -24,11 +24,10 @@ export const getInlineQueryNode = ({
 }: GetInlineQueryNodeParams): GraphNode => {
   return async (state) => {
     let query = state.original_rule.query;
-
     // Check before to avoid unnecessary LLM calls
     let unsupportedComment = getUnsupportedComment(query);
     if (unsupportedComment) {
-      return { comments: [unsupportedComment] };
+      return { comments: [generateAssistantComment(unsupportedComment)] };
     }
 
     const resources = await ruleMigrationsRetriever.resources.getResources(state.original_rule);
@@ -51,10 +50,13 @@ export const getInlineQueryNode = ({
       // Check after replacing in case the replacements made it untranslatable
       unsupportedComment = getUnsupportedComment(query);
       if (unsupportedComment) {
-        return { comments: [unsupportedComment] };
+        return { comments: [generateAssistantComment(unsupportedComment)] };
       }
 
-      return { inline_query: query, comments: [cleanMarkdown(inliningSummary)] };
+      return {
+        inline_query: query,
+        comments: [generateAssistantComment(cleanMarkdown(inliningSummary))],
+      };
     }
     return { inline_query: query };
   };

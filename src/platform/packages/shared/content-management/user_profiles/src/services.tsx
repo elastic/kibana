@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import React, { FC, PropsWithChildren, useCallback, useContext, useMemo } from 'react';
 import type { UserProfile } from '@kbn/user-profile-components';
 import { createBatcher } from './utils/batcher';
-
-export const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false, staleTime: 30 * 60 * 1000 } },
-});
 
 export interface UserProfilesKibanaDependencies {
   core: {
@@ -36,11 +31,7 @@ export const UserProfilesProvider: FC<PropsWithChildren<UserProfilesServices>> =
   children,
   ...services
 }) => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <UserProfilesContext.Provider value={services}>{children}</UserProfilesContext.Provider>
-    </QueryClientProvider>
-  );
+  return <UserProfilesContext.Provider value={services}>{children}</UserProfilesContext.Provider>;
 };
 
 export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibanaDependencies>> = ({

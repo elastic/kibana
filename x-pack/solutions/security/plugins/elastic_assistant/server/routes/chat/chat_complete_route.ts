@@ -16,6 +16,8 @@ import {
   transformRawData,
   getAnonymizedValue,
   ConversationResponse,
+  newContentReferencesStore,
+  pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -75,7 +77,7 @@ export const chatCompleteRoute = (
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -91,7 +93,7 @@ export const chatCompleteRoute = (
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
           let messages;
-          const conversationId = request.body.conversationId;
+          const existingConversationId = request.body.conversationId;
           const connectorId = request.body.connectorId;
 
           let latestReplacements: Replacements = {};
@@ -106,6 +108,7 @@ export const chatCompleteRoute = (
           const connector = connectors.length > 0 ? connectors[0] : undefined;
           actionTypeId = connector?.actionTypeId ?? '.gen-ai';
           const isOssModel = isOpenSourceModel(connector);
+          const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
           // replacements
           const anonymizationFieldsRes =
@@ -156,11 +159,10 @@ export const chatCompleteRoute = (
           });
 
           let newConversation: ConversationResponse | undefined | null;
-          if (conversationsDataClient && !conversationId && request.body.persist) {
+          if (conversationsDataClient && !existingConversationId && request.body.persist) {
             newConversation = await createConversationWithUserInput({
               actionTypeId,
               connectorId,
-              conversationId,
               conversationsDataClient,
               promptId: request.body.promptId,
               replacements: latestReplacements,
@@ -175,19 +177,29 @@ export const chatCompleteRoute = (
             }));
           }
 
+          // Do not persist conversation messages if `persist = false`
+          const conversationId = request.body.persist
+            ? existingConversationId ?? newConversation?.id
+            : undefined;
+
+          const contentReferencesStore = newContentReferencesStore();
+
           const onLlmResponse = async (
             content: string,
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
-            if (newConversation?.id && conversationsDataClient) {
+            if (conversationId && conversationsDataClient) {
+              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+
               await appendAssistantMessageToConversation({
-                conversationId: newConversation?.id,
+                conversationId,
                 conversationsDataClient,
                 messageContent: content,
                 replacements: latestReplacements,
                 isError,
                 traceData,
+                contentReferences,
               });
             }
           };
@@ -199,7 +211,7 @@ export const chatCompleteRoute = (
             actionTypeId,
             connectorId,
             isOssModel,
-            conversationId: conversationId ?? newConversation?.id,
+            conversationId,
             context: ctx,
             getElser,
             logger,
@@ -208,6 +220,7 @@ export const chatCompleteRoute = (
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
+            contentReferencesStore,
             request: {
               ...request,
               // TODO: clean up after empty tools will be available to use
@@ -221,6 +234,7 @@ export const chatCompleteRoute = (
             response,
             telemetry,
             responseLanguage: request.body.responseLanguage,
+            savedObjectsClient,
             ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });
         } catch (err) {

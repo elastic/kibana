@@ -11,7 +11,7 @@
  *
  * info:
  *   title: KnowledgeBase API endpoints
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';
@@ -67,10 +67,9 @@ export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBa
 export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
 export const ReadKnowledgeBaseResponse = z.object({
   elser_exists: z.boolean().optional(),
-  index_exists: z.boolean().optional(),
   is_setup_available: z.boolean().optional(),
   is_setup_in_progress: z.boolean().optional(),
-  pipeline_exists: z.boolean().optional(),
   security_labs_exists: z.boolean().optional(),
   user_data_exists: z.boolean().optional(),
+  product_documentation_status: z.string().optional(),
 });

@@ -9,28 +9,28 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { setupNodeEvents } from './setup_cypress_node_events';
 
 export default defineCypressConfig({
-  projectId: 'omwh6f',
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './reporter_config.json',
+  },
   fileServerFolder: './cypress',
   fixturesFolder: './cypress/fixtures',
   screenshotsFolder: './cypress/screenshots',
   videosFolder: './cypress/videos',
-  requestTimeout: 10000,
-  responseTimeout: 40000,
-  defaultCommandTimeout: 30000,
+  defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 120000,
   viewportHeight: 1800,
   viewportWidth: 1440,
-  video: true,
-  screenshotOnRunFailure: true,
-  retries: {
-    runMode: 1,
-  },
+  video: false,
+  screenshotOnRunFailure: false,
   e2e: {
     setupNodeEvents,
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
-    specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: './cypress/e2e/**/*.cy.ts',
     experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 3,
+    experimentalRunAllSpecs: true,
   },
 });

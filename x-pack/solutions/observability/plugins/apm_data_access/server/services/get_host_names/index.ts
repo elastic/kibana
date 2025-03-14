@@ -43,22 +43,20 @@ export function createGetHostNames({ apmEventClient }: ApmDataAccessServicesPara
           },
         ],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [...castArray(query), ...rangeQuery(start, end)],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [...castArray(query), ...rangeQuery(start, end)],
         },
-        aggs: {
-          hostNames: {
-            terms: {
-              field: HOST_NAME,
-              size: Math.min(size, MAX_SIZE),
-              order: {
-                _key: 'asc',
-              },
+      },
+      aggs: {
+        hostNames: {
+          terms: {
+            field: HOST_NAME,
+            size: Math.min(size, MAX_SIZE),
+            order: {
+              _key: 'asc',
             },
           },
         },

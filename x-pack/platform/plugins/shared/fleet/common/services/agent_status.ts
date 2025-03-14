@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActiveAgentStatuses } from '../constants';
 import type { Agent, AgentStatus, FleetServerAgent } from '../types';
 
 export function getPreviousAgentStatusForOfflineAgents(
@@ -36,6 +37,12 @@ export function getPreviousAgentStatusForOfflineAgents(
 export function buildKueryForUnenrolledAgents(): string {
   return 'status:unenrolled';
 }
+export function buildKueryForUninstalledAgents(): string {
+  return 'status:uninstalled';
+}
+export function buildKueryForOrphanedAgents(): string {
+  return 'status:orphaned';
+}
 
 export function buildKueryForOnlineAgents(): string {
   return 'status:online';
@@ -55,6 +62,10 @@ export function buildKueryForUpdatingAgents(): string {
 
 export function buildKueryForInactiveAgents() {
   return 'status:inactive';
+}
+
+export function buildKueryForActiveAgents() {
+  return `(${ActiveAgentStatuses.map((s) => `status:${s}`).join(' or ')})`;
 }
 
 export const AGENT_UPDATING_TIMEOUT_HOURS = 2;

@@ -46,6 +46,7 @@ export function mockTelemetryService({
     telemetryNotifyUserAboutOptInDefault: true,
     userCanChangeSettings: true,
     labels: {},
+    localShipper: false,
     ...configOverride,
   };
 

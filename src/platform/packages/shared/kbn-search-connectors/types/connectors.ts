@@ -227,6 +227,7 @@ export interface Connector {
   id: string;
   index_name: string | null;
   is_native: boolean;
+  deleted: boolean | null;
   language: string | null;
   last_access_control_sync_error: string | null;
   last_access_control_sync_scheduled_at: string | null;

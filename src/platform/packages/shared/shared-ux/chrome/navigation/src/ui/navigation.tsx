@@ -16,7 +16,7 @@ import type {
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
-import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   RecentlyAccessed,
   NavigationPanel,
@@ -94,14 +94,16 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
           <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
             <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
-            {isFeedbackBtnVisible && (
-              <EuiFlexItem grow={false}>
-                <FeedbackBtn solutionId={solutionId} />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiCollapsibleNavBeta.Body>
-
+        {isFeedbackBtnVisible && (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="s" />
+              <FeedbackBtn solutionId={solutionId} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         {/* Footer */}
         {navigationTree.footer && (
           <EuiCollapsibleNavBeta.Footer>

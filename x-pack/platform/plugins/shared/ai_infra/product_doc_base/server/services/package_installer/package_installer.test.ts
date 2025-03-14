@@ -10,6 +10,7 @@ import {
   createIndexMock,
   populateIndexMock,
   loadMappingFileMock,
+  loadManifestFileMock,
   openZipArchiveMock,
   validateArtifactArchiveMock,
   fetchArtifactVersionsMock,
@@ -36,6 +37,8 @@ const callOrder = (fn: { mock: { invocationCallOrder: number[] } }): number => {
   return fn.mock.invocationCallOrder[0];
 };
 
+const TEST_FORMAT_VERSION = '2.0.0';
+
 describe('PackageInstaller', () => {
   let logger: MockedLogger;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -55,6 +58,12 @@ describe('PackageInstaller', () => {
       artifactRepositoryUrl,
       kibanaVersion,
     });
+
+    loadManifestFileMock.mockResolvedValue({
+      formatVersion: TEST_FORMAT_VERSION,
+      productName: 'kibana',
+      productVersion: '8.17',
+    });
   });
 
   afterEach(() => {
@@ -62,6 +71,7 @@ describe('PackageInstaller', () => {
     createIndexMock.mockReset();
     populateIndexMock.mockReset();
     loadMappingFileMock.mockReset();
+    loadManifestFileMock.mockReset();
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
@@ -99,10 +109,14 @@ describe('PackageInstaller', () => {
       expect(loadMappingFileMock).toHaveBeenCalledTimes(1);
       expect(loadMappingFileMock).toHaveBeenCalledWith(zipArchive);
 
+      expect(loadManifestFileMock).toHaveBeenCalledTimes(1);
+      expect(loadManifestFileMock).toHaveBeenCalledWith(zipArchive);
+
       expect(createIndexMock).toHaveBeenCalledTimes(1);
       expect(createIndexMock).toHaveBeenCalledWith({
         indexName,
         mappings,
+        manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
       });
@@ -111,6 +125,7 @@ describe('PackageInstaller', () => {
       expect(populateIndexMock).toHaveBeenCalledWith({
         indexName,
         archive: zipArchive,
+        manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
       });
@@ -130,6 +145,7 @@ describe('PackageInstaller', () => {
       expect(callOrder(downloadToDiskMock)).toBeLessThan(callOrder(openZipArchiveMock));
       expect(callOrder(openZipArchiveMock)).toBeLessThan(callOrder(loadMappingFileMock));
       expect(callOrder(loadMappingFileMock)).toBeLessThan(callOrder(createIndexMock));
+      expect(callOrder(loadManifestFileMock)).toBeLessThan(callOrder(createIndexMock));
       expect(callOrder(createIndexMock)).toBeLessThan(callOrder(populateIndexMock));
       expect(callOrder(populateIndexMock)).toBeLessThan(
         callOrder(productDocClient.setInstallationSuccessful)

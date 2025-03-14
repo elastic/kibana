@@ -8,7 +8,7 @@
 import type {
   MigrationDeprecationsResponse,
   MigrationDeprecationsDeprecation,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import _ from 'lodash';
 import { EnrichedDeprecationInfo } from '../../../common/types';
@@ -16,14 +16,15 @@ import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
 } from '../es_system_indices_migration';
-import { getCorrectiveAction } from './get_corrective_actions';
+import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
- * Remove once the data_streams type is added to the `MigrationDeprecationsResponse` type
+ * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
  */
 interface EsDeprecations extends MigrationDeprecationsResponse {
-  data_streams: Record<string, MigrationDeprecationsDeprecation[]>;
+  templates: Record<string, MigrationDeprecationsDeprecation[]>;
+  ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
 const createBaseMigrationDeprecation = (
@@ -35,9 +36,7 @@ const createBaseMigrationDeprecation = (
     message,
     url,
     level,
-    // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
     _meta: metadata,
-    // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
     resolve_during_rolling_upgrade: resolveDuringUpgrade,
   } = migrationDeprecation;
 
@@ -76,6 +75,28 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
+  const ilmPoliciesMigrations = Object.entries(migrationsResponse.ilm_policies).flatMap(
+    ([indexName, ilmPolicyDeprecations]) => {
+      return ilmPolicyDeprecations.flatMap((ilmPolicyData) =>
+        createBaseMigrationDeprecation(ilmPolicyData, {
+          indexName,
+          deprecationType: 'ilm_policies',
+        })
+      );
+    }
+  );
+
+  const templatesMigrations = Object.entries(migrationsResponse.templates).flatMap(
+    ([indexName, templatesDeprecations]) => {
+      return templatesDeprecations.flatMap((templatesDataa) =>
+        createBaseMigrationDeprecation(templatesDataa, {
+          indexName,
+          deprecationType: 'templates',
+        })
+      );
+    }
+  );
+
   const mlSettingsMigrations = migrationsResponse.ml_settings.map((depractionData) =>
     createBaseMigrationDeprecation(depractionData, { deprecationType: 'ml_settings' })
   );
@@ -93,6 +114,8 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     ...nodeSettingsMigrations,
     ...indexSettingsMigrations,
     ...dataStreamsMigrations,
+    ...ilmPoliciesMigrations,
+    ...templatesMigrations,
   ].flat();
 };
 
@@ -104,12 +127,12 @@ export const getEnrichedDeprecations = async (
 
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
-  const indexSettingsIndexNames = Object.keys(deprecations.index_settings).map(
-    (indexName) => indexName!
-  );
+  const indexSettingsIndexNames = Object.keys(deprecations.index_settings);
   const indexSettingsIndexStates = indexSettingsIndexNames.length
     ? await esIndicesStateCheck(dataClient.asCurrentUser, indexSettingsIndexNames)
     : {};
+
+  const deprecationsByIndex = new Map<string, EnrichedDeprecationInfo[]>();
 
   return normalizeEsResponse(deprecations)
     .filter((deprecation) => {
@@ -122,6 +145,8 @@ export const getEnrichedDeprecations = async (
           return !systemIndicesList.includes(deprecation.index);
         }
         case 'cluster_settings':
+        case 'templates':
+        case 'ilm_policies':
         case 'ml_settings':
         case 'node_settings':
         case 'data_streams': {
@@ -136,9 +161,10 @@ export const getEnrichedDeprecations = async (
     })
     .map((deprecation) => {
       const correctiveAction = getCorrectiveAction(
+        deprecation.type,
         deprecation.message,
-        deprecation.metadata,
-        deprecation.index!
+        deprecation.metadata as EsMetadata,
+        deprecation.index
       );
 
       // If we have found deprecation information for index/indices
@@ -148,10 +174,39 @@ export const getEnrichedDeprecations = async (
           indexSettingsIndexStates[deprecation.index!] === 'closed' ? 'index-closed' : undefined;
       }
 
-      const enrichedDeprecation = _.omit(deprecation, 'metadata');
-      return {
-        ...enrichedDeprecation,
+      const enrichedDeprecation = {
+        ..._.omit(deprecation, 'metadata'),
         correctiveAction,
       };
+
+      if (deprecation.index) {
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index) || [];
+        indexDeprecations.push(enrichedDeprecation);
+        deprecationsByIndex.set(deprecation.index, indexDeprecations);
+      }
+
+      return enrichedDeprecation;
+    })
+    .filter((deprecation) => {
+      if (
+        deprecation.index &&
+        deprecation.message.includes(`Index [${deprecation.index}] is a frozen index`)
+      ) {
+        // frozen indices are created in 7.x, so they are old / incompatible as well
+        // reindexing + deleting is required, so no need to bubble up this deprecation in the UI
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index)!;
+        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations.find(
+          (elem) =>
+            elem.type === 'index_settings' &&
+            elem.index === deprecation.index &&
+            elem.correctiveAction?.type === 'reindex'
+        );
+        if (oldIndexDeprecation) {
+          oldIndexDeprecation.frozen = true;
+          return false;
+        }
+      }
+
+      return true;
     });
 };

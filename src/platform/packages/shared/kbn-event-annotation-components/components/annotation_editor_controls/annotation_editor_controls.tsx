@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -365,7 +364,6 @@ const AnnotationEditorControls = ({
         >
           <EuiFormRow
             display="rowCompressed"
-            className="lnsRowCompressedMargin"
             fullWidth
             label={i18n.translate('eventAnnotationComponents.xyChart.annotation.tooltip', {
               defaultMessage: 'Show additional fields',

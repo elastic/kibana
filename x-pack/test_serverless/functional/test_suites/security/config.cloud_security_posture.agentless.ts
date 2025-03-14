@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import { createTestConfig } from '../../config.base';
 
 // TODO: Remove the agentless default config once Serverless API is merged  and default policy is deleted
@@ -19,7 +19,7 @@ export default createTestConfig({
     `--xpack.cloud.serverless.project_id=some_fake_project_id`,
 
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
-    `--xpack.fleet.packages.0.version=${CLOUD_CREDENTIALS_PACKAGE_VERSION}`,
+    `--xpack.fleet.packages.0.version=${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`,
     `--xpack.fleet.agentless.enabled=true`,
     `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
     `--xpack.fleet.internal.fleetServerStandalone=true`,

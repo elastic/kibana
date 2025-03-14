@@ -10,7 +10,7 @@ import {
   IndicesGetResponse,
   SecurityHasPrivilegesPrivileges,
   IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { AlwaysShowPattern, ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';

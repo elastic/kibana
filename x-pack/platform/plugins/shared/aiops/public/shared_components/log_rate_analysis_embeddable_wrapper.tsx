@@ -20,6 +20,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import type { PublishesFilters } from '@kbn/presentation-publishing';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { ReloadContextProvider } from '../hooks/use_reload';
@@ -59,6 +60,7 @@ export interface LogRateAnalysisEmbeddableWrapperProps {
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   windowParameters?: WindowParameters;
+  filtersApi?: PublishesFilters;
 }
 
 const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps> = ({
@@ -71,6 +73,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   embeddingOrigin,
   lastReloadRequestTime,
   windowParameters,
+  filtersApi,
 }) => {
   const deps = useMemo(() => {
     const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
@@ -155,7 +158,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
                 dataViews={pluginStart.data.dataViews}
                 dataViewId={dataViewId}
               >
-                <FilterQueryContextProvider timeRange={timeRange}>
+                <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                   <LogRateAnalysisReduxProvider initialAnalysisStart={windowParameters}>
                     <LogRateAnalysisForEmbeddable timeRange={timeRange} />
                   </LogRateAnalysisReduxProvider>

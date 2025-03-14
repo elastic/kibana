@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { validateAndConvertAggregations } from './validation';
 
 type AggsMap = Record<string, estypes.AggregationsAggregationContainer>;

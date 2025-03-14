@@ -143,8 +143,10 @@ export class UnenrollInactiveAgentsTask {
         perPage: UNENROLLMENT_BATCHSIZE,
       });
       if (!res.agents.length) {
-        this.endRun('No inactive agents to unenroll');
-        return;
+        this.logger.debug(
+          '[UnenrollInactiveAgentsTask] No inactive agents to unenroll in agent policy batch'
+        );
+        continue;
       }
       agentCounter += res.agents.length;
       if (agentCounter >= UNENROLLMENT_BATCHSIZE) {

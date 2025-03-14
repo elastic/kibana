@@ -10,7 +10,7 @@
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -44,8 +44,10 @@ const mockedEditPanelAction = {
   execute: jest.fn(),
   isCompatible: jest.fn().mockResolvedValue(true),
 };
-jest.mock('@kbn/presentation-panel-plugin/public', () => ({
-  getEditPanelAction: () => mockedEditPanelAction,
+jest.mock('../services/kibana_services', () => ({
+  uiActionsService: {
+    getAction: async () => mockedEditPanelAction,
+  },
 }));
 
 describe('filters notification popover', () => {
@@ -59,15 +61,15 @@ describe('filters notification popover', () => {
     updateFilters = (filters) => filtersSubject.next(filters);
     const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     updateQuery = (query) => querySubject.next(query);
-    const viewModeSubject = new BehaviorSubject<ViewMode>('view');
-    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
+    const viewMode$ = new BehaviorSubject<ViewMode>('view');
+    updateViewMode = (viewMode) => viewMode$.next(viewMode);
 
     api = {
       uuid: 'testId',
       filters$: filtersSubject,
       query$: querySubject,
       parentApi: {
-        viewMode: viewModeSubject,
+        viewMode$,
       },
       canEditUnifiedSearch,
     };
@@ -133,6 +135,8 @@ describe('filters notification popover', () => {
     await renderAndOpenPopover();
     const editButton = await screen.findByTestId('filtersNotificationModal__editButton');
     await userEvent.click(editButton);
-    expect(mockedEditPanelAction.execute).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockedEditPanelAction.execute).toHaveBeenCalled();
+    });
   });
 });

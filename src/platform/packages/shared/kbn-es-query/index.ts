@@ -104,6 +104,7 @@ export {
   uniqFilters,
   unpinFilter,
   updateFilter,
+  updateFilterReferences,
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,

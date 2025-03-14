@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { MonitoringConfig } from '../../../config';
 import { StackProductUsage } from '../types';
 
@@ -44,48 +44,46 @@ export async function fetchStackProductUsage(
     index,
     ignore_unavailable: true,
     filter_path: ['aggregations.uuids.buckets'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                type: {
-                  value: type,
-                },
+    size: 0,
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              type: {
+                value: type,
               },
             },
-            {
-              term: {
-                cluster_uuid: {
-                  value: clusterUuid,
-                },
-              },
-            },
-            {
-              range: {
-                timestamp: {
-                  gte: 'now-1h',
-                },
-              },
-            },
-            ...filters,
-          ],
-        },
-      },
-      aggs: {
-        uuids: {
-          terms: {
-            field: uuidPath,
-            size,
           },
-          aggs: {
-            indices: {
-              terms: {
-                field: '_index',
-                size: 2,
+          {
+            term: {
+              cluster_uuid: {
+                value: clusterUuid,
               },
+            },
+          },
+          {
+            range: {
+              timestamp: {
+                gte: 'now-1h',
+              },
+            },
+          },
+          ...filters,
+        ],
+      },
+    },
+    aggs: {
+      uuids: {
+        terms: {
+          field: uuidPath,
+          size,
+        },
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: 2,
             },
           },
         },

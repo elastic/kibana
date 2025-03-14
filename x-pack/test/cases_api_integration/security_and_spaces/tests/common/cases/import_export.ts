@@ -38,7 +38,7 @@ import {
   createCase,
   createComment,
   findCases,
-  getCaseUserActions,
+  findCaseUserActions,
   findAttachments,
 } from '../../../../common/lib/api';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const comment = commentsResponse.comments[0] as unknown as UserCommentAttachmentAttributes;
       expect(comment.comment).to.eql('A comment for my case');
 
-      const userActions = await getCaseUserActions({
+      const { userActions } = await findCaseUserActions({
         supertest: supertestService,
         caseID: findResponse.cases[0].id,
       });
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await expectImportToHaveOneCase(supertestService);
 
-      const userActions = await getCaseUserActions({
+      const { userActions } = await findCaseUserActions({
         supertest: supertestService,
         caseID: 'afeefae0-5cea-11ec-a615-15461784e410',
       });

@@ -116,6 +116,67 @@ describe('create', () => {
         `Failed to create case: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license`
       );
     });
+
+    it('validates with assign+create operations when cases have assignees', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: [
+            {
+              action: 'cases_assign',
+              docType: 'case',
+              ecsType: 'change',
+              name: 'assignCase',
+              savedObjectType: 'cases',
+              verbs: { past: 'updated', present: 'update', progressive: 'updating' },
+            },
+            {
+              action: 'case_create',
+              docType: 'case',
+              ecsType: 'creation',
+              name: 'createCase',
+              savedObjectType: 'cases',
+              verbs: { past: 'created', present: 'create', progressive: 'creating' },
+            },
+          ],
+        })
+      );
+    });
+
+    it('validates with only create operation when cases have no assignees', async () => {
+      await create({ ...theCase, assignees: [] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: {
+            action: 'case_create',
+            docType: 'case',
+            ecsType: 'creation',
+            name: 'createCase',
+            savedObjectType: 'cases',
+            verbs: { past: 'created', present: 'create', progressive: 'creating' },
+          },
+        })
+      );
+    });
+
+    it('should filter out empty assignees', async () => {
+      await create(
+        { ...theCase, assignees: [{ uid: '' }, { uid: '1' }] },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            assignees: [{ uid: '1' }],
+          }),
+        })
+      );
+    });
   });
 
   describe('Attributes', () => {

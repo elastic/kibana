@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, Suspense, useCallback } from 'react';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -40,12 +40,12 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
+  renderAlertsTable,
 }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
   useReadonlyHeader();
-  const location = useLocation();
 
   const onCreateCaseSuccess: CreateCaseFormProps['onSuccess'] = useCallback(
     async ({ id }) => navigateToCaseView({ detailName: id }),
@@ -81,11 +81,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
-        <Route
-          key={location.key}
-          exact
-          path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}
-        >
+        <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <CaseViewLazy
               actionsNavigation={actionsNavigation}
@@ -95,6 +91,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               onAlertsTableLoaded={onAlertsTableLoaded}
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
+              renderAlertsTable={renderAlertsTable}
             />
           </Suspense>
         </Route>

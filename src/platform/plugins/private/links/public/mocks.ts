@@ -58,9 +58,9 @@ export const getMockLinksParentApi = (
     to: 'now',
   }),
   timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
-  savedObjectId: new BehaviorSubject<string | undefined>('999'),
-  hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
-  panelTitle: new BehaviorSubject<string | undefined>('My Dashboard'),
-  panelDescription: new BehaviorSubject<string | undefined>(''),
+  savedObjectId$: new BehaviorSubject<string | undefined>('999'),
+  hideTitle$: new BehaviorSubject<boolean | undefined>(false),
+  title$: new BehaviorSubject<string | undefined>('My Dashboard'),
+  description$: new BehaviorSubject<string | undefined>(''),
   getSerializedStateForChild: () => ({ rawState: serializedState, references }),
 });

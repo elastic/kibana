@@ -11,7 +11,7 @@ import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { Logger } from '@kbn/core/server';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { MlClient } from '../ml_client';
-import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { AnnotationService } from '../../models/annotation_service/annotation';
 import type { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 import type { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';

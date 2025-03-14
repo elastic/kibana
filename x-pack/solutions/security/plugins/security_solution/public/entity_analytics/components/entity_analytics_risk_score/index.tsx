@@ -8,22 +8,25 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPanelKey } from '../../../flyout/entity_details/host_right';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import {
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../flyout/entity_details/shared/constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { getRiskScoreColumns } from './columns';
 import { LastUpdatedAt } from '../../../common/components/last_updated_at';
 import { HeaderSection } from '../../../common/components/header_section';
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import {
+  type EntityType,
+  EntityTypeToIdentifierField,
+} from '../../../../common/entity_analytics/types';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { StyledBasicTable } from '../styled_basic_table';
-import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
-import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
-import { useRefetchQueries } from '../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../common/components/loader';
 import { Panel } from '../../../common/components/panel';
 import { useEntityInfo } from './use_entity';
@@ -35,20 +38,26 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
-import { UserPanelKey } from '../../../flyout/entity_details/user_right';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
+import { RiskScoreHeaderTitle } from '../risk_score_header_title';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
-const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
+const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
+  riskEntity,
+}: {
+  riskEntity: T;
+}) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const entity = useEntityInfo(riskEntity);
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
   const { telemetry } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
+  const entityNameField = EntityTypeToIdentifierField[riskEntity];
 
   const openEntityOnAlertsPage = useCallback(
     (entityName: string) => {
@@ -57,23 +66,27 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         {
           title: getRiskEntityTranslation(riskEntity),
           selectedOptions: [entityName],
-          fieldName: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+          fieldName: entityNameField,
         },
       ]);
     },
-    [telemetry, riskEntity, openAlertsPageWithFilters]
+    [telemetry, riskEntity, openAlertsPageWithFilters, entityNameField]
   );
 
   const openEntityOnExpandableFlyout = useCallback(
     (entityName: string) => {
-      openRightPanel({
-        id: riskEntity === RiskScoreEntity.host ? HostPanelKey : UserPanelKey,
-        params: {
-          [riskEntity === RiskScoreEntity.host ? 'hostName' : 'userName']: entityName,
-          contextID: ENTITY_RISK_SCORE_TABLE_ID,
-          scopeId: ENTITY_RISK_SCORE_TABLE_ID,
-        },
-      });
+      const panelKey = EntityPanelKeyByType[riskEntity];
+      const panelParam = EntityPanelParamByType[riskEntity];
+      if (panelKey && panelParam) {
+        openRightPanel({
+          id: panelKey,
+          params: {
+            [panelParam]: entityName,
+            contextID: ENTITY_RISK_SCORE_TABLE_ID,
+            scopeId: ENTITY_RISK_SCORE_TABLE_ID,
+          },
+        });
+      }
     },
     [openRightPanel, riskEntity]
   );
@@ -126,14 +139,14 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     deleteQuery,
     inspect: inspectKpi,
   });
+
   const {
     data,
     loading: isTableLoading,
     inspect,
     refetch,
-    isDeprecated,
     isAuthorized,
-    isModuleEnabled,
+    hasEngineBeenInstalled,
   } = useRiskScore({
     filterQuery,
     skip: !toggleStatus,
@@ -159,18 +172,13 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     setUpdatedAt(Date.now());
   }, [isTableLoading, isKpiLoading]); // Update the time when data loads
 
-  const refreshPage = useRefetchQueries();
-
-  const privileges = useMissingRiskEnginePrivileges(['read']);
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   if (!isAuthorized) {
     return null;
   }
 
-  const status = {
-    isDisabled: !isModuleEnabled && !isTableLoading,
-    isDeprecated: isDeprecated && !isTableLoading,
-  };
+  const isDisabled = !hasEngineBeenInstalled && !isTableLoading;
 
   if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
     return (
@@ -180,19 +188,12 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     );
   }
 
-  if (status.isDisabled || status.isDeprecated) {
-    return (
-      <EnableRiskScore
-        {...status}
-        entityType={riskEntity}
-        refetch={refreshPage}
-        timerange={timerange}
-      />
-    );
+  if (isDisabled) {
+    return <EnableRiskScore isDisabled={isDisabled} entityType={riskEntity} />;
   }
 
-  if (isModuleEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={riskEntity} refetch={refreshPage} />;
+  if (hasEngineBeenInstalled && selectedSeverity.length === 0 && data && data.length === 0) {
+    return <RiskScoresNoDataDetected entityType={riskEntity} />;
   }
 
   return (
@@ -221,7 +222,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
             <EuiFlexItem grow={false}>
               <ChartContent
                 dataExists={data && data.length > 0}
-                kpiQueryId={entity.kpiQueryId}
+                kpiQueryId={entity.kpiQueryId ?? ''}
                 riskEntity={riskEntity}
                 severityCount={severityCount}
                 timerange={timerange}
@@ -230,7 +231,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledBasicTable
-                responsive={false}
+                responsiveBreakpoint={false}
                 items={data ?? []}
                 columns={columns}
                 loading={isTableLoading}

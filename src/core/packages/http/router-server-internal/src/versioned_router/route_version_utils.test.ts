@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
 import { hapiMocks } from '@kbn/hapi-mocks';
-import { CoreKibanaRequest } from '../request';
-import { passThroughValidation } from './core_versioned_route';
 import {
   isValidRouteVersion,
   isAllowedPublicVersion,
@@ -65,9 +62,8 @@ describe('isValidRouteVersion', () => {
   });
 });
 
-function getRequest(arg: { headers?: any; query?: any } = {}): KibanaRequest {
-  const request = hapiMocks.createRequest({ ...arg });
-  return CoreKibanaRequest.from(request, passThroughValidation);
+function getRequest(arg: { headers?: any; query?: any } = {}) {
+  return hapiMocks.createRequest({ ...arg });
 }
 
 describe('readVersion', () => {

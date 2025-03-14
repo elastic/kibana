@@ -49,7 +49,7 @@ export const createAnnotationActions = ({
   const actions = [];
 
   const savingToLibraryPermitted = Boolean(
-    core.application.capabilities.visualize.save && isSaveable
+    core.application.capabilities.visualize_v2.save && isSaveable
   );
 
   if (savingToLibraryPermitted) {

@@ -8,6 +8,7 @@
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../types';
 import * as i18n from './translations';
@@ -72,12 +73,15 @@ const END = 10 as const;
 type SubStep = 1 | 2 | 3 | typeof END;
 export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
   ({ migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
+    const { telemetry } = useKibana().services.siemMigrations.rules;
     const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 3 : 1);
 
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-    }, []);
+      telemetry.reportSetupRulesQueryCopied({ migrationId: migrationStats?.id });
+    }, [telemetry, migrationStats?.id]);
+
     const copyStep = useCopyExportQueryStep({ status: getStatus(1, subStep), onCopied });
 
     // Upload rules step

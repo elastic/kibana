@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
-import { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
+import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
+import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import { CombinedSummarizedAlerts } from '../../../types';
-import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common';
-import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
+import type { CombinedSummarizedAlerts } from '../../../types';
+import type { RuleTypeState, RuleAlertData } from '../../../../common';
+import { parseDuration } from '../../../../common';
+import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
@@ -22,7 +23,7 @@ import {
   logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
-import {
+import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
   GetActionsToScheduleOpts,
@@ -81,13 +82,13 @@ export class SummaryActionScheduler<
   }
 
   public async getActionsToSchedule({
-    activeCurrentAlerts,
-    recoveredCurrentAlerts,
+    activeAlerts,
+    recoveredAlerts,
     throttledSummaryActions,
   }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
     ActionsToSchedule[]
   > {
-    const alerts = { ...activeCurrentAlerts, ...recoveredCurrentAlerts };
+    const alerts = { ...activeAlerts, ...recoveredAlerts };
     const executables: Array<{
       action: RuleAction;
       summarizedAlerts: CombinedSummarizedAlerts;
@@ -206,7 +207,9 @@ export class SummaryActionScheduler<
         actionToEnqueue: formatActionToEnqueue({
           action: actionToRun,
           apiKey: this.context.apiKey,
+          apiKeyId: this.context.apiKeyId,
           executionId: this.context.executionId,
+          priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,
           ruleId: this.context.rule.id,
           ruleTypeId: this.context.ruleType.id,

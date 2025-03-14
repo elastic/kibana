@@ -34,11 +34,17 @@ export interface Usage {
   agents: AgentUsage;
   packages: PackageUsage[];
   fleet_server: FleetServerUsage;
+  agentless_agents: AgentUsage;
 }
 
 export interface FleetUsage extends Usage, AgentData {
   fleet_server_config: { policies: Array<{ input_config: any }> };
-  agent_policies: { count: number; output_types: string[] };
+  agent_policies: {
+    count: number;
+    output_types: string[];
+    count_with_global_data_tags: number;
+    count_with_non_default_space: number;
+  };
   agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
@@ -55,6 +61,7 @@ export const fetchFleetUsage = async (
   if (!soClient || !esClient) {
     return;
   }
+
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
@@ -69,18 +76,20 @@ export const fetchFleetUsage = async (
     license_issued_to: (await esClient.license.get()).license.issued_to,
     deployment_id: appContextService.getCloud()?.deploymentId,
     integrations_details: await getIntegrationsDetails(soClient),
+    agentless_agents: await getAgentUsage(soClient, esClient, true),
   };
   return usage;
 };
 
 // used by kibana daily collector
-const fetchUsage = async (core: CoreSetup, config: FleetConfigType) => {
+const fetchUsage = async (core: CoreSetup, config: FleetConfigType): Promise<Usage> => {
   const [soClient, esClient] = await getInternalClients(core);
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
+    agentless_agents: await getAgentUsage(soClient, esClient, true),
   };
   return usage;
 };
@@ -228,6 +237,56 @@ export function registerFleetUsageCollector(
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           enabled: { type: 'boolean' },
+        },
+      },
+      agentless_agents: {
+        total_enrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents, in any state',
+          },
+        },
+        healthy: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in a healthy state',
+          },
+        },
+        unhealthy: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in an unhealthy state',
+          },
+        },
+        updating: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents in an updating state',
+          },
+        },
+        offline: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of enrolled agents currently offline',
+          },
+        },
+        inactive: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of of enrolled agents currently inactive',
+          },
+        },
+        unenrolled: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents currently unenrolled',
+          },
+        },
+        total_all_statuses: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of agents in any state, both enrolled and inactive',
+          },
         },
       },
     },

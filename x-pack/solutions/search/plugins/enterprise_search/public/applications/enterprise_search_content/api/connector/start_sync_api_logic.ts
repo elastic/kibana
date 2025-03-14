@@ -9,20 +9,14 @@ import { i18n } from '@kbn/i18n';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
-import { CrawlRequestOverrides } from '../../components/search_index/crawler/crawler_logic';
 
 export interface StartSyncArgs {
   connectorId: string;
-  nextSyncConfig?: CrawlRequestOverrides;
 }
 
-export const startSync = async ({ connectorId, nextSyncConfig }: StartSyncArgs) => {
+export const startSync = async ({ connectorId }: StartSyncArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/start_sync`;
-  return await HttpLogic.values.http.post(route, {
-    // ConnectorConfiguration type is a record of key-value pair where value is a string
-    // To store nextSyncConfig into ConnectorConfiguration the object should be casted to string
-    body: JSON.stringify({ nextSyncConfig: JSON.stringify(nextSyncConfig) }),
-  });
+  return await HttpLogic.values.http.post(route);
 };
 
 export const StartSyncApiLogic = createApiLogic(['start_sync_api_logic'], startSync, {

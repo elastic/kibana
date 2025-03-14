@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchServiceDestinationMetrics } from '../../../../context/time_range_metadata/use_search_service_destination_metrics';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -59,7 +60,7 @@ export function DependencyDetailOperationsList() {
       offset,
     },
   } = useApmParams('/dependencies/operations');
-
+  const { onPageReady } = usePerformanceContext();
   const { core } = useApmPluginContext();
 
   const { isLarge } = useBreakpoints();
@@ -131,6 +132,20 @@ export function DependencyDetailOperationsList() {
       searchServiceDestinationMetrics,
     ]
   );
+
+  useEffect(() => {
+    if (
+      comparisonStatsFetch.status === FETCH_STATUS.SUCCESS &&
+      primaryStatsFetch.status === FETCH_STATUS.SUCCESS
+    ) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [onPageReady, primaryStatsFetch, comparisonStatsFetch, rangeFrom, rangeTo]);
 
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [
     {

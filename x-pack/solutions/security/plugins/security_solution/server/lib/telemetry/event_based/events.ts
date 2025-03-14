@@ -5,12 +5,12 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
@@ -145,6 +145,27 @@ export const FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Configured interval for the field retention enrich policy task',
+      },
+    },
+  },
+};
+
+export const ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT: EventTypeOpts<{
+  duration: number;
+  interval: string;
+}> = {
+  eventType: 'entity_store_data_view_refresh_execution_event',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the entity store data view refresh execution time',
+      },
+    },
+    interval: {
+      type: 'keyword',
+      _meta: {
+        description: 'Configured interval for the entity store data view refresh task',
       },
     },
   },
@@ -680,6 +701,285 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
   },
 };
 
+export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+}> = {
+  eventType: 'siem_migrations_migration_success',
+  schema: {
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  duration: number;
+  translationResult: string;
+  prebuiltMatch: boolean;
+}> = {
+  eventType: 'siem_migrations_rule_translation_success',
+  schema: {
+    translationResult: {
+      type: 'keyword',
+      _meta: {
+        description: 'Describes if the translation was full or partial',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    prebuiltMatch: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether a prebuilt rule was matched',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  preFilterRuleNames: string[];
+  preFilterRuleCount: number;
+  postFilterRuleName: string;
+  postFilterRuleCount: number;
+}> = {
+  eventType: 'siem_migrations_prebuilt_rules_match',
+  schema: {
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    preFilterRuleNames: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of matched rules from Semantic search before LLM filtering',
+        },
+      },
+    },
+    preFilterRuleCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of rules matched before LLM filtering',
+      },
+    },
+    postFilterRuleName: {
+      type: 'keyword',
+      _meta: {
+        description: 'List of matched rules from Semantic search after LLM filtering',
+      },
+    },
+    postFilterRuleCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of rules matched before LLM filtering',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
+  model: string;
+  migrationId: string;
+  preFilterIntegrationNames: string[];
+  preFilterIntegrationCount: number;
+  postFilterIntegrationName: string;
+  postFilterIntegrationCount: number;
+}> = {
+  eventType: 'siem_migrations_integration_match',
+  schema: {
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    preFilterIntegrationNames: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of matched integrations from Semantic search before LLM filtering',
+        },
+      },
+    },
+    preFilterIntegrationCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of integrations matched before LLM filtering',
+      },
+    },
+    postFilterIntegrationName: {
+      type: 'keyword',
+      _meta: {
+        description: 'List of matched integrations from Semantic search after LLM filtering',
+      },
+    },
+    postFilterIntegrationCount: {
+      type: 'long',
+      _meta: {
+        description: 'Count of integrations matched before LLM filtering',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
+  model: string;
+  error: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+}> = {
+  eventType: 'siem_migrations_migration_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for the migration failure',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
+export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
+  model: string;
+  error: string;
+  migrationId: string;
+}> = {
+  eventType: 'siem_migrations_rule_translation_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for the translation failure',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -690,6 +990,7 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
+  ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
@@ -697,4 +998,10 @@ export const events = [
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
+  SIEM_MIGRATIONS_MIGRATION_SUCCESS,
+  SIEM_MIGRATIONS_MIGRATION_FAILURE,
+  SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
+  SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
+  SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
+  SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
 ];

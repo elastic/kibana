@@ -36,7 +36,7 @@ export function CardFooterContent() {
                 <LegacyAPMLink path="/services">
                   {i18n.translate(
                     'xpack.apm.settings.schema.success.returnText.serviceInventoryLink',
-                    { defaultMessage: 'Service inventory' }
+                    { defaultMessage: 'Service Inventory' }
                   )}
                 </LegacyAPMLink>
               ),

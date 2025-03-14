@@ -6,14 +6,13 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useLocalStorage, clearUseLocalStorageCache } from './use_local_storage';
+import { useLocalStorage } from './use_local_storage';
 
 describe('useLocalStorage', () => {
   const key = 'testKey';
   const defaultValue: string = 'defaultValue';
 
   beforeEach(() => {
-    clearUseLocalStorageCache();
     localStorage.clear();
   });
 

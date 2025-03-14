@@ -10,7 +10,7 @@ import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesUnifiedSearch,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -41,7 +41,7 @@ export interface AnomalySwimLaneComponentApi {
 export type AnomalySwimLaneEmbeddableApi = MlEmbeddableBaseApi<AnomalySwimLaneEmbeddableState> &
   PublishesDataViews &
   PublishesUnifiedSearch &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   HasEditCapabilities &
   AnomalySwimLaneComponentApi;
 

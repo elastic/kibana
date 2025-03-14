@@ -14,7 +14,7 @@
         "tags": [],
         "label": "pluginsServiceMock",
         "description": [],
-        "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+        "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<PluginsServiceContract>"
             ],
-            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -45,7 +45,7 @@
               "() => ",
               "InternalPluginsServiceSetup"
             ],
-            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -62,7 +62,7 @@
               "() => ",
               "InternalPluginsServiceSetup"
             ],
-            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -88,7 +88,7 @@
               "PluginInitializerContext",
               "<object>"
             ],
-            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -103,7 +103,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+                "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -125,7 +125,7 @@
                   },
                   " | undefined; }"
                 ],
-                "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+                "path": "src/core/packages/plugins/browser-mocks/src/plugins_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

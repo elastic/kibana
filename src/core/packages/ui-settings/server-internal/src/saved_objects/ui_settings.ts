@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { migrations } from './migrations';
+import { migrations, modelVersions } from './migrations';
 
 /**
  * The `config` object type contains many attributes that are defined by consumers.
@@ -43,6 +43,7 @@ export const uiSettingsType: SavedObjectsType = {
     },
   },
   migrations,
+  modelVersions,
 };
 
 export const uiSettingsGlobalType: SavedObjectsType = {

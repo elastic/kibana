@@ -28,16 +28,16 @@ const scrollToCard = (cardId: OnboardingCardId) => {
  * This hook manages the expanded card id state in the LocalStorage and the hash in the URL.
  */
 export const useExpandedCard = () => {
-  const { setCardDetail } = useUrlDetail();
+  const { setCard } = useUrlDetail();
   const { hash } = useLocation();
   const cardIdFromHash = useMemo(() => getCardIdFromHash(hash), [hash]);
 
-  const [cardId, setCardId] = useState<OnboardingCardId | null>(null);
+  const [expandedCardId, _setExpandedCardId] = useState<OnboardingCardId | null>(null);
 
   // This effect implements auto-scroll in the initial render.
   useEffect(() => {
     if (cardIdFromHash) {
-      setCardId(cardIdFromHash);
+      _setExpandedCardId(cardIdFromHash);
       scrollToCard(cardIdFromHash);
     }
     // cardIdFromHash is only defined once on page load
@@ -46,14 +46,14 @@ export const useExpandedCard = () => {
 
   const setExpandedCardId = useCallback<SetExpandedCardId>(
     (newCardId, options) => {
-      setCardId(newCardId);
-      setCardDetail(newCardId);
+      _setExpandedCardId(newCardId);
+      setCard(newCardId);
       if (newCardId != null && options?.scroll) {
         scrollToCard(newCardId);
       }
     },
-    [setCardDetail]
+    [setCard]
   );
 
-  return { expandedCardId: cardId, setExpandedCardId };
+  return { expandedCardId, setExpandedCardId };
 };

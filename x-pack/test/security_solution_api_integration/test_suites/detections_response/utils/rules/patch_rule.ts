@@ -34,7 +34,7 @@ export const patchRule = async (
     log.error(
       `Did not get an expected 200 "ok" when patching a rule (patchRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
-      )}, status: ${JSON.stringify(response.status)}`
+      )}, status: ${JSON.stringify(response.status)}, body: ${JSON.stringify(response.body)}`
     );
   }
   return response.body;

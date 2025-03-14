@@ -35,18 +35,6 @@ export function buildMessage(params: BuildMessageProps): Message {
   );
 }
 
-export function buildSystemMessage(
-  params?: Omit<BuildMessageProps, 'message'> & {
-    message: DeepPartial<Omit<Message['message'], 'role'>>;
-  }
-) {
-  return buildMessage(
-    merge({}, params, {
-      message: { role: MessageRole.System },
-    })
-  );
-}
-
 export function buildUserMessage(
   params?: Omit<BuildMessageProps, 'message'> & {
     message?: DeepPartial<Omit<Message['message'], 'role'>>;
@@ -117,7 +105,8 @@ export function buildConversation(params?: Partial<Conversation>): Conversation 
       title: '',
       last_updated: '',
     },
-    messages: [buildSystemMessage()],
+    systemMessage: '',
+    messages: [],
     labels: {},
     numeric_labels: {},
     namespace: '',

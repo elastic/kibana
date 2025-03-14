@@ -63,6 +63,8 @@ describe('GetSLO', () => {
         name: 'irrelevant',
         description: 'irrelevant',
         budgetingMethod: 'occurrences',
+        createdBy: 'irrelevant',
+        updatedBy: 'irrelevant',
         indicator: {
           params: {
             environment: 'irrelevant',

@@ -12,7 +12,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
@@ -59,7 +59,7 @@ describe('InferenceConnector', () => {
       services,
     });
 
-    it('uses the completion task_type is supplied', async () => {
+    it('uses the chat_completion task_type is supplied', async () => {
       mockEsClient.transport.request.mockResolvedValue({
         body: Readable.from([
           `data: {"id":"chatcmpl-AbLKRuRMZCAcMMQdl96KMTUgAfZNg","choices":[{"delta":{"content":" you"},"index":0}],"model":"gpt-4o-2024-08-06","object":"chat.completion.chunk"}\n\n`,
@@ -70,6 +70,7 @@ describe('InferenceConnector', () => {
 
       const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        telemetryMetadata: { pluginId: 'security_ai_assistant' },
       });
       expect(mockEsClient.transport.request).toBeCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
@@ -84,9 +85,15 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+          },
+        }
       );
       expect(response.choices[0].message.content).toEqual(' you');
     });
@@ -237,6 +244,7 @@ describe('InferenceConnector', () => {
       });
       streamMock.complete();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockEsClient.inference.inference.mockResolvedValue(streamMock.transform as any);
     };
 
@@ -287,9 +295,12 @@ describe('InferenceConnector', () => {
             n: undefined,
           },
           method: 'POST',
-          path: '_inference/completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+        }
       );
     });
 
@@ -309,9 +320,13 @@ describe('InferenceConnector', () => {
         {
           body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
           method: 'POST',
-          path: '_inference/completion/test/_unified',
+          path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true, signal }
+        {
+          asStream: true,
+          meta: true,
+          signal,
+        }
       );
     });
 

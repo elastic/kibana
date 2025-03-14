@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiFlexGroup,
   EuiHeader,
   EuiHeaderSection,
   EuiHeaderSectionItem,
@@ -19,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -45,7 +43,7 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
-import { HeaderExtension } from './header_extension';
+import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
@@ -56,7 +54,7 @@ export interface HeaderProps {
   headerBanner$: Observable<ChromeUserBanner | undefined>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  breadcrumbsAppendExtension$: Observable<ChromeBreadcrumbsAppendExtension | undefined>;
+  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   kibanaDocLink: string;
@@ -88,7 +86,7 @@ export function Header({
   basePath,
   onIsLockedUpdate,
   homeHref,
-  breadcrumbsAppendExtension$,
+  breadcrumbsAppendExtensions$,
   globalHelpExtensionMenuLinks$,
   customBranding$,
   isServerless,
@@ -96,7 +94,6 @@ export function Header({
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
-  const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
   const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
@@ -206,24 +203,11 @@ export function Header({
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
-
-            {!breadcrumbsAppendExtension ? (
-              Breadcrumbs
-            ) : (
-              <EuiFlexGroup
-                responsive={false}
-                wrap={false}
-                alignItems={'center'}
-                className={'header__breadcrumbsWithExtensionContainer'}
-                gutterSize={'none'}
-              >
-                {Breadcrumbs}
-                <HeaderExtension
-                  extension={breadcrumbsAppendExtension.content}
-                  containerClassName={'header__breadcrumbsAppendExtension'}
-                />
-              </EuiFlexGroup>
-            )}
+            <BreadcrumbsWithExtensionsWrapper
+              breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
+            >
+              {Breadcrumbs}
+            </BreadcrumbsWithExtensionsWrapper>
 
             <HeaderBadge badge$={observables.badge$} />
 

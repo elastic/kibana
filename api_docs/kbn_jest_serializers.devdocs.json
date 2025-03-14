@@ -29,7 +29,7 @@
         "signature": [
           "(rootPath: string, replacement: string) => { test: (value: any) => boolean; serialize: (value: string) => string; }"
         ],
-        "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
+        "path": "src/platform/packages/private/kbn-jest-serializers/src/absolute_path_serializer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -58,7 +58,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,7 +77,7 @@
         "signature": [
           "(Class: Function, name: string | ((instance: any) => string) | undefined) => { test: (v: any) => boolean; serialize: (v: any) => string; }"
         ],
-        "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
+        "path": "src/platform/packages/private/kbn-jest-serializers/src/any_instance_serizlizer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,7 +91,7 @@
             "signature": [
               "Function"
             ],
-            "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
             "signature": [
               "string | ((instance: any) => string) | undefined"
             ],
-            "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -125,7 +125,7 @@
         "signature": [
           "(test: (v: any) => boolean, print: (v: any, printRaw: (v: string) => RawPrint) => string | RawPrint) => { test: (v: any) => boolean; serialize: (v: any, ...rest: any[]) => any; }"
         ],
-        "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
+        "path": "src/platform/packages/private/kbn-jest-serializers/src/recursive_serializer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,7 +139,7 @@
             "signature": [
               "(v: any) => boolean"
             ],
-            "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,7 +154,7 @@
             "signature": [
               "(v: any, printRaw: (v: string) => RawPrint) => string | RawPrint"
             ],
-            "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -173,7 +173,7 @@
         "signature": [
           "(toReplace: string | RegExp, replaceWith: string | Replacer) => { test: (v: any) => boolean; serialize: (v: any, ...rest: any[]) => any; }"
         ],
-        "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
+        "path": "src/platform/packages/private/kbn-jest-serializers/src/replace_serializer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,7 +187,7 @@
             "signature": [
               "string | RegExp"
             ],
-            "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,7 +202,7 @@
             "signature": [
               "string | Replacer"
             ],
-            "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
+            "path": "src/platform/packages/private/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -221,7 +221,7 @@
         "signature": [
           "() => { test: (v: any) => boolean; serialize: (v: any, ...rest: any[]) => any; }"
         ],
-        "path": "packages/kbn-jest-serializers/src/strip_ansi_serializer.ts",
+        "path": "src/platform/packages/private/kbn-jest-serializers/src/strip_ansi_serializer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

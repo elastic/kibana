@@ -24,30 +24,26 @@ export const EntityActions = ({ entity, setShowActions }: Props) => {
     ? `inventoryEntityActionsButton-${entity.entityDisplayName}`
     : 'inventoryEntityActionsButton';
 
-  const { getDiscoverEntitiesRedirectUrl, isEntityDefinitionLoading } = useDiscoverRedirect(entity);
+  const { getDiscoverEntitiesRedirectUrl } = useDiscoverRedirect(entity);
   const discoverUrl = getDiscoverEntitiesRedirectUrl();
 
-  const actions: React.ReactElement[] = [];
+  const actions = [
+    <EuiContextMenuItem
+      data-test-subj="inventoryEntityActionExploreInDiscover"
+      key={`exploreInDiscover-${entity.entityDisplayName}`}
+      color="text"
+      icon="discoverApp"
+      href={discoverUrl}
+    >
+      {i18n.translate('xpack.inventory.entityActions.exploreInDiscoverLink', {
+        defaultMessage: 'Explore in Discover',
+      })}
+    </EuiContextMenuItem>,
+  ];
 
-  if (!discoverUrl && !isEntityDefinitionLoading) {
+  if (!discoverUrl) {
     setShowActions(false);
     return null;
-  }
-
-  if (!isEntityDefinitionLoading) {
-    actions.push(
-      <EuiContextMenuItem
-        data-test-subj="inventoryEntityActionExploreInDiscover"
-        key={`exploreInDiscover-${entity.entityDisplayName}`}
-        color="text"
-        icon="discoverApp"
-        href={discoverUrl}
-      >
-        {i18n.translate('xpack.inventory.entityActions.exploreInDiscoverLink', {
-          defaultMessage: 'Explore in Discover',
-        })}
-      </EuiContextMenuItem>
-    );
   }
 
   return (
@@ -65,7 +61,6 @@ export const EntityActions = ({ entity, setShowActions }: Props) => {
           iconType="boxesHorizontal"
           color="text"
           onClick={togglePopover}
-          isLoading={isEntityDefinitionLoading}
         />
       }
       closePopover={closePopover}

@@ -18,6 +18,7 @@ import {
   downloadToDisk,
   openZipArchive,
   loadMappingFile,
+  loadManifestFile,
   ensureDefaultElserDeployed,
   type ZipArchive,
 } from './utils';
@@ -158,19 +159,25 @@ export class PackageInstaller {
 
       validateArtifactArchive(zipArchive);
 
-      const mappings = await loadMappingFile(zipArchive);
+      const [manifest, mappings] = await Promise.all([
+        loadManifestFile(zipArchive),
+        loadMappingFile(zipArchive),
+      ]);
 
+      const manifestVersion = manifest.formatVersion;
       const indexName = getProductDocIndexName(productName);
 
       await createIndex({
         indexName,
         mappings,
+        manifestVersion,
         esClient: this.esClient,
         log: this.log,
       });
 
       await populateIndex({
         indexName,
+        manifestVersion,
         archive: zipArchive,
         esClient: this.esClient,
         log: this.log,

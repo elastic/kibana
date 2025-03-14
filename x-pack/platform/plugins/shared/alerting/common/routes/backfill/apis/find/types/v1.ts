@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { findQuerySchemaV1, findResponseSchemaV1 } from '..';
+import type { findQuerySchemaV1, findResponseSchemaV1 } from '..';
 
 export type FindBackfillRequestQuery = TypeOf<typeof findQuerySchemaV1>;
 export type FindBackfillResponseBody = TypeOf<typeof findResponseSchemaV1>;

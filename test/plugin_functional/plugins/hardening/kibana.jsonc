@@ -5,7 +5,7 @@
   "plugin": {
     "id": "hardeningPlugin",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": [
       "hardening_plugin"
     ]

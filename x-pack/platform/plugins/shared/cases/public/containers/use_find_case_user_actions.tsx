@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
+import type { CaseUserActionTypeWithAll, InternalFindCaseUserActions } from '../../common/ui/types';
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -25,7 +25,7 @@ export const useFindCaseUserActions = (
 ) => {
   const { showErrorToast } = useCasesToast();
 
-  return useQuery<FindCaseUserActions, ServerError>(
+  return useQuery<InternalFindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),
     async ({ signal }) => findCaseUserActions(caseId, params, signal),
     {

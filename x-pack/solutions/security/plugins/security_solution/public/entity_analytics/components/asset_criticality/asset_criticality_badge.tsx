@@ -10,10 +10,11 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { CRITICALITY_LEVEL_TITLE } from './translations';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 
+// below will be updated with new severity color palette & shared security wide severity colors hook creation
 export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevelWithUnassigned, string> = {
   extreme_impact: '#E7664C',
   high_impact: '#DA8B45',
-  medium_impact: 'D6BF57',
+  medium_impact: '#D6BF57',
   low_impact: '#54B399',
   unassigned: euiLightVars.euiColorMediumShade,
 };

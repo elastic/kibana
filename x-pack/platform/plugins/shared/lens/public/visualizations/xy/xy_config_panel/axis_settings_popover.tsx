@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiSwitch, IconType, EuiFormRow, EuiButtonGroup, EuiSelect } from '@elastic/eui';
+import { EuiSwitch, IconType, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
@@ -24,14 +24,14 @@ import {
   ToolbarTitleSettings,
   AxisBoundsControl,
   AxisTicksSettings,
+  AxisLabelOrientationSelector,
+  allowedOrientations,
 } from '../../../shared_components';
-import { XYLayerConfig, AxesSettingsConfig } from '../types';
-
+import type { Orientation, AxesSettingsConfigKeys } from '../../../shared_components';
+import { XYLayerConfig } from '../types';
 import './axis_settings_popover.scss';
 import { validateExtent } from '../../../shared_components/axis/extent/helpers';
 import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
-
-type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
 export interface AxisSettingsPopoverProps {
   /**
@@ -186,33 +186,6 @@ const popoverConfig = (
       };
   }
 };
-const axisOrientationOptions: Array<{
-  id: string;
-  value: 0 | -90 | -45;
-  label: string;
-}> = [
-  {
-    id: 'xy_axis_orientation_horizontal',
-    value: 0,
-    label: i18n.translate('xpack.lens.xyChart.axisOrientation.horizontal', {
-      defaultMessage: 'Horizontal',
-    }),
-  },
-  {
-    id: 'xy_axis_orientation_vertical',
-    value: -90,
-    label: i18n.translate('xpack.lens.xyChart.axisOrientation.vertical', {
-      defaultMessage: 'Vertical',
-    }),
-  },
-  {
-    id: 'xy_axis_orientation_angled',
-    value: -45,
-    label: i18n.translate('xpack.lens.xyChart.axisOrientation.angled', {
-      defaultMessage: 'Angled',
-    }),
-  },
-];
 
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
@@ -305,30 +278,17 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         isAxisLabelVisible={areTickLabelsVisible}
       />
       {!useMultilayerTimeAxis && areTickLabelsVisible && (
-        <EuiFormRow
-          display="columnCompressed"
-          fullWidth
-          label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
-            defaultMessage: 'Orientation',
-          })}
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
-              defaultMessage: 'Orientation',
-            })}
-            data-test-subj="lnsXY_axisOrientation_groups"
-            buttonSize="compressed"
-            options={axisOrientationOptions}
-            idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
-            onChange={(optionId) => {
-              const newOrientation = axisOrientationOptions.find(
-                ({ id }) => id === optionId
-              )!.value;
-              setOrientation(axis, newOrientation);
-            }}
-          />
-        </EuiFormRow>
+        <AxisLabelOrientationSelector
+          axis={axis}
+          selectedLabelOrientation={
+            allowedOrientations.includes(orientation as Orientation)
+              ? (orientation as Orientation)
+              : 0 // Default to 0 if the value is not valid
+          }
+          setLabelOrientation={(newOrientation) => {
+            setOrientation(axis, newOrientation);
+          }}
+        />
       )}
       {setEndzoneVisibility && (
         <EuiFormRow

@@ -6,8 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { Agent, PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
@@ -16,12 +20,28 @@ export interface ConnectorMetadata {
   id: string;
   name: string;
   service_type: string;
+  is_deleted: boolean;
 }
+
+export interface PackageConnectorSettings {
+  id: string;
+  name: string;
+  service_type: string;
+}
+
+export type AgentMetadata = Pick<Agent, 'last_checkin_status' | 'id' | 'status'>;
 
 export interface PackagePolicyMetadata {
   package_policy_id: string;
+  package_policy_name: string;
+  package_name: string;
   agent_policy_ids: string[];
-  connector_metadata: ConnectorMetadata;
+  connector_settings: PackageConnectorSettings;
+}
+
+// Agent metadata is only returned when there is an agent associated with the policy
+export interface PackagePolicyAndAgentMetadata extends PackagePolicyMetadata {
+  agent_metadata?: AgentMetadata;
 }
 
 const connectorsInputName = 'connectors-py';
@@ -34,25 +54,35 @@ export class AgentlessConnectorsInfraService {
   private esClient: ElasticsearchClient;
   private packagePolicyService: PackagePolicyClient;
   private agentPolicyService: AgentPolicyServiceInterface;
+  private agentService: AgentService;
 
   constructor(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyService: PackagePolicyClient,
     agentPolicyService: AgentPolicyServiceInterface,
+    agentService: AgentService,
     logger: Logger
   ) {
     this.logger = logger;
     this.soClient = soClient;
     this.esClient = esClient;
     this.packagePolicyService = packagePolicyService;
+    this.agentService = agentService;
     this.agentPolicyService = agentPolicyService;
   }
 
   public getNativeConnectors = async (): Promise<ConnectorMetadata[]> => {
     this.logger.debug(`Fetching all connectors and filtering only to native`);
     const nativeConnectors: ConnectorMetadata[] = [];
-    const allConnectors = await fetchConnectors(this.esClient);
+    const allConnectors = await fetchConnectors(
+      this.esClient,
+      undefined,
+      undefined,
+      undefined,
+      true // includeDeleted
+    );
+
     for (const connector of allConnectors) {
       if (connector.is_native && connector.service_type != null) {
         if (NATIVE_CONNECTOR_DEFINITIONS[connector.service_type] == null) {
@@ -66,6 +96,7 @@ export class AgentlessConnectorsInfraService {
           id: connector.id,
           name: connector.name,
           service_type: connector.service_type,
+          is_deleted: !!connector.deleted,
         });
       }
     }
@@ -91,8 +122,8 @@ export class AgentlessConnectorsInfraService {
               }
 
               if (input.compiled_input.connector_id == null) {
-                this.logger.debug(`Policy ${policy.id} is missing connector_id, skipping`);
-                continue;
+                this.logger.debug(`Policy ${policy.id} is missing connector_id`);
+                // No need to skip, that's fine
               }
 
               if (input.compiled_input.connector_name == null) {
@@ -109,8 +140,10 @@ export class AgentlessConnectorsInfraService {
 
               policiesMetadata.push({
                 package_policy_id: policy.id,
+                package_policy_name: policy.name,
+                package_name: policy.package?.name || '',
                 agent_policy_ids: policy.policy_ids,
-                connector_metadata: {
+                connector_settings: {
                   id: input.compiled_input.connector_id,
                   name: input.compiled_input.connector_name || '',
                   service_type: input.compiled_input.service_type,
@@ -134,6 +167,10 @@ export class AgentlessConnectorsInfraService {
       throw new Error(`Connector id is null or empty`);
     }
 
+    if (connector.is_deleted) {
+      throw new Error(`Connector ${connector.id} has been deleted`);
+    }
+
     if (connector.service_type == null || connector.service_type.trim().length === 0) {
       throw new Error(`Connector ${connector.id} service_type is null or empty`);
     }
@@ -148,11 +185,25 @@ export class AgentlessConnectorsInfraService {
     this.logger.debug(`Latest package version for ${pkgName} is ${pkgVersion}`);
 
     const createdPolicy = await this.agentPolicyService.create(this.soClient, this.esClient, {
-      name: `${connector.service_type} connector: ${connector.id}`,
+      name: `Agentless policy for ${connector.service_type} connector: ${connector.id}`,
       description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
+      global_data_tags: [
+        {
+          name: 'organization',
+          value: 'elastic',
+        },
+        {
+          name: 'division',
+          value: 'engineering',
+        },
+        {
+          name: 'team',
+          value: 'search-extract-and-transform',
+        },
+      ],
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
-      inactivity_timeout: 1209600,
+      inactivity_timeout: 3600,
       is_protected: false,
       supports_agentless: true,
     });
@@ -184,6 +235,7 @@ export class AgentlessConnectorsInfraService {
           streams: [],
         },
       ],
+      supports_agentless: true,
     });
 
     this.logger.info(
@@ -214,6 +266,54 @@ export class AgentlessConnectorsInfraService {
     }
   };
 
+  public getAgentPolicyForConnectorId = async ({
+    connectorId,
+  }: {
+    connectorId: string;
+  }): Promise<PackagePolicyAndAgentMetadata | null> => {
+    const allPolicies = await this.getConnectorPackagePolicies();
+
+    const policies = getPoliciesByConnectorId(allPolicies, connectorId);
+
+    if (!policies || policies.length === 0) {
+      return null;
+    }
+
+    const [policy] = policies;
+
+    if (policy && policy.agent_policy_ids.length > 0) {
+      const policyId = policy!.agent_policy_ids[0];
+
+      const listAgentsResponse = await this.agentService.asInternalUser.listAgents({
+        kuery: `fleet-agents.policy_id:${policyId}`,
+        showInactive: false,
+      });
+
+      if (!listAgentsResponse || listAgentsResponse.agents.length === 0) {
+        // If no agents assigned to policy, just return the policy
+        return policy;
+      } else {
+        if (listAgentsResponse.agents.length > 1) {
+          this.logger.warn(
+            `More than one agent assigned to policy ${policyId} that manages connector with id ${connectorId}`
+          );
+        }
+
+        // Return the first (and only) agentless host associated with this policy
+        return {
+          ...policy,
+          agent_metadata: {
+            id: listAgentsResponse.agents[0].id,
+            last_checkin_status: listAgentsResponse.agents[0].last_checkin_status,
+            status: listAgentsResponse.agents[0].status,
+          },
+        };
+      }
+    }
+
+    return policy;
+  };
+
   private getPackageVersion = async (): Promise<string> => {
     this.logger.debug(`Fetching ${pkgName} version`);
 
@@ -234,20 +334,68 @@ export class AgentlessConnectorsInfraService {
   };
 }
 
-export const getConnectorsWithoutPolicies = (
+export const getConnectorsToDeploy = (
   packagePolicies: PackagePolicyMetadata[],
   connectors: ConnectorMetadata[]
 ): ConnectorMetadata[] => {
-  return connectors.filter(
-    (x) => packagePolicies.filter((y) => y.connector_metadata.id === x.id).length === 0
-  );
+  const results: ConnectorMetadata[] = [];
+
+  for (const connector of connectors) {
+    // Skip deleted connectors
+    if (connector.is_deleted) continue;
+
+    // If no package policies reference this connector by id then it should be deployed
+    if (
+      packagePolicies.every(
+        (packagePolicy) =>
+          connector.id !== packagePolicy.connector_settings.id &&
+          connector.id !== packagePolicy.package_policy_id
+      )
+    ) {
+      results.push(connector);
+    }
+  }
+
+  return results;
 };
 
-export const getPoliciesWithoutConnectors = (
+export const getPoliciesToDelete = (
   packagePolicies: PackagePolicyMetadata[],
   connectors: ConnectorMetadata[]
 ): PackagePolicyMetadata[] => {
+  const results: PackagePolicyMetadata[] = [];
+
+  for (const packagePolicy of packagePolicies) {
+    // If there is a connector that has been soft-deleted for this package policy then this policy should be deleted
+    if (
+      connectors.some(
+        (connector) =>
+          connector.id === packagePolicy.connector_settings.id && connector.is_deleted === true
+      )
+    ) {
+      results.push(packagePolicy);
+    }
+  }
+
+  return results;
+};
+
+export const getPoliciesByConnectorId = (
+  packagePolicies: PackagePolicyMetadata[],
+  connectorId: string
+): PackagePolicyMetadata[] => {
   return packagePolicies.filter(
-    (x) => connectors.filter((y) => y.id === x.connector_metadata.id).length === 0
+    (packagePolicy) =>
+      packagePolicy.connector_settings.id === connectorId ||
+      packagePolicy.package_policy_id === connectorId
+  );
+};
+
+export const getConnectorPolicyId = (
+  packagePolicies: PackagePolicyMetadata[],
+  connectorId: string
+): string[] => {
+  return getPoliciesByConnectorId(packagePolicies, connectorId).map(
+    (policy) => policy.package_policy_id
   );
 };

@@ -13,3 +13,5 @@ export {
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from './backfill';
 export { PLUGIN } from './plugin';
+export { gapStatus } from './gap_status';
+export type { GapStatus } from './gap_status';

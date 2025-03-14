@@ -532,8 +532,8 @@ describe('Lens App', () => {
       it('shows a disabled save button when the user does not have permissions', async () => {
         services.application.capabilities = {
           ...services.application.capabilities,
-          visualize: { save: false, saveQuery: false, show: true },
-          dashboard: {
+          visualize_v2: { save: false, show: true },
+          dashboard_v2: {
             showWriteControls: false,
           },
         };
@@ -804,31 +804,6 @@ describe('Lens App', () => {
         await waitForModalVisible();
         expect(screen.queryByTestId('saveAsNewCheckbox')).not.toBeInTheDocument();
       });
-
-      it('enables Save Query UI when user has app-level permissions', async () => {
-        services.application.capabilities = {
-          ...services.application.capabilities,
-          visualize: { saveQuery: true },
-        };
-
-        await renderApp();
-        expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenLastCalledWith(
-          expect.objectContaining({ saveQueryMenuVisibility: 'allowed_by_app_privilege' }),
-          {}
-        );
-      });
-
-      it('checks global save query permission when user does not have app-level permissions', async () => {
-        services.application.capabilities = {
-          ...services.application.capabilities,
-          visualize: { saveQuery: false },
-        };
-        await renderApp();
-        expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenLastCalledWith(
-          expect.objectContaining({ saveQueryMenuVisibility: 'globally_managed' }),
-          {}
-        );
-      });
     });
   });
 
@@ -854,7 +829,7 @@ describe('Lens App', () => {
     it('should still be enabled even if the user is missing save permissions', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true, createShortUrl: true },
+        visualize_v2: { save: false, show: true, createShortUrl: true },
       };
 
       await renderApp({
@@ -869,7 +844,7 @@ describe('Lens App', () => {
     it('should still be enabled even if the user is missing shortUrl permissions', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: true, saveQuery: false, show: true, createShortUrl: false },
+        visualize_v2: { save: true, show: true, createShortUrl: false },
       };
 
       await renderApp({
@@ -885,7 +860,7 @@ describe('Lens App', () => {
     it('should be disabled if the user is missing shortUrl permissions and visualization is not saveable', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true, createShortUrl: false },
+        visualize_v2: { save: false, show: true, createShortUrl: false },
       };
 
       await renderApp({
@@ -1046,24 +1021,11 @@ describe('Lens App', () => {
   });
 
   describe('saved query handling', () => {
-    it('does not allow saving when the user is missing the saveQuery permission', async () => {
-      services.application.capabilities = {
-        ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true },
-      };
-      await renderApp();
-      expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
-        expect.objectContaining({ saveQueryMenuVisibility: 'globally_managed' }),
-        {}
-      );
-    });
-
     it('persists the saved query ID when the query is saved', async () => {
       await renderApp();
 
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          saveQueryMenuVisibility: 'allowed_by_app_privilege',
           savedQuery: undefined,
           onSaved: expect.any(Function),
           onSavedQueryUpdated: expect.any(Function),
@@ -1320,7 +1282,7 @@ describe('Lens App', () => {
     it('does not confirm if the user is missing save permissions', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true },
+        visualize_v2: { save: false, show: true },
       };
       await renderApp({
         preloadedState: { isSaveable: true },

@@ -90,6 +90,23 @@ export interface DatatableColumnMeta {
   sourceParams?: SerializableRecord;
 }
 
+interface SourceParamsESQL extends Record<string, unknown> {
+  indexPattern: string;
+  sourceField: string;
+  operationType: string;
+  interval?: number;
+}
+
+export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {
+  return (
+    obj &&
+    typeof obj.indexPattern === 'string' &&
+    typeof obj.sourceField === 'string' &&
+    typeof obj.operationType === 'string' &&
+    (typeof obj.interval === 'number' || !obj.interval)
+  );
+}
+
 /**
  * This type represents the shape of a column in a `Datatable`.
  */
@@ -98,6 +115,7 @@ export interface DatatableColumn {
   name: string;
   meta: DatatableColumnMeta;
   isNull?: boolean;
+  variable?: string;
 }
 
 /**

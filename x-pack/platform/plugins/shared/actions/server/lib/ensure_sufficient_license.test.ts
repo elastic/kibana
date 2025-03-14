@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ActionType } from '../types';
+import type { ActionType } from '../types';
 import { ensureSufficientLicense } from './ensure_sufficient_license';
 
 const sampleActionType: ActionType = {
@@ -66,6 +66,7 @@ describe('ensureSufficientLicense()', () => {
         ...sampleActionType,
         // we're faking an invalid value, this requires stripping the typing
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         minimumLicenseRequired: 'foo' as any,
       })
     ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);

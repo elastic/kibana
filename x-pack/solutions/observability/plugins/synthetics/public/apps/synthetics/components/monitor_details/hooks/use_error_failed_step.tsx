@@ -8,7 +8,7 @@
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
 import { asMutableArray } from '../../../../../../common/utils/as_mutable_array';
 import { Ping } from '../../../../../../common/runtime_types';
@@ -23,31 +23,29 @@ export function useErrorFailedStep(checkGroups: string[]) {
   const { data, loading } = useEsSearch(
     {
       index: checkGroups?.length > 0 ? SYNTHETICS_INDEX_PATTERN : '',
-      body: {
-        size: checkGroups.length,
-        query: {
-          bool: {
-            filter: [
-              STEP_END_FILTER,
-              {
-                exists: {
-                  field: 'synthetics.error',
-                },
+      size: checkGroups.length,
+      query: {
+        bool: {
+          filter: [
+            STEP_END_FILTER,
+            {
+              exists: {
+                field: 'synthetics.error',
               },
-              {
-                terms: {
-                  'monitor.check_group': checkGroups,
-                },
+            },
+            {
+              terms: {
+                'monitor.check_group': checkGroups,
               },
-            ] as QueryDslQueryContainer[],
-          },
+            },
+          ] as QueryDslQueryContainer[],
         },
-        sort: asMutableArray([
-          { 'synthetics.step.index': { order: 'asc' } },
-          { '@timestamp': { order: 'asc' } },
-        ] as const),
-        _source: ['synthetics.step', 'synthetics.error', 'monitor.check_group'],
       },
+      sort: asMutableArray([
+        { 'synthetics.step.index': { order: 'asc' } },
+        { '@timestamp': { order: 'asc' } },
+      ] as const),
+      _source: ['synthetics.step', 'synthetics.error', 'monitor.check_group'],
     },
     [lastRefresh, monitorId, checkGroups],
     { name: 'getMonitorErrorFailedStep' }

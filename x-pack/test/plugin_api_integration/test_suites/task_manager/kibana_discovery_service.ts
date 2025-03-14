@@ -17,11 +17,9 @@ export default function createTaskManagementScheduledAtTests({ getService }: Ftr
       {
         index: '.kibana_task_manager',
         size: 100,
-        body: {
-          query: {
-            term: {
-              type: 'background-task-node',
-            },
+        query: {
+          term: {
+            type: 'background-task-node',
           },
         },
       },

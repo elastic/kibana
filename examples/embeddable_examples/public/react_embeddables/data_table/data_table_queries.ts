@@ -60,7 +60,7 @@ export const initializeDataTableQueries = async (
         dataView$.next(defaultDataView);
         return;
       }
-      const dataViewSubscription = dataViewProvider.dataViews.subscribe((dataViews) => {
+      const dataViewSubscription = dataViewProvider.dataViews$.subscribe((dataViews) => {
         dataView$.next(dataViews?.[0] ?? defaultDataView);
       });
       return () => dataViewSubscription.unsubscribe();

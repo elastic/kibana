@@ -20,6 +20,7 @@ import {
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
@@ -35,6 +36,8 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     beforeEach(() => {
+      preventPrebuiltRulesPackageInstallation();
+
       login();
       /* Make sure persisted rules table state is cleared */
       resetRulesTableState();

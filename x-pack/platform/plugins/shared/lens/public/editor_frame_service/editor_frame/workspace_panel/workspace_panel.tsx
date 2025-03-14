@@ -23,7 +23,6 @@ import type {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -81,6 +80,7 @@ import {
 } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
+import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -282,14 +282,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         if (adapters && adapters.tables) {
           dispatchLens(
             onActiveDataChange({
-              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], _index, tables) => {
-                  const id = tables.length === 1 ? defaultLayerId : key;
-                  acc[id] = value as Datatable;
-                  return acc;
-                },
-                {}
-              ),
+              activeData: getActiveDataFromDatatable(defaultLayerId, adapters.tables?.tables),
             })
           );
         }

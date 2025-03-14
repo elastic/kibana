@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
@@ -15,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
 
     services: {
       ...commonFunctionalServices,

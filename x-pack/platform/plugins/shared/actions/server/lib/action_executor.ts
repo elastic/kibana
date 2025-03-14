@@ -6,20 +6,19 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   type AuthenticatedUser,
   type SecurityServiceStart,
-  AnalyticsServiceStart,
-  KibanaRequest,
-  Logger,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
@@ -31,7 +30,7 @@ import {
   validateParams,
   validateSecrets,
 } from './validate_with_schema';
-import {
+import type {
   ActionType,
   ActionTypeConfig,
   ActionTypeExecutorRawResult,
@@ -43,13 +42,13 @@ import {
   InMemoryConnector,
   RawAction,
   Services,
-  UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS,
   UnsecuredServices,
   ValidatorServices,
 } from '../types';
+import { UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionExecutionSource, ActionExecutionSourceType } from './action_execution_source';
-import { RelatedSavedObjects } from './related_saved_objects';
+import type { ActionExecutionSource, ActionExecutionSourceType } from './action_execution_source';
+import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
@@ -418,7 +417,7 @@ export class ActionExecutor {
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
 
-        let validatedParams;
+        let validatedParams: Record<string, unknown>;
         let validatedConfig;
         let validatedSecrets;
         try {
@@ -605,11 +604,14 @@ export class ActionExecutor {
                   prompt_tokens: tokenTracking.prompt_tokens ?? 0,
                   completion_tokens: tokenTracking.completion_tokens ?? 0,
                 });
+
                 analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
                   actionTypeId,
                   total_tokens: tokenTracking.total_tokens ?? 0,
                   prompt_tokens: tokenTracking.prompt_tokens ?? 0,
                   completion_tokens: tokenTracking.completion_tokens ?? 0,
+                  aggregateBy: tokenTracking?.telemetry_metadata?.aggregateBy,
+                  pluginId: tokenTracking?.telemetry_metadata?.pluginId,
                   ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
                     ? { provider: config?.apiProvider }
                     : {}),

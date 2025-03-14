@@ -36,7 +36,12 @@ interface DocumentCountPerIndexBucket {
 
 const createFirehoseOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/firehose/flow',
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'This route has custom authorization logic using Elasticsearch client',
+    },
+  },
   async handler({
     context,
     request,
@@ -95,7 +100,12 @@ const hasFirehoseDataRoute = createObservabilityOnboardingServerRoute({
       stackName: t.string,
     }),
   }),
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Authorization is checked by Elasticsearch client',
+    },
+  },
   async handler(resources): Promise<HasFirehoseDataRouteResponse> {
     const { streamName, stackName } = resources.params.query;
     const { elasticsearch } = await resources.context.core;

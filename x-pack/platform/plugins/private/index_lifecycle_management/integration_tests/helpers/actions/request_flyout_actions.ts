@@ -15,7 +15,6 @@ export const createRequestFlyoutActions = (testBed: TestBed) => {
   const openRequestFlyout = async () => {
     await act(async () => {
       find('requestButton').simulate('click');
-      jest.advanceTimersByTime(0); // Wait for the flyout to open and form validation to run
     });
     component.update();
   };

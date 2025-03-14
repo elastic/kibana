@@ -107,7 +107,9 @@ export class ObservabilityAIAssistantAppPlugin
     const appService = (this.appService = createAppService({
       pluginsStart,
     }));
+
     const isEnabled = appService.isEnabled();
+
     if (isEnabled) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {
@@ -122,7 +124,9 @@ export class ObservabilityAIAssistantAppPlugin
             () => {}
           );
 
-          return () => {};
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
         },
         // right before the user profile
         order: 1001,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type {
@@ -18,7 +18,9 @@ import type {
 } from '../../../../common/options_list';
 import type { DataControlApi } from '../types';
 
-export type OptionsListControlApi = DataControlApi;
+export type OptionsListControlApi = DataControlApi & {
+  setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
+};
 
 export interface OptionsListComponentState
   extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
@@ -37,6 +39,6 @@ export type OptionsListComponentApi = OptionsListControlApi &
   PublishesOptions & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
-    loadMoreSubject: BehaviorSubject<null>;
+    loadMoreSubject: Subject<void>;
     setExclude: (next: boolean | undefined) => void;
   };

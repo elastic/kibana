@@ -100,7 +100,8 @@ function onPackagePolicyDelete({
 
       try {
         await internalESClient.security.invalidateApiKey({
-          body: { ids: [agentConfigApiKeyId, sourceMapApiKeyId], owner: true },
+          ids: [agentConfigApiKeyId, sourceMapApiKeyId],
+          owner: true,
         });
       } catch (e) {
         logger.error(
@@ -122,7 +123,7 @@ function onPackagePolicyPostCreate({
   coreStart: CoreStart;
   logger: Logger;
 }): PostPackagePolicyPostCreateCallback {
-  return async (packagePolicy) => {
+  return async (packagePolicy, savedObjectsClient) => {
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
@@ -130,6 +131,7 @@ function onPackagePolicyPostCreate({
     // add api key to new package policy
     await addApiKeysToPackagePolicyIfMissing({
       policy: packagePolicy,
+      savedObjectsClient,
       coreStart,
       fleet,
       logger,

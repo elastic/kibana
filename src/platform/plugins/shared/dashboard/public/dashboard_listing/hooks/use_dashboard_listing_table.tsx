@@ -21,11 +21,12 @@ import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
-} from '../../dashboard_constants';
+} from '../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices } from '../../services/kibana_services';
+import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
   dashboardListingErrorStrings,
@@ -216,6 +217,7 @@ export const useDashboardListingTable = ({
           options: {
             // include only tags references in the response to save bandwidth
             includeReferences: ['tag'],
+            fields: ['title', 'description', 'timeRestore'],
           },
         })
         .then(({ total, hits }) => {
@@ -341,7 +343,7 @@ export const useDashboardListingTable = ({
   );
 
   const contentInsightsClient = useMemo(
-    () => new ContentInsightsClient({ http: coreServices.http }, { domainId: 'dashboard' }),
+    () => new ContentInsightsClient({ http: coreServices.http, logger }, { domainId: 'dashboard' }),
     []
   );
 

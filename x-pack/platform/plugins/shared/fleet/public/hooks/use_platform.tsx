@@ -8,73 +8,97 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export type PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes';
+export type PLATFORM_TYPE =
+  | 'linux_aarch64'
+  | 'linux_x86_64'
+  | 'mac_aarch64'
+  | 'mac_x86_64'
+  | 'windows'
+  | 'rpm_aarch64'
+  | 'rpm_x86_64'
+  | 'deb_aarch64'
+  | 'deb_x86_64'
+  | 'kubernetes';
 
-export const REDUCED_PLATFORM_OPTIONS: Array<{
+interface PLATFORM_OPTION {
   label: string;
   id: PLATFORM_TYPE;
   'data-test-subj'?: string;
-}> = [
+}
+
+export const VISIBLE_PALFORM_OPTIONS: PLATFORM_OPTION[] = [
   {
-    id: 'linux',
+    id: 'linux_aarch64',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux', {
-      defaultMessage: 'Linux Tar',
+      defaultMessage: 'Linux aarch64',
     }),
     'data-test-subj': 'platformTypeLinux',
   },
   {
-    id: 'mac',
+    id: 'mac_aarch64',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.mac', {
-      defaultMessage: 'Mac',
+      defaultMessage: 'MacOS aarch64',
     }),
     'data-test-subj': 'platformTypeMac',
   },
   {
-    id: 'windows',
-    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.windows', {
-      defaultMessage: 'Windows',
-    }),
-    'data-test-subj': 'platformTypeWindows',
-  },
-  {
-    id: 'rpm',
-    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
-      defaultMessage: 'RPM',
-    }),
-    'data-test-subj': 'platformTypeLinuxRpm',
-  },
-  {
-    id: 'deb',
+    id: 'deb_aarch64',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.deb', {
-      defaultMessage: 'DEB',
+      defaultMessage: 'DEB aarch64',
     }),
     'data-test-subj': 'platformTypeLinuxDeb',
   },
-];
-
-export const PLATFORM_OPTIONS = [
-  ...REDUCED_PLATFORM_OPTIONS,
   {
-    id: 'kubernetes',
-    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.kubernetes', {
-      defaultMessage: 'Kubernetes',
+    id: 'rpm_aarch64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
+      defaultMessage: 'RPM aarch64',
     }),
-    'data-test-subj': 'platformTypeKubernetes',
+    'data-test-subj': 'platformTypeLinuxRpm',
   },
 ];
 
-export const PLATFORM_OPTIONS_CLOUD_SHELL = [
-  ...PLATFORM_OPTIONS,
+export const EXTENDED_PLATFORM_OPTIONS: PLATFORM_OPTION[] = [
   {
-    id: 'googleCloudShell',
-    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.googleCloudShell', {
-      defaultMessage: 'Google Cloud Shell Script',
+    id: 'windows',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.windows', {
+      defaultMessage: 'Windows x86_64',
     }),
-    'data-test-subj': 'platformTypeGoogleCloudShellScript',
+  },
+  {
+    id: 'linux_x86_64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux', {
+      defaultMessage: 'Linux x86_64',
+    }),
+  },
+  {
+    id: 'mac_x86_64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.mac', {
+      defaultMessage: 'MacOS x86_64',
+    }),
+  },
+  {
+    id: 'deb_x86_64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.deb', {
+      defaultMessage: 'DEB x86_64',
+    }),
+  },
+  {
+    id: 'rpm_x86_64',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux.rpm', {
+      defaultMessage: 'RPM x86_64',
+    }),
   },
 ];
 
-export function usePlatform(initialPlatform: PLATFORM_TYPE = 'linux') {
+export const KUBERNETES_PLATFORM_OPTION: PLATFORM_OPTION = {
+  id: 'kubernetes',
+  label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.kubernetes', {
+    defaultMessage: 'Kubernetes',
+  }),
+  'data-test-subj': 'platformTypeKubernetes',
+};
+
+export function usePlatform(initialPlatform: PLATFORM_TYPE = 'linux_aarch64') {
   const [platform, setPlatform] = useState<PLATFORM_TYPE>(initialPlatform);
 
   return {

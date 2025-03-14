@@ -15,7 +15,7 @@ export const registerSiemMigrationsRoutes = (
   config: ConfigType,
   logger: Logger
 ) => {
-  if (config.experimentalFeatures.siemMigrationsEnabled) {
+  if (!config.experimentalFeatures.siemMigrationsDisabled) {
     registerSiemRuleMigrationsRoutes(router, logger);
   }
 };

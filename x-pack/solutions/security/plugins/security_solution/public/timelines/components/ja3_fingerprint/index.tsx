@@ -30,16 +30,14 @@ export const Ja3Fingerprint = React.memo<{
   eventId: string;
   contextId: string;
   fieldName: string;
-  isDraggable?: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, isDraggable, value }) => (
+}>(({ contextId, eventId, fieldName, value }) => (
   <DraggableBadge
     contextId={contextId}
     data-test-subj="ja3-hash"
     eventId={eventId}
     field={fieldName}
     iconType="snowflake"
-    isDraggable={isDraggable}
     value={value}
     isAggregatable={true}
     fieldType="keyword"

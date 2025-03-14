@@ -61,6 +61,7 @@ export const getComments: GetAssistantMessages = ({
   currentUserAvatar,
   setIsStreaming,
   systemPromptContent,
+  contentReferencesVisible,
 }) => {
   if (!currentConversation) return [];
 
@@ -85,7 +86,9 @@ export const getComments: GetAssistantMessages = ({
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
               setIsStreaming={setIsStreaming}
+              contentReferencesVisible={contentReferencesVisible}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              contentReferences={null}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
               index={999}
@@ -129,6 +132,8 @@ export const getComments: GetAssistantMessages = ({
                 refetchCurrentConversation={refetchCurrentConversation}
                 regenerateMessage={regenerateMessageOfConversation}
                 setIsStreaming={setIsStreaming}
+                contentReferences={null}
+                contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
                 // we never need to append to a code block in the system comment, which is what this index is used for
                 index={999}
@@ -174,6 +179,8 @@ export const getComments: GetAssistantMessages = ({
           children: (
             <StreamComment
               abortStream={abortStream}
+              contentReferences={null}
+              contentReferencesVisible={contentReferencesVisible}
               index={index}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
@@ -197,6 +204,8 @@ export const getComments: GetAssistantMessages = ({
           <StreamComment
             abortStream={abortStream}
             content={transformedMessage.content}
+            contentReferences={message.metadata?.contentReferences}
+            contentReferencesVisible={contentReferencesVisible}
             index={index}
             isControlsEnabled={isControlsEnabled}
             isError={message.isError}

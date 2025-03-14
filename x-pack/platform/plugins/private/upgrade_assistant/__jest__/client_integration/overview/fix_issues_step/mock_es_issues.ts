@@ -9,7 +9,7 @@ import { ESUpgradeStatus } from '../../../../common/types';
 
 export const esCriticalAndWarningDeprecations: ESUpgradeStatus = {
   totalCriticalDeprecations: 1,
-  deprecations: [
+  migrationsDeprecations: [
     {
       isCritical: true,
       type: 'cluster_settings',
@@ -34,11 +34,13 @@ export const esCriticalAndWarningDeprecations: ESUpgradeStatus = {
       },
     },
   ],
+  totalCriticalHealthIssues: 0,
+  enrichedHealthIndicators: [],
 };
 
 export const esCriticalOnlyDeprecations: ESUpgradeStatus = {
   totalCriticalDeprecations: 1,
-  deprecations: [
+  migrationsDeprecations: [
     {
       isCritical: true,
       type: 'cluster_settings',
@@ -49,9 +51,13 @@ export const esCriticalOnlyDeprecations: ESUpgradeStatus = {
         'The Index Lifecycle Management poll interval setting [indices.lifecycle.poll_interval] is currently set to [500ms], but must be 1s or greater',
     },
   ],
+  totalCriticalHealthIssues: 0,
+  enrichedHealthIndicators: [],
 };
 
 export const esNoDeprecations: ESUpgradeStatus = {
   totalCriticalDeprecations: 0,
-  deprecations: [],
+  migrationsDeprecations: [],
+  totalCriticalHealthIssues: 0,
+  enrichedHealthIndicators: [],
 };

@@ -22,10 +22,9 @@ export const USER_NAME_FIELD_NAME = 'user.name';
 export const UserProcess = React.memo<{
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   processName?: string[] | null;
   userName?: string[] | null;
-}>(({ contextId, eventId, isDraggable, processName, userName }) => (
+}>(({ contextId, eventId, processName, userName }) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="user-process"
@@ -41,7 +40,6 @@ export const UserProcess = React.memo<{
               data-test-subj="user-name"
               eventId={eventId}
               field={USER_NAME_FIELD_NAME}
-              isDraggable={isDraggable}
               value={user}
               iconType="user"
               isAggregatable={true}
@@ -58,7 +56,6 @@ export const UserProcess = React.memo<{
               contextId={contextId}
               eventId={eventId}
               field={PROCESS_NAME_FIELD_NAME}
-              isDraggable={isDraggable}
               value={process}
               iconType="console"
               isAggregatable={true}

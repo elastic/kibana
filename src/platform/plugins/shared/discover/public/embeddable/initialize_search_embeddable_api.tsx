@@ -9,25 +9,26 @@
 
 import { pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, map, Observable, skip } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
-import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { DiscoverServices } from '../build_services';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
-import {
+import type {
   PublishesSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
@@ -83,7 +84,7 @@ export const initializeSearchEmbeddableApi = async (
     initialState.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
-  const dataViews = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
 
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
@@ -151,7 +152,7 @@ export const initializeSearchEmbeddableApi = async (
   /** APIs for updating search source properties */
   const setDataViews = (nextDataViews: DataView[]) => {
     searchSource.setField('index', nextDataViews[0]);
-    dataViews.next(nextDataViews);
+    dataViews$.next(nextDataViews);
     searchSource$.next(searchSource);
   };
 
@@ -187,7 +188,7 @@ export const initializeSearchEmbeddableApi = async (
     },
     api: {
       setDataViews,
-      dataViews,
+      dataViews$,
       savedSearch$,
       filters$,
       setFilters,

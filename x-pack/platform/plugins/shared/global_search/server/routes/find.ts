@@ -14,6 +14,12 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
   router.post(
     {
       path: '/internal/global_search/find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           params: schema.object({

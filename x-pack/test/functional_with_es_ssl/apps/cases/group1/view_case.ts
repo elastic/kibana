@@ -32,6 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const security = getPageObject('security');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
 
   const hasFocus = async (testSubject: string) => {
     const targetElement = await testSubjects.find(testSubject);
@@ -41,7 +42,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
-  describe.skip('View case', () => {
+  describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
@@ -442,7 +443,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          */
         await setTimeoutAsync(2000);
 
-        await testSubjects.click('backToCases');
+        await testSubjects.click('breadcrumb');
 
         await cases.casesTable.waitForCasesToBeListed();
         await cases.casesTable.goToFirstListedCase();
@@ -581,12 +582,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
 
-      /**
-       * There is this bug https://github.com/elastic/kibana/issues/157280
-       * where this test randomly reproduces thus making the test flaky.
-       * Skipping for now until we fix it.
-       */
-      it.skip('should persist the draft of new comment while description is updated', async () => {
+      it('should persist the draft of new comment while description is updated', async () => {
         let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -786,6 +782,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await header.waitUntilLoadingHasFinished();
 
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
 
@@ -1077,6 +1075,48 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('Tabs - alerts linked to case', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/rule_registry/alerts');
+        await cases.navigation.navigateToApp();
+        const theCase = await cases.api.createCase();
+        await cases.casesTable.waitForCasesToBeListed();
+        await retry.try(async () => {
+          await cases.api.createAttachment({
+            caseId: theCase.id,
+            params: {
+              type: AttachmentType.alert,
+              alertId: ['NoxgpHkBqbdrfX07MqXV'],
+              index: '.alerts-observability.apm.alerts',
+              rule: { id: 'id', name: 'name' },
+              owner: theCase.owner,
+            },
+          });
+        });
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts/');
+      });
+
+      beforeEach(async () => {
+        await cases.navigation.navigateToApp();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      it('should show the right amount of alerts linked to a case', async () => {
+        const visibleText = await testSubjects.getVisibleText('case-view-alerts-stats-badge');
+        expect(visibleText).to.be('1');
+      });
+
+      it('should render the alerts table when opening the alerts tab', async () => {
+        await testSubjects.click('case-view-tab-title-alerts');
+        await testSubjects.existOrFail('alertsTableEmptyState');
+      });
+    });
+
     describe('Files', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
@@ -1277,7 +1317,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
       });
 
-      afterEach(async () => {
+      after(async () => {
         await cases.api.deleteAllCases();
       });
 

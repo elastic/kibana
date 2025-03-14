@@ -17,6 +17,7 @@ const bodySchema = schema.object({
     schema.object({
       name: schema.string(),
       isLegacy: schema.maybe(schema.boolean()),
+      type: schema.maybe(schema.string()),
     })
   ),
 });

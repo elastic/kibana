@@ -12,7 +12,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { scheduleBackfillRoute } from './schedule_backfill_route';
-import { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
+import type { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -44,6 +44,7 @@ describe('scheduleBackfillRoute', () => {
         tags: ['foo'],
         alertTypeId: 'myType',
         params: {},
+        actions: [],
         apiKeyOwner: 'user',
         apiKeyCreatedByUser: false,
         consumer: 'myApp',
@@ -71,6 +72,7 @@ describe('scheduleBackfillRoute', () => {
         tags: ['foo'],
         alertTypeId: 'myType',
         params: {},
+        actions: [],
         apiKeyOwner: 'user',
         apiKeyCreatedByUser: false,
         consumer: 'myApp',

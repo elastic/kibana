@@ -31,6 +31,7 @@ import { useManagementApiService } from '../../../../../services/ml_api_service/
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { getFilters } from './filters';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
 
 interface Props {
   spacesApi?: SpacesPluginStart;
@@ -39,6 +40,9 @@ interface Props {
 }
 
 export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload }) => {
+  const {
+    services: { application },
+  } = useMlKibana();
   const { getList } = useManagementApiService();
 
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType | null>(null);
@@ -123,6 +127,9 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload })
     [currentTabId]
   );
 
+  const canShareIntoSpace = useMemo(() => {
+    return !application?.capabilities?.savedObjectsManagement?.shareIntoSpace;
+  }, [application]);
   const createColumns = useCallback(() => {
     if (currentTabId === null) {
       return [];
@@ -143,10 +150,11 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload })
               render: (item: ManagementItems) => {
                 return (
                   <MLSavedObjectsSpacesList
+                    disabled={canShareIntoSpace}
                     spacesApi={spacesApi}
-                    spaceIds={item.spaces ?? []}
-                    id={item.id}
+                    spaceIds={item.spaces}
                     mlSavedObjectType={currentTabId}
+                    id={item.id}
                     refresh={refresh.bind(null, currentTabId)}
                   />
                 );
@@ -155,7 +163,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload })
           ]
         : []),
     ] as Array<EuiBasicTableColumn<ManagementItems>>;
-  }, [currentTabId, spacesApi, refresh]);
+  }, [currentTabId, spacesApi, refresh, canShareIntoSpace]);
 
   const getTable = useCallback(() => {
     return (

@@ -79,12 +79,40 @@ export class AssetCriticalityMigrationClient {
         ignore_unavailable: true,
         allow_no_indices: true,
         scroll_size: 10000,
-        body: {
-          query: ECS_MAPPINGS_MIGRATION_QUERY,
-          script: {
-            source: PAINLESS_SCRIPT,
-            lang: 'painless',
+        query: ECS_MAPPINGS_MIGRATION_QUERY,
+        script: {
+          source: PAINLESS_SCRIPT,
+          lang: 'painless',
+        },
+      },
+      {
+        requestTimeout: '5m',
+        retryOnTimeout: true,
+        maxRetries: 2,
+        signal: abortSignal,
+      }
+    );
+  };
+
+  public copyTimestampToEventIngestedForAssetCriticality = (abortSignal?: AbortSignal) => {
+    return this.options.esClient.updateByQuery(
+      {
+        index: this.assetCriticalityDataClient.getIndex(),
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'event.ingested',
+              },
+            },
           },
+        },
+        script: {
+          source: 'ctx._source.event.ingested = ctx._source.@timestamp',
+          lang: 'painless',
         },
       },
       {

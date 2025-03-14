@@ -14,6 +14,7 @@ export const createInferenceConnectorMock = (
     type: InferenceConnectorType.OpenAI,
     name: 'Inference connector',
     connectorId: 'connector-id',
+    config: {},
     ...parts,
   };
 };

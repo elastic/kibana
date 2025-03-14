@@ -13,9 +13,11 @@ import { setIndexPatterns, setSearchService } from '../../services';
 import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
+  createFilterESQL,
 } from './create_filters_from_value_click';
 import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
 import { RangeFilter } from '@kbn/es-query';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 const mockField = {
   name: 'bytes',
@@ -105,6 +107,68 @@ describe('createFiltersFromClickEvent', () => {
       expect(filters.length).toEqual(1);
     });
   });
+
+  describe('createFilterESQL', () => {
+    let table: Datatable;
+
+    beforeEach(() => {
+      table = {
+        type: 'datatable',
+        columns: [
+          {
+            name: 'test',
+            id: '1-1',
+            meta: {
+              type: 'number',
+              sourceParams: {
+                sourceField: 'bytes',
+              },
+            },
+          },
+        ],
+        rows: [
+          {
+            '1-1': '2048',
+          },
+        ],
+      };
+    });
+
+    test('ignores event when sourceField is missing', async () => {
+      table.columns[0].meta.sourceParams = {};
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toEqual([]);
+    });
+
+    test('ignores event when value for rows is not provided', async () => {
+      table.rows[0]['1-1'] = null;
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toEqual([]);
+    });
+
+    test('handles an event when operation type is a date histogram', async () => {
+      (table.columns[0].meta.sourceParams as any).operationType = 'date_histogram';
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toMatchInlineSnapshot(`Array []`);
+    });
+
+    test('handles an event when operation type is histogram', async () => {
+      (table.columns[0].meta.sourceParams as any).operationType = 'histogram';
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toMatchInlineSnapshot(`Array []`);
+    });
+
+    test('handles an event when operation type is not date histogram', async () => {
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toMatchInlineSnapshot(`Array []`);
+    });
+  });
+
   describe('appendFilterToESQLQueryFromValueClickAction', () => {
     let dataPoints: Parameters<typeof appendFilterToESQLQueryFromValueClickAction>[0]['data'];
     beforeEach(() => {

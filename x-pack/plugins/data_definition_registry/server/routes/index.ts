@@ -30,6 +30,7 @@ export function registerServerRoutes({
   core,
   logger,
   dependencies,
+  runDevModeChecks,
 }: {
   core: CoreSetup;
   logger: Logger;
@@ -37,11 +38,13 @@ export function registerServerRoutes({
     DataDefinitionRegistryRouteHandlerResources,
     'request' | 'context' | 'logger' | 'params'
   >;
+  runDevModeChecks: boolean;
 }) {
   registerRoutes({
     core,
     logger,
     repository: getGlobalDataDefinitionRegistryServerRouteRepository(),
     dependencies,
+    runDevModeChecks,
   });
 }

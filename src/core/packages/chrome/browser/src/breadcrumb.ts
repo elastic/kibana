@@ -23,6 +23,8 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
 /** @public */
 export interface ChromeBreadcrumbsAppendExtension {
   content: MountPoint<HTMLDivElement>;
+  /** The order in which the extension should be appended to the breadcrumbs. Default is 50 */
+  order?: number;
 }
 
 /** @public */

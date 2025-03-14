@@ -20,7 +20,6 @@ export interface EntityEngineInstallationDescriptor {
   id: string;
   version: string;
   entityType: EntityType;
-
   identityField: string;
 
   /**
@@ -48,6 +47,8 @@ export interface EntityEngineInstallationDescriptor {
   settings: {
     syncDelay: string;
     frequency: string;
+    timeout: string;
+    docsPerSecond?: number;
     lookbackPeriod: string;
     timestampField: string;
   };
@@ -57,9 +58,17 @@ export interface EntityEngineInstallationDescriptor {
    * This can be an array of processors which get appended to the default pipeline,
    * or a function that takes the default processors and returns an array of processors.
    **/
-  pipeline:
+  pipeline?:
     | IngestProcessorContainer[]
     | ((defaultProcessors: IngestProcessorContainer[]) => IngestProcessorContainer[]);
+
+  /**
+   * Whether the extracted entity data is dynamic.
+   * If true, it means we don't know which fields will be extracted from the definition itself, and we need to apply field retention to all the incoming doc's fields.
+   *
+   * This is mainly used for the Asset Inventory use case.
+   */
+  dynamic: boolean;
 }
 
 export type FieldDescription = EntityDefinitionMetadataElement & {

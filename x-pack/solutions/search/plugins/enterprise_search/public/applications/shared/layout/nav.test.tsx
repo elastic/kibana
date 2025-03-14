@@ -9,18 +9,11 @@ jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
-jest.mock('../../enterprise_search_content/components/search_index/indices/indices_nav', () => ({
-  useIndicesNav: () => [],
-}));
-
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { renderHook } from '@testing-library/react';
 
-import { EuiSideNavItemType } from '@elastic/eui';
-
 import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
-import { ProductAccess } from '../../../../common/types';
 
 import {
   useEnterpriseSearchNav,
@@ -28,10 +21,6 @@ import {
   useEnterpriseSearchAnalyticsNav,
 } from './nav';
 
-const DEFAULT_PRODUCT_ACCESS: ProductAccess = {
-  hasAppSearchAccess: true,
-  hasWorkplaceSearchAccess: true,
-};
 const baseNavItems = [
   expect.objectContaining({
     'data-test-subj': 'searchSideNav-Home',
@@ -45,10 +34,10 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
-        href: '/app/elasticsearch/content/search_indices',
+        href: '/app/management/data/index_management/',
         id: 'search_indices',
-        items: [],
-        name: 'Indices',
+        items: undefined,
+        name: 'Index Management',
       },
       {
         'data-test-subj': 'searchSideNav-Connectors',
@@ -84,13 +73,6 @@ const baseNavItems = [
         id: 'searchApplications',
         items: undefined,
         name: 'Search Applications',
-      },
-      {
-        'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-        href: '/app/elasticsearch/analytics',
-        id: 'analyticsCollections',
-        items: undefined,
-        name: 'Behavioral Analytics',
       },
     ],
     name: 'Build',
@@ -152,9 +134,9 @@ const mockNavLinks = [
     url: '/app/elasticsearch/overview',
   },
   {
-    id: 'enterpriseSearchContent:searchIndices',
-    title: 'Indices',
-    url: '/app/elasticsearch/content/search_indices',
+    id: 'management:index_management',
+    title: 'Index Management',
+    url: '/app/management/data/index_management/',
   },
   {
     id: 'enterpriseSearchContent:connectors',
@@ -187,16 +169,6 @@ const mockNavLinks = [
     url: '/app/elasticsearch/relevance/inference_endpoints',
   },
   {
-    id: 'appSearch:engines',
-    title: 'App Search',
-    url: '/app/enterprise_search/app_search',
-  },
-  {
-    id: 'workplaceSearch',
-    title: 'Workplace Search',
-    url: '/app/enterprise_search/workplace_search',
-  },
-  {
     id: 'enterpriseSearchElasticsearch',
     title: 'Elasticsearch',
     url: '/app/elasticsearch/elasticsearch',
@@ -221,7 +193,6 @@ const mockNavLinks = [
 const defaultMockValues = {
   hasEnterpriseLicense: true,
   isSidebarEnabled: true,
-  productAccess: DEFAULT_PRODUCT_ACCESS,
   productFeatures: DEFAULT_PRODUCT_FEATURES,
 };
 
@@ -233,11 +204,7 @@ describe('useEnterpriseSearchContentNav', () => {
   });
 
   it('returns an array of top-level Enterprise Search nav items', () => {
-    const fullProductAccess: ProductAccess = DEFAULT_PRODUCT_ACCESS;
-    setMockValues({
-      ...defaultMockValues,
-      productAccess: fullProductAccess,
-    });
+    setMockValues(defaultMockValues);
 
     const { result } = renderHook(() => useEnterpriseSearchNav());
 
@@ -257,134 +224,6 @@ describe('useEnterpriseSearchApplicationNav', () => {
     const { result } = renderHook(() => useEnterpriseSearchApplicationNav());
     expect(result.current).toEqual(baseNavItems);
   });
-
-  it('returns selected engine sub nav items', () => {
-    const engineName = 'my-test-engine';
-    const {
-      result: { current: navItems },
-    } = renderHook(() => useEnterpriseSearchApplicationNav(engineName));
-    expect(navItems![0].id).toEqual('home');
-    expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
-      'Content',
-      'Build',
-      'Relevance',
-      'Getting started',
-    ]);
-    const searchItem = navItems?.find((ni) => ni.id === 'build');
-    expect(searchItem).not.toBeUndefined();
-    expect(searchItem!.items).not.toBeUndefined();
-    // @ts-ignore
-    const enginesItem: EuiSideNavItemType<unknown> = searchItem?.items?.find(
-      (si: EuiSideNavItemType<unknown>) => si.id === 'searchApplications'
-    );
-    expect(enginesItem).not.toBeUndefined();
-    expect(enginesItem!.items).not.toBeUndefined();
-    expect(enginesItem!.items).toHaveLength(1);
-
-    // @ts-ignore
-    const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
-    expect(engineItem).toMatchInlineSnapshot(`
-      Object {
-        "href": "/app/elasticsearch/applications/search_applications/my-test-engine",
-        "id": "searchApplicationId",
-        "items": Array [
-          Object {
-            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/docs_explorer",
-            "id": "enterpriseSearchApplicationDocsExplorer",
-            "items": undefined,
-            "name": "Docs Explorer",
-          },
-          Object {
-            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/content",
-            "iconToString": undefined,
-            "id": "enterpriseSearchApplicationsContent",
-            "items": undefined,
-            "name": <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              Content
-            </EuiFlexGroup>,
-            "nameToString": "Content",
-          },
-          Object {
-            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/connect",
-            "id": "enterpriseSearchApplicationConnect",
-            "items": undefined,
-            "name": "Connect",
-          },
-        ],
-        "name": "my-test-engine",
-      }
-    `);
-  });
-
-  it('returns selected engine without tabs when isEmpty', () => {
-    const engineName = 'my-test-engine';
-    const {
-      result: { current: navItems },
-    } = renderHook(() => useEnterpriseSearchApplicationNav(engineName, true));
-    expect(navItems![0].id).toEqual('home');
-    expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
-      'Content',
-      'Build',
-      'Relevance',
-      'Getting started',
-    ]);
-    const searchItem = navItems?.find((ni) => ni.id === 'build');
-    expect(searchItem).not.toBeUndefined();
-    expect(searchItem!.items).not.toBeUndefined();
-    // @ts-ignore
-    const enginesItem: EuiSideNavItemType<unknown> = searchItem?.items?.find(
-      (si: EuiSideNavItemType<unknown>) => si.id === 'searchApplications'
-    );
-    expect(enginesItem).not.toBeUndefined();
-    expect(enginesItem!.items).not.toBeUndefined();
-    expect(enginesItem!.items).toHaveLength(1);
-
-    // @ts-ignore
-    const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
-    expect(engineItem).toEqual({
-      href: `/app/elasticsearch/applications/search_applications/${engineName}`,
-      id: 'searchApplicationId',
-      name: engineName,
-    });
-  });
-
-  it('returns selected engine with conflict warning when hasSchemaConflicts', () => {
-    const engineName = 'my-test-engine';
-    const {
-      result: { current: navItems },
-    } = renderHook(() => useEnterpriseSearchApplicationNav(engineName, false, true));
-
-    // @ts-ignore
-    const engineItem = navItems
-      .find((ni: EuiSideNavItemType<unknown>) => ni.id === 'build')
-      .items.find((ni: EuiSideNavItemType<unknown>) => ni.id === 'searchApplications')
-      .items[0].items.find(
-        (ni: EuiSideNavItemType<unknown>) => ni.id === 'enterpriseSearchApplicationsContent'
-      );
-
-    expect(engineItem).toMatchInlineSnapshot(`
-      Object {
-        "href": "/app/elasticsearch/applications/search_applications/my-test-engine/content",
-        "iconToString": "warning",
-        "id": "enterpriseSearchApplicationsContent",
-        "items": undefined,
-        "name": <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
-          Content
-          <EuiIcon
-            color="danger"
-            type="warning"
-          />
-        </EuiFlexGroup>,
-        "nameToString": "Content",
-      }
-    `);
-  });
 });
 
 describe('useEnterpriseSearchAnalyticsNav', () => {
@@ -397,7 +236,41 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
   it('returns basic nav all params are empty', () => {
     const { result } = renderHook(() => useEnterpriseSearchAnalyticsNav());
 
-    expect(result.current).toEqual(baseNavItems);
+    expect(result.current).toEqual([
+      baseNavItems[0],
+      baseNavItems[1],
+
+      {
+        'data-test-subj': 'searchSideNav-Build',
+        id: 'build',
+        items: [
+          {
+            'data-test-subj': 'searchSideNav-Playground',
+            href: '/app/search_playground',
+            id: 'playground',
+            items: undefined,
+            name: 'Playground',
+          },
+          {
+            'data-test-subj': 'searchSideNav-SearchApplications',
+            href: '/app/elasticsearch/applications/search_applications',
+            id: 'searchApplications',
+            items: undefined,
+            name: 'Search Applications',
+          },
+
+          {
+            href: '/app/elasticsearch/analytics',
+            id: 'analyticsCollections',
+            items: undefined,
+            name: 'Behavioral Analytics',
+          },
+        ],
+        name: 'Build',
+      },
+      baseNavItems[3],
+      baseNavItems[4],
+    ]);
   });
 
   it('returns basic nav if only name provided', () => {
@@ -414,50 +287,5 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           : item
       )
     );
-  });
-
-  it('returns nav with sub items when name and paths provided', () => {
-    const {
-      result: { current: navItems },
-    } = renderHook(() =>
-      useEnterpriseSearchAnalyticsNav('my-test-collection', {
-        explorer: '/explorer-path',
-        integration: '/integration-path',
-        overview: '/overview-path',
-      })
-    );
-    const applicationsNav = navItems?.find((item) => item.id === 'build');
-    expect(applicationsNav).not.toBeUndefined();
-    const analyticsNav = applicationsNav?.items?.[2];
-    expect(analyticsNav).not.toBeUndefined();
-    expect(analyticsNav).toEqual({
-      'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-      href: '/app/elasticsearch/analytics',
-      id: 'analyticsCollections',
-      items: [
-        {
-          id: 'analyticsCollection',
-          items: [
-            {
-              href: '/app/elasticsearch/analytics/overview-path',
-              id: 'analyticsCollectionOverview',
-              name: 'Overview',
-            },
-            {
-              href: '/app/elasticsearch/analytics/explorer-path',
-              id: 'analyticsCollectionExplorer',
-              name: 'Explorer',
-            },
-            {
-              href: '/app/elasticsearch/analytics/integration-path',
-              id: 'analyticsCollectionIntegration',
-              name: 'Integration',
-            },
-          ],
-          name: 'my-test-collection',
-        },
-      ],
-      name: 'Behavioral Analytics',
-    });
   });
 });

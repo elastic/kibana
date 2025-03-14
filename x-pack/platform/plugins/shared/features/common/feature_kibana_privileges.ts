@@ -54,25 +54,27 @@ export interface FeatureKibanaPrivileges {
    *
    * @example
    * ```ts
-   *  // Configure your routes with a tag starting with the 'access:' prefix
+   *  // Configure your routes with requiredPrivileges
    *  server.route({
    *    path: '/api/my-route',
    *    method: 'GET',
    *    handler: () => { ...},
-   *    options: {
-   *      tags: ['access:my_feature-admin']
-   *    }
+   *    security: {
+   *     authz: {
+   *      requiredPrivileges: ['my_feature_admin']
+   *     },
+   *   },
    *  });
    *
-   *  Then, specify the tags here (without the 'access:' prefix) which should be secured:
+   *  Then, specify requiredPrivileges which should be secured:
    *
    *  {
-   *    api: ['my_feature-admin']
+   *    api: ['my_feature_admin']
    *  }
    * ```
    *
-   * NOTE: It is important to name your tags in a way that will not collide with other platform/plugins/shared/features.
-   * A generic tag name like "access:read" could be used elsewhere, and access to that API endpoint would also
+   * NOTE: It is important to name your privileges in a way that will not collide with other platform/plugins/shared/features.
+   * A generic tag name like "read" could be used elsewhere, and access to that API endpoint would also
    * extend to any routes you have also tagged with that name.
    */
   api?: readonly string[];
@@ -238,6 +240,16 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     reopenCase?: readonly string[];
+    /**
+     * List of case owners whose users should have assignCase access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    assign: ['securitySolution']
+     *  }
+     * ```
+     */
+    assign?: readonly string[];
   };
 
   /**

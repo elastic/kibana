@@ -13,8 +13,8 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import {
-  selectNotesByDocumentId,
-  selectDocumentNotesBySavedObjectId,
+  makeSelectNotesByDocumentId,
+  makeSelectDocumentNotesBySavedObjectId,
 } from '../../../notes/store/notes.slice';
 import type { State } from '../../store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
@@ -73,6 +73,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   refetch,
   toggleShowNotes,
   disablePinAction = true,
+  disableTimelineAction = false,
 }) => {
   const dispatch = useDispatch();
 
@@ -258,14 +259,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
   );
-
+  const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
   /* only applicable for new event based notes */
   const documentBasedNotes = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
+  const selectDocumentNotesBySavedObjectId = useMemo(
+    () => makeSelectDocumentNotesBySavedObjectId(),
+    []
+  );
   const documentBasedNotesInTimeline = useSelector((state: State) =>
-    selectDocumentNotesBySavedObjectId(state, {
-      documentId: eventId,
-      savedObjectId: savedObjectId ?? '',
-    })
+    selectDocumentNotesBySavedObjectId(state, eventId, savedObjectId ?? '')
   );
 
   /* note ids associated with the document AND attached to the current timeline, used for pinning */
@@ -332,6 +334,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                     iconType="expand"
                     onClick={onExpandEvent}
                     size="s"
+                    color="text"
                   />
                 </EuiToolTip>
               </EventsTdContent>
@@ -339,7 +342,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </GuidedOnboardingTourStep>
         )}
         <>
-          {timelineId !== TimelineId.active && (
+          {!disableTimelineAction && timelineId !== TimelineId.active && (
             <InvestigateInTimelineAction
               ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
               key="investigate-in-timeline"
@@ -396,6 +399,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   iconType="analyzeEvent"
                   onClick={handleClick}
                   size="s"
+                  color="text"
                 />
               </EuiToolTip>
             </EventsTdContent>
@@ -411,6 +415,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   iconType="sessionViewer"
                   onClick={openSessionView}
                   size="s"
+                  color="text"
                 />
               </EuiToolTip>
             </EventsTdContent>

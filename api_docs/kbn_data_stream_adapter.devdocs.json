@@ -855,7 +855,7 @@
             "section": "def-server.MultiField",
             "text": "MultiField"
           },
-          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; search_inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
         "deprecated": false,
@@ -878,7 +878,7 @@
             "section": "def-server.MultiField",
             "text": "MultiField"
           },
-          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; search_inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/types.ts",
         "deprecated": false,
@@ -966,7 +966,7 @@
             "section": "def-server.MultiField",
             "text": "MultiField"
           },
-          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; search_inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
         "deprecated": false,

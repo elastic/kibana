@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
 
-        const res = await getReport();
+        const res = await getReport({ timeout: 180_000 }); // 3 minutes
         expect(res.text).to.be(`\n`);
       });
 
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const res = await es.bulk({
           index: TEST_INDEX_NAME,
-          body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
+          operations: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
         });
 
         log.info(`Indexed ${res.items.length} test data docs.`);

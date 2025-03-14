@@ -15,7 +15,7 @@ import {
 import { TimesliceMetricTransformGenerator } from './timeslice_metric';
 
 const SPACE_ID = 'custom-space';
-const generator = new TimesliceMetricTransformGenerator(SPACE_ID, dataViewsService);
+const generator = new TimesliceMetricTransformGenerator(SPACE_ID, dataViewsService, false);
 const everythingIndicator = createTimesliceMetricIndicator(
   [
     { name: 'A', aggregation: 'avg', field: 'test.field', filter: 'test.category: "test"' },

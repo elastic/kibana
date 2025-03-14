@@ -9,7 +9,7 @@ import { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
   PluginStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import {
   ON_PREM_REPOSITORY_TYPES,
@@ -308,7 +308,7 @@ export function registerRepositoriesRoutes({
       try {
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
           name,
-          body: {
+          repository: {
             // @ts-expect-error upgrade to @elastic/elasticsearch v8.13.0: can't be string, only valid "source"
             type,
             // TODO: Bring {@link RepositorySettings} in line with {@link SnapshotRepositorySettings}

@@ -23,7 +23,7 @@ jest.mock('../services', () => ({
 }));
 
 jest.mock('@kbn/visualizations-plugin/public', () => ({
-  convertToLensModule: Promise.resolve({
+  getConvertToLensModule: async () => ({
     getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
     getPercentageColumnFormulaColumn: jest.fn(() => mockGetPercentageColumnFormulaColumn()),
     getPercentageModeConfig: jest.fn(() => mockGetPercentageModeConfig()),

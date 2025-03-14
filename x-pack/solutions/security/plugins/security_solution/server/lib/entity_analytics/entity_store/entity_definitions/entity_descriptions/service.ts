@@ -6,6 +6,7 @@
  */
 
 import type { EntityDescription } from '../types';
+import { getCommonFieldDescriptions } from './common';
 import { collectValues as collect, newestValue } from './field_utils';
 
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
@@ -25,8 +26,10 @@ export const serviceEntityEngineDescription: EntityDescription = {
     collect({ source: 'service.id' }),
     collect({ source: 'service.node.name' }),
     collect({ source: 'service.node.roles' }),
+    collect({ source: 'service.node.role' }),
     newestValue({ source: 'service.state' }),
     collect({ source: 'service.type' }),
     newestValue({ source: 'service.version' }),
+    ...getCommonFieldDescriptions('service'),
   ],
 };

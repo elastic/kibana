@@ -251,6 +251,7 @@ export const item: GetInfoResponse['item'] = {
       index_pattern: [],
       lens: [],
       map: [],
+      security_ai_prompt: [],
       security_rule: [],
       csp_rule_template: [],
       tag: [],

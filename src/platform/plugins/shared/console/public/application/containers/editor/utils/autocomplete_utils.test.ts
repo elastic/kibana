@@ -11,6 +11,7 @@
  * Mock the function "populateContext" that accesses the autocomplete definitions
  */
 import { monaco } from '@kbn/monaco';
+import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 
 const mockPopulateContext = jest.fn();
 
@@ -26,6 +27,7 @@ import {
   getDocumentationLinkFromAutocomplete,
   getUrlPathCompletionItems,
   shouldTriggerSuggestions,
+  getBodyCompletionItems,
 } from './autocomplete_utils';
 
 describe('autocomplete_utils', () => {
@@ -214,6 +216,82 @@ describe('autocomplete_utils', () => {
       const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
       expect(items.length).toBe(5);
+    });
+  });
+
+  describe('inline JSON body completion', () => {
+    it('completes "term" inside {"query": {te}} without extra quotes or missing template', async () => {
+      // 1) Set up a mock monaco model with two lines of text
+      //    - Line 1: GET index/_search
+      //    - Line 2: {"query": {te}}
+      // In a real editor, requestStartLineNumber = 1 (0-based vs 1-based might differ),
+      // so we adjust accordingly in the test.
+      const mockModel = {
+        getLineContent: (lineNumber: number) => {
+          if (lineNumber === 1) {
+            // request line
+            return 'GET index/_search';
+          } else if (lineNumber === 2) {
+            // inline JSON with partial property 'te'
+            return '{"query": {te}}';
+          }
+          return '';
+        },
+        // getValueInRange will return everything from line 2 up to our position
+        getValueInRange: ({ startLineNumber, endLineNumber }: monaco.IRange) => {
+          if (startLineNumber === 2 && endLineNumber === 2) {
+            // partial body up to cursor (we can just return the entire line for simplicity)
+            return '{"query": {te}}';
+          }
+          return '';
+        },
+        getWordUntilPosition: () => ({
+          startColumn: 13, // approximate "te" start
+          endColumn: 15,
+          word: 'te',
+        }),
+        getLineMaxColumn: () => 999, // large max
+      } as unknown as monaco.editor.ITextModel;
+
+      // 2) The user is on line 2, at column ~15 (after 'te').
+      const mockPosition = {
+        lineNumber: 2,
+        column: 15,
+      } as monaco.Position;
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [
+          {
+            name: 'term',
+          },
+        ];
+      });
+
+      // 4) We call getBodyCompletionItems, passing requestStartLineNumber = 1
+      //    because line 1 has "GET index/_search", so line 2 is the body.
+      const mockEditor = {} as MonacoEditorActionsProvider;
+      const suggestions = await getBodyCompletionItems(
+        mockModel,
+        mockPosition,
+        1, // the line number where the request method/URL is
+        mockEditor
+      );
+
+      // 5) We should get 1 suggestion for "term"
+      expect(suggestions).toHaveLength(1);
+      const termSuggestion = suggestions[0];
+
+      // 6) Check the snippet text. For example, if your final snippet logic
+      //    inserts `"term": $0`, we ensure there's no extra quote like ""term"
+      //    and if you have a template for "term", we can check that too.
+      const insertText = termSuggestion.insertText;
+
+      // No double quotes at the start:
+      expect(insertText).not.toContain('""term"');
+      // Valid JSON snippet
+      expect(insertText).toContain('"term"');
+      expect(insertText).toContain('$0');
     });
   });
 });

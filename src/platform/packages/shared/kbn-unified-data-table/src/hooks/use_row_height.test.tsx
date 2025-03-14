@@ -76,7 +76,7 @@ describe('useRowHeightsOptions', () => {
     expect(result.current.rowHeightLines).toEqual(CONFIG_ROW_HEIGHT);
   });
 
-  test('should apply rowHeight from configRowHeight instead of local storage value, since configRowHeight has been changed', () => {
+  it('should apply rowHeight from configRowHeight instead of local storage value, since configRowHeight has been changed', () => {
     const {
       hook: { result },
     } = renderRowHeightHook({
@@ -113,12 +113,6 @@ describe('useRowHeightsOptions', () => {
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
     });
     expect(onUpdateRowHeight).toHaveBeenLastCalledWith(-1);
-    result.current.onChangeRowHeight?.(RowHeightMode.single);
-    expect(storage.get('discover:dataGridRowHeight')).toEqual({
-      previousRowHeight: 0,
-      previousConfigRowHeight: CONFIG_ROW_HEIGHT,
-    });
-    expect(onUpdateRowHeight).toHaveBeenLastCalledWith(0);
     result.current.onChangeRowHeight?.(RowHeightMode.custom);
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: CONFIG_ROW_HEIGHT,
@@ -145,9 +139,9 @@ describe('useRowHeightsOptions', () => {
     const { hook, initialProps } = renderRowHeightHook({ rowHeightState: -1 });
     expect(hook.result.current.rowHeight).toEqual(RowHeightMode.auto);
     expect(hook.result.current.rowHeightLines).toEqual(-1);
-    hook.rerender({ ...initialProps, rowHeightState: 0 });
-    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.single);
-    expect(hook.result.current.rowHeightLines).toEqual(0);
+    hook.rerender({ ...initialProps, rowHeightState: 0 }); // after removing "single" from UI, we can get "0" from legacy state, so we cast it to "custom" with 1 line count,
+    expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(hook.result.current.rowHeightLines).toEqual(1);
     hook.rerender({ ...initialProps, rowHeightState: 3 });
     expect(hook.result.current.rowHeight).toEqual(RowHeightMode.custom);
     expect(hook.result.current.rowHeightLines).toEqual(3);

@@ -13,9 +13,18 @@ export const DEFAULT_EMS_LANDING_PAGE_URL = 'https://maps.elastic.co';
 export const DEFAULT_EMS_FONT_LIBRARY_URL =
   'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
 
+// Theme-bound style identifiers
+export const EMS_ROADMAP_BOREALIS_DESATURATED_ID = 'road_map_desaturated_v9';
+export const EMS_DARKMAP_BOREALIS_ID = 'dark_map_v9';
+export const EMS_ROADMAP_AMSTERDAM_DESATURATED_ID = 'road_map_desaturated';
+export const EMS_DARKMAP_AMSTERDAM_ID = 'dark_map';
+
+// Default identifiers
 export const DEFAULT_EMS_ROADMAP_ID = 'road_map';
-export const DEFAULT_EMS_ROADMAP_DESATURATED_ID = 'road_map_desaturated';
-export const DEFAULT_EMS_DARKMAP_ID = 'dark_map';
+
+// To be updated when Kibana only ships the Borealis tehem
+export const DEFAULT_EMS_ROADMAP_DESATURATED_ID = EMS_ROADMAP_AMSTERDAM_DESATURATED_ID;
+export const DEFAULT_EMS_DARKMAP_ID = EMS_DARKMAP_AMSTERDAM_ID;
 
 export const EMS_APP_NAME = 'kibana'; // app-name submitted as the `app`-param to EMS
 

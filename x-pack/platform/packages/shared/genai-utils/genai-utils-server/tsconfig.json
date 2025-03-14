@@ -16,7 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core",
     "@kbn/genai-utils-common",
+    "@kbn/traced-es-client",
   ]
 }

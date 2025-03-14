@@ -3,7 +3,7 @@
 There is a new way to generate openapi docs from the route definition in code.
 
 When adding a new route/modifying request/response parameters, make sure to add/update schema definitions when registering the route.
-[Example](https://github.com/elastic/kibana/blob/5ea1ab0b8a21764aa54a5ef9650a0d8046f3f0a8/x-pack/platform/plugins/shared/fleet/server/routes/agent/index.ts#L96-L123)
+[Example](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/server/routes/agent/index.ts#L96-L123)
 
 Read more: https://docs.elastic.dev/kibana-dev-docs/genereating-oas-for-http-apis 
 

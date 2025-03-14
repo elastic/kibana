@@ -18,20 +18,22 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
+import type {
+  DataGridDensity,
+  UnifiedDataTableProps,
+  UseColumnsProps,
+} from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   useColumns,
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
-  DataGridDensity,
-  UnifiedDataTableProps,
-  UseColumnsProps,
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
@@ -44,16 +46,14 @@ import {
 } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
-import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import {
   getMaxAllowedSampleSize,
@@ -68,12 +68,17 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
+import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import {
-  CellRenderersExtensionParams,
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
   useProfileAccessor,
 } from '../../../../context_awareness';
+import {
+  internalStateActions,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../state_management/redux';
 
 const containerStyles = css`
   position: relative;
@@ -109,9 +114,11 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
   const [
     dataSource,
     query,
@@ -204,9 +211,9 @@ function DiscoverDocumentsComponent({
 
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
-      stateContainer.internalState.transitions.setExpandedDoc(doc);
+      dispatch(internalStateActions.setExpandedDoc(doc));
     },
-    [stateContainer]
+    [dispatch]
   );
 
   const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -269,20 +276,14 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
-
   const { filters } = useQuerySubscriber({ data: services.data });
-
-  const timeRange = useObservable(
-    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
-    services.timefilter.getTime()
-  );
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query,
     filters,
-    timeRange,
+    timeRange: requestParams.timeRangeAbsolute,
   });
 
   const renderDocumentView = useCallback(

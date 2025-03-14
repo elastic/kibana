@@ -14,7 +14,6 @@ import {
   type TelemetryEventTypeWithPayload,
   ObservabilityAIAssistantTelemetryEventType,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { omit } from 'lodash';
 import { useLastUsedPrompts } from '../hooks/use_last_used_prompts';
 import { FunctionListPopover } from '../chat/function_list_popover';
 import { PromptEditorFunction } from './prompt_editor_function';
@@ -134,7 +133,7 @@ export function PromptEditor({
       setMode('prompt');
       onSendTelemetry({
         type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
-        payload: { ...message, message: omit(message.message, 'attachments'), scopes },
+        payload: { scopes },
       });
     } catch (_) {
       setInnerMessage(oldMessage);

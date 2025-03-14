@@ -8,10 +8,9 @@
  */
 
 export const capabilitiesProvider = () => ({
-  discover: {
+  discover_v2: {
     show: true,
     createShortUrl: true,
     save: true,
-    saveQuery: true,
   },
 });

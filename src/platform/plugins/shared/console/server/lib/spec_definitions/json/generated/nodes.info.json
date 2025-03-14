@@ -6,11 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "flat_settings": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "timeout": [
         "30s",
         "-1",

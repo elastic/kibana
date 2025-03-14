@@ -314,7 +314,7 @@ describe('DynamicActionManager', () => {
 
         await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
 
-        const createdAction = actions.values().next().value;
+        const createdAction = await actions.values().next().value();
 
         expect(createdAction.grouping).toBe(dynamicActionGrouping);
       });
@@ -477,7 +477,7 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
-        const registeredAction1 = actions.values().next().value;
+        const registeredAction1 = await actions.values().next().value();
 
         expect(registeredAction1.getDisplayName()).toBe('Action 3');
 
@@ -491,7 +491,7 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
-        const registeredAction2 = actions.values().next().value;
+        const registeredAction2 = await actions.values().next().value();
 
         expect(registeredAction2.getDisplayName()).toBe('foo');
       });
@@ -600,7 +600,7 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
-        const registeredAction1 = actions.values().next().value;
+        const registeredAction1 = await actions.values().next().value();
 
         expect(registeredAction1.getDisplayName()).toBe('Action 3');
 
@@ -614,7 +614,7 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(1);
 
-        const registeredAction2 = actions.values().next().value;
+        const registeredAction2 = await actions.values().next().value();
 
         expect(registeredAction2.getDisplayName()).toBe('Action 3');
       });
@@ -733,10 +733,10 @@ describe('DynamicActionManager', () => {
 
     await manager.start();
 
-    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(2);
+    expect(await uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(2);
     expect(await storage.list()).toEqual([event1, event3, event2]);
 
     await manager.stop();
-    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(0);
+    expect(await uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(0);
   });
 });

@@ -8,6 +8,7 @@
  */
 
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { sanitazeESQLInput } from './sanitaze_input';
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
@@ -99,3 +100,16 @@ export function appendWhereClauseToESQLQuery(
   const whereClause = `| WHERE ${fieldName}${operator}${filterValue}`;
   return appendToESQLQuery(baseESQLQuery, whereClause);
 }
+
+export const appendStatsByToQuery = (queryString: string, column: string) => {
+  const { root } = parse(queryString);
+  const lastCommand = root.commands[root.commands.length - 1];
+  if (lastCommand.name === 'stats') {
+    const statsCommand = lastCommand;
+    mutate.generic.commands.remove(root, statsCommand);
+    const queryWithoutStats = BasicPrettyPrinter.print(root);
+    return `${queryWithoutStats}\n| STATS BY ${column}`;
+  } else {
+    return `${queryString}\n| STATS BY ${column}`;
+  }
+};

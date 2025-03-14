@@ -8,22 +8,9 @@
 /*
  * Mocking EuiSearchBar because its onChange is not firing during tests
  */
-import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
-
-import { applicationServiceMock } from '@kbn/core/public/mocks';
-jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
-  return {
-    EuiSearchBox: (props: EuiSearchBoxProps) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          props.onSearch(event.target.value);
-        }}
-      />
-    ),
-  };
-});
 import React from 'react';
+import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
@@ -40,6 +27,20 @@ import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
+
+jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+  return {
+    EuiSearchBox: (props: EuiSearchBoxProps) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          props.onSearch(event.target.value);
+        }}
+      />
+    ),
+  };
+});
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
@@ -491,11 +492,13 @@ describe('<IndexManagementHome />', () => {
       });
       component.update();
 
+      await actions.selectIndexMode('indexModeLookupOption');
+
       await actions.clickCreateIndexSaveButton();
 
       // Saves the index with expected name
       expect(httpSetup.put).toHaveBeenCalledWith(`${INTERNAL_API_BASE_PATH}/indices/create`, {
-        body: '{"indexName":"test-index-b"}',
+        body: '{"indexName":"test-index-b","indexMode":"lookup"}',
       });
       // It refresh indices after saving
       expect(httpSetup.get).toHaveBeenCalledTimes(2);

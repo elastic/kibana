@@ -14,14 +14,14 @@ export const javaDefinition: LanguageDefinition = {
   iconType: 'java.svg',
   github: {
     label: i18n.translate('xpack.serverlessSearch.languages.java.githubLabel', {
-      defaultMessage: 'elasticsearch-java-serverless',
+      defaultMessage: 'elasticsearch-java',
     }),
-    link: 'https://github.com/elastic/elasticsearch-java/tree/main/java-client-serverless',
+    link: 'https://github.com/elastic/elasticsearch-java',
   },
   // Code Snippets,
   installClient: `dependencies {
-    implementation 'co.elastic.clients:elasticsearch-java-serverless:1.0.0-20231031'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    implementation 'co.elastic.clients:elasticsearch-java:$elasticsearchVersion'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:$jacksonVersion'
 }`,
   configureClient: ({ apiKey, url }) => `// URL and API key
 String serverUrl = "${url}";

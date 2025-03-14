@@ -6,11 +6,16 @@
  */
 
 import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
+import { v5 as uuidv5 } from 'uuid';
 import { EntityDiscoveryApiKeyType } from '../../../saved_objects';
 import { EntityManagerServerSetup } from '../../../types';
 import { EntityDiscoveryAPIKey } from './api_key';
 
 const ENTITY_DISCOVERY_API_KEY_SO_ID = '19540C97-E35C-485B-8566-FB86EC8455E4';
+
+export const getSpaceAwareEntityDiscoverySavedObjectId = (space: string) => {
+  return uuidv5(space, ENTITY_DISCOVERY_API_KEY_SO_ID);
+};
 
 const getEncryptedSOClient = (server: EntityManagerServerSetup) => {
   return server.encryptedSavedObjects.getClient({

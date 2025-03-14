@@ -198,6 +198,9 @@
           "id": "kibDevTutorialDebugging"
         },
         {
+          "id": "kibDevTutorialDebuggingFipsTestFailures"
+        },
+        {
           "id": "kibDevTutorialBuildingDistributable",
           "label": "Building a Kibana distributable"
         },

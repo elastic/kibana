@@ -30,15 +30,9 @@ export type {
   RuleFlyoutCloseReason,
   RuleTypeParams,
   AsApiContract,
-  AlertsTableProps,
   RuleSummary,
   AlertStatus,
-  AlertsTableConfigurationRegistryContract,
-  AlertsTableFlyoutBaseProps,
   RuleEventLogListProps,
-  AlertTableFlyoutComponent,
-  FieldBrowserOptions,
-  FieldBrowserProps,
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
@@ -71,8 +65,6 @@ export {
 
 export type { ConnectorFormSchema } from './application/sections/action_connector_form';
 
-export { getCategory } from './application/sections/field_browser/helpers';
-
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
 export {
@@ -93,10 +85,6 @@ export {
 } from './application/lib';
 
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
-
-export type { ActionGroupWithCondition } from './application/sections';
-
-export { AlertConditions, AlertConditionsGroup } from './application/sections';
 
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
@@ -145,15 +133,6 @@ export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/rules_app';
 export type { BulkOperationAttributes, BulkOperationResponse } from './types';
 
-export const getNotifyWhenOptions = async () => {
-  const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
-  return NOTIFY_WHEN_OPTIONS;
-};
-
 export { transformRule } from './application/lib/rule_api/common_transformations';
 
 export { validateActionFilterQuery } from './application/lib/value_validators';
-
-export { useBulkUntrackAlerts } from './application/sections/alerts_table/hooks/use_bulk_untrack_alerts';
-
-export { AlertsTableContext } from './application/sections/alerts_table/contexts/alerts_table_context';

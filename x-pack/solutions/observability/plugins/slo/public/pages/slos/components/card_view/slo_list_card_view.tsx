@@ -13,7 +13,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
@@ -44,9 +44,7 @@ const useColumns = () => {
 };
 
 export function SloListCardView({ sloList, loading, error }: Props) {
-  const sloIdsAndInstanceIds = sloList.map(
-    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
-  );
+  const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
@@ -67,7 +65,7 @@ export function SloListCardView({ sloList, loading, error }: Props) {
       {sloList
         .filter((slo) => slo.summary)
         .map((slo) => (
-          <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
+          <EuiFlexItem key={`${slo.id}-${slo.instanceId}`}>
             <SloCardItem
               slo={slo}
               loading={loading}
@@ -78,7 +76,7 @@ export function SloListCardView({ sloList, loading, error }: Props) {
                 historicalSummaries.find(
                   (historicalSummary) =>
                     historicalSummary.sloId === slo.id &&
-                    historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+                    historicalSummary.instanceId === slo.instanceId
                 )?.data
               }
               historicalSummaryLoading={historicalSummaryLoading}

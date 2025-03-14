@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
@@ -324,6 +324,8 @@ export interface GetFieldsOptions {
   forceRefresh?: boolean;
   fieldTypes?: string[];
   includeEmptyFields?: boolean;
+  abortSignal?: AbortSignal;
+  runtimeMappings?: estypes.MappingRuntimeFields;
 }
 
 /**

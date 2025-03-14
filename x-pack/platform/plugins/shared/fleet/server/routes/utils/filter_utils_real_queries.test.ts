@@ -19,12 +19,9 @@ import {
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 
-import { appContextService } from '../../services/app_context';
-
 import { validateFilterKueryNode, validateKuery } from './filter_utils';
 
 jest.mock('../../services/app_context');
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {
@@ -512,14 +509,6 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 });
 
 describe('validateKuery validates real kueries', () => {
-  beforeEach(() => {
-    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-      enableStrictKQLValidation: true,
-    } as any);
-  });
-  afterEach(() => {
-    mockedAppContextService.getExperimentalFeatures.mockReset();
-  });
   describe('Agent policies', () => {
     it('Search by data_output_id', async () => {
       const validationObj = validateKuery(
@@ -828,36 +817,6 @@ describe('validateKuery validates real kueries', () => {
         `policyId1`,
         [FLEET_ENROLLMENT_API_PREFIX],
         ENROLLMENT_API_KEY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
-      expect(validationObj?.error).toEqual(undefined);
-    });
-  });
-  describe('Feature flag enableStrictKQLValidation', () => {
-    beforeEach(() => {
-      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-        enableStrictKQLValidation: false,
-      } as any);
-    });
-
-    it('Allows to skip validation for a free text query', async () => {
-      const validationObj = validateKuery(`test`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
-      expect(validationObj?.isValid).toEqual(true);
-      expect(validationObj?.error).toEqual(undefined);
-    });
-
-    it('Allows to skip validation for a catch all query', async () => {
-      const validationObj = validateKuery(`*`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
-      expect(validationObj?.isValid).toEqual(true);
-      expect(validationObj?.error).toEqual(undefined);
-    });
-
-    it('Allows to skip validation for a disallowed query too', async () => {
-      const validationObj = validateKuery(
-        `non_existent_parameter: 'test_id'`,
-        [AGENTS_PREFIX],
-        AGENT_MAPPINGS,
         true
       );
       expect(validationObj?.isValid).toEqual(true);

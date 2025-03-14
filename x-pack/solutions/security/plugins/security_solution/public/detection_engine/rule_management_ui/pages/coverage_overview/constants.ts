@@ -17,18 +17,6 @@ export const coverageOverviewLegendWidth = 380;
 
 export const coverageOverviewFilterWidth = 300;
 
-/**
- * Rules count -> color map
- *
- * A corresponding color is applied if rules count >= a specific threshold
- */
-export const coverageOverviewCardColorThresholds = [
-  { threshold: 10, color: '#00BFB3' },
-  { threshold: 7, color: '#00BFB399' },
-  { threshold: 3, color: '#00BFB34D' },
-  { threshold: 1, color: '#00BFB326' },
-];
-
 export const ruleActivityFilterDefaultOptions = [
   {
     label: CoverageOverviewRuleActivity.Enabled,

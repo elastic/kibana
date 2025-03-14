@@ -10,7 +10,6 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAccessViewMode,
@@ -20,8 +19,8 @@ import {
   getInheritedViewMode,
   HasUniqueId,
   PublishesUnifiedSearch,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
 } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
@@ -42,8 +41,7 @@ import {
   getUsageCollection,
 } from '../services';
 import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
-
-export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
+import { ACTION_EDIT_IN_LENS } from './constants';
 
 const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {
   defaultMessage: 'Convert to Lens',
@@ -67,12 +65,7 @@ const MenuItem: React.FC = () => {
 type EditInLensActionApi = HasUniqueId &
   HasVisualizeConfig &
   CanAccessViewMode &
-  Partial<
-    PublishesUnifiedSearch &
-      HasExpressionVariables &
-      PublishesPanelTitle &
-      PublishesPanelDescription
-  >;
+  Partial<PublishesUnifiedSearch & HasExpressionVariables & PublishesTitle & PublishesDescription>;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is EditInLensActionApi =>
   apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiHasVisualizeConfig(api);
@@ -108,7 +101,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
     const parentSearchSource = vis.data.searchSource?.getParent();
     const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
     const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
-    const title = vis.title || embeddable.panelTitle?.getValue();
+    const title = vis.title || embeddable.title$?.getValue();
     const panelTimeRange = embeddable.timeRange$?.getValue();
     const updatedWithMeta = {
       ...navigateToLensConfig,
@@ -119,7 +112,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
       searchFilters,
       searchQuery,
       isEmbeddable: true,
-      description: vis.description || embeddable.panelDescription?.getValue(),
+      description: vis.description || embeddable.description$?.getValue(),
       panelTimeRange,
     };
     if (navigateToLensConfig) {
@@ -147,11 +140,11 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
 
   async isCompatible(context: EmbeddableApiContext) {
     const { embeddable } = context;
-    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== ViewMode.EDIT)
+    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== 'edit')
       return false;
 
     const vis = embeddable.getVis();
-    const { visualize } = getCapabilities();
+    const { visualize_v2: visualize } = getCapabilities();
     if (!vis || !visualize.show) {
       return false;
     }

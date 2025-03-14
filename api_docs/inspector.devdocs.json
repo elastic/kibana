@@ -898,6 +898,20 @@
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorOptions.flyoutType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flyoutType",
+            "description": [],
+            "signature": [
+              "\"push\" | \"overlay\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

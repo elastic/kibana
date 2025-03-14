@@ -510,6 +510,39 @@
       },
       {
         "parentPluginId": "@kbn/content-management-favorites-public",
+        "id": "def-public.StardustWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "StardustWrapper",
+        "description": [],
+        "signature": [
+          "({ active, className, children, }: React.PropsWithChildren<{ className?: string | undefined; active: boolean; }>) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/stardust_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-favorites-public",
+            "id": "def-public.StardustWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  active,\n  className,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ className?: string | undefined; active: boolean; }>"
+            ],
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_public/src/components/stardust_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-favorites-public",
         "id": "def-public.useFavorites",
         "type": "Function",
         "tags": [],

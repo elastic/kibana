@@ -6,6 +6,7 @@
  */
 import { DESTINATION_CHART_LABEL, SOURCE_CHART_LABEL } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
+import { getDestinationIpColor, getSourceIpColor } from '../common/utils/unique_ips_palette';
 
 const columnTimestamp = '662cd5e5-82bf-4325-a703-273f84b97e09';
 const columnSourceIp = '5f317308-cfbb-4ee5-bfb9-07653184fabf';
@@ -66,7 +67,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ eu
             yConfig: [
               {
                 forAccessor: columnSourceIp,
-                color: euiTheme.colors.vis.euiColorVis4,
+                color: getSourceIpColor(euiTheme),
               },
             ],
           },
@@ -79,7 +80,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ eu
             yConfig: [
               {
                 forAccessor: columnDestinationIp,
-                color: euiTheme.colors.vis.euiColorVis2,
+                color: getDestinationIpColor(euiTheme),
               },
             ],
           },

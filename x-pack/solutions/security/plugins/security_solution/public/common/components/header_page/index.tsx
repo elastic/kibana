@@ -11,10 +11,10 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   useEuiTheme,
+  euiFontSize,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import styled, { css as styleCss } from 'styled-components';
 
 import type { LinkIconProps } from '../link_icon';
 import { LinkIcon } from '../link_icon';
@@ -29,25 +29,6 @@ interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;
 }
-
-const LinkBack = styled.div.attrs({
-  className: 'securitySolutionHeaderPage__linkBack',
-})`
-  ${({ theme }) => styleCss`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    margin-bottom: ${theme.eui.euiSizeS};
-  `}
-`;
-LinkBack.displayName = 'LinkBack';
-
-const HeaderSection = styled(EuiPageHeaderSection)`
-  // Without  min-width: 0, as a flex child, it wouldn't shrink properly
-  // and could overflow its parent.
-  min-width: 0;
-  max-width: 100%;
-`;
-HeaderSection.displayName = 'HeaderSection';
 
 function Divider(): JSX.Element {
   const { euiTheme } = useEuiTheme();
@@ -81,14 +62,30 @@ export interface HeaderPageProps extends HeaderProps {
   titleNode?: React.ReactElement;
 }
 
+const useHeaderLinkBackStyles = () => {
+  const euiThemeContext = useEuiTheme();
+  const fontSizeXs = euiFontSize(euiThemeContext, 'xs').fontSize;
+  const lineHeightS = euiFontSize(euiThemeContext, 's').lineHeight;
+  const { euiTheme } = euiThemeContext;
+
+  return {
+    linkBack: css`
+      font-size: ${fontSizeXs};
+      line-height: ${lineHeightS};
+      margin-bottom: ${euiTheme.size.s};
+    `,
+  };
+};
+
 export const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(
   ({ backOptions }) => {
+    const styles = useHeaderLinkBackStyles();
     const { navigateToUrl } = useKibana().services.application;
     const { formatUrl } = useFormatUrl(backOptions.pageId);
 
     const backUrl = formatUrl(backOptions.path ?? '');
     return (
-      <LinkBack>
+      <div css={styles.linkBack} className="securitySolutionHeaderPage__linkBack">
         <LinkIcon
           dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
           onClick={(ev: Event) => {
@@ -100,11 +97,20 @@ export const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo
         >
           {backOptions.text}
         </LinkIcon>
-      </LinkBack>
+      </div>
     );
   }
 );
 HeaderLinkBack.displayName = 'HeaderLinkBack';
+
+const headerPageStyles = {
+  // Without  min-width: 0, as a flex child, it wouldn't shrink properly
+  // and could overflow its parent.
+  headerSection: css`
+    min-width: 0;
+    max-width: 100%;
+  `,
+};
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   backOptions,
@@ -121,7 +127,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
 }) => (
   <>
     <EuiPageHeader alignItems="center" rightSideItems={rightSideItems}>
-      <HeaderSection>
+      <EuiPageHeaderSection css={headerPageStyles.headerSection}>
         {backOptions && <HeaderLinkBack backOptions={backOptions} />}
         {!backOptions && backComponent && <>{backComponent}</>}
 
@@ -134,7 +140,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           </>
         )}
         {border && isLoading && <EuiProgress size="xs" color="accent" />}
-      </HeaderSection>
+      </EuiPageHeaderSection>
 
       {children && (
         <EuiPageHeaderSection data-test-subj="header-page-supplements">

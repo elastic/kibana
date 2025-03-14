@@ -940,7 +940,6 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
-          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -990,7 +989,6 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
-          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1040,7 +1038,6 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
-          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1091,7 +1088,6 @@ describe('SourceDestinationIp', () => {
           destinationIp={undefined}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
-          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1241,7 +1237,6 @@ describe('SourceDestinationIp', () => {
           destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, getMockNetflowData()))}
           destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, getMockNetflowData()))}
           eventId={get(ID_FIELD_NAME, getMockNetflowData())}
-          isDraggable={true}
           sourceGeoContinentName={asArrayIfExists(
             get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
           )}
@@ -1264,7 +1259,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('draggable-content-source.geo.continent_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-source.geo.continent_name').textContent).toBe(
       'North America'
     );
   });

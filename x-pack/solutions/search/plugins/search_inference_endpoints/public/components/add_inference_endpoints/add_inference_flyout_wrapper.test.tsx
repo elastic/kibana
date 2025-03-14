@@ -5,84 +5,57 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import InferenceFlyoutWrapper from '@kbn/inference-endpoint-ui-common';
+import { coreMock as mockCore } from '@kbn/core/public/mocks';
+import { useKibana } from '../../hooks/use_kibana';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-
+import { render, screen } from '@testing-library/react';
 import { AddInferenceFlyoutWrapper } from './add_inference_flyout_wrapper';
-import { mockProviders } from '../../utils/test_utils/test_utils';
 
-const mockAddEndpoint = jest.fn();
-const onClose = jest.fn();
-jest.mock('../../hooks/use_add_endpoint', () => ({
-  useAddEndpoint: () => ({
-    mutate: mockAddEndpoint.mockImplementation(() => Promise.resolve()),
-  }),
-}));
+jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/inference-endpoint-ui-common');
 
-jest.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => ({
-  useProviders: jest.fn(() => ({
-    data: mockProviders,
-  })),
-}));
+const mockUseKibana = useKibana as jest.Mock;
+const mockInferenceFlyoutWrapper = InferenceFlyoutWrapper as jest.Mock;
 
-const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
-  const { form } = useForm();
-  return (
-    <I18nProvider>
-      <Form form={form}>{children}</Form>
-    </I18nProvider>
-  );
-};
+describe('AddInferenceFlyoutWrapper', () => {
+  const mockServices = mockCore.createStart();
+  const mockOnFlyoutClose = jest.fn();
+  const mockReloadFn = jest.fn();
 
-// Failing: See https://github.com/elastic/kibana/issues/205201
-describe.skip('AddInferenceFlyout', () => {
-  it('renders', () => {
-    render(
-      <MockFormProvider>
-        <AddInferenceFlyoutWrapper onClose={onClose} />
-      </MockFormProvider>
-    );
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: mockServices,
+    });
 
-    expect(screen.getByTestId('create-inference-flyout')).toBeInTheDocument();
-    expect(screen.getByTestId('create-inference-flyout-header')).toBeInTheDocument();
-    expect(screen.getByTestId('create-inference-flyout-header')).toBeInTheDocument();
-    expect(screen.getByTestId('provider-select')).toBeInTheDocument();
-    expect(screen.getByTestId('add-inference-endpoint-submit-button')).toBeInTheDocument();
-    expect(screen.getByTestId('create-inference-flyout-close-button')).toBeInTheDocument();
+    mockInferenceFlyoutWrapper.mockImplementation(({ onSubmitSuccess }) => {
+      return (
+        <div data-testid="mock-inference-flyout">
+          <button onClick={() => onSubmitSuccess()}>Trigger Success</button>
+        </div>
+      );
+    });
   });
 
-  it('invalidates form if no provider is selected', async () => {
-    render(
-      <MockFormProvider>
-        <AddInferenceFlyoutWrapper onClose={onClose} />
-      </MockFormProvider>
-    );
+  it('renders InferenceFlyoutWrapper with correct props', () => {
+    render(<AddInferenceFlyoutWrapper onFlyoutClose={mockOnFlyoutClose} reloadFn={mockReloadFn} />);
 
-    await userEvent.click(screen.getByTestId('add-inference-endpoint-submit-button'));
-    expect(screen.getByText('Provider is required.')).toBeInTheDocument();
-    expect(mockAddEndpoint).not.toHaveBeenCalled();
-    expect(screen.getByTestId('add-inference-endpoint-submit-button')).toBeDisabled();
+    expect(mockInferenceFlyoutWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        onFlyoutClose: mockOnFlyoutClose,
+        http: mockServices.http,
+        toasts: mockServices.notifications.toasts,
+        onSubmitSuccess: expect.any(Function),
+      }),
+      expect.any(Object)
+    );
   });
 
-  it('valid submission', async () => {
-    render(
-      <MockFormProvider>
-        <AddInferenceFlyoutWrapper onClose={onClose} />
-      </MockFormProvider>
-    );
+  it('calls reloadFn when onSubmitSuccess is triggered', () => {
+    render(<AddInferenceFlyoutWrapper onFlyoutClose={mockOnFlyoutClose} reloadFn={mockReloadFn} />);
 
-    await userEvent.click(screen.getByTestId('provider-select'));
-    await userEvent.click(screen.getByText('Anthropic'));
-    await userEvent.type(await screen.findByTestId('api_key-password'), 'test api passcode');
-    await userEvent.type(
-      await screen.findByTestId('model_id-input'),
-      'sample model name from Anthropic'
-    );
-
-    await userEvent.click(screen.getByTestId('add-inference-endpoint-submit-button'));
-    expect(mockAddEndpoint).toHaveBeenCalled();
-  }, 10e3);
+    screen.getByText('Trigger Success').click();
+    expect(mockReloadFn).toHaveBeenCalled();
+  });
 });

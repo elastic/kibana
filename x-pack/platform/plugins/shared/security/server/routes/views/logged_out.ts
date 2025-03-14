@@ -20,7 +20,19 @@ export function defineLoggedOutRoutes({
     {
       path: '/security/logged_out',
       validate: false,
-      options: { authRequired: false, excludeFromOAS: true },
+      options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is a host for the logged out view.',
+        },
+        authc: {
+          enabled: false,
+          reason:
+            'This route is opted out from authentication because it is a host for the logged out view.',
+        },
+      },
     },
     async (context, request, response) => {
       // Authentication flow isn't triggered automatically for this route, so we should explicitly

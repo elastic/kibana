@@ -312,6 +312,7 @@ class EndpointMetadataProcessor {
       system_impact: systemImpact,
       threads,
       event_filter: eventFilter,
+      top_process_trees: topProcessTrees,
     } = endpointMetric.Endpoint.metrics;
     const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
     if (endpointPolicyDetail) {
@@ -336,6 +337,7 @@ class EndpointMetadataProcessor {
         systemImpact,
         threads,
         eventFilter,
+        topProcessTrees,
       },
       endpoint_meta: {
         os: endpointMetric.host.os,

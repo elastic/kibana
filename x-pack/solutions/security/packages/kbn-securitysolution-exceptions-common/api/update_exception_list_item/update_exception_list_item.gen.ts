@@ -28,6 +28,7 @@ import {
   ExceptionListItemOsTypeArray,
   ExceptionListItemTags,
   ExceptionListItemMeta,
+  ExceptionListItemExpireTime,
   ExceptionListItem,
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
@@ -62,8 +63,11 @@ export const UpdateExceptionListItemRequestBody = z.object({
   os_types: ExceptionListItemOsTypeArray.optional().default([]),
   tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),
-  expire_time: z.string().datetime().optional(),
+  expire_time: ExceptionListItemExpireTime.optional(),
   comments: UpdateExceptionListItemCommentArray.optional().default([]),
+  /**
+   * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
+   */
   _version: z.string().optional(),
 });
 export type UpdateExceptionListItemRequestBodyInput = z.input<

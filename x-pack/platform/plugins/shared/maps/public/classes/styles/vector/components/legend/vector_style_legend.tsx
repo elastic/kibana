@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { StyleError } from './style_error';
 import {
   DynamicStyleProperty,
@@ -36,6 +35,7 @@ export function VectorStyleLegend({
   svg,
 }: Props) {
   const legendRows = [];
+  const { euiTheme } = useEuiTheme();
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()
@@ -89,10 +89,7 @@ export function VectorStyleLegend({
         </EuiText>
         <ul>
           {masksByFieldOrigin.map((mask) => (
-            <li
-              key={mask.getEsAggField().getMbFieldName()}
-              style={{ marginLeft: euiThemeVars.euiSizeS }}
-            >
+            <li key={mask.getEsAggField().getMbFieldName()} style={{ marginLeft: euiTheme.size.s }}>
               <MaskLegend
                 esAggField={mask.getEsAggField()}
                 onlyShowLabelAndValue={true}

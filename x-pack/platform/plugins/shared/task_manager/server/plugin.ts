@@ -7,21 +7,13 @@
 
 import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
   UsageCounter,
 } from '@kbn/usage-collection-plugin/server';
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  Logger,
-  CoreStart,
-  ServiceStatusLevels,
-  CoreStatus,
-} from '@kbn/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
@@ -35,7 +27,6 @@ import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
@@ -48,10 +39,12 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
+import { calculateStartingCapacity } from './lib/create_managed_configuration';
 import {
   registerMarkRemovedTasksAsUnrecognizedDefinition,
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
+import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 
 export interface TaskManagerSetupContract {
   /**
@@ -144,7 +137,16 @@ export class TaskManagerPlugin
     core: CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>,
     plugins: TaskManagerPluginsSetup
   ): TaskManagerSetupContract {
-    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+    const clusterClientPromise = core
+      .getStartServices()
+      .then(([coreServices]) => coreServices.elasticsearch.client);
+    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability({
+      core$: core.status.core$,
+      isServerless,
+      logger: this.logger,
+      getClusterClient: () => clusterClientPromise,
+    });
 
     core.metrics
       .getOpsMetrics$()
@@ -165,10 +167,6 @@ export class TaskManagerPlugin
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
 
-    const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
-      elasticsearch: coreServices.elasticsearch,
-    }));
-
     this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
 
     // Routes
@@ -182,8 +180,7 @@ export class TaskManagerPlugin
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
-      getClusterClient: () =>
-        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+      getClusterClient: () => clusterClientPromise,
       shouldRunTasks: this.shouldRunBackgroundTasks,
       docLinks: core.docLinks,
       numOfKibanaInstances$: this.numOfKibanaInstances$,
@@ -197,8 +194,7 @@ export class TaskManagerPlugin
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
-      getClusterClient: () =>
-        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+      getClusterClient: () => clusterClientPromise,
     });
     metricsRoute({
       router,
@@ -325,12 +321,7 @@ export class TaskManagerPlugin
       }`
     );
 
-    const managedConfiguration = createManagedConfiguration({
-      config: this.config!,
-      errors$: taskStore.errors$,
-      defaultCapacity,
-      logger: this.logger,
-    });
+    const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
@@ -357,8 +348,8 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-        ...managedConfiguration,
         taskPartitioner,
+        startingCapacity,
       });
     }
 
@@ -366,11 +357,11 @@ export class TaskManagerPlugin
       taskStore,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       config: this.config!,
-      managedConfig: managedConfiguration,
       logger: this.logger,
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      startingCapacity,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
     metricsStream({
@@ -426,17 +417,4 @@ export class TaskManagerPlugin
       }
     }
   }
-}
-
-export function getElasticsearchAndSOAvailability(
-  core$: Observable<CoreStatus>
-): Observable<boolean> {
-  return core$.pipe(
-    map(
-      ({ elasticsearch, savedObjects }) =>
-        elasticsearch.level === ServiceStatusLevels.available &&
-        savedObjects.level === ServiceStatusLevels.available
-    ),
-    distinctUntilChanged()
-  );
 }

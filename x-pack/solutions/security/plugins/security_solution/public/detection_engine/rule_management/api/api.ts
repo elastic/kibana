@@ -15,14 +15,14 @@ import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
-  UpgradeSpecificRulesRequest,
-  PickVersionValues,
   PerformRuleUpgradeResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
   GetPrebuiltRulesStatusResponseBody,
   ReviewRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
+  ReviewRuleUpgradeRequestBody,
+  PerformRuleUpgradeRequestBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   BulkDuplicateRules,
@@ -31,15 +31,16 @@ import type {
   BulkManualRuleRun,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
+  BulkActionsDryRunErrCode,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   RULE_MANAGEMENT_FILTERS_URL,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   BulkActionTypeEnum,
 } from '../../../../common/api/detection_engine/rule_management';
-import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_IMPORT_URL,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
@@ -186,6 +187,7 @@ export const fetchRules = async ({
     page: 1,
     perPage: 20,
   },
+  gapsRange,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
@@ -195,6 +197,7 @@ export const fetchRules = async ({
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
+    ...(gapsRange ? { gaps_range_start: gapsRange.start, gaps_range_end: gapsRange.end } : {}),
     ...(kql !== '' ? { filter: kql } : {}),
   };
 
@@ -455,21 +458,18 @@ export const importRules = async ({
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportDataResponse>(
-    `${DETECTION_ENGINE_RULES_URL}/_import`,
-    {
-      method: 'POST',
-      version: '2023-10-31',
-      headers: { 'Content-Type': undefined },
-      query: {
-        overwrite,
-        overwrite_exceptions: overwriteExceptions,
-        overwrite_action_connectors: overwriteActionConnectors,
-      },
-      body: formData,
-      signal,
-    }
-  );
+  return KibanaServices.get().http.fetch<ImportDataResponse>(DETECTION_ENGINE_RULES_IMPORT_URL, {
+    method: 'POST',
+    version: '2023-10-31',
+    headers: { 'Content-Type': undefined },
+    query: {
+      overwrite,
+      overwrite_exceptions: overwriteExceptions,
+      overwrite_action_connectors: overwriteActionConnectors,
+    },
+    body: formData,
+    signal,
+  });
 };
 
 /**
@@ -637,13 +637,16 @@ export const getPrebuiltRulesStatus = async ({
  */
 export const reviewRuleUpgrade = async ({
   signal,
+  request,
 }: {
   signal: AbortSignal | undefined;
+  request: ReviewRuleUpgradeRequestBody;
 }): Promise<ReviewRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(REVIEW_RULE_UPGRADE_URL, {
     method: 'POST',
     version: '1',
     signal,
+    body: JSON.stringify(request),
   });
 
 /**
@@ -685,23 +688,13 @@ export const performInstallSpecificRules = async (
     }),
   });
 
-export interface PerformUpgradeRequest {
-  rules: UpgradeSpecificRulesRequest['rules'];
-  pickVersion: PickVersionValues;
-}
-
-export const performUpgradeSpecificRules = async ({
-  rules,
-  pickVersion,
-}: PerformUpgradeRequest): Promise<PerformRuleUpgradeResponseBody> =>
+export const performUpgradeRules = async (
+  body: PerformRuleUpgradeRequestBody
+): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
     version: '1',
-    body: JSON.stringify({
-      mode: 'SPECIFIC_RULES',
-      rules,
-      pick_version: pickVersion,
-    }),
+    body: JSON.stringify(body),
   });
 
 export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesResponse> =>

@@ -6,9 +6,9 @@
  */
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type { DeepPartial } from '@kbn/utility-types';
+import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import type {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -22,8 +22,8 @@ import {
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import { Alert as LegacyAlert } from '../alert/alert';
-import {
+import type { Alert as LegacyAlert } from '../alert/alert';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   AlertsFilter,
@@ -32,11 +32,11 @@ import {
   RuleAlertData,
   WithoutReservedActionGroups,
 } from '../types';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
   consumer: string;
@@ -74,20 +74,20 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAlerts(opts: ProcessAlertsOpts): void;
+  processAlerts(): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
-    type: 'new' | 'active' | 'activeCurrent'
+    type: 'new' | 'active' | 'trackedActiveAlerts'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds>> | {};
   getProcessedAlerts(
-    type: 'recovered' | 'recoveredCurrent'
+    type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
-  getAlertsToSerialize(): {
-    alertsToReturn: Record<string, RawAlertInstance>;
-    recoveredAlertsToReturn: Record<string, RawAlertInstance>;
+  getRawAlertInstancesForState(): {
+    rawActiveAlerts: Record<string, RawAlertInstance>;
+    rawRecoveredAlerts: Record<string, RawAlertInstance>;
   };
   factory(): PublicAlertFactory<
     State,
@@ -100,6 +100,8 @@ export interface IAlertsClient<
     Context,
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   > | null;
+  determineFlappingAlerts(): void;
+  determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -111,12 +113,10 @@ export interface ProcessAndLogAlertsOpts {
   alertDelay: number;
 }
 
-export interface ProcessAlertsOpts {
-  flappingSettings: RulesSettingsFlappingProperties;
+export interface DetermineDelayedAlertsOpts {
   alertDelay: number;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }
-
 export interface LogAlertsOpts {
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -221,12 +221,13 @@ export type UpdateAlertsMaintenanceWindowIdByScopedQueryParams =
 export type GetAlertsQueryParams = Omit<
   GetSummarizedAlertsParams,
   'formatAlert' | 'isLifecycleAlert' | 'spaceId'
->;
+> & { maxAlertLimit: number };
 
 export interface GetLifecycleAlertsQueryByExecutionUuidParams {
   executionUuid: string;
   ruleId: string;
   excludedAlertInstanceIds: string[];
+  maxAlertLimit: number;
   alertsFilter?: AlertsFilter | null;
 }
 
@@ -239,6 +240,7 @@ export interface GetQueryByScopedQueriesParams {
   ruleId: string;
   executionUuid: string;
   maintenanceWindows: MaintenanceWindow[];
+  maxAlertLimit: number;
   action?: string;
 }
 
@@ -246,6 +248,7 @@ export interface GetMaintenanceWindowAlertsQueryParams {
   ruleId: string;
   maintenanceWindows: MaintenanceWindow[];
   executionUuid: string;
+  maxAlertLimit: number;
   action?: string;
 }
 
@@ -254,6 +257,7 @@ export interface GetLifecycleAlertsQueryByTimeRangeParams {
   end: Date;
   ruleId: string;
   excludedAlertInstanceIds: string[];
+  maxAlertLimit: number;
   alertsFilter?: AlertsFilter | null;
 }
 

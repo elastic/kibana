@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { unmountComponentAtNode } from 'react-dom';
+import type { SaveModalContainerProps } from '@kbn/lens-plugin/public/async_services';
 import { useKibana } from '../../lib/kibana';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
@@ -21,7 +21,7 @@ export const useSaveToLibrary = ({
   attributes: LensAttributes | undefined | null;
 }) => {
   const startServices = useKibana().services;
-  const canSaveVisualization = !!startServices.application.capabilities.visualize?.save;
+  const canSaveVisualization = !!startServices.application.capabilities.visualize_v2?.save;
   const { SaveModalComponent } = startServices.lens;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { redirectTo, getEditOrCreateDashboardPath } = useRedirectToDashboardFromLens({
@@ -32,7 +32,7 @@ export const useSaveToLibrary = ({
     const targetDomElement = document.createElement('div');
     const mount = toMountPoint(
       <SaveModalComponent
-        initialInput={attributes as unknown as LensEmbeddableInput}
+        initialInput={{ attributes } as SaveModalContainerProps['initialInput']}
         onSave={() => unmountComponentAtNode(targetDomElement)}
         onClose={() => unmountComponentAtNode(targetDomElement)}
         originatingApp={APP_UI_ID}

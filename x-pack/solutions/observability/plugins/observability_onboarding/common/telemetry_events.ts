@@ -7,19 +7,23 @@
 
 import type { EventTypeOpts, SchemaValue } from '@elastic/ebt/client';
 
-interface ObservabilityOnboardingIntegrationTelemetryFields {
-  installSource: string;
-  pkgName: string;
-  pkgVersion: string;
-  title: string;
-}
-
 interface FlowEventFields {
-  flow?: string;
-  step?: string;
-  step_status?: string;
+  flow_type: string;
+  flow_id: string;
+  step: string;
+  step_status: string;
   step_message?: string;
-  uses_legacy_onboarding_page: boolean;
+  payload?: {
+    integrations?: Array<{
+      installSource: string;
+      pkgName: string;
+      pkgVersion: string;
+      title: string;
+    }>;
+    agentId?: string;
+    os?: string;
+    arch?: string;
+  };
 }
 
 type ObservabilityOnboardingTelemetryEvent = EventTypeOpts<FlowEventFields>;
@@ -27,26 +31,29 @@ type ObservabilityOnboardingTelemetryEvent = EventTypeOpts<FlowEventFields>;
 export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: ObservabilityOnboardingTelemetryEvent = {
   eventType: 'observability_onboarding',
   schema: {
-    flow: {
+    flow_type: {
       type: 'keyword',
       _meta: {
         description:
-          "The current onboarding flow user is going through (e.g. 'system_logs', 'nginx'). If not present, user is on the landing screen.",
-        optional: true,
+          "The current onboarding flow type user is going through (e.g. 'autoDetect', 'logFiles', 'kubernetes'). If not present, user is on the landing screen.",
+      },
+    },
+    flow_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier of the current onboarding session',
       },
     },
     step: {
       type: 'keyword',
       _meta: {
         description: 'The current step in the onboarding flow.',
-        optional: true,
       },
     },
     step_status: {
       type: 'keyword',
       _meta: {
         description: 'The status of the step in the onboarding flow.',
-        optional: true,
       },
     },
     step_message: {
@@ -56,10 +63,62 @@ export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: ObservabilityOnboardingTe
         optional: true,
       },
     },
-    uses_legacy_onboarding_page: {
-      type: 'boolean',
+    payload: {
+      properties: {
+        integrations: {
+          type: 'array',
+          items: {
+            properties: {
+              installSource: {
+                type: 'keyword',
+                _meta: {
+                  description:
+                    'The source of the package used to create the integration. Usually "registry" or "custom".',
+                },
+              },
+              pkgName: {
+                type: 'keyword',
+                _meta: {
+                  description: 'The name of the package used to create the integration.',
+                },
+              },
+              pkgVersion: {
+                type: 'keyword',
+                _meta: {
+                  description: 'The version of the package used to create the integration.',
+                },
+              },
+              title: { type: 'keyword', _meta: { description: 'The visual name of the package.' } },
+            },
+          },
+          _meta: {
+            optional: true,
+          },
+        },
+        agentId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The ID of the Elastic Agent installed on the host.',
+            optional: true,
+          },
+        },
+        os: {
+          type: 'keyword',
+          _meta: {
+            description: 'OS used by the host.',
+            optional: true,
+          },
+        },
+        arch: {
+          type: 'keyword',
+          _meta: {
+            description: 'Architecture used by the host.',
+            optional: true,
+          },
+        },
+      },
       _meta: {
-        description: 'Whether the user is using the legacy onboarding page or the new one',
+        optional: true,
       },
     },
   },
@@ -86,48 +145,6 @@ export const OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT: EventTypeOpts<{
     },
   },
 };
-
-type ObservabilityOnboardingAutodetectTelemetryEvent = EventTypeOpts<
-  FlowEventFields & {
-    integrations?: ObservabilityOnboardingIntegrationTelemetryFields[];
-  }
->;
-
-export const OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT: ObservabilityOnboardingAutodetectTelemetryEvent =
-  {
-    eventType: 'observability_onboarding_autodetect',
-    schema: {
-      ...OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.schema,
-      integrations: {
-        type: 'array',
-        items: {
-          properties: {
-            installSource: {
-              type: 'keyword',
-              _meta: {
-                description:
-                  'The source of the package used to create the integration. Usually "registry" or "custom".',
-              },
-            },
-            pkgName: {
-              type: 'keyword',
-              _meta: {
-                description: 'The name of the package used to create the integration.',
-              },
-            },
-            pkgVersion: {
-              type: 'keyword',
-              _meta: { description: 'The version of the package used to create the integration.' },
-            },
-            title: { type: 'keyword', _meta: { description: 'The visual name of the package.' } },
-          },
-        },
-        _meta: {
-          optional: true,
-        },
-      },
-    },
-  };
 
 interface OnboardingFirehoseFlowEventContext {
   selectedCreateStackOption?: string;

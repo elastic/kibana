@@ -32,15 +32,11 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
       const accessAPIKeyBody = await esClient.security.createApiKey({
-        body: {
-          name: `test access api key: ${uuidv4()}`,
-        },
+        name: `test access api key: ${uuidv4()}`,
       });
       accessAPIKeyId = accessAPIKeyBody.id;
       const outputAPIKeyBody = await esClient.security.createApiKey({
-        body: {
-          name: `test output api key: ${uuidv4()}`,
-        },
+        name: `test output api key: ${uuidv4()}`,
       });
       outputAPIKeyId = outputAPIKeyBody.id;
       const { _source: agentDoc } = await esClient.get({
@@ -60,9 +56,7 @@ export default function (providerContext: FtrProviderContext) {
         index: '.fleet-agents',
         id: 'agent1',
         refresh: true,
-        body: {
-          doc: agentDoc,
-        },
+        doc: agentDoc,
       });
     });
     afterEach(async () => {
@@ -195,12 +189,10 @@ export default function (providerContext: FtrProviderContext) {
         id: 'agent4',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_id: 'policy1',
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
-          },
+        doc: {
+          policy_id: 'policy1',
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
         },
       });
       // unenroll all agents that had last checkin before "now"
@@ -223,12 +215,10 @@ export default function (providerContext: FtrProviderContext) {
         id: 'agent4',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_id: 'policy1',
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
-          },
+        doc: {
+          policy_id: 'policy1',
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
         },
       });
       // agent inactive through enrolled_at as no last_checkin

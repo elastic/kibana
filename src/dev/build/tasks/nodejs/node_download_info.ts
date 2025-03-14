@@ -22,7 +22,8 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
     } else {
       variants = ['glibc-217'];
     }
-    if (platform.isServerless()) variants.push('pointer-compression');
+    // disabled, see https://github.com/nodejs/node/issues/54531
+    // if (platform.isServerless()) variants.push('pointer-compression');
   }
 
   return variants.map((variant) => {

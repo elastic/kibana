@@ -7,6 +7,7 @@
 
 import { get } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EsQueryConfig } from '@kbn/es-query';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { CustomThresholdAlert } from '../../types';
 import { getGroupFilters } from '../../../../../../common/custom_threshold_rule/helpers/get_group';
@@ -32,7 +33,8 @@ const getKuery = (metrics: CustomThresholdExpressionMetric[], filter?: string) =
 };
 
 export const getLogRateAnalysisEQQuery = (
-  alert: CustomThresholdAlert
+  alert: CustomThresholdAlert,
+  config: EsQueryConfig
 ): QueryDslQueryContainer | undefined => {
   const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
   // We only show log rate analysis for one condition with one count aggregation
@@ -50,6 +52,7 @@ export const getLogRateAnalysisEQQuery = (
   const boolQuery = buildEsQuery({
     kuery: getKuery(ruleParams.criteria[0].metrics, optionalFilter),
     filters: groupByFilters,
+    config,
   });
 
   return boolQuery;

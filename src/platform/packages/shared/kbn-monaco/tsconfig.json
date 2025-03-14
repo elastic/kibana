@@ -2,32 +2,15 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "src/**/*",
-    "**/*.ts",
-    "src/painless/autocomplete_definitions/boolean_script_field_script_field.json",
-    "src/painless/autocomplete_definitions/common.json",
-    "src/painless/autocomplete_definitions/date_script_field.json",
-    "src/painless/autocomplete_definitions/double_script_field_script_field.json",
-    "src/painless/autocomplete_definitions/filter.json",
-    "src/painless/autocomplete_definitions/ip_script_field_script_field.json",
-    "src/painless/autocomplete_definitions/long_script_field_script_field.json",
-    "src/painless/autocomplete_definitions/processor_conditional.json",
-    "src/painless/autocomplete_definitions/score.json",
-    "src/painless/autocomplete_definitions/string_script_field_script_field.json",
-  ],
+  "include": ["src/**/*", "**/*.ts", "src/languages/painless/autocomplete_definitions/*.json"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/repo-info",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

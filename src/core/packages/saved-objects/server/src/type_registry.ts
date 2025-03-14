@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectsType } from './saved_objects_type';
-
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
  */
@@ -90,4 +89,10 @@ export interface ISavedObjectTypeRegistry {
    * `false` if the type is not registered or does not define a management section.
    */
   isImportableAndExportable(type: string): boolean;
+
+  /**
+   * Returns the `nameAttribute` property for given type, or `unknown` if
+   * the property/type is not registered.
+   */
+  getNameAttribute(type: string): string;
 }

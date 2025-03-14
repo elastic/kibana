@@ -7,7 +7,7 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType, AggregationResultOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
 import { kqlQuery } from '../../utils/es_queries';
 

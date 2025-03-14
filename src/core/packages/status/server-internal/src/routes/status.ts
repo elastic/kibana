@@ -90,6 +90,7 @@ export const registerStatusRoute = ({
         tags: ['api', 'security:acceptJWT', 'oas-tag:system'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
         summary: `Get Kibana's current status`,
+        excludeFromRateLimiter: true,
       },
       validate: {
         request: {

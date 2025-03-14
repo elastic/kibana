@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 export type IdField = z.infer<typeof IdField>;
-export const IdField = z.enum(['host.name', 'user.name', 'service.name', 'related.entity']);
+export const IdField = z.enum(['host.name', 'user.name', 'service.name']);
 export type IdFieldEnum = typeof IdField.enum;
 export const IdFieldEnum = IdField.enum;
 

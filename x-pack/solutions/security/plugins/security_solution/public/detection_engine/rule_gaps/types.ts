@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
+
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 
 export type Backfill = FindBackfillResponseBody['data']['0'];
 
 export type BackfillStatus = Backfill['status'];
+
+export type Gap = FindGapsResponseBody['data']['0'];
+export type GapStatus = Gap['status'];
 
 export interface BackfillStats {
   total: number;

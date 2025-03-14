@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllRenderables } from '../../../state/actions/elements';
 import { getInFlight } from '../../../state/selectors/resolved_args';
 import { ToolTipShortcut } from '../../tool_tip_shortcut';
+import { useCanvasApi } from '../../hooks/use_canvas_api';
 
 const strings = {
   getRefreshAriaLabel: () =>
@@ -30,7 +31,11 @@ const strings = {
 export const RefreshControl = () => {
   const dispatch = useDispatch();
   const inFlight = useSelector(getInFlight);
-  const doRefresh = useCallback(() => dispatch(fetchAllRenderables()), [dispatch]);
+  const canvasApi = useCanvasApi();
+  const doRefresh = useCallback(() => {
+    canvasApi.reload();
+    dispatch(fetchAllRenderables());
+  }, [canvasApi, dispatch]);
 
   return (
     <EuiToolTip

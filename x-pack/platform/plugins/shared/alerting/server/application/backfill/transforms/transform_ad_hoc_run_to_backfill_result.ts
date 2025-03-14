@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type { AdHocRun, AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { createBackfillError } from '../../../backfill_client/lib';
-import { ScheduleBackfillResult } from '../methods/schedule/types';
+import type { ScheduleBackfillResult } from '../methods/schedule/types';
+import { transformRawActionsToDomainActions } from '../../rule/transforms';
 
-export const transformAdHocRunToBackfillResult = (
-  { id, attributes, references, error }: SavedObject<AdHocRunSO>,
-  originalSO?: SavedObjectsBulkCreateObject<AdHocRunSO>
-): ScheduleBackfillResult => {
+interface TransformAdHocRunToBackfillResultOpts {
+  adHocRunSO: SavedObject<AdHocRunSO>;
+  isSystemAction: (connectorId: string) => boolean;
+  originalSO?: SavedObjectsBulkCreateObject<AdHocRunSO>;
+  omitGeneratedActionValues?: boolean;
+}
+
+export const transformAdHocRunToBackfillResult = ({
+  adHocRunSO,
+  isSystemAction,
+  originalSO,
+  omitGeneratedActionValues = true,
+}: TransformAdHocRunToBackfillResultOpts): ScheduleBackfillResult => {
+  const { id, attributes, references, error } = adHocRunSO;
   const ruleId = references?.[0]?.id ?? originalSO?.references?.[0]?.id ?? 'unknown';
   const ruleName = attributes?.rule?.name ?? originalSO?.attributes?.rule.name;
   if (error) {
@@ -55,10 +66,38 @@ export const transformAdHocRunToBackfillResult = (
     rule: {
       ...attributes.rule,
       id: references[0].id,
+      actions: transformRawActionsToDomainActions({
+        ruleId: id,
+        actions: attributes.rule.actions,
+        references,
+        isSystemAction,
+        omitGeneratedValues: omitGeneratedActionValues,
+      }),
     },
     spaceId: attributes.spaceId,
     start: attributes.start,
     status: attributes.status,
     schedule: attributes.schedule,
   };
+};
+
+// includes API key information
+export const transformAdHocRunToAdHocRunData = ({
+  adHocRunSO,
+  isSystemAction,
+  originalSO,
+  omitGeneratedActionValues = true,
+}: TransformAdHocRunToBackfillResultOpts): AdHocRun => {
+  const result = transformAdHocRunToBackfillResult({
+    adHocRunSO,
+    isSystemAction,
+    originalSO,
+    omitGeneratedActionValues,
+  });
+
+  return {
+    ...result,
+    apiKeyId: adHocRunSO.attributes.apiKeyId,
+    apiKeyToUse: adHocRunSO.attributes.apiKeyToUse,
+  } as AdHocRun;
 };

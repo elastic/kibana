@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IEvent } from '@kbn/event-log-plugin/server';
-import { AlertInstanceState } from '../types';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { IEvent } from '@kbn/event-log-plugin/server';
+import type { AlertInstanceState } from '../types';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export type Event = Exclude<IEvent, undefined>;
 
@@ -44,6 +44,13 @@ interface CreateAlertEventLogRecordParams {
   };
   maintenanceWindowIds?: string[];
   ruleRevision?: number;
+  gap?: {
+    status: string;
+    range: {
+      gte: string;
+      lte: string;
+    };
+  };
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -64,6 +71,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     alertSummary,
     maintenanceWindowIds,
     ruleRevision,
+    gap,
   } = params;
   const alerting =
     params.instanceId || group || alertSummary
@@ -109,6 +117,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
                 },
               }
             : {}),
+          ...(gap ? { gap } : {}),
         },
       },
       ...(alerting ? alerting : {}),

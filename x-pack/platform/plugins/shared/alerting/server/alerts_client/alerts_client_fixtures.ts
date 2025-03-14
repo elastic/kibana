@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
   UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
 } from './types';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
-import { AlertRuleData } from '.';
-import { AlertsFilter } from '../types';
+import type { AlertRuleData } from '.';
+import type { AlertsFilter } from '../types';
 
 export const alertRuleData: AlertRuleData = {
   consumer: 'bar',
@@ -129,67 +129,66 @@ export const getExpectedQueryByExecutionUuid = ({
   excludedAlertInstanceIds?: string[];
   alertsFilter?: AlertsFilter;
 }) => ({
-  body: {
-    query: {
-      bool: {
-        filter: [
-          { term: { 'kibana.alert.rule.execution.uuid': uuid } },
-          { term: { 'kibana.alert.rule.uuid': ruleId } },
-          {
-            bool: { must_not: { exists: { field: 'kibana.alert.maintenance_window_ids' } } },
-          },
-          ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
-          ...(!!excludedAlertInstanceIds?.length
-            ? [
-                {
-                  bool: {
-                    must_not: {
-                      terms: {
-                        'kibana.alert.instance.id': excludedAlertInstanceIds,
-                      },
+  query: {
+    bool: {
+      filter: [
+        { term: { 'kibana.alert.rule.execution.uuid': uuid } },
+        { term: { 'kibana.alert.rule.uuid': ruleId } },
+        {
+          bool: { must_not: { exists: { field: 'kibana.alert.maintenance_window_ids' } } },
+        },
+        ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
+        ...(!!excludedAlertInstanceIds?.length
+          ? [
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      'kibana.alert.instance.id': excludedAlertInstanceIds,
                     },
                   },
                 },
-              ]
-            : []),
-          ...(alertsFilter
-            ? [
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        match: {
-                          [alertsFilter.query!.kql.split(':')[0]]:
-                            alertsFilter.query!.kql.split(':')[1],
-                        },
+              },
+            ]
+          : []),
+        ...(alertsFilter
+          ? [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        [alertsFilter.query!.kql.split(':')[0]]:
+                          alertsFilter.query!.kql.split(':')[1],
                       },
-                    ],
-                  },
-                },
-                {
-                  script: {
-                    script: {
-                      params: {
-                        datetimeField: '@timestamp',
-                        days: alertsFilter.timeframe?.days,
-                        timezone: alertsFilter.timeframe!.timezone,
-                      },
-                      source:
-                        'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                     },
+                  ],
+                },
+              },
+              {
+                script: {
+                  script: {
+                    params: {
+                      datetimeField: '@timestamp',
+                      days: alertsFilter.timeframe?.days,
+                      timezone: alertsFilter.timeframe!.timezone,
+                    },
+                    source:
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
-                {
+              },
+              {
+                script: {
                   script: {
-                    script: {
-                      params: {
-                        datetimeField: '@timestamp',
-                        end: alertsFilter.timeframe!.hours.end,
-                        start: alertsFilter.timeframe!.hours.start,
-                        timezone: alertsFilter.timeframe!.timezone,
-                      },
-                      source: `
+                    params: {
+                      datetimeField: '@timestamp',
+                      end: alertsFilter.timeframe!.hours.end,
+                      start: alertsFilter.timeframe!.hours.start,
+                      timezone: alertsFilter.timeframe!.timezone,
+                    },
+                    source: `
               def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
@@ -211,17 +210,16 @@ export const getExpectedQueryByExecutionUuid = ({
                 }
               }
            `,
-                    },
                   },
                 },
-              ]
-            : []),
-        ],
-      },
+              },
+            ]
+          : []),
+      ],
     },
-    size: 100,
-    track_total_hits: true,
   },
+  size: 1000,
+  track_total_hits: true,
   ignore_unavailable: true,
   index: indexName,
 });
@@ -257,7 +255,7 @@ export const getExpectedQueryByTimeRange = ({
     },
     { term: { 'kibana.alert.rule.uuid': ruleId } }
   );
-  if (!!excludedAlertInstanceIds?.length) {
+  if (excludedAlertInstanceIds?.length) {
     filter.push({
       bool: {
         must_not: {
@@ -376,15 +374,13 @@ export const getExpectedQueryByTimeRange = ({
   }
 
   return {
-    body: {
-      query: {
-        bool: {
-          filter,
-        },
+    query: {
+      bool: {
+        filter,
       },
-      size: 100,
-      track_total_hits: true,
     },
+    size: 1000,
+    track_total_hits: true,
     ignore_unavailable: true,
     index: indexName,
   };

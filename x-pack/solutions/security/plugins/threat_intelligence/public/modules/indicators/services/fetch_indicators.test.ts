@@ -44,13 +44,11 @@ describe('FetchIndicatorsService', () => {
         expect(mockedSearchService.search).toHaveBeenCalledWith(
           expect.objectContaining({
             params: {
-              body: {
-                fields: [{ field: '*', include_unmapped: true }],
-                from: 0,
-                query: expect.objectContaining({ bool: expect.anything() }),
-                size: 25,
-                sort: [],
-              },
+              fields: [{ field: '*', include_unmapped: true }],
+              from: 0,
+              query: expect.objectContaining({ bool: expect.anything() }),
+              size: 25,
+              sort: [],
               index: [],
             },
             factoryQueryType: FactoryQueryType.IndicatorGrid,

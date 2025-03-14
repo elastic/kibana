@@ -5,47 +5,46 @@
  * 2.0.
  */
 
-import { expect, Page } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
 
 export class AutoDetectFlowPage {
   page: Page;
 
+  private readonly copyToClipboardButton: Locator;
+  private readonly receivedDataIndicator: Locator;
+  private readonly autoDetectSystemIntegrationActionLink: Locator;
+  private readonly codeBlock: Locator;
+
   constructor(page: Page) {
     this.page = page;
-  }
-
-  private readonly copyToClipboardButton = () =>
-    this.page.getByTestId('observabilityOnboardingCopyToClipboardButton');
-
-  private readonly receivedDataIndicator = () =>
-    this.page
+    this.copyToClipboardButton = this.page.getByTestId(
+      'observabilityOnboardingCopyToClipboardButton'
+    );
+    this.receivedDataIndicator = this.page
       .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
       .getByText('Your data is ready to explore!');
-
-  private readonly autoDetectSystemIntegrationActionLink = () =>
-    this.page.getByTestId(
+    this.autoDetectSystemIntegrationActionLink = this.page.getByTestId(
       'observabilityOnboardingDataIngestStatusActionLink-inventory-host-details'
     );
-
-  private readonly codeBlock = () =>
-    this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
+    this.codeBlock = this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
+  }
 
   public async copyToClipboard() {
-    await this.copyToClipboardButton().click();
+    await this.copyToClipboardButton.click();
   }
 
   public async assertVisibilityCodeBlock() {
-    await expect(this.codeBlock(), 'Code block should be visible').toBeVisible();
+    await expect(this.codeBlock, 'Code block should be visible').toBeVisible();
   }
 
   public async assertReceivedDataIndicator() {
     await expect(
-      this.receivedDataIndicator(),
+      this.receivedDataIndicator,
       'Received data indicator should be visible'
     ).toBeVisible();
   }
 
   public async clickAutoDetectSystemIntegrationCTA() {
-    await this.autoDetectSystemIntegrationActionLink().click();
+    await this.autoDetectSystemIntegrationActionLink.click();
   }
 }

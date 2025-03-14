@@ -23,9 +23,8 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useLicense } from '../../../../hooks';
+import { useAuthz, useLicense } from '../../../../hooks';
 import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
 
@@ -66,6 +65,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   sortOrder,
 }) => {
   const licenseService = useLicense();
+  const authz = useAuthz();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
 
   // Bulk actions menu states
@@ -105,9 +105,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       : nAgentsInTable - totalManagedAgentIds?.length;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const { diagnosticFileUploadEnabled, enableExportCSV } = ExperimentalFeaturesService.get();
 
-  const { generateReportingJobCSV } = useExportCSV(enableExportCSV);
+  const { generateReportingJobCSV } = useExportCSV();
 
   const menuItems = [
     {
@@ -119,6 +118,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="tag" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
@@ -133,6 +133,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="pencil" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: () => {
         closeMenu();
         setIsReassignFlyoutOpen(true);
@@ -150,6 +151,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="refresh" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
@@ -167,7 +169,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="timeRefresh" size="m" />,
-      disabled: !isLicenceAllowingScheduleUpgrade,
+      disabled: !authz.fleet.allAgents || !isLicenceAllowingScheduleUpgrade,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
@@ -185,32 +187,30 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       icon: <EuiIcon type="refresh" size="m" />,
+      disabled: !authz.fleet.allAgents,
       onClick: () => {
         closeMenu();
         setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
       },
     },
-    ...(diagnosticFileUploadEnabled
-      ? [
-          {
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.requestDiagnostics"
-                data-test-subj="agentBulkActionsRequestDiagnostics"
-                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
-                values={{
-                  agentCount,
-                }}
-              />
-            ),
-            icon: <EuiIcon type="download" size="m" />,
-            onClick: () => {
-              closeMenu();
-              setIsRequestDiagnosticsModalOpen(true);
-            },
-          },
-        ]
-      : []),
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.requestDiagnostics"
+          data-test-subj="agentBulkActionsRequestDiagnostics"
+          defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      disabled: !authz.fleet.readAgents,
+      icon: <EuiIcon type="download" size="m" />,
+      onClick: () => {
+        closeMenu();
+        setIsRequestDiagnosticsModalOpen(true);
+      },
+    },
     {
       name: (
         <FormattedMessage
@@ -222,33 +222,31 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           }}
         />
       ),
+      disabled: !authz.fleet.allAgents,
       icon: <EuiIcon type="trash" size="m" />,
       onClick: () => {
         closeMenu();
         setIsUnenrollModalOpen(true);
       },
     },
-    ...(enableExportCSV
-      ? [
-          {
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.exportAgents"
-                data-test-subj="bulkAgentExportBtn"
-                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-                values={{
-                  agentCount,
-                }}
-              />
-            ),
-            icon: <EuiIcon type="exportAction" size="m" />,
-            onClick: () => {
-              closeMenu();
-              setIsExportCSVModalOpen(true);
-            },
-          },
-        ]
-      : []),
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.exportAgents"
+          data-test-subj="bulkAgentExportBtn"
+          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      disabled: !authz.fleet.readAgents,
+      icon: <EuiIcon type="exportAction" size="m" />,
+      onClick: () => {
+        closeMenu();
+        setIsExportCSVModalOpen(true);
+      },
+    },
   ];
 
   const panels = [

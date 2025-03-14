@@ -7,9 +7,10 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SeverityFilter } from './severity_filter';
-import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../common/mock';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -30,7 +31,7 @@ describe('SeverityFilter', () => {
   it('sends telemetry when selecting a classification', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SeverityFilter selectedItems={[]} onSelect={jest.fn()} riskEntity={RiskScoreEntity.user} />
+        <SeverityFilter selectedItems={[]} onSelect={jest.fn()} riskEntity={EntityType.user} />
       </TestProviders>
     );
 
@@ -53,7 +54,7 @@ describe('SeverityFilter', () => {
             RiskSeverity.Unknown,
           ]}
           onSelect={jest.fn()}
-          riskEntity={RiskScoreEntity.user}
+          riskEntity={EntityType.user}
         />
       </TestProviders>
     );

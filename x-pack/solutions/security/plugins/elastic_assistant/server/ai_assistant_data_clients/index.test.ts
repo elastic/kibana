@@ -80,12 +80,10 @@ describe('AIAssistantDataClient', () => {
       });
       const reader = await assistantConversationsDataClient.getReader();
       const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
-      await reader.search({
-        body: query,
-      });
+      await reader.search(query);
 
       expect(clusterClient.search).toHaveBeenCalledWith({
-        body: query,
+        ...query,
         ignore_unavailable: true,
         index: '.kibana-elastic-ai-assistant-conversations-default',
         seq_no_primary_term: true,
@@ -102,11 +100,9 @@ describe('AIAssistantDataClient', () => {
       const reader = await assistantConversationsDataClient.getReader();
       const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
 
-      await expect(
-        reader.search({
-          body: query,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+      await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"something went wrong!"`
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error performing search in AIAssistantDataClient - something went wrong!`
@@ -155,7 +151,6 @@ describe('AIAssistantDataClient', () => {
                 },
               ],
               title: 'Alert summary',
-              is_default: true,
               users: [
                 {
                   name: 'elastic',
@@ -189,7 +184,6 @@ describe('AIAssistantDataClient', () => {
                   model: 'anthropic.claude-v2',
                 },
                 created_at: '2024-01-25T01:32:37.649Z',
-                is_default: true,
                 messages: [
                   {
                     '@timestamp': '1/24/2024, 5:32:19 PM',

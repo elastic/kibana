@@ -95,10 +95,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -133,11 +131,9 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: { agent: { upgradeable: true, version: fleetServerVersion } },
-              },
+          doc: {
+            local_metadata: {
+              elastic: { agent: { upgradeable: true, version: fleetServerVersion } },
             },
           },
         });
@@ -159,11 +155,9 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: { agent: { upgradeable: true, version: fleetServerVersion } },
-              },
+          doc: {
+            local_metadata: {
+              elastic: { agent: { upgradeable: true, version: fleetServerVersion } },
             },
           },
         });
@@ -184,10 +178,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -204,10 +196,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -220,9 +210,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
         });
         const action: any = actionsRes.hits.hits[0]._source;
         expect(action.data.sourceURI).contain('http://path/to/download');
@@ -245,10 +233,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '7.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '7.0.0' } } },
           },
         });
         const res = await supertest
@@ -282,10 +268,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              unenrolled_at: new Date().toISOString(),
-            },
+          doc: {
+            unenrolled_at: new Date().toISOString(),
           },
         });
         const res = await supertest
@@ -323,10 +307,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         // attempt to upgrade agent in hosted agent policy
@@ -348,10 +330,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertestWithoutAuth
@@ -369,15 +349,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -404,15 +382,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -433,15 +409,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -462,15 +436,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    upgraded_at: new Date(Date.now() - 11 * 6e4).toString(),
-                    version: '0.0.0',
-                  },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  upgraded_at: new Date(Date.now() - 11 * 6e4).toString(),
+                  version: '0.0.0',
                 },
               },
             },
@@ -490,15 +462,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgrade_started_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgrade_started_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -520,15 +490,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgrade_started_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgrade_started_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -549,21 +517,19 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
-              upgrade_details: {
-                target_version: fleetServerVersion,
-                action_id: 'XXX',
-                state: 'UPG_REQUESTED',
-              },
+            },
+            upgrade_details: {
+              target_version: fleetServerVersion,
+              action_id: 'XXX',
+              state: 'UPG_REQUESTED',
             },
           },
         });
@@ -583,21 +549,19 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
-              upgrade_details: {
-                target_version: fleetServerVersion,
-                action_id: 'XXX',
-                state: 'UPG_REQUESTED',
-              },
+            },
+            upgrade_details: {
+              target_version: fleetServerVersion,
+              action_id: 'XXX',
+              state: 'UPG_REQUESTED',
             },
           },
         });
@@ -616,23 +580,21 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
-              upgrade_details: {
-                target_version: fleetServerVersion,
-                action_id: 'XXX',
-                state: 'UPG_FAILED',
-                metadata: {
-                  error_msg: 'Upgrade timed out',
-                },
+            },
+            upgrade_details: {
+              target_version: fleetServerVersion,
+              action_id: 'XXX',
+              state: 'UPG_FAILED',
+              metadata: {
+                error_msg: 'Upgrade timed out',
               },
             },
           },
@@ -651,10 +613,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         const agentBuildVersion = '7.16.0+build20240116';
@@ -668,9 +628,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
         });
 
         const action: any = actionsRes.hits.hits[0]._source;
@@ -711,18 +669,16 @@ export default function (providerContext: FtrProviderContext) {
 
         await es.updateByQuery({
           index: '.fleet-agents',
-          body: {
-            script: "ctx._source.remove('upgrade_started_at')",
-            query: {
-              bool: {
-                must: [
-                  {
-                    exists: {
-                      field: 'upgrade_started_at',
-                    },
+          script: "ctx._source.remove('upgrade_started_at')",
+          query: {
+            bool: {
+              must: [
+                {
+                  exists: {
+                    field: 'upgrade_started_at',
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         });
@@ -733,15 +689,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -766,15 +720,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -802,20 +754,16 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         const agentBuildVersion = '7.16.0+build20240116';
@@ -830,9 +778,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
         });
 
         const action: any = actionsRes.hits.hits[0]._source;
@@ -844,22 +790,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: false, version: '0.0.0' },
-                },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: false, version: '0.0.0' },
               },
             },
           },
@@ -886,20 +828,16 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -914,9 +852,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
         });
 
         const action: any = actionsRes.hits.hits[0]._source;
@@ -931,20 +867,16 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -959,9 +891,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
         });
 
         const action: any = actionsRes.hits.hits[0]._source;
@@ -976,25 +906,21 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: false, version: '0.0.0' },
-                },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: false, version: '0.0.0' },
               },
-              upgrade_started_at: undefined,
             },
+            upgrade_started_at: undefined,
           },
         });
         await supertest
@@ -1018,20 +944,16 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
 
@@ -1088,20 +1010,16 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -1124,22 +1042,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              unenrolled_at: new Date().toISOString(),
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            unenrolled_at: new Date().toISOString(),
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: { agent: { upgradeable: true, version: '0.0.0' } },
-              },
+          doc: {
+            local_metadata: {
+              elastic: { agent: { upgradeable: true, version: '0.0.0' } },
             },
           },
         });
@@ -1164,22 +1078,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
-                },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
               },
             },
           },
@@ -1188,10 +1098,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent3',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -1216,15 +1124,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 11 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 11 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -1234,15 +1140,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -1268,15 +1172,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 11 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 11 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -1286,15 +1188,13 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
-              local_metadata: {
-                elastic: {
-                  agent: {
-                    upgradeable: true,
-                    version: '0.0.0',
-                  },
+          doc: {
+            upgraded_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+            local_metadata: {
+              elastic: {
+                agent: {
+                  upgradeable: true,
+                  version: '0.0.0',
                 },
               },
             },
@@ -1321,22 +1221,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: true, version: semver.inc(fleetServerVersion, 'patch') },
-                },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: semver.inc(fleetServerVersion, 'patch') },
               },
             },
           },
@@ -1345,10 +1241,8 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent3',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: false, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -1376,22 +1270,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-1`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
-            },
+          doc: {
+            policy_id: `agent-policy-1`,
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-2`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
-            },
+          doc: {
+            policy_id: `agent-policy-2`,
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
           },
         });
         await supertest
@@ -1410,22 +1300,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-1`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            policy_id: `agent-policy-1`,
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-2`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            policy_id: `agent-policy-2`,
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await supertest
@@ -1443,22 +1329,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-1`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
-            },
+          doc: {
+            policy_id: `agent-policy-1`,
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              policy_id: `agent-policy-2`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
-            },
+          doc: {
+            policy_id: `agent-policy-2`,
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
           },
         });
         await supertest
@@ -1482,22 +1364,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: false, version: '0.0.0' },
-                },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: false, version: '0.0.0' },
               },
             },
           },
@@ -1514,9 +1392,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
         });
         const action: any = actionsRes.hits.hits[0]._source;
 
@@ -1539,22 +1415,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: true, version: '0.0.0' },
-                },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: '0.0.0' },
               },
             },
           },
@@ -1596,22 +1468,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: true, version: fleetServerVersion },
-                },
+          doc: {
+            local_metadata: {
+              elastic: {
+                agent: { upgradeable: true, version: fleetServerVersion },
               },
             },
           },
@@ -1639,20 +1507,16 @@ export default function (providerContext: FtrProviderContext) {
           id: 'agent1',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         await es.update({
           id: 'agent2',
           refresh: 'wait_for',
           index: AGENTS_INDEX,
-          body: {
-            doc: {
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-            },
+          doc: {
+            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
           },
         });
         const today = new Date(Date.now());
@@ -1668,9 +1532,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
         });
 
         const action: any = actionsRes.hits.hits[0]._source;

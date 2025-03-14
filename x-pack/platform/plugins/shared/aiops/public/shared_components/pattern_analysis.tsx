@@ -14,6 +14,7 @@ import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import type { PublishesFilters } from '@kbn/presentation-publishing';
 import type { MinimumTimeRangeOption } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
 import type {
   RandomSamplerOption,
@@ -60,6 +61,7 @@ export interface PatternAnalysisProps {
   onLoading: (isLoading: boolean) => void;
   onRenderComplete: () => void;
   onError: (error: Error) => void;
+  filtersApi?: PublishesFilters;
 }
 
 const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
@@ -79,6 +81,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   embeddingOrigin,
   lastReloadRequestTime,
   onChange,
+  filtersApi,
 }) => {
   const deps = useMemo(() => {
     const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
@@ -145,7 +148,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
               dataViews={pluginStart.data.dataViews}
               dataViewId={dataViewId}
             >
-              <FilterQueryContextProvider timeRange={timeRange}>
+              <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                 <PatternAnalysisEmbeddableWrapper
                   dataViewId={dataViewId}
                   timeRange={timeRange}

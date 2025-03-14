@@ -10,7 +10,7 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -32,7 +32,7 @@ export function fetchEsql({
   query,
   inputQuery,
   filters,
-  inputTimeRange,
+  timeRange,
   dataView,
   abortSignal,
   inspectorAdapters,
@@ -43,7 +43,7 @@ export function fetchEsql({
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
-  inputTimeRange?: TimeRange;
+  timeRange?: TimeRange;
   dataView: DataView;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
@@ -51,20 +51,15 @@ export function fetchEsql({
   expressions: ExpressionsStart;
   profilesManager: ProfilesManager;
 }): Promise<RecordsFetchResponse> {
-  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getTime();
-  return textBasedQueryStateToAstWithValidation({
-    filters,
+  const props = getTextBasedQueryStateToAstProps({
     query,
-    time: timeRange,
-    timeFieldName: dataView.timeFieldName,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
-      defaultMessage: 'Table',
-    }),
-    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-    }),
-  })
+    filters,
+    timeRange,
+    dataView,
+    data,
+  });
+  return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
         const contract = expressions.execute(ast, null, {
@@ -117,4 +112,33 @@ export function fetchEsql({
     .catch((err) => {
       throw new Error(err.message);
     });
+}
+export function getTextBasedQueryStateToAstProps({
+  query,
+  inputQuery,
+  filters,
+  timeRange,
+  dataView,
+  data,
+}: {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  dataView: DataView;
+  data: DataPublicPluginStart;
+}) {
+  return {
+    filters,
+    query,
+    time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
+    timeFieldName: dataView.timeFieldName,
+    inputQuery,
+    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
+      defaultMessage: 'Table',
+    }),
+    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+    }),
+  };
 }

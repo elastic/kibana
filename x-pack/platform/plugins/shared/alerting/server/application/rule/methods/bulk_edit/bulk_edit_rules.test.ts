@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -19,11 +22,12 @@ import {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { RecoveredActionGroup, RuleTypeParams } from '../../../../../common';
+import type { RuleTypeParams } from '../../../../../common';
+import { RecoveredActionGroup } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -36,12 +40,12 @@ import {
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter } from '../../../../connector_adapters/types';
-import { SavedObject } from '@kbn/core/server';
+import type { ConnectorAdapter } from '../../../../connector_adapters/types';
+import type { SavedObject } from '@kbn/core/server';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -58,8 +62,8 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-jest.mock('../../../../lib/snooze/is_snooze_active', () => ({
-  isSnoozeActive: jest.fn(),
+jest.mock('../../../../lib/snooze/get_active_snooze_if_exist', () => ({
+  getActiveSnoozeIfExist: jest.fn(),
 }));
 
 jest.mock('uuid', () => {
@@ -71,7 +75,9 @@ jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
 }));
 
-const { isSnoozeActive } = jest.requireMock('../../../../lib/snooze/is_snooze_active');
+const { getActiveSnoozeIfExist } = jest.requireMock(
+  '../../../../lib/snooze/get_active_snooze_if_exist'
+);
 const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
 const taskManager = taskManagerMock.createStart();
@@ -257,6 +263,7 @@ describe('bulkEdit()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -773,6 +780,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -1884,10 +1892,10 @@ describe('bulkEdit()', () => {
 
   describe('snoozeSchedule operations', () => {
     afterEach(() => {
-      isSnoozeActive.mockImplementation(() => false);
+      getActiveSnoozeIfExist.mockImplementation(() => false);
     });
 
-    const getSnoozeSchedule = (useId: boolean = true) => {
+    const getSnoozeSchedule = (useId = true) => {
       return {
         ...(useId && { id: uuidv4() }),
         duration: 28800000,
@@ -3117,6 +3125,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         category: 'test',
         validLegacyConsumers: [],
       });
@@ -3163,6 +3172,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         category: 'test',
         validLegacyConsumers: [],
       });

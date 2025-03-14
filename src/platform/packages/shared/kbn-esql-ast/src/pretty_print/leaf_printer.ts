@@ -169,8 +169,11 @@ export const LeafPrinter = {
     return text;
   },
 
-  print: (node: ESQLProperNode): string => {
+  print: (node: ESQLProperNode | ESQLAstComment): string => {
     switch (node.type) {
+      case 'source': {
+        return LeafPrinter.source(node);
+      }
       case 'identifier': {
         return LeafPrinter.identifier(node);
       }
@@ -182,6 +185,9 @@ export const LeafPrinter = {
       }
       case 'timeInterval': {
         return LeafPrinter.timeInterval(node);
+      }
+      case 'comment': {
+        return LeafPrinter.comment(node);
       }
     }
     return '';

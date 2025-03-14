@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { mapValues } from 'lodash';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { mergeSampleDocumentsWithFieldCaps } from '@kbn/genai-utils-common/src/data_analysis/merge_sample_documents_with_field_caps';
 import { DocumentAnalysis } from '@kbn/genai-utils-common/src/data_analysis/types';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { mapValues } from 'lodash';
 
 export async function getDataAnalysis({
   esClient,
@@ -17,7 +17,7 @@ export async function getDataAnalysis({
   end,
   index,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   kuery: string;
   start: number;
   end: number;
@@ -34,7 +34,7 @@ export async function getDataAnalysis({
   };
 
   const [fieldCaps, hits] = await Promise.all([
-    esClient.fieldCaps({
+    esClient.fieldCaps('get_field_caps_for_data_analysis', {
       index,
       fields: '*',
       index_filter: {
@@ -44,7 +44,7 @@ export async function getDataAnalysis({
       },
     }),
     esClient
-      .search({
+      .search('get_document_samples_for_data_analysis', {
         index,
         size: 1000,
         track_total_hits: true,
@@ -85,7 +85,7 @@ export async function getDataAnalysis({
       })
       .then((response) => ({
         hits: response.hits.hits.map((hit) =>
-          mapValues(hit.fields!, (value) => (value.length === 1 ? value[0] : value))
+          mapValues(hit.fields!, (value) => (value?.length === 1 ? value[0] : value))
         ),
         total: response.hits.total as { value: number },
       })),

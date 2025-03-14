@@ -192,7 +192,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('show edit context', async () => {
-          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
+            'basic_index',
+            ['baz']
+          );
         });
 
         it('save selected fields between modes', async () => {

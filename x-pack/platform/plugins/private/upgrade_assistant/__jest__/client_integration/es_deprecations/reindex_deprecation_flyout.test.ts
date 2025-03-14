@@ -68,7 +68,7 @@ describe('Reindex deprecation flyout', () => {
   });
 
   it('renders a flyout with reindexing details', async () => {
-    const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
+    const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
     const { actions, find, exists } = testBed;
 
     await actions.table.clickDeprecationRowAt('reindex', 0);

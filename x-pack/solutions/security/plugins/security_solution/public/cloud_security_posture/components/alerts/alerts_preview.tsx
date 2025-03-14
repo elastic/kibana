@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
@@ -36,17 +37,17 @@ const AlertsCount = ({
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h1 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
+            <h3 data-test-subj={'securitySolutionFlyoutInsightsAlertsCount'}>
               {getAbbreviatedNumber(alertsTotal)}
-            </h1>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
-            size="m"
-            css={{
-              fontWeight: euiTheme.font.weight.semiBold,
-            }}
+            size="xs"
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.insights.alerts.alertsCountDescription"
@@ -86,7 +87,7 @@ export const AlertsPreview = ({
   const alertStats = Array.from(severityMap, ([key, count]) => ({
     key: capitalize(key),
     count,
-    color: getSeverityColor(key),
+    color: getSeverityColor(key, euiTheme),
   }));
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);

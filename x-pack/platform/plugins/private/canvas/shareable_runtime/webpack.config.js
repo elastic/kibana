@@ -9,7 +9,6 @@ require('@kbn/babel-register').install();
 
 const path = require('path');
 const webpack = require('webpack');
-const { stringifyRequest } = require('loader-utils');
 
 const { CiStatsPlugin } = require('./webpack/ci_stats_plugin');
 const {
@@ -21,11 +20,13 @@ const {
 
 const isProd = process.env.NODE_ENV === 'production';
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
   context: KIBANA_ROOT,
   entry: {
     [SHAREABLE_RUNTIME_NAME]: require.resolve('./index.ts'),
   },
+  target: 'web',
   mode: isProd ? 'production' : 'development',
   output: {
     path: SHAREABLE_RUNTIME_OUTPUT,
@@ -35,18 +36,28 @@ module.exports = {
   resolve: {
     alias: {
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
+      [require.resolve('@elastic/eui/es/components/drag_and_drop')]: false,
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
-    mainFields: ['browser', 'main'],
+    mainFields: ['browser', 'module', 'main'],
+    fallback: {
+      fs: false,
+      child_process: false,
+    },
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loaders: 'babel-loader',
+        loader: 'babel-loader',
         options: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          presets: [
+            [
+              require.resolve('@kbn/babel-preset/webpack_preset'),
+              { useTransformRequireDefault: true },
+            ],
+          ],
         },
       },
       {
@@ -105,15 +116,15 @@ module.exports = {
       },
       {
         test: /\.module\.s(a|c)ss$/,
-        loader: [
+        use: [
           'style-loader',
           {
             loader: 'css-loader',
             options: {
               modules: {
                 localIdentName: '[name]__[local]___[hash:base64:5]',
+                exportLocalsConvention: 'camelCase',
               },
-              localsConvention: 'camelCase',
               sourceMap: !isProd,
             },
           },
@@ -160,10 +171,16 @@ module.exports = {
             loader: 'sass-loader',
             options: {
               additionalData(content, loaderContext) {
-                return `@import ${stringifyRequest(
-                  loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
-                )};\n${content}`;
+                const req = JSON.stringify(
+                  loaderContext.utils.contextify(
+                    loaderContext.context || loaderContext.rootContext,
+                    path.resolve(
+                      KIBANA_ROOT,
+                      'src/core/public/styles/core_app/_globals_v8light.scss'
+                    )
+                  )
+                );
+                return `@import ${req};\n${content}`;
               },
               implementation: require('sass-embedded'),
               sassOptions: {
@@ -176,11 +193,23 @@ module.exports = {
       },
       {
         test: require.resolve('jquery'),
-        loader: 'expose-loader?jQuery!expose-loader?$',
+        use: [
+          {
+            loader: 'expose-loader',
+            options: {
+              exposes: ['jQuery', '$'],
+            },
+          },
+        ],
       },
       {
         test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-        loader: 'url-loader',
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8192,
+          },
+        },
         sideEffects: false,
       },
       {
@@ -189,18 +218,10 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: [require.resolve('@elastic/eui/es/components/drag_and_drop')],
-        use: require.resolve('null-loader'),
-      },
-      {
         test: /\.peggy$/,
         use: require.resolve('@kbn/peggy-loader'),
       },
     ],
-  },
-  node: {
-    fs: 'empty',
-    child_process: 'empty',
   },
   plugins: [
     isProd ? new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }) : [],

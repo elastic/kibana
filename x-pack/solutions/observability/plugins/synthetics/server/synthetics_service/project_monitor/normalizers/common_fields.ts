@@ -96,6 +96,9 @@ export const getNormalizeCommonFields = ({
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
+    ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
+      [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],
+    }),
   };
   return { normalizedFields, errors };
 };
@@ -217,10 +220,9 @@ export const getMonitorLocations = ({
     }) || [];
   const privateLocs =
     monitorLocations.privateLocations?.map((locationName) => {
+      const loc = locationName.toLowerCase();
       const locationFound = allPrivateLocations.find(
-        (location) =>
-          location.label.toLowerCase() === locationName.toLowerCase() ||
-          location.id.toLowerCase() === locationName.toLowerCase()
+        (location) => location.label.toLowerCase() === loc || location.id.toLowerCase() === loc
       );
       if (locationFound) {
         return locationFound;

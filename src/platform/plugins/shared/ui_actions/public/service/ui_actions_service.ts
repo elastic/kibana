@@ -8,6 +8,7 @@
  */
 
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import { asyncMap } from '@kbn/std';
 import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import {
   ActionInternal,
@@ -70,6 +71,11 @@ export class UiActionsService {
     return trigger.contract;
   };
 
+  /**
+   * @deprecated
+   *
+   * Use `plugins.uiActions.registerActionAsync` instead.
+   */
   public readonly registerAction = <Context extends object>(
     definition: ActionDefinition<Context>
   ): Action<Context> => {
@@ -79,9 +85,23 @@ export class UiActionsService {
 
     const action = new ActionInternal(definition);
 
-    this.actions.set(action.id, action as unknown as ActionInternal<object>);
+    this.actions.set(action.id, async () => action as unknown as ActionInternal<object>);
 
     return action;
+  };
+
+  public readonly registerActionAsync = <Context extends object>(
+    id: string,
+    getDefinition: () => Promise<ActionDefinition<Context>>
+  ) => {
+    if (this.actions.has(id)) {
+      throw new Error(`Action [action.id = ${id}] already registered.`);
+    }
+
+    this.actions.set(id, async () => {
+      const action = new ActionInternal(await getDefinition());
+      return action as unknown as ActionInternal<object>;
+    });
   };
 
   public readonly unregisterAction = (actionId: string): void => {
@@ -130,40 +150,56 @@ export class UiActionsService {
   };
 
   /**
-   * `addTriggerAction` is similar to `attachAction` as it attaches action to a
-   * trigger, but it also registers the action, if it has not been registered, yet.
+   * @deprecated
+   *
+   * Use `plugins.uiActions.addTriggerActionAsync` instead.
    */
   public readonly addTriggerAction = (triggerId: string, action: ActionDefinition<any>): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
   };
 
-  public readonly getAction = (id: string): Action => {
-    if (!this.actions.has(id)) {
+  /**
+   * `addTriggerAction` is similar to `attachAction` as it attaches action to a
+   * trigger, but it also registers the action, if it has not been registered, yet.
+   */
+  public readonly addTriggerActionAsync = (
+    triggerId: string,
+    actionId: string,
+    getDefinition: () => Promise<ActionDefinition<any>>
+  ): void => {
+    if (!this.actions.has(actionId)) this.registerActionAsync(actionId, getDefinition);
+    this.attachAction(triggerId, actionId);
+  };
+
+  public readonly getAction = async (id: string): Promise<Action> => {
+    const getAction = this.actions.get(id);
+    if (!getAction) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
 
-    return this.actions.get(id)! as Action;
+    return (await getAction()) as Action;
   };
 
-  public readonly getTriggerActions = (triggerId: string): Action[] => {
+  public readonly getTriggerActions = async (triggerId: string): Promise<Action[]> => {
     // This line checks if trigger exists, otherwise throws.
     this.getTrigger!(triggerId);
 
-    const actionIds = this.triggerToActions.get(triggerId);
+    const actionIds = this.triggerToActions.get(triggerId) ?? [];
 
-    const actions = actionIds!
-      .map((actionId) => this.actions.get(actionId) as ActionInternal)
-      .filter(Boolean);
+    const actions = await asyncMap(
+      actionIds,
+      async (actionId) => (await this.actions.get(actionId)?.()) as ActionInternal
+    );
 
-    return actions as Action[];
+    return actions.filter(Boolean);
   };
 
   public readonly getTriggerCompatibleActions = async (
     triggerId: string,
     context: object
   ): Promise<Action[]> => {
-    const actions = this.getTriggerActions!(triggerId);
+    const actions = await this.getTriggerActions(triggerId);
     const isCompatibles = await Promise.all(
       actions.map((action) =>
         action.isCompatible({
@@ -180,13 +216,13 @@ export class UiActionsService {
     }, []);
   };
 
-  public readonly getFrequentlyChangingActionsForTrigger = (
+  public readonly getFrequentlyChangingActionsForTrigger = async (
     triggerId: string,
     context: object
-  ): FrequentCompatibilityChangeAction[] => {
-    return this.getTriggerActions!(triggerId).filter((action) => {
+  ): Promise<FrequentCompatibilityChangeAction[]> => {
+    return (await this.getTriggerActions(triggerId)).filter((action) => {
       return (
-        Boolean(action.subscribeToCompatibilityChanges) &&
+        Boolean(action.getCompatibilityChangesSubject) &&
         action.couldBecomeCompatible?.({
           ...context,
           trigger: this.getTrigger(triggerId),

@@ -40,7 +40,7 @@ export const getKnowledgeBaseStatus = async ({
     const response = await http.fetch(path, {
       method: 'GET',
       signal,
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
     });
 
     return response as ReadKnowledgeBaseResponse;
@@ -71,7 +71,7 @@ export const postKnowledgeBase = async ({
   const response = await http.fetch(path, {
     method: 'POST',
     signal,
-    version: API_VERSIONS.internal.v1,
+    version: API_VERSIONS.public.v1,
   });
 
   return response as CreateKnowledgeBaseResponse;

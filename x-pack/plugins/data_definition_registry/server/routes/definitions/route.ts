@@ -12,6 +12,7 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { ServerSentEventBase } from '@kbn/sse-utils';
 import { getDataAnalysis } from '@kbn/genai-utils-server/src/data_analysis/get_data_analysis';
 import { sortAndTruncateAnalyzedFields } from '@kbn/genai-utils-common/src/data_analysis/sort_and_truncate_analyzed_fields';
+import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import { Observable, filter, of, switchMap } from 'rxjs';
 import { badRequest } from '@hapi/boom';
@@ -147,7 +148,9 @@ const suggestQueryRoute = createDataDefinitionRegistryServerRoute({
     >
   > => {
     const [esClient, registryClient, inferenceClient] = await Promise.all([
-      context.core.then(({ elasticsearch }) => elasticsearch.client.asCurrentUser),
+      context.core.then(({ elasticsearch }) =>
+        createTracedEsClient({ client: elasticsearch.client.asCurrentUser, logger })
+      ),
       registry.getClientWithRequest(request),
       plugins.inference.start().then((inferenceStart) => inferenceStart.getClient({ request })),
     ]);
@@ -176,7 +179,7 @@ const suggestQueryRoute = createDataDefinitionRegistryServerRoute({
     const givenIndices = castArray(index ?? []).filter(Boolean);
     const indices = castArray(isEmpty(givenIndices) ? ['*:*', '*'] : givenIndices);
 
-    const { data_streams: dataStreams } = await esClient.indices.resolveIndex({
+    const { data_streams: dataStreams } = await esClient.client.indices.resolveIndex({
       name: indices.join(','),
       allow_no_indices: true,
     });

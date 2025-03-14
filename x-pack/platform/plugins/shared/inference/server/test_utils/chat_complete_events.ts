@@ -12,12 +12,16 @@ import {
   ChatCompletionMessageEvent,
   ChatCompletionTokenCount,
   ToolCall,
+  ChatCompletionChunkToolCall,
 } from '@kbn/inference-common';
 
-export const chunkEvent = (content: string = 'chunk'): ChatCompletionChunkEvent => ({
+export const chunkEvent = (
+  content: string = 'chunk',
+  toolCalls: ChatCompletionChunkToolCall[] = []
+): ChatCompletionChunkEvent => ({
   type: ChatCompletionEventType.ChatCompletionChunk,
   content,
-  tool_calls: [],
+  tool_calls: toolCalls,
 });
 
 export const messageEvent = (

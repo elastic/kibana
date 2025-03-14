@@ -11,6 +11,10 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import type { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import type { MapConfig, TileMapConfig } from '@kbn/maps-ems-plugin/public';
+import {
+  EMS_DARKMAP_BOREALIS_ID,
+  EMS_ROADMAP_BOREALIS_DESATURATED_ID,
+} from '@kbn/maps-ems-plugin/common';
 import type { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN_LEGACY, TMS_IN_YML_ID } from './service_settings_types';
 /**
@@ -120,11 +124,16 @@ export class ServiceSettings implements IServiceSettings {
     return this._emsClient.findTMSServiceById(id);
   }
 
-  async getDefaultTmsLayer(isDarkMode: boolean): Promise<string> {
+  async getDefaultTmsLayer(isDarkMode: boolean, themeName: string): Promise<string> {
     const { dark, desaturated } = this._mapConfig.emsTileLayerId;
 
     if (hasUserConfiguredTmsLayer(this._mapConfig)) {
       return TMS_IN_YML_ID;
+    }
+
+    // To be removed once Borealis is the only theme available
+    if (themeName === 'borealis') {
+      return isDarkMode ? EMS_DARKMAP_BOREALIS_ID : EMS_ROADMAP_BOREALIS_DESATURATED_ID;
     }
 
     return isDarkMode ? dark : desaturated;

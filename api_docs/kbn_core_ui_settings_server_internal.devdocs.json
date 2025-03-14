@@ -321,7 +321,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ themeSwitcherEnabled?: boolean | undefined; } & {}> | undefined>; }>"
+              "<Readonly<{ themeSwitcherEnabled?: boolean | undefined; defaultTheme?: string | undefined; } & {}> | undefined>; }>"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
             "deprecated": false,

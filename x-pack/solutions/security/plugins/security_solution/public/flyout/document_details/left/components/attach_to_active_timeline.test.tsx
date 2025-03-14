@@ -24,7 +24,7 @@ const mockSetAttachToTimeline = jest.fn();
 describe('AttachToActiveTimeline', () => {
   it('should render the component for an unsaved timeline', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true },
+      timelinePrivileges: { crud: true },
     });
     const mockStore = createMockStore({
       ...mockGlobalState,

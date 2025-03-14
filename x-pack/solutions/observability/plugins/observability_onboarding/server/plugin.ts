@@ -26,6 +26,7 @@ import {
 import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import { ObservabilityOnboardingConfig } from './config';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
 
 export class ObservabilityOnboardingPlugin
   implements
@@ -93,6 +94,7 @@ export class ObservabilityOnboardingPlugin
       logger: this.logger,
       repository: getObservabilityOnboardingServerRouteRepository(),
       dependencies,
+      runDevModeChecks: this.initContext.env.mode.dev,
     });
 
     plugins.customIntegrations.registerCustomIntegration({
@@ -115,6 +117,8 @@ export class ObservabilityOnboardingPlugin
       shipper: 'tutorial',
       isBeta: true,
     });
+
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
 
     return {};
   }

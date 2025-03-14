@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import type {
   RulesUpgradeState,
   FieldsUpgradeState,
@@ -44,7 +44,7 @@ interface UseRulesUpgradeStateResult {
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const [rulesResolvedValues, setRulesResolvedValues] = useState<RulesResolvedConflicts>({});
   const resetRuleResolvedValues = useCallback(
     (ruleId: RuleSignatureId) => {
@@ -134,18 +134,25 @@ export function usePrebuiltRulesUpgradeState(
           fieldState === FieldUpgradeStateEnum.SolvableConflict ||
           fieldState === FieldUpgradeStateEnum.NonSolvableConflict
       );
+      const hasNonSolvableFieldConflicts = Object.values(fieldsUpgradeState).some(
+        ({ state: fieldState }) => fieldState === FieldUpgradeStateEnum.NonSolvableConflict
+      );
 
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
+        conflict: getWorstConflictLevelAmongFields(ruleUpgradeInfo.diff.fields),
         fieldsUpgradeState,
-        hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
+        hasUnresolvedConflicts: isRulesCustomizationEnabled
           ? hasRuleTypeChange || hasFieldConflicts
+          : false,
+        hasNonSolvableUnresolvedConflicts: isRulesCustomizationEnabled
+          ? hasRuleTypeChange || hasNonSolvableFieldConflicts
           : false,
       };
     }
 
     return state;
-  }, [ruleUpgradeInfos, rulesResolvedValues, isPrebuiltRulesCustomizationEnabled]);
+  }, [ruleUpgradeInfos, rulesResolvedValues, isRulesCustomizationEnabled]);
 
   return {
     rulesUpgradeState,
@@ -205,4 +212,23 @@ function calcFieldsState(
   }
 
   return fieldsState;
+}
+
+function getWorstConflictLevelAmongFields(
+  fieldsDiff: FieldsDiff<Record<string, unknown>>
+): ThreeWayDiffConflict {
+  let mostSevereFieldConflict = ThreeWayDiffConflict.NONE;
+
+  for (const { conflict } of Object.values<{ conflict: ThreeWayDiffConflict }>(fieldsDiff)) {
+    if (conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+      // return early as there is no higher severity
+      return ThreeWayDiffConflict.NON_SOLVABLE;
+    }
+
+    if (conflict === ThreeWayDiffConflict.SOLVABLE) {
+      mostSevereFieldConflict = ThreeWayDiffConflict.SOLVABLE;
+    }
+  }
+
+  return mostSevereFieldConflict;
 }

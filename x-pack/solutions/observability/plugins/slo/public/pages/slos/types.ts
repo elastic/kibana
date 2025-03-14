@@ -12,7 +12,8 @@ export type GroupByField =
   | 'status'
   | 'slo.indicator.type'
   | 'slo.instanceId'
-  | '_index';
+  | '_index'
+  | 'slo.id';
 export type SortDirection = 'asc' | 'desc';
 export type SortField =
   | 'sli_value'

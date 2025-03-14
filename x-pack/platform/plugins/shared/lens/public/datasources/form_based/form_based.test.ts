@@ -592,6 +592,9 @@ describe('IndexPattern Data Source', () => {
                 "idMap": Array [
                   "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"timestampLabel\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
                 ],
+                "isTextBased": Array [
+                  false,
+                ],
               },
               "function": "lens_map_to_columns",
               "type": "function",
@@ -2170,6 +2173,7 @@ describe('IndexPattern Data Source', () => {
           scale: undefined,
           sortingHint: undefined,
           interval: undefined,
+          hasArraySupport: false,
         } as OperationDescriptor);
       });
 

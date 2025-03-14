@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { visit } from './common';
+
 export const INTEGRATIONS = 'app/integrations#/';
 export const FLEET = 'app/fleet/';
 export const LOGIN_API_ENDPOINT = '/internal/security/login';
@@ -16,5 +18,5 @@ export const hostDetailsUrl = (hostName: string) =>
   `/app/security/hosts/${hostName}/authentications`;
 
 export const navigateTo = (page: string) => {
-  cy.visit(page);
+  visit(page);
 };

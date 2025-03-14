@@ -10,10 +10,10 @@ import React from 'react';
 import { useStartServices, useBreadcrumbs } from '../../../../hooks';
 
 export const CreateIntegration = React.memo(() => {
-  const { integrationAssistant } = useStartServices();
+  const { automaticImport } = useStartServices();
   useBreadcrumbs('integration_create');
 
-  const CreateIntegrationAssistant = integrationAssistant?.components.CreateIntegration;
+  const CreateAutomaticImport = automaticImport?.components.CreateIntegration;
 
-  return CreateIntegrationAssistant ? <CreateIntegrationAssistant /> : null;
+  return CreateAutomaticImport ? <CreateAutomaticImport /> : null;
 });

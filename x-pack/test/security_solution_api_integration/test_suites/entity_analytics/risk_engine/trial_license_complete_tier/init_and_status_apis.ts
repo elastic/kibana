@@ -8,19 +8,11 @@
 import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 
-import {
-  legacyTransformIds,
-  createLegacyTransforms,
-  clearLegacyTransforms,
-  riskEngineRouteHelpersFactory,
-  installLegacyRiskScore,
-  getLegacyRiskScoreDashboards,
-  clearLegacyDashboards,
-} from '../../utils';
+import { riskEngineRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const expectTaskIsNotRunning = (taskStatus?: string) => {
-  expect(['idle', 'claiming']).contain(taskStatus);
+const expectTaskIsHealthy = (taskStatus?: string) => {
+  expect(['idle', 'claiming', 'running']).contain(taskStatus);
 };
 
 export default ({ getService }: FtrProviderContext) => {
@@ -31,7 +23,6 @@ export default ({ getService }: FtrProviderContext) => {
   const customSpaceName = 'ea-customspace-it';
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const riskEngineRoutesWithNamespace = riskEngineRouteHelpersFactory(supertest, customSpaceName);
-  const log = getService('log');
 
   describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
     before(async () => {
@@ -48,8 +39,6 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await riskEngineRoutes.cleanUp();
       await riskEngineRoutesWithNamespace.cleanUp();
-      await clearLegacyTransforms({ es, log });
-      await clearLegacyDashboards({ supertest, log });
       await spaces.delete(customSpaceName);
     });
 
@@ -59,7 +48,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body).to.eql({
           result: {
             errors: [],
-            legacy_risk_engine_disabled: true,
             risk_engine_configuration_created: true,
             risk_engine_enabled: true,
             risk_engine_resources_installed: true,
@@ -70,7 +58,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(customNamespaceResponse.body).to.eql({
           result: {
             errors: [],
-            legacy_risk_engine_disabled: true,
             risk_engine_configuration_created: true,
             risk_engine_enabled: true,
             risk_engine_resources_installed: true,
@@ -84,6 +71,8 @@ export default ({ getService }: FtrProviderContext) => {
         const dataStreamName = 'risk-score.risk-score-default';
         const latestIndexName = 'risk-score.risk-score-latest-default';
         const transformId = 'risk_score_latest_transform_default';
+        const defaultPipeline =
+          'entity_analytics_create_eventIngest_from_timestamp-pipeline-default';
 
         await riskEngineRoutes.init();
 
@@ -101,6 +90,13 @@ export default ({ getService }: FtrProviderContext) => {
             '@timestamp': {
               ignore_malformed: false,
               type: 'date',
+            },
+            event: {
+              properties: {
+                ingested: {
+                  type: 'date',
+                },
+              },
             },
             host: {
               properties: {
@@ -301,6 +297,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(indexTemplate.index_template.template!.settings).to.eql({
           index: {
+            default_pipeline: defaultPipeline,
             mapping: {
               total_fields: {
                 limit: '1000',
@@ -354,6 +351,7 @@ export default ({ getService }: FtrProviderContext) => {
         const dataStreamName = `risk-score.risk-score-${customSpaceName}`;
         const latestIndexName = `risk-score.risk-score-latest-${customSpaceName}`;
         const transformId = `risk_score_latest_transform_${customSpaceName}`;
+        const defaultPipeline = `entity_analytics_create_eventIngest_from_timestamp-pipeline-${customSpaceName}`;
 
         await riskEngineRoutesWithNamespace.init();
 
@@ -371,6 +369,13 @@ export default ({ getService }: FtrProviderContext) => {
             '@timestamp': {
               ignore_malformed: false,
               type: 'date',
+            },
+            event: {
+              properties: {
+                ingested: {
+                  type: 'date',
+                },
+              },
             },
             host: {
               properties: {
@@ -575,6 +580,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(indexTemplate.index_template.template!.settings).to.eql({
           index: {
+            default_pipeline: defaultPipeline,
             mapping: {
               total_fields: {
                 limit: '1000',
@@ -639,7 +645,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 2,
+            mappingsVersion: 3,
           },
         });
       });
@@ -670,57 +676,53 @@ export default ({ getService }: FtrProviderContext) => {
 
         await es.cluster.putComponentTemplate({
           name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },
               },
             },
-            version: 1,
           },
+          version: 1,
         });
 
         // Call an API to put the index template
 
         await es.indices.putIndexTemplate({
           name: indexTemplateName,
-          body: {
-            index_patterns: [indexTemplateName],
-            composed_of: [componentTemplateName],
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          index_patterns: [indexTemplateName],
+          composed_of: [componentTemplateName],
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },
@@ -739,57 +741,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response2.component_templates.length).to.eql(1);
         expect(response2.component_templates[0].name).to.eql(newComponentTemplateName);
       });
-
-      // Failing: See https://github.com/elastic/kibana/issues/191637
-      describe.skip('remove legacy risk score transform', function () {
-        this.tags('skipFIPS');
-        it('should remove legacy risk score transform if it exists', async () => {
-          await installLegacyRiskScore({ supertest });
-
-          for (const transformId of legacyTransformIds) {
-            const tr = await es.transform.getTransform({
-              transform_id: transformId,
-            });
-
-            expect(tr?.transforms?.[0]?.id).to.eql(transformId);
-          }
-
-          const legacyDashboards = await getLegacyRiskScoreDashboards({
-            kibanaServer,
-          });
-
-          expect(legacyDashboards.length).to.eql(4);
-
-          await riskEngineRoutes.init();
-
-          for (const transformId of legacyTransformIds) {
-            try {
-              await es.transform.getTransform({
-                transform_id: transformId,
-              });
-            } catch (err) {
-              expect(err).to.not.be(undefined);
-            }
-          }
-
-          const legacyDashboardsAfterInit = await getLegacyRiskScoreDashboards({
-            kibanaServer,
-          });
-
-          expect(legacyDashboardsAfterInit.length).to.eql(0);
-        });
-      });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/196319
-    // FLAKY: https://github.com/elastic/kibana/issues/196166
-    describe.skip('status api', () => {
+    describe('status api', () => {
       it('should disable / enable risk engine', async () => {
         const status1 = await riskEngineRoutes.getStatus();
 
         expect(status1.body).to.eql({
           risk_engine_status: 'NOT_INSTALLED',
-          legacy_risk_engine_status: 'NOT_INSTALLED',
         });
 
         await riskEngineRoutes.init();
@@ -797,50 +756,24 @@ export default ({ getService }: FtrProviderContext) => {
         const status2 = await riskEngineRoutes.getStatus();
 
         expect(status2.body.risk_engine_status).to.be('ENABLED');
-        expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
         expect(status2.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expectTaskIsNotRunning(status2.body.risk_engine_task_status?.status);
-        expect(status2.body.risk_engine_task_status?.startedAt).to.be(undefined);
+        expectTaskIsHealthy(status2.body.risk_engine_task_status?.status);
 
         await riskEngineRoutes.disable();
         const status3 = await riskEngineRoutes.getStatus();
 
         expect(status3.body).to.eql({
           risk_engine_status: 'DISABLED',
-          legacy_risk_engine_status: 'NOT_INSTALLED',
         });
 
         await riskEngineRoutes.enable();
         const status4 = await riskEngineRoutes.getStatus();
 
         expect(status4.body.risk_engine_status).to.be('ENABLED');
-        expect(status4.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
 
         expect(status4.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expectTaskIsNotRunning(status4.body.risk_engine_task_status?.status);
-        expect(status4.body.risk_engine_task_status?.startedAt).to.be(undefined);
-      });
-
-      it('should return status of legacy risk engine', async () => {
-        await createLegacyTransforms({ es });
-        const status1 = await riskEngineRoutes.getStatus();
-
-        expect(status1.body).to.eql({
-          risk_engine_status: 'NOT_INSTALLED',
-          legacy_risk_engine_status: 'ENABLED',
-        });
-
-        await riskEngineRoutes.init();
-
-        const status2 = await riskEngineRoutes.getStatus();
-
-        expect(status2.body.risk_engine_status).to.be('ENABLED');
-        expect(status2.body.legacy_risk_engine_status).to.be('NOT_INSTALLED');
-
-        expect(status2.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expectTaskIsNotRunning(status2.body.risk_engine_task_status?.status);
-        expect(status2.body.risk_engine_task_status?.startedAt).to.be(undefined);
+        expectTaskIsHealthy(status4.body.risk_engine_task_status?.status);
       });
     });
   });

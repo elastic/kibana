@@ -357,10 +357,9 @@ const getLogsNavigationEntries = ({
 
   if (isLogsExplorerAccessible) {
     entries.push({
-      label: 'Explorer',
+      label: 'Discover',
       app: 'observability-logs-explorer',
       path: '/',
-      isBetaFeature: true,
     });
   }
 

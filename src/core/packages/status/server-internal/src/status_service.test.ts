@@ -100,7 +100,12 @@ describe('StatusService', () => {
       expect(prebootRouterMock.get).toHaveBeenCalledWith(
         {
           path: '/api/status',
-          options: { authRequired: false, tags: ['api'], access: 'public' },
+          options: {
+            authRequired: false,
+            tags: ['api'],
+            access: 'public',
+            excludeFromRateLimiter: true,
+          },
           validate: false,
         },
         expect.any(Function)

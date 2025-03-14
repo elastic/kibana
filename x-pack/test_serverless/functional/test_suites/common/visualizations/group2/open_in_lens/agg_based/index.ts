@@ -17,7 +17,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - Agg based Vis Open in Lens', () => {
+  describe('lens app - Agg based Vis Open in Lens', function () {
+    // see details: https://github.com/elastic/kibana/issues/208926
+    this.tags(['failsOnMKI']);
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';

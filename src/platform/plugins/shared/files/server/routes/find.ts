@@ -82,8 +82,10 @@ export function register(router: FilesRouter) {
     {
       path: FILES_API_ROUTES.find,
       validate: { ...rt },
-      options: {
-        tags: [`access:${FILES_MANAGE_PRIVILEGE}`],
+      security: {
+        authz: {
+          requiredPrivileges: [FILES_MANAGE_PRIVILEGE],
+        },
       },
     },
     handler

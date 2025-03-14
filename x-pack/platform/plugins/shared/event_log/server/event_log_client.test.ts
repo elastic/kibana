@@ -285,6 +285,10 @@ describe('EventLogStart', () => {
 function fakeEvent(overrides = {}) {
   return merge(
     {
+      _id: '1',
+      _index: '1',
+      _seq_no: 1,
+      _primary_term: 1,
       event: {
         provider: 'actions',
         action: 'execute',

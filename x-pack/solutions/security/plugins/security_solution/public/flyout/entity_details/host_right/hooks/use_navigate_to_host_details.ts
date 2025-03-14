@@ -7,12 +7,13 @@
 
 import { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { EntityType } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { HostPanelKey } from '..';
 import { HostDetailsPanelKey } from '../../host_details_left';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {
   hostName: string;
@@ -23,7 +24,6 @@ interface UseNavigateToHostDetailsParams {
   hasNonClosedAlerts: boolean;
   isPreviewMode?: boolean;
   contextID: string;
-  isDraggable?: boolean;
 }
 
 interface UseNavigateToHostDetailsResult {
@@ -40,16 +40,15 @@ export const useNavigateToHostDetails = ({
   hasNonClosedAlerts,
   isPreviewMode,
   contextID,
-  isDraggable,
 }: UseNavigateToHostDetailsParams): UseNavigateToHostDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-    entity: 'host',
+    entity: EntityType.host,
   });
 
   const isLinkEnabled = useMemo(() => {
@@ -77,7 +76,6 @@ export const useNavigateToHostDetails = ({
           contextID,
           scopeId,
           hostName,
-          isDraggable,
         },
       };
 
@@ -102,7 +100,6 @@ export const useNavigateToHostDetails = ({
       hasVulnerabilitiesFindings,
       hasNonClosedAlerts,
       contextID,
-      isDraggable,
     ]
   );
 

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './integration_icon';
-export * from './insufficient_privileges';
+export { IntegrationIcon } from './integration_icon';
+export { PrivilegesWarningIconWrapper } from './insufficient_privileges';

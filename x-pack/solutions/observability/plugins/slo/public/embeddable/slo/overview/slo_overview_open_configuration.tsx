@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiSkeletonText } from '@elastic/eui';
 import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
 import { SLOPublicPluginsStart } from '../../..';
-import { SloConfiguration } from './slo_configuration';
 import { SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
 
@@ -28,6 +28,12 @@ export async function openSloConfiguration(
 
   return new Promise(async (resolve, reject) => {
     try {
+      const LazySloConfiguration = lazy(async () => {
+        const { SloConfiguration } = await import('./slo_configuration');
+        return {
+          default: SloConfiguration,
+        };
+      });
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <KibanaContextProvider
@@ -45,17 +51,19 @@ export async function openSloConfiguration(
               }}
             >
               <QueryClientProvider client={queryClient}>
-                <SloConfiguration
-                  initialInput={initialState}
-                  onCreate={(update: GroupSloCustomInput | SingleSloCustomInput) => {
-                    flyoutSession.close();
-                    resolve(update);
-                  }}
-                  onCancel={() => {
-                    flyoutSession.close();
-                    reject();
-                  }}
-                />
+                <Suspense fallback={<EuiSkeletonText />}>
+                  <LazySloConfiguration
+                    initialInput={initialState}
+                    onCreate={(update: GroupSloCustomInput | SingleSloCustomInput) => {
+                      flyoutSession.close();
+                      resolve(update);
+                    }}
+                    onCancel={() => {
+                      flyoutSession.close();
+                      reject();
+                    }}
+                  />
+                </Suspense>
               </QueryClientProvider>
             </PluginContext.Provider>
           </KibanaContextProvider>,

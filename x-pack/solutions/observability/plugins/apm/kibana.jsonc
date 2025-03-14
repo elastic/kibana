@@ -39,7 +39,8 @@
       "uiActions",
       "logsDataAccess",
       "savedSearch",
-      "entityManager"
+      "entityManager",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "actions",
@@ -61,7 +62,8 @@
       "profilingDataAccess",
       "cases",
       "observabilityAIAssistant",
-      "dataDefinitionRegistry"
+      "dataDefinitionRegistry",
+      "share"
     ],
     "requiredBundles": [
       "fleet",

@@ -30,6 +30,24 @@ async function sha1(str: string) {
 }
 
 /**
+ * Helper function to get the request body for the getFieldsForWildcard request
+ * @param options options for fields request
+ * @returns string | undefined
+ */
+export function getFieldsForWildcardRequestBody(options: GetFieldsOptions): string | undefined {
+  const { indexFilter, runtimeMappings } = options;
+
+  if (!indexFilter && !runtimeMappings) {
+    return;
+  }
+
+  return JSON.stringify({
+    ...(indexFilter && { index_filter: indexFilter }),
+    ...(runtimeMappings && { runtime_mappings: runtimeMappings }),
+  });
+}
+
+/**
  * Data Views API Client - client implementation
  */
 export class DataViewsApiClient implements IDataViewsApiClient {
@@ -49,7 +67,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     url: string,
     query?: {},
     body?: string,
-    forceRefresh?: boolean
+    forceRefresh?: boolean,
+    abortSignal?: AbortSignal
   ): Promise<HttpResponse<T> | undefined> {
     const asResponse = true;
     const cacheOptions: { cache?: RequestCache } = forceRefresh ? { cache: 'no-cache' } : {};
@@ -59,21 +78,33 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const headers = userHash ? { 'user-hash': userHash } : undefined;
 
     const request = body
-      ? this.http.post<T>(url, { query, body, version, asResponse })
+      ? this.http.post<T>(url, { query, body, version, asResponse, signal: abortSignal })
       : this.http.fetch<T>(url, {
           query,
           version,
           ...cacheOptions,
           asResponse,
           headers,
+          signal: abortSignal,
         });
 
     return request.catch((resp) => {
-      if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
-        throw new DataViewMissingIndices(resp.body.message);
+      // Custom errors with a body
+      if (resp?.body) {
+        if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
+          throw new DataViewMissingIndices(resp.body.message);
+        }
+
+        throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
       }
 
-      throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
+      // Regular errors including AbortError
+      if (typeof resp?.name === 'string' && typeof resp?.message === 'string') {
+        throw resp;
+      }
+
+      // Other unknown errors
+      throw new Error('Unknown error');
     });
   }
 
@@ -99,6 +130,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       allowHidden,
       fieldTypes,
       includeEmptyFields,
+      abortSignal,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
     const versionQueryParam = indexFilter ? {} : { apiVersion: version };
@@ -119,8 +151,9 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         include_empty_fields: includeEmptyFields,
         ...versionQueryParam,
       },
-      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
-      forceRefresh
+      getFieldsForWildcardRequestBody(options),
+      forceRefresh,
+      abortSignal
     ).then((response) => {
       return {
         indices: response?.body?.indices || [],

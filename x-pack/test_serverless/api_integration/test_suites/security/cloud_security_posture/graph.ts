@@ -30,7 +30,9 @@ export default function ({ getService }: FtrProviderContext) {
     return req.send(body);
   };
 
-  describe('POST /internal/cloud_security_posture/graph', () => {
+  describe('POST /internal/cloud_security_posture/graph', function () {
+    // see details: https://github.com/elastic/kibana/issues/208903
+    this.tags(['failsOnMKI']);
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit'

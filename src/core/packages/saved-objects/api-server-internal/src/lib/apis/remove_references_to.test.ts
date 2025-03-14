@@ -15,7 +15,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -106,9 +106,7 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess(client, repository, type, id, { type });
 
         expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.objectContaining({ ...query }),
-          }),
+          expect.objectContaining({ ...query }),
           expect.anything()
         );
       });
@@ -139,13 +137,11 @@ describe('SavedObjectsRepository', () => {
         await removeReferencesToSuccess(client, repository, type, id);
         expect(client.updateByQuery).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              script: expect.objectContaining({
-                params: {
-                  type,
-                  id,
-                },
-              }),
+            script: expect.objectContaining({
+              params: {
+                type,
+                id,
+              },
             }),
           }),
           expect.anything()
@@ -248,6 +244,39 @@ describe('SavedObjectsRepository', () => {
       });
 
       it('calls authorizeRemoveReferences with the correct parameters', async () => {
+        apiExecutionContext.client.get.mockResponse({
+          _source: {
+            foo: {
+              name: 'foo_name',
+            },
+          },
+          found: true,
+          _index: '.kibana',
+          _id: 'id',
+        });
+
+        const securityExt = apiExecutionContext.extensions.securityExtension!;
+
+        securityExt.includeSavedObjectNames.mockReturnValue(true);
+
+        await performRemoveReferencesTo(
+          { type: 'foo', id: 'id', options: { namespace } },
+          apiExecutionContext
+        );
+
+        expect(securityExt.authorizeRemoveReferences).toHaveBeenLastCalledWith({
+          namespace,
+          object: { type: 'foo', id: 'id', name: 'foo_name' },
+        });
+      });
+
+      it('calls authorizeRemoveReferences with the correct parameters when includeSavedObjectNames is disabled', async () => {
+        apiExecutionContext.extensions.securityExtension.includeSavedObjectNames.mockReturnValue(
+          false
+        );
+
+        expect(apiExecutionContext.client.get).not.toHaveBeenCalled();
+
         await performRemoveReferencesTo(
           { type: 'foo', id: 'id', options: { namespace } },
           apiExecutionContext
@@ -270,11 +299,10 @@ describe('SavedObjectsRepository', () => {
         const client = apiExecutionContext.client;
         expect(client.updateByQuery).toHaveBeenCalledTimes(1);
         expect(client.updateByQuery).toHaveBeenLastCalledWith(
-          {
+          expect.objectContaining({
             refresh: false,
             index: indices,
-            body: expect.any(Object),
-          },
+          }),
           { ignore: [404], meta: true }
         );
       });

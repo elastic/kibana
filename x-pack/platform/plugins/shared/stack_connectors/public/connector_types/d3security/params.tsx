@@ -14,6 +14,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { D3SecurityRunActionParams } from '../../../common/d3security/types';
 import { SUB_ACTION } from '../../../common/d3security/constants';
 import { D3SecurityActionParams } from './types';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityActionParams>> = ({
   actionParams,
@@ -50,6 +51,7 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityAction
         label={i18n.translate('xpack.stackConnectors.components.d3security.eventTypeFieldLabel', {
           defaultMessage: 'Event Type',
         })}
+        labelAppend={OptionalFieldLabel}
       >
         <EuiFieldText
           data-test-subj="eventTypeInput"
@@ -69,6 +71,7 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityAction
         label={i18n.translate('xpack.stackConnectors.components.d3security.severityFieldLabel', {
           defaultMessage: 'Severity',
         })}
+        labelAppend={OptionalFieldLabel}
       >
         <EuiFieldText
           data-test-subj="severityInput"

@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -340,25 +340,23 @@ async function fetchBeatsByType(
       'hits.hits._source.beats_state.state',
       'hits.hits._source.beats_state.beat.type',
     ],
-    body: {
-      query: createQuery({
-        start,
-        end,
-        filters: [
-          { terms: { cluster_uuid: clusterUuids } },
-          {
-            bool: {
-              must_not: { term: { [`${type}.beat.type`]: 'apm-server' } },
-              must: { term: { type } },
-            },
+    query: createQuery({
+      start,
+      end,
+      filters: [
+        { terms: { cluster_uuid: clusterUuids } },
+        {
+          bool: {
+            must_not: { term: { [`${type}.beat.type`]: 'apm-server' } },
+            must: { term: { type } },
           },
-        ],
-      }) as estypes.QueryDslQueryContainer,
-      from: page * HITS_SIZE,
-      collapse: { field: `${type}.beat.uuid` },
-      sort: [{ [`${type}.timestamp`]: { order: 'desc', unmapped_type: 'long' } }],
-      size: HITS_SIZE,
-    },
+        },
+      ],
+    }) as estypes.QueryDslQueryContainer,
+    from: page * HITS_SIZE,
+    collapse: { field: `${type}.beat.uuid` },
+    sort: [{ [`${type}.timestamp`]: { order: 'desc', unmapped_type: 'long' } }],
+    size: HITS_SIZE,
   };
 
   const results = await callCluster.search<BeatsStats>(params);

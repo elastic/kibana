@@ -5,55 +5,61 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
+import { isAgentlessEnabled } from '../../utils/agentless';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-
-const errorMessage = i18n.translate(
-  'xpack.enterpriseSearch.server.routes.configData.errorMessage',
-  {
-    defaultMessage: 'Error fetching data from Enterprise Search',
-  }
-);
 
 export function registerConfigDataRoute({
   router,
   config,
   log,
   globalConfigService,
+  getStartServices,
 }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/config_data',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: false,
     },
-    elasticsearchErrorHandler(log, async (context, request, response) => {
-      const data = await callEnterpriseSearchConfigAPI({ config, log, request });
+    elasticsearchErrorHandler(log, async (context, _request, response) => {
+      const [_core, start] = await getStartServices();
+      const data = {
+        features: {
+          hasConnectors: config.hasConnectors,
+          hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
+          hasDocumentLevelSecurityEnabled: config.hasDocumentLevelSecurityEnabled,
+          hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
+          hasNativeConnectors: isAgentlessEnabled(start),
+          // 9.x Does not have ent search node, and therefore does not have support for the following
+          hasWebCrawler: false,
+        },
+        kibanaVersion: kibanaPackageJson.version,
+      };
 
-      if ('responseStatus' in data) {
-        return response.customError({
-          body: errorMessage,
-          statusCode: data.responseStatus,
-        });
-      } else if (!Object.keys(data).length) {
-        return response.customError({
-          body: errorMessage,
-          statusCode: 502,
-        });
-      } else {
-        return response.ok({
-          body: data,
-          headers: { 'content-type': 'application/json' },
-        });
-      }
+      return response.ok({
+        body: data,
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 
   router.get(
     {
       path: '/internal/enterprise_search/es_config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: false,
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {

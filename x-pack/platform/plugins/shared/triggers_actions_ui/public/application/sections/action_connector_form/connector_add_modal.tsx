@@ -306,7 +306,7 @@ const ConnectorAddModal = ({
         {canSave ? (
           <EuiButton
             fill
-            color="success"
+            color="primary"
             data-test-subj="saveActionButtonModal"
             type="submit"
             iconType="check"

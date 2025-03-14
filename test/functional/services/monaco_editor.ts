@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type monaco } from '@kbn/monaco';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -28,9 +27,9 @@ export class MonacoEditorService extends FtrService {
     await this.retry.try(async () => {
       values = await this.browser.execute(
         () =>
-          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-          (window.MonacoEnvironment?.monaco.editor as typeof monaco.editor)
-            .getModels()
+          // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
+          window
+            .MonacoEnvironment!.monaco!.editor.getModels()
             .map((model: any) => model.getValue()) as string[]
       );
     });
@@ -48,8 +47,8 @@ export class MonacoEditorService extends FtrService {
     await this.retry.try(async () => {
       await this.browser.execute(
         (editorIndex, codeEditorValue) => {
-          // @ts-expect-error this value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-          const editor = window.MonacoEnvironment?.monaco.editor as typeof monaco.editor;
+          // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
+          const editor = window.MonacoEnvironment!.monaco!.editor;
           const textModels = editor.getModels();
 
           if (editorIndex) {

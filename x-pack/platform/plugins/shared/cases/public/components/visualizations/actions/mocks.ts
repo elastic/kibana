@@ -43,7 +43,7 @@ export const getMockLensApi = (
     getFullAttributes: () => {
       return mockLensAttributes;
     },
-    panelTitle: new BehaviorSubject<string | undefined>('myPanel'),
+    title$: new BehaviorSubject<string | undefined>('myPanel'),
     timeRange$: new BehaviorSubject<TimeRange | undefined>({
       from,
       to,

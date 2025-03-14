@@ -20,15 +20,9 @@
         "description": [],
         "signature": [
           "() => ",
-          {
-            "pluginId": "@kbn/core-http-router-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-            "section": "def-server.MockedVersionedRouter",
-            "text": "MockedVersionedRouter"
-          }
+          "MockedVersionedRouter"
         ],
-        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -44,7 +38,7 @@
         "tags": [],
         "label": "RegisteredVersionedRoute",
         "description": [],
-        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +60,7 @@
               "RouteSecurity",
               " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
             ],
-            "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+            "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -86,7 +80,7 @@
               "KibanaResponseFactory",
               ">; }; }"
             ],
-            "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+            "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -136,7 +130,7 @@
           "RequestHandlerContextBase",
           ">"
         ],
-        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -174,16 +168,10 @@
           "<unknown, unknown, unknown>[], [], unknown>; } & ",
           "VersionedRouter",
           "<any> & { getRoute: (method: \"get\" | \"delete\" | \"post\" | \"put\" | \"patch\", path: string) => ",
-          {
-            "pluginId": "@kbn/core-http-router-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-            "section": "def-server.RegisteredVersionedRoute",
-            "text": "RegisteredVersionedRoute"
-          },
+          "RegisteredVersionedRoute",
           "; }"
         ],
-        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "path": "src/core/packages/http/router-server-mocks/src/versioned_router.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -249,16 +237,10 @@
           "<any>; } & ",
           "IRouter",
           "<any> & { versioned: ",
-          {
-            "pluginId": "@kbn/core-http-router-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-            "section": "def-server.MockedVersionedRouter",
-            "text": "MockedVersionedRouter"
-          },
+          "MockedVersionedRouter",
           "; }"
         ],
-        "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+        "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -272,7 +254,7 @@
         "tags": [],
         "label": "mockRouter",
         "description": [],
-        "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+        "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -285,15 +267,9 @@
             "description": [],
             "signature": [
               "({ routerPath }?: { routerPath?: string | undefined; }) => ",
-              {
-                "pluginId": "@kbn/core-http-router-server-mocks",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-                "section": "def-server.RouterMock",
-                "text": "RouterMock"
-              }
+              "RouterMock"
             ],
-            "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+            "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -308,7 +284,7 @@
                 "signature": [
                   "{ routerPath?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -328,7 +304,7 @@
               "KibanaRequest",
               "<P, Q, B, any>"
             ],
-            "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+            "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -344,7 +320,7 @@
                   "RequestFixtureOptions",
                   "<P, Q, B>"
                 ],
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -362,7 +338,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+            "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -377,7 +353,7 @@
                 "signature": [
                   "{ headers?: Record<string, string> | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -395,7 +371,7 @@
               "KibanaResponseFactory",
               ">"
             ],
-            "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+            "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

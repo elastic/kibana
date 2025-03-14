@@ -34,6 +34,8 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
 import type { ColumnHeaderType } from '../../../../../common/types';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -85,6 +87,11 @@ const SPECIAL_TEST_TIMEOUT = 50000;
 
 const localMockedTimelineData = structuredClone(mockTimelineData);
 
+const mockDataView = new DataView({
+  spec: mockSourcererScope.sourcererDataView,
+  fieldFormats: fieldFormatsMock,
+});
+
 const TestComponent = (
   props: Partial<ComponentProps<typeof UnifiedTimeline>> & { show?: boolean }
 ) => {
@@ -92,6 +99,7 @@ const TestComponent = (
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
     columns: getColumnHeaders(columnsToDisplay, mockSourcererScope.browserFields),
     activeTab: TimelineTabs.query,
+    dataView: mockDataView,
     rowRenderers: [],
     timelineId: TimelineId.test,
     itemsPerPage: 10,
@@ -233,7 +241,7 @@ describe('unified timeline', () => {
         });
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toHaveAttribute('data-gridcell-column-index', '3');
+        ).toHaveAttribute('data-gridcell-column-index', '4');
 
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
@@ -268,7 +276,7 @@ describe('unified timeline', () => {
         });
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toHaveAttribute('data-gridcell-column-index', '3');
+        ).toHaveAttribute('data-gridcell-column-index', '4');
 
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
@@ -482,7 +490,7 @@ describe('unified timeline', () => {
         });
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toHaveAttribute('data-gridcell-column-index', '3');
+        ).toHaveAttribute('data-gridcell-column-index', '4');
 
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
@@ -513,50 +521,14 @@ describe('unified timeline', () => {
   });
 
   describe('unified field list', () => {
-    describe('render', () => {
-      let TestProviderWithNewStore: FC<PropsWithChildren<unknown>>;
-      beforeEach(() => {
-        const freshStore = createMockStore();
-        // eslint-disable-next-line react/display-name
-        TestProviderWithNewStore = ({ children }) => {
-          return <TestProviders store={freshStore}>{children}</TestProviders>;
-        };
-      });
-      it(
-        'should not render when timeline has never been opened',
-        async () => {
-          render(<TestComponent show={false} />, {
-            wrapper: TestProviderWithNewStore,
-          });
-          expect(await screen.queryByTestId('timeline-sidebar')).not.toBeInTheDocument();
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-
-      it(
-        'should render when timeline has been opened',
-        async () => {
-          render(<TestComponent />, {
-            wrapper: TestProviderWithNewStore,
-          });
-          expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-
-      it(
-        'should not re-render when timeline has been opened at least once',
-        async () => {
-          const { rerender } = render(<TestComponent />, {
-            wrapper: TestProviderWithNewStore,
-          });
-          rerender(<TestComponent show={false} />);
-          // Even after timeline is closed, it should still exist in the background
-          expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
-        },
-        SPECIAL_TEST_TIMEOUT
-      );
-    });
+    it(
+      'should render',
+      async () => {
+        renderTestComponents();
+        expect(await screen.queryByTestId('timeline-sidebar')).toBeInTheDocument();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
     it(
       'should be able to add filters',

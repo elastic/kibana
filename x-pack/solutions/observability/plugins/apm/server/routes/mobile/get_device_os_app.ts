@@ -46,38 +46,36 @@ export async function getDeviceOSApp({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(TRANSACTION_TYPE, transactionType),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
+      },
+    },
+    aggs: {
+      devices: {
+        terms: {
+          field: DEVICE_MODEL_IDENTIFIER,
+          size,
         },
       },
-      aggs: {
-        devices: {
-          terms: {
-            field: DEVICE_MODEL_IDENTIFIER,
-            size,
-          },
+      osVersions: {
+        terms: {
+          field: HOST_OS_VERSION,
+          size,
         },
-        osVersions: {
-          terms: {
-            field: HOST_OS_VERSION,
-            size,
-          },
-        },
-        appVersions: {
-          terms: {
-            field: SERVICE_VERSION,
-            size,
-          },
+      },
+      appVersions: {
+        terms: {
+          field: SERVICE_VERSION,
+          size,
         },
       },
     },

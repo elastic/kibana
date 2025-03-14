@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ClusterHealthState } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import { getRuleStatsAggregation, normalizeRuleStatsAggregation } from './rule_stats';
 

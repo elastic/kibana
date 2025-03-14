@@ -6,7 +6,7 @@
  */
 
 import { formatExecutionErrorsResult } from './format_execution_log_errors';
-import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 
 describe('formatExecutionErrorsResult', () => {
   test('should return empty results if data is undefined', () => {
@@ -190,6 +190,10 @@ function getEsResults({
     per_page: perPage,
     total,
     data: data.map((d: GetEsResult) => ({
+      _id: 'test-id',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': d.timestamp,
       event: {
         provider: d.provider,

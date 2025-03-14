@@ -32,7 +32,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
         transform="translate(0 80)"
       >
         <text
-          fill="#69707D"
+          fill="#5A6D8C"
           fontSize={11}
           textAnchor="middle"
           x={50}
@@ -41,7 +41,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
           0 μs
         </text>
         <text
-          fill="#69707D"
+          fill="#5A6D8C"
           fontSize={11}
           textAnchor="middle"
           x={30}
@@ -50,7 +50,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
           200 μs
         </text>
         <text
-          fill="#69707D"
+          fill="#5A6D8C"
           fontSize={11}
           textAnchor="middle"
           x={10}
@@ -59,7 +59,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
           400 μs
         </text>
         <text
-          fill="#69707D"
+          fill="#5A6D8C"
           fontSize={11}
           textAnchor="middle"
           x={-10}
@@ -68,7 +68,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
           600 μs
         </text>
         <text
-          fill="#69707D"
+          fill="#5A6D8C"
           fontSize={11}
           textAnchor="middle"
           x={-30}
@@ -77,7 +77,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
           800 μs
         </text>
         <text
-          fill="#343741"
+          fill="#1D2A3E"
           textAnchor="middle"
           x={-50}
           y={0}
@@ -104,15 +104,15 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
       >
         
         <div
-          className="css-dncsr3"
+          className="css-1ksntcu"
           disabled={false}
           onBlur={[Function]}
           onFocus={[Function]}
         >
           
           <span
-            className="css-18bonuo"
-            color="#98A2B3"
+            className="css-11ohb43"
+            color="#8E9FBC"
             shape="circle"
           />
         </div>
@@ -136,15 +136,15 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
       >
         
         <div
-          className="css-dncsr3"
+          className="css-1ksntcu"
           disabled={false}
           onBlur={[Function]}
           onFocus={[Function]}
         >
           
           <span
-            className="css-18bonuo"
-            color="#98A2B3"
+            className="css-11ohb43"
+            color="#8E9FBC"
             shape="circle"
           />
         </div>
@@ -168,15 +168,15 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
       >
         
         <div
-          className="css-dncsr3"
+          className="css-1ksntcu"
           disabled={false}
           onBlur={[Function]}
           onFocus={[Function]}
         >
           
           <span
-            className="css-18bonuo"
-            color="#98A2B3"
+            className="css-11ohb43"
+            color="#8E9FBC"
             shape="circle"
           />
         </div>
@@ -210,70 +210,70 @@ exports[`Timeline VerticalLinesContainer should render with data 1`] = `
       transform="translate(0 100)"
     >
       <line
-        stroke="#F1F4FA"
+        stroke="#ECF1F9"
         x1={50}
         x2={50}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#F1F4FA"
+        stroke="#ECF1F9"
         x1={30}
         x2={30}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#F1F4FA"
+        stroke="#ECF1F9"
         x1={10}
         x2={10}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#F1F4FA"
+        stroke="#ECF1F9"
         x1={-10}
         x2={-10}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#F1F4FA"
+        stroke="#ECF1F9"
         x1={-30}
         x2={-30}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#F1F4FA"
+        stroke="#ECF1F9"
         x1={-50}
         x2={-50}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#98A2B3"
+        stroke="#8E9FBC"
         x1={-9950}
         x2={-9950}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#98A2B3"
+        stroke="#8E9FBC"
         x1={-10950}
         x2={-10950}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#98A2B3"
+        stroke="#8E9FBC"
         x1={-18950}
         x2={-18950}
         y1={0}
         y2="100%"
       />
       <line
-        stroke="#98A2B3"
+        stroke="#8E9FBC"
         x1={-50}
         x2={-50}
         y1={0}

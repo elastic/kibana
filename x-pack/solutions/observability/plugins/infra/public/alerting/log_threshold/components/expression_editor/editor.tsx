@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -101,7 +108,6 @@ export const ExpressionEditor: React.FC<
   const {
     services: { logsShared },
   } = useKibanaContextForPlugin(); // injected during alert registration
-
   return (
     <>
       {isInternal ? (
@@ -164,6 +170,9 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   const { setRuleParams, ruleParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { logViewReference, resolvedLogView } = useLogViewContext();
+  const {
+    services: { http },
+  } = useKibanaContextForPlugin();
 
   if (logViewReference.type !== 'log-view-reference') {
     throw new Error('The Log Threshold rule type only supports persisted Log Views');
@@ -289,18 +298,28 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   return (
     <>
       {resolvedLogView && <LogViewSwitcher logView={resolvedLogView} />}
-
+      <EuiText size="xs">
+        {i18n.translate('xpack.infra.editor.modifyLogViewSetting', {
+          defaultMessage: 'To modify go to ',
+        })}
+        <EuiLink
+          data-test-subj="infraEditorLinkToAdvancedSettings"
+          href={http.basePath.prepend('/app/management/kibana/settings?query=Log+sources')}
+        >
+          {i18n.translate('xpack.infra.editor.euiLink.advancedSettingsLabel', {
+            defaultMessage: 'Advanced Settings.',
+          })}
+        </EuiLink>
+      </EuiText>
+      <EuiSpacer size="m" />
       <TypeSwitcher criteria={ruleParams.criteria || []} updateType={updateType} />
-
       {ruleParams.criteria && !isRatioRule(ruleParams.criteria) && criteriaComponent}
-
       <Threshold
         comparator={ruleParams.count?.comparator}
         value={ruleParams.count?.value}
         updateThreshold={updateThreshold}
         errors={thresholdErrors}
       />
-
       <ForLastExpression
         timeWindowSize={ruleParams.timeSize}
         timeWindowUnit={ruleParams.timeUnit}
@@ -308,15 +327,12 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
         onChangeWindowUnit={updateTimeUnit}
         errors={{ timeWindowSize: timeWindowSizeErrors, timeSizeUnit: timeSizeUnitErrors }}
       />
-
       <GroupByExpression
         selectedGroups={ruleParams.groupBy}
         onChange={updateGroupBy}
         fields={groupByFields}
       />
-
       {ruleParams.criteria && isRatioRule(ruleParams.criteria) && criteriaComponent}
-
       {shouldShowGroupByOptimizationWarning && (
         <>
           <EuiSpacer size="l" />
@@ -331,7 +347,6 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
           </EuiCallOut>
         </>
       )}
-
       <EuiSpacer size="l" />
     </>
   );

@@ -12,8 +12,7 @@ export class IntegrationRetriever {
   constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
 
   public async populateIndex() {
-    // TODO: use Fleet API client for integration retrieval as an argument once feature is available
-    return this.clients.data.integrations.create();
+    return this.clients.data.integrations.populate();
   }
 
   public async getIntegrations(semanticString: string): Promise<RuleMigrationIntegration[]> {

@@ -24,7 +24,7 @@ const roleToAccessSecuritySolution = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['*'],
       },
@@ -47,7 +47,7 @@ const roleToAccessSecuritySolutionWithDls = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['*'],
       },

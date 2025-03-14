@@ -318,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show available data views after switching to classic mode', async () => {
+      it('should show available data views and search results after switching to classic mode', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -329,10 +329,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedSearch.switchToDataViewMode();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.assertHitCount('14,004');
         const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        if (await testSubjects.exists('~nav-item-observability_project_nav')) {
+          expect(availableDataViews).to.eql([
+            'All logs',
+            'kibana_sample_data_flights',
+            'logstash-*',
+          ]);
+        } else {
+          expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        }
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });

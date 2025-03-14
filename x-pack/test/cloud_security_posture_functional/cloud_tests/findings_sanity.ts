@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(rowsCount).to.be(expectedRowsCount);
             const groupSelector = await findings.groupSelector();
             await groupSelector.openDropDown();
-            await groupSelector.setValue('Cloud account');
+            await groupSelector.setValue('Cloud account ID');
             const grouping = await findings.findingsGrouping();
             // Check that the group count and unit count matches the expected values
             const groupCount = await grouping.getGroupCount();

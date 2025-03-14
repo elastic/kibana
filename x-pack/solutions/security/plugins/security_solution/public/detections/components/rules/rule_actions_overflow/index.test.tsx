@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-
+import { RuleActionsOverflow } from '.';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
+import { TestProviders } from '../../../../common/mock';
 import { useBulkExport } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
-import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
-
-import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
-import { TestProviders } from '../../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
@@ -26,48 +22,34 @@ jest.mock(
   '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action'
 );
 jest.mock('../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export');
-jest.mock('../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run');
-jest.mock('../../../../common/lib/apm/use_start_transaction');
-jest.mock('../../../../common/hooks/use_app_toasts');
+
 const mockReportEvent = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...actual,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        telemetry: {
-          reportEvent: (eventType: ManualRuleRunEventTypes, params: { type: 'single' | 'bulk' }) =>
-            mockReportEvent(eventType, params),
+    useKibana: jest.fn().mockImplementation(() => {
+      const useKibana = actual.useKibana();
+      return {
+        ...useKibana,
+        services: {
+          ...useKibana.services,
+          telemetry: {
+            reportEvent: (
+              eventType: ManualRuleRunEventTypes,
+              params: { type: 'single' | 'bulk' }
+            ) => mockReportEvent(eventType, params),
+          },
         },
-        application: {
-          navigateToApp: jest.fn(),
-        },
-      },
+      };
     }),
   };
 });
 
 const useExecuteBulkActionMock = useExecuteBulkAction as jest.Mock;
 const useBulkExportMock = useBulkExport as jest.Mock;
-const useScheduleRuleRunMock = useScheduleRuleRun as jest.Mock;
-
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('RuleActionsOverflow', () => {
-  const scheduleRuleRun = jest.fn();
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-  beforeEach(() => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-    useScheduleRuleRunMock.mockReturnValue({ scheduleRuleRun });
-  });
-
   describe('rules details menu panel', () => {
     test('menu items rendered when a rule is passed to the component', () => {
       const { getByTestId } = render(

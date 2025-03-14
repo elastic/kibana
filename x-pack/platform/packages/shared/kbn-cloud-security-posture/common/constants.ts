@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { VulnSeverity } from './types/vulnerabilities';
+import { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
@@ -40,6 +41,8 @@ export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 // meant as a temp workaround to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683
 export const CDR_3RD_PARTY_RETENTION_POLICY = '90d';
 
+export const CSP_MISCONFIGURATIONS_DATASET = 'cloud_security_posture.findings';
+
 export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
@@ -48,7 +51,21 @@ export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   UNKNOWN: 'UNKNOWN',
 };
 
-export const MISCONFIGURATION_STATUS: Record<string, string> = {
+export const MISCONFIGURATION_STATUS: Record<string, MisconfigurationEvaluationStatus> = {
   PASSED: 'passed',
   FAILED: 'failed',
+  UNKNOWN: 'unknown',
 };
+
+export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
+
+// A mapping of in-development features to their status. These features should be hidden from users but can be easily
+// activated via a simple code change in a single location.
+export const INTERNAL_FEATURE_FLAGS = {
+  showManageRulesMock: false,
+  showFindingFlyoutEvidence: true,
+} as const;
+
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
+
+export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';

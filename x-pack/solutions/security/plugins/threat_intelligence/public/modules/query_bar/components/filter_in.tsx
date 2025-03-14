@@ -16,7 +16,7 @@ import {
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterIn } from '../utils/filter';
 import { Indicator } from '../../../../common/types/indicator';
-import { FILTER_IN_TITLE } from './translations';
+import { FILTER_FOR_TITLE } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
 
@@ -60,9 +60,9 @@ export const FilterInButtonIcon: VFC<FilterInProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_IN_TITLE}>
+    <EuiToolTip content={FILTER_FOR_TITLE}>
       <EuiButtonIcon
-        aria-label={FILTER_IN_TITLE}
+        aria-label={FILTER_FOR_TITLE}
         iconType={ICON_TYPE}
         iconSize="s"
         size="xs"
@@ -92,16 +92,16 @@ export const FilterInButtonEmpty: VFC<FilterInProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_IN_TITLE}>
+    <EuiToolTip content={FILTER_FOR_TITLE}>
       <EuiButtonEmpty
-        aria-label={FILTER_IN_TITLE}
+        aria-label={FILTER_FOR_TITLE}
         iconType={ICON_TYPE}
         iconSize="s"
         color="primary"
         onClick={filterFn}
         data-test-subj={dataTestSub}
       >
-        {FILTER_IN_TITLE}
+        {FILTER_FOR_TITLE}
       </EuiButtonEmpty>
     </EuiToolTip>
   );
@@ -132,7 +132,7 @@ export const FilterInContextMenu: VFC<FilterInProps> = ({
       onClick={filterFn}
       data-test-subj={dataTestSub}
     >
-      {FILTER_IN_TITLE}
+      {FILTER_FOR_TITLE}
     </EuiContextMenuItem>
   );
 };
@@ -156,10 +156,10 @@ export const FilterInCellAction: VFC<FilterInCellActionProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_IN_TITLE}>
+    <EuiToolTip content={FILTER_FOR_TITLE}>
       <EuiFlexItem data-test-subj={dataTestSub}>
-        <Component aria-label={FILTER_IN_TITLE} iconType={ICON_TYPE} onClick={filterFn}>
-          {FILTER_IN_TITLE}
+        <Component aria-label={FILTER_FOR_TITLE} iconType={ICON_TYPE} onClick={filterFn}>
+          {FILTER_FOR_TITLE}
         </Component>
       </EuiFlexItem>
     </EuiToolTip>

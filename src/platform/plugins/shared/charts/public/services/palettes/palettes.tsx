@@ -38,7 +38,9 @@ function buildRoundRobinCategoricalWithMappedColors(
       const colorKey = series[0].name;
       mappedColors.mapKeys([colorKey]);
       const mappedColor = mappedColors.get(colorKey);
-      outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
+      outputColor = chartConfiguration.behindText
+        ? behindTextColorMap[mappedColor] ?? mappedColor
+        : mappedColor;
     } else {
       outputColor =
         chartConfiguration.behindText && behindTextColors
@@ -215,6 +217,7 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
   return {
     default: {
       title: defaultPalette.name,
+      tag: defaultPalette.tag,
       ...buildRoundRobinCategoricalWithMappedColors(
         'default', // needs to match key of palette definition
         defaultPalette.colors(),

@@ -15,7 +15,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { TimeRange } from '@kbn/es-query';
 import type { Vis } from '../vis';
-import { urlFor } from '../utils/saved_visualize_utils';
+import { urlFor } from '..';
 import { getCapabilities, getEmbeddable } from '../services';
 
 export function initializeEditApi({
@@ -77,9 +77,9 @@ export function initializeEditApi({
           const isByValue = !savedObjectId$.getValue();
           if (isByValue)
             return Boolean(
-              capabilities.dashboard?.showWriteControls && capabilities.visualize?.show
+              capabilities.dashboard_v2?.showWriteControls && capabilities.visualize_v2?.show
             );
-          else return Boolean(capabilities.visualize?.save);
+          else return Boolean(capabilities.visualize_v2?.save);
         },
       };
 }

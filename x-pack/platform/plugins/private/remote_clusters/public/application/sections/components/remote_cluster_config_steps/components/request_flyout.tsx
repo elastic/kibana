@@ -21,10 +21,12 @@ import {
 } from '@elastic/eui';
 
 import { ClusterPayload, serializeCluster } from '../../../../../../common/lib';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
 interface Props {
   close: () => void;
   cluster: ClusterPayload;
+  previousClusterMode?: typeof PROXY_MODE | typeof SNIFF_MODE;
 }
 
 export class RequestFlyout extends PureComponent<Props> {
@@ -32,7 +34,11 @@ export class RequestFlyout extends PureComponent<Props> {
     const { close, cluster } = this.props;
     const { name } = cluster;
     const endpoint = 'PUT _cluster/settings';
-    const payload = JSON.stringify(serializeCluster(cluster), null, 2);
+    const payload = JSON.stringify(
+      serializeCluster(cluster, this.props.previousClusterMode),
+      null,
+      2
+    );
     const request = `${endpoint}\n${payload}`;
 
     return (

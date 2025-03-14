@@ -15,13 +15,13 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
+  useEuiFontSize,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { Filter } from '@kbn/es-query';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { GroupStatsItem } from '../types';
-import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
 
 interface GroupStatsProps<T> {
@@ -34,6 +34,7 @@ interface GroupStatsProps<T> {
 }
 
 const Separator = () => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexItem
       grow={false}
@@ -41,7 +42,7 @@ const Separator = () => {
       css={css`
         align-self: center;
         height: 20px;
-        border-right: ${euiThemeVars.euiBorderThin};
+        border-right: ${euiTheme.border.thin};
       `}
     />
   );
@@ -55,6 +56,9 @@ const GroupStatsComponent = <T,>({
   stats,
   takeActionItems: getTakeActionItems,
 }: GroupStatsProps<T>) => {
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
   const [isPopoverOpen, setPopover] = useState(false);
   const takeActionItems = useMemo(() => {
     return getTakeActionItems?.(groupFilter, groupNumber) ?? [];
@@ -86,14 +90,28 @@ const GroupStatsComponent = <T,>({
 
         return (
           <EuiFlexItem grow={false} key={stat.title}>
-            <span css={statsContainerCss} data-test-subj={dataTestSubj}>
+            <span
+              css={css`
+                font-size: ${xsFontSize};
+                font-weight: ${euiTheme.font.weight.semiBold};
+                .smallDot {
+                  width: 3px !important;
+                  display: inline-block;
+                }
+                .euiBadge__text {
+                  text-align: center;
+                  width: 100%;
+                }
+              `}
+              data-test-subj={dataTestSubj}
+            >
               {stat.title}
               {component}
             </span>
           </EuiFlexItem>
         );
       }) ?? [],
-    [stats]
+    [stats, euiTheme, xsFontSize]
   );
 
   const takeActionMenu = useMemo(

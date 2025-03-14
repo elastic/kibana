@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -21,13 +21,13 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
-import { SavedObject } from '@kbn/core-saved-objects-api-server';
-import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -41,37 +41,9 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
 const logger = loggingSystemMock.create().get();
 
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
-  taskManager,
-  ruleTypeRegistry,
-  unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-  auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient,
-  isSystemAction: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-};
-
 const fakeRuleName = 'fakeRuleName';
 
+const mockActionsClient = actionsClientMock.create();
 const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
   id: '1',
   type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -85,7 +57,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
       name: fakeRuleName,
       tags: ['foo'],
       alertTypeId: 'myType',
-      // @ts-expect-error
+      actions: [],
       params: {},
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
@@ -121,10 +93,41 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
 
 describe('getBackfill()', () => {
   let rulesClient: RulesClient;
+  let isSystemAction: jest.Mock;
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    rulesClient = new RulesClient(rulesClientParams);
+    isSystemAction = jest.fn().mockReturnValue(false);
+    mockActionsClient.isSystemAction.mockImplementation(isSystemAction);
+
+    rulesClient = new RulesClient({
+      taskManager,
+      ruleTypeRegistry,
+      unsecuredSavedObjectsClient,
+      authorization: authorization as unknown as AlertingAuthorization,
+      actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
+      spaceId: 'default',
+      namespace: 'default',
+      getUserName: jest.fn(),
+      createAPIKey: jest.fn(),
+      logger,
+      internalSavedObjectsRepository,
+      encryptedSavedObjectsClient: encryptedSavedObjects,
+      getActionsClient: jest.fn().mockResolvedValue(mockActionsClient),
+      getEventLogClient: jest.fn(),
+      kibanaVersion,
+      auditLogger,
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      isAuthenticationTypeAPIKey: jest.fn(),
+      getAuthenticationAPIKey: jest.fn(),
+      getAlertIndicesAlias: jest.fn(),
+      alertsService: null,
+      backfillClient,
+      isSystemAction: jest.fn(),
+      connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+    });
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAdHocRunSO);
   });
 
@@ -158,7 +161,67 @@ describe('getBackfill()', () => {
     });
     expect(logger.error).not.toHaveBeenCalled();
 
-    expect(result).toEqual(transformAdHocRunToBackfillResult(mockAdHocRunSO));
+    expect(result).toEqual(
+      transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })
+    );
+  });
+
+  test('should successfully get backfill with actions', async () => {
+    const mockAdHocRunSOWithActions = {
+      ...mockAdHocRunSO,
+      attributes: {
+        ...mockAdHocRunSO.attributes,
+        rule: {
+          ...mockAdHocRunSO.attributes.rule,
+          actions: [
+            {
+              uuid: '123abc',
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {},
+            },
+          ],
+        },
+      },
+      references: [
+        { id: 'abc', name: 'rule', type: RULE_SAVED_OBJECT_TYPE },
+        { id: '4', name: 'action_0', type: 'action' },
+      ],
+    };
+    unsecuredSavedObjectsClient.get.mockResolvedValue(mockAdHocRunSOWithActions);
+    const result = await rulesClient.getBackfill('1');
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(AD_HOC_RUN_SAVED_OBJECT_TYPE, '1');
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+      entity: 'rule',
+      consumer: 'myApp',
+      operation: 'getBackfill',
+      ruleTypeId: 'myType',
+    });
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      event: {
+        action: 'ad_hoc_run_get',
+        category: ['database'],
+        outcome: 'success',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "fakeRuleName"`,
+        },
+      },
+      message:
+        'User has got ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+
+    expect(result).toEqual(
+      transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSOWithActions, isSystemAction })
+    );
   });
 
   describe('error handling', () => {

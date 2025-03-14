@@ -25,7 +25,7 @@ export function initializeDataLoadingManager(
     boolean | undefined
   >(
     { children$ },
-    'dataLoading',
+    'dataLoading$',
     apiPublishesDataLoading,
     undefined,
     // flatten method
@@ -38,7 +38,7 @@ export function initializeDataLoadingManager(
 
   return {
     api: {
-      dataLoading: dataLoading$,
+      dataLoading$,
     },
     internalApi: {
       waitForPanelsToLoad$: dataLoading$.pipe(

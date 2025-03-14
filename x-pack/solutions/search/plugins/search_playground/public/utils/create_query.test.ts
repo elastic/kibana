@@ -516,20 +516,9 @@ describe('create_query', () => {
                   {
                     standard: {
                       query: {
-                        nested: {
-                          inner_hits: {
-                            _source: ['field2.inference.chunks.text'],
-                            name: 'index1.field2',
-                            size: 2,
-                          },
-                          path: 'field2.inference.chunks',
-                          query: {
-                            sparse_vector: {
-                              field: 'field2.inference.chunks.embeddings',
-                              inference_id: 'model2',
-                              query: '{query}',
-                            },
-                          },
+                        semantic: {
+                          field: 'field2',
+                          query: '{query}',
                         },
                       },
                     },
@@ -540,6 +529,15 @@ describe('create_query', () => {
                     },
                   },
                 ],
+              },
+            },
+            highlight: {
+              fields: {
+                field2: {
+                  number_of_fragments: 2,
+                  order: 'score',
+                  type: 'semantic',
+                },
               },
             },
           });
@@ -638,24 +636,9 @@ describe('create_query', () => {
                   {
                     standard: {
                       query: {
-                        nested: {
-                          inner_hits: {
-                            _source: ['field2.inference.chunks.text'],
-                            name: 'index1.field2',
-                            size: 2,
-                          },
-                          path: 'field2.inference.chunks',
-                          query: {
-                            knn: {
-                              field: 'field2.inference.chunks.embeddings',
-                              query_vector_builder: {
-                                text_embedding: {
-                                  model_id: 'model2',
-                                  model_text: '{query}',
-                                },
-                              },
-                            },
-                          },
+                        semantic: {
+                          field: 'field2',
+                          query: '{query}',
                         },
                       },
                     },
@@ -666,6 +649,15 @@ describe('create_query', () => {
                     },
                   },
                 ],
+              },
+            },
+            highlight: {
+              fields: {
+                field2: {
+                  number_of_fragments: 2,
+                  order: 'score',
+                  type: 'semantic',
+                },
               },
             },
           });
@@ -885,7 +877,7 @@ describe('create_query', () => {
   });
 
   describe('getDefaultSourceFields', () => {
-    it('should return default source fields', () => {
+    it('should return source fields', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         'search-search-labs': {
           elser_query_fields: [],
@@ -930,7 +922,23 @@ describe('create_query', () => {
       };
 
       expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
-        'search-search-labs': ['body_content'],
+        'search-search-labs': [
+          'additional_urls',
+          'title',
+          'links',
+          'id',
+          'url_host',
+          'url_path',
+          'url_path_dir3',
+          'body_content',
+          'domains',
+          'url',
+          'url_scheme',
+          'meta_description',
+          'headings',
+          'url_path_dir2',
+          'url_path_dir1',
+        ],
       });
     });
 
@@ -950,23 +958,6 @@ describe('create_query', () => {
 
       expect(defaultSourceFields).toEqual({
         'search-search-labs': [undefined],
-      });
-    });
-
-    it('should return the first single field when no source fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        'search-search-labs': {
-          elser_query_fields: [],
-          semantic_fields: [],
-          dense_vector_query_fields: [],
-          bm25_query_fields: [],
-          source_fields: ['non_suggested_field'],
-          skipped_fields: 0,
-        },
-      };
-
-      expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
-        'search-search-labs': ['non_suggested_field'],
       });
     });
   });

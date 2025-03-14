@@ -25,7 +25,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
     share,
     application: { capabilities },
   } = useAppDependencies();
-  const isDiscoverAvailable = !!capabilities.discover?.show;
+  const isDiscoverAvailable = !!capabilities.discover_v2?.show;
 
   const { data: dataViewsTitleIdMap } = useGetDataViewsTitleIdMap();
 

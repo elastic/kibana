@@ -222,7 +222,7 @@ export function TimeseriesChart({
           ]}
           style={endZoneRectAnnotationStyle}
         />
-        {allSeries.map((serie) => {
+        {allSeries.map((serie, index) => {
           const Series = getChartType(serie.type);
 
           return (

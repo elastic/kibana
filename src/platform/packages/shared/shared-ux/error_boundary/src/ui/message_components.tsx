@@ -29,21 +29,18 @@ import {
 
 import { errorMessageStrings as strings } from './message_strings';
 
-export interface ErrorCalloutProps {
-  error: Error;
-  errorInfo: Partial<React.ErrorInfo> | null;
-  name: string | null;
+interface FatalPromptProps {
+  showErrorDetails: () => void;
   onClickRefresh: () => void;
 }
 
-const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props) => {
+const CodePanel: React.FC<CodePanelProps> = (props) => {
   const { error, errorInfo, name: errorComponentName, onClose } = props;
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
 
-  const errorName =
-    errorComponentName && strings.fatal.callout.details.componentName(errorComponentName);
+  const errorName = errorComponentName && strings.details.componentName(errorComponentName);
   const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
 
   return (
@@ -51,7 +48,7 @@ const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props)
       <EuiFlyoutHeader hasBorder>
         <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
           <EuiTitle size="m">
-            <h2>{strings.fatal.callout.details.title()}</h2>
+            <h2>{strings.details.title()}</h2>
           </EuiTitle>
         </EuiPanel>
       </EuiFlyoutHeader>
@@ -69,14 +66,14 @@ const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props)
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onClose} flush="left">
-                {strings.fatal.callout.details.closeButton()}
+                {strings.details.closeButton()}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={errorName + '\n\n' + errorTrace}>
                 {(copy) => (
                   <EuiButton onClick={copy} fill iconType="copyClipboard">
-                    {strings.fatal.callout.details.copyToClipboardButton()}
+                    {strings.details.copyToClipboardButton()}
                   </EuiButton>
                 )}
               </EuiCopy>
@@ -88,18 +85,17 @@ const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props)
   );
 };
 
-export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
-  const { onClickRefresh } = props;
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  return (
+export const FatalPrompt = withErrorDetails(
+  ({ showErrorDetails, onClickRefresh }: FatalPromptProps): JSX.Element => (
     <EuiEmptyPrompt
-      title={<h2 data-test-subj="errorBoundaryFatalHeader">{strings.fatal.callout.title()}</h2>}
+      title={
+        <h2 data-test-subj="errorBoundaryFatalHeader">{strings.page.callout.fatal.title()}</h2>
+      }
       color="danger"
       iconType="error"
       body={
         <>
-          <p data-test-subj="errorBoundaryFatalPromptBody">{strings.fatal.callout.body()}</p>
+          <p data-test-subj="errorBoundaryFatalPromptBody">{strings.page.callout.fatal.body()}</p>
           <p>
             <EuiButton
               color="danger"
@@ -108,41 +104,41 @@ export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
               onClick={onClickRefresh}
               data-test-subj="errorBoundaryFatalPromptReloadBtn"
             >
-              {strings.fatal.callout.pageReloadButton()}
+              {strings.page.callout.fatal.pageReloadButton()}
             </EuiButton>
           </p>
           <p>
             <EuiLink
               color="danger"
-              onClick={() => setIsFlyoutVisible(true)}
+              onClick={showErrorDetails}
               data-test-subj="errorBoundaryFatalShowDetailsBtn"
             >
-              {strings.fatal.callout.showDetailsButton()}
+              {strings.page.callout.fatal.showDetailsButton()}
             </EuiLink>
-            {isFlyoutVisible ? (
-              <CodePanel {...props} onClose={() => setIsFlyoutVisible(false)} />
-            ) : null}
           </p>
         </>
       }
     />
-  );
-};
+  )
+);
 
-export const RecoverablePrompt = (props: ErrorCalloutProps) => {
-  const { onClickRefresh } = props;
+interface RecoverablePromptProps {
+  onClickRefresh: () => void;
+}
+
+export const RecoverablePrompt = ({ onClickRefresh }: RecoverablePromptProps) => {
   return (
     <EuiEmptyPrompt
       title={
         <h2 data-test-subj="errorBoundaryRecoverableHeader">
-          {strings.recoverable.callout.title()}
+          {strings.page.callout.recoverable.title()}
         </h2>
       }
       color="warning"
       iconType="warning"
       body={
         <p data-test-subj="errorBoundaryRecoverablePromptBody">
-          {strings.recoverable.callout.body()}
+          {strings.page.callout.recoverable.body()}
         </p>
       }
       actions={
@@ -153,9 +149,119 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
           onClick={onClickRefresh}
           data-test-subj="errorBoundaryRecoverablePromptReloadBtn"
         >
-          {strings.recoverable.callout.pageReloadButton()}
+          {strings.page.callout.recoverable.pageReloadButton()}
         </EuiButton>
       }
     />
   );
 };
+
+interface SectionFatalPromptProps {
+  sectionName: string;
+  showErrorDetails: () => void;
+}
+
+export const SectionFatalPrompt = withErrorDetails(
+  ({ sectionName, showErrorDetails }: SectionFatalPromptProps): JSX.Element => {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={
+          <h2 data-test-subj="sectionErrorBoundaryPromptHeader">
+            {strings.section.callout.fatal.title(sectionName)}
+          </h2>
+        }
+        body={
+          <>
+            <p data-test-subj="sectionErrorBoundaryPromptBody">
+              {strings.section.callout.fatal.body(sectionName)}
+            </p>
+            <p>
+              <EuiLink color="danger" onClick={showErrorDetails}>
+                {strings.section.callout.fatal.showDetailsButton()}
+              </EuiLink>
+            </p>
+          </>
+        }
+      />
+    );
+  }
+);
+
+interface SectionRecoverablePromptProps {
+  sectionName: string;
+  onClickRefresh: () => void;
+}
+
+export const SectionRecoverablePrompt = ({
+  sectionName,
+  onClickRefresh,
+}: SectionRecoverablePromptProps): JSX.Element => {
+  return (
+    <EuiEmptyPrompt
+      color="warning"
+      iconType="warning"
+      title={
+        <h2 data-test-subj="sectionErrorBoundaryPromptHeader">
+          {strings.section.callout.recoverable.title(sectionName)}
+        </h2>
+      }
+      body={
+        <p data-test-subj="sectionErrorBoundaryPromptBody">
+          {strings.section.callout.recoverable.body(sectionName)}
+        </p>
+      }
+      actions={
+        <EuiButton
+          color="warning"
+          iconType="refresh"
+          fill={true}
+          onClick={onClickRefresh}
+          data-test-subj="sectionErrorBoundaryRecoverBtn"
+        >
+          {strings.section.callout.recoverable.pageReloadButton()}
+        </EuiButton>
+      }
+    />
+  );
+};
+
+interface ErrorDetailsProps {
+  error: Error;
+  errorInfo: Partial<React.ErrorInfo> | null;
+  name: string | null;
+}
+
+interface ErrorPromptProps {
+  showErrorDetails: () => void;
+}
+
+function withErrorDetails<PromptComponentProps extends ErrorPromptProps = ErrorPromptProps>(
+  PromptComponent: React.FC<PromptComponentProps>
+): React.FC<ErrorDetailsProps & Omit<PromptComponentProps, 'showErrorDetails'>> {
+  return ({ error, errorInfo, name, ...rest }) => {
+    const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+    return (
+      <>
+        <PromptComponent {...(rest as any)} showErrorDetails={() => setIsFlyoutVisible(true)} />
+        {isFlyoutVisible ? (
+          <CodePanel
+            error={error}
+            errorInfo={errorInfo}
+            name={name}
+            onClose={() => setIsFlyoutVisible(false)}
+          />
+        ) : null}
+      </>
+    );
+  };
+}
+
+interface CodePanelProps {
+  error: Error;
+  errorInfo: Partial<React.ErrorInfo> | null;
+  name: string | null;
+  onClose: () => void;
+}

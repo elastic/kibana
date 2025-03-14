@@ -11,10 +11,3 @@ import { CustomRequestHandlerContext } from '@kbn/core/server';
  * @internal
  */
 export type CloudRequestHandlerContext = CustomRequestHandlerContext<{}>;
-
-export interface CloudDataAttributes {
-  onboardingData: {
-    solutionType: 'security' | 'observability' | 'search' | 'elasticsearch';
-    token: string;
-  };
-}

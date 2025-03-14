@@ -13,7 +13,7 @@ main () {
   report_main_step "Cloning repositories"
 
   rm -rf elasticsearch-specification
-  if ! git clone https://github.com/elastic/elasticsearch-specification --depth 1; then
+  if ! git clone --branch "$BUILDKITE_BRANCH" https://github.com/elastic/elasticsearch-specification --depth 1; then
     echo "Error: Failed to clone the elasticsearch-specification repository."
     exit 1
   fi
@@ -40,7 +40,7 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[Console] Update console definitions'
+  PR_TITLE="[Console] Update console definitions (${BUILDKITE_BRANCH})"
   PR_BODY='This PR updates the console definitions to match the latest ones from the @elastic/elasticsearch-specification repo.'
 
   # Check if a PR already exists
@@ -66,7 +66,15 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Feature:Console' --label 'Team:Kibana Management'
+  gh pr create \
+    --title "$PR_TITLE" \
+    --body "$PR_BODY" \
+    --base "$BUILDKITE_BRANCH" \
+    --head "$BRANCH_NAME" \
+    --label 'backport:skip' \
+    --label 'release_note:skip' \
+    --label 'Feature:Console' \
+    --label 'Team:Kibana Management'
 }
 
 main

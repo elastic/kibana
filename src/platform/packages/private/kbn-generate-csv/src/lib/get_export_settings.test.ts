@@ -15,7 +15,6 @@ import {
 } from '@kbn/core/server/mocks';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { TaskInstanceFields } from '@kbn/reporting-common/types';
-import { sub, add, type Duration } from 'date-fns';
 
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -24,6 +23,7 @@ import {
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../constants';
 import { getExportSettings } from './get_export_settings';
+import moment from 'moment';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
@@ -154,7 +154,7 @@ describe('getExportSettings', () => {
   describe('scroll duration function', () => {
     let spiedDateNow: jest.Spied<typeof Date.now>;
     let mockedTaskInstanceFields: TaskInstanceFields;
-    const durationApart: Duration = { minutes: 5 };
+    const durationApart: { minutes: number } = { minutes: 5 };
 
     beforeEach(() => {
       const now = Date.now();
@@ -163,8 +163,8 @@ describe('getExportSettings', () => {
       spiedDateNow = jest.spyOn(Date, 'now').mockReturnValue(now);
 
       mockedTaskInstanceFields = {
-        startedAt: sub(new Date(Date.now()), durationApart),
-        retryAt: add(new Date(Date.now()), durationApart),
+        startedAt: moment().subtract(durationApart).toDate(),
+        retryAt: moment().add(durationApart).toDate(),
       };
     });
 
@@ -238,7 +238,7 @@ describe('getExportSettings', () => {
       };
 
       spiedDateNow.mockReturnValue(
-        add(mockedTaskInstanceFields.retryAt!, { minutes: 5 }).getTime()
+        moment(mockedTaskInstanceFields.retryAt!).add(durationApart).toDate().getTime()
       );
 
       const { scroll } = await getExportSettings(

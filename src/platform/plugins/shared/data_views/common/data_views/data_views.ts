@@ -148,6 +148,11 @@ export interface DataViewsServicePublicMethods {
   clearInstanceCache: (id?: string) => void;
 
   /**
+   * Clear the cache of lazy data view instances.
+   */
+  clearDataViewLazyCache: (id: string) => void;
+
+  /**
    * Create data view based on the provided spec.
    * @param spec - Data view spec.
    * @param skipFetchFields - If true, do not fetch fields.
@@ -242,7 +247,7 @@ export interface DataViewsServicePublicMethods {
    */
   getFieldsForIndexPattern: (
     indexPattern: DataView | DataViewSpec,
-    options?: GetFieldsOptions | undefined
+    options?: Omit<GetFieldsOptions, 'allowNoIndex' | 'pattern'>
   ) => Promise<FieldSpec[]>;
   /**
    * Get fields for index pattern string
@@ -524,6 +529,13 @@ export class DataViewsService {
   };
 
   /**
+   * Clear instance in data view lazy cache
+   */
+  clearDataViewLazyCache = (id: string) => {
+    this.dataViewLazyCache.delete(id);
+  };
+
+  /**
    * Get cache, contains data view saved objects.
    */
 
@@ -593,13 +605,13 @@ export class DataViewsService {
   };
 
   /**
-   * Get field list by providing an index patttern (or spec).
+   * Get field list by providing an index pattern (or spec).
    * @param options options for getting field list
    * @returns FieldSpec[]
    */
   getFieldsForIndexPattern = async (
     indexPattern: DataView | DataViewSpec,
-    options?: Omit<GetFieldsOptions, 'allowNoIndex'>
+    options?: Omit<GetFieldsOptions, 'allowNoIndex' | 'pattern'>
   ) =>
     this.getFieldsForWildcard({
       type: indexPattern.type,
@@ -821,6 +833,16 @@ export class DataViewsService {
       ? JSON.parse(runtimeFieldMap)
       : {};
 
+    if (parsedFieldAttrs) {
+      Object.keys(parsedFieldAttrs).forEach((fieldName) => {
+        const parsedFieldAttr = parsedFieldAttrs?.[fieldName];
+        // Because of https://github.com/elastic/kibana/issues/211109 bug, the persisted "count" data can be polluted and have string type.
+        if (parsedFieldAttr && typeof parsedFieldAttr.count === 'string') {
+          parsedFieldAttr.count = Number(parsedFieldAttr.count) || 0;
+        }
+      });
+    }
+
     return {
       id,
       version,
@@ -893,9 +915,6 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
-    spec.fieldAttrs = savedObject.attributes.fieldAttrs
-      ? JSON.parse(savedObject.attributes.fieldAttrs)
-      : {};
 
     let fields: Record<string, FieldSpec> = {};
     let indices: string[] = [];

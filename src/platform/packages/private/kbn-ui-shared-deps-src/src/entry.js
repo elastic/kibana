@@ -8,6 +8,15 @@
  */
 
 require('./polyfills');
+// Optional prototype hardening. This must occur immediately after polyfills.
+if (typeof window.__kbnHardenPrototypes__ !== 'boolean') {
+  throw new Error(
+    'Invariant bootstrap failure: __kbnHardenPrototypes__ must be set to true or false'
+  );
+}
+if (window.__kbnHardenPrototypes__) {
+  require('@kbn/security-hardening/prototype');
+}
 
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
@@ -42,10 +51,9 @@ export const Rxjs = require('rxjs');
 export const ElasticNumeral = require('@elastic/numeral');
 export const ElasticCharts = require('@elastic/charts');
 export const ElasticEui = require('@elastic/eui');
-export const ElasticEuiThemeBorealis = require('@elastic/eui-theme-borealis');
 export const ElasticEuiLibComponentsUseIsNestedEuiProvider = require('@elastic/eui/optimize/es/components/provider/nested');
-export const ElasticEuiLibServices = require('@elastic/eui/optimize/es/services');
-export const ElasticEuiLibServicesFormat = require('@elastic/eui/optimize/es/services/format');
+export const ElasticEuiLibServicesThemeWarning = require('@elastic/eui/optimize/es/services/theme/warning');
+export const ElasticEuiThemeBorealis = require('@elastic/eui-theme-borealis');
 export const KbnDatemath = require('@kbn/datemath');
 export const HelloPangeaDnd = require('@hello-pangea/dnd/dist/dnd');
 export const ReduxjsToolkit = require('@reduxjs/toolkit');

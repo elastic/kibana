@@ -115,6 +115,7 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
 interface HttpLogicProps {
   errorConnectingMessage?: string;
   http: HttpSetup;
+  // TODO: remove this
   readOnlyMode?: boolean;
 }
 

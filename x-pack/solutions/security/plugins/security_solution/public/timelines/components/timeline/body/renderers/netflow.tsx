@@ -60,58 +60,52 @@ import {
 interface NetflowRendererProps {
   data: Ecs;
   timelineId: string;
-  isDraggable?: boolean;
 }
 
-export const NetflowRenderer = React.memo<NetflowRendererProps>(
-  ({ data, timelineId, isDraggable }) => (
-    <Netflow
-      contextId={`netflow-renderer-${timelineId}-${data._id}`}
-      destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
-      destinationGeoContinentName={asArrayIfExists(
-        get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)
-      )}
-      destinationGeoCountryName={asArrayIfExists(
-        get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, data)
-      )}
-      destinationGeoCountryIsoCode={asArrayIfExists(
-        get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, data)
-      )}
-      destinationGeoRegionName={asArrayIfExists(get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, data))}
-      destinationGeoCityName={asArrayIfExists(get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, data))}
-      destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, data))}
-      destinationPackets={asArrayIfExists(get(DESTINATION_PACKETS_FIELD_NAME, data))}
-      destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, data))}
-      eventDuration={asArrayIfExists(get(EVENT_DURATION_FIELD_NAME, data))}
-      eventId={get(ID_FIELD_NAME, data)}
-      eventEnd={asArrayIfExists(get(EVENT_END_FIELD_NAME, data))}
-      eventStart={asArrayIfExists(get(EVENT_START_FIELD_NAME, data))}
-      isDraggable={isDraggable}
-      networkBytes={asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, data))}
-      networkCommunityId={asArrayIfExists(get(NETWORK_COMMUNITY_ID_FIELD_NAME, data))}
-      networkDirection={asArrayIfExists(get(NETWORK_DIRECTION_FIELD_NAME, data))}
-      networkPackets={asArrayIfExists(get(NETWORK_PACKETS_FIELD_NAME, data))}
-      networkProtocol={asArrayIfExists(get(NETWORK_PROTOCOL_FIELD_NAME, data))}
-      sourceBytes={asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, data))}
-      sourceGeoContinentName={asArrayIfExists(get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, data))}
-      sourceGeoCountryName={asArrayIfExists(get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, data))}
-      sourceGeoCountryIsoCode={asArrayIfExists(get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, data))}
-      sourceGeoRegionName={asArrayIfExists(get(SOURCE_GEO_REGION_NAME_FIELD_NAME, data))}
-      sourceGeoCityName={asArrayIfExists(get(SOURCE_GEO_CITY_NAME_FIELD_NAME, data))}
-      sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, data))}
-      sourcePackets={asArrayIfExists(get(SOURCE_PACKETS_FIELD_NAME, data))}
-      sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, data))}
-      tlsClientCertificateFingerprintSha1={asArrayIfExists(
-        get(TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME, data)
-      )}
-      tlsFingerprintsJa3Hash={asArrayIfExists(get(JA3_HASH_FIELD_NAME, data))}
-      tlsServerCertificateFingerprintSha1={asArrayIfExists(
-        get(TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME, data)
-      )}
-      transport={asArrayIfExists(get(NETWORK_TRANSPORT_FIELD_NAME, data))}
-      userName={undefined}
-    />
-  )
-);
+export const NetflowRenderer = React.memo<NetflowRendererProps>(({ data, timelineId }) => (
+  <Netflow
+    contextId={`netflow-renderer-${timelineId}-${data._id}`}
+    destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
+    destinationGeoContinentName={asArrayIfExists(
+      get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)
+    )}
+    destinationGeoCountryName={asArrayIfExists(get(DESTINATION_GEO_COUNTRY_NAME_FIELD_NAME, data))}
+    destinationGeoCountryIsoCode={asArrayIfExists(
+      get(DESTINATION_GEO_COUNTRY_ISO_CODE_FIELD_NAME, data)
+    )}
+    destinationGeoRegionName={asArrayIfExists(get(DESTINATION_GEO_REGION_NAME_FIELD_NAME, data))}
+    destinationGeoCityName={asArrayIfExists(get(DESTINATION_GEO_CITY_NAME_FIELD_NAME, data))}
+    destinationIp={asArrayIfExists(get(DESTINATION_IP_FIELD_NAME, data))}
+    destinationPackets={asArrayIfExists(get(DESTINATION_PACKETS_FIELD_NAME, data))}
+    destinationPort={asArrayIfExists(get(DESTINATION_PORT_FIELD_NAME, data))}
+    eventDuration={asArrayIfExists(get(EVENT_DURATION_FIELD_NAME, data))}
+    eventId={get(ID_FIELD_NAME, data)}
+    eventEnd={asArrayIfExists(get(EVENT_END_FIELD_NAME, data))}
+    eventStart={asArrayIfExists(get(EVENT_START_FIELD_NAME, data))}
+    networkBytes={asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, data))}
+    networkCommunityId={asArrayIfExists(get(NETWORK_COMMUNITY_ID_FIELD_NAME, data))}
+    networkDirection={asArrayIfExists(get(NETWORK_DIRECTION_FIELD_NAME, data))}
+    networkPackets={asArrayIfExists(get(NETWORK_PACKETS_FIELD_NAME, data))}
+    networkProtocol={asArrayIfExists(get(NETWORK_PROTOCOL_FIELD_NAME, data))}
+    sourceBytes={asArrayIfExists(get(SOURCE_BYTES_FIELD_NAME, data))}
+    sourceGeoContinentName={asArrayIfExists(get(SOURCE_GEO_CONTINENT_NAME_FIELD_NAME, data))}
+    sourceGeoCountryName={asArrayIfExists(get(SOURCE_GEO_COUNTRY_NAME_FIELD_NAME, data))}
+    sourceGeoCountryIsoCode={asArrayIfExists(get(SOURCE_GEO_COUNTRY_ISO_CODE_FIELD_NAME, data))}
+    sourceGeoRegionName={asArrayIfExists(get(SOURCE_GEO_REGION_NAME_FIELD_NAME, data))}
+    sourceGeoCityName={asArrayIfExists(get(SOURCE_GEO_CITY_NAME_FIELD_NAME, data))}
+    sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, data))}
+    sourcePackets={asArrayIfExists(get(SOURCE_PACKETS_FIELD_NAME, data))}
+    sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, data))}
+    tlsClientCertificateFingerprintSha1={asArrayIfExists(
+      get(TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME, data)
+    )}
+    tlsFingerprintsJa3Hash={asArrayIfExists(get(JA3_HASH_FIELD_NAME, data))}
+    tlsServerCertificateFingerprintSha1={asArrayIfExists(
+      get(TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME, data)
+    )}
+    transport={asArrayIfExists(get(NETWORK_TRANSPORT_FIELD_NAME, data))}
+    userName={undefined}
+  />
+));
 
 NetflowRenderer.displayName = 'NetflowRenderer';

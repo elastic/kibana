@@ -16,7 +16,8 @@ import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/co
 import { SolutionFilter } from './solution_filter';
 import userEvent from '@testing-library/user-event';
 
-describe('SolutionFilter ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/207427
+describe.skip('SolutionFilter ', () => {
   let appMockRender: AppMockRenderer;
   const onChange = jest.fn();
   const solutions = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER];

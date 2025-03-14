@@ -15,19 +15,22 @@ import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  ShouldShowFieldInTableHandler,
+  RESOURCE_FIELDS,
+  type ShouldShowFieldInTableHandler,
+  TRACE_FIELDS,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import { getAvailableResourceFields, getAvailableTraceFields } from '@kbn/discover-utils/src';
 import { Resource } from './resource';
 import { Content } from './content';
-import { createResourceFields, formatJsonDocumentForContent } from './utils';
+import { createResourceFields, formatJsonDocumentForContent, isTraceDocument } from './utils';
 import {
   closeCellActionPopoverText,
   contentLabel,
   jsonLabel,
   resourceLabel,
+  traceLabel,
 } from '../translations';
 
 export interface SummaryColumnFactoryDeps {
@@ -39,7 +42,7 @@ export interface SummaryColumnFactoryDeps {
   share?: SharePluginStart;
 }
 
-export type SummaryColumnProps = DataGridCellValueElementProps;
+export type SummaryColumnProps = DataGridCellValueElementProps & { isTracesSummary?: boolean };
 export type AllSummaryColumnProps = SummaryColumnProps & SummaryColumnFactoryDeps;
 
 export const SummaryColumn = (props: AllSummaryColumnProps) => {
@@ -55,20 +58,43 @@ export const SummaryColumn = (props: AllSummaryColumnProps) => {
 // eslint-disable-next-line import/no-default-export
 export default SummaryColumn;
 
+const DEFAULT_ROW_COUNT = 1;
+const SINGLE_ROW_COUNT = 1;
+
 const SummaryCell = ({
   density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
   ...props
 }: AllSummaryColumnProps) => {
-  const { onFilter, row, share, core } = props;
+  const { dataView, onFilter, row, share, core, isTracesSummary, fieldFormats } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
 
-  const rowHeight = maybeNullishRowHeight ?? ROWS_HEIGHT_OPTIONS.single;
-  const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
+  const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
+  const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
-  const resourceFields = createResourceFields(row, core, share);
+  const resourceFields = createResourceFields(
+    isTracesSummary && isTraceDocument(row)
+      ? {
+          row,
+          fields: TRACE_FIELDS,
+          getAvailableFields: getAvailableTraceFields,
+          dataView,
+          core,
+          share,
+          fieldFormats,
+        }
+      : {
+          row,
+          fields: RESOURCE_FIELDS,
+          getAvailableFields: getAvailableResourceFields,
+          dataView,
+          core,
+          share,
+          fieldFormats,
+        }
+  );
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -99,9 +125,32 @@ const SummaryCell = ({
 };
 
 export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
-  const { row, dataView, fieldFormats, onFilter, closePopover, share, core } = props;
+  const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
+    props;
 
-  const resourceFields = createResourceFields(row, core, share);
+  const isTraceDoc = isTracesSummary && isTraceDocument(row);
+
+  const resourceFields = createResourceFields(
+    isTraceDoc
+      ? {
+          row,
+          fields: TRACE_FIELDS,
+          getAvailableFields: getAvailableTraceFields,
+          dataView,
+          core,
+          share,
+          fieldFormats,
+        }
+      : {
+          row,
+          fields: RESOURCE_FIELDS,
+          getAvailableFields: getAvailableResourceFields,
+          dataView,
+          core,
+          share,
+          fieldFormats,
+        }
+  );
   const shouldRenderResource = resourceFields.length > 0;
 
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
@@ -129,7 +178,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
       {shouldRenderResource && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xxs">
-            <span>{resourceLabel}</span>
+            <span>{isTraceDoc ? traceLabel : resourceLabel}</span>
           </EuiTitle>
           <Resource fields={resourceFields} onFilter={onFilter} />
         </EuiFlexGroup>

@@ -74,7 +74,7 @@ export const AttachmentsMenu = ({
 
   const timeRange = useTimeRangeUpdates();
 
-  const canEditDashboards = capabilities.dashboard.createNew;
+  const canEditDashboards = capabilities.dashboard_v2.createNew;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {

@@ -23,6 +23,7 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FleetStart } from '@kbn/fleet-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -56,18 +57,13 @@ import { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
-import {
-  CONNECTORS_PATH,
-  SEARCH_INDICES_PATH,
-  CRAWLERS_PATH,
-} from './applications/enterprise_search_content/routes';
-
+import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
 import { docLinks } from './applications/shared/doc_links';
+
 import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
-  publicUrl?: string;
 }
 
 export type EnterpriseSearchPublicSetup = ReturnType<EnterpriseSearchPlugin['setup']>;
@@ -87,6 +83,7 @@ export interface PluginsStart {
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
   data?: DataPublicPluginStart;
+  fleet?: FleetStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
   lens?: LensPublicStart;
@@ -116,13 +113,6 @@ const contentLinks: AppDeepLink[] = [
     }),
   },
   {
-    id: 'searchIndices',
-    path: `/${SEARCH_INDICES_PATH}`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.contentIndicesLinkLabel', {
-      defaultMessage: 'Indices',
-    }),
-  },
-  {
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
@@ -141,7 +131,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
-    visibleIn: ['globalSearch'],
+    visibleIn: [],
   },
 ];
 
@@ -155,7 +145,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
   }
 
-  private data: ClientData = {} as ClientData;
+  private data: ClientData = {};
   private esConfig: ESConfig;
 
   private async getInitialData(http: HttpSetup) {
@@ -219,10 +209,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { config } = this;
-    if (!config.ui?.enabled) {
-      return;
-    }
     const { cloud, share } = plugins;
 
     core.application.register({
@@ -273,6 +259,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
       order: 1,
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -402,6 +389,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
       title: ANALYTICS_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -448,7 +436,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElasticsearch',
         id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
         order: 100,
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -478,7 +466,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.register({
         category: 'data',
         description: SEARCH_EXPERIENCES_PLUGIN.DESCRIPTION,
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElasticsearch',
         id: SEARCH_EXPERIENCES_PLUGIN.ID,
         path: SEARCH_EXPERIENCES_PLUGIN.URL,
         showOnHomePage: false,
@@ -490,9 +478,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    if (!this.config.ui?.enabled) {
-      return;
-    }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);

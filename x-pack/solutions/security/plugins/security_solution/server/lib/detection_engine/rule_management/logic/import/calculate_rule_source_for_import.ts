@@ -6,11 +6,12 @@
  */
 
 import type {
+  RuleResponse,
   RuleSource,
   ValidatedRuleToImport,
 } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset';
+import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
 import { convertRuleToImportToRuleResponse } from './converters/convert_rule_to_import_to_rule_response';
 
 /**
@@ -25,31 +26,41 @@ import { convertRuleToImportToRuleResponse } from './converters/convert_rule_to_
  * @returns The calculated rule_source and immutable fields for the rule
  */
 export const calculateRuleSourceForImport = ({
-  rule,
+  importedRule,
+  currentRule,
   prebuiltRuleAssetsByRuleId,
   isKnownPrebuiltRule,
-  isRuleCustomizationEnabled,
 }: {
-  rule: ValidatedRuleToImport;
+  importedRule: ValidatedRuleToImport;
+  currentRule: RuleResponse | undefined;
   prebuiltRuleAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
   isKnownPrebuiltRule: boolean;
-  isRuleCustomizationEnabled: boolean;
 }): { ruleSource: RuleSource; immutable: boolean } => {
-  const assetWithMatchingVersion = prebuiltRuleAssetsByRuleId[rule.rule_id];
+  if (!isKnownPrebuiltRule) {
+    return {
+      ruleSource: { type: 'internal' },
+      immutable: false,
+    };
+  }
+
+  const baseRule = prebuiltRuleAssetsByRuleId[importedRule.rule_id];
   // We convert here so that RuleSource calculation can
   // continue to deal only with RuleResponses. The fields missing from the
   // incoming rule are not actually needed for the calculation, but only to
   // satisfy the type system.
-  const ruleResponseForImport = convertRuleToImportToRuleResponse(rule);
-  const ruleSource = calculateRuleSourceFromAsset({
-    rule: ruleResponseForImport,
-    assetWithMatchingVersion,
-    isKnownPrebuiltRule,
-    isRuleCustomizationEnabled,
+  const nextRule = convertRuleToImportToRuleResponse(importedRule);
+
+  const isCustomized = calculateIsCustomized({
+    baseRule,
+    nextRule,
+    currentRule,
   });
 
   return {
-    ruleSource,
-    immutable: ruleSource.type === 'external',
+    ruleSource: {
+      type: 'external',
+      is_customized: isCustomized,
+    },
+    immutable: true,
   };
 };

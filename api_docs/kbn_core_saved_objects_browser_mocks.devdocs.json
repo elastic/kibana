@@ -16,17 +16,21 @@
         ],
         "label": "savedObjectsServiceMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
+        "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/core-lifecycle-browser-mocks",
-            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/index.ts"
           },
           {
-            "plugin": "@kbn/core-lifecycle-browser-mocks",
-            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/lifecycle/browser-mocks/src/core_start.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/lifecycle/browser-mocks/src/core_start.mock.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -52,7 +56,7 @@
             "signature": [
               "() => jest.Mocked<SavedObjectsServiceContract>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -70,7 +74,7 @@
               "SavedObjectsStart",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -88,10 +92,14 @@
         ],
         "label": "simpleSavedObjectMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+        "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/index.ts"
+          },
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/mocks.ts"
@@ -122,7 +130,7 @@
               "SimpleSavedObject",
               "<unknown>>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -136,7 +144,7 @@
                 "signature": [
                   "SavedObjectsClientContract"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -152,7 +160,7 @@
                   "SavedObject",
                   "<unknown>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

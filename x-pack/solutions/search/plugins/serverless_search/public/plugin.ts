@@ -157,8 +157,6 @@ export class ServerlessSearchPlugin
       },
     });
 
-    setupDeps.discover.showInlineTopNav();
-
     return {};
   }
 

@@ -9,17 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiCode, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -32,7 +22,6 @@ import {
 
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { KibanaLogic } from '../../../shared/kibana';
 
 import { EuiButtonTo } from '../../../shared/react_router_helpers/eui_components';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
@@ -48,8 +37,8 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(IndexViewLogic);
-  const { connector, error, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic);
-  const { isCloud } = useValues(KibanaLogic);
+  const { connector, error, connectorAgentlessPolicy } = useValues(ConnectorViewLogic);
+
   const { showModal } = useActions(ConvertConnectorLogic);
   const { isModalVisible } = useValues(ConvertConnectorLogic);
 
@@ -83,35 +72,55 @@ export const ConnectorDetailOverview: React.FC = () => {
             </>
           )
       }
-      {isWaitingOnAgentlessDeployment && (
+      {connector?.is_native && (
         <>
+          {isModalVisible && <ConvertConnectorModal />}
           <EuiCallOut
+            iconType="warning"
             color="warning"
-            title={
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.connectors.overview.agentlessDeploymentNotReadyCallOut.title',
-                    {
-                      defaultMessage: 'Provisioning infrastructure',
-                    }
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
+              {
+                defaultMessage: 'Elastic managed connectors are no longer supported',
+              }
+            )}
           >
             <EuiSpacer size="s" />
             <EuiText size="s">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
-                {
-                  defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
-                }
-              )}
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
+                  defaultMessage="Elastic managed connectors are no longer supported. Convert it to a {link} to continue using it."
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        href={docLinks.buildConnector}
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
+                          { defaultMessage: 'self-managed connector' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
             </EuiText>
+            <EuiSpacer size="s" />
+            <EuiButton
+              data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton"
+              color="warning"
+              fill
+              onClick={() => showModal()}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
+                { defaultMessage: 'Convert connector' }
+              )}
+            </EuiButton>
           </EuiCallOut>
           <EuiSpacer />
         </>
@@ -201,69 +210,23 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {connector?.is_native && !isCloud && (
-        <>
-          {isModalVisible && <ConvertConnectorModal />}
-          <EuiCallOut
-            iconType="warning"
-            color="warning"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
-              {
-                defaultMessage:
-                  'Elastic managed connectors (formerly native connectors) are no longer supported outside Elastic Cloud',
-              }
-            )}
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
-                  defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed connectors are available only in your Elastic Cloud deployment."
-                  values={{
-                    link: (
-                      <EuiLink
-                        data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
-                        data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
-                        href={docLinks.buildConnector}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
-                          { defaultMessage: 'self-managed connector' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiButton
-              data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton"
-              color="warning"
-              fill
-              onClick={() => showModal()}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
-                { defaultMessage: 'Convert connector' }
-              )}
-            </EuiButton>
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      )}
-      {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
-        <ConnectorStats connector={connector} indexData={indexData || undefined} />
-      )}
-      {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
-        <>
-          <EuiSpacer />
-          <SyncJobs connector={connector} />
-        </>
-      )}
+      {connector &&
+        !connector.is_native &&
+        connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
+          <ConnectorStats
+            connector={connector}
+            indexData={indexData || undefined}
+            agentlessOverview={connectorAgentlessPolicy}
+          />
+        )}
+      {connector &&
+        !connector.is_native &&
+        connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
+          <>
+            <EuiSpacer />
+            <SyncJobs connector={connector} />
+          </>
+        )}
     </>
   );
 };

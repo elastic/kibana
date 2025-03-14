@@ -90,6 +90,23 @@ export async function getResponseStream(
   throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
 }
 
+export async function getResponseStreamWithSize(
+  url: string,
+  retries?: number
+): Promise<{ stream: NodeJS.ReadableStream; size?: number }> {
+  const res = await getResponse(url, retries);
+  if (res) {
+    const contentLengthHeader = res.headers.get('Content-Length');
+    const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined;
+
+    return {
+      stream: res.body,
+      size: contentLength && !isNaN(contentLength) ? contentLength : undefined,
+    };
+  }
+  throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
+}
+
 export async function fetchUrl(url: string, retries?: number): Promise<string> {
   const logger = appContextService.getLogger();
   try {

@@ -9,52 +9,48 @@ import React, { useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutProps } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
-import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
+import type { Alert } from '@kbn/alerting-types';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
-import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import type { TopAlert } from '../../typings/alerts';
 
 type AlertsFlyoutProps = {
-  alert?: TopAlert;
-  rawAlert?: EcsFieldsResponse;
-  alerts?: Array<Record<string, unknown>>;
-  isInApp?: boolean;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  alert?: Alert;
+  alerts?: Alert[];
   selectedAlertId?: string;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 } & EuiFlyoutProps;
 
 export function AlertsFlyout({
   alert,
-  rawAlert,
   alerts,
-  isInApp = false,
-  observabilityRuleTypeRegistry,
   onClose,
   selectedAlertId,
+  observabilityRuleTypeRegistry,
 }: AlertsFlyoutProps) {
-  const decoratedAlerts = useMemo(() => {
-    const parseObservabilityAlert = parseAlert(observabilityRuleTypeRegistry);
-    return (alerts ?? []).map(parseObservabilityAlert);
-  }, [alerts, observabilityRuleTypeRegistry]);
+  const selectedAlert = useMemo(
+    () => alert ?? alerts?.find((a) => a[ALERT_UUID] === selectedAlertId),
+    [alert, alerts, selectedAlertId]
+  );
 
-  let alertData = alert;
-  if (!alertData) {
-    alertData = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId) as TopAlert;
-  }
-  if (!alertData || !rawAlert) {
+  if (!selectedAlert) {
     return null;
   }
 
   return (
     <EuiFlyout className="oblt__flyout" onClose={onClose} size="m" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader hasBorder>
-        <AlertsFlyoutHeader alert={alertData} />
+        <AlertsFlyoutHeader alert={selectedAlert} />
       </EuiFlyoutHeader>
-      <AlertsFlyoutBody alert={alertData} rawAlert={rawAlert} />
-      <AlertsFlyoutFooter alert={alertData} isInApp={isInApp} />
+      <AlertsFlyoutBody
+        alert={selectedAlert}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+      />
+      <AlertsFlyoutFooter
+        alert={selectedAlert}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+      />
     </EuiFlyout>
   );
 }

@@ -77,7 +77,7 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
           @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
       <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
         {sortedRuleLastRunOutcomeValues.map((item: RuleLastRunOutcomes) => {
-          const healthColor = getOutcomeHealthColor(item);
+          const healthColor = getOutcomeHealthColor(item, euiTheme);
           return (
             <EuiFilterSelectItem
               key={item}

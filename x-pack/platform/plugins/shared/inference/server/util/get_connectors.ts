@@ -36,6 +36,7 @@ export const getConnectors = async ({
 
   return supportedConnectors.map((connector): InferenceConnector => {
     return {
+      config: connector.config ?? {},
       connectorId: connector.id,
       name: connector.name,
       type: connector.actionTypeId as InferenceConnectorType,

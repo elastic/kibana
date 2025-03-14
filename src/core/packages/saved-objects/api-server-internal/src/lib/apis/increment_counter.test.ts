@@ -16,7 +16,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   SavedObjectsIncrementCounterField,
@@ -222,19 +222,17 @@ describe('#incrementCounter', () => {
         await incrementCounterSuccess(type, id, counterFields, { namespace, upsertAttributes });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              upsert: expect.objectContaining({
-                [type]: {
-                  foo: 'bar',
-                  hello: 'dolly',
-                  ...counterFields.reduce((aggs, field) => {
-                    return {
-                      ...aggs,
-                      [field]: 1,
-                    };
-                  }, {}),
-                },
-              }),
+            upsert: expect.objectContaining({
+              [type]: {
+                foo: 'bar',
+                hello: 'dolly',
+                ...counterFields.reduce((aggs, field) => {
+                  return {
+                    ...aggs,
+                    [field]: 1,
+                  };
+                }, {}),
+              },
             }),
           }),
           expect.anything()
@@ -495,12 +493,10 @@ describe('#incrementCounter', () => {
         expect(client.update).toBeCalledTimes(1);
         expect(client.update).toBeCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              script: expect.objectContaining({
-                params: expect.objectContaining({
-                  counterFieldNames: [counterFields[0]],
-                  counts: [3],
-                }),
+            script: expect.objectContaining({
+              params: expect.objectContaining({
+                counterFieldNames: [counterFields[0]],
+                counts: [3],
               }),
             }),
           }),
@@ -514,12 +510,10 @@ describe('#incrementCounter', () => {
         expect(client.update).toBeCalledTimes(1);
         expect(client.update).toBeCalledWith(
           expect.objectContaining({
-            body: expect.objectContaining({
-              script: expect.objectContaining({
-                params: expect.objectContaining({
-                  counterFieldNames: [counterFields[0]],
-                  counts: [0],
-                }),
+            script: expect.objectContaining({
+              params: expect.objectContaining({
+                counterFieldNames: [counterFields[0]],
+                counts: [0],
               }),
             }),
           }),

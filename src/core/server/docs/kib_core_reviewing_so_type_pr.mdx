@@ -14,8 +14,8 @@ tags: ['kibana','dev', 'contributor', 'api docs']
 PRs modifying / adding / deleting any SO type registration will be flagged by the integration
 test located at `src/core/server/integration_tests/saved_objects/migrations/check_registered_types.test.ts`.
 
-This test will fail any time a change is performed on an SO type registration that could risk having an impact on 
-upgrades/migrations, and will force the PR's author to update the test's snapshot, which will trigger a review 
+This test will fail any time a change is performed on an SO type registration that could risk having an impact on
+upgrades/migrations, and will force the PR's author to update the test's snapshot, which will trigger a review
 from the Core team.
 
 ## What and how to review?
@@ -42,16 +42,16 @@ In that scenario, we should:
   - fields being defined explicitly in the mappings but not directly used for search
   - overall amount of fields is high
   - use of `dynamic: true` (this can lead to mapping explosions)
-- check if the type is registered as `hidden: true` and encourage to do so otherwise. 
-  - this avoids polluting the global SO HTTP APIs with another type, and instead requires plugin developers to build 
+- check if the type is registered as `hidden: true` and encourage to do so otherwise.
+  - this avoids polluting the global SO HTTP APIs with another type, and instead requires plugin developers to build
     their own HTTP APIs to access this type of SO if they truly need to.
 
 ### A type was removed
 
-The integration test mentioned in the previous section also detects those scenarios. 
+The integration test mentioned in the previous section also detects those scenarios.
 
 Here, we need to check:
-- that `REMOVED_TYPES` (`packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/unused_types.ts`) was properly updated 
+- that `REMOVED_TYPES` (`src/core/packages/saved-objects/migration-server-internal/src/core/unused_types.ts`) was properly updated
   - (but, again, the integration test will fail otherwise)
 - that no other existing SO types may be referencing this type
   - can't really be automated, will likely need to ask the owning team directly
@@ -60,7 +60,7 @@ Here, we need to check:
 
 - Review the migration function
     - owners are supposed to do it, but an additional review never hurts
-    - make sure they are typing their migration function using `SavedObjectMigrationFn` and supplying arguments for the generics 
+    - make sure they are typing their migration function using `SavedObjectMigrationFn` and supplying arguments for the generics
       e.g. `SavedObjectMigrationFn<My810Type, My816Type>`.
 - Make sure that the migration function is properly tested
   - by unit tests
@@ -81,4 +81,4 @@ Here, we need to check:
 
 - Make sure the associated mapping changes were performed, and that a migration function was added accordingly.
 - Ideally schemas are validated with unit tests as well, especially for more complex ones.
-- Refer to prior sections to see what to check. 
+- Refer to prior sections to see what to check.

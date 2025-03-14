@@ -10,7 +10,6 @@
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
@@ -46,6 +45,10 @@ export interface DataViewPickerProps {
    */
   adHocDataViews?: DataView[];
   /**
+   * Data views managed by the application
+   */
+  managedDataViews?: DataView[];
+  /**
    * Saved data views
    */
   savedDataViews?: DataViewListItem[];
@@ -66,12 +69,6 @@ export interface DataViewPickerProps {
 
   onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
   /**
-   * List of the supported text based languages (SQL, ESQL) etc.
-   * Defined per application, if not provided, no text based languages
-   * will be available.
-   */
-  textBasedLanguages?: TextBasedLanguages[];
-  /**
    * Makes the picker disabled by disabling the popover trigger
    */
   isDisabled?: boolean;
@@ -81,6 +78,7 @@ export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  managedDataViews,
   savedDataViews,
   onChangeDataView,
   onEditDataView,
@@ -88,7 +86,6 @@ export const DataViewPicker = ({
   onDataViewCreated,
   trigger,
   selectableProps,
-  textBasedLanguages,
   onCreateDefaultAdHocDataView,
   isDisabled,
 }: DataViewPickerProps) => {
@@ -103,9 +100,9 @@ export const DataViewPicker = ({
       onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
+      managedDataViews={managedDataViews}
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
-      textBasedLanguages={textBasedLanguages}
       isDisabled={isDisabled}
     />
   );

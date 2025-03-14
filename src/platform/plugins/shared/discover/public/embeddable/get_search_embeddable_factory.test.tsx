@@ -14,17 +14,21 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { PhaseEvent, PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
+import type { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type {
+  PhaseEvent,
+  PublishesUnifiedSearch,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
-import {
+import type {
   SearchEmbeddableApi,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
@@ -137,10 +141,10 @@ describe('saved search embeddable', () => {
       const discoverComponent = render(<Component />);
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
       await waitFor(() =>
@@ -173,10 +177,10 @@ describe('saved search embeddable', () => {
       const discoverComponent = render(<Component />);
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
     });
@@ -200,13 +204,13 @@ describe('saved search embeddable', () => {
       await waitOneTick(); // wait for build to complete
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(search).toHaveBeenCalledTimes(1);
-      api.setPanelTitle('custom title');
+      api.setTitle('custom title');
       await waitOneTick();
       expect(search).toHaveBeenCalledTimes(1);
     });
@@ -242,6 +246,31 @@ describe('saved search embeddable', () => {
       expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
       resolveRootProfileSpy.mockClear();
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
+    });
+
+    it('should allow overriding the solutionNavId used to resolve the root profile', async () => {
+      const resolveRootProfileSpy = jest.spyOn(
+        discoverServiceMock.profilesManager,
+        'resolveRootProfile'
+      );
+      const initialRuntimeState = {
+        ...getInitialRuntimeState(),
+        nonPersistedDisplayOptions: {
+          solutionNavIdOverride: 'search' as const,
+        },
+      };
+      await factory.buildEmbeddable(
+        initialRuntimeState,
+        buildApiMock,
+        uuid,
+        mockedDashboardApi,
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
+      );
+      await waitOneTick(); // wait for build to complete
+      expect(resolveRootProfileSpy).toHaveBeenCalledWith({
+        solutionNavId: 'search',
+      });
     });
 
     it('should resolve data source profile when fetching', async () => {
@@ -293,10 +322,10 @@ describe('saved search embeddable', () => {
       const discoverComponent = render(<Component />);
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       const discoverGridComponent = discoverComponent.queryByTestId('discoverDocTable');
       expect(discoverGridComponent).toBeInTheDocument();

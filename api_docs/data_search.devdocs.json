@@ -26425,13 +26425,7 @@
             "text": "IKibanaSearchRequest"
           },
           "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.EqlRequestParams",
-            "text": "EqlRequestParams"
-          },
+          "EqlSearchRequest",
           ">"
         ],
         "path": "src/platform/plugins/shared/data/common/search/strategies/eql_search/types.ts",
@@ -29190,7 +29184,7 @@
                 "section": "def-common.DataViewLazy",
                 "text": "DataViewLazy"
               },
-              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
+              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; clearDataViewLazyCache: (id: string) => void; getCache: () => Promise<",
               "SavedObject",
               "<",
               {
@@ -29248,7 +29242,7 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
+              ", \"allowNoIndex\" | \"pattern\"> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -31364,8 +31358,6 @@
         "label": "EqlRequestParams",
         "description": [],
         "signature": [
-          "EqlSearchRequest",
-          " | ",
           "EqlSearchRequest"
         ],
         "path": "src/platform/plugins/shared/data/common/search/strategies/eql_search/types.ts",
@@ -33185,16 +33177,16 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.CidrMaskIpRangeAggKey",
-            "text": "CidrMaskIpRangeAggKey"
+            "section": "def-common.RangeIpRangeAggKey",
+            "text": "RangeIpRangeAggKey"
           },
           " | ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.RangeIpRangeAggKey",
-            "text": "RangeIpRangeAggKey"
+            "section": "def-common.CidrMaskIpRangeAggKey",
+            "text": "CidrMaskIpRangeAggKey"
           }
         ],
         "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/ip_range.ts",
@@ -39759,7 +39751,15 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableWarningToasts?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -40102,7 +40102,15 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableWarningToasts?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/select_filter.ts",
             "deprecated": false,

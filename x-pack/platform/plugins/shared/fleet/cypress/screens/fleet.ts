@@ -91,6 +91,7 @@ export const AGENT_FLYOUT = {
   MANAGED_TAB: 'managedTab',
   CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
   INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+  PLATFORM_SELECTOR_EXTENDED: 'platformSelectorExtended',
   KUBERNETES_PLATFORM_TYPE: 'platformTypeKubernetes',
 };
 

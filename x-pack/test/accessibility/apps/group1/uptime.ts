@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const toasts = getService('toasts');
 
-  // github.com/elastic/kibana/issues/153601
+  // Failing: See https://github.com/elastic/kibana/issues/210245
   describe.skip('uptime Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
@@ -55,7 +55,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('overview page with expanded monitor detail', async () => {
       await uptimeService.overview.expandMonitorDetail(A11Y_TEST_MONITOR_ID);
-      await uptimeService.overview.openIntegrationsPopoverForMonitor(A11Y_TEST_MONITOR_ID);
+      await uptimeService.overview.openIntegrationsPopoverForMonitor(
+        A11Y_TEST_MONITOR_ID,
+        'uptime'
+      );
       await a11y.testAppSnapshot();
     });
 

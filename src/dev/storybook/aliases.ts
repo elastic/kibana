@@ -54,11 +54,10 @@ export const storybookAliases = {
   investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/platform/plugins/shared/kibana_react/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
-  logs_explorer: 'x-pack/solutions/observability/plugins/logs_explorer/.storybook',
-  management: 'packages/kbn-management/storybook/config',
+  management: 'src/platform/packages/shared/kbn-management/storybook/config',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   observability_ai_assistant:
-    'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/.storybook',
+    'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
@@ -67,13 +66,16 @@ export const storybookAliases = {
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
-  security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
-  security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
-  serverless: 'packages/serverless/storybook/config',
+  // Skipped, please check and fix https://github.com/elastic/kibana/issues/207227
+  // security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
+  // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  serverless: 'src/platform/packages/shared/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
+  unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
+  event_stacktrace: 'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook',
 };

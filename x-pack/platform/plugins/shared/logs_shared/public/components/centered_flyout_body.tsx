@@ -6,9 +6,9 @@
  */
 
 import { EuiFlyoutBody } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
-export const CenteredEuiFlyoutBody = euiStyled(EuiFlyoutBody)`
+export const CenteredEuiFlyoutBody = styled(EuiFlyoutBody)`
   & .euiFlyoutBody__overflow {
     display: flex;
     flex-direction: column;

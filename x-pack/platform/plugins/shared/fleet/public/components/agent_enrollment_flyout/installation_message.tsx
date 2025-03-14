@@ -39,7 +39,7 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.enrollmentInstructions.installationMessage"
-            defaultMessage="Select the appropriate platform and run commands to install, enroll, and start Elastic Agent. Reuse commands to set up agents on more than one host. For aarch64, see our {downloadLink}. This guidance is for AMD but you can adapt it to your device architecture. For additional guidance, see our {installationLink}."
+            defaultMessage="Select the appropriate platform and run commands to install, enroll, and start Elastic Agent. Reuse commands to set up agents on more than one host. All builds can be found on our {downloadLink}. For additional guidance, see our {installationLink}."
             values={{
               downloadLink: (
                 <EuiLink

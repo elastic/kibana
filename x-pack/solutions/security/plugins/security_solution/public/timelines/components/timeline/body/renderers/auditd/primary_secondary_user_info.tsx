@@ -21,87 +21,79 @@ interface Props {
   eventId: string;
   primary: string | null | undefined;
   secondary: string | null | undefined;
-  isDraggable?: boolean;
 }
 
-export const PrimarySecondary = React.memo<Props>(
-  ({ contextId, eventId, primary, secondary, isDraggable }) => {
-    if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
-      return null;
-    } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
-      return (
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="auditd.summary.actor.primary"
-          isDraggable={isDraggable}
-          value={primary}
-          iconType="user"
-          isAggregatable={true}
-          fieldType="keyword"
-        />
-      );
-    } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
-      return (
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="auditd.summary.actor.secondary"
-          isDraggable={isDraggable}
-          value={secondary}
-          iconType="user"
-          isAggregatable={true}
-          fieldType="keyword"
-        />
-      );
-    } else if (primary === secondary) {
-      return (
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="auditd.summary.actor.secondary"
-          isDraggable={isDraggable}
-          value={secondary}
-          iconType="user"
-          isAggregatable={true}
-          fieldType="keyword"
-        />
-      );
-    } else {
-      return (
-        <EuiFlexGroup gutterSize="none">
-          <TokensFlexItem grow={false} component="span">
-            <DraggableBadge
-              contextId={contextId}
-              eventId={eventId}
-              field="auditd.summary.actor.primary"
-              isDraggable={isDraggable}
-              value={primary}
-              iconType="user"
-              isAggregatable={true}
-              fieldType="keyword"
-            />
-          </TokensFlexItem>
-          <TokensFlexItem grow={false} component="span">
-            {i18n.AS}
-          </TokensFlexItem>
-          <TokensFlexItem grow={false} component="span">
-            <DraggableBadge
-              contextId={contextId}
-              eventId={eventId}
-              field="auditd.summary.actor.secondary"
-              isDraggable={isDraggable}
-              value={secondary}
-              iconType="user"
-              isAggregatable={true}
-              fieldType="keyword"
-            />
-          </TokensFlexItem>
-        </EuiFlexGroup>
-      );
-    }
+export const PrimarySecondary = React.memo<Props>(({ contextId, eventId, primary, secondary }) => {
+  if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
+    return null;
+  } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
+    return (
+      <DraggableBadge
+        contextId={contextId}
+        eventId={eventId}
+        field="auditd.summary.actor.primary"
+        value={primary}
+        iconType="user"
+        isAggregatable={true}
+        fieldType="keyword"
+      />
+    );
+  } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
+    return (
+      <DraggableBadge
+        contextId={contextId}
+        eventId={eventId}
+        field="auditd.summary.actor.secondary"
+        value={secondary}
+        iconType="user"
+        isAggregatable={true}
+        fieldType="keyword"
+      />
+    );
+  } else if (primary === secondary) {
+    return (
+      <DraggableBadge
+        contextId={contextId}
+        eventId={eventId}
+        field="auditd.summary.actor.secondary"
+        value={secondary}
+        iconType="user"
+        isAggregatable={true}
+        fieldType="keyword"
+      />
+    );
+  } else {
+    return (
+      <EuiFlexGroup gutterSize="none">
+        <TokensFlexItem grow={false} component="span">
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="auditd.summary.actor.primary"
+            value={primary}
+            iconType="user"
+            isAggregatable={true}
+            fieldType="keyword"
+          />
+        </TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
+          {i18n.AS}
+        </TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="auditd.summary.actor.secondary"
+            value={secondary}
+            iconType="user"
+            isAggregatable={true}
+            fieldType="keyword"
+          />
+        </TokensFlexItem>
+      </EuiFlexGroup>
+    );
   }
-);
+});
 
 PrimarySecondary.displayName = 'PrimarySecondary';
 
@@ -111,11 +103,10 @@ interface PrimarySecondaryUserInfoProps {
   userName: string | null | undefined;
   primary: string | null | undefined;
   secondary: string | null | undefined;
-  isDraggable?: boolean;
 }
 
 export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps>(
-  ({ contextId, eventId, userName, primary, secondary, isDraggable }) => {
+  ({ contextId, eventId, userName, primary, secondary }) => {
     if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return null;
     } else if (
@@ -130,7 +121,6 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           contextId={contextId}
           eventId={eventId}
           field="user.name"
-          isDraggable={isDraggable}
           value={userName}
           iconType="user"
           isAggregatable={true}
@@ -143,7 +133,6 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           contextId={contextId}
           eventId={eventId}
           field="user.name"
-          isDraggable={isDraggable}
           value={userName}
           iconType="user"
           isAggregatable={true}
@@ -155,7 +144,6 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
         <PrimarySecondary
           contextId={contextId}
           eventId={eventId}
-          isDraggable={isDraggable}
           primary={primary}
           secondary={secondary}
         />

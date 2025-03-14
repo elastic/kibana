@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_CONSUMER, ALERT_URL } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId, sampleRuleGuid } from '../__mocks__/es_results';
 import {
@@ -14,20 +14,20 @@ import {
   objectPairIntersection,
 } from './build_alert_group_from_sequence';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../rule_schema/mocks';
-import type { QueryRuleParams } from '../../rule_schema';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { getQueryRuleParams } from '../../rule_schema/mocks';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
 } from '../../../../../common/field_maps/field_names';
+import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
+import { getSharedParamsMock } from '../__mocks__/shared_params';
 
-const SPACE_ID = 'space';
-const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';
-
-const ruleExecutionLoggerMock = ruleExecutionLogMock.forExecutors.create();
+const sharedParams = getSharedParamsMock({
+  ruleParams: getQueryRuleParams(),
+  rewrites: { spaceId: 'space' },
+});
 
 describe('buildAlert', () => {
   beforeEach(() => {
@@ -35,7 +35,6 @@ describe('buildAlert', () => {
   });
 
   test('it builds an alert as expected without original_event if event does not exist', () => {
-    const completeRule = getCompleteRuleMock<QueryRuleParams>(getQueryRuleParams());
     const eqlSequence = {
       join_keys: [],
       events: [
@@ -44,15 +43,9 @@ describe('buildAlert', () => {
       ],
     };
     const { shellAlert, buildingBlocks } = buildAlertGroupFromSequence({
-      ruleExecutionLogger: ruleExecutionLoggerMock,
+      sharedParams,
       sequence: eqlSequence,
-      completeRule,
-      mergeStrategy: 'allFields',
-      spaceId: SPACE_ID,
-      buildReasonMessage: jest.fn(),
-      indicesToQuery: completeRule.ruleParams.index as string[],
-      alertTimestampOverride: undefined,
-      publicBaseUrl: PUBLIC_BASE_URL,
+      buildReasonMessage: buildReasonMessageForEqlAlert,
     });
     expect(buildingBlocks.length).toEqual(2);
     expect(buildingBlocks[0]).toEqual(
@@ -129,6 +122,7 @@ describe('buildAlert', () => {
           [ALERT_DEPTH]: 2,
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
           [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+          [ALERT_REASON]: 'event with source 127.0.0.1 created high alert rule-name.',
         }),
       })
     );

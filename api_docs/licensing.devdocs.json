@@ -843,6 +843,10 @@
               "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx"
+            },
+            {
               "plugin": "searchprofiler",
               "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
             },
@@ -2209,6 +2213,10 @@
               "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
             },
             {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/data_streams/data_stream_reindex_service.ts"
+            },
+            {
               "plugin": "aiops",
               "path": "x-pack/platform/plugins/shared/aiops/server/plugin.ts"
             },
@@ -2235,6 +2243,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/solutions/observability/plugins/apm/server/routes/fleet/api_keys/add_api_keys_to_policies_if_missing.ts"
             },
             {
               "plugin": "searchprofiler",

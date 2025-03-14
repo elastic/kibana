@@ -6,7 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { CONNECTORS_INDEX, SyncJobType } from '@kbn/search-connectors';
+import { SyncJobType } from '@kbn/search-connectors';
 
 import { fetchConnectorById, startConnectorSync } from '@kbn/search-connectors';
 
@@ -82,52 +82,6 @@ describe('startSync lib function', () => {
       startSync(mockClient as unknown as IScopedClusterClient, 'connectorId', SyncJobType.FULL)
     ).rejects.toEqual(new Error(ErrorCode.RESOURCE_NOT_FOUND));
     expect(startConnectorSync).not.toHaveBeenCalled();
-  });
-
-  it('should set sync_now for crawler and not index a sync job', async () => {
-    (fetchConnectorById as jest.Mock).mockResolvedValue({
-      api_key_id: null,
-      configuration: { config: { label: 'label', value: 'haha' } },
-      created_at: null,
-      custom_scheduling: {},
-      error: null,
-      filtering: [{ active: 'filtering' }],
-      id: 'connectorId',
-      index_name: 'index_name',
-      language: 'nl',
-      last_seen: null,
-      last_sync_error: null,
-      last_sync_status: null,
-      last_synced: null,
-      pipeline: { name: 'pipeline' },
-      scheduling: { enabled: true, interval: '1 2 3 4 5' },
-      service_type: 'elastic-crawler',
-      status: 'not connected',
-      sync_now: false,
-    });
-
-    mockClient.asCurrentUser.update.mockImplementation(() => ({ _id: 'fakeId' }));
-
-    await expect(
-      startSync(
-        mockClient as unknown as IScopedClusterClient,
-        'connectorId',
-        SyncJobType.FULL,
-        'syncConfig'
-      )
-    ).resolves.toEqual({ _id: 'fakeId' });
-    expect(startConnectorSync).not.toHaveBeenCalled();
-    expect(mockClient.asCurrentUser.update).toHaveBeenCalledWith({
-      doc: {
-        configuration: {
-          config: { label: 'label', value: 'haha' },
-          nextSyncConfig: { label: 'nextSyncConfig', value: 'syncConfig' },
-        },
-        sync_now: true,
-      },
-      id: 'connectorId',
-      index: CONNECTORS_INDEX,
-    });
   });
 
   it('should start an incremental sync', async () => {

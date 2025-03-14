@@ -9,6 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { css } from '@emotion/react';
 import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -86,6 +87,7 @@ export class FlyoutService {
 
     return {
       open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
+        const { isResizable, ...restOptions } = options;
         // If there is an active flyout session close it before opening a new one.
         if (this.activeFlyout) {
           this.activeFlyout.close();
@@ -112,9 +114,9 @@ export class FlyoutService {
         };
 
         const getWrapper = (children: JSX.Element) => {
-          return options?.isResizable ? (
+          return isResizable ? (
             <EuiFlyoutResizable
-              {...options}
+              {...restOptions}
               onClose={onCloseFlyout}
               ref={React.createRef()}
               maxWidth={Number(options?.maxWidth)}
@@ -122,12 +124,21 @@ export class FlyoutService {
               {children}
             </EuiFlyoutResizable>
           ) : (
-            <EuiFlyout {...options} onClose={onCloseFlyout}>
+            <EuiFlyout {...restOptions} onClose={onCloseFlyout}>
               {children}
             </EuiFlyout>
           );
         };
 
+        const overlayMountWrapperStyle = css({
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflow: 'hidden',
+        });
+
+        // NOTE: The kbnOverlayMountWrapper className is used for allowing consumers to add additional styles
+        // that support drag-and-drop (padding, pointer styles). It is not used for internal styling.
         render(
           <KibanaRenderContextProvider
             analytics={analytics}
@@ -135,7 +146,13 @@ export class FlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
-            {getWrapper(<MountWrapper mount={mount} className="kbnOverlayMountWrapper" />)}
+            {getWrapper(
+              <MountWrapper
+                mount={mount}
+                css={overlayMountWrapperStyle}
+                className="kbnOverlayMountWrapper"
+              />
+            )}
           </KibanaRenderContextProvider>,
           this.targetDomElement
         );

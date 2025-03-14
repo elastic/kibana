@@ -10,6 +10,7 @@ import type { EuiComboBoxProps } from '@elastic/eui';
 import React from 'react';
 
 import '@kbn/code-editor-mock/jest_helper';
+import type { RemoteClusterPrivilege } from '@kbn/security-plugin-types-common';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { RemoteClusterPrivilegesForm } from './remote_cluster_privileges_form';
@@ -141,7 +142,7 @@ describe('delete button', () => {
   const props = {
     remoteClusterPrivilege: {
       clusters: ['cluster1'],
-      privileges: ['monitor_enrich'],
+      privileges: ['monitor_enrich'] as RemoteClusterPrivilege[],
     },
     formIndex: 0,
     availableRemoteClusterPrivileges: ['monitor_enrich'],

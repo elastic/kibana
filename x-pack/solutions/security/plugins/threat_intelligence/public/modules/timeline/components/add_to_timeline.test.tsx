@@ -153,4 +153,17 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
     );
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should render empty when the user does not have access to timeline', () => {
+    const mockField: string = 'threat.indicator.ip';
+    const mockData: Indicator = generateMockIndicator();
+
+    const { container } = render(
+      <TestProvidersComponent securityContextOverrides={{ hasAccessToTimeline: false }}>
+        <AddToTimelineContextMenu field={mockField} data={mockData} data-test-subj={TEST_ID} />
+      </TestProvidersComponent>
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
 });

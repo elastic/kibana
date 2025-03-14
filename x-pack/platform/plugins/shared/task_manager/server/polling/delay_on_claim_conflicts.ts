@@ -15,7 +15,6 @@ import { merge, of, Observable, combineLatest, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs';
 import { Option, none, some, isSome, Some } from 'fp-ts/lib/Option';
 import { isOk } from '../lib/result_type';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
 import { ClaimAndFillPoolResult } from '../lib/fill_pool';
@@ -26,8 +25,8 @@ import { getCapacityInWorkers } from '../task_pool';
  * Emits a delay amount in ms to apply to polling whenever the task store exceeds a threshold of claim claimClashes
  */
 export function delayOnClaimConflicts(
-  capacityConfiguration$: ManagedConfiguration['capacityConfiguration$'],
-  pollIntervalConfiguration$: ManagedConfiguration['pollIntervalConfiguration$'],
+  capacityConfiguration$: Observable<number>,
+  pollIntervalConfiguration$: Observable<number>,
   taskLifecycleEvents$: Observable<TaskLifecycleEvent>,
   claimClashesPercentageThreshold: number,
   runningAverageWindowSize: number

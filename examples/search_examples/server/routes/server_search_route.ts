@@ -39,12 +39,10 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
             {
               params: {
                 index,
-                body: {
-                  aggs: {
-                    '1': {
-                      avg: {
-                        field,
-                      },
+                aggs: {
+                  '1': {
+                    avg: {
+                      field,
                     },
                   },
                 },

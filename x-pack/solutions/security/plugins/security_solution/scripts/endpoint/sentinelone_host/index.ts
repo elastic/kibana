@@ -94,6 +94,10 @@ console and pushes the data to Elasticsearch.`,
       --spaceId           Optional. The space id where the host should be added to in kibana. The
                             space will be created if it does not exist. Default: default space.
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
+      --version           Optional. The version of the Agent to use for enrolling the new host.
+                          Default: uses the same version as the stack (kibana). Version
+                          can also be from 'SNAPSHOT'.
+                          Examples: 8.6.0, 8.7.0-SNAPSHOT
 `,
     },
   });
@@ -110,6 +114,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   const apiKey = flags.apiKey as string;
   const forceFleetServer = flags.forceFleetServer as boolean;
   const forceNewS1Host = flags.forceNewS1Host as boolean;
+  const version = flags.version as string | undefined;
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
@@ -207,6 +212,7 @@ const runCli: RunFn = async ({ log, flags }) => {
         kbnClient,
         logger: log,
         force: forceFleetServer,
+        version,
       });
     }
 
@@ -215,6 +221,7 @@ const runCli: RunFn = async ({ log, flags }) => {
       kbnClient,
       log,
       agentPolicyId,
+      version,
     });
   } else {
     log.debug(
@@ -233,7 +240,13 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   // Trigger an alert on the SentinelOn host so that we get an alert back in Kibana
   log.info(`Triggering SentinelOne alert`);
-  await s1HostVm.exec('nslookup elastic.co');
+  await s1HostVm
+    .exec('curl -o /tmp/eicar.com.txt https://secure.eicar.org/eicar.com.txt')
+    .catch((err) => {
+      log.warning(
+        `Attempted to trigger an alert on host [${s1HostVm.name}], but failed with: ${err.message}`
+      );
+    });
 
   log.info(`Done!
 

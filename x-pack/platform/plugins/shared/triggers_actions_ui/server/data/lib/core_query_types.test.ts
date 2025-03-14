@@ -7,10 +7,10 @@
 
 // tests of common properties on time_series_query and alert_type_params
 
-import { ObjectType } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { CoreQueryParams } from './core_query_types';
-import { MAX_GROUPS } from '..';
+import type { CoreQueryParams } from '@kbn/response-ops-rule-params/index_threshold';
+import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';
 
 const DefaultParams: Writable<Partial<CoreQueryParams>> = {
   index: 'index-name',
@@ -23,6 +23,7 @@ const DefaultParams: Writable<Partial<CoreQueryParams>> = {
 };
 
 export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
 
   describe('coreQueryTypes', () => {

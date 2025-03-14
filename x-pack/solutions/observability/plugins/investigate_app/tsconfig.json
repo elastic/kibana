@@ -10,6 +10,7 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
+    "scripts/**/*",
     ".storybook/**/*"
   ],
   "exclude": [
@@ -59,7 +60,6 @@
     "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/observability-utils-browser",
-    "@kbn/observability-utils-server",
     "@kbn/presentation-containers",
     "@kbn/react-kibana-context-theme",
     "@kbn/rule-data-utils",
@@ -80,5 +80,12 @@
     "@kbn/utility-types-jest",
     "@kbn/visualization-utils",
     "@kbn/zod",
+    "@kbn/babel-register",
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-runner",
+    "@kbn/datemath",
+    "@kbn/sse-utils-client",
+    "@kbn/traced-es-client",
+    "@kbn/react-hooks",
   ],
 }

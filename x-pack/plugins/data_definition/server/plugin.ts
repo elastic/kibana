@@ -76,6 +76,7 @@ export function createPlugin(
             };
           }),
         },
+        runDevModeChecks: context.env.mode.dev,
       });
 
       return {};

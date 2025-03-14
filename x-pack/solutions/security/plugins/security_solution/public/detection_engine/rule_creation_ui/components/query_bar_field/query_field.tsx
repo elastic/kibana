@@ -45,6 +45,7 @@ export interface QueryBarFieldProps {
   onSavedQueryError?: () => void;
   defaultSavedQuery?: SavedQuery | undefined;
   onOpenTimeline?: (timeline: TimelineModel) => void;
+  bubbleSubmitEvent?: boolean;
 }
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
@@ -80,6 +81,7 @@ export const QueryBarField = ({
   resetToSavedQuery,
   onOpenTimeline,
   onSavedQueryError,
+  bubbleSubmitEvent,
 }: QueryBarFieldProps) => {
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
@@ -175,8 +177,8 @@ export const QueryBarField = ({
   // if saved query fetched, reset values in queryBar input and filters to saved query's values
   useEffect(() => {
     if (resetToSavedQuery && savedQuery) {
-      const newFiledValue = savedQueryToFieldValue(savedQuery);
-      setFieldValue(newFiledValue);
+      const newFieldValue = savedQueryToFieldValue(savedQuery);
+      setFieldValue(newFieldValue);
     }
   }, [resetToSavedQuery, savedQuery, setFieldValue]);
 
@@ -286,6 +288,7 @@ export const QueryBarField = ({
                 hideSavedQuery={false}
                 displayStyle="inPage"
                 isDisabled={isDisabled}
+                bubbleSubmitEvent={bubbleSubmitEvent}
               />
             </div>
           )}

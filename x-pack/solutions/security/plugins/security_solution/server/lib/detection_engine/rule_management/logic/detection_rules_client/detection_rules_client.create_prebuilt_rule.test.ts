@@ -21,6 +21,8 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -33,8 +35,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
   let actionsClient: jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
@@ -44,7 +44,8 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
-      isRuleCustomizationEnabled: true,
+      license: licenseMock.createLicenseMock(),
+      productFeaturesService: createProductFeaturesServiceMock(),
     });
   });
 

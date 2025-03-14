@@ -52,6 +52,14 @@ const mockKibana = () => {
           prepend: (url: string) => url,
         },
       },
+      docLinks: {
+        links: {
+          query: {},
+          observability: {
+            slo: 'dummy_link',
+          },
+        },
+      },
       observabilityAIAssistant: mockObservabilityAIAssistant,
     },
   });

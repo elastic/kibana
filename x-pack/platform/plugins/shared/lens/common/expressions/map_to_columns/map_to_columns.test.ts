@@ -319,8 +319,8 @@ describe('map_to_columns', () => {
       );
 
       expect(result.columns).toStrictEqual([
-        { id: 'a', name: 'A', meta: { type: 'number', field: undefined, params: undefined } },
-        { id: 'b', name: 'B', meta: { type: 'number', field: undefined, params: undefined } },
+        { id: 'a', name: 'A', meta: { type: 'number', sourceParams: {} } },
+        { id: 'b', name: 'B', meta: { type: 'number', sourceParams: {} } },
       ]);
 
       expect(result.rows).toStrictEqual([
@@ -328,6 +328,57 @@ describe('map_to_columns', () => {
         { a: 3, b: 4 },
         { a: 5, b: 6 },
         { a: 7, b: 8 },
+      ]);
+    });
+
+    it('should handle correctly columns controlled by variables', async () => {
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'a', name: 'A', meta: { type: 'number' } },
+          { id: 'b', name: 'B', meta: { type: 'number' } },
+          { id: 'c', name: 'C', meta: { type: 'string' }, variable: 'field' },
+        ],
+        rows: [
+          { a: 1, b: 2, c: '3' },
+          { a: 3, b: 4, c: '5' },
+          { a: 5, b: 6, c: '7' },
+          { a: 7, b: 8, c: '9' },
+        ],
+      };
+
+      const idMap = {
+        a: [
+          {
+            id: 'a',
+            label: 'A',
+          },
+        ],
+        '?field': [
+          {
+            id: 'field',
+            label: '?field',
+            variable: 'field',
+          },
+        ],
+      };
+
+      const result = await mapToColumns.fn(
+        input,
+        { idMap: JSON.stringify(idMap), isTextBased: true },
+        createMockExecutionContext()
+      );
+
+      expect(result.columns).toStrictEqual([
+        { id: 'a', name: 'A', meta: { type: 'number', sourceParams: {} } },
+        { id: 'field', name: 'C', meta: { type: 'string' }, variable: 'field' },
+      ]);
+
+      expect(result.rows).toStrictEqual([
+        { a: 1, field: '3' },
+        { a: 3, field: '5' },
+        { a: 5, field: '7' },
+        { a: 7, field: '9' },
       ]);
     });
   });

@@ -67,6 +67,7 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
         userProfile={userProfile}
         i18n={i18n}
         logger={logger}
+        enableSecurityLink=""
       >
         {children}
       </EditSpaceProviderRoot>

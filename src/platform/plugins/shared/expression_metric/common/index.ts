@@ -9,6 +9,12 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110893
 
-export * from './constants';
-export * from './types';
-export * from './expression_functions';
+export { PLUGIN_ID, PLUGIN_NAME, FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from './constants';
+export type {
+  Input,
+  Arguments,
+  ExpressionMetricFunction,
+  MetricRendererConfig,
+  NodeDimensions,
+} from './types';
+export { functions, metricFunction } from './expression_functions';

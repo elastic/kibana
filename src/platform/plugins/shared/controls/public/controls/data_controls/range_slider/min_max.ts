@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
@@ -26,7 +26,7 @@ export function minMax$({
 }: {
   controlFetch$: Observable<ControlFetchContext>;
   controlGroupApi: ControlGroupApi;
-  dataViews$: PublishesDataViews['dataViews'];
+  dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;
   setIsLoading: (isLoading: boolean) => void;
 }) {

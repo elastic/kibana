@@ -20,33 +20,29 @@ const HashFlexGroup = styled(EuiFlexGroup)`
 interface Props {
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   processHashSha256: string | null | undefined;
 }
 
-export const ProcessHash = React.memo<Props>(
-  ({ contextId, eventId, isDraggable, processHashSha256 }) => {
-    if (isNillEmptyOrNotFinite(processHashSha256)) {
-      return null;
-    }
-
-    return (
-      <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
-        <TokensFlexItem grow={false} component="div">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.hash.sha256"
-            iconType="number"
-            isDraggable={isDraggable}
-            value={processHashSha256}
-            fieldType="keyword"
-            isAggregatable={true}
-          />
-        </TokensFlexItem>
-      </HashFlexGroup>
-    );
+export const ProcessHash = React.memo<Props>(({ contextId, eventId, processHashSha256 }) => {
+  if (isNillEmptyOrNotFinite(processHashSha256)) {
+    return null;
   }
-);
+
+  return (
+    <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
+      <TokensFlexItem grow={false} component="div">
+        <DraggableBadge
+          contextId={contextId}
+          eventId={eventId}
+          field="process.hash.sha256"
+          iconType="number"
+          value={processHashSha256}
+          fieldType="keyword"
+          isAggregatable={true}
+        />
+      </TokensFlexItem>
+    </HashFlexGroup>
+  );
+});
 
 ProcessHash.displayName = 'ProcessHash';

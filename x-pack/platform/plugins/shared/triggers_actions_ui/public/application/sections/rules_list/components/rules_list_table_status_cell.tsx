@@ -14,6 +14,7 @@ import {
   EuiHealth,
   EuiToolTip,
   EuiStat,
+  useEuiTheme,
 } from '@elastic/eui';
 import { RuleTableItem } from '../../../../types';
 import {
@@ -33,11 +34,12 @@ export interface RulesListTableStatusCellProps {
 }
 
 export const RulesListTableStatusCell = (props: RulesListTableStatusCellProps) => {
+  const { euiTheme } = useEuiTheme();
   const { rule, onManageLicenseClick } = props;
   const { lastRun } = rule;
 
   const isLicenseError = getIsLicenseError(rule);
-  const healthColor = getRuleHealthColor(rule);
+  const healthColor = getRuleHealthColor(rule, euiTheme);
   const statusMessage = getRuleStatusMessage({
     rule,
     licenseErrorText: ALERT_STATUS_LICENSE_ERROR,

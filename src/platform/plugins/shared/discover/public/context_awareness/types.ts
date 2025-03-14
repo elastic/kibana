@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
   UnifiedDataTableProps,
+  DataGridPaginationMode,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
@@ -36,6 +37,17 @@ export interface AppMenuExtension {
    * @returns The updated app menu registry
    */
   appMenuRegistry: (prevRegistry: AppMenuRegistry) => AppMenuRegistry;
+}
+
+/**
+ * Supports extending the Pagination Config in Discover
+ */
+export interface PaginationConfigExtension {
+  /**
+   * Supports customizing the pagination mode in Discover
+   * @returns paginationMode - which mode to use for loading Pagination toolbar
+   */
+  paginationMode: DataGridPaginationMode;
 }
 
 /**
@@ -278,6 +290,15 @@ export interface Profile {
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
 
   /**
+   * Gets an array of default ad hoc data views to display in the data view picker (e.g. "All logs").
+   * The returned specs must include consistent IDs across resolutions for Discover to manage them correctly.
+   * @returns The default data views to display in the data view picker
+   */
+  getDefaultAdHocDataViews: () => Array<
+    Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
+  >;
+
+  /**
    * Data grid
    */
 
@@ -311,6 +332,14 @@ export interface Profile {
    * @returns The additional cell actions to show in the data grid
    */
   getAdditionalCellActions: () => AdditionalCellAction[];
+
+  /**
+   * Allows setting the pagination mode and its configuration
+   * The `getPaginationConfig` extension point currently gives `paginationMode` which can be set to 'multiPage' | 'singlePage' | 'infinite';
+   * Note: This extension point currently only returns `paginationMode` but can be extended to return `pageSize` etc as well.
+   * @returns The pagination mode extension
+   */
+  getPaginationConfig: () => PaginationConfigExtension;
 
   /**
    * Document viewer flyout

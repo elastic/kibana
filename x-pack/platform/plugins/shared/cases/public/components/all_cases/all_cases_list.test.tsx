@@ -90,6 +90,44 @@ const mockKibana = () => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
+// eslint-disable-next-line prefer-object-spread
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+const restoreGetComputedStyle = () => {
+  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+};
+
+const patchGetComputedStyle = () => {
+  // The JSDOM implementation is too slow
+  // Especially for dropdowns that try to position themselves
+  // perf issue - https://github.com/jsdom/jsdom/issues/3234
+  Object.defineProperty(window, 'getComputedStyle', {
+    value: (el: HTMLElement) => {
+      /**
+       * This is based on the jsdom implementation of getComputedStyle
+       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+       *
+       * It is missing global style parsing and will only return styles applied directly to an element.
+       * Will not return styles that are global or from emotion
+       */
+      const declaration = new CSSStyleDeclaration();
+      const { style } = el;
+
+      Array.prototype.forEach.call(style, (property: string) => {
+        declaration.setProperty(
+          property,
+          style.getPropertyValue(property),
+          style.getPropertyPriority(property)
+        );
+      });
+
+      return declaration;
+    },
+    configurable: true,
+    writable: true,
+  });
+};
+
 // FLAKY: https://github.com/elastic/kibana/issues/192739
 describe.skip('AllCasesListGeneric', () => {
   const onRowClick = jest.fn();
@@ -113,48 +151,18 @@ describe.skip('AllCasesListGeneric', () => {
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');
-  // eslint-disable-next-line prefer-object-spread
-  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   let appMockRenderer: AppMockRenderer;
 
   beforeAll(() => {
-    // The JSDOM implementation is too slow
-    // Especially for dropdowns that try to position themselves
-    // perf issue - https://github.com/jsdom/jsdom/issues/3234
-    Object.defineProperty(window, 'getComputedStyle', {
-      value: (el: HTMLElement) => {
-        /**
-         * This is based on the jsdom implementation of getComputedStyle
-         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
-         *
-         * It is missing global style parsing and will only return styles applied directly to an element.
-         * Will not return styles that are global or from emotion
-         */
-        const declaration = new CSSStyleDeclaration();
-        const { style } = el;
-
-        Array.prototype.forEach.call(style, (property: string) => {
-          declaration.setProperty(
-            property,
-            style.getPropertyValue(property),
-            style.getPropertyPriority(property)
-          );
-        });
-
-        return declaration;
-      },
-      configurable: true,
-      writable: true,
-    });
-
+    patchGetComputedStyle();
     mockKibana();
     const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
   afterAll(() => {
-    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+    restoreGetComputedStyle();
   });
 
   beforeEach(() => {

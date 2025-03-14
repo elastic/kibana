@@ -295,6 +295,15 @@ export type PersistableStateAttachmentAttributes = rt.TypeOf<
  * Common
  */
 
+export const AttachmentPayloadRt = rt.union([
+  UserCommentAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  ActionsAttachmentPayloadRt,
+  ExternalReferenceNoSOAttachmentPayloadRt,
+  ExternalReferenceSOAttachmentPayloadRt,
+  PersistableStateAttachmentPayloadRt,
+]);
+
 export const AttachmentAttributesRt = rt.union([
   UserCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,

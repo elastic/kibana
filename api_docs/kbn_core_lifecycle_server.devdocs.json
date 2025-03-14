@@ -383,13 +383,7 @@
               "{@link UserSettingsServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUserSettingsServerPluginApi",
-                "section": "def-server.UserSettingsServiceSetup",
-                "text": "UserSettingsServiceSetup"
-              }
+              "UserSettingsServiceSetup"
             ],
             "path": "src/core/packages/lifecycle/server/src/core_setup.ts",
             "deprecated": false,

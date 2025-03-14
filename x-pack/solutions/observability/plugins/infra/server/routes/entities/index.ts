@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { METRICS_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { createTracedEsClient } from '@kbn/traced-es-client';
 import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import type { InfraBackendLibs } from '../../lib/infra_types';
@@ -55,7 +55,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
         context: requestContext,
       });
 
-      const obsEsClient = createObservabilityEsClient({
+      const obsEsClient = createTracedEsClient({
         client: coreContext.elasticsearch.client.asCurrentUser,
         logger,
         plugin: `@kbn/${METRICS_APP_ID}-plugin`,

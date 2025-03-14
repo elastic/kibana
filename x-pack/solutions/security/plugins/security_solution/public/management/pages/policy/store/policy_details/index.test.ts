@@ -272,6 +272,7 @@ describe('policy details: ', () => {
               policy: {
                 value: {
                   global_manifest_version: 'latest',
+                  global_telemetry_enabled: false,
                   meta: {
                     license: '',
                     cloud: false,

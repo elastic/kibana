@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  DEFAULT_EMS_DARKMAP_ID,
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_ROADMAP_ID,
+} from '@kbn/maps-ems-plugin/common';
 import { ServiceSettings } from './service_settings';
 
 function makeMockLayer({ id, min, max, attributions, url }) {
@@ -62,21 +67,21 @@ function createMockEMSClient() {
     getTMSServices() {
       return [
         makeMockLayer({
-          id: 'road_map',
+          id: DEFAULT_EMS_ROADMAP_ID,
           min: 0,
           max: 10,
           attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
           url: 'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
         }),
         makeMockLayer({
-          id: 'road_map_desaturated',
+          id: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
           min: 0,
           max: 18,
           attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
           url: 'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
         }),
         makeMockLayer({
-          id: 'dark_map',
+          id: DEFAULT_EMS_DARKMAP_ID,
           min: 0,
           max: 22,
           attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
@@ -96,9 +101,9 @@ describe('service_settings (FKA tile_map test)', function () {
     emsTileApiUrl,
     includeElasticMapsService: true,
     emsTileLayerId: {
-      bright: 'road_map',
-      desaturated: 'road_map_desaturated',
-      dark: 'dark_map',
+      bright: DEFAULT_EMS_ROADMAP_ID,
+      desaturated: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+      dark: DEFAULT_EMS_DARKMAP_ID,
     },
   };
 
@@ -134,7 +139,7 @@ describe('service_settings (FKA tile_map test)', function () {
           id: 'TMS in config/kibana.yml',
         },
         {
-          id: 'road_map',
+          id: DEFAULT_EMS_ROADMAP_ID,
           name: 'Road Map - Bright',
           url: 'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
           minZoom: 0,
@@ -160,7 +165,9 @@ describe('service_settings (FKA tile_map test)', function () {
     it('should load appropriate EMS attributes for desaturated and dark theme', async () => {
       serviceSettings = makeServiceSettings();
       const tilemapServices = await serviceSettings.getTMSServices();
-      const roadMapService = tilemapServices.find((service) => service.id === 'road_map');
+      const roadMapService = tilemapServices.find(
+        (service) => service.id === DEFAULT_EMS_ROADMAP_ID
+      );
 
       const desaturationFalse = await serviceSettings.getAttributesForTMSLayer(
         roadMapService,

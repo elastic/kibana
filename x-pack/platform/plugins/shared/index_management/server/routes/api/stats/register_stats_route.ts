@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';

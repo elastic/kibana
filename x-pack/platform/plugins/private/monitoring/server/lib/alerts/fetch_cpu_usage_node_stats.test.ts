@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchCpuUsageNodeStats } from './fetch_cpu_usage_node_stats';
 
@@ -216,62 +216,60 @@ describe('fetchCpuUsageNodeStats', () => {
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['abc123'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'node_stats' } },
-                    { term: { 'metricset.name': 'node_stats' } },
-                    {
-                      term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['abc123'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'node_stats' } },
+                  { term: { 'metricset.name': 'node_stats' } },
+                  {
+                    term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
-              {
-                bool: { should: [{ exists: { field: 'cluster_uuid' } }], minimum_should_match: 1 },
-              },
-            ],
-          },
+            },
+            { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
+            {
+              bool: { should: [{ exists: { field: 'cluster_uuid' } }], minimum_should_match: 1 },
+            },
+          ],
         },
-        aggs: {
-          clusters: {
-            terms: { field: 'cluster_uuid', size: 10, include: ['abc123'] },
-            aggs: {
-              nodes: {
-                terms: { field: 'node_stats.node_id', size: 10 },
-                aggs: {
-                  index: { terms: { field: '_index', size: 1 } },
-                  average_cpu: { avg: { field: 'node_stats.process.cpu.percent' } },
-                  average_quota: { avg: { field: 'node_stats.os.cgroup.cpu.cfs_quota_micros' } },
-                  name: { terms: { field: 'source_node.name', size: 1 } },
-                  histo: {
-                    date_histogram: { field: 'timestamp', fixed_interval: '0m' },
-                    aggs: {
-                      average_periods: {
-                        max: { field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods' },
+      },
+      aggs: {
+        clusters: {
+          terms: { field: 'cluster_uuid', size: 10, include: ['abc123'] },
+          aggs: {
+            nodes: {
+              terms: { field: 'node_stats.node_id', size: 10 },
+              aggs: {
+                index: { terms: { field: '_index', size: 1 } },
+                average_cpu: { avg: { field: 'node_stats.process.cpu.percent' } },
+                average_quota: { avg: { field: 'node_stats.os.cgroup.cpu.cfs_quota_micros' } },
+                name: { terms: { field: 'source_node.name', size: 1 } },
+                histo: {
+                  date_histogram: { field: 'timestamp', fixed_interval: '0m' },
+                  aggs: {
+                    average_periods: {
+                      max: { field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods' },
+                    },
+                    average_usage: { max: { field: 'node_stats.os.cgroup.cpuacct.usage_nanos' } },
+                    usage_deriv: {
+                      derivative: {
+                        buckets_path: 'average_usage',
+                        gap_policy: 'skip',
+                        unit: '1s',
                       },
-                      average_usage: { max: { field: 'node_stats.os.cgroup.cpuacct.usage_nanos' } },
-                      usage_deriv: {
-                        derivative: {
-                          buckets_path: 'average_usage',
-                          gap_policy: 'skip',
-                          unit: '1s',
-                        },
-                      },
-                      periods_deriv: {
-                        derivative: {
-                          buckets_path: 'average_periods',
-                          gap_policy: 'skip',
-                          unit: '1s',
-                        },
+                    },
+                    periods_deriv: {
+                      derivative: {
+                        buckets_path: 'average_periods',
+                        gap_policy: 'skip',
+                        unit: '1s',
                       },
                     },
                   },

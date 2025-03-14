@@ -45,6 +45,9 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   packageInfo: PackageInfo;
   isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
+  defaultSetupTechnology?: SetupTechnology;
+  integrationToEnable?: string;
+  setIntegrationToEnable?: (integration: string) => void;
 };
 
 /**
@@ -72,6 +75,7 @@ export interface PackagePolicyEditExtensionComponentProps {
     isValid: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: Partial<NewPackagePolicy>;
+    isExtensionLoaded?: boolean;
   }) => void;
 }
 

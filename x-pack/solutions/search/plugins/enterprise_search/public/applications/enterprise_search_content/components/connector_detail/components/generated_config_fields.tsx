@@ -31,7 +31,8 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
-import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../../../routes';
+import { CONNECTOR_DETAIL_PATH } from '../../../routes';
+import { ConnectorViewIndexLink } from '../../shared/connector_view_search_indices_details/connector_view_search_indices_details';
 
 export interface GeneratedConfigFieldsProps {
   apiKey?: ApiKey;
@@ -84,7 +85,6 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   isGenerateLoading,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-
   const refreshButtonClick = () => {
     setIsModalVisible(true);
   };
@@ -184,15 +184,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             {connector.index_name && (
-              <EuiLinkTo
-                external
-                target="_blank"
-                to={generateEncodedPath(SEARCH_INDEX_PATH, {
-                  indexName: connector.index_name,
-                })}
-              >
-                {connector.index_name}
-              </EuiLinkTo>
+              <ConnectorViewIndexLink indexName={connector.index_name} target />
             )}
           </EuiFlexItem>
           <EuiFlexItem />

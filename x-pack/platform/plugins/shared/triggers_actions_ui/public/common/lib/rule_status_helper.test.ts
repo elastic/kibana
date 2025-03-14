@@ -6,7 +6,8 @@
  */
 
 import { getRuleHealthColor, getRuleStatusMessage } from './rule_status_helpers';
-import { RuleTableItem } from '../../types';
+import type { EuiThemeComputed } from '@elastic/eui';
+import type { RuleTableItem } from '../../types';
 
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
 import {
@@ -18,6 +19,16 @@ import {
 jest.mock('../get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
+
+const mockTheme = {
+  colors: {
+    success: '008A5E',
+    warning: '#FACB3D',
+    danger: '#C61E25',
+    primary: '#0B64DD',
+    accent: '#BC1E70',
+  },
+} as EuiThemeComputed;
 
 const mockRule = {
   id: '1',
@@ -70,33 +81,33 @@ beforeEach(() => {
 
 describe('getRuleHealthColor', () => {
   it('should return the correct color for successful rule', () => {
-    let color = getRuleHealthColor(mockRule);
-    expect(color).toEqual('success');
+    let color = getRuleHealthColor(mockRule, mockTheme);
+    expect(color).toEqual(mockTheme.colors.success);
 
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
-    color = getRuleHealthColor(mockRule);
-    expect(color).toEqual('success');
+    color = getRuleHealthColor(mockRule, mockTheme);
+    expect(color).toEqual(mockTheme.colors.success);
   });
 
   it('should return the correct color for warning rule', () => {
-    let color = getRuleHealthColor(warningRule);
-    expect(color).toEqual('warning');
+    let color = getRuleHealthColor(warningRule, mockTheme);
+    expect(color).toEqual(mockTheme.colors.warning);
 
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
-    color = getRuleHealthColor(warningRule);
-    expect(color).toEqual('warning');
+    color = getRuleHealthColor(warningRule, mockTheme);
+    expect(color).toEqual(mockTheme.colors.warning);
   });
 
   it('should return the correct color for failed rule', () => {
-    let color = getRuleHealthColor(failedRule);
-    expect(color).toEqual('danger');
+    let color = getRuleHealthColor(failedRule, mockTheme);
+    expect(color).toEqual(mockTheme.colors.danger);
 
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
-    color = getRuleHealthColor(failedRule);
-    expect(color).toEqual('danger');
+    color = getRuleHealthColor(failedRule, mockTheme);
+    expect(color).toEqual(mockTheme.colors.danger);
   });
 });
 
