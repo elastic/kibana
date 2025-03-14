@@ -16,7 +16,7 @@ set -e;
 
 if [[ $EXIT_CODE -ne 0 ]]; then
   echo "Exiting with code 10 without retrying"
-  ERROR_MSG=$(echo "$OUTPUT" | sed 's/\x1B\[[0-9;]*m//g')
+  ERROR_MSG=$(echo "$OUTPUT" | grep -A 10 "ERROR" | sed -E 's/\x1b\[[0-9;]*m//g')
 {
   echo "$ERROR_MSG"
 } | buildkite-agent annotate --style "error" --context "unregistered-playwright-configs"
