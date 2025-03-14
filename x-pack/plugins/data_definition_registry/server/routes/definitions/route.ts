@@ -270,6 +270,11 @@ const suggestQueryRoute = createDataDefinitionRegistryServerRoute({
             query wrapped in \`\`\`esql \`\`\` ticks will replace the existing
             query in the editor.
 
+            Look at the comments to see if there are instructions from the user,
+            and take them into account. If those instructions are applied, remove
+            the comment from the generated query.
+            If not, leave the comment as-is.
+
             The current query is:
             \`\`\`esql
             ${query}
