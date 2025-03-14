@@ -1020,104 +1020,74 @@
       },
       {
         "parentPluginId": "@kbn/scout",
-        "id": "def-common.ingestSynthtraceDataHook",
+        "id": "def-common.globalSetupHook",
         "type": "Function",
         "tags": [],
-        "label": "ingestSynthtraceDataHook",
+        "label": "globalSetupHook",
         "description": [],
         "signature": [
-          "(config: ",
-          "FullConfig",
-          "<{}, {}>, data: SynthtraceIngestionData) => Promise<void>"
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          ", ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & { log: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutLogger",
+            "text": "ScoutLogger"
+          },
+          "; config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; esClient: ",
+          "default",
+          "; kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; samlAuth: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.SamlSessionManager",
+            "text": "SamlSessionManager"
+          },
+          "; } & { esArchiver: ",
+          "EsArchiverFixture",
+          "; } & ",
+          "SynthtraceFixture",
+          " & { fleetApi: ",
+          "FleetApiFixture",
+          "; }>"
         ],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/synthtrace_ingestion.ts",
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestSynthtraceDataHook.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "FullConfig",
-              "<{}, {}>"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/synthtrace_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestSynthtraceDataHook.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "SynthtraceIngestionData"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/synthtrace_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout",
-        "id": "def-common.ingestTestDataHook",
-        "type": "Function",
-        "tags": [],
-        "label": "ingestTestDataHook",
-        "description": [],
-        "signature": [
-          "(config: ",
-          "FullConfig",
-          "<{}, {}>, archives: string[]) => Promise<void>"
-        ],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestTestDataHook.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "FullConfig",
-              "<{}, {}>"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestTestDataHook.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "archives",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -6201,7 +6171,7 @@
           },
           " extends Pick<",
           "PlaywrightTestConfig",
-          "<{}, {}>, \"workers\" | \"testDir\" | \"globalSetup\">"
+          "<{}, {}>, \"workers\" | \"testDir\">"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
         "deprecated": false,
@@ -6227,20 +6197,6 @@
             "description": [],
             "signature": [
               "2 | 1 | 3 | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutPlaywrightOptions.globalSetup",
-            "type": "string",
-            "tags": [],
-            "label": "globalSetup",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
@@ -6584,6 +6540,20 @@
             "tags": [],
             "label": "serversConfigDir",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutTestOptions.configName",
+            "type": "string",
+            "tags": [],
+            "label": "configName",
+            "description": [],
+            "signature": [
+              "\"local\""
+            ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
             "trackAdoption": false

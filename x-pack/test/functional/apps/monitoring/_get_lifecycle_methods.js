@@ -28,7 +28,12 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
     async setup(archive, { from, to, useSuperUser = false, useCreate = false }) {
       _archive = archive;
       if (!useSuperUser) {
-        await security.testUser.setRoles(['monitoring_user', 'kibana_admin', 'test_monitoring']);
+        await security.testUser.setRoles([
+          'monitoring_user',
+          'kibana_admin',
+          'test_monitoring',
+          'test_filebeat_reader',
+        ]);
       }
 
       const kibanaServer = getService('kibanaServer');

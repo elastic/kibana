@@ -66,6 +66,7 @@ function getPatternRuleType(): RuleType {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
