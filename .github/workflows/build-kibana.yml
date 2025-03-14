@@ -55,14 +55,15 @@ jobs:
           which node || echo "Node binary not found"
           ls -l $(which node) || echo "Node path is incorrect"
 
-      - name: Install Yarn Manually
+      - name: Enable Corepack and Install Yarn
         run: |
           corepack enable
-          npm install -g yarn
-          yarn -v || echo "Yarn still not found in PATH"
+          corepack prepare yarn@stable --activate
+          yarn -v || echo "Yarn is still missing"
 
       - name: Ensure Yarn is in PATH
         run: |
+          export PATH=$(yarn global bin):$PATH
           echo "export PATH=$(yarn global bin):$PATH" >> ~/.bashrc
           source ~/.bashrc
           which yarn || echo "Yarn is still missing"
