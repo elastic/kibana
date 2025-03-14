@@ -54,5 +54,4 @@ export const rawRuleMonitoringSchema = schema.object({
 
 export const rawRuleSchema = rawRuleSchemaV3.extends({
   monitoring: schema.maybe(rawRuleMonitoringSchema),
-  dashboards: schema.maybe(schema.arrayOf(schema.object({ id: schema.string() }))),
 });
