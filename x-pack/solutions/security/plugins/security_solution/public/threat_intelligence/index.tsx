@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import type { SecuritySubPlugin } from '../app/types';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { generateAttachmentType } from './modules/cases/utils/attachments';
 import { routes } from './routes';
+import type { SetupPlugins } from './types';
 
 export class ThreatIntelligence {
-  public setup() {}
+  public async setup(_core: CoreSetup, plugins: SetupPlugins) {
+    const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
+    plugins.cases.attachmentFramework.registerExternalReference(externalAttachmentType);
 
-  public start(): SecuritySubPlugin {
+    return {};
+  }
+
+  public start() {
     return {
       routes,
     };
   }
+
+  public stop() {}
 }
