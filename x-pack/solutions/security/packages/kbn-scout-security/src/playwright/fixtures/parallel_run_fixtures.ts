@@ -44,8 +44,8 @@ export const spaceTest = spaceBase.extend<
     await use(extendedPageObjects);
   },
   detectionRuleApi: [
-    async ({ kbnClient, log }, use) => {
-      const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient, log });
+    async ({ kbnClient, log, scoutSpace }, use) => {
+      const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient, log, scoutSpace });
       await use(detectionRuleHelper);
     },
     { scope: 'worker' },

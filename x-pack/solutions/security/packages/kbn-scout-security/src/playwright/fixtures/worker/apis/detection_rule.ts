@@ -6,6 +6,7 @@
  */
 
 import { KbnClient, measurePerformanceAsync, ScoutLogger } from '@kbn/scout';
+import { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/worker';
 import { CUSTOM_QUERY_RULE, CustomQueryRule } from '../../../constants/detection_rules';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
@@ -19,9 +20,11 @@ export interface DetectionRuleFixture {
 export const createDetectionRuleFixture = async ({
   kbnClient,
   log,
+  scoutSpace,
 }: {
   kbnClient: KbnClient;
   log: ScoutLogger;
+  scoutSpace?: ScoutSpaceParallelFixture;
 }) => {
   const detectionRuleHelper: DetectionRuleFixture = {
     createCustomQueryRule: async (body = CUSTOM_QUERY_RULE) => {
@@ -29,9 +32,12 @@ export const createDetectionRuleFixture = async ({
         log,
         'security.detectionRule.createCustomQueryRule',
         async () => {
+          const path = scoutSpace?.id
+            ? `/s/${scoutSpace?.id}${DETECTION_ENGINE_RULES_URL}`
+            : DETECTION_ENGINE_RULES_URL;
           await kbnClient.request({
             method: 'POST',
-            path: DETECTION_ENGINE_RULES_URL,
+            path,
             body,
           });
         }
@@ -40,9 +46,12 @@ export const createDetectionRuleFixture = async ({
 
     deleteAll: async () => {
       await measurePerformanceAsync(log, 'security.detectionRule.deleteAll', async () => {
+        const path = scoutSpace?.id
+          ? `/s/${scoutSpace?.id}${DETECTION_ENGINE_RULES_BULK_ACTION}`
+          : DETECTION_ENGINE_RULES_BULK_ACTION;
         await kbnClient.request({
           method: 'POST',
-          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          path,
           body: {
             query: '',
             action: 'delete',

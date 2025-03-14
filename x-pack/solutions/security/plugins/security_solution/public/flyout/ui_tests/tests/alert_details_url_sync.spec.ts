@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { expect, test } from '@kbn/scout-security';
+import { expect, spaceTest } from '@kbn/scout-security';
 import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/detection_rules';
 
 const RIGHT = 'right';
 
-test.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }, () => {
-  test.beforeEach(async ({ browserAuth, detectionRuleApi }) => {
+spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, detectionRuleApi }) => {
     await detectionRuleApi.deleteAll();
     await detectionRuleApi.createCustomQueryRule(CUSTOM_QUERY_RULE);
     await browserAuth.loginAsPlatformEngineer();
   });
 
-  test('should test flyout url sync', async ({ pageObjects }) => {
+  spaceTest('should test flyout url sync', async ({ pageObjects }) => {
     await pageObjects.alertsTablePage.navigate();
 
     const urlBeforeAlertDetails = await pageObjects.alertsTablePage.getCurrentUrl();
