@@ -8,3 +8,7 @@
  */
 
 export const STORYBOOK_TITLE = 'Unified Tabs';
+
+export const servicesMock = {
+  core: {},
+};

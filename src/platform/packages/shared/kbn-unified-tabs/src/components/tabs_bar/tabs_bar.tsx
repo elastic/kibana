@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem } from '../../types';
+import type { TabItem, TabsServices } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
@@ -28,6 +28,7 @@ export type TabsBarProps = Pick<
   items: TabItem[];
   selectedItem: TabItem | null;
   maxItemsCount?: number;
+  services: TabsServices;
   onAdd: () => Promise<void>;
 };
 
@@ -37,6 +38,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   maxItemsCount,
   tabContentId,
   getTabMenuItems,
+  services,
   onAdd,
   onLabelEdited,
   onSelect,
@@ -101,6 +103,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                   isSelected={selectedItem?.id === item.id}
                   tabContentId={tabContentId}
                   tabsSizeConfig={tabsSizeConfig}
+                  services={services}
                   getTabMenuItems={getTabMenuItems}
                   onLabelEdited={onLabelEdited}
                   onSelect={onSelect}
@@ -138,7 +141,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   );
 
   return (
-    <TabsBarWithBackground role="tablist" data-test-subj="unifiedTabs_tabsBar">
+    <TabsBarWithBackground role="tablist" data-test-subj="unifiedTabs_tabsBar" services={services}>
       {mainTabsBarContent}
     </TabsBarWithBackground>
   );

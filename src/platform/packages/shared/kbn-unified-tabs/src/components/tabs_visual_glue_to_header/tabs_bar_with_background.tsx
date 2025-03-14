@@ -12,6 +12,8 @@ import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
+import { useChromeStyle } from './use_chrome_style';
+import type { TabsServices } from '../../types';
 
 const globalCss = cssString`
   // Disables the overscroll behavior to prevent the page from bouncing when scrolling
@@ -19,7 +21,7 @@ const globalCss = cssString`
 
   // Removes the shadow from the global header.
   // We add our own shadow to the tabs bar to be able to set a solid color for the selected tab on top of the shadow.
-  #kbnHeaderSecondBar,
+  .header__secondBar,
   [data-test-subj='kibanaProjectHeaderActionMenu'] {
     box-shadow: none;
     border-bottom: none;
@@ -28,13 +30,16 @@ const globalCss = cssString`
 `;
 
 export interface TabsBarWithBackgroundProps extends HTMLAttributes<HTMLElement> {
+  services: TabsServices;
   children: React.ReactNode;
 }
 
 export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
+  services,
   children,
   ...otherProps
 }) => {
+  const { isProjectChromeStyle } = useChromeStyle(services);
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
@@ -49,13 +54,12 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
   return (
     <div
       {...otherProps}
-      // tabs bar background
       css={css`
+        // tabs bar background
         background: ${euiTheme.colors.lightestShade};
 
-        .kbnBody--hasProjectActionMenu & {
-          margin-top: 1px; // for some reason the header slightly overlaps the tabs bar in a solution view
-        }
+        // for some reason the header slightly overlaps the tabs bar in a solution view
+        margin-top: ${isProjectChromeStyle ? '1px' : '0'};
       `}
     >
       <div

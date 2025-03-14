@@ -12,7 +12,7 @@ import type { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { useNewTabProps } from '../../hooks/use_new_tab_props';
-import { STORYBOOK_TITLE } from './storybook_constants';
+import { STORYBOOK_TITLE, servicesMock } from './storybook_constants';
 
 export default {
   title: `${STORYBOOK_TITLE}/Tabs`,
@@ -33,6 +33,7 @@ const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (arg
     <TabbedContent
       {...args}
       createItem={getNewTabDefaultProps}
+      services={servicesMock}
       onChanged={action('onClosed')}
       renderContent={(item) => (
         <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>

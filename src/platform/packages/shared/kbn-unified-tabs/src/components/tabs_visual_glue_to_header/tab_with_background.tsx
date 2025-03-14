@@ -11,23 +11,26 @@ import React, { HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
+import { useChromeStyle } from './use_chrome_style';
+import type { TabsServices } from '../../types';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isSelected: boolean;
+  services: TabsServices;
   children: React.ReactNode;
 }
 
 export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({
   isSelected,
+  services,
   children,
   ...otherProps
 }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  const selectedTabBackgroundColor = document.querySelector(
-    // TODO: listen to chromeStyle changes instead
-    '.kbnBody--hasProjectActionMenu'
-  )
+  const { isProjectChromeStyle } = useChromeStyle(services);
+
+  const selectedTabBackgroundColor = isProjectChromeStyle
     ? euiTheme.colors.body
     : euiTheme.colors.emptyShade;
 
