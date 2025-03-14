@@ -8,6 +8,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { OutputInvalidError } from '../../../../../../common/errors';
 import { getDefaultFleetServerpolicyId } from '../../../../../../common/services/agent_policies_helpers';
 import type { useComboInput, useInput, useSwitchInput } from '../../../hooks';
 import {
@@ -126,11 +127,26 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
         setStatus('success');
       }
     } catch (err) {
-      notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
-          defaultMessage: 'Error adding Fleet Server host',
-        }),
-      });
+      if (err?.attributes?.type === OutputInvalidError.name) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
+            defaultMessage: 'Error creating a Fleet Server policy',
+          }),
+          toastMessage: i18n.translate(
+            'xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle',
+            {
+              defaultMessage:
+                'Fleet Server policy creation failed as your default output is not an elasticsearch output. Use the advanced section to use an elasticsearch output to create that policy.',
+            }
+          ),
+        });
+      } else {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
+            defaultMessage: 'Error adding Fleet Server host',
+          }),
+        });
+      }
 
       setStatus('error');
       setError(err.message);

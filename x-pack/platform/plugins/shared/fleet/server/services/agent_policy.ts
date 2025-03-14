@@ -413,14 +413,15 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
     });
+    const policyForOutputValidation = {
+      ...agentPolicy,
+      has_fleet_server: options?.hasFleetServer,
+    };
     await validateOutputForPolicy(
       soClient,
-      agentPolicy,
+      policyForOutputValidation,
       {},
-      getAllowedOutputTypesForAgentPolicy({
-        ...agentPolicy,
-        has_fleet_server: options?.hasFleetServer,
-      })
+      getAllowedOutputTypesForAgentPolicy(policyForOutputValidation)
     );
 
     validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
