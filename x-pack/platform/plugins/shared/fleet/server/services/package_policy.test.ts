@@ -3379,7 +3379,7 @@ describe('Package policy service', () => {
               dynamic_templates: {},
             },
           },
-        },
+        } as any,
       };
 
       await packagePolicyService.runExternalCallbacks(
