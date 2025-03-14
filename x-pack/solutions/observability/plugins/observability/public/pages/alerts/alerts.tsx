@@ -242,6 +242,11 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TODO: remove
+  useEffect(() => {
+    console.log('filterControls:', filterControls);
+  }, [filterControls]);
+
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
   return (
