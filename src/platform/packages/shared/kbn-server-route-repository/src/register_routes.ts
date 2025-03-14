@@ -191,6 +191,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access,
+        summary: options.summary,
+        description: options.description,
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
         security,
       }).addVersion(
