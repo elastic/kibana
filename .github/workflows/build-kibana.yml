@@ -13,82 +13,49 @@ jobs:
     runs-on: ubuntu-latest  # GitHub-hosted runner
 
     steps:
-      - name: Checkout Repository and Ensure Correct Branch
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           ref: openai_pki_connector_8_15
-
-      - name: Verify Git Branch Being Used
-        run: |
-          echo "Currently checked out branch:"
-          git branch --show-current
-          git log --oneline -1
 
       - name: Read Node.js Version from .node-version
         id: node_version
         run: echo "NODE_VERSION=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
 
-      - name: Set up Node.js (DO NOT REMOVE EXISTING NODEJS)
+      - name: Set up Node.js and Yarn
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Install Dependencies (RESTORED FROM OLD WORKING VERSION)
+      - name: Install Dependencies
         run: |
           sudo apt update
           sudo apt install -y tar gzip build-essential python3
 
-      - name: Enable Corepack and Install Yarn (FIX)
-        run: |
-          corepack enable
-          corepack prepare yarn@stable --activate
-          yarn -v || echo "Yarn is still missing"
-
-      - name: Ensure Yarn is in PATH (FIX)
-        run: |
-          export PATH="$(yarn global bin):$PATH"
-          echo "export PATH=$(yarn global bin):$PATH" >> ~/.bashrc
-          source ~/.bashrc
-          which yarn || echo "Yarn is still missing"
-          yarn -v
-
-      - name: Cache Yarn Dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.yarn
-          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: yarn-${{ runner.os }}-
-
-      - name: Verify Kibana Version Being Built
-        run: |
-          echo "Kibana Version Being Built:"
-          cat package.json | grep '"version"'
-
       - name: Bootstrap Kibana
         run: yarn kbn bootstrap
 
-      - name: Build Only Linux-x86_64 Version (Skip OS Packages)
+      - name: Build Kibana (Only for Linux x86_64)
         run: |
           yarn build --release --skip-os-packages --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
 
-      - name: Verify Dockerfile Exists in the Correct Location
+      - name: Locate Dockerfile
         run: |
-          if [ -f Dockerfile ]; then
-            echo "Dockerfile found in root directory!"
-          elif [ -f build/default/Dockerfile ]; then
-            echo "Dockerfile found in build/default/"
+          if [ -f build/default/Dockerfile ]; then
+            echo "Using Dockerfile at build/default/Dockerfile"
+            echo "DOCKERFILE_PATH=build/default/Dockerfile" >> $GITHUB_ENV
           else
-            echo "ERROR: Dockerfile not found!"
+            echo "ERROR: Dockerfile not found in expected location!"
             exit 1
           fi
 
       - name: Log in to GitHub Container Registry (GHCR)
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker Image with Tag 8.15
+      - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15 build/default
+          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15 -f ${{ env.DOCKERFILE_PATH }} .
 
       - name: Push Docker Image to GHCR
         run: |
