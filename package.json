@@ -152,7 +152,7 @@
     "@hapi/boom": "^10.0.1",
     "@hapi/cookie": "^12.0.1",
     "@hapi/h2o2": "^10.0.4",
-    "@hapi/hapi": "^21.3.12",
+    "@hapi/hapi": "^21.4.0",
     "@hapi/hoek": "^11.0.7",
     "@hapi/inert": "^7.1.0",
     "@hapi/wreck": "^18.1.0",

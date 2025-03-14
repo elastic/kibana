@@ -9,7 +9,10 @@ import React, { memo, useMemo, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type {
+  UnifiedDataTableProps,
+  UnifiedDataTableSettingsColumn,
+} from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -147,9 +150,24 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
-    const { rowHeight, sampleSize, excludedRowRendererIds } = useSelector((state: State) =>
-      selectTimelineById(state, timelineId)
-    );
+    const {
+      rowHeight,
+      sampleSize,
+      excludedRowRendererIds,
+      columns: timelineColumns,
+    } = useSelector((state: State) => selectTimelineById(state, timelineId));
+
+    const settings: UnifiedDataTableProps['settings'] = useMemo(() => {
+      const _columns: Record<string, UnifiedDataTableSettingsColumn> = {};
+      timelineColumns.forEach((timelineColumn) => {
+        _columns[timelineColumn.id] = {
+          width: timelineColumn.initialWidth ?? undefined,
+        };
+      });
+      return {
+        columns: _columns,
+      };
+    }, [timelineColumns]);
 
     const { tableRows, tableStylesOverride } = useMemo(
       () => transformTimelineItemToUnifiedRows({ events, dataView }),
@@ -192,27 +210,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [tableRows, handleOnEventDetailPanelOpened, closeFlyout]
     );
 
-    const onColumnResize = useCallback(
-      ({ columnId, width }: { columnId: string; width?: number }) => {
-        dispatch(
-          timelineActions.updateColumnWidth({
-            columnId,
-            id: timelineId,
-            width, // initialWidth?
-          })
-        );
-      },
-      [dispatch, timelineId]
-    );
-
     const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
       (colSettings) => {
-        onColumnResize({
-          columnId: colSettings.columnId,
-          ...(colSettings.width ? { width: Math.round(colSettings.width) } : {}),
-        });
+        if (colSettings.width) {
+          dispatch(
+            timelineActions.updateColumnWidth({
+              columnId: colSettings.columnId,
+              id: timelineId,
+              width: Math.round(colSettings.width),
+            })
+          );
+        }
       },
-      [onColumnResize]
+      [dispatch, timelineId]
     );
 
     const onChangeItemsPerPage = useCallback<
@@ -425,6 +435,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             externalControlColumns={leadingControlColumns}
             onUpdatePageIndex={onUpdatePageIndex}
             getRowIndicator={getTimelineRowTypeIndicator}
+            settings={settings}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>
