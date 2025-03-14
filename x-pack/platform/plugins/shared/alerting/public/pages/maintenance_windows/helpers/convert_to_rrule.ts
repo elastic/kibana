@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
-import { RecurringScheduleFormProps } from '../components/schema';
+import type { RecurringScheduleFormProps } from '../components/schema';
 import { getPresets } from './get_presets';
-import { RRuleParams } from '../../../../common';
+import type { RRuleParams } from '../../../../common';
 
 export const convertToRRule = (
   startDate: Moment,

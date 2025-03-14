@@ -6,17 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { estypes } from '@elastic/elasticsearch';
-import { KueryNode } from '@kbn/es-query';
-import { DocLinksServiceSetup } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { KueryNode } from '@kbn/es-query';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 
-import { ILicenseState } from '../../lib/license_state';
+import type { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { renameKeys } from '../lib/rename_keys';
-import { IndexType } from '../../rules_client';
+import type { IndexType } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';

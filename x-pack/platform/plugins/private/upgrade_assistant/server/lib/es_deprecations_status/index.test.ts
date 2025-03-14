@@ -39,13 +39,13 @@ describe('getESUpgradeStatus', () => {
   // @ts-expect-error mock data is too loosely typed
   const deprecationsResponse: estypes.MigrationDeprecationsResponse = _.cloneDeep(fakeDeprecations);
 
-  const esClient = elasticsearchServiceMock.createScopedClusterClient();
+  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
-  esClient.asCurrentUser.healthReport.mockResponse({ cluster_name: 'mock', indicators: {} });
+  esClient.healthReport.mockResponse({ cluster_name: 'mock', indicators: {} });
 
-  esClient.asCurrentUser.migration.deprecations.mockResponse(deprecationsResponse);
+  esClient.migration.deprecations.mockResponse(deprecationsResponse);
 
-  esClient.asCurrentUser.transport.request.mockResolvedValue({
+  esClient.transport.request.mockResolvedValue({
     features: [
       {
         feature_name: 'machine_learning',
@@ -63,11 +63,11 @@ describe('getESUpgradeStatus', () => {
   });
 
   // @ts-expect-error not full interface of response
-  esClient.asCurrentUser.indices.resolveIndex.mockResponse(resolvedIndices);
+  esClient.indices.resolveIndex.mockResponse(resolvedIndices);
 
   it('calls /_migration/deprecations', async () => {
     await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
-    expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
+    expect(esClient.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
@@ -76,7 +76,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('returns totalCriticalDeprecations > 0 when critical issues found', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       // @ts-expect-error not full interface
       cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
       node_settings: [],
@@ -93,7 +93,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('returns totalCriticalDeprecations === 0 when no critical issues found', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       // @ts-expect-error not full interface
       cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
       node_settings: [],
@@ -110,7 +110,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('filters out system indices returned by upgrade system indices API', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [],
       ml_settings: [],
@@ -149,7 +149,7 @@ describe('getESUpgradeStatus', () => {
       ...esMigrationsMock.getMockMlSettingsDeprecations(),
     };
     // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
-    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+    esClient.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
       featureSet,
@@ -181,7 +181,7 @@ describe('getESUpgradeStatus', () => {
       ...esMigrationsMock.getMockEsDeprecations(),
       ...esMigrationsMock.getMockDataStreamDeprecations(),
     } as MigrationDeprecationsResponse;
-    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+    esClient.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
       featureSet,
@@ -209,7 +209,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('filters out reindex corrective actions if featureSet.reindexCorrectiveActions is set to false', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [
         {
@@ -253,7 +253,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('filters out old index deprecations enterprise search indices and data streams', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [],
       ml_settings: [],
@@ -337,7 +337,7 @@ describe('getESUpgradeStatus', () => {
     });
   });
   it('filters out frozen indices if old index deprecations exist for the same indices', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [],
       ml_settings: [],
@@ -369,7 +369,7 @@ describe('getESUpgradeStatus', () => {
     });
 
     // @ts-expect-error not full interface of response
-    esClient.asCurrentUser.indices.resolveIndex.mockResponse(resolvedIndices);
+    esClient.indices.resolveIndex.mockResponse(resolvedIndices);
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
       featureSet,
@@ -384,7 +384,7 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('returns health indicators', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
+    esClient.migration.deprecations.mockResponse({
       cluster_settings: [],
       node_settings: [
         {
@@ -404,7 +404,7 @@ describe('getESUpgradeStatus', () => {
       templates: {},
     });
 
-    esClient.asCurrentUser.healthReport.mockResponse({
+    esClient.healthReport.mockResponse({
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorGreen,
@@ -450,6 +450,11 @@ describe('getESUpgradeStatus', () => {
         Object {
           "correctiveAction": Object {
             "excludedActions": Array [],
+            "metadata": Object {
+              "isClosedIndex": false,
+              "isFrozenIndex": false,
+              "isInDataStream": false,
+            },
             "type": "reindex",
           },
           "details": "This index was created using version: 6.8.13",

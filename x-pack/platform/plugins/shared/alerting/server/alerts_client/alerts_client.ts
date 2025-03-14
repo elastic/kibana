@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   ALERT_INSTANCE_ID,
@@ -15,14 +15,14 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { DeepPartial } from '@kbn/utility-types';
-import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DeepPartial } from '@kbn/utility-types';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { CLUSTER_BLOCK_EXCEPTION, isClusterBlockError } from '../lib/error_with_type';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import {
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type {
   SummarizedAlerts,
   ScopedQueryAlerts,
   AlertInstanceContext,
@@ -32,13 +32,11 @@ import {
   DataStreamAdapter,
 } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
-import {
-  getIndexTemplateAndPattern,
-  IIndexPatternString,
-} from '../alerts_service/resource_installer_utils';
-import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, SearchResult, DetermineDelayedAlertsOpts } from './types';
-import {
+import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
+import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import type { AlertRule, DetermineDelayedAlertsOpts, LogAlertsOpts, SearchResult } from './types';
+import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
+import type {
   IAlertsClient,
   InitializeExecutionOpts,
   TrackedAlerts,
@@ -367,7 +365,7 @@ export class AlertsClient<
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
     }
-    const queryByExecutionUuid: boolean = !!executionUuid;
+    const queryByExecutionUuid = !!executionUuid;
     const queryByTimeRange: boolean = !!start && !!end;
     // Either executionUuid or start/end dates must be specified, but not both
     if (
@@ -436,7 +434,7 @@ export class AlertsClient<
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
-      if (!!activeAlerts[id]) {
+      if (activeAlerts[id]) {
         if (
           Object.hasOwn(this.fetchedAlerts.data, id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'

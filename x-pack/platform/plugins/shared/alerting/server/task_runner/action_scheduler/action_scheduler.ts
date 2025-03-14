@@ -10,17 +10,17 @@ import {
   isEphemeralTaskRejectedDueToCapacityError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
-import {
-  ExecuteOptions as EnqueueExecutionOptions,
+import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
+import type {
   ExecutionResponseItem,
-  ExecutionResponseType,
+  ExecuteOptions as EnqueueExecutionOptions,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
-import { ThrottledActions } from '../../types';
-import { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
-import { Alert } from '../../alert';
-import {
+import type { ThrottledActions } from '../../types';
+import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
+import type { Alert } from '../../alert';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
@@ -136,7 +136,7 @@ export class ActionScheduler<
     }
 
     const actionsToNotLog: string[] = [];
-    if (!!bulkScheduleResponse.length) {
+    if (bulkScheduleResponse.length) {
       for (const r of bulkScheduleResponse) {
         if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
           this.context.ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
@@ -167,7 +167,7 @@ export class ActionScheduler<
       (result) => result.actionToLog.uuid && !actionsToNotLog.includes(result.actionToLog.uuid)
     );
 
-    if (!!actionsToLog.length) {
+    if (actionsToLog.length) {
       for (const action of actionsToLog) {
         this.context.alertingEventLogger.logAction(action.actionToLog);
       }
