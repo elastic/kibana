@@ -4619,6 +4619,7 @@
             }
           },
           {
+            "description": "The identifier for the rule.",
             "in": "path",
             "name": "ruleId",
             "required": true,
@@ -4627,6 +4628,7 @@
             }
           },
           {
+            "description": "The identifier for the snooze schedule.",
             "in": "path",
             "name": "scheduleId",
             "required": true,
@@ -4649,7 +4651,7 @@
             "description": "Indicates a rule with the given id does not exist."
           }
         },
-        "summary": "Delete an existing snooze schedule for a rule",
+        "summary": "Delete a snooze schedule for a rule",
         "tags": [
           "alerting"
         ]

@@ -4014,12 +4014,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The identifier for the rule.
+          in: path
           name: ruleId
           required: true
           schema:
             type: string
-        - in: path
+        - description: The identifier for the snooze schedule.
+          in: path
           name: scheduleId
           required: true
           schema:
@@ -4033,7 +4035,7 @@ paths:
           description: Indicates that this call is forbidden.
         '404':
           description: Indicates a rule with the given id does not exist.
-      summary: Delete an existing snooze schedule for a rule
+      summary: Delete a snooze schedule for a rule
       tags:
         - alerting
   /api/alerting/rules/_find:
