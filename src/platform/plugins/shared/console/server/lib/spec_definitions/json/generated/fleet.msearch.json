@@ -40,7 +40,7 @@
       "_fleet/_fleet_msearch",
       "{index}/_fleet/_fleet_msearch"
     ],
-    "documentation": null,
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-msearch",
     "availability": {
       "stack": true,
       "serverless": false
