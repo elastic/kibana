@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, getByRole, render, screen } from '@testing-library/react';
+import { act, fireEvent, getByRole, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { SynonymRuleFlyout } from './synonym_rule_flyout';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -160,20 +160,28 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      });
 
       ACTIONS.AddFromTerm('from1');
-      expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
+        expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
+      });
 
       ACTIONS.AddFromTerm('from2');
-      expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
+      });
 
       ACTIONS.PressSaveChangesButton();
-      expect(mutateMock).toHaveBeenCalledWith({
-        synonymsSetId: 'my_synonyms_set',
-        ruleId: 'generated-id',
-        synonyms: 'from1,from2',
+      waitFor(() => {
+        expect(mutateMock).toHaveBeenCalledWith({
+          synonymsSetId: 'my_synonyms_set',
+          ruleId: 'generated-id',
+          synonyms: 'from1,from2',
+        });
       });
     });
 
@@ -193,17 +201,24 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
       ACTIONS.AddFromTerm('from1');
-      expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('1 term');
+        expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      });
 
       ACTIONS.AddMapToTerm('to1');
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
+      });
       ACTIONS.PressSaveChangesButton();
 
-      expect(mutateMock).toHaveBeenCalledWith({
-        synonymsSetId: 'my_synonyms_set',
-        ruleId: 'generated-id',
-        synonyms: 'from1 => to1',
+      waitFor(() => {
+        expect(mutateMock).toHaveBeenCalledWith({
+          synonymsSetId: 'my_synonyms_set',
+          ruleId: 'generated-id',
+          synonyms: 'from1 => to1',
+        });
       });
     });
 
@@ -225,16 +240,22 @@ describe('SynonymRuleFlyout', () => {
       ACTIONS.AddFromTerm('a');
       ACTIONS.AddFromTerm('b');
 
-      expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
-      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('a');
-      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('b');
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('2 terms');
+        expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('a');
+        expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('b');
+      });
       ACTIONS.PressSortAZButton();
 
-      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('b');
-      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('a');
+      waitFor(() => {
+        expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('b');
+        expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('a');
+      });
       ACTIONS.PressSortAZButton();
-      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('a');
-      expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('b');
+      waitFor(() => {
+        expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[0].textContent?.trim()).toBe('a');
+        expect(screen.getAllByTestId(TEST_IDS.FromTermBadge)[1].textContent?.trim()).toBe('b');
+      });
     });
   });
 
@@ -289,16 +310,22 @@ describe('SynonymRuleFlyout', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeDisabled();
+      });
       ACTIONS.AddFromTerm('synonym3');
-      expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
-      expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('3 terms');
+      waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SaveChangesButton)).toBeEnabled();
+        expect(screen.getByTestId(TEST_IDS.FromTermCountLabel).textContent).toBe('3 terms');
+      });
 
       ACTIONS.PressSaveChangesButton();
-      expect(mutateMock).toHaveBeenCalledWith({
-        synonymsSetId: 'my_synonyms_set',
-        ruleId: 'rule_id_3',
-        synonyms: 'synonym1,synonym2,synonym3',
+      waitFor(() => {
+        expect(mutateMock).toHaveBeenCalledWith({
+          synonymsSetId: 'my_synonyms_set',
+          ruleId: 'rule_id_3',
+          synonyms: 'synonym1,synonym2,synonym3',
+        });
       });
     });
 
