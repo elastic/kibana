@@ -46,7 +46,7 @@ import { DiscoverMainApp } from './main_app';
 import type { MainRouteInitializationState } from '../../types';
 import { useAsyncFunction } from '../../hooks/use_async_function';
 
-interface DiscoverSessionViewProps {
+export interface DiscoverSessionViewProps {
   mainRouteInitializationState: MainRouteInitializationState;
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks: CustomizationCallback[];
