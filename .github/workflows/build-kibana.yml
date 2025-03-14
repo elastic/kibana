@@ -72,12 +72,23 @@ jobs:
         run: |
           yarn build --release --skip-os-packages --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
 
+      - name: Verify Dockerfile Exists in the Correct Location
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "Dockerfile found in root directory!"
+          elif [ -f build/default/Dockerfile ]; then
+            echo "Dockerfile found in build/default/"
+          else
+            echo "ERROR: Dockerfile not found!"
+            exit 1
+          fi
+
       - name: Log in to GitHub Container Registry (GHCR)
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker Image with Tag 8.15
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15 .
+          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15 build/default
 
       - name: Push Docker Image to GHCR
         run: |
