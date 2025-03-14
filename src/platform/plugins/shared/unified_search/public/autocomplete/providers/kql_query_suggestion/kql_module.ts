@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { applyFiltersPopover } from './apply_filters_popover';
+export { fromKueryExpression } from '@kbn/es-query';
+export { setupGetFieldSuggestions } from './field';
+export { setupGetValueSuggestions } from './value';
+export { setupGetOperatorSuggestions } from './operator';
+export { setupGetConjunctionSuggestions } from './conjunction';

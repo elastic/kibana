@@ -39,13 +39,14 @@ export const setupKqlQuerySuggestionProvider = (
     if (getSuggestionsByType) {
       return getSuggestionsByType;
     }
+
     const {
+      fromKueryExpression,
       setupGetFieldSuggestions,
       setupGetValueSuggestions,
       setupGetOperatorSuggestions,
       setupGetConjunctionSuggestions,
-    } = await import('./async_loads');
-    const { fromKueryExpression } = await import('@kbn/es-query');
+    } = await import('./kql_module');
 
     const providers = {
       field: setupGetFieldSuggestions(core),

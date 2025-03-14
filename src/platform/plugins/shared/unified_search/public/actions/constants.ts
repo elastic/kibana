@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { setupGetFieldSuggestions } from './field';
-export { setupGetValueSuggestions } from './value';
-export { setupGetOperatorSuggestions } from './operator';
-export { setupGetConjunctionSuggestions } from './conjunction';
+export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
+export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION';
