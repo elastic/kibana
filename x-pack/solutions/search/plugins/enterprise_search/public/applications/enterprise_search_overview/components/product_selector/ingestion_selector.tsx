@@ -32,6 +32,8 @@ import languageClientsLogo from '../../../../assets/images/search_language_clien
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
 import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../../enterprise_search_content/routes';
 
+import { ConnectorIcon } from '../../../shared/icons/connector';
+
 import { GithubIcon } from '../../../shared/icons/github_icon';
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -109,7 +111,7 @@ export const IngestionSelector: React.FC = () => {
                   defaultMessage: 'Create a connector',
                 }
               )}
-              buttonIcon="plugs"
+              buttonIcon={ConnectorIcon}
               description={i18n.translate(
                 'xpack.enterpriseSearch.ingestSelector.method.connectors.description',
                 {
