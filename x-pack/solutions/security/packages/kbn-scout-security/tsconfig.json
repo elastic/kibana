@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts", "../../plugins/security_solution/public/flyout/ui_tests/tests/global.setup.ts",
   ],
   "exclude": [
     "target/**/*",
