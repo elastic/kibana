@@ -83,7 +83,8 @@ import { buildCreateRuleExceptionListItemsProps } from './modules/exceptions';
 // ... omitted client setup stuff
 
 // Core logic
-const ruleCopies = duplicateRuleParams(basicRule, 200);
+const bodyWithCreatedRule = await createRule(supertest, log, basicRule);
+const ruleCopies = duplicateRuleParams(bodyWithCreatedRule, 200);
 const { body } = await detectionsClient.
                   .performRulesBulkAction({
                     query: { dry_run: false },
