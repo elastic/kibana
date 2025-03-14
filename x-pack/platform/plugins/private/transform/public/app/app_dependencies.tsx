@@ -74,7 +74,6 @@ export interface AppDependencies {
   fieldsMetadata: FieldsMetadataPublicStart;
   dashboard: DashboardStart;
   featureFlags: FeatureFlagsStart;
-
 }
 
 export const useAppDependencies = () => {
