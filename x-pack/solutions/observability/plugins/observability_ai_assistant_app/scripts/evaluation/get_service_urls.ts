@@ -121,7 +121,7 @@ export async function getServiceUrls({
 
   let auth = parsedTarget.auth;
 
-  if (!parsedTarget.auth) {
+  if (!parsedTarget.auth || parsedTarget.auth.includes('undefined')) {
     auth = await discoverAuth(parsedTarget, log);
   }
 
