@@ -11,6 +11,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type {
@@ -50,8 +51,8 @@ export class ApmDataAccessPlugin
   }
 
   public start(core: CoreStart, plugins: ApmDataAccessServerDependencies) {
-    const getApmIndicesWithInternalUserFn = () => {
-      const soClient = core.savedObjects.createInternalRepository();
+    const getApmIndicesWithInternalUserFn = (request: KibanaRequest) => {
+      const soClient = core.savedObjects.getScopedClient(request);
       return plugins.apmSourcesAccess.getApmIndices(soClient);
     };
 
