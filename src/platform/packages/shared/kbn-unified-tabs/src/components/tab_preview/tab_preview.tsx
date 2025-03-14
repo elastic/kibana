@@ -20,28 +20,12 @@ import {
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiPortal,
-  type EuiThemeComputed,
   EuiText,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 
-// TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
-export interface PreviewContent {
-  id: number;
-  name: string;
-  query: {
-    language: 'esql' | 'kql';
-    query: string;
-  };
-  status: 'success' | 'running' | 'danger'; // status for now matches EuiHealth colors for mocking simplicity
-}
-interface TabPreviewProps {
-  children: React.ReactNode;
-  showPreview: boolean;
-  setShowPreview: (show: boolean) => void;
-  previewContent: PreviewContent;
-  stopPreviewOnHover?: boolean;
-  previewDelay?: number;
-}
+import { PREVIEW_WIDTH } from '../../constants';
+import type { TabPreviewProps } from '../../types';
 
 export const TabPreview: React.FC<TabPreviewProps> = ({
   children,
@@ -59,9 +43,22 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   useEffect(() => {
     if (showPreview && tabRef.current) {
       const rect = tabRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+
+      // Check if preview would extend beyond right edge
+      const wouldExtendBeyondRight = rect.left + PREVIEW_WIDTH > windowWidth;
+
+      // Calculate left position based on screen edge constraints
+      let leftPosition = rect.left + window.scrollX;
+
+      if (wouldExtendBeyondRight) {
+        // Align right edge of preview with right edge of window
+        leftPosition = windowWidth - PREVIEW_WIDTH + window.scrollX;
+      }
+
       setTabPosition({
         top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        left: leftPosition,
       });
     }
   }, [showPreview]);
@@ -158,7 +155,7 @@ const getPreviewContainerCss = (
     left: ${tabPosition.left}px;
     z-index: 10000;
     margin-top: ${euiTheme.size.xs};
-    width: 280px;
+    width: ${PREVIEW_WIDTH}px;
     opacity: ${showPreview ? 1 : 0};
     transition: opacity ${euiTheme.animation.normal} ease;
   `;

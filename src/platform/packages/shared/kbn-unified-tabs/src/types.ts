@@ -26,6 +26,25 @@ export interface TabsSizeConfig {
   // TODO: extend with possibly different sizes for pinned tabs
 }
 
+// TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
+export interface PreviewContentConfig {
+  id: number;
+  name: string;
+  query: {
+    language: 'esql' | 'kql';
+    query: string;
+  };
+  status: 'success' | 'running' | 'danger'; // status for now matches EuiHealth colors for mocking simplicity
+}
+export interface TabPreviewProps {
+  children: React.ReactNode;
+  showPreview: boolean;
+  setShowPreview: (show: boolean) => void;
+  previewContent: PreviewContentConfig;
+  stopPreviewOnHover?: boolean;
+  previewDelay?: number;
+}
+
 export type TabMenuItem = TabMenuItemWithClick | 'divider';
 
 export type GetTabMenuItems = (item: TabItem) => TabMenuItem[];

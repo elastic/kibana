@@ -21,11 +21,11 @@ import {
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import type { TabItem, TabsSizeConfig, GetTabMenuItems } from '../../types';
-import { TabPreview, type PreviewContent } from '../tab_preview';
+import type { TabItem, TabsSizeConfig, GetTabMenuItems, PreviewContentConfig } from '../../types';
+import { TabPreview } from '../tab_preview';
 
 // TODO: replace with real data when ready
-const TAB_CONTENT_MOCK: PreviewContent[] = [
+const TAB_CONTENT_MOCK: PreviewContentConfig[] = [
   {
     id: 1,
     name: 'Tab example',
@@ -276,6 +276,7 @@ function getTabButtonCss(euiTheme: EuiThemeComputed) {
     padding-inline: ${euiTheme.size.xs};
     text-align: left;
     color: inherit;
+    border: none;
     border-radius: 0;
     background: transparent;
   `;
