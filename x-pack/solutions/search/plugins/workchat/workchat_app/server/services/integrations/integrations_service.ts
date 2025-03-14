@@ -34,6 +34,7 @@ type IntegrationModel = ExternalIntegrationModel | InternalIntegrationModel;
 
 // TODO: move to reading from saved objects
 const IntegrationsSO: IntegrationModel[] = [
+  // searching on index, for document knowledgebase
   {
     id: '4',
     type: 'custom_index' as IntegrationTypes,
@@ -51,6 +52,7 @@ const IntegrationsSO: IntegrationModel[] = [
     },
     isInternal: true,
   },
+  // external mcp server, connects to SalesForce
   {
     id: '2',
     configuration: {
@@ -58,6 +60,7 @@ const IntegrationsSO: IntegrationModel[] = [
     },
     isInternal: false,
   },
+  // 
   {
     id: '3',
     isInternal: true,
