@@ -461,3 +461,17 @@ export const LUCENE_LANGUAGE_LABEL = i18n.translate(
     defaultMessage: 'Lucene',
   }
 );
+
+export const HAS_RULE_UPDATE_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateCalloutTitle',
+  {
+    defaultMessage: 'Elastic rule update available',
+  }
+);
+
+export const HAS_RULE_UPDATE_CALLOUT_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton',
+  {
+    defaultMessage: 'Review update',
+  }
+);

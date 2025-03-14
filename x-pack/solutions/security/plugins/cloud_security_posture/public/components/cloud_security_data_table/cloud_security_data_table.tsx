@@ -28,6 +28,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
+import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
@@ -36,7 +37,6 @@ import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { TakeAction } from '../take_action';
 
-import { RuleResponse } from '../../common/types';
 export interface CloudSecurityDefaultColumn {
   id: string;
   width?: number;

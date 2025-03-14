@@ -73,5 +73,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
     // total run time ~30m
     loadTestFile(require.resolve('./logsdb')); // 30m
+    loadTestFile(require.resolve('./esql'));
   });
 };

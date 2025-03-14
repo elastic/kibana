@@ -38,18 +38,15 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
         const response = await client.search(
           {
             index,
-            body: {
-              _source:
-                additionalFields && additionalFields.length > 0 ? additionalFields : undefined,
-              size: 10,
-              timeout: '30s',
-              query: query ?? { match_all: {} },
-              script_fields: {
-                [name]: {
-                  script: {
-                    lang: 'painless',
-                    source: script,
-                  },
+            _source: additionalFields && additionalFields.length > 0 ? additionalFields : undefined,
+            size: 10,
+            timeout: '30s',
+            query: query ?? { match_all: {} },
+            script_fields: {
+              [name]: {
+                script: {
+                  lang: 'painless',
+                  source: script,
                 },
               },
             },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import { pick } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -164,7 +164,7 @@ export class MemoryUsageService {
       id: trainedModelStats.model_id,
       type: 'trained-model',
       size,
-      nodeNames: nodes.map((n) => Object.values(n.node)[0].name),
+      nodeNames: nodes.map((n) => Object.values(n.node || {})[0]?.name!),
     };
   }
 
@@ -193,7 +193,7 @@ export class MemoryUsageService {
             (d) =>
               isDefined(d.deployment_stats) &&
               isDefined(d.deployment_stats.nodes) &&
-              d.deployment_stats.nodes.some((n) => Object.keys(n.node)[0] === nodeId)
+              d.deployment_stats.nodes.some((n) => Object.keys(n.node || {})[0] === nodeId)
           )
           .map((d) => {
             const modelSizeState = d.model_size_stats;
@@ -206,7 +206,7 @@ export class MemoryUsageService {
             const { nodes, ...rest } = deploymentStats;
 
             const { node: tempNode, ...nodeRest } = nodes.find(
-              (v) => Object.keys(v.node)[0] === nodeId
+              (v) => Object.keys(v.node || {})[0] === nodeId
             )!;
             return {
               model_id: d.model_id,

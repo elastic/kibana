@@ -38,10 +38,14 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
         .set('kbn-xsrf', 'xxxx');
-      await es.transport.request({
-        method: 'DELETE',
-        path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
-      });
+      try {
+        await es.transport.request({
+          method: 'DELETE',
+          path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
+        });
+      } catch (e) {
+        // ignore
+      }
     });
 
     it('should return the list of agents when requesting as admin', async () => {
@@ -222,13 +226,11 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent1',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date().toISOString(),
-            status: 'online',
-            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date().toISOString(),
+          status: 'online',
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
         },
       });
       // 1 agent inactive
@@ -236,14 +238,12 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent4',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_id: 'policy-inactivity-timeout',
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
-            status: 'online',
-            local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
-          },
+        doc: {
+          policy_id: 'policy-inactivity-timeout',
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
+          status: 'online',
+          local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
         },
       });
 
@@ -264,6 +264,90 @@ export default function ({ getService }: FtrProviderContext) {
         unenrolling: 0,
         updating: 0,
         uninstalled: 0,
+      });
+    });
+
+    describe('advanced search params', () => {
+      afterEach(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      });
+
+      it('should return correct results with searchAfter parameter', async () => {
+        const { body: apiResponse } = await supertest.get(
+          '/api/fleet/agents?perPage=1&sortField=agent.id&sortOrder=desc'
+        );
+        expect(apiResponse.page).to.eql(1);
+        expect(apiResponse.nextSearchAfter).to.eql(JSON.stringify(apiResponse.items[0].sort));
+        expect(apiResponse.items.map(({ agent }: any) => agent.id)).to.eql(['agent4']);
+
+        const { body: apiResponse2 } = await supertest
+          .get(
+            `/api/fleet/agents?perPage=2&sortField=agent.id&sortOrder=desc&searchAfter=${apiResponse.nextSearchAfter}`
+          )
+          .expect(200);
+
+        expect(apiResponse2.page).to.eql(0);
+        expect(apiResponse2.nextSearchAfter).to.eql(JSON.stringify(apiResponse2.items[1].sort));
+        expect(apiResponse2.items.map(({ agent }: any) => agent.id)).to.eql(['agent3', 'agent2']);
+      });
+
+      it('should return a pit ID when openPit is true', async () => {
+        const { body: apiResponse } = await supertest
+          .get('/api/fleet/agents?perPage=1&openPit=true&pitKeepAlive=1s')
+          .expect(200);
+
+        expect(apiResponse).to.have.keys('page', 'total', 'items', 'pit');
+        expect(apiResponse.items.length).to.eql(1);
+        expect(apiResponse.pit).to.be.a('string');
+        expect(apiResponse.nextSearchAfter).to.eql(JSON.stringify(apiResponse.items[0].sort));
+      });
+
+      it('should use pit to return correct results', async () => {
+        const { body: apiResponse } = await supertest
+          .get(
+            '/api/fleet/agents?perPage=1&sortField=agent.id&sortOrder=desc&openPit=true&pitKeepAlive=1m'
+          )
+          .expect(200);
+
+        expect(apiResponse.pit).to.be.a('string');
+        expect(apiResponse.nextSearchAfter).to.eql(JSON.stringify(apiResponse.items[0].sort));
+        expect(apiResponse.items.map(({ agent }: any) => agent.id)).to.eql(['agent4']);
+
+        // update ES document to change the order by changing agent.id of agent2 to agent9
+        await es.transport.request({
+          method: 'POST',
+          path: `/.fleet-agents/_update/agent2`,
+          body: {
+            doc: { agent: { id: 'agent9' } },
+          },
+        });
+        await es.transport.request({
+          method: 'POST',
+          path: `/.fleet-agents/_refresh`,
+        });
+
+        // check that non-pit query returns the new order
+        // new order is [agent9, agent4, agent3, agent1]
+        const { body: apiResponse2 } = await supertest
+          .get(`/api/fleet/agents?sortField=agent.id&sortOrder=desc`)
+          .expect(200);
+        expect(apiResponse2.items.map(({ agent }: any) => agent.id)).to.eql([
+          'agent9',
+          'agent4',
+          'agent3',
+          'agent1',
+        ]);
+
+        // check that the pit query returns the old order
+        // old order saved by PIT is [agent4, agent3, agent2, agent1]
+        const { body: apiResponse3 } = await supertest
+          .get(
+            `/api/fleet/agents?perPage=2&sortField=agent.id&sortOrder=desc&searchAfter=${apiResponse.nextSearchAfter}&pitId=${apiResponse.pit}&pitKeepAlive=1m`
+          )
+          .expect(200);
+        expect(apiResponse3.items.map(({ agent }: any) => agent.id)).to.eql(['agent3', 'agent2']);
+        expect(apiResponse3.nextSearchAfter).to.eql(JSON.stringify(apiResponse3.items[1].sort));
       });
     });
   });

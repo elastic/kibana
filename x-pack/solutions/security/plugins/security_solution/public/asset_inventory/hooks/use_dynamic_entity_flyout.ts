@@ -14,6 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../common/lib/kibana';
 import {
   HostPanelKey,
@@ -25,53 +26,19 @@ import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_exp
 
 interface InventoryFlyoutProps {
   entity: EntityEcs;
+  source?: EsHitRecord['_source'];
   scopeId?: string;
   contextId?: string;
 }
-
-interface SecurityFlyoutPanelsCommonParams {
-  scopeId?: string;
-  contextId?: string;
-  [key: string]: unknown;
-}
-
-type FlyoutParams =
-  | {
-      id: typeof UniversalEntityPanelKey;
-      params: { entity: EntityEcs };
-    }
-  | { id: typeof UserPanelKey; params: { userName: string } & SecurityFlyoutPanelsCommonParams }
-  | { id: typeof HostPanelKey; params: { hostName: string } & SecurityFlyoutPanelsCommonParams }
-  | {
-      id: typeof ServicePanelKey;
-      params: { serviceName: string } & SecurityFlyoutPanelsCommonParams;
-    };
-
-const getFlyoutParamsByEntity = ({
-  entity,
-  scopeId,
-  contextId,
-}: InventoryFlyoutProps): FlyoutParams => {
-  const entitiesFlyoutParams: Record<EntityEcs['type'], FlyoutParams> = {
-    universal: { id: UniversalEntityPanelKey, params: { entity } },
-    user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
-    host: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
-    service: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } },
-  } as const;
-
-  return entitiesFlyoutParams[entity.type];
-};
 
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
   const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
   const { notifications } = useKibana().services;
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
-  const openDynamicFlyout = ({ entity, scopeId, contextId }: InventoryFlyoutProps) => {
-    const entityFlyoutParams = getFlyoutParamsByEntity({ entity, scopeId, contextId });
-
+  const openDynamicFlyout = ({ entity, source, scopeId, contextId }: InventoryFlyoutProps) => {
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
-    if (entity.type !== 'universal' && !entity.name) {
+    if (['user', 'host', 'service'].includes(entity.type) && !entity.name) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',
@@ -88,14 +55,29 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
       return;
     }
 
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS);
+    switch (entity.type) {
+      case 'user':
+        openFlyout({
+          right: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
+        });
+        break;
+      case 'host':
+        openFlyout({
+          right: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
+        });
+        break;
+      case 'service':
+        openFlyout({
+          right: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } },
+        });
+        break;
 
-    openFlyout({
-      right: {
-        id: entityFlyoutParams.id || UniversalEntityPanelKey,
-        params: entityFlyoutParams.params,
-      },
-    });
+      default:
+        openFlyout({ right: { id: UniversalEntityPanelKey, params: { entity, source } } });
+        break;
+    }
+
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS);
   };
 
   const closeDynamicFlyout = () => {

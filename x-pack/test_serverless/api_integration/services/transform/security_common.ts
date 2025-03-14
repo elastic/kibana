@@ -124,11 +124,9 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
         return map;
       }, {});
       const apiKey = await esClient.security.createApiKey({
-        body: {
-          name: `Transform API Key ${user.full_name}`,
-          role_descriptors: roleDescriptors,
-          metadata: user,
-        },
+        name: `Transform API Key ${user.full_name}`,
+        role_descriptors: roleDescriptors,
+        metadata: user,
       });
       return { user: { name: user.name as USER, roles: user.roles }, apiKey };
     },

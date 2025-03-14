@@ -9,7 +9,7 @@ import React, { type FC } from 'react';
 import { pick } from 'lodash';
 import type { Moment } from 'moment';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { DataView } from '@kbn/data-views-plugin/public';

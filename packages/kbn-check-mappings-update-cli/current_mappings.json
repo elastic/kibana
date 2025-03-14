@@ -1685,6 +1685,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1709,6 +1713,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
@@ -2072,6 +2077,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2096,6 +2105,7 @@
     }
   },
   "ingest-download-sources": {
+    "dynamic": false,
     "properties": {
       "host": {
         "type": "keyword"

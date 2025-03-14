@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import {
   ENTERPRISE_SEARCH_APP_ID,
-  ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
@@ -94,13 +93,6 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
           link: 'enterpriseSearchApplications:searchApplications',
         },
         id: 'searchApplications',
-      },
-      {
-        'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-        deepLink: {
-          link: ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-        },
-        id: 'analyticsCollections',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {

@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiSplitPanel,
   EuiText,
-  useEuiTheme,
   transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -100,7 +100,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       const percentage = rightPercentage
         ? rightPercentage
         : defaultPercentages[type].rightPercentage;
-      return showExpanded ? `calc(${percentage}% - 8px)` : `calc(100% - 8px)`;
+      // we need to keep 1px here to make sure users can click on the EuiResizableButton and resize the flyout with preview opened
+      return showExpanded ? `calc(${percentage}% - 1px)` : `calc(100% - 1px)`;
     }, [defaultPercentages, rightPercentage, showExpanded, type]);
 
     const closeButton = (

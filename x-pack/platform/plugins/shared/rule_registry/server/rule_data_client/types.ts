@@ -6,7 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { FieldDescriptor } from '@kbn/data-plugin/server';

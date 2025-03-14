@@ -35,7 +35,7 @@
           },
           " implements Storage"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +46,7 @@
             "tags": [],
             "label": "length",
             "description": [],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "signature": [
               "(i: number) => string"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -74,7 +74,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -92,7 +92,7 @@
             "signature": [
               "(key: string) => string | null"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -106,7 +106,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,7 +124,7 @@
             "signature": [
               "(key: string, value: string) => void"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,7 +138,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -153,7 +153,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -171,7 +171,7 @@
             "signature": [
               "(key: string) => void"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -185,7 +185,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -203,7 +203,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -219,7 +219,7 @@
             "signature": [
               "(sizeLimit: number) => void"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -233,7 +233,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -251,7 +251,7 @@
             "signature": [
               "() => number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -267,7 +267,7 @@
             "signature": [
               "() => number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -290,7 +290,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -307,7 +307,7 @@
         "signature": [
           "(time?: number) => Promise<unknown>"
         ],
-        "path": "packages/kbn-test-jest-helpers/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -321,7 +321,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/index.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -348,7 +348,7 @@
           "HTMLAttributes",
           ", {}, React.Component<{}, {}, any>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -365,7 +365,7 @@
               "ReactWrapper",
               "<{}, {}, React.Component<{}, {}, any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -382,7 +382,7 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -399,7 +399,7 @@
             "signature": [
               "Matcher"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -420,7 +420,7 @@
         "signature": [
           "() => BroadcastChannel[]"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -439,7 +439,7 @@
         "signature": [
           "(range?: { min: number; max: number; }) => number"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/random.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -450,7 +450,7 @@
             "tags": [],
             "label": "range",
             "description": [],
-            "path": "packages/kbn-test-jest-helpers/src/random.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -461,7 +461,7 @@
                 "tags": [],
                 "label": "min",
                 "description": [],
-                "path": "packages/kbn-test-jest-helpers/src/random.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -472,7 +472,7 @@
                 "tags": [],
                 "label": "max",
                 "description": [],
-                "path": "packages/kbn-test-jest-helpers/src/random.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -492,7 +492,7 @@
         "signature": [
           "(options?: {}) => string"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/random.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +506,7 @@
             "signature": [
               "{}"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/random.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/random.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -529,7 +529,7 @@
         "signature": [
           "<Args extends {}, HookValue extends unknown>(body: (args: Args) => HookValue, WrapperComponent?: React.ComponentType<{ children?: React.ReactNode; }> | undefined, initialArgs?: Args) => ReactHookWrapper<Args, HookValue>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -545,7 +545,7 @@
             "signature": [
               "(args: Args) => HookValue"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -562,7 +562,7 @@
             "signature": [
               "React.ComponentType<{ children?: React.ReactNode; }> | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -577,7 +577,7 @@
             "signature": [
               "Args"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -604,7 +604,7 @@
           "ReactWrapper",
           "<any, any, React.Component<{}, {}, any>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -618,7 +618,7 @@
             "signature": [
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -637,7 +637,7 @@
               "ComponentType",
               "<any> | undefined; }) | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -664,7 +664,7 @@
           "ReactWrapper",
           "<any, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -680,7 +680,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -698,7 +698,7 @@
               "MountRendererProps",
               " | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -719,7 +719,7 @@
         "signature": [
           "() => Promise<unknown>"
         ],
-        "path": "packages/kbn-test-jest-helpers/index.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -740,7 +740,7 @@
           "IntlShape",
           "; }, string | React.JSXElementConstructor<any>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -754,7 +754,7 @@
             "signature": [
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -791,7 +791,7 @@
           },
           "<T, Partial<P>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -807,7 +807,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -831,7 +831,7 @@
               },
               "<P>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -866,7 +866,7 @@
           },
           "<T, Partial<P>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -880,7 +880,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -902,7 +902,7 @@
               },
               "<P> | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -945,7 +945,7 @@
           },
           "<T, Partial<P>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -959,7 +959,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -989,7 +989,7 @@
               },
               "<P> | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1016,7 +1016,7 @@
           "node_modules/@testing-library/dom/types/queries",
           ", HTMLElement, HTMLElement>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1034,7 +1034,7 @@
               "node_modules/@testing-library/dom/types/queries",
               ", HTMLElement, HTMLElement>, \"queries\"> | undefined]"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testing_library_react_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1057,7 +1057,7 @@
           "ComponentType",
           "<any> | undefined; }) | undefined) => cheerio.Cheerio"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1071,7 +1071,7 @@
             "signature": [
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1090,7 +1090,7 @@
               "ComponentType",
               "<any> | undefined; }) | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1113,7 +1113,7 @@
         "signature": [
           "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: any) => cheerio.Cheerio"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1129,7 +1129,7 @@
             "signature": [
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1146,7 +1146,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1167,7 +1167,7 @@
         "signature": [
           "(width: number, height: number) => { mockRestore: () => void; }"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1181,7 +1181,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1196,7 +1196,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1215,7 +1215,7 @@
         "signature": [
           "(width: number, height: number) => { mockRestore: () => void; }"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1229,7 +1229,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1244,7 +1244,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1263,7 +1263,7 @@
         "signature": [
           "(width: number, height: number, x?: number, y?: number) => { mockRestore: () => void; }"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1277,7 +1277,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1292,7 +1292,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1307,7 +1307,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1322,7 +1322,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1341,7 +1341,7 @@
         "signature": [
           "(width: number) => { mockRestore: () => void; }"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1355,7 +1355,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1380,7 +1380,7 @@
           "ShallowWrapper",
           "<Readonly<{}>, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1394,7 +1394,7 @@
             "signature": [
               "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1413,7 +1413,7 @@
               "ComponentType",
               "<any> | undefined; }) | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1440,7 +1440,7 @@
           "ShallowWrapper",
           "<any, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1456,7 +1456,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1475,7 +1475,7 @@
               "ShallowRendererProps",
               " & { wrappingComponent?: React.ComponentType<{}> | undefined; }) | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1498,7 +1498,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1515,7 +1515,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/stub_web_worker.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/stub_web_worker.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1534,7 +1534,7 @@
           "LocationDescriptor",
           "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => React.JSX.Element"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1549,7 +1549,7 @@
               "LocationDescriptor",
               "<unknown>[]"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1564,7 +1564,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1587,7 +1587,7 @@
           "LocationDescriptor",
           "<unknown>[], onRouter: (router: any) => void) => (WrappedComponent: React.ComponentType<T>) => (props: any) => React.JSX.Element"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1604,7 +1604,7 @@
               "LocationDescriptor",
               "<unknown>[]"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1619,7 +1619,7 @@
             "signature": [
               "(router: any) => void"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1638,7 +1638,7 @@
         "signature": [
           "(store: any) => (WrappedComponent: React.ComponentType<T>) => (props: any) => React.JSX.Element"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/redux_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1652,7 +1652,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/redux_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1682,7 +1682,7 @@
           "BaseTestBedConfig",
           "<T>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1696,7 +1696,7 @@
             "signature": [
               "true"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1710,7 +1710,7 @@
         "tags": [],
         "label": "EuiTableMetaData",
         "description": [],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1730,7 +1730,7 @@
               "ReactWrapper",
               "; value: string; }[]; }[]"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1746,7 +1746,7 @@
             "signature": [
               "string[][]"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1770,7 +1770,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1787,7 +1787,7 @@
               "ReactWrapper",
               "<any, {}, React.Component<{}, {}, any>>"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1803,7 +1803,7 @@
             "signature": [
               "(testSubject: T, count?: number | undefined) => boolean"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1819,7 +1819,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1836,7 +1836,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1859,7 +1859,7 @@
               " | undefined) => ",
               "ReactWrapper"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1875,7 +1875,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1891,7 +1891,7 @@
                   "ReactWrapper",
                   " | undefined"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1911,7 +1911,7 @@
             "signature": [
               "(updatedProps: any) => void"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1927,7 +1927,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1951,7 +1951,7 @@
               "ReactWrapper",
               " | undefined) => string[]; }"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1973,7 +1973,7 @@
               },
               "; }"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1987,7 +1987,7 @@
             "signature": [
               "{ navigateTo: (url: string) => void; }"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2013,7 +2013,7 @@
           "BaseTestBedConfig",
           "<T>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2027,7 +2027,7 @@
             "signature": [
               "false | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2055,7 +2055,7 @@
           },
           "<T>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2070,7 +2070,7 @@
             "signature": [
               "P | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2103,7 +2103,7 @@
           },
           "<T>>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2118,7 +2118,7 @@
             "signature": [
               "P | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2143,7 +2143,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2158,7 +2158,7 @@
             "signature": [
               "P | undefined"
             ],
-            "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2174,7 +2174,7 @@
         "tags": [],
         "label": "reactRouterMock",
         "description": [],
-        "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+        "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2185,7 +2185,7 @@
             "tags": [],
             "label": "history",
             "description": [],
-            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2199,7 +2199,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -2217,7 +2217,7 @@
                   "LocationDescriptorObject",
                   "<unknown>) => string"
                 ],
-                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2232,7 +2232,7 @@
                       "LocationDescriptorObject",
                       "<unknown>"
                     ],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -2247,7 +2247,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2258,7 +2258,7 @@
                     "tags": [],
                     "label": "pathname",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2269,7 +2269,7 @@
                     "tags": [],
                     "label": "search",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2280,7 +2280,7 @@
                     "tags": [],
                     "label": "state",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2291,7 +2291,7 @@
                     "tags": [],
                     "label": "hash",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2306,7 +2306,7 @@
             "tags": [],
             "label": "route",
             "description": [],
-            "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+            "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2317,7 +2317,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2328,7 +2328,7 @@
                     "tags": [],
                     "label": "pathname",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2339,7 +2339,7 @@
                     "tags": [],
                     "label": "search",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2350,7 +2350,7 @@
                     "tags": [],
                     "label": "state",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2361,7 +2361,7 @@
                     "tags": [],
                     "label": "hash",
                     "description": [],
-                    "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
+                    "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false
                   }

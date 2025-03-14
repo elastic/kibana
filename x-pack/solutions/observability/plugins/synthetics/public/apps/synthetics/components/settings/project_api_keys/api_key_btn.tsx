@@ -12,12 +12,12 @@ export const ApiKeyBtn = ({
   isDisabled,
   apiKey,
   loading,
-  setLoadAPIKey,
+  onClick: callback,
 }: {
   loading?: boolean;
   isDisabled?: boolean;
   apiKey?: string;
-  setLoadAPIKey: (val: boolean) => void;
+  onClick: Function;
 }) => {
   return (
     <>
@@ -30,9 +30,7 @@ export const ApiKeyBtn = ({
             fullWidth={true}
             isLoading={loading}
             color="primary"
-            onClick={() => {
-              setLoadAPIKey(true);
-            }}
+            onClick={() => callback()}
             data-test-subj="uptimeMonitorManagementApiKeyGenerate"
           >
             {loading ? GET_API_KEY_LOADING_LABEL : GET_API_KEY_LABEL}

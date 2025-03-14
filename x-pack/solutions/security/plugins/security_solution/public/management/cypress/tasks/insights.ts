@@ -17,7 +17,7 @@ import {
 } from '../../../../common/endpoint/constants';
 
 const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
-const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Inference-Rainbow-Sprinkles'];
+const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-LLM'];
 const INTERNAL_CONNECTORS = [...INTERNAL_CLOUD_CONNECTORS, ...INTERNAL_INFERENCE_CONNECTORS];
 
 export const createBedrockAIConnector = (connectorName?: string) =>
@@ -186,7 +186,7 @@ export const stubWorkflowInsightsApiResponse = (endpointId: string) => {
                 list_id: 'endpoint_trusted_apps',
                 name: 'ClamAV',
                 os_types: ['linux'],
-                description: 'Suggested by Security Workflow Insights',
+                description: 'Suggested by Automatic Troubleshooting',
                 tags: ['policy:all'],
               },
             ],

@@ -21,6 +21,7 @@ import {
   touchMoveTo,
   touchStart,
 } from './test_utils/events';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const onLayoutChange = jest.fn();
 
@@ -34,7 +35,7 @@ const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
     ...propsOverrides,
   } as GridLayoutProps;
 
-  const { rerender, ...rtlRest } = render(<GridLayout {...props} />);
+  const { rerender, ...rtlRest } = render(<GridLayout {...props} />, { wrapper: EuiThemeProvider });
 
   return {
     ...rtlRest,
@@ -95,10 +96,10 @@ describe('GridLayout', () => {
 
     // if layout **has** changed, call `onLayoutChange`
     const newLayout = cloneDeep(layout);
-    newLayout[0] = {
-      ...newLayout[0],
+    newLayout.first = {
+      ...newLayout.first,
       panels: {
-        ...newLayout[0].panels,
+        ...newLayout.first.panels,
         panel1: {
           id: 'panel1',
           row: 100,
@@ -216,7 +217,7 @@ describe('GridLayout', () => {
     it('after removing a panel', async () => {
       const { rerender } = renderGridLayout();
       const sampleLayoutWithoutPanel1 = cloneDeep(getSampleLayout());
-      delete sampleLayoutWithoutPanel1[0].panels.panel1;
+      delete sampleLayoutWithoutPanel1.first.panels.panel1;
       rerender({ layout: sampleLayoutWithoutPanel1 });
 
       expect(getAllThePanelIds()).toEqual([
@@ -235,9 +236,9 @@ describe('GridLayout', () => {
     it('after replacing a panel id', async () => {
       const { rerender } = renderGridLayout();
       const modifiedLayout = cloneDeep(getSampleLayout());
-      const newPanel = { ...modifiedLayout[0].panels.panel1, id: 'panel11' };
-      delete modifiedLayout[0].panels.panel1;
-      modifiedLayout[0].panels.panel11 = newPanel;
+      const newPanel = { ...modifiedLayout.first.panels.panel1, id: 'panel11' };
+      delete modifiedLayout.first.panels.panel1;
+      modifiedLayout.first.panels.panel11 = newPanel;
 
       rerender({ layout: modifiedLayout });
 

@@ -16,31 +16,29 @@ export const useMonitorDetail = (
 ): { data?: Ping; loading?: boolean } => {
   const params = {
     index: SYNTHETICS_INDEX_PATTERN,
-    body: {
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                config_id: configId,
-              },
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              config_id: configId,
             },
-            {
-              term: {
-                'observer.geo.name': location,
-              },
+          },
+          {
+            term: {
+              'observer.geo.name': location,
             },
-            {
-              exists: {
-                field: 'summary',
-              },
+          },
+          {
+            exists: {
+              field: 'summary',
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: [{ '@timestamp': 'desc' }],
     },
+    sort: [{ '@timestamp': 'desc' as const }],
   };
   const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
     params,
@@ -52,7 +50,7 @@ export const useMonitorDetail = (
 
   if (!result || result.hits.hits.length !== 1) return { data: undefined, loading };
   return {
-    data: { ...result.hits.hits[0]._source, timestamp: result.hits.hits[0]._source['@timestamp'] },
+    data: result.hits.hits[0]._source,
     loading,
   };
 };

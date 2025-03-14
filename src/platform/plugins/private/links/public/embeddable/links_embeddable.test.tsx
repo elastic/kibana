@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
+import { EuiThemeProvider } from '@elastic/eui';
 import { getLinksEmbeddableFactory } from './links_embeddable';
 import { Link } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
@@ -139,8 +140,27 @@ jest.mock('../content_management', () => {
   };
 });
 
+const renderEmbeddable = (
+  parent: LinksParentApi,
+  overrides?: {
+    onApiAvailable: (api: LinksApi) => void;
+  }
+) => {
+  return render(
+    <EuiThemeProvider>
+      <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
+        type={CONTENT_ID}
+        onApiAvailable={jest.fn()}
+        getParentApi={jest.fn().mockReturnValue(parent)}
+        {...overrides}
+      />
+    </EuiThemeProvider>
+  );
+};
+
 describe('getLinksEmbeddableFactory', () => {
   const factory = getLinksEmbeddableFactory();
+
   beforeAll(() => {
     const embeddable = embeddablePluginMock.createSetupContract();
     embeddable.registerReactEmbeddableFactory(CONTENT_ID, async () => {
@@ -185,30 +205,17 @@ describe('getLinksEmbeddableFactory', () => {
     });
 
     test('component renders', async () => {
-      render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksApi>
-          type={CONTENT_ID}
-          getParentApi={() => parent}
-        />
-      );
-
+      renderEmbeddable(parent);
       expect(await screen.findByTestId('links--component')).toBeInTheDocument();
     });
 
     test('api methods', async () => {
       const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
-
-      render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
-          type={CONTENT_ID}
-          onApiAvailable={onApiAvailable}
-          getParentApi={() => parent}
-        />
-      );
+      renderEmbeddable(parent, { onApiAvailable });
 
       await waitFor(async () => {
         const api = onApiAvailable.mock.calls[0][0];
-        expect(await api.serializeState()).toEqual({
+        expect(api.serializeState()).toEqual({
           rawState: {
             savedObjectId: '123',
             title: 'my links',
@@ -225,18 +232,11 @@ describe('getLinksEmbeddableFactory', () => {
 
     test('unlink from library', async () => {
       const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
-
-      render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
-          type={CONTENT_ID}
-          onApiAvailable={onApiAvailable}
-          getParentApi={() => parent}
-        />
-      );
+      renderEmbeddable(parent, { onApiAvailable });
 
       await waitFor(async () => {
         const api = onApiAvailable.mock.calls[0][0];
-        expect(await api.getSerializedStateByValue()).toEqual({
+        expect(api.getSerializedStateByValue()).toEqual({
           rawState: {
             title: 'my links',
             description: 'just a few links',
@@ -291,30 +291,18 @@ describe('getLinksEmbeddableFactory', () => {
     });
 
     test('component renders', async () => {
-      render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksApi>
-          type={CONTENT_ID}
-          getParentApi={() => parent}
-        />
-      );
+      renderEmbeddable(parent);
 
       expect(await screen.findByTestId('links--component')).toBeInTheDocument();
     });
 
     test('api methods', async () => {
       const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
-
-      render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
-          type={CONTENT_ID}
-          onApiAvailable={onApiAvailable}
-          getParentApi={() => parent}
-        />
-      );
+      renderEmbeddable(parent, { onApiAvailable });
 
       await waitFor(async () => {
         const api = onApiAvailable.mock.calls[0][0];
-        expect(await api.serializeState()).toEqual({
+        expect(api.serializeState()).toEqual({
           rawState: {
             title: 'my links',
             description: 'just a few links',
@@ -332,14 +320,7 @@ describe('getLinksEmbeddableFactory', () => {
     });
     test('save to library', async () => {
       const onApiAvailable = jest.fn() as jest.MockedFunction<(api: LinksApi) => void>;
-
-      render(
-        <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
-          type={CONTENT_ID}
-          onApiAvailable={onApiAvailable}
-          getParentApi={() => parent}
-        />
-      );
+      renderEmbeddable(parent, { onApiAvailable });
 
       await waitFor(async () => {
         const api = onApiAvailable.mock.calls[0][0];
@@ -353,7 +334,7 @@ describe('getLinksEmbeddableFactory', () => {
           options: { references },
         });
         expect(newId).toBe('333');
-        expect(await api.getSerializedStateByReference(newId)).toEqual({
+        expect(api.getSerializedStateByReference(newId)).toEqual({
           rawState: {
             savedObjectId: '333',
             title: 'my links',

@@ -5,44 +5,24 @@ info:
 paths: { }
 components:
   schemas:
-    Id:
-      type: string
-    IdOrUndefined:
-      $ref: '#/components/schemas/Id'
-      nullable: true
-
-    AgentSelection:
-      type: object
-      properties:
-        agents:
-          type: array
-          items:
-            type: string
-        allAgentsSelected:
-          type: boolean
-        platformsSelected:
-          type: array
-          items:
-            type: string
-        policiesSelected:
-          type: array
-          items:
-            type: string
-
-    AgentSelectionOrUndefined:
-      $ref: '#/components/schemas/AgentSelection'
-      nullable: true
-
-
-    Description:
+    QueryId:
+      description: 'The ID of the query.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
-    DescriptionOrUndefined:
-      $ref: '#/components/schemas/Description'
+    PackDescription:
+      description: 'The pack description.'
+      example: 'Pack description'
+      type: string
+
+    PackDescriptionOrUndefined:
+      $ref: '#/components/schemas/PackDescription'
       nullable: true
 
 
     Platform:
+      description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.'
+      example: 'linux,darwin'
       type: string
 
     PlatformOrUndefined:
@@ -51,6 +31,8 @@ components:
 
 
     Query:
+      description: 'The SQL query you want to run.'
+      example: 'select * from uptime;'
       type: string
 
     QueryOrUndefined:
@@ -58,6 +40,8 @@ components:
       nullable: true
 
     Version:
+      description: 'Uses the Osquery versions greater than or equal to the specified version string.'
+      example: '1.0.0'
       type: string
 
     VersionOrUndefined:
@@ -65,6 +49,8 @@ components:
       nullable: true
 
     Interval:
+      description: 'An interval, in seconds, on which to run the query.'
+      example: '60'
       type: string
 
     IntervalOrUndefined:
@@ -72,6 +58,8 @@ components:
       nullable: true
 
     Snapshot:
+      description: 'Indicates whether the query is a snapshot.'
+      example: true
       type: boolean
 
     SnapshotOrUndefined:
@@ -79,6 +67,8 @@ components:
       nullable: true
 
     Removed:
+      description: 'Indicates whether the query is removed.'
+      example: false
       type: boolean
 
     RemovedOrUndefined:
@@ -86,17 +76,31 @@ components:
       nullable: true
 
     PackName:
+      description: 'The pack name.'
       type: string
 
     SavedQueryId:
+      description: 'The ID of a saved query.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
     SavedQueryIdOrUndefined:
       $ref: '#/components/schemas/SavedQueryId'
       nullable: true
 
+    SavedQueryDescription:
+      description: 'The saved query description.'
+      example: 'Saved query description'
+      type: string
+
+    SavedQueryDescriptionOrUndefined:
+      $ref: '#/components/schemas/SavedQueryDescription'
+      nullable: true
+
 
     PackId:
+      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
     PackIdOrUndefined:
@@ -104,6 +108,8 @@ components:
       nullable: true
 
     Enabled:
+      description: 'Enables the pack.'
+      example: true
       type: boolean
 
     EnabledOrUndefined:
@@ -111,6 +117,10 @@ components:
       nullable: true
 
     PolicyIds:
+      description: 'A list of agents policy IDs.'
+      example:
+        - "policyId1"
+        - "policyId2"
       type: array
       items:
         type: string
@@ -119,28 +129,16 @@ components:
       $ref: '#/components/schemas/PolicyIds'
       nullable: true
 
-    ExecutionContext:
-      type: object
-      properties:
-        name:
-          type: string
-          nullable: true
-        url:
-          type: string
-          nullable: true
-
-
-    ExecutionContextOrUndefined:
-      $ref: '#/components/schemas/ExecutionContext'
-      nullable: true
-
-
     ECSMappingItem:
       type: object
       properties:
         field:
+          description: 'The ECS field to map to.'
+          example: 'host.uptime'
           type: string
         value:
+          description: 'The value to map to the ECS field.'
+          example: 'total_seconds'
           oneOf:
             - type: string
             - type: array
@@ -148,6 +146,10 @@ components:
                 type: string
 
     ECSMapping:
+      description: 'Map osquery results columns or static values to Elastic Common Schema (ECS) fields'
+      example:
+        host.uptime:
+          field: 'total_seconds'
       type: object
       additionalProperties:
         $ref: '#/components/schemas/ECSMappingItem'
@@ -156,19 +158,11 @@ components:
       $ref: '#/components/schemas/ECSMapping'
       nullable: true
 
-
-    StringArrayOrUndefined:
-      type: array
-      items:
-        type: string
-        nullable: true
-
-
     ArrayQueriesItem:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          $ref: '#/components/schemas/QueryId'
         query:
           $ref: '#/components/schemas/Query'
         ecs_mapping:
@@ -184,6 +178,7 @@ components:
 
     ArrayQueries:
       type: array
+      description: 'An array of queries to run.'
       items:
         $ref: '#/components/schemas/ArrayQueriesItem'
 
@@ -193,7 +188,7 @@ components:
         query:
           $ref: '#/components/schemas/Query'
         id:
-          $ref: '#/components/schemas/Id'
+          $ref: '#/components/schemas/QueryId'
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
         version:
@@ -209,6 +204,7 @@ components:
 
     ObjectQueries:
       type: object
+      description: 'An object of queries.'
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
 
@@ -223,29 +219,42 @@ components:
       nullable: true
 
     KueryOrUndefined:
+      description: 'The kuery to filter the results by.'
+      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
       type: string
       nullable: true
 
     PageOrUndefined:
+      description: 'The page number to return. The default is 1.'
+      example: 1
       type: integer
       nullable: true
 
     PageSizeOrUndefined:
+      description: 'The number of results to return per page. The default is 20.'
+      example: 20
       type: integer
       nullable: true
 
     SortOrUndefined:
+      description: 'The field that is used to sort the results.'
+      example: 'createdAt'
+      default: createdAt
       type: string
       nullable: true
 
     SortOrderOrUndefined:
-      oneOf:
-
-        - type: string
-          nullable: true
-        - enum: [ asc, desc ]
+      description: 'Specifies the sort order.'
+      example: 'desc'
+      enum:
+        - asc
+        - desc
+      type: string
 
     Shards:
+      description: 'An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.'
+      example:
+        policy_id: 50
       type: object
       additionalProperties:
         type: number

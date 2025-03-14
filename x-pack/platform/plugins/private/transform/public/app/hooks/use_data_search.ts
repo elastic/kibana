@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { IKibanaSearchRequest } from '@kbn/search-types';
 

@@ -25,7 +25,7 @@ export function createOrUpdateCustomLink({
   const params: APMIndexDocumentParams<CustomLinkES> = {
     refresh: 'wait_for' as const,
     index: APM_CUSTOM_LINK_INDEX,
-    body: {
+    document: {
       '@timestamp': Date.now(),
       ...toESFormat(customLink),
     },

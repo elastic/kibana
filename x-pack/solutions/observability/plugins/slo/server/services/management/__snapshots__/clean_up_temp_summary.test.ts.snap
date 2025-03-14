@@ -5,38 +5,36 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
   "calls": Array [
     Array [
       Object {
-        "body": Object {
-          "query": Object {
-            "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
-                Object {
-                  "bool": Object {
-                    "must": Array [
-                      Object {
-                        "term": Object {
-                          "isTempDoc": true,
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "slo.id": "slo-id-one",
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "spaceId": "space-one",
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        },
         "conflicts": "proceed",
         "index": ".slo-observability.summary-v3.4.temp",
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "isTempDoc": true,
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "slo.id": "slo-id-one",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "spaceId": "space-one",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
         "slices": "auto",
         "wait_for_completion": false,
       },
@@ -46,38 +44,36 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
     ],
     Array [
       Object {
-        "body": Object {
-          "query": Object {
-            "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
-                Object {
-                  "bool": Object {
-                    "must": Array [
-                      Object {
-                        "term": Object {
-                          "isTempDoc": true,
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "slo.id": "another-temp-id",
-                        },
-                      },
-                      Object {
-                        "term": Object {
-                          "spaceId": "space-two",
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        },
         "conflicts": "proceed",
         "index": ".slo-observability.summary-v3.4.temp",
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "isTempDoc": true,
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "slo.id": "another-temp-id",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "spaceId": "space-two",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
         "slices": "auto",
         "wait_for_completion": false,
       },

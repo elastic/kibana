@@ -150,17 +150,15 @@ describe('unrecognized task types', () => {
 async function getTask(esClient: ElasticsearchClient) {
   const response = await esClient.search<{ task: ConcreteTaskInstance }>({
     index: '.kibana_task_manager',
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'task.taskType': 'sampleTaskRemovedType',
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'task.taskType': 'sampleTaskRemovedType',
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

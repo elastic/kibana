@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { mockRuleMigrationsDataClient } from '../data/__mocks__/mocks';
-import { mockRuleMigrationsTaskClient } from '../task/__mocks__/mocks';
+import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
+import { createRuleMigrationsTaskClientMock } from '../task/__mocks__/mocks';
 
 export const createRuleMigrationDataClient = jest
   .fn()
-  .mockImplementation(() => mockRuleMigrationsDataClient);
+  .mockImplementation(() => createRuleMigrationsDataClientMock());
 
 export const createRuleMigrationTaskClient = jest
   .fn()
-  .mockImplementation(() => mockRuleMigrationsTaskClient);
+  .mockImplementation(() => createRuleMigrationsTaskClientMock());
 
 export const createRuleMigrationClient = () => ({
   data: createRuleMigrationDataClient(),

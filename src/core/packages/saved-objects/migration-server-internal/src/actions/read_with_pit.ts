@@ -9,12 +9,13 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
+  catchRetryableSearchPhaseExecutionException,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { DEFAULT_PIT_KEEP_ALIVE } from './open_pit';
@@ -121,5 +122,6 @@ export const readWithPit =
           throw e;
         }
       })
+      .catch(catchRetryableSearchPhaseExecutionException)
       .catch(catchRetryableEsClientErrors);
   };

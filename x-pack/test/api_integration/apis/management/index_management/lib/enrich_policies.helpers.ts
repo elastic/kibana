@@ -24,15 +24,13 @@ export function enrichPoliciesHelpers(getService: FtrProviderContext['getService
   const createIndex = async (indexName: string) => {
     await es.indices.create({
       index: indexName,
-      body: {
-        mappings: {
-          properties: {
-            email: {
-              type: 'text',
-            },
-            firstName: {
-              type: 'text',
-            },
+      mappings: {
+        properties: {
+          email: {
+            type: 'text',
+          },
+          firstName: {
+            type: 'text',
           },
         },
       },

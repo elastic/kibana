@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { CategoryId, Category } from '../../../../../common/types/categories';
 import type { MlClient } from '../../../../lib/ml_client';
@@ -14,23 +14,21 @@ export function topCategoriesProvider(mlClient: MlClient) {
   async function getTotalCategories(jobId: string): Promise<number> {
     const body = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    job_id: jobId,
-                  },
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
                 },
-                {
-                  exists: {
-                    field: 'category_id',
-                  },
+              },
+              {
+                exists: {
+                  field: 'category_id',
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       },
@@ -42,35 +40,33 @@ export function topCategoriesProvider(mlClient: MlClient) {
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
     const body = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    job_id: jobId,
-                  },
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
                 },
-                {
-                  term: {
-                    result_type: 'model_plot',
-                  },
-                },
-                {
-                  term: {
-                    by_field_name: 'mlcategory',
-                  },
-                },
-              ],
-            },
-          },
-          aggs: {
-            cat_count: {
-              terms: {
-                field: 'by_field_value',
-                size: numberOfCategories,
               },
+              {
+                term: {
+                  result_type: 'model_plot',
+                },
+              },
+              {
+                term: {
+                  by_field_name: 'mlcategory',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          cat_count: {
+            terms: {
+              field: 'by_field_value',
+              size: numberOfCategories,
             },
           },
         },
@@ -107,19 +103,17 @@ export function topCategoriesProvider(mlClient: MlClient) {
         };
     const body = await mlClient.anomalySearch<any>(
       {
-        body: {
-          size,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    job_id: jobId,
-                  },
+        size,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
                 },
-                categoryFilter,
-              ],
-            },
+              },
+              categoryFilter,
+            ],
           },
         },
       },

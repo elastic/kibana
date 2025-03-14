@@ -137,11 +137,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       index: ['logs-crowdstrike*'],
       size: 1,
       _source: ['host.hostname', 'host.name'],
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { 'device.id': agentId } }],
-          },
+      query: {
+        bool: {
+          filter: [{ term: { 'device.id': agentId } }],
         },
       },
     };

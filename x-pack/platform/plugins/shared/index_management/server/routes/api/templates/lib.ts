@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
 import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
 
@@ -39,33 +40,18 @@ export const saveTemplate = async ({
     : serializeTemplate(template);
 
   if (isLegacy) {
-    const {
-      order,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      index_patterns,
-      version,
-      settings,
-      mappings,
-      aliases,
-    } = serializedTemplate as LegacyTemplateSerialized;
+    const { settings } = serializedTemplate as LegacyTemplateSerialized;
 
     return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
-      order,
-      body: {
-        index_patterns,
-        version,
-        // @ts-expect-error Types of property auto_expand_replicas are incompatible.
-        settings,
-        mappings,
-        aliases,
-      },
+      ...serializedTemplate,
+      // @ts-expect-error Types of property auto_expand_replicas are incompatible.
+      settings,
     });
   }
 
   return await client.asCurrentUser.indices.putIndexTemplate({
     name: template.name,
-    // @ts-expect-error LegacyTemplateSerialized | TemplateSerialized conflicts with @elastic/elasticsearch IndicesPutIndexTemplateRequest
-    body: serializedTemplate,
+    ...(serializedTemplate as Omit<IndicesPutIndexTemplateRequest, 'name'>),
   });
 };

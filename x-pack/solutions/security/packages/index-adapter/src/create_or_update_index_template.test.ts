@@ -15,44 +15,42 @@ const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const getIndexTemplate = (namespace: string = 'default', useDataStream: boolean = false) => ({
   name: `.alerts-test.alerts-${namespace}-index-template`,
-  body: {
-    _meta: {
-      kibana: {
-        version: '8.6.1',
-      },
-      managed: true,
-      namespace,
+  _meta: {
+    kibana: {
+      version: '8.6.1',
     },
-    composed_of: ['mappings1', 'framework-mappings'],
-    index_patterns: [`.internal.alerts-test.alerts-${namespace}-*`],
-    template: {
-      mappings: {
-        _meta: {
-          kibana: {
-            version: '8.6.1',
-          },
-          managed: true,
-          namespace,
-        },
-        dynamic: false,
-      },
-      settings: {
-        auto_expand_replicas: '0-1',
-        hidden: true,
-        ...(useDataStream
-          ? {}
-          : {
-              'index.lifecycle': {
-                name: 'test-ilm-policy',
-                rollover_alias: `.alerts-test.alerts-${namespace}`,
-              },
-            }),
-        'index.mapping.ignore_malformed': true,
-        'index.mapping.total_fields.limit': 2500,
-      },
-    },
-    priority: namespace.length,
+    managed: true,
+    namespace,
   },
+  composed_of: ['mappings1', 'framework-mappings'],
+  index_patterns: [`.internal.alerts-test.alerts-${namespace}-*`],
+  template: {
+    mappings: {
+      _meta: {
+        kibana: {
+          version: '8.6.1',
+        },
+        managed: true,
+        namespace,
+      },
+      dynamic: false,
+    },
+    settings: {
+      auto_expand_replicas: '0-1',
+      hidden: true,
+      ...(useDataStream
+        ? {}
+        : {
+            'index.lifecycle': {
+              name: 'test-ilm-policy',
+              rollover_alias: `.alerts-test.alerts-${namespace}`,
+            },
+          }),
+      'index.mapping.ignore_malformed': true,
+      'index.mapping.total_fields.limit': 2500,
+    },
+  },
+  priority: namespace.length,
 });
 
 const simulateTemplateResponse = {

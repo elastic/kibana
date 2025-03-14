@@ -19,6 +19,24 @@ export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
   )
 );
 
+export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./sections/siem_migration_start').then(({ SiemMigrationStartUpsellSection }) => ({
+      default: SiemMigrationStartUpsellSection,
+    }))
+  )
+);
+
+export const SiemMigrationsTranslatedRulesUpsellPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/siem_migrations_translated_rules').then(
+      ({ SiemMigrationsTranslatedRulesPage }) => ({
+        default: SiemMigrationsTranslatedRulesPage,
+      })
+    )
+  )
+);
+
 export const EntityAnalyticsUpsellingPageLazy = lazy(() =>
   import('./pages/entity_analytics_upselling').then(({ EntityAnalyticsUpsellingPageESS }) => ({
     default: EntityAnalyticsUpsellingPageESS,

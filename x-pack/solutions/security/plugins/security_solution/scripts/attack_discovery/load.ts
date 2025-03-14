@@ -158,7 +158,7 @@ const createPipeline = async ({ esClient, log }: { esClient: Client; log: Toolin
 
       await esClient.ingest.putPipeline({
         id: PIPELINE_NAME,
-        body: pipelineConfig,
+        ...pipelineConfig,
       });
     } else {
       log.error('Error checking or creating ingest pipeline:');
@@ -196,12 +196,10 @@ const createAndConfigureIndex = async ({
       log.info(`Creating and configuring Elasticsearch index: ${indexName}`);
       await esClient.indices.create({
         index: indexName,
-        body: {
-          settings: {
-            'index.mapping.total_fields.limit': '6000',
-          },
-          mappings: JSON.parse(mappingData),
+        settings: {
+          'index.mapping.total_fields.limit': '6000',
         },
+        mappings: JSON.parse(mappingData),
       });
     }
   } catch (error) {

@@ -28,7 +28,7 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { AdHocInstruction, Instruction } from '../../../../common/types';
+import { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../../chat_function_client';
@@ -79,6 +79,7 @@ function executeFunctionAndCatchError({
         },
         args,
         signal,
+        logger,
         messages,
         connectorId,
         simulateFunctionCalling,
@@ -172,8 +173,8 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  adHocInstructions = [],
-  userInstructions,
+  apiUserInstructions = [],
+  kbUserInstructions,
   logger,
   disableFunctions,
   tracer,
@@ -185,8 +186,8 @@ export function continueConversation({
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
-  adHocInstructions: AdHocInstruction[];
-  userInstructions: Instruction[];
+  apiUserInstructions: Instruction[];
+  kbUserInstructions: Instruction[];
   logger: Logger;
   disableFunctions:
     | boolean
@@ -322,8 +323,8 @@ export function continueConversation({
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
               signal,
-              userInstructions,
-              adHocInstructions,
+              kbUserInstructions,
+              apiUserInstructions,
               logger,
               disableFunctions,
               tracer,

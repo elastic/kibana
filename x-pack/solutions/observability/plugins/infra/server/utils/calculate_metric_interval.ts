@@ -38,34 +38,32 @@ export const calculateMetricInterval = async (
     allow_no_indices: true,
     index: options.indexPattern,
     ignore_unavailable: true,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                [TIMESTAMP_FIELD]: {
-                  gte: from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              [TIMESTAMP_FIELD]: {
+                gte: from,
+                lte: options.timerange.to,
+                format: 'epoch_millis',
               },
             },
-          ],
-        },
-      },
-      size: 0,
-      aggs: {
-        modules: {
-          terms: {
-            field: 'event.dataset',
-            include: modules,
           },
-          aggs: {
-            period: {
-              max: {
-                field: 'metricset.period',
-              },
+        ],
+      },
+    },
+    size: 0,
+    aggs: {
+      modules: {
+        terms: {
+          field: 'event.dataset',
+          include: modules,
+        },
+        aggs: {
+          period: {
+            max: {
+              field: 'metricset.period',
             },
           },
         },

@@ -178,6 +178,8 @@ export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
 export const SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;
+export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
+  'securitySolution:enableAssetInventory' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

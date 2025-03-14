@@ -21,39 +21,37 @@ export const buildSignalsSearchQuery = ({
   size,
 }: BuildSignalsSearchQuery) => ({
   index,
-  body: {
-    size,
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  match: {
-                    'signal.rule.rule_id': ruleId,
-                  },
+  size,
+  query: {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [
+              {
+                match: {
+                  'signal.rule.rule_id': ruleId,
                 },
-                {
-                  match: {
-                    'kibana.alert.rule.rule_id': ruleId,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          {
-            range: {
-              '@timestamp': {
-                gt: from,
-                lte: to,
-                format: 'epoch_millis',
               },
+              {
+                match: {
+                  'kibana.alert.rule.rule_id': ruleId,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        {
+          range: {
+            '@timestamp': {
+              gt: from,
+              lte: to,
+              format: 'epoch_millis',
             },
           },
-        ],
-      },
+        },
+      ],
     },
   },
 });

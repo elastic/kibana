@@ -8,7 +8,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
 /**

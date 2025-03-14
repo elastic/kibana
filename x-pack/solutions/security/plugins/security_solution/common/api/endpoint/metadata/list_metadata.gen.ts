@@ -16,30 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-export type ListRequestQuery = z.infer<typeof ListRequestQuery>;
-export const ListRequestQuery = z.object({
-  /**
-   * Page number
-   */
-  page: z.number().int().min(0).optional().default(0),
-  /**
-   * Number of items per page
-   */
-  pageSize: z.number().int().min(1).max(10000).optional().default(10),
-  kuery: z.string().nullable().optional(),
-  sortField: z
-    .enum([
-      'enrolled_at',
-      'metadata.host.hostname',
-      'host_status',
-      'metadata.Endpoint.policy.applied.name',
-      'metadata.Endpoint.policy.applied.status',
-      'metadata.host.os.name',
-      'metadata.host.ip',
-      'metadata.agent.version',
-      'last_checkin',
-    ])
-    .optional(),
-  sortDirection: z.enum(['asc', 'desc']).nullable().optional(),
-  hostStatuses: z.array(z.enum(['healthy', 'offline', 'updating', 'inactive', 'unenrolled'])),
-});
+export type EndpointMetadataResponse = z.infer<typeof EndpointMetadataResponse>;
+export const EndpointMetadataResponse = z.object({});
+
+export type MetadataListResponse = z.infer<typeof MetadataListResponse>;
+export const MetadataListResponse = z.object({});

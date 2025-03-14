@@ -8,7 +8,7 @@
  */
 
 import React, { Component } from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiSearchBar, type EuiSearchBarOnChangeArgs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Request } from '../../../../../../common/adapters/request/types';

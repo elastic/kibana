@@ -1601,7 +1601,7 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
           {
             "pluginId": "logsShared",
             "scope": "common",
@@ -2182,7 +2182,7 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
           {
             "pluginId": "logsShared",
             "scope": "common",
@@ -5011,7 +5011,7 @@
         "label": "LogEntryAfterCursor",
         "description": [],
         "signature": [
-          "{ after: \"first\" | { time: string; tiebreaker: number; }; }"
+          "{ after: { time: string; tiebreaker: number; } | \"first\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -5277,7 +5277,7 @@
         "tags": [],
         "label": "LogsLocatorParams",
         "description": [
-          "\nAccepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewSpec` param to all log sources."
+          "\nAccepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewId` param to all log sources."
         ],
         "signature": [
           {
@@ -5331,7 +5331,7 @@
         "label": "LogView",
         "description": [],
         "signature": [
-          "{ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }"
+          "{ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
         "deprecated": false,

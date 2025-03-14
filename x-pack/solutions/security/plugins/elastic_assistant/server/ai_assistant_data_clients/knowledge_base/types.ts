@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
+import type {
+  DocumentEntryType,
+  IndexEntryType,
+  KnowledgeBaseResource,
+} from '@kbn/elastic-assistant-common';
 
 export type EsKnowledgeBaseEntrySchema = EsDocumentEntry | EsIndexEntry;
 
@@ -23,7 +27,7 @@ export interface EsDocumentEntry {
   name: string;
   namespace: string;
   type: DocumentEntryType;
-  kb_resource: string;
+  kb_resource: KnowledgeBaseResource;
   required: boolean;
   source: string;
   text: string;

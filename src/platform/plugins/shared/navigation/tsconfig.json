@@ -27,6 +27,7 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/std",
+    "@kbn/router-utils",
   ],
   "exclude": [
     "target/**/*",

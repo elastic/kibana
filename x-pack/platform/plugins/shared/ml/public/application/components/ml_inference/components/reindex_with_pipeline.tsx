@@ -27,7 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { debounce } from 'lodash';
 import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';

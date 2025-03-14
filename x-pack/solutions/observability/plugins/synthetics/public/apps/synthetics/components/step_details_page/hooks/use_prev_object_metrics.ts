@@ -36,83 +36,81 @@ export const usePreviousObjectMetrics = () => {
   const { data: prevObjectMetrics } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        track_total_hits: false,
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
-        size: 0,
-        runtime_mappings: {
-          'synthetics.payload.transfer_size': {
-            type: 'long',
+      track_total_hits: false,
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc',
           },
         },
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    lte: timestamp ?? 'now',
-                    gte: moment(timestamp).subtract(1, 'day').toISOString(),
-                  },
+      ],
+      size: 0,
+      runtime_mappings: {
+        'synthetics.payload.transfer_size': {
+          type: 'long',
+        },
+      },
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  lte: timestamp ?? 'now',
+                  gte: moment(timestamp).subtract(1, 'day').toISOString(),
                 },
               },
-              {
-                term: {
-                  config_id: monitorId,
+            },
+            {
+              term: {
+                config_id: monitorId,
+              },
+            },
+            {
+              term: {
+                'synthetics.type': 'journey/network_info',
+              },
+            },
+            {
+              term: {
+                'synthetics.step.index': stepIndex,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-24h/h',
+                  lte: 'now',
                 },
               },
-              {
-                term: {
-                  'synthetics.type': 'journey/network_info',
+            },
+          ],
+          must_not: [
+            {
+              term: {
+                'monitor.check_group': {
+                  value: checkGroupId,
                 },
               },
-              {
-                term: {
-                  'synthetics.step.index': stepIndex,
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-24h/h',
-                    lte: 'now',
-                  },
-                },
-              },
-            ],
-            must_not: [
-              {
-                term: {
-                  'monitor.check_group': {
-                    value: checkGroupId,
-                  },
-                },
-              },
-            ],
+            },
+          ],
+        },
+      },
+      aggs: {
+        testRuns: {
+          cardinality: {
+            field: 'monitor.check_group',
           },
         },
-        aggs: {
-          testRuns: {
-            cardinality: {
-              field: 'monitor.check_group',
-            },
+        objectCounts: {
+          terms: {
+            field: 'http.response.mime_type',
+            size: 500,
           },
-          objectCounts: {
-            terms: {
-              field: 'http.response.mime_type',
-              size: 500,
-            },
-            aggs: {
-              weight: {
-                sum: {
-                  field: 'synthetics.payload.transfer_size',
-                },
+          aggs: {
+            weight: {
+              sum: {
+                field: 'synthetics.payload.transfer_size',
               },
             },
           },

@@ -50,31 +50,29 @@ export async function getServerlessFunctionsOverview({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(METRICSET_NAME, 'app'),
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(METRICSET_NAME, 'app'),
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        serverlessFunctions: {
-          terms: { field: FAAS_ID },
-          aggs: {
-            faasDurationAvg: { avg: { field: FAAS_DURATION } },
-            faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
-            coldStartCount: { sum: { field: FAAS_COLDSTART } },
-            maxTotalMemory: { max: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-            avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-            avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          },
+    },
+    aggs: {
+      serverlessFunctions: {
+        terms: { field: FAAS_ID },
+        aggs: {
+          faasDurationAvg: { avg: { field: FAAS_DURATION } },
+          faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
+          coldStartCount: { sum: { field: FAAS_COLDSTART } },
+          maxTotalMemory: { max: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
         },
       },
     },

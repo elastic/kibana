@@ -186,9 +186,9 @@ async function createSetupSideEffects(
   let packages = packagesOrUndefined ?? [];
 
   logger.debug('Setting Fleet server config');
-  await migrateSettingsToFleetServerHost(soClient);
+  await migrateSettingsToFleetServerHost(soClient, esClient);
   logger.debug('Setting up Fleet download source');
-  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient, esClient);
   // Need to be done before outputs and fleet server hosts as these object can reference a proxy
   logger.debug('Setting up Proxy');
   await ensurePreconfiguredFleetProxies(

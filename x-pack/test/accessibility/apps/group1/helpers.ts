@@ -28,18 +28,16 @@ export async function putSamplePipeline(client: Client) {
   return await client.ingest.putPipeline(
     {
       id: 'testPipeline',
-      body: {
-        description: 'describe pipeline',
-        version: 123,
-        processors: [
-          {
-            set: {
-              field: 'foo',
-              value: 'bar',
-            },
+      description: 'describe pipeline',
+      version: 123,
+      processors: [
+        {
+          set: {
+            field: 'foo',
+            value: 'bar',
           },
-        ],
-      },
+        },
+      ],
     },
     { meta: true }
   );
