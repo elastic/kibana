@@ -26,6 +26,7 @@ describe('wrapSuppressedEsqlAlerts', () => {
       sharedParams,
       events: [doc],
       isRuleAggregating: false,
+      expandedFields: undefined,
     });
 
     expect(alerts[0]._id).toEqual('ed7fbf575371c898e0f0aea48cdf0bf1865939a9');
@@ -46,6 +47,7 @@ describe('wrapSuppressedEsqlAlerts', () => {
       sharedParams: newSharedParams,
       events: [doc],
       isRuleAggregating: true,
+      expandedFields: undefined,
     });
 
     expect(alerts[0]._id).toEqual('mocked-alert-id');
@@ -72,20 +74,10 @@ describe('wrapSuppressedEsqlAlerts', () => {
     const doc2 = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d72');
     const doc3 = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d73');
     const alerts = wrapEsqlAlerts({
+      sharedParams,
       events: [doc1, doc1, doc2, doc2, doc3],
       isRuleAggregating: false,
-      spaceId: 'default',
-      mergeStrategy: 'missingFields',
-      completeRule,
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
-      publicBaseUrl,
-      tuple: {
-        to: moment('2010-10-20 04:43:12'),
-        from: moment('2010-10-20 04:43:12'),
-        maxSignals: 100,
-      },
-      intendedTimestamp: undefined,
+      expandedFields: undefined,
     });
 
     expect(alerts).toHaveLength(3);

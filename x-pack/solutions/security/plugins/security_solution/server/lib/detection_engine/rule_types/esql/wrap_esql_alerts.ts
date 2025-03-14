@@ -27,7 +27,7 @@ export const wrapEsqlAlerts = ({
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
-  expandedFields?: string[];
+  expandedFields: string[] | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest>>((event, i) => {
     const id = generateAlertId({

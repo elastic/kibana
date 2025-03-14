@@ -31,7 +31,7 @@ export const wrapSuppressedEsqlAlerts = ({
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
-  expandedFields?: string[];
+  expandedFields: string[] | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   const { spaceId, completeRule, tuple, primaryTimestamp, secondaryTimestamp } = sharedParams;
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(

@@ -215,6 +215,7 @@ export const esqlExecutor = async ({
             sharedParams,
             events: syntheticHits,
             isRuleAggregating,
+            expandedFields,
           });
 
           const enrichAlerts = createEnrichEventsFunction({
