@@ -15,7 +15,7 @@ import { internalProcessingRoutes } from './internal/streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
 import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
 import { groupRoutes } from './streams/group/route';
-import { contentPacksRoutes } from './content_packs/route';
+import { contentRoutes } from './content/route';
 import { internalDashboardRoutes } from './internal/dashboards/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
@@ -36,7 +36,7 @@ export const streamsRouteRepository = {
   ...managementRoutes,
   ...ingestRoutes,
   ...groupRoutes,
-  ...contentPacksRoutes,
+  ...contentRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

@@ -14,11 +14,12 @@ import {
   createPromiseFromStreams,
 } from '@kbn/utils';
 import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
+import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
-const downloadContentPacksRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/content_packs',
+const exportContentRoute = createServerRoute({
+  endpoint: 'GET /api/streams/{name}/content/_export',
   options: {
     access: 'internal',
   },
@@ -62,17 +63,19 @@ const downloadContentPacksRoute = createServerRoute({
     ]);
 
     return response.ok({
-      body: savedObjects.join('\n'),
+      body: {
+        content: savedObjects.join('\n'),
+      },
       headers: {
-        'Content-Disposition': `attachment; filename="content_pack.ndjson"`,
-        'Content-Type': 'application/ndjson',
+        'Content-Disposition': `attachment; filename="content.json"`,
+        'Content-Type': 'application/json',
       },
     });
   },
 });
 
-const uploadContentPacksRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/content_packs',
+const importContentRoute = createServerRoute({
+  endpoint: 'POST /api/streams/{name}/content/_import',
   options: {
     access: 'internal',
     body: {
@@ -85,7 +88,7 @@ const uploadContentPacksRoute = createServerRoute({
       name: z.string(),
     }),
     body: z.object({
-      content_pack: z.instanceof(Readable),
+      content: z.instanceof(Readable),
     }),
   }),
   security: {
@@ -100,8 +103,22 @@ const uploadContentPacksRoute = createServerRoute({
 
     await streamsClient.ensureStream(params.path.name);
 
+    const body: ContentPack = await new Promise((resolve, reject) => {
+      let data = '';
+      params.body.content.on('data', (chunk) => (data += chunk));
+      params.body.content.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          resolve(contentPackSchema.parse(parsed));
+        } catch (err) {
+          reject(new StatusError('Invalid content pack format', 400));
+        }
+      });
+      params.body.content.on('error', (error) => reject(error));
+    });
+
     const updatedSavedObjectsStream = await createPromiseFromStreams([
-      await createSavedObjectsStreamFromNdJson(params.body.content_pack),
+      await createSavedObjectsStreamFromNdJson(Readable.from(body.content)),
       createConcatStream([]),
     ]);
 
@@ -132,7 +149,7 @@ const uploadContentPacksRoute = createServerRoute({
   },
 });
 
-export const contentPacksRoutes = {
-  ...downloadContentPacksRoute,
-  ...uploadContentPacksRoute,
+export const contentRoutes = {
+  ...exportContentRoute,
+  ...importContentRoute,
 };
