@@ -73,7 +73,7 @@ export class InspectorViewChooser extends Component<Props, State> {
           >
             <FormattedMessage
               id="inspector.view"
-              defaultMessage="View: {viewName}"
+              defaultMessage="{viewName}"
               values={{ viewName: this.props.selectedView.title }}
             />
           </EuiTab>
