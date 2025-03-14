@@ -39,7 +39,7 @@ interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alertsCount: number;
   casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
-  externalBulkActions?: PublicAlertsDataGridProps['externalBulkActions'];
+  additionalBulkActions?: PublicAlertsDataGridProps['externalBulkActions'];
   refresh: () => void;
   hideBulkActions?: boolean;
   application: ApplicationStart;
@@ -290,7 +290,7 @@ export function useBulkActions({
   casesConfig,
   query,
   refresh,
-  externalBulkActions = EMPTY_BULK_ACTIONS_CONFIG,
+  additionalBulkActions = EMPTY_BULK_ACTIONS_CONFIG,
   ruleTypeIds,
   hideBulkActions,
   http,
@@ -342,11 +342,11 @@ export function useBulkActions({
 
     return initialItems.length
       ? addItemsToInitialPanel({
-          panels: externalBulkActions,
+          panels: additionalBulkActions,
           items: initialItems,
         })
-      : externalBulkActions;
-  }, [externalBulkActions, initialItems, hideBulkActions]);
+      : additionalBulkActions;
+  }, [additionalBulkActions, initialItems, hideBulkActions]);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 

@@ -393,7 +393,7 @@ export interface PublicAlertsDataGridProps
   /**
    * An array of bulk actions to be displayed in the table
    */
-  externalBulkActions?: BulkActionsPanelConfig[];
+  additionalBulkActions?: BulkActionsPanelConfig[];
   /**
    * Width of the actions column
    */

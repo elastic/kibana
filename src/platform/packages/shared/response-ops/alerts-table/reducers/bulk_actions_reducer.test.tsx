@@ -77,7 +77,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
   const dataGridProps: TestAlertsDataGridProps = {
     ...mockDataGridProps,
-    externalBulkActions: undefined,
+    additionalBulkActions: undefined,
   };
 
   const baseRenderContext = {
@@ -92,7 +92,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
   const dataGridPropsWithBulkActions: AlertsTableWithBulkActionsContextProps = {
     ...dataGridProps,
-    externalBulkActions: [
+    additionalBulkActions: [
       {
         id: 0,
         items: [
@@ -173,7 +173,7 @@ describe('AlertsDataGrid bulk actions', () => {
     );
   };
 
-  describe('when the externalBulkActions option is not set', () => {
+  describe('when the additionalBulkActions option is not set', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -249,7 +249,7 @@ describe('AlertsDataGrid bulk actions', () => {
           rowCount: 1,
           rowSelection: new Map([[0, { isLoading: false }]]),
         },
-        externalBulkActions: [
+        additionalBulkActions: [
           {
             id: 0,
             items: [
@@ -310,7 +310,7 @@ describe('AlertsDataGrid bulk actions', () => {
     });
   });
 
-  describe('when the externalBulkActions option is set', () => {
+  describe('when the additionalBulkActions option is set', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -498,7 +498,7 @@ describe('AlertsDataGrid bulk actions', () => {
               ...createDefaultBulkActionsState(),
               rowSelection: new Map([[1, { isLoading: false }]]),
             },
-            externalBulkActions: [
+            additionalBulkActions: [
               {
                 id: 0,
                 items: [
@@ -560,7 +560,7 @@ describe('AlertsDataGrid bulk actions', () => {
           const mockOnClick = jest.fn();
           const props: TestAlertsDataGridProps = {
             ...dataGridPropsWithBulkActions,
-            externalBulkActions: [
+            additionalBulkActions: [
               {
                 id: 0,
                 items: [
@@ -710,7 +710,7 @@ describe('AlertsDataGrid bulk actions', () => {
                   [1, { isLoading: false }],
                 ]),
               },
-              externalBulkActions: [
+              additionalBulkActions: [
                 {
                   id: 0,
                   items: [

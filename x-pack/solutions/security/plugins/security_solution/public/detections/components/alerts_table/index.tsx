@@ -479,7 +479,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
                   tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
                 }
                 actionsColumnWidth={leadingControlColumn.width}
-                externalBulkActions={bulkActions}
+                additionalBulkActions={bulkActions}
                 fieldsBrowserOptions={
                   tableType === TableId.alertsOnAlertsPage ||
                   tableType === TableId.alertsOnRuleDetailsPage

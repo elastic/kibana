@@ -591,7 +591,7 @@ describe('bulk action hooks', () => {
             query: {},
             casesConfig,
             refresh,
-            externalBulkActions: useBulkActionsConfig,
+            additionalBulkActions: useBulkActionsConfig,
             http,
             notifications,
             application,

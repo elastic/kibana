@@ -74,7 +74,7 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   onSortChange: jest.fn(),
   onChangePageIndex: jest.fn(),
   onChangePageSize: jest.fn(),
-  externalBulkActions: [
+  additionalBulkActions: [
     {
       id: 0,
       items: [
