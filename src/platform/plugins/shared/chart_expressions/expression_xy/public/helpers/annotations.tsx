@@ -217,7 +217,7 @@ export function Marker({
 
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
   if (config.textVisibility) {
-    if (hasReducedPadding) {
+    if (hasReducedPadding && label) {
       return <MarkerBody label={label} isHorizontal={isHorizontal} />;
     }
     return <EuiIcon type="empty" />;

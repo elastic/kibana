@@ -285,6 +285,10 @@ export const Annotations = ({
         const { timebucket, time, isGrouped, id: configId } = annotation;
         const strokeWidth = simpleView ? 1 : annotation.lineWidth || 1;
         const id = snakeCase(`${configId}-${time}`);
+        const markerBodyLabel =
+          !simpleView && !isGrouped && annotation.textVisibility && !hasReducedPadding
+            ? annotation.label
+            : undefined;
         return (
           <LineAnnotation
             id={id}
@@ -304,15 +308,8 @@ export const Annotations = ({
               ) : undefined
             }
             markerBody={
-              !simpleView ? (
-                <MarkerBody
-                  label={
-                    !isGrouped && annotation.textVisibility && !hasReducedPadding
-                      ? annotation.label
-                      : undefined
-                  }
-                  isHorizontal={!isHorizontal}
-                />
+              markerBodyLabel ? (
+                <MarkerBody label={markerBodyLabel} isHorizontal={!isHorizontal} />
               ) : undefined
             }
             markerPosition={
