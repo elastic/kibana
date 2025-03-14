@@ -136,22 +136,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         initials: '1',
       });
       expect(spaceApiResponse.space).property('id');
+
       const {
         space: { id: spaceId1 },
       } = spaceApiResponse;
-      const apiResponse = await sloApi.createWithSpace(DEFAULT_SLO, spaceId1, adminRoleAuthc, 200);
-      expect(apiResponse).property('id');
-      const { id } = apiResponse;
+      const sloApiResponse = await sloApi.createWithSpace(
+        DEFAULT_SLO,
+        spaceId1,
+        adminRoleAuthc,
+        200
+      );
+      expect(sloApiResponse).property('id');
+
+      const { id } = sloApiResponse;
       const spaceApiResponse2 = await spaceApi.create({
         ...DEFAULT_SPACE_FOR_SLO,
         name: 'space2',
         id: 'space2',
         initials: '2',
       });
+
       const {
         space: { id: spaceId2 },
       } = spaceApiResponse;
       expect(spaceApiResponse2.space).property('id');
+
       await sloApi.createWithSpace({ ...DEFAULT_SLO, id }, spaceId2, adminRoleAuthc, 409);
     });
 
