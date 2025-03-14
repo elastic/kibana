@@ -13,19 +13,19 @@ import {
   type ESQLAst,
   type ESQLFunction,
   type ESQLCommand,
-  type ESQLCommandOption,
-  type ESQLCommandMode,
   Walker,
   isIdentifier,
+  ESQLCommandOption,
+  ESQLCommandMode,
 } from '@kbn/esql-ast';
 import { FunctionDefinitionTypes } from '../definitions/types';
 import { EDITOR_MARKER } from './constants';
 import {
-  isOptionItem,
   isColumnItem,
   isSourceItem,
   pipePrecedesCurrentWord,
   getFunctionDefinition,
+  isOptionItem,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -119,7 +119,7 @@ export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCo
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
-    return { command: undefined, node: undefined, option: undefined, setting: undefined };
+    return { command: undefined, node: undefined };
   }
   return {
     command: removeMarkerArgFromArgsList(command)!,
@@ -144,8 +144,6 @@ function isOperator(node: ESQLFunction) {
  * Type details:
  * * "list": the cursor is inside a "in" list of values (i.e. `a in (1, 2, <here>)`)
  * * "function": the cursor is inside a function call (i.e. `fn(<here>)`)
- * * "option": the cursor is inside a command option (i.e. `command ... by <here>`)
- * * "setting": the cursor is inside a setting (i.e. `command _<here>`)
  * * "expression": the cursor is inside a command expression (i.e. `command ... <here>` or `command a = ... <here>`)
  * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
  */
@@ -191,13 +189,6 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option };
-  }
-
-  // TODO — remove this option branch once https://github.com/elastic/kibana/issues/195418 is complete
-  if (command && isOptionItem(command.args[command.args.length - 1]) && command.name !== 'stats') {
-    if (option) {
-      return { type: 'option' as const, command, node, option };
-    }
   }
 
   // command a ... <here> OR command a = ... <here>

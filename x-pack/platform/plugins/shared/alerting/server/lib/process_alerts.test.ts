@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { cloneDeep } from 'lodash';
 import { processAlerts } from './process_alerts';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import type { AlertInstanceState, AlertInstanceContext } from '../types';
 
 describe('processAlerts', () => {
   let clock: sinon.SinonFakeTimers;

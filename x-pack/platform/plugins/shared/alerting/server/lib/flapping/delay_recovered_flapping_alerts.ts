@@ -6,10 +6,10 @@
  */
 
 import { keys, map } from 'lodash';
-import { Logger } from '@kbn/logging';
-import { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
+import type { Logger } from '@kbn/logging';
+import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 import { Alert } from '../../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../../types';
+import type { AlertInstanceState, AlertInstanceContext } from '../../types';
 
 export function delayRecoveredFlappingAlerts<
   State extends AlertInstanceState,
