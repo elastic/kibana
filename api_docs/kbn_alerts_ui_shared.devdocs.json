@@ -817,6 +817,70 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.useFetchAlertsIndexNamesQuery",
+        "type": "Function",
+        "tags": [
+          "external"
+        ],
+        "label": "useFetchAlertsIndexNamesQuery",
+        "description": [
+          "\nFetch alerts index names feature ids\n\nWhen testing components that depend on this hook, prefer mocking the {@link fetchAlertsIndexNames} function instead of the hook itself."
+        ],
+        "signature": [
+          "({ http, ruleTypeIds }: ",
+          "FetchAlertsIndexNamesParams",
+          ", options?: Pick<",
+          "QueryOptionsOverrides",
+          "<({ http, ruleTypeIds }: ",
+          "FetchAlertsIndexNamesParams",
+          ") => Promise<string[]>, string[], unknown, string[]>, \"onError\" | \"context\" | \"enabled\" | \"staleTime\" | \"refetchOnWindowFocus\"> | undefined) => ",
+          "UseQueryResult",
+          "<string[], unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_alerts_index_names_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.useFetchAlertsIndexNamesQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ http, ruleTypeIds }",
+            "description": [],
+            "signature": [
+              "FetchAlertsIndexNamesParams"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_alerts_index_names_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.useFetchAlertsIndexNamesQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "QueryOptionsOverrides",
+              "<({ http, ruleTypeIds }: ",
+              "FetchAlertsIndexNamesParams",
+              ") => Promise<string[]>, string[], unknown, string[]>, \"onError\" | \"context\" | \"enabled\" | \"staleTime\" | \"refetchOnWindowFocus\"> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_alerts_index_names_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.useFetchFlappingSettings",
         "type": "Function",
         "tags": [],
@@ -3334,6 +3398,20 @@
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.FilterGroupProps.disableLocalStorageSync",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableLocalStorageSync",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5586,6 +5664,21 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.queryKeyPrefix",
+        "type": "Array",
+        "tags": [],
+        "label": "queryKeyPrefix",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_alerts_index_names_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.ResolvedRule",
         "type": "Type",
         "tags": [],
@@ -5902,6 +5995,21 @@
           "<never, never>, \"config\" | \"secrets\"> & { isSystemAction: true; isPreconfigured: false; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.UseFetchAlertsIndexNamesQueryParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UseFetchAlertsIndexNamesQueryParams",
+        "description": [],
+        "signature": [
+          "FetchAlertsIndexNamesParams"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/hooks/use_fetch_alerts_index_names_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

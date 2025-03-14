@@ -3077,18 +3077,6 @@
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/info.ts"
-              },
-              {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/feature_usage.ts"
-              },
-              {
-                "plugin": "features",
-                "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
-              },
-              {
                 "plugin": "customIntegrations",
                 "path": "src/platform/plugins/shared/custom_integrations/server/routes/define_routes.ts"
               },
@@ -3103,6 +3091,18 @@
               {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/list.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/info.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/feature_usage.ts"
+              },
+              {
+                "plugin": "features",
+                "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
               },
               {
                 "plugin": "spaces",
@@ -5237,20 +5237,20 @@
                 "path": "src/platform/plugins/shared/content_management/server/rpc/routes/routes.ts"
               },
               {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/notify_feature_usage.ts"
-              },
-              {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/register_feature.ts"
-              },
-              {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/install.ts"
               },
               {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/routes/fetch_es_hits_status.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/notify_feature_usage.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/register_feature.ts"
               },
               {
                 "plugin": "spaces",

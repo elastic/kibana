@@ -3955,6 +3955,20 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleType.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [],
+            "signature": [
+              "\"security\" | \"observability\" | \"stack\""
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleType.actionVariables",
             "type": "Object",
             "tags": [],
