@@ -40,7 +40,7 @@ jobs:
           sudo rm -rf /usr/local/lib/node
           sudo rm -rf ~/.npm
           sudo rm -rf ~/.nvm
-          node -v || echo "Node.js is not installed"
+          echo "Node.js is now removed"
 
       - name: Install Correct Node.js Version
         uses: actions/setup-node@v4
@@ -48,30 +48,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Install Yarn Manually
-        run: npm install -g yarn
-
-      - name: Verify Installed Node.js & Yarn Version
+      - name: Verify Installed Node.js Version
         run: |
           echo "Node.js version after setup:"
           node -v
-          echo "Yarn version:"
-          yarn -v
-          which yarn
-          ls -l $(which yarn)
+          which node || echo "Node binary not found"
+          ls -l $(which node) || echo "Node path is incorrect"
 
-      - name: Check Disk Space Before Cleanup
-        run: df -h
-
-      - name: Free Up Disk Space
+      - name: Install Yarn Manually
         run: |
-          sudo apt-get clean
-          sudo apt-get autoremove -y
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo docker system prune -af
-          df -h  # Check space again
+          corepack enable
+          npm install -g yarn
+          yarn -v || echo "Yarn still not found in PATH"
+
+      - name: Ensure Yarn is in PATH
+        run: |
+          echo "export PATH=$(yarn global bin):$PATH" >> ~/.bashrc
+          source ~/.bashrc
+          which yarn || echo "Yarn is still missing"
+          yarn -v
 
       - name: Cache Yarn Dependencies
         uses: actions/cache@v4
