@@ -171,7 +171,6 @@ function getTabContainerCss(
   // TODO: remove the usage of deprecated colors
 
   return css`
-    position: relative;
     display: inline-flex;
     height: ${euiTheme.size.xl};
     padding-inline: ${euiTheme.size.xs};

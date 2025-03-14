@@ -155,7 +155,6 @@ export const useResponsiveTabs = ({
 
     return css`
       overflow-x: auto;
-      overflow-y: visible;
       max-width: 100%;
       user-select: none;
       scrollbar-width: none; // hide the scrollbar
