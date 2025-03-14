@@ -15,22 +15,31 @@
  */
 
 import { z } from '@kbn/zod';
-import { isValidDateMath } from '@kbn/zod-helpers';
+import { isValidDateMath, isNonEmptyString } from '@kbn/zod-helpers';
 
 import { UUID, NonEmptyString } from '../../../model/primitives.gen';
 
+/**
+ * The unique identifier for the rule object.
+ */
 export type RuleObjectId = z.infer<typeof RuleObjectId>;
 export const RuleObjectId = UUID;
 
 /**
- * Could be any string, not necessarily a UUID
+ * A unique identifier for the rule, which could be any string, not necessarily a UUID.
  */
 export type RuleSignatureId = z.infer<typeof RuleSignatureId>;
 export const RuleSignatureId = z.string();
 
+/**
+ * The rule’s name.
+ */
 export type RuleName = z.infer<typeof RuleName>;
 export const RuleName = z.string().min(1);
 
+/**
+ * The rule’s description.
+ */
 export type RuleDescription = z.infer<typeof RuleDescription>;
 export const RuleDescription = z.string().min(1);
 
@@ -104,7 +113,7 @@ export type RuleSource = z.infer<typeof RuleSource>;
 export const RuleSource = z.discriminatedUnion('type', [ExternalRuleSource, InternalRuleSource]);
 
 /**
- * Determines whether the rule is enabled.
+ * Determines whether the rule is enabled. Defaults to true.
  */
 export type IsRuleEnabled = z.infer<typeof IsRuleEnabled>;
 export const IsRuleEnabled = z.boolean();
@@ -125,14 +134,24 @@ export type RuleIntervalTo = z.infer<typeof RuleIntervalTo>;
 export const RuleIntervalTo = z.string();
 
 /**
- * Risk score (0 to 100)
- */
+  * A numerical representation of the alert's severity from 0 to 100, where:
+* `0` - `21` represents low severity
+* `22` - `47` represents medium severity
+* `48` - `73` represents high severity
+* `74` - `100` represents critical severity
+
+  */
 export type RiskScore = z.infer<typeof RiskScore>;
 export const RiskScore = z.number().int().min(0).max(100);
 
 /**
- * Overrides generated alerts' risk_score with a value from the source event
- */
+  * Overrides generated alerts' risk_score with a value from the source event:
+
+- field (string, required): Source event field used to override the default risk_score. This field must be an integer.
+- operator (string, required): Must be equals.
+- value(string, required): Must be an empty string ("").
+
+  */
 export type RiskScoreMapping = z.infer<typeof RiskScoreMapping>;
 export const RiskScoreMapping = z.array(
   z.object({
@@ -144,8 +163,13 @@ export const RiskScoreMapping = z.array(
 );
 
 /**
- * Severity of the rule
- */
+  * Severity level of alerts produced by the rule, which must be one of the following:
+* `low`: Alerts that are of interest but generally not considered to be security incidents
+* `medium`: Alerts that require investigation
+* `high`: Alerts that require immediate investigation
+* `critical`: Alerts that indicate it is highly likely a security incident has occurred
+
+  */
 export type Severity = z.infer<typeof Severity>;
 export const Severity = z.enum(['low', 'medium', 'high', 'critical']);
 export type SeverityEnum = typeof Severity.enum;
@@ -170,6 +194,13 @@ export const SeverityMapping = z.array(
 export type RuleTagArray = z.infer<typeof RuleTagArray>;
 export const RuleTagArray = z.array(z.string());
 
+/**
+  * Placeholder for metadata about the rule.
+
+> info
+> This field is overwritten when you save changes to the rule’s settings.
+
+  */
 export type RuleMetadata = z.infer<typeof RuleMetadata>;
 export const RuleMetadata = z.object({}).catchall(z.unknown());
 
@@ -179,12 +210,21 @@ export const RuleMetadata = z.object({}).catchall(z.unknown());
 export type RuleLicense = z.infer<typeof RuleLicense>;
 export const RuleLicense = z.string();
 
+/**
+ * The rule’s author.
+ */
 export type RuleAuthorArray = z.infer<typeof RuleAuthorArray>;
 export const RuleAuthorArray = z.array(z.string());
 
+/**
+ * String array used to describe common reasons why the rule may issue false-positive alerts. Defaults to an empty array.
+ */
 export type RuleFalsePositiveArray = z.infer<typeof RuleFalsePositiveArray>;
 export const RuleFalsePositiveArray = z.array(z.string());
 
+/**
+ * Array containing notes about or references to relevant information about the rule. Defaults to an empty array.
+ */
 export type RuleReferenceArray = z.infer<typeof RuleReferenceArray>;
 export const RuleReferenceArray = z.array(z.string());
 
@@ -194,6 +234,9 @@ export const RuleReferenceArray = z.array(z.string());
 export type InvestigationGuide = z.infer<typeof InvestigationGuide>;
 export const InvestigationGuide = z.string();
 
+/**
+ * Populates the rule’s setup guide with instructions on rule prerequisites such as required integrations, configuration steps, and anything else needed for the rule to work correctly.
+ */
 export type SetupGuide = z.infer<typeof SetupGuide>;
 export const SetupGuide = z.string();
 
@@ -216,9 +259,23 @@ export const AlertsIndex = z.string();
 export type AlertsIndexNamespace = z.infer<typeof AlertsIndexNamespace>;
 export const AlertsIndexNamespace = z.string();
 
+/**
+  * Maximum number of alerts the rule can create during a single run. Defaults to 100.
+
+> info
+> This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) xpack.alerting.rules.run.alerts.max, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if xpack.alerting.rules.run.alerts.max is set to 1000, the rule can generate no more than 1000 alerts even if max_signals is set higher.
+
+  */
 export type MaxSignals = z.infer<typeof MaxSignals>;
 export const MaxSignals = z.number().int().min(1);
 
+/**
+  * Array containing more specific information on the attack technique.
+
+> info
+> Only threats described using the MITRE ATT&CKTM framework are displayed in the UI (Rules → Detection rules (SIEM) → Rule name).
+
+  */
 export type ThreatSubtechnique = z.infer<typeof ThreatSubtechnique>;
 export const ThreatSubtechnique = z.object({
   /**
@@ -249,12 +306,13 @@ export const ThreatTechnique = z.object({
    * Technique reference
    */
   reference: z.string(),
-  /**
-   * Array containing more specific information on the attack technique
-   */
   subtechnique: z.array(ThreatSubtechnique).optional(),
 });
 
+/**
+  * Object containing information on the attack type
+
+  */
 export type ThreatTactic = z.infer<typeof ThreatTactic>;
 export const ThreatTactic = z.object({
   /**
@@ -287,29 +345,49 @@ export const Threat = z.object({
 export type ThreatArray = z.infer<typeof ThreatArray>;
 export const ThreatArray = z.array(Threat);
 
+/**
+  * Indices on which the rule functions. Defaults to the Security Solution indices defined on the Kibana Advanced Settings page (Kibana → Stack Management → Advanced Settings → securitySolution:defaultIndex).
+
+> info
+> This field is not supported for ES|QL rules.
+
+  */
 export type IndexPatternArray = z.infer<typeof IndexPatternArray>;
 export const IndexPatternArray = z.array(z.string());
 
 export type DataViewId = z.infer<typeof DataViewId>;
 export const DataViewId = z.string();
 
+/**
+ * Kibana saved search used by the rule to create alerts.
+ */
 export type SavedQueryId = z.infer<typeof SavedQueryId>;
 export const SavedQueryId = z.string();
 
+/**
+ * My New Query description
+ */
 export type RuleQuery = z.infer<typeof RuleQuery>;
 export const RuleQuery = z.string();
 
+/**
+  * The query and filter context array used to define the conditions for when alerts are created from events. Defaults to an empty array.
+
+> info
+> This field is not supported for ES|QL rules.
+
+  */
 export type RuleFilterArray = z.infer<typeof RuleFilterArray>;
 export const RuleFilterArray = z.array(z.unknown());
 
 /**
- * Sets the source field for the alert's signal.rule.name value
+ * Sets the source field for the alert's signal.rule.name value. (in the UI, this value is displayed on the Rules page in the Rule column). When unspecified, the rule’s name value is used. The source field must be a string data type.
  */
 export type RuleNameOverride = z.infer<typeof RuleNameOverride>;
 export const RuleNameOverride = z.string();
 
 /**
- * Sets the time field used to query indices
+ * Sets the time field used to query indices. When unspecified, rules query the @timestamp field. The source field must be an Elasticsearch date data type.
  */
 export type TimestampOverride = z.infer<typeof TimestampOverride>;
 export const TimestampOverride = z.string();
@@ -349,13 +427,13 @@ export const RequiredField = z.object({
   /**
    * Name of an Elasticsearch field
    */
-  name: NonEmptyString,
+  name: z.string().min(1).superRefine(isNonEmptyString),
   /**
    * Type of the Elasticsearch field
    */
-  type: NonEmptyString,
+  type: z.string().min(1).superRefine(isNonEmptyString),
   /**
-   * Whether the field is an ECS field
+   * Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.
    */
   ecs: z.boolean(),
 });
@@ -368,11 +446,11 @@ export const RequiredFieldInput = z.object({
   /**
    * Name of an Elasticsearch field
    */
-  name: NonEmptyString,
+  name: z.string().min(1).superRefine(isNonEmptyString),
   /**
-   * Type of an Elasticsearch field
+   * Type of the Elasticsearch field
    */
-  type: NonEmptyString,
+  type: z.string().min(1).superRefine(isNonEmptyString),
 });
 
 export type RequiredFieldArray = z.infer<typeof RequiredFieldArray>;
@@ -406,39 +484,6 @@ export const SavedObjectResolveAliasPurpose = z.enum([
 export type SavedObjectResolveAliasPurposeEnum = typeof SavedObjectResolveAliasPurpose.enum;
 export const SavedObjectResolveAliasPurposeEnum = SavedObjectResolveAliasPurpose.enum;
 
-/**
-  * Related integration is a potential dependency of a rule. It's assumed that if the user installs
-one of the related integrations of a rule, the rule might start to work properly because it will
-have source events (generated by this integration) potentially matching the rule's query.
-
-NOTE: Proper work is not guaranteed, because a related integration, if installed, can be
-configured differently or generate data that is not necessarily relevant for this rule.
-
-Related integration is a combination of a Fleet package and (optionally) one of the
-package's "integrations" that this package contains. It is represented by 3 properties:
-
-- `package`: name of the package (required, unique id)
-- `version`: version of the package (required, semver-compatible)
-- `integration`: name of the integration of this package (optional, id within the package)
-
-There are Fleet packages like `windows` that contain only one integration; in this case,
-`integration` should be unspecified. There are also packages like `aws` and `azure` that contain
-several integrations; in this case, `integration` should be specified.
-
-@example
-const x: RelatedIntegration = {
-  package: 'windows',
-  version: '1.5.x',
-};
-
-@example
-const x: RelatedIntegration = {
-  package: 'azure',
-  version: '~1.1.6',
-  integration: 'activitylogs',
-};
-
-  */
 export type RelatedIntegration = z.infer<typeof RelatedIntegration>;
 export const RelatedIntegration = z.object({
   package: NonEmptyString,
@@ -452,17 +497,6 @@ export const RelatedIntegrationArray = z.array(RelatedIntegration);
 /**
   * Schema for fields relating to investigation fields. These are user defined fields we use to highlight
 in various features in the UI such as alert details flyout and exceptions auto-population from alert.
-Added in PR #163235
-Right now we only have a single field but anticipate adding more related fields to store various
-configuration states such as `override` - where a user might say if they want only these fields to
-display, or if they want these fields + the fields we select. When expanding this field, it may look
-something like:
-```typescript
-const investigationFields = z.object({
-  field_names: NonEmptyArray(NonEmptyString),
-  override: z.boolean().optional(),
-});
-```
 
   */
 export type InvestigationFields = z.infer<typeof InvestigationFields>;
@@ -471,8 +505,18 @@ export const InvestigationFields = z.object({
 });
 
 /**
- * Defines how often rule actions are taken.
- */
+  * Defines how often rule actions are taken.
+- no_actions: Never
+- rule: Every time new alerts are detected
+- 1h: Every hour
+- 1d: Every day
+- 7d: Every week
+
+> info
+> The rule level throttle field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
+> In Elastic Security 8.8 and later, you can use the (frequency) field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s throttle field. In the response, the converted throttle setting appears in the individual actions' frequency field.
+
+  */
 export type RuleActionThrottle = z.infer<typeof RuleActionThrottle>;
 export const RuleActionThrottle = z.union([
   z.enum(['no_actions', 'rule']),
@@ -504,12 +548,84 @@ export const RuleActionFrequency = z.object({
   throttle: RuleActionThrottle.nullable(),
 });
 
+/**
+ * Object containing an action’s conditional filters.
+ */
 export type RuleActionAlertsFilter = z.infer<typeof RuleActionAlertsFilter>;
-export const RuleActionAlertsFilter = z.object({}).catchall(z.unknown());
+export const RuleActionAlertsFilter = z.object({
+  /**
+   * Object containing the time frame for when this action can be run.
+   */
+  timeframe: z
+    .object({
+      /**
+       * List of days of the week on which this action can be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
+       */
+      days: z.array(z.number().int()).optional(),
+      /**
+       * The hours of the day during which this action can run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
+       */
+      hours: z
+        .object({
+          /**
+           * Start time in `hh:mm` format.
+           */
+          start: z.string().optional(),
+          /**
+           * End time in `hh:mm` format.
+           */
+          end: z.string().optional(),
+        })
+        .optional(),
+      /**
+       * An ISO timezone name, such as `Europe/Madrid` or `America/New_York`. Specific offsets such as UTC or UTC+1 will also work, but lack built-in DST.
+       */
+      timezone: z.string().optional(),
+    })
+    .optional(),
+  /**
+   * Object containing a query filter which gets applied to an action and determines whether the action should run.
+   */
+  query: z
+    .object({
+      /**
+       * A KQL string.
+       */
+      kql: z.string().optional(),
+      filters: z.array(z.object({})).optional(),
+    })
+    .optional(),
+});
 
 /**
- * Object containing the allowed connector fields, which varies according to the connector type.
- */
+  * Object containing the allowed connector fields, which varies according to the connector type.
+
+For Slack:
+
+  - message (string, required): The notification message.
+
+For email:
+
+  - to, cc, bcc (string): Email addresses to which the notifications are sent. At least one field must have a value.
+  - subject (string, optional): Email subject line.
+
+For Webhook:
+
+  - body (string, required): JSON payload.
+
+For PagerDuty:
+
+  - severity (string, required): Severity of on the alert notification, can be: Critical, Error, Warning or Info.
+  - eventAction (string, required): Event action type, which can be trigger, resolve, or acknowledge.
+  - dedupKey (string, optional): Groups alert notifications with the same PagerDuty alert.
+  - timestamp (DateTime, optional): ISO-8601 format timestamp.
+  - component (string, optional): Source machine component responsible for the event, for example security-solution.
+  - group (string, optional): Enables logical grouping of service components.
+  - source (string, optional): The affected system. Defaults to the Kibana saved object ID of the action.
+  - summary (string, options): Summary of the event. Defaults to No summary provided. Maximum length is 1024 characters.
+  - class (string, optional): Value indicating the class/type of the event.
+
+  */
 export type RuleActionParams = z.infer<typeof RuleActionParams>;
 export const RuleActionParams = z.object({}).catchall(z.unknown());
 
@@ -525,11 +641,33 @@ export const RuleActionGroup = z.string();
 export type RuleActionId = z.infer<typeof RuleActionId>;
 export const RuleActionId = z.string();
 
+/**
+ * Array defining the automated actions (notifications) taken when alerts are generated
+ */
 export type RuleAction = z.infer<typeof RuleAction>;
 export const RuleAction = z.object({
-  /**
-   * The action type used for sending notifications.
-   */
+  /** 
+      * The action type used for sending notifications, can be:
+
+  - .slack
+  - .slack_api
+  - .email
+  - .index
+  - .pagerduty
+  - .swimlane
+  - .webhook
+  - .servicenow
+  - .servicenow-itom
+  - .servicenow-sir
+  - .jira
+  - .resilient
+  - .opsgenie
+  - .teams
+  - .torq
+  - .tines
+  - .d3security
+ 
+      */
   action_type_id: z.string(),
   group: RuleActionGroup.optional(),
   id: RuleActionId,
@@ -555,6 +693,10 @@ export const ExceptionListType = z.enum([
 export type ExceptionListTypeEnum = typeof ExceptionListType.enum;
 export const ExceptionListTypeEnum = ExceptionListType.enum;
 
+/**
+  * Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
+
+  */
 export type RuleExceptionList = z.infer<typeof RuleExceptionList>;
 export const RuleExceptionList = z.object({
   /**
@@ -572,6 +714,9 @@ export const RuleExceptionList = z.object({
   namespace_type: z.enum(['agnostic', 'single']),
 });
 
+/**
+ * Time unit
+ */
 export type AlertSuppressionDurationUnit = z.infer<typeof AlertSuppressionDurationUnit>;
 export const AlertSuppressionDurationUnit = z.enum(['s', 'm', 'h']);
 export type AlertSuppressionDurationUnitEnum = typeof AlertSuppressionDurationUnit.enum;
@@ -599,6 +744,9 @@ export const AlertSuppressionMissingFieldsStrategyEnum = AlertSuppressionMissing
 export type AlertSuppressionGroupBy = z.infer<typeof AlertSuppressionGroupBy>;
 export const AlertSuppressionGroupBy = z.array(z.string()).min(1).max(3);
 
+/**
+ * Defines alert suppression configuration.
+ */
 export type AlertSuppression = z.infer<typeof AlertSuppression>;
 export const AlertSuppression = z.object({
   group_by: AlertSuppressionGroupBy,
