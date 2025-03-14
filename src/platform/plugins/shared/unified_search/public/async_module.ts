@@ -15,7 +15,6 @@ export { setupGetValueSuggestions } from './autocomplete/providers/kql_query_sug
 export { setupGetOperatorSuggestions } from './autocomplete/providers/kql_query_suggestion/operator';
 export { setupGetConjunctionSuggestions } from './autocomplete/providers/kql_query_suggestion/conjunction';
 
-export { ApplyFiltersPopoverContent } from './apply_filters/apply_filter_popover_content';
 export { DataViewsList } from './dataview_picker/dataview_list';
 export { DataViewPicker } from './dataview_picker/data_view_picker';
 export { DataViewSelector } from './dataview_picker/data_view_selector';

@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-// for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
-import { getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../apply_filters';
+import { getIndexPatterns } from '../../services';
+import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../constants';
 
-export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
+export type CreateFilterActionArguments = Parameters<typeof createFilterAction>;
 
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
@@ -36,7 +37,7 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
-  core: CoreSetup,
+  coreStart: CoreStart,
   id: string = ACTION_GLOBAL_APPLY_FILTER,
   type: string = ACTION_GLOBAL_APPLY_FILTER
 ): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
@@ -63,7 +64,6 @@ export function createFilterAction(
       let selectedFilters: Filter[] = filters;
 
       if (selectedFilters.length > 1) {
-        const [coreStart] = await core.getStartServices();
         const indexPatterns = await Promise.all(
           filters.map((filter) => {
             return getIndexPatterns().get(filter.meta.index!);
@@ -73,18 +73,18 @@ export function createFilterAction(
         const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
           const overlay = coreStart.overlays.openModal(
             toMountPoint(
-              applyFiltersPopover(
-                filters,
-                indexPatterns,
-                () => {
+              <ApplyFiltersPopoverContent
+                indexPatterns={indexPatterns}
+                filters={filters}
+                onCancel={() => {
                   overlay.close();
                   resolve([]);
-                },
-                (filterSelection: Filter[]) => {
+                }}
+                onSubmit={(filterSelection: Filter[]) => {
                   overlay.close();
                   resolve(filterSelection);
-                }
-              ),
+                }}
+              />,
               coreStart
             ),
             {
