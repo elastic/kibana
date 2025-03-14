@@ -80,7 +80,7 @@ describe('autocomplete.suggest', () => {
         expect(createIndexCommandSuggestion).toEqual({
           command: {
             arguments: [''],
-            id: 'esql.control.lookup_index.create',
+            id: 'esql.lookup_index.create',
             title: 'Click to create',
           },
           detail: 'Click to create',
@@ -114,7 +114,7 @@ describe('autocomplete.suggest', () => {
         expect(createIndexCommandSuggestion).toEqual({
           command: {
             arguments: ['new_join_index'],
-            id: 'esql.control.lookup_index.create',
+            id: 'esql.lookup_index.create',
             title: 'Click to create',
           },
           detail: 'Click to create',

@@ -586,7 +586,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): SuggestionRa
     ),
     sortText: '0-0',
     command: {
-      id: `esql.control.lookup_index.create`,
+      id: `esql.lookup_index.create`,
       title: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
         {

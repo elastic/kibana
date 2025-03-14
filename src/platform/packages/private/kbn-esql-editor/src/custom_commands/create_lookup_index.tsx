@@ -75,7 +75,7 @@ export const useCreateLookupIndexCommand = (
   // TODO: Replace with the actual lookup index docs URL once it's available
   const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
 
-  monaco.editor.registerCommand('esql.control.lookup_index.create', async (_, initialIndexName) => {
+  monaco.editor.registerCommand('esql.lookup_index.create', async (_, initialIndexName) => {
     await uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
       onUploadComplete,
       autoCreateDataView: false,
