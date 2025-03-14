@@ -48,12 +48,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Verify Installed Node.js Version
+      - name: Install Yarn Manually
+        run: npm install -g yarn
+
+      - name: Verify Installed Node.js & Yarn Version
         run: |
           echo "Node.js version after setup:"
           node -v
-          which node
-          ls -l $(which node)
+          echo "Yarn version:"
+          yarn -v
+          which yarn
+          ls -l $(which yarn)
 
       - name: Check Disk Space Before Cleanup
         run: df -h
