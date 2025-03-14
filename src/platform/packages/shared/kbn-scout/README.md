@@ -300,5 +300,9 @@ export const scoutTestFixtures = mergeTests(
 #### Best Practices
 - **Reusable Code:** When creating Page Objects, API services or Fixtures that apply to more than one plugin, ensure they are added to the `kbn-scout` package.
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
+- **Keep the Scope of Components Clear** When designing test components, keep in naming conventions, scope, maintainability and performance.
+  - `Page Objects` should focus exclusively on UI interactions (clicking buttons, filling forms, navigating page). They should not make API calls directly.
+  - `API Services` should handle server interactions, such as sending API requests and processing responses.
+  - `Fixtures` can combine browser interactions with API requests, but they should be used wisely, especially with the `test` scope: a new instance of the fixture is created for **every test block**. If a fixture performs expensive operations (API setup, data ingestion), excessive usage can **slow down** the test suite runtime. Consider using `worker` scope when appropriate to reuse instances across tests within a worker.
 - **Add Unit Tests:** Include tests for new logic where applicable, ensuring it works as expected.
 - **Playwright documentation:** [Official best practices](https://playwright.dev/docs/best-practices)
