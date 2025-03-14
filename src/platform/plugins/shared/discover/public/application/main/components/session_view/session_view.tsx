@@ -46,7 +46,7 @@ import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
 import { useAsyncFunction } from '../../hooks/use_async_function';
 
-interface DiscoverSessionViewProps {
+export interface DiscoverSessionViewProps {
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks: CustomizationCallback[];
   urlStateStorage: IKbnUrlStateStorage;

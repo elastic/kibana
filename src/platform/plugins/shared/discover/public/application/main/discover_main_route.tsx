@@ -24,12 +24,9 @@ import {
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
 import { DiscoverError } from '../../components/common/error_alert';
-import {
-  BrandedLoadingIndicator,
-  DiscoverSessionView,
-  NoDataPage,
-} from './components/session_view';
+import { BrandedLoadingIndicator, NoDataPage } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
+import { TabsView } from './components/tabs_view';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -123,12 +120,14 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
-        <DiscoverSessionView
-          customizationContext={customizationContext}
-          customizationCallbacks={customizationCallbacks}
-          urlStateStorage={urlStateStorage}
-          internalState={internalState}
-          runtimeStateManager={runtimeStateManager}
+        <TabsView
+          sessionViewProps={{
+            customizationContext,
+            customizationCallbacks,
+            urlStateStorage,
+            internalState,
+            runtimeStateManager,
+          }}
         />
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
