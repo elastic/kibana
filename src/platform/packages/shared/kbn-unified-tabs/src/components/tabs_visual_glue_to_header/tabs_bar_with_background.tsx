@@ -14,8 +14,11 @@ import { useEuiTheme } from '@elastic/eui';
 import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
 
 const globalCss = cssString`
+  // Disables the overscroll behavior to prevent the page from bouncing when scrolling
   overscroll-behavior: none;
 
+  // Removes the shadow from the global header.
+  // We add our own shadow to the tabs bar to be able to set a solid color for the selected tab on top of the shadow.
   #kbnHeaderSecondBar,
   [data-test-subj='kibanaProjectHeaderActionMenu'] {
     box-shadow: none;
