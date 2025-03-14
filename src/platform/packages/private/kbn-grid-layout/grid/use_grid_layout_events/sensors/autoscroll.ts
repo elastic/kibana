@@ -25,7 +25,7 @@ export const startAutoScroll = () => {
   if (shouldAutoScroll) return;
   shouldAutoScroll = true;
 
-  let lastFrameTime: number = +(document.timeline.currentTime ?? 0);
+  let lastFrameTime: number = +(document?.timeline?.currentTime ?? 0);
 
   const autoScroll: FrameRequestCallback = (now: number) => {
     if (!shouldAutoScroll) return;
