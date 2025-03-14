@@ -60,7 +60,7 @@ export interface ObservabilityAlertSearchBarProps
     AlertSearchBarStateTransitions,
     CommonAlertSearchBarProps {
   services: Services;
-  filterControls: Filter[];
+  filterControls?: Filter[];
   onFilterControlsChange: (controlConfigs: Filter[]) => void;
   savedQuery?: SavedQuery;
   showFilterBar?: boolean;

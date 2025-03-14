@@ -92,11 +92,14 @@ function InternalAlertsPage() {
     },
   } = data;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const [filterControls, setFilterControls] = useState<Filter[]>([]);
+  const [filterControls, setFilterControls] = useState<Filter[]>();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
-
+  const hasInitialControlLoadingFinished = useMemo(
+    () => Array.isArray(filterControls),
+    [filterControls]
+  );
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
@@ -299,7 +302,7 @@ function InternalAlertsPage() {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {esQuery && (
+            {esQuery && hasInitialControlLoadingFinished && (
               <AlertsGrouping<AlertsByGroupingAgg>
                 ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                 consumers={observabilityAlertFeatureIds}
@@ -307,7 +310,7 @@ function InternalAlertsPage() {
                 to={alertSearchBarStateProps.rangeTo}
                 globalFilters={[
                   ...(alertSearchBarStateProps.filters ?? DEFAULT_FILTERS),
-                  ...filterControls,
+                  ...(filterControls ?? []),
                 ]}
                 globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
