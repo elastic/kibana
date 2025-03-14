@@ -5,41 +5,31 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { useCallback, useEffect, useState } from 'react';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import { css } from '@emotion/react';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { getCombinedMessage } from '../assistant/prompt/helpers';
-import type { PromptContext } from '../..';
-import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
-import { MessageText } from './message_text';
-import { useFetchAnonymizationFields } from '../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import { useChatComplete } from '../assistant/api/chat_complete/use_chat_complete';
-import * as i18n from './translations';
-import { ChatCompleteResponse } from '../assistant/api/chat_complete/post_chat_complete';
+import { useChatComplete } from '../../assistant/api/chat_complete/use_chat_complete';
+import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import { ChatCompleteResponse } from '../../assistant/api/chat_complete/post_chat_complete';
+import { useFetchAlertSummary } from './use_fetch_alert_summary';
+import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
+import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
+import { getCombinedMessage } from '../../assistant/prompt/helpers';
+import type { PromptContext } from '../../..';
+import * as i18n from '../translations';
 
 interface Props {
-  isReady: boolean;
+  alertId: string;
+  isContextReady: boolean;
   promptContext: PromptContext;
 }
-
 const notActualPromptJustForTesting =
-  ' Highlight any host names or user names at the top of your summary.';
+  'Highlight any host names or user names at the top of your summary.';
 const prompt = `Give a brief analysis of the event from the context above and format your output neatly in markdown syntax. Give only key observations in paragraph format. ${notActualPromptJustForTesting}`;
 
-export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext }) => {
+export const useAlertSummary = ({ alertId, isContextReady, promptContext }: Props) => {
   const { abortStream, isLoading, sendMessage } = useChatComplete();
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
     useFetchAnonymizationFields();
@@ -52,6 +42,14 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
     replacements: Replacements;
   } | null>(null);
   const [didFetch, setDidFetch] = useState<boolean>(false);
+  const { data: alertSummary, isFetched: isFetchedAlertSummary } = useFetchAlertSummary({
+    alertId,
+  });
+  const { bulkUpdate, isLoading: isUpdatingAlertSummary } = useBulkUpdateAlertSummary();
+
+  useEffect(() => {
+    console.log('alertSummary', alertSummary);
+  }, [alertSummary]);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -81,8 +79,9 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
       setMessageAndReplacements({ message: userMessage.content ?? '', replacements });
     };
 
-    if (isFetchedAnonymizationFields && isReady) fetchContext();
-  }, [anonymizationFields, isFetchedAnonymizationFields, isReady, promptContext]);
+    if (isFetchedAnonymizationFields && isContextReady) fetchContext();
+  }, [anonymizationFields, isFetchedAnonymizationFields, isContextReady, promptContext]);
+
   const fetchAISummary = useCallback(() => {
     const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
       setDidFetch(true);
@@ -94,61 +93,32 @@ export const AlertSummary: FunctionComponent<Props> = ({ isReady, promptContext 
           replacements: content.replacements,
         }),
       });
+      const bulkResponse = await bulkUpdate({
+        alertSummary: {
+          create: [
+            {
+              alertId,
+              summary: rawResponse.response,
+            },
+          ],
+        },
+      });
+      console.log('bulkResponse', bulkResponse);
     };
 
     if (messageAndReplacements !== null) fetchSummary(messageAndReplacements);
-  }, [messageAndReplacements, sendMessage]);
+  }, [alertId, bulkUpdate, messageAndReplacements, sendMessage]);
+
   useEffect(() => {
     return () => {
       abortStream();
     };
   }, [abortStream]);
-  return (
-    <>
-      <EuiTitle size={'s'}>
-        <h2>{i18n.AI_SUMMARY}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      {didFetch ? (
-        isLoading ? (
-          <>
-            <EuiText
-              color="subdued"
-              css={css`
-                font-style: italic;
-              `}
-              size="s"
-            >
-              {i18n.GENERATING}
-            </EuiText>
-            <EuiSkeletonText lines={3} size="s" />
-          </>
-        ) : (
-          <MessageText
-            content={chatCompletionResponse.response}
-            contentReferences={chatCompletionResponse.metadata?.contentReferences}
-          />
-        )
-      ) : (
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={fetchAISummary}
-              color="primary"
-              size="m"
-              data-test-subj="generateInsights"
-              isLoading={messageAndReplacements == null}
-            >
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <AssistantIcon size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{i18n.GENERATE}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </>
-  );
+  return {
+    chatCompletionResponse,
+    didFetch,
+    fetchAISummary,
+    isLoading,
+    messageAndReplacements,
+  };
 };
