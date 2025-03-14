@@ -28,7 +28,7 @@ export const unsnoozeRuleRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
-        summary: 'Delete an existing snooze schedule for a rule',
+        summary: 'Delete a snooze schedule for a rule',
         tags: ['oas-tag:alerting'],
         availability: {
           since: '8.19.0',
