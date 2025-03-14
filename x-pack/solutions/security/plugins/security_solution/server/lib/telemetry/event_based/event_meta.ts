@@ -8,10 +8,10 @@
 import { SiemMigrationsEventTypes } from './types';
 
 export const siemMigrationEventNames = {
-  [SiemMigrationsEventTypes.MigrationSuccess]: 'Migration Success',
-  [SiemMigrationsEventTypes.PrebuiltRulesMatch]: 'Prebuilt Rules Match',
-  [SiemMigrationsEventTypes.IntegrationsMatch]: 'Integrations Match',
-  [SiemMigrationsEventTypes.MigrationFailure]: 'Migration Failure',
-  [SiemMigrationsEventTypes.TranslationFailure]: 'Translation Failure',
-  [SiemMigrationsEventTypes.TranslationSucess]: 'Translation Success',
+  [SiemMigrationsEventTypes.MigrationSuccess]: 'Migration success',
+  [SiemMigrationsEventTypes.PrebuiltRulesMatch]: 'Prebuilt rules match',
+  [SiemMigrationsEventTypes.IntegrationsMatch]: 'Integrations match',
+  [SiemMigrationsEventTypes.MigrationFailure]: 'Migration failure',
+  [SiemMigrationsEventTypes.TranslationFailure]: 'Translation failure',
+  [SiemMigrationsEventTypes.TranslationSucess]: 'Translation success',
 } as const;
