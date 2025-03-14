@@ -26,8 +26,5 @@ export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
 export const createRuleParamsExamples = () =>
   path.join(__dirname, 'examples_create_rule_params.yaml');
 
-export const updateRuleParamsExamples = () =>
-  path.join(__dirname, 'examples_update_rule_params.yaml');
-
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleParamsWithDefaultValue = TypeOf<typeof ruleParamsSchemaWithDefaultValue>;
