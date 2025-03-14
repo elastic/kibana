@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { MaintenanceWindow } from '../../application/maintenance_window/types';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { MaintenanceWindow } from '../../application/maintenance_window/types';
 import { filterMaintenanceWindowsIds } from './get_maintenance_windows';
-import { MaintenanceWindowClientApi } from '../../types';
-import { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
+import type { MaintenanceWindowClientApi } from '../../types';
+import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { withAlertingSpan } from '../lib';
 
 export const DEFAULT_CACHE_INTERVAL_MS = 60000; // 1 minute cache

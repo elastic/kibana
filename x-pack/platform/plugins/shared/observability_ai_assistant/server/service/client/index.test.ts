@@ -130,7 +130,6 @@ describe('Observability AI Assistant client', () => {
     getActions: jest.fn(),
     validate: jest.fn(),
     getInstructions: jest.fn(),
-    getAdhocInstructions: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
@@ -177,7 +176,6 @@ describe('Observability AI Assistant client', () => {
     knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
-    functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,

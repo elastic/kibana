@@ -49,7 +49,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly isUsingRuleCreateFlyout: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -250,74 +250,6 @@
               "T"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertConditions",
-        "type": "Function",
-        "tags": [],
-        "label": "AlertConditions",
-        "description": [],
-        "signature": [
-          "React.LazyExoticComponent<(<ConditionProps extends unknown, ActionGroupIds extends string>({ headline, actionGroups, onInitializeConditionsFor, onResetConditionsFor, includeBuiltInActionGroups, children, }: React.PropsWithChildren<",
-          "RuleConditionsProps",
-          "<ConditionProps, ActionGroupIds>>) => React.JSX.Element)>"
-        ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertConditions.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.AlertConditionsGroup",
-        "type": "Function",
-        "tags": [],
-        "label": "AlertConditionsGroup",
-        "description": [],
-        "signature": [
-          "React.LazyExoticComponent<(<ConditionProps extends unknown>({ actionGroup, onResetConditionsFor, children, ...otherProps }: React.PropsWithChildren<",
-          "RuleConditionsGroupProps",
-          "<ConditionProps>>) => React.JSX.Element | null)>"
-        ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.AlertConditionsGroup.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -759,25 +691,6 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.getNotifyWhenOptions",
-        "type": "Function",
-        "tags": [],
-        "label": "getNotifyWhenOptions",
-        "description": [],
-        "signature": [
-          "() => Promise<",
-          "EuiSuperSelectOption",
-          "<\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\">[]>"
-        ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3827,20 +3740,6 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleDefinitionProps.useNewRuleForm",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "useNewRuleForm",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5569,28 +5468,6 @@
           "<Config, Secrets>"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ActionGroupWithCondition",
-        "type": "Type",
-        "tags": [],
-        "label": "ActionGroupWithCondition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionGroup",
-            "text": "ActionGroup"
-          },
-          "<ActionGroupIds> & ({ conditions?: T | undefined; isRequired?: false | undefined; } | { conditions: T; isRequired: true; })"
-        ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_conditions.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8846,7 +8723,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly isUsingRuleCreateFlyout: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly stackAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly alertDeletionSettingsEnabled: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -8925,7 +8802,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: true; readonly stackAlertsPage: true; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly isUsingRuleCreateFlyout: false; readonly alertDeletionSettingsEnabled: false; }"
+          "{ readonly rulesListDatagrid: true; readonly stackAlertsPage: true; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly alertDeletionSettingsEnabled: false; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,

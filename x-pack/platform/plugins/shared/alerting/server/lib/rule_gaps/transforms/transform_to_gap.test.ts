@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { transformToGap } from './transform_to_gap';
 import { Gap } from '../gap';
 

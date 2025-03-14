@@ -12,10 +12,13 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { i18n } from '@kbn/i18n';
+import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
+import { groupBy } from 'lodash';
+import { stringify } from '../../../endpoint/utils/stringify';
 import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
   getArtifactOwnerSpaceIds,
-  setArtifactOwnerSpaceId,
+  isArtifactGlobal,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { FeatureKeys } from '../../../endpoint/services';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
@@ -174,9 +177,14 @@ export class BaseValidator {
    */
   protected async validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      const { packagePolicy, savedObjects } = this.endpointAppContext.getInternalFleetServices();
+      const spaceId = this.endpointAppContext.experimentalFeatures
+        .endpointManagementSpaceAwarenessEnabled
+        ? await this.getActiveSpaceId()
+        : undefined;
+      const { packagePolicy, savedObjects } =
+        this.endpointAppContext.getInternalFleetServices(spaceId);
       const policyIds = getPolicyIdsFromArtifact(item);
-      const soClient = savedObjects.createInternalScopedSoClient();
+      const soClient = savedObjects.createInternalScopedSoClient({ spaceId });
 
       if (policyIds.length === 0) {
         return;
@@ -185,6 +193,19 @@ export class BaseValidator {
       const policiesFromFleet = await packagePolicy.getByIDs(soClient, policyIds, {
         ignoreMissing: true,
       });
+
+      this.logger.debug(
+        () =>
+          `Lookup of policy ids:\n[${policyIds.join(
+            ' | '
+          )}] for space [${spaceId}] returned:\n${stringify(
+            (policiesFromFleet ?? []).map((policy) => ({
+              id: policy.id,
+              name: policy.name,
+              spaceIds: policy.spaceIds,
+            }))
+          )}`
+      );
 
       if (!policiesFromFleet) {
         throw new EndpointArtifactExceptionValidationError(
@@ -290,19 +311,6 @@ export class BaseValidator {
     return (await this.endpointAppContext.getActiveSpace(this.request)).id;
   }
 
-  /**
-   * Update the artifact item (if necessary) with a `ownerSpaceId` tag using the HTTP request's active space
-   * @param item
-   * @protected
-   */
-  protected async setOwnerSpaceId(
-    item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
-  ): Promise<void> {
-    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      setArtifactOwnerSpaceId(item, await this.getActiveSpaceId());
-    }
-  }
-
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
     if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
       if (
@@ -374,6 +382,74 @@ export class BaseValidator {
           403
         );
       }
+    }
+  }
+
+  protected async validateCanReadItemInActiveSpace(
+    currentSavedItem: ExceptionListItemSchema
+  ): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      this.logger.debug(
+        () => `Validating if can read single item:\n${stringify(currentSavedItem)}`
+      );
+
+      // Everyone can read global artifacts and those with global artifact management privilege can do it all
+      if (
+        isArtifactGlobal(currentSavedItem) ||
+        (await this.endpointAuthzPromise).canManageGlobalArtifacts
+      ) {
+        return;
+      }
+
+      const activeSpaceId = await this.getActiveSpaceId();
+      const ownerSpaceIds = getArtifactOwnerSpaceIds(currentSavedItem);
+      const policyIds = getPolicyIdsFromArtifact(currentSavedItem);
+
+      // If per-policy item is not assigned to any policy (dangling artifact) and this artifact
+      // is owned by the active space, then allow read.
+      if (policyIds.length === 0 && ownerSpaceIds.includes(activeSpaceId)) {
+        return;
+      }
+
+      // if at least one policy is visible in active space, then allow read
+      if (policyIds.length > 0) {
+        const { packagePolicy, savedObjects } =
+          this.endpointAppContext.getInternalFleetServices(activeSpaceId);
+        const soClient = savedObjects.createInternalScopedSoClient({ spaceId: activeSpaceId });
+        const policiesFromFleet = await packagePolicy
+          .getByIDs(soClient, policyIds, {
+            ignoreMissing: true,
+          })
+          .then((packagePolicies) => {
+            this.logger.debug(
+              () =>
+                `Lookup of policy ids:[${policyIds.join(
+                  ' | '
+                )}]\nvia fleet for space ID [${activeSpaceId}] returned:\n${stringify(
+                  (packagePolicies ?? []).map((policy) => ({
+                    id: policy.id,
+                    name: policy.name,
+                    spaceIds: policy.spaceIds,
+                  }))
+                )}`
+            );
+
+            return groupBy(packagePolicies ?? [], 'id');
+          });
+
+        if (policyIds.some((policyId) => Boolean(policiesFromFleet[policyId]))) {
+          return;
+        }
+      }
+
+      this.logger.debug(
+        () => `item can not be read from space [${activeSpaceId}]:\n${stringify(currentSavedItem)}`
+      );
+
+      throw new EndpointExceptionsValidationError(
+        `Item not found in space [${activeSpaceId}]`,
+        404
+      );
     }
   }
 }

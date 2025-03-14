@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
@@ -102,6 +102,7 @@ export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds> =
   id: CLIENT_ALERT_TYPES.TLS_LEGACY,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
+  solution: observabilityFeatureId,
   name: tlsTranslations.legacyAlertFactoryName,
   validate: {
     params: schema.object({}),

@@ -7,7 +7,7 @@
 
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
-import { BulkEditRuleSnoozeSchedule } from '../types';
+import type { BulkEditRuleSnoozeSchedule } from '../types';
 
 export const validateSnoozeSchedule = (schedule: BulkEditRuleSnoozeSchedule) => {
   const intervalIsDaily = schedule.rRule.freq === Frequency.DAILY;

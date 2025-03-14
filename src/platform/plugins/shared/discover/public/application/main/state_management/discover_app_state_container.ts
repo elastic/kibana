@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-  ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
+import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
 import {
-  AggregateQuery,
   COMPARE_ALL_OPTIONS,
   compareFilters,
-  Filter,
-  FilterCompareOptions,
   FilterStateStore,
-  Query,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
+import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { IKbnUrlStateStorage, ISyncStateRef } from '@kbn/kibana-utils-plugin/public';
+import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -33,15 +31,16 @@ import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
+import type { DiscoverDataSource } from '../../../../common/data_sources';
 import {
   createDataViewDataSource,
   createEsqlDataSource,
   DataSourceType,
-  DiscoverDataSource,
   isDataSourceType,
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { internalStateActions, InternalStateStore } from './redux';
+import type { InternalStateStore } from './redux';
+import { internalStateActions } from './redux';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
