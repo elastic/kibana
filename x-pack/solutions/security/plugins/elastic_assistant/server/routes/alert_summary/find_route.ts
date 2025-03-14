@@ -17,6 +17,7 @@ import {
   FindAlertSummaryResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/find_alert_summary_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import _ from 'lodash';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsAlertSummarySchema } from '../../ai_assistant_data_clients/alert_summary/types';
@@ -66,7 +67,7 @@ export const findAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             ...(query.filter ? { filter: decodeURIComponent(query.filter) } : {}),
-            fields: query.fields,
+            fields: query.fields?.map((f) => _.snakeCase(f)),
           });
 
           if (result) {

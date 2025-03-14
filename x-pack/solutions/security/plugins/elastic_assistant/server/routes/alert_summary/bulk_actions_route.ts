@@ -178,9 +178,7 @@ export const bulkAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
             const result = await dataClient?.findDocuments<EsAlertSummarySchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
-                .map((c) => `alertId:${c.alertId}`)
-                .join(' OR ')})`,
+              filter: `(${body.create.map((c) => `alertId:${c.alertId}`).join(' OR ')})`,
               fields: ['name'],
             });
             if (result?.data != null && result.total > 0) {

@@ -58,7 +58,8 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <AlertSummary
-              isReady={(dataFormattedForFieldBrowser ?? []).length > 0}
+              alertId={eventId}
+              isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
               promptContext={promptContext}
             />
           </EuiFlexItem>

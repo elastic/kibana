@@ -95,6 +95,9 @@ export const transformToCreateScheme = (
   return {
     '@timestamp': updatedAt,
     updated_at: updatedAt,
+    updated_by: user.username,
+    created_at: updatedAt,
+    created_by: user.username,
     summary: summary ?? '',
     alert_id: alertId,
     users: [

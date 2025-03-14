@@ -39,6 +39,8 @@ export interface CreateAlertSummarySchema {
   summary: string;
   updated_at?: string;
   updated_by?: string;
+  created_at?: string;
+  created_by?: string;
   users?: Array<{
     id?: string;
     name?: string;
