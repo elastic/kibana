@@ -6,6 +6,7 @@
  */
 
 import { createSLOParamsSchema } from '@kbn/slo-schema';
+import { SavedObjectsClient } from '@kbn/core/server';
 import {
   CreateSLO,
   DefaultSummaryTransformManager,
@@ -37,8 +38,12 @@ export const createSLORoute = createSloServerRoute({
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = core.savedObjects.client;
+    const [coreStart] = await corePlugins.getStartServices();
+    const internalSoClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
     const basePath = corePlugins.http.basePath;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, internalSoClient, logger);
 
     const [spaceId, dataViewsService] = await Promise.all([
       getSpaceId(plugins, request),

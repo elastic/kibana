@@ -30,10 +30,14 @@ export interface SLORepository {
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
-  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private internalSOClient: SavedObjectsClientContract,
+    private logger: Logger
+  ) {}
 
   async exists(id: string, namespaces = []) {
-    const findResponse = await this.soClient.find<StoredSLODefinition>({
+    const findResponse = await this.internalSOClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       perPage: 0,
       filter: `slo.attributes.id:(${id})`,
