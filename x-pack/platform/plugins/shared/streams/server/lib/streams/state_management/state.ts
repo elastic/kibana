@@ -216,9 +216,10 @@ export class State {
   }
 
   async attemptRollback(startingState: State) {
+    // Here we should forcefully mark the changed streams as created in their previous state
+    // To get a full set of creation actions to ensure we restore it
+    // We can use the same logic for resync but applied to all streams in the state
     const brokenState = this;
-    // TODO: I don't think this fully works, we might need to go through a proper planning cycle here again
-    // or somehow signal that it shouldn't do change detection but play it save
     const rollbackTargets = brokenState.changedStreams().map((stream) => {
       if (startingState.has(stream.definition.name)) {
         return startingState.get(stream.definition.name)!;
