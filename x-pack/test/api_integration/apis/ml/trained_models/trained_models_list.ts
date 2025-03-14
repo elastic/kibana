@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    it('returns a formatted list of trained model with stats, associated pipelines and indices', async () => {
+    it('returns a formatted list of trained model with stats, associated pipelines, indices and spaces', async () => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models_list`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
@@ -71,6 +71,16 @@ export default ({ getService }: FtrProviderContext) => {
           dfaRegressionN1.indices.length
         })`
       );
+
+      const downloadedModels = body.filter((v: any) => v.state !== 'notDownloaded');
+
+      downloadedModels.forEach((model: any) => {
+        if (ml.api.isInternalModelId(model.model_id)) {
+          expect(model.spaces).to.eql(['*']);
+        } else {
+          expect(model.spaces).to.eql(['default']);
+        }
+      });
     });
 
     it('returns models without pipeline in case user does not have required permission', async () => {
