@@ -5,27 +5,35 @@
  * 2.0.
  */
 
-import { esqlRoutes } from './esql/route';
+import { internalEsqlRoutes } from './internal/esql/route';
 import { dashboardRoutes } from './dashboards/route';
 import { crudRoutes } from './streams/crud/route';
 import { enablementRoutes } from './streams/enablement/route';
 import { managementRoutes } from './streams/management/route';
-import { schemaRoutes } from './streams/schema/route';
-import { processingRoutes } from './streams/processing/route';
+import { internalSchemaRoutes } from './internal/streams/schema/route';
+import { internalProcessingRoutes } from './internal/streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
-import { lifecycleRoutes } from './streams/lifecycle/route';
+import { internalLifecycleRoutes } from './internal/streams/lifecycle/route';
 import { groupRoutes } from './streams/group/route';
+import { internalDashboardRoutes } from './internal/dashboards/route';
+import { internalCrudRoutes } from './internal/streams/crud/route';
+import { internalManagementRoutes } from './internal/streams/management/route';
 
 export const streamsRouteRepository = {
-  ...esqlRoutes,
+  // internal APIs
+  ...internalEsqlRoutes,
+  ...internalDashboardRoutes,
+  ...internalCrudRoutes,
+  ...internalManagementRoutes,
+  ...internalSchemaRoutes,
+  ...internalLifecycleRoutes,
+  ...internalProcessingRoutes,
+  // public APIs
   ...dashboardRoutes,
   ...crudRoutes,
   ...enablementRoutes,
   ...managementRoutes,
-  ...schemaRoutes,
-  ...processingRoutes,
   ...ingestRoutes,
-  ...lifecycleRoutes,
   ...groupRoutes,
 };
 

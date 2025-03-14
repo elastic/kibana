@@ -60,7 +60,7 @@ export class CreateSLO {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
-      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo));
+      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo, this.spaceId));
       rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
 
       const rollupTransformPromise = this.transformManager.install(slo);
@@ -181,7 +181,7 @@ export class CreateSLO {
     validateSLO(slo);
 
     const rollUpTransform = await this.transformManager.inspect(slo);
-    const rollUpPipeline = getSLIPipelineTemplate(slo);
+    const rollUpPipeline = getSLIPipelineTemplate(slo, this.spaceId);
     const summaryPipeline = getSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
     const summaryTransform = await this.summaryTransformManager.inspect(slo);
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
