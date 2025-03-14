@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverServices } from '../../../../build_services';
+import { InternalStateStore, RuntimeStateManager } from '../redux';
 
 interface DataViewData {
   /**
@@ -174,18 +174,21 @@ export const loadAndResolveDataView = async ({
   dataViewSpec,
   savedSearch,
   isEsqlMode,
-  internalStateContainer,
+  internalState,
+  runtimeStateManager,
   services,
 }: {
   dataViewId?: string;
   dataViewSpec?: DataViewSpec;
   savedSearch?: SavedSearch;
   isEsqlMode?: boolean;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
+  runtimeStateManager: RuntimeStateManager;
   services: DiscoverServices;
 }) => {
   const { dataViews, toastNotifications } = services;
-  const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+  const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
+  const { savedDataViews } = internalState.getState();
 
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found

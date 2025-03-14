@@ -46,7 +46,6 @@ describe('updateVolatileSearchSource', () => {
     expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: true }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });
-
   test('updates a given search source when showUnmappedFields option is set to true', async () => {
     const volatileSearchSourceMock = createSearchSourceMock({});
     discoverServiceMock.uiSettings = getUiSettingsMock(false);
@@ -77,8 +76,6 @@ describe('updateVolatileSearchSource', () => {
 
   test('should properly update the search source with the given custom filters', async () => {
     const searchSource = createSearchSourceMock({});
-    discoverServiceMock.uiSettings = getUiSettingsMock(false);
-
     const filter = { meta: { index: 'foo', key: 'bar' } } as Filter;
 
     updateVolatileSearchSource(searchSource, {
