@@ -3,10 +3,10 @@ name: Build and Publish Kibana to GHCR
 on:
   push:
     branches:
-      - openai_pki_connector_8_15  # Updated to your branch
+      - openai_pki_connector_8_15
   pull_request:
     branches:
-      - openai_pki_connector_8_15  # Runs on PRs within your fork only
+      - openai_pki_connector_8_15
 
 jobs:
   build:
@@ -16,20 +16,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: openai_pki_connector_8_15  # Ensure the correct branch is used
+          ref: openai_pki_connector_8_15  # Ensure correct branch
 
       - name: Read Node.js Version from .node-version
         id: node_version
         run: echo "NODE_VERSION=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
 
-      - name: Verify Node.js Version
-        run: echo "Using Node.js version $NODE_VERSION"
+      - name: Remove Any Existing Node.js Versions
+        run: |
+          sudo rm -rf /opt/hostedtoolcache/Node*
+          node -v || echo "Node.js is not installed"
 
-      - name: Set up Node.js and Yarn with Correct Version
+      - name: Install Correct Node.js Version
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
+
+      - name: Verify Node.js Version
+        run: node -v  # Print Node.js version for debugging
 
       - name: Check Disk Space Before Cleanup
         run: df -h
