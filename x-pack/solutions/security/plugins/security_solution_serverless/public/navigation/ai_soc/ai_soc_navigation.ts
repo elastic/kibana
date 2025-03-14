@@ -64,7 +64,6 @@ export const applyAiSocNavigation = (
 
   // hardcode elements existing only in AI for SOC group
   securityGroup.children.push(alertSummaryLink);
-  // securityGroup.children.push(knowledgeSourceLink);
 
   // Overwrite the children with only the elements available for AI for SOC navigation
   // Temporary solution until we have clarity how to proceed with Upselling in the new Tier
