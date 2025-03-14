@@ -73,7 +73,7 @@ export const RuleDefinition = () => {
 
   const { dashboard, featureFlags } = plugins;
   const ruleDashboardsPlugins = { dashboard, featureFlags };
-  
+
   const { colorMode } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
 

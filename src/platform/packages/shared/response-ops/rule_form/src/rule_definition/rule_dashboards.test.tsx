@@ -58,7 +58,7 @@ describe('RuleDashboards', () => {
     dashboard: {
       findDashboardsService: jest.fn(),
       registerDashboardPanelPlacementSetting: jest.fn(),
-    }
+    },
   };
   beforeEach(() => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
@@ -85,7 +85,7 @@ describe('RuleDashboards', () => {
     expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
     expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
   });
-      
+
   it('renders linked dashboards combo box when feature flag is enabled', async () => {
     plugins.featureFlags.getBooleanValue.mockReturnValue(true);
 

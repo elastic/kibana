@@ -112,5 +112,4 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-export interface RuleDashboardsPlugins extends Pick<RuleFormPlugins, 'dashboard' | 'featureFlags'> {}
-
+export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'dashboard' | 'featureFlags'>;

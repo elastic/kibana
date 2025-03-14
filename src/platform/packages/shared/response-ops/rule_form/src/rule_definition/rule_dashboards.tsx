@@ -22,7 +22,6 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
 import { type RuleDashboardsPlugins } from '../types';
 
-
 export interface RuleDashboardsPluginsProps {
   plugins: RuleDashboardsPlugins;
 }
