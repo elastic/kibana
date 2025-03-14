@@ -19,7 +19,7 @@ import { AnnotationIcon } from '..';
 import { TimestampRangeLabel } from '../timestamp_range_label';
 import { Annotation, CreateAnnotationParams } from '../../../../../common/annotations';
 
-import './annotations.scss';
+import './../annotations.scss';
 
 export interface AnnotationTooltipProps {
   annotation: Annotation | CreateAnnotationParams;
