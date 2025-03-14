@@ -1070,6 +1070,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -1091,6 +1092,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test2',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -1112,6 +1114,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test3',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
