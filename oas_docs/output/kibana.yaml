@@ -15457,6 +15457,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -15605,6 +15607,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -15654,6 +15658,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -15746,6 +15752,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -15899,6 +15907,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -16624,6 +16634,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -17496,6 +17508,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -18186,6 +18200,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -18852,6 +18868,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -19734,6 +19752,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -20422,6 +20442,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -20474,6 +20496,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -20491,6 +20515,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -20892,6 +20918,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -20990,6 +21018,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21051,6 +21081,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -21168,6 +21200,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21261,6 +21295,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21337,6 +21373,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -21747,6 +21785,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21806,6 +21846,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21857,6 +21899,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -22184,6 +22228,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -22527,6 +22573,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -22665,6 +22713,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -22721,6 +22771,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -22785,6 +22837,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -22882,6 +22936,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -22956,6 +23012,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23117,6 +23175,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23205,6 +23265,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23244,6 +23306,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23313,6 +23377,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23380,6 +23446,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23454,6 +23522,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23526,6 +23596,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23606,6 +23678,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23659,6 +23733,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23700,6 +23776,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23764,6 +23842,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23823,6 +23903,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23874,6 +23956,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23921,6 +24005,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24020,6 +24106,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24147,6 +24235,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24238,6 +24328,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24289,6 +24381,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24358,6 +24452,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24452,6 +24548,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24517,6 +24615,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24657,6 +24757,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24733,6 +24835,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -25141,6 +25245,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -25263,6 +25369,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -25443,6 +25551,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -25554,6 +25664,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -26035,6 +26147,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -26180,6 +26294,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -26651,6 +26767,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -26696,6 +26814,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -26783,6 +26903,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -26831,6 +26953,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -26980,6 +27104,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27019,6 +27145,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27122,6 +27250,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27160,6 +27290,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27290,6 +27422,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27501,6 +27635,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27550,6 +27686,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27673,6 +27811,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27882,6 +28022,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27942,6 +28084,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27959,6 +28103,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28013,6 +28159,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28060,6 +28208,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28077,6 +28227,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28122,6 +28274,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28174,6 +28328,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28191,6 +28347,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28969,6 +29127,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -30477,6 +30637,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -30527,6 +30689,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -30544,6 +30708,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -31315,6 +31481,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -32807,6 +32975,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -32858,6 +33028,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -33331,6 +33503,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -34177,6 +34351,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -34194,6 +34370,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -34644,6 +34822,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -34709,6 +34889,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -35138,6 +35320,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -35994,6 +36178,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -36011,6 +36197,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -36143,6 +36331,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -36217,6 +36407,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37025,6 +37217,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -37105,6 +37299,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37218,6 +37414,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -37267,6 +37465,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37341,6 +37541,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37456,6 +37658,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -37514,6 +37718,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37594,6 +37800,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37723,6 +37931,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -37793,6 +38003,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37900,6 +38112,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -37964,6 +38178,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
