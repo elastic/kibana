@@ -7,18 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
-const Fallback = () => <div />;
-
-const LazySuggestionsComponent = React.lazy(async () => {
-  const { SuggestionsComponent } = await import('../ui_module');
-  return { default: SuggestionsComponent };
-});
-export const SuggestionsComponent = (
-  props: React.ComponentProps<typeof LazySuggestionsComponent>
-) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazySuggestionsComponent {...props} />
-  </React.Suspense>
-);
+export { fromKueryExpression } from '@kbn/es-query';
+export { setupGetFieldSuggestions } from './field';
+export { setupGetValueSuggestions } from './value';
+export { setupGetOperatorSuggestions } from './operator';
+export { setupGetConjunctionSuggestions } from './conjunction';

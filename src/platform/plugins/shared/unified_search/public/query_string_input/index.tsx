@@ -15,7 +15,7 @@ import type { QueryStringInputProps } from './query_string_input';
 const Fallback = () => <div />;
 
 const LazyQueryBarTopRow = React.lazy(async () => {
-  const { QueryBarTopRow } = await import('../async_module');
+  const { QueryBarTopRow } = await import('../ui_module');
   return { default: QueryBarTopRow };
 });
 
@@ -28,7 +28,7 @@ export const QueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
 );
 
 const LazyQueryStringInputUI = React.lazy(async () => {
-  const { QueryStringInput } = await import('../async_module');
+  const { QueryStringInput } = await import('../ui_module');
   return { default: QueryStringInput };
 });
 

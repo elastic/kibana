@@ -14,7 +14,7 @@ export type { FilterItemsProps } from './filter_item/filter_items';
 const Fallback = () => <div />;
 
 const LazyFilterBar = React.lazy(async () => {
-  const { FilterBar } = await import('../async_module');
+  const { FilterBar } = await import('../ui_module');
   return { default: FilterBar };
 });
 export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => (
@@ -24,7 +24,7 @@ export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => 
 );
 
 const LazyFilterItems = React.lazy(async () => {
-  const { FilterItems } = await import('../async_module');
+  const { FilterItems } = await import('../ui_module');
   return { default: FilterItems };
 });
 /**
@@ -37,7 +37,7 @@ export const FilterItems = (props: React.ComponentProps<typeof LazyFilterItems>)
 );
 
 const LazyFilterItem = React.lazy(async () => {
-  const { FilterItem } = await import('../async_module');
+  const { FilterItem } = await import('../ui_module');
   return { default: FilterItem };
 });
 /**

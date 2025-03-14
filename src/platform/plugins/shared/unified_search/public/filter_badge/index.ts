@@ -17,7 +17,7 @@ export { FilterContent, FilterContentLazy } from './filter_content';
  * the withSuspense` HOC to load this component.
  */
 export const FilterBadgeLazy = React.lazy(async () => {
-  const { FilterBadge } = await import('../async_module');
+  const { FilterBadge } = await import('../ui_module');
   return { default: FilterBadge };
 });
 
@@ -33,7 +33,7 @@ export const FilterBadge = withSuspense(FilterBadgeLazy);
  * the withSuspense` HOC to load this component.
  */
 export const FilterBadgeGroupLazy = React.lazy(async () => {
-  const { FilterBadgeGroup } = await import('../async_module');
+  const { FilterBadgeGroup } = await import('../ui_module');
   return { default: FilterBadgeGroup };
 });
 

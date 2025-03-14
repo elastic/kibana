@@ -9,12 +9,6 @@
 
 import './index.scss';
 
-export { fromKueryExpression } from '@kbn/es-query';
-export { setupGetFieldSuggestions } from './autocomplete/providers/kql_query_suggestion/field';
-export { setupGetValueSuggestions } from './autocomplete/providers/kql_query_suggestion/value';
-export { setupGetOperatorSuggestions } from './autocomplete/providers/kql_query_suggestion/operator';
-export { setupGetConjunctionSuggestions } from './autocomplete/providers/kql_query_suggestion/conjunction';
-
 export { DataViewsList } from './dataview_picker/dataview_list';
 export { DataViewPicker } from './dataview_picker/data_view_picker';
 export { DataViewSelector } from './dataview_picker/data_view_selector';

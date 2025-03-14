@@ -17,7 +17,7 @@ export type { DataViewPickerProps } from './data_view_picker';
  * the withSuspense` HOC to load this component.
  */
 export const DataViewsListLazy = React.lazy(async () => {
-  const { DataViewsList } = await import('../async_module');
+  const { DataViewsList } = await import('../ui_module');
   return { default: DataViewsList };
 });
 
@@ -33,7 +33,7 @@ export const DataViewsList = withSuspense(DataViewsListLazy);
  * the withSuspense` HOC to load this component.
  */
 export const DataViewSelectorLazy = React.lazy(async () => {
-  const { DataViewSelector } = await import('../async_module');
+  const { DataViewSelector } = await import('../ui_module');
   return { default: DataViewSelector };
 });
 
@@ -49,7 +49,7 @@ export const DataViewSelector = withSuspense(DataViewSelectorLazy);
  * the withSuspense` HOC to load this component.
  */
 export const DataViewPickerLazy = React.lazy(async () => {
-  const { DataViewPicker } = await import('../async_module');
+  const { DataViewPicker } = await import('../ui_module');
   return { default: DataViewPicker };
 });
 

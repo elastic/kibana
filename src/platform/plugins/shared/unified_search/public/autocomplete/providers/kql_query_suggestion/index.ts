@@ -46,7 +46,7 @@ export const setupKqlQuerySuggestionProvider = (
       setupGetValueSuggestions,
       setupGetOperatorSuggestions,
       setupGetConjunctionSuggestions,
-    } = await import('../../../async_module');
+    } = await import('./kql_module');
 
     const providers = {
       field: setupGetFieldSuggestions(core),
