@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { CORSError } from './cors_error';
 import {
   isRESTApiError,
   isFieldInvalid,
   getConnectorDescriptiveTitle,
   getSelectedConnectorIcon,
+  isCORSError,
 } from './helpers';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 const deprecatedConnector: ActionConnector = {
   secrets: {},
@@ -48,6 +50,17 @@ describe('helpers', () => {
     test('should return false if there is no error', async () => {
       // @ts-expect-error
       expect(isRESTApiError({ whatever: 'test' })).toBeFalsy();
+    });
+  });
+
+  describe('isCORSError', () => {
+    test('should return true if the error is CORSError', () => {
+      const error = new CORSError('cors error');
+      expect(isCORSError(error)).toBeTruthy();
+    });
+
+    test('should return false if there is no error', () => {
+      expect(isCORSError(new Error())).toBeFalsy();
     });
   });
 

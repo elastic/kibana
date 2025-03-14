@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
-import type { EsqlRuleParams } from '../../rule_schema';
-import { getCompleteRuleMock, getEsqlRuleParams } from '../../rule_schema/mocks';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { getEsqlRuleParams } from '../../rule_schema/mocks';
 import { esqlExecutor } from './esql';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { getSharedParamsMock } from '../__mocks__/shared_params';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
@@ -26,23 +24,16 @@ jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn()
 const getDataTierFilterMock = getDataTierFilter as jest.Mock;
 
 describe('esqlExecutor', () => {
-  const version = '9.1.0';
-  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   let alertServices: RuleExecutorServicesMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEsqlRuleParams();
-  const esqlCompleteRule = getCompleteRuleMock<EsqlRuleParams>(params);
-  const tuple = {
-    from: dateMath.parse(params.from)!,
-    to: dateMath.parse(params.to)!,
-    maxSignals: params.maxSignals,
-  };
   const mockExperimentalFeatures = {} as ExperimentalFeatures;
   const mockScheduleNotificationResponseActionsService = jest.fn();
-  const SPACE_ID = 'space';
-  const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';
+  const licensing = licensingMock.createSetup();
 
   let mockedArguments: Parameters<typeof esqlExecutor>[0];
+
+  const sharedParams = getSharedParamsMock({ ruleParams: params });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,24 +41,13 @@ describe('esqlExecutor', () => {
     getDataTierFilterMock.mockResolvedValue([]);
 
     mockedArguments = {
-      runOpts: {
-        completeRule: esqlCompleteRule,
-        tuple,
-        ruleExecutionLogger,
-        bulkCreate: jest.fn(),
-        mergeStrategy: 'allFields',
-        primaryTimestamp: '@timestamp',
-        alertWithSuppression: jest.fn(),
-        unprocessedExceptions: [getExceptionListItemSchemaMock()],
-        publicBaseUrl: PUBLIC_BASE_URL,
-      },
+      sharedParams,
       services: alertServices,
-      version,
-      licensing: {},
-      spaceId: SPACE_ID,
+      licensing,
       experimentalFeatures: mockExperimentalFeatures,
       scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
-    } as unknown as Parameters<typeof esqlExecutor>[0];
+      state: {},
+    };
   });
 
   describe('errors', () => {

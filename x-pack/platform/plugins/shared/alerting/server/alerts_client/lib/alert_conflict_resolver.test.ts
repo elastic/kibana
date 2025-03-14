@@ -14,7 +14,7 @@ import {
   ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
-import {
+import type {
   BulkRequest,
   BulkResponse,
   BulkResponseItem,

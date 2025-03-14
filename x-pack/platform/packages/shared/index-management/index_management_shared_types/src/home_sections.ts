@@ -7,7 +7,7 @@
 
 import { FunctionComponent, ReactNode } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb, EuiThemeComputed } from '@elastic/eui';
 import { Index } from './types';
 
 export enum Section {
@@ -36,6 +36,7 @@ export interface IndexDetailsTab {
   renderTabContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
+    euiTheme: EuiThemeComputed;
   }) => ReturnType<FunctionComponent>;
   // a number to specify the order of the tabs
   order: number;

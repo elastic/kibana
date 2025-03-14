@@ -26,6 +26,7 @@ import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import { clearConversations } from '../knowledge_base/helpers';
+import { systemMessageSorted } from './functions/helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -247,7 +248,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const simulator = await simulatorPromise;
         const requestData = simulator.requestBody;
         expect(requestData.messages[0].role).to.eql('system');
-        expect(requestData.messages[0].content).to.eql(systemMessage);
+        expect(systemMessageSorted(requestData.messages[0].content as string)).to.eql(
+          systemMessageSorted(systemMessage)
+        );
       });
     });
 
