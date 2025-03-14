@@ -12,9 +12,6 @@ import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import { UnifiedSearchPublicPlugin } from './plugin';
 
-/*
- * Autocomplete query suggestions:
- */
 export type {
   QuerySuggestion,
   QuerySuggestionGetFn,
@@ -54,8 +51,6 @@ export async function createFilterAction(
   return createAction(filterManager, timeFilter, coreStart, id, type);
 }
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new UnifiedSearchPublicPlugin(initializerContext);
 }
