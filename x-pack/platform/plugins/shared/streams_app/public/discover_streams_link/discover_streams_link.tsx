@@ -82,14 +82,17 @@ function DiscoverStreamsLinkContent({
       if (!index) {
         return getFallbackStreamName(flattenedDoc);
       }
-      const definition = await streamsRepositoryClient.fetch('GET /api/streams/_resolve_index', {
-        signal,
-        params: {
-          query: {
-            index,
+      const definition = await streamsRepositoryClient.fetch(
+        'GET /internal/streams/_resolve_index',
+        {
+          signal,
+          params: {
+            query: {
+              index,
+            },
           },
-        },
-      });
+        }
+      );
       return definition?.stream?.name;
     },
     [streamsRepositoryClient, index],
