@@ -98,7 +98,6 @@ describe('evaluateDefendInsights', () => {
     });
 
     expect(mockGetDefaultDefendInsightsGraph).toHaveBeenCalledWith({
-      connectorType: '.test',
       insightType: DefendInsightType.Enum.incompatible_antivirus,
       endpointIds: [],
       esClient: mockEsClient,

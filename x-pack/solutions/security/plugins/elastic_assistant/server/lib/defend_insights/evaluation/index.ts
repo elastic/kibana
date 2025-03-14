@@ -96,7 +96,6 @@ export const evaluateDefendInsights = async ({
         logger,
         size,
         anonymizationFields,
-        connectorType: connector.actionTypeId,
       });
 
       return {

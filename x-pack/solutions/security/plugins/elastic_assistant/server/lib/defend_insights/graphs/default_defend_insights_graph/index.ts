@@ -35,7 +35,6 @@ export interface GetDefaultDefendInsightsGraphParams {
   size?: number;
   start?: string;
   end?: string;
-  connectorType?: string;
 }
 
 export type DefaultDefendInsightsGraph = ReturnType<typeof getDefaultDefendInsightsGraph>;
@@ -56,14 +55,13 @@ export const getDefaultDefendInsightsGraph = ({
   size,
   start,
   end,
-  connectorType,
 }: GetDefaultDefendInsightsGraphParams): CompiledStateGraph<
   GraphState,
   Partial<GraphState>,
   'generate' | 'refine' | 'retrieve_anonymized_events' | '__start__'
 > => {
   try {
-    const graphState = getDefaultGraphState({ insightType, start, end, connectorType });
+    const graphState = getDefaultGraphState({ insightType, start, end });
 
     // get nodes:
     const retrieveAnonymizedEventsNode = getRetrieveAnonymizedEventsNode({

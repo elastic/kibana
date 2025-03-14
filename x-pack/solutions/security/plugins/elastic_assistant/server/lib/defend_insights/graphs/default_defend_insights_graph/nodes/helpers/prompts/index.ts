@@ -13,14 +13,12 @@ import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
 export function getDefendInsightsPrompt({
   type,
   events,
-  connectorType,
 }: {
   type: DefendInsightType;
   events?: string[];
-  connectorType?: string;
 }): string {
   if (type === DefendInsightType.Enum.incompatible_antivirus) {
-    return getIncompatibleAntivirusPrompt(events, connectorType);
+    return getIncompatibleAntivirusPrompt(events);
   }
 
   throw new InvalidDefendInsightTypeError();
