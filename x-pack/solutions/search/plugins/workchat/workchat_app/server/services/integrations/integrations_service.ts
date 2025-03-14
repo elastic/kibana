@@ -35,9 +35,20 @@ type IntegrationModel = ExternalIntegrationModel | InternalIntegrationModel;
 // TODO: move to reading from saved objects
 const IntegrationsSO: IntegrationModel[] = [
   {
-    id: '1',
-    type: 'salesforce' as IntegrationTypes,
-    configuration: {},
+    id: '4',
+    type: 'custom_index' as IntegrationTypes,
+    configuration: {
+      index: "hr-questions",
+      description: "HR document knowledgebase",
+      fields: {
+        filterFields: [],
+        contextFields: [
+          { field: "content"},
+          { field: "title" },
+        ]
+      },
+      queryTemplate: '{"semantic":{"query":"{query}","field":"content"}}'
+    },
     isInternal: true,
   },
   {
@@ -61,8 +72,8 @@ const IntegrationsSO: IntegrationModel[] = [
           { field: "created", type: "date", aggs: false, description: "Date the article was created" }
         ],
         contextFields: [
-          { field: "description", type: "keyword", description: "Description of the article" },
-          { field: "content", type: "semantic", description: "Content of the article" }
+          { field: "description" },
+          { field: "content" }
         ]
       },
       queryTemplate: '{"semantic":{"query":"{query}","field":"content"}}'

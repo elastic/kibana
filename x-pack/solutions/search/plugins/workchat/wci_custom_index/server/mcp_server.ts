@@ -82,7 +82,7 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
     if (field.type === "keyword" && field.aggs && field.values.length > 0) {
       return {
         ...acc,
-        [field.field]: z.string().describe(field.description + " (one of " + field.values.join(", ") + ")")
+        [field.field]: z.string().describe(field.description + ". (one of " + field.values.join(", ") + ")").optional()
       }
     } else if (field.type === "keyword" && !field.aggs) {
       return {
@@ -102,8 +102,8 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
     query: z.string().describe("The query to search for").optional()
   })
 
-  server.tool("search", configuration.description, filterSchema, async ({ query, ...filters }: typeof filterSchema) => {
-    const { index, } = configuration;
+  server.tool("search", configuration.description, filterSchema, async ({ query, ...filters }) => {
+    const { index } = configuration;
 
     services.logger.info(`Searching for "${query}" in index "${index}"`);
 
@@ -116,7 +116,7 @@ export async function getMcpServer(configuration: CustomIndexConfiguration, serv
           "term": { [field]: value }
         }
       } 
-    })
+    }) || []
 
     try {
       result = await services.elasticsearchClient.search<SearchResult>({
