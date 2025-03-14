@@ -160,19 +160,6 @@ package's "integrations" that this package contains. It is represented by 3 prop
 There are Fleet packages like `windows` that contain only one integration; in this case,
 `integration` should be unspecified. There are also packages like `aws` and `azure` that contain
 several integrations; in this case, `integration` should be specified.
-
-@example
-const x: RelatedIntegration = {
-  package: 'windows',
-  version: '1.5.x',
-};
-
-@example
-const x: RelatedIntegration = {
-  package: 'azure',
-  version: '~1.1.6',
-  integration: 'activitylogs',
-};
  
       */
   related_integrations: RelatedIntegrationArray.optional(),
@@ -252,9 +239,6 @@ export const EqlRequiredFields = z.object({
    * Rule type
    */
   type: z.literal('eql'),
-  /**
-   * EQL query to execute
-   */
   query: RuleQuery,
   /**
    * Query language to use
@@ -610,9 +594,6 @@ export const EsqlRuleRequiredFields = z.object({
    */
   type: z.literal('esql'),
   language: EsqlQueryLanguage,
-  /**
-   * ESQL query to execute
-   */
   query: RuleQuery,
 });
 
