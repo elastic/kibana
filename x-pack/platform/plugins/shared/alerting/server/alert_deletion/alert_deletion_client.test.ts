@@ -13,7 +13,8 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RULES_SETTINGS_SAVED_OBJECT_TYPE, RulesSettingsAlertDeletionProperties } from '../types';
+import type { RulesSettingsAlertDeletionProperties } from '../types';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -28,69 +29,37 @@ const taskManagerStart = taskManagerMock.createStart();
 
 const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-1') => ({
   bool: {
-    filter: [
+    should: [
       {
         bool: {
-          minimum_should_match: 1,
-          should: [
+          filter: [
             {
               bool: {
-                filter: [
+                should: [
                   {
                     bool: {
-                      minimum_should_match: 1,
-                      should: [{ match_phrase: { 'event.kind': 'close' } }],
-                    },
-                  },
-                  {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [{ range: { '@timestamp': { lt: `now-${days}d` } } }],
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      minimum_should_match: 1,
                       should: [{ match_phrase: { 'kibana.alert.workflow_status': 'closed' } }],
+                      minimum_should_match: 1,
                     },
                   },
                   {
                     bool: {
-                      minimum_should_match: 1,
                       should: [
-                        {
-                          range: {
-                            'kibana.alert.workflow_status_updated_at': { lt: `now-${days}d` },
-                          },
-                        },
+                        { match_phrase: { 'kibana.alert.workflow_status': 'acknowledged' } },
                       ],
+                      minimum_should_match: 1,
                     },
                   },
                 ],
+                minimum_should_match: 1,
               },
             },
             {
               bool: {
-                filter: [
-                  {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [{ match_phrase: { 'kibana.alert.status': 'untracked' } }],
-                    },
-                  },
-                  {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [{ range: { 'kibana.alert.end': { lt: `now-${days}d` } } }],
-                    },
-                  },
+                should: [
+                  { range: { 'kibana.alert.workflow_status_updated_at': { lt: `now-${days}d` } } },
                 ],
+                minimum_should_match: 1,
               },
             },
           ],
@@ -98,11 +67,49 @@ const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-1') => 
       },
       {
         bool: {
-          minimum_should_match: 1,
-          should: [{ match: { 'kibana.space_ids': spaceId } }],
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            should: [{ match_phrase: { 'kibana.alert.status': 'untracked' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [{ match_phrase: { 'kibana.alert.status': 'recovered' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [{ range: { 'kibana.alert.end': { lt: `now-${days}d` } } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                should: [{ match: { 'kibana.space_ids': spaceId } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
       },
     ],
+    minimum_should_match: 1,
   },
 });
 
@@ -112,20 +119,7 @@ const activeAlertsQuery = (days: number = 45, spaceId: string = 'space-1') => ({
       {
         bool: {
           minimum_should_match: 1,
-          should: [
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [{ match_phrase: { 'event.kind': 'open' } }],
-              },
-            },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [{ match_phrase: { 'event.kind': 'active' } }],
-              },
-            },
-          ],
+          should: [{ match_phrase: { 'kibana.alert.status': 'active' } }],
         },
       },
       {
@@ -140,6 +134,16 @@ const activeAlertsQuery = (days: number = 45, spaceId: string = 'space-1') => ({
             bool: {
               minimum_should_match: 1,
               should: [{ exists: { field: 'kibana.alert.end' } }],
+            },
+          },
+        },
+      },
+      {
+        bool: {
+          must_not: {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ exists: { field: 'kibana.alert.workflow_status_updated_at' } }],
             },
           },
         },
@@ -393,6 +397,23 @@ describe('AlertDeletionClient', () => {
       expect(result).toEqual(1);
     });
 
+    test('should throw error for invalid category IDs', async () => {
+      await expect(
+        alertDeletionClient.previewTask(
+          {
+            isActiveAlertsDeletionEnabled: false,
+            isInactiveAlertsDeletionEnabled: true,
+            activeAlertsDeletionThreshold: 1,
+            inactiveAlertsDeletionThreshold: 30,
+            categoryIds: ['invalid-category', 'management'],
+          },
+          'space-1'
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid category id - invalid-category,management"`
+      );
+    });
+
     test('should throw error if count query throws error', async () => {
       esClient.count.mockRejectedValue(new Error('Fail to count alerts'));
       await expect(
@@ -587,6 +608,54 @@ describe('AlertDeletionClient', () => {
     });
 
     describe('error handling', () => {
+      test('test should handle invalid category IDs rule settings saved objects', async () => {
+        internalSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield {
+              saved_objects: [
+                {
+                  id: 'alert-deletion-settings',
+                  type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    isActiveAlertsDeletionEnabled: false,
+                    isInactiveAlertsDeletionEnabled: true,
+                    activeAlertsDeletionThreshold: 1,
+                    inactiveAlertsDeletionThreshold: 30,
+                    categoryIds: ['invalid-category'],
+                  },
+                  references: [],
+                },
+              ],
+            };
+          },
+        });
+
+        // @ts-ignore - accessing private function for testing
+        await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(esClient.bulk).not.toHaveBeenCalled();
+        expect(taskManagerStart.bulkUpdateState).not.toHaveBeenCalled();
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+          '@timestamp': expect.any(String),
+          event: {
+            action: 'delete-alerts',
+            outcome: 'failure',
+            start: expect.any(String),
+            end: expect.any(String),
+            duration: expect.any(String),
+          },
+          error: { message: `Invalid category ID found - invalid-category - not deleting alerts` },
+          kibana: {
+            alert: { deletion: { num_deleted: 0 } },
+            space_ids: ['default'],
+          },
+        });
+      });
+
       test('should handle errors querying for rule settings saved objects', async () => {
         internalSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
           close: jest.fn(),

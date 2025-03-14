@@ -173,7 +173,7 @@
     "@kbn/aiops-log-rate-analysis": "link:x-pack/platform/packages/shared/ml/aiops_log_rate_analysis",
     "@kbn/aiops-plugin": "link:x-pack/platform/plugins/shared/aiops",
     "@kbn/aiops-test-utils": "link:x-pack/platform/packages/private/ml/aiops_test_utils",
-    "@kbn/alerting-api-integration-test-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/alerts",
+    "@kbn/alerting-api-integration-test-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/alerting",
     "@kbn/alerting-comparators": "link:x-pack/platform/packages/shared/kbn-alerting-comparators",
     "@kbn/alerting-example-plugin": "link:x-pack/examples/alerting_example",
     "@kbn/alerting-fixture-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/alerts",

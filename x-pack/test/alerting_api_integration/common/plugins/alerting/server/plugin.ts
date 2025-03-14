@@ -89,6 +89,9 @@ const testAlertingFeatures = testRuleTypes.map((ruleTypeId) => ({
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly logger: Logger;
 
+  alertingStart$ = new Subject<AlertingServerStart>();
+  alertingStart = firstValueFrom(this.alertingStart$);
+
   taskManagerStart$ = new Subject<TaskManagerStartContract>();
   taskManagerStart = firstValueFrom(this.taskManagerStart$);
 
@@ -146,13 +149,16 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     const eventLogger = eventLog.getLogger({
       event: { provider: 'alerting' },
     });
-    defineRoutes(core, this.taskManagerStart, this.notificationsStart, {
+    defineRoutes(core, this.taskManagerStart, this.notificationsStart, this.alertingStart, {
       logger: this.logger,
       eventLogger,
     });
   }
 
-  public start(core: CoreStart, { taskManager, notifications }: FixtureStartDeps) {
+  public start(core: CoreStart, { alerting, taskManager, notifications }: FixtureStartDeps) {
+    this.alertingStart$.next(alerting);
+    this.alertingStart$.complete();
+
     this.taskManagerStart$.next(taskManager);
     this.taskManagerStart$.complete();
 

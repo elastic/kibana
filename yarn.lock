@@ -3933,7 +3933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-api-integration-test-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts":
+"@kbn/alerting-api-integration-test-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerting":
   version "0.0.0"
   uid ""
 

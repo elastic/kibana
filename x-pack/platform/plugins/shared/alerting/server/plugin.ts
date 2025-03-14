@@ -64,7 +64,11 @@ import {
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import type { ILicenseState } from './lib/license_state';
 import { LicenseState } from './lib/license_state';
-import type { AlertingRequestHandlerContext, RuleAlertData } from './types';
+import type {
+  AlertingRequestHandlerContext,
+  RuleAlertData,
+  RulesSettingsAlertDeletionProperties,
+} from './types';
 import { ALERTING_FEATURE_ID, RULES_SETTINGS_SAVED_OBJECT_TYPE } from './types';
 import { defineRoutes } from './routes';
 import type {
@@ -177,6 +181,11 @@ export interface AlertingServerStart {
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
+  scheduleAlertDeletion(spaceIds: string[]): Promise<void>;
+  previewAlertDeletion(
+    settings: RulesSettingsAlertDeletionProperties,
+    spaceId: string
+  ): Promise<number>;
 }
 
 export interface AlertingPluginsSetup {
@@ -428,7 +437,6 @@ export class AlertingPlugin {
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
       docLinks: core.docLinks,
-      alertDeletionClient: this.alertDeletionClient,
     });
 
     return {
@@ -672,6 +680,14 @@ export class AlertingPlugin {
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
+
+      // remove when we have real routes
+      scheduleAlertDeletion: async (spaceIds: string[]) =>
+        await this.alertDeletionClient!.scheduleTask(spaceIds),
+      previewAlertDeletion: async (
+        settings: RulesSettingsAlertDeletionProperties,
+        spaceId: string
+      ) => await this.alertDeletionClient!.previewTask(settings, spaceId),
     };
   }
 
@@ -679,6 +695,7 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>
   ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const {
+      alertDeletionClient,
       ruleTypeRegistry,
       rulesClientFactory,
       rulesSettingsClientFactory,
@@ -687,6 +704,9 @@ export class AlertingPlugin {
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
+        getAlertDeletionClient: () => {
+          return alertDeletionClient!;
+        },
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },

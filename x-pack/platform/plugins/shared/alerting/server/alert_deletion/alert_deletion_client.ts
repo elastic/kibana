@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  ISavedObjectsRepository,
-  Logger,
-  SavedObjectsUtils,
-} from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsUtils } from '@kbn/core/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { IEventLogger, millisToNanos } from '@kbn/event-log-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { omitBy } from 'lodash';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { GetAlertIndicesAlias, spaceIdToNamespace } from '../lib';
-import {
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  RuleTypeRegistry,
-  RulesSettingsAlertDeletionProperties,
-} from '../types';
+import type { GetAlertIndicesAlias } from '../lib';
+import { spaceIdToNamespace } from '../lib';
+import type { RuleTypeRegistry, RulesSettingsAlertDeletionProperties } from '../types';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 export const ALERT_DELETION_TASK_TYPE = 'alert-deletion';
 
+const allowedAppCategories = [
+  DEFAULT_APP_CATEGORIES.security.id,
+  DEFAULT_APP_CATEGORIES.management.id,
+  DEFAULT_APP_CATEGORIES.observability.id,
+];
 interface ConstructorOpts {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   eventLogger: IEventLogger;
@@ -121,6 +121,11 @@ export class AlertDeletionClient {
       categoryIds,
     } = settings;
 
+    if (categoryIds && categoryIds.length > 0) {
+      if (categoryIds.some((category) => !allowedAppCategories.includes(category))) {
+        throw new Error(`Invalid category id - ${categoryIds}`);
+      }
+    }
     const ruleTypes =
       categoryIds && categoryIds.length > 0
         ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds)
@@ -244,6 +249,15 @@ export class AlertDeletionClient {
       categoryIds,
     } = settings;
 
+    if (categoryIds && categoryIds.length > 0) {
+      if (categoryIds.some((category) => !allowedAppCategories.includes(category))) {
+        return {
+          numAlertsDeleted: 0,
+          errors: [`Invalid category ID found - ${categoryIds} - not deleting alerts`],
+        };
+      }
+    }
+
     const ruleTypes =
       categoryIds && categoryIds.length > 0
         ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds)
@@ -252,6 +266,11 @@ export class AlertDeletionClient {
 
     let numAlertsDeleted = 0;
     const errors = [];
+
+    if (indices.length === 0) {
+      this.logger.warn(`No indices found for rules settings ${settings}. No alerts deleted`);
+      return { numAlertsDeleted, errors: [`No indices found`] };
+    }
 
     if (isActiveAlertsDeletionEnabled) {
       const activeAlertsQuery = getActiveAlertsQuery(activeAlertsDeletionThreshold, spaceId);
@@ -388,7 +407,7 @@ export class AlertDeletionClient {
 }
 
 function getActiveAlertsQuery(threshold: number, spaceId: string): QueryDslQueryContainer {
-  const filter = `(event.kind: "open" OR event.kind: "active") AND kibana.alert.start < "now-${threshold}d" AND NOT kibana.alert.end:* AND ${[
+  const filter = `kibana.alert.status: "active" AND kibana.alert.start < "now-${threshold}d" AND NOT kibana.alert.end:* AND NOT kibana.alert.workflow_status_updated_at:* AND ${[
     SPACE_IDS,
   ]}: ${spaceId}`;
   const filterKueryNode = fromKueryExpression(filter);
@@ -396,7 +415,7 @@ function getActiveAlertsQuery(threshold: number, spaceId: string): QueryDslQuery
 }
 
 function getInactiveAlertsQuery(threshold: number, spaceId: string): QueryDslQueryContainer {
-  const filter = `((event.kind: "close" AND @timestamp < "now-${threshold}d") OR (kibana.alert.workflow_status: "closed" AND kibana.alert.workflow_status_updated_at < "now-${threshold}d") OR (kibana.alert.status: "untracked" AND kibana.alert.end < "now-${threshold}d")) AND ${[
+  const filter = `((kibana.alert.workflow_status: "closed" OR kibana.alert.workflow_status: "acknowledged") AND kibana.alert.workflow_status_updated_at < "now-${threshold}d") OR ((kibana.alert.status: "untracked" OR kibana.alert.status: "recovered") AND kibana.alert.end < "now-${threshold}d") AND ${[
     SPACE_IDS,
   ]}: ${spaceId}`;
   const filterKueryNode = fromKueryExpression(filter);

@@ -226,7 +226,7 @@ export const Users: User[] = [
   StackAlertsOnly,
 ];
 
-const Space1: Space = {
+export const Space1: Space = {
   id: 'space1',
   name: 'Space 1',
   disabledFeatures: [],
