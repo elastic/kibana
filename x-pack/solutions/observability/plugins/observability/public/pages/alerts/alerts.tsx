@@ -54,6 +54,7 @@ import { buildEsQuery } from '../../utils/build_es_query';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
+import { AlertsLoader } from './components/alerts_loader';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -101,6 +102,7 @@ function InternalAlertsPage() {
     [filterControls]
   );
   const filteredRuleTypes = useGetFilteredRuleTypes();
+  const themeOverrides = charts.theme.useChartsBaseTheme();
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
@@ -289,17 +291,21 @@ function InternalAlertsPage() {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertSummaryWidget
-              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-              consumers={observabilityAlertFeatureIds}
-              filter={esQuery}
-              fullSize
-              timeRange={alertSummaryTimeRange}
-              chartProps={{
-                themeOverrides: charts.theme.useChartsBaseTheme(),
-                onBrushEnd,
-              }}
-            />
+            {hasInitialControlLoadingFinished ? (
+              <AlertSummaryWidget
+                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                consumers={observabilityAlertFeatureIds}
+                filter={esQuery}
+                fullSize
+                timeRange={alertSummaryTimeRange}
+                chartProps={{
+                  themeOverrides,
+                  onBrushEnd,
+                }}
+              />
+            ) : (
+              <AlertsLoader />
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
             {esQuery && hasInitialControlLoadingFinished && (
