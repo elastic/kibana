@@ -80,6 +80,7 @@ type ExpectedDiffOutcome =
   | {
       expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate;
       expectedFieldDiffValues: MissingHistoricalRuleVersionsFieldDiffValueVersions;
+      isMergableField?: boolean;
     };
 
 /**
@@ -162,6 +163,7 @@ export function testFieldUpgradeReview(
         expectMissingBaseABFieldDiff(diff, {
           diffableRuleFieldName: params.diffableRuleFieldName,
           valueVersions: params.expectedFieldDiffValues,
+          isMergableField: params.isMergableField,
         });
         break;
     }
@@ -500,6 +502,7 @@ function expectMissingBaseAAFieldDiff(
 interface MissingBaseFieldAssertParams {
   diffableRuleFieldName: string;
   valueVersions: MissingHistoricalRuleVersionsFieldDiffValueVersions;
+  isMergableField?: boolean;
 }
 
 /**
@@ -523,7 +526,9 @@ function expectMissingBaseABFieldDiff(
         target_version: fieldAssertParams.valueVersions.target,
         merged_version: fieldAssertParams.valueVersions.merged,
         diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Target,
+        merge_outcome: fieldAssertParams.isMergableField
+          ? ThreeWayMergeOutcome.Merged
+          : ThreeWayMergeOutcome.Target,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       },
       isUndefined
