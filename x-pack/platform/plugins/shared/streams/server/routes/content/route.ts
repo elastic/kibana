@@ -19,9 +19,11 @@ import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
 const exportContentRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/content/export',
+  endpoint: 'GET /api/streams/{name}/content/export 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Export stream content',
+    description: 'Exports the content associated to a stream.',
   },
   params: z.object({
     path: z.object({
@@ -75,9 +77,11 @@ const exportContentRoute = createServerRoute({
 });
 
 const importContentRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/content/import',
+  endpoint: 'POST /api/streams/{name}/content/import 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Import content into a stream',
+    description: 'Links content objects to a stream.',
     body: {
       accepts: 'multipart/form-data',
       output: 'stream',
