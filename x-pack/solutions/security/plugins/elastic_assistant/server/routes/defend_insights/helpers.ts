@@ -468,8 +468,6 @@ export const invokeDefendInsightsGraph = async ({
     savedObjectsClient,
   });
 
-  console.log(JSON.stringify({ defendInsightsPrompts }, null, 2)); // TODO: remove
-
   const graph = getDefaultDefendInsightsGraph({
     insightType,
     endpointIds,
