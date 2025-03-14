@@ -8,6 +8,7 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -20,7 +21,6 @@ import { css } from '@emotion/react';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
-import { ConversationSelectorSettingsOption } from './types';
 
 interface Props {
   conversations: Record<string, Conversation>;
@@ -67,25 +67,24 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       [conversations]
     );
 
-    const [conversationOptions, setConversationOptions] = useState<
-      ConversationSelectorSettingsOption[]
-    >(() => {
-      return Object.values(conversations).map((conversation) => ({
-        value: { isDefault: conversation.isDefault ?? false },
-        label: conversation.title,
-        id: conversation.id,
-        'data-test-subj': conversation.title,
-      }));
-    });
+    const [conversationOptions, setConversationOptions] = useState<EuiComboBoxOptionOption[]>(
+      () => {
+        return Object.values(conversations).map((conversation) => ({
+          label: conversation.title,
+          id: conversation.id,
+          'data-test-subj': conversation.title,
+        }));
+      }
+    );
 
-    const selectedOptions = useMemo<ConversationSelectorSettingsOption[]>(() => {
+    const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
       return selectedConversationTitle
         ? conversationOptions.filter((c) => c.label === selectedConversationTitle) ?? []
         : [];
     }, [conversationOptions, selectedConversationTitle]);
 
     const handleSelectionChange = useCallback(
-      (conversationSelectorSettingsOption: ConversationSelectorSettingsOption[]) => {
+      (conversationSelectorSettingsOption: EuiComboBoxOptionOption[]) => {
         const newConversation =
           conversationSelectorSettingsOption.length === 0
             ? undefined
@@ -129,7 +128,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     // Callback for when a user selects a conversation
     const onChange = useCallback(
-      (newOptions: ConversationSelectorSettingsOption[]) => {
+      (newOptions: EuiComboBoxOptionOption[]) => {
         if (newOptions.length === 0) {
           handleSelectionChange([]);
         } else if (conversationOptions.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
@@ -163,11 +162,11 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
     }, [conversationTitles, selectedConversationTitle, conversationOptions, handleSelectionChange]);
 
     const renderOption: (
-      option: ConversationSelectorSettingsOption,
+      option: EuiComboBoxOptionOption,
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue) => {
-      const { label, value } = option;
+      const { label } = option;
       return (
         <EuiFlexGroup
           alignItems="center"
@@ -192,28 +191,26 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
               {label}
             </EuiHighlight>
           </EuiFlexItem>
-          {!value?.isDefault && (
-            <EuiFlexItem grow={false} component={'span'}>
-              <EuiToolTip position="right" content={i18n.DELETE_CONVERSATION}>
-                <EuiButtonIcon
-                  iconType="cross"
-                  aria-label={i18n.DELETE_CONVERSATION}
-                  color="danger"
-                  data-test-subj="delete-conversation"
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    onDelete(label);
-                  }}
-                  css={css`
-                    visibility: hidden;
-                    .parentFlexGroup:hover & {
-                      visibility: visible;
-                    }
-                  `}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false} component={'span'}>
+            <EuiToolTip position="right" content={i18n.DELETE_CONVERSATION}>
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={i18n.DELETE_CONVERSATION}
+                color="danger"
+                data-test-subj="delete-conversation"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  onDelete(label);
+                }}
+                css={css`
+                  visibility: hidden;
+                  .parentFlexGroup:hover & {
+                    visibility: visible;
+                  }
+                `}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       );
     };

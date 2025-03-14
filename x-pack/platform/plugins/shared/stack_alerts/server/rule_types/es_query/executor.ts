@@ -7,7 +7,7 @@
 
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import {
@@ -18,15 +18,12 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
-import {
-  addMessages,
-  EsQueryRuleActionContext,
-  getContextConditionsDescription,
-} from './action_context';
-import {
+import type { EsQueryRuleActionContext } from './action_context';
+import { addMessages, getContextConditionsDescription } from './action_context';
+import type {
   ExecutorOptions,
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,

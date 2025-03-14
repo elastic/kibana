@@ -12,15 +12,13 @@ import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../../common/lib/kibana';
 import { FiltersGlobal } from '../../common/components/filters_global/filters_global';
 import { useDataViewContext } from '../hooks/data_view_context';
-import type { AssetsBaseURLQuery } from '../hooks/use_asset_inventory_data_table';
-
-type SearchBarQueryProps = Pick<AssetsBaseURLQuery, 'query' | 'filters'>;
+import type { AssetsURLQuery } from '../hooks/use_asset_inventory_data_table';
 
 interface AssetInventorySearchBarProps {
-  setQuery(v: Partial<SearchBarQueryProps>): void;
+  setQuery(v: Partial<AssetsURLQuery>): void;
   loading: boolean;
   placeholder?: string;
-  query: SearchBarQueryProps;
+  query: AssetsURLQuery;
 }
 
 export const AssetInventorySearchBar = ({
@@ -54,7 +52,7 @@ export const AssetInventorySearchBar = ({
           isLoading={loading}
           indexPatterns={[dataView]}
           onQuerySubmit={setQuery}
-          onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
+          onFiltersUpdated={(filters: Filter[]) => setQuery({ filters })}
           placeholder={placeholder}
           query={{
             query: query?.query?.query || '',
@@ -69,6 +67,6 @@ export const AssetInventorySearchBar = ({
 
 const getContainerStyle = (theme: EuiThemeComputed) => css`
   border-bottom: ${theme.border.thin};
-  background-color: ${theme.colors.body};
+  background-color: ${theme.colors.backgroundBaseSubdued};
   padding: ${theme.size.base};
 `;

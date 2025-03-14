@@ -126,23 +126,23 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export type PackagePolicyAssetsMap = AssetsMap & { __brand: 'PackagePolicyAssetsMap' };
+
 export interface ArchiveEntry {
   path: string;
   buffer?: Buffer;
 }
 
 export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  traverseEntries: (
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
+  ) => Promise<void>;
   getPaths: () => Promise<string[]>;
 }
 
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
-  /**
-   * @deprecated Use `archiveIterator` to access the package archive entries
-   * without loading them all into memory at once.
-   */
-  assetsMap: AssetsMap;
   paths: string[];
   archiveIterator: ArchiveIterator;
 }
@@ -585,6 +585,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
   is_policy_template?: boolean;
+  packagePoliciesInfo?: { count: number };
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -725,6 +726,7 @@ export interface EsAssetReference {
 
 export interface PackageAssetReference {
   id: string;
+  path?: string; // Package installed prior to 9.1.0 will not have that property
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 }
 

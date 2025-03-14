@@ -193,7 +193,7 @@ function controlGroupInputIn(
     controlGroupInput;
   const updatedControls = Object.fromEntries(
     controls.map(({ controlConfig, id = uuidv4(), ...restOfControl }) => {
-      return [id, { ...restOfControl, explicitInput: { ...controlConfig, id } }];
+      return [id, { ...restOfControl, explicitInput: controlConfig }];
     })
   );
   return {

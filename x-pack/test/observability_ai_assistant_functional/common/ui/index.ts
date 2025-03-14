@@ -33,13 +33,20 @@ const pages = {
     tableAuthorCell: 'knowledgeBaseTableAuthorCell',
   },
   conversations: {
-    setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
+    setupGenAiConnectorsButtonSelector:
+      'observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton',
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
     connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
     conversationsPage: 'observabilityAiAssistantConversationsPage',
+    access: {
+      shareButton: 'observabilityAiAssistantChatAccessBadge',
+      sharedOption: 'observabilityAiAssistantChatSharedOption',
+      privateOption: 'observabilityAiAssistantChatPrivateOption',
+      loadingBadge: 'observabilityAiAssistantChatAccessLoadingBadge',
+    },
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
@@ -67,6 +74,8 @@ const pages = {
       'management-settings-editField-observability:aiAssistantSearchConnectorIndexPattern',
     saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
     aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
+    resetToDefaultLink:
+      'management-settings-resetField-observability:aiAssistantSearchConnectorIndexPattern',
   },
 };
 

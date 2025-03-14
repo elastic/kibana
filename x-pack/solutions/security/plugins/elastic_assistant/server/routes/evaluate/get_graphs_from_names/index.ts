@@ -21,9 +21,12 @@ export const getGraphsFromNames = (graphNames: string[]): GetGraphsFromNamesResu
     (acc, graphName) => {
       const graph = ASSISTANT_GRAPH_MAP[graphName];
       if (graph != null) {
-        return graph.graphType === 'assistant'
-          ? { ...acc, assistantGraphs: [...acc.assistantGraphs, graph] }
-          : { ...acc, attackDiscoveryGraphs: [...acc.attackDiscoveryGraphs, graph] };
+        switch (graph.graphType) {
+          case 'assistant':
+            return { ...acc, assistantGraphs: [...acc.assistantGraphs, graph] };
+          case 'attack-discovery':
+            return { ...acc, attackDiscoveryGraphs: [...acc.attackDiscoveryGraphs, graph] };
+        }
       }
 
       return acc;

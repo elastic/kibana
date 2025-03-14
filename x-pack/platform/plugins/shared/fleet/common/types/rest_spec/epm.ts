@@ -39,6 +39,7 @@ export interface GetPackagesRequest {
     category?: string;
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
+    withPackagePoliciesCount?: boolean;
   };
 }
 
