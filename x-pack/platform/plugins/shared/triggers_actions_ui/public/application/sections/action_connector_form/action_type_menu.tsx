@@ -25,7 +25,7 @@ interface Props {
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   searchValue?: string;
-  selectedOptions?: Array<{ label: string; key?: string }>;
+  selectedCategories?: Array<{ label: string; key?: string }>;
 }
 
 export const ActionTypeMenu = ({
@@ -35,7 +35,7 @@ export const ActionTypeMenu = ({
   setAllActionTypes,
   actionTypeRegistry,
   searchValue = '',
-  selectedOptions = [],
+  selectedCategories = [],
 }: Props) => {
   const {
     http,
@@ -101,18 +101,14 @@ export const ActionTypeMenu = ({
     });
 
   const filteredConnectors = useMemo(() => {
-    const filterByCategory = selectedOptions.length
+    const filterByCategory = selectedCategories.length
       ? registeredActionTypes.filter((connector) => {
           const supportedFeatureIds = connector.actionType.supportedFeatureIds.map((feature) =>
             feature.toLowerCase()
           );
-          const selectedCategories = selectedOptions.map(
-            (selectedOption) => selectedOption.key?.toLowerCase() ?? ''
-          );
-          return selectedCategories.some((selectedOption) =>
-            supportedFeatureIds.some(
-              (feature) => feature.includes(selectedOption) || selectedOption.includes(feature)
-            )
+          const selected = selectedCategories.map((opt) => opt.key?.toLowerCase() ?? '');
+          return selected.some((opt) =>
+            supportedFeatureIds.some((feature) => feature.includes(opt) || opt.includes(feature))
           );
         })
       : registeredActionTypes;
@@ -130,7 +126,7 @@ export const ActionTypeMenu = ({
       : filterByCategory;
 
     return filterBySearch;
-  }, [registeredActionTypes, selectedOptions, searchValue]);
+  }, [registeredActionTypes, selectedCategories, searchValue]);
 
   const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))

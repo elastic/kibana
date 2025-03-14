@@ -145,6 +145,10 @@ const AllAvailableConnectorFeatures = {
   [EndpointSecurityConnectorFeature.id]: EndpointSecurityConnectorFeature,
 };
 
+export function getAllAvailableConnectorFeatures() {
+  return structuredClone(AllAvailableConnectorFeatures);
+}
+
 export function areValidFeatures(ids: string[]) {
   return ids.every((id: string) => !!AllAvailableConnectorFeatures[id]);
 }

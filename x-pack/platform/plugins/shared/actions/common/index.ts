@@ -59,6 +59,7 @@ export {
   areValidFeatures,
   getConnectorFeatureName,
   getConnectorCompatibility,
+  getAllAvailableConnectorFeatures,
 } from './connector_feature_config';
 export type {
   IExecutionLog,
