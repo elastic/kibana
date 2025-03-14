@@ -12,11 +12,13 @@ export const productLine = schema.oneOf([
   schema.literal(ProductLine.security),
   schema.literal(ProductLine.endpoint),
   schema.literal(ProductLine.cloud),
+  schema.literal(ProductLine.aiSoc),
 ]);
 
 export type SecurityProductLine = TypeOf<typeof productLine>;
 
 export const productTier = schema.oneOf([
+  schema.literal(ProductTier.searchAiLake),
   schema.literal(ProductTier.essentials),
   schema.literal(ProductTier.complete),
 ]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { monthDayDate } from './helpers/month_day_date';
 
@@ -626,6 +626,20 @@ export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
   }
 );
 
+export const DELETE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.deleteModal.title',
+  {
+    defaultMessage: 'Delete maintenance window',
+  }
+);
+
+export const DELETE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.deleteModal.subtitle',
+  {
+    defaultMessage: "You won't be able to recover a deleted maintenance window.",
+  }
+);
+
 export const ARCHIVE = i18n.translate('xpack.alerting.maintenanceWindows.archive', {
   defaultMessage: 'Archive',
 });
@@ -657,6 +671,13 @@ export const TABLE_ACTION_UNARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.unarchive',
   {
     defaultMessage: 'Unarchive',
+  }
+);
+
+export const TABLE_ACTION_DELETE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.delete',
+  {
+    defaultMessage: 'Delete',
   }
 );
 

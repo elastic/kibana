@@ -1,0 +1,160 @@
+{
+  "spans": [
+    {
+      "spanId": "f0dc50bb2415f74c",
+      "spanDestinationServiceResource": "sqlite/main",
+      "spanType": "db",
+      "spanSubtype": "sqlite",
+      "agentName": "dotnet",
+      "serviceName": "opbeans-dotnet",
+      "serviceEnvironment": "production"
+    },
+    {
+      "spanId": "1577a1c5d072d16a",
+      "spanDestinationServiceResource": "opbeans:3000",
+      "spanType": "external",
+      "spanSubtype": "http",
+      "agentName": "go",
+      "serviceName": "opbeans-go",
+      "serviceEnvironment": "opbeans",
+      "destinationService": {
+        "agentName": "nodejs",
+        "serviceEnvironment": "opbeans",
+        "serviceName": "opbeans-node"
+      }
+    },
+    {
+      "spanId": "6d4272837d04692f",
+      "spanDestinationServiceResource": "postgresql",
+      "spanType": "db",
+      "spanSubtype": "postgresql",
+      "agentName": "go",
+      "serviceName": "opbeans-go",
+      "serviceEnvironment": "opbeans"
+    },
+    {
+      "spanId": "20c6641d5ac8524a",
+      "spanDestinationServiceResource": "opbeans:3000",
+      "spanType": "external",
+      "spanSubtype": "http",
+      "agentName": "java",
+      "serviceName": "opbeans-java",
+      "serviceEnvironment": "opbeans",
+      "destinationService": {
+        "agentName": "nodejs",
+        "serviceEnvironment": "opbeans",
+        "serviceName": "opbeans-node"
+      }
+    },
+    {
+      "spanId": "33393ec7b7fe2a36",
+      "spanDestinationServiceResource": "postgresql/opbeans-java",
+      "spanType": "db",
+      "spanSubtype": "postgresql",
+      "agentName": "java",
+      "serviceName": "opbeans-java",
+      "serviceEnvironment": "opbeans"
+    },
+    {
+      "spanId": "14cd51ab5ee1d79d",
+      "spanDestinationServiceResource": "opbeans:3000",
+      "spanType": "external",
+      "spanSubtype": "http",
+      "agentName": "nodejs",
+      "serviceName": "opbeans-node",
+      "serviceEnvironment": "opbeans",
+      "destinationService": {
+        "agentName": "go",
+        "serviceEnvironment": "opbeans",
+        "serviceName": "opbeans-go"
+      }
+    },
+    {
+      "spanId": "3e9486b0e6d511d8",
+      "spanDestinationServiceResource": "postgresql/opbeans-node",
+      "spanType": "db",
+      "spanSubtype": "postgresql",
+      "agentName": "nodejs",
+      "serviceName": "opbeans-node",
+      "serviceEnvironment": "opbeans"
+    },
+    {
+      "spanId": "794ac250ad50c678",
+      "spanDestinationServiceResource": "redis",
+      "spanType": "db",
+      "spanSubtype": "redis",
+      "agentName": "nodejs",
+      "serviceName": "opbeans-node",
+      "serviceEnvironment": "opbeans"
+    },
+    {
+      "spanId": "6c39d0f33b597a69",
+      "spanDestinationServiceResource": "mysql/opbeans-php",
+      "spanType": "db",
+      "spanSubtype": "mysql",
+      "agentName": "php",
+      "serviceName": "opbeans-php",
+      "serviceEnvironment": "opbeans"
+    },
+    {
+      "spanId": "e97cd17b6bd9ffe1",
+      "spanDestinationServiceResource": "opbeans:3000",
+      "spanType": "external",
+      "spanSubtype": "http",
+      "agentName": "php",
+      "serviceName": "opbeans-php",
+      "serviceEnvironment": "opbeans",
+      "destinationService": {
+        "agentName": "go",
+        "serviceEnvironment": "opbeans",
+        "serviceName": "opbeans-go"
+      }
+    },
+    {
+      "spanId": "7017bb724934eb14",
+      "spanDestinationServiceResource": "opbeans:3000",
+      "spanType": "external",
+      "spanSubtype": "http",
+      "agentName": "python",
+      "serviceName": "opbeans-python",
+      "serviceEnvironment": "opbeans",
+      "destinationService": {
+        "agentName": "go",
+        "serviceEnvironment": "opbeans",
+        "serviceName": "opbeans-go"
+      }
+    },
+    {
+      "spanId": "0b737a7eb3a2d44c",
+      "spanDestinationServiceResource": "postgresql",
+      "spanType": "db",
+      "spanSubtype": "postgresql",
+      "agentName": "python",
+      "serviceName": "opbeans-python",
+      "serviceEnvironment": "opbeans"
+    },
+    {
+      "spanId": "042d9505225a6995",
+      "spanDestinationServiceResource": "opbeans:3000",
+      "spanType": "external",
+      "spanSubtype": "http",
+      "agentName": "ruby",
+      "serviceName": "opbeans-ruby",
+      "serviceEnvironment": "opbeans",
+      "destinationService": {
+        "agentName": "go",
+        "serviceEnvironment": "opbeans",
+        "serviceName": "opbeans-go"
+      }
+    },
+    {
+      "spanId": "b7708e76d6836ba6",
+      "spanDestinationServiceResource": "postgresql",
+      "spanType": "db",
+      "spanSubtype": "postgresql",
+      "agentName": "ruby",
+      "serviceName": "opbeans-ruby",
+      "serviceEnvironment": "opbeans"
+    }
+  ]
+}

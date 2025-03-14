@@ -8,6 +8,7 @@
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/snooze';
 import { Space, User } from '../types';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
@@ -52,6 +53,15 @@ const SNOOZE_SCHEDULE = {
     count: 1,
   },
   duration: 864000000,
+};
+
+const snoozeSchedule: SnoozeBody = {
+  schedule: {
+    custom: {
+      duration: '15m',
+      start: '2021-03-07T00:00:00.000Z',
+    },
+  },
 };
 
 export class AlertUtils {
@@ -115,7 +125,7 @@ export class AlertUtils {
     return request;
   }
 
-  public getSnoozeRequest(alertId: string) {
+  public getSnoozeInternalRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_snooze`)
       .set('kbn-xsrf', 'foo')
@@ -123,6 +133,19 @@ export class AlertUtils {
       .send({
         snooze_schedule: SNOOZE_SCHEDULE,
       });
+
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public getSnoozeRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/snooze_schedule`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json')
+      .send(snoozeSchedule);
 
     if (this.user) {
       return request.auth(this.user.username, this.user.password);

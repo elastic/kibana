@@ -53,7 +53,6 @@ import {
   type TrainedModelDeploymentStatsResponse,
 } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
-import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 import type { HttpService } from '../services/http_service';
@@ -924,9 +923,8 @@ export const getUserInputModelDeploymentParamsProvider =
     modelId: string,
     initialParams?: TrainedModelDeploymentStatsResponse,
     deploymentIds?: string[]
-  ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
+  ): Promise<DeploymentParamsUI | void> => {
     const deploymentParamsMapper = new DeploymentParamsMapper(
-      modelId,
       getNewJobLimits(),
       cloudInfo,
       showNodeInfo,
@@ -953,7 +951,8 @@ export const getUserInputModelDeploymentParamsProvider =
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
-                  resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
+
+                  resolve(config);
                 }}
                 onClose={() => {
                   modalSession.close();

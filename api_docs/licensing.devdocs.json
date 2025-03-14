@@ -843,6 +843,10 @@
               "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx"
+            },
+            {
               "plugin": "searchprofiler",
               "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
             },

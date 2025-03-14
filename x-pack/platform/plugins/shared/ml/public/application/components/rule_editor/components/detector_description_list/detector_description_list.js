@@ -65,14 +65,7 @@ export function DetectorDescriptionList({ job, detector, anomaly }) {
     });
   }
 
-  return (
-    <EuiDescriptionList
-      className="rule-detector-description-list"
-      type="column"
-      columnWidths={[15, 85]}
-      listItems={listItems}
-    />
-  );
+  return <EuiDescriptionList type="column" columnWidths={[15, 85]} listItems={listItems} />;
 }
 DetectorDescriptionList.propTypes = {
   job: PropTypes.object.isRequired,
