@@ -2227,7 +2227,6 @@ paths:
         than the key that created or most recently updated the rule, the rule
         behavior might change.
 
-
         > info
 
         > To import rules with actions, you need at least Read privileges for
@@ -3034,9 +3033,8 @@ components:
         $ref: '#/components/schemas/AlertTag'
       type: array
     AnomalyThreshold:
-      description: >-
-        Anomaly score threshold above which the rule creates an alert. Valid
-        values are from 0 to 100.
+      description: Anomaly score threshold above which the rule creates an alert.
+      maximum: 100
       minimum: 0
       type: integer
     BuildingBlockType:
@@ -3518,7 +3516,6 @@ components:
           description: Query language to use
         query:
           $ref: '#/components/schemas/RuleQuery'
-          description: EQL query to execute
         type:
           description: Rule type
           enum:
@@ -3625,23 +3622,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -3817,23 +3797,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -3904,7 +3867,6 @@ components:
               description: Query language to use
             query:
               $ref: '#/components/schemas/RuleQuery'
-              description: EQL query to execute
             type:
               description: Rule type
               enum:
@@ -4010,23 +3972,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -4182,23 +4127,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -4384,23 +4312,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -4576,23 +4487,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -4716,7 +4610,6 @@ components:
               $ref: '#/components/schemas/AlertsIndex'
             query:
               $ref: '#/components/schemas/RuleQuery'
-              description: ESQL query to execute
             references:
               $ref: '#/components/schemas/RuleReferenceArray'
             related_integrations:
@@ -4763,23 +4656,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -4844,7 +4720,6 @@ components:
           $ref: '#/components/schemas/EsqlQueryLanguage'
         query:
           $ref: '#/components/schemas/RuleQuery'
-          description: ESQL query to execute
         type:
           description: Rule type
           enum:
@@ -4957,23 +4832,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -5091,7 +4949,6 @@ components:
         Indices on which the rule functions. Defaults to the Security Solution
         indices defined on the Kibana Advanced Settings page (Kibana → Stack
         Management → Advanced Settings → securitySolution:defaultIndex).
-
 
         > info
 
@@ -5258,23 +5115,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -5450,23 +5290,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -5646,23 +5469,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -5834,23 +5640,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -5913,15 +5702,15 @@ components:
         Maximum number of alerts the rule can create during a single run.
         Defaults to 100.
 
-
         > info
 
         > This setting can be superseded by the [Kibana configuration
         setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings)
-        xpack.alerting.rules.run.alerts.max, which determines the maximum alerts
-        generated by any rule in the Kibana alerting framework. For example, if
-        xpack.alerting.rules.run.alerts.max is set to 1000, the rule can
-        generate no more than 1000 alerts even if max_signals is set higher.
+        `xpack.alerting.rules.run.alerts.max`, which determines the maximum
+        alerts generated by any rule in the Kibana alerting framework. For
+        example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the
+        rule can generate no more than 1000 alerts even if `max_signals` is set
+        higher.
       minimum: 1
       type: integer
     NewTermsFields:
@@ -6028,23 +5817,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -6221,23 +5993,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -6431,23 +6186,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -6628,23 +6366,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -6950,23 +6671,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -7143,23 +6847,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -7351,23 +7038,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -7542,23 +7212,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -7974,17 +7627,16 @@ components:
 
         - 7d: Every week
 
-
         > info
 
-        > The rule level throttle field is deprecated in Elastic Security 8.8
+        > The rule level `throttle` field is deprecated in Elastic Security 8.8
         and will remain active for at least the next 12 months.
 
-        > In Elastic Security 8.8 and later, you can use the (frequency) field
+        > In Elastic Security 8.8 and later, you can use the `frequency` field
         to define frequencies for individual actions. Actions without
-        frequencies will acquire a converted version of the rule’s throttle
-        field. In the response, the converted throttle setting appears in the
-        individual actions' frequency field.
+        frequencies will acquire a converted version of the rule’s `throttle`
+        field. In the response, the converted `throttle` setting appears in the
+        individual actions' `frequency` field.
       oneOf:
         - enum:
             - no_actions
@@ -8168,7 +7820,6 @@ components:
         The query and filter context array used to define the conditions for
         when alerts are created from events. Defaults to an empty array.
 
-
         > info
 
         > This field is not supported for ES|QL rules.
@@ -8196,7 +7847,6 @@ components:
       additionalProperties: true
       description: >
         Placeholder for metadata about the rule.
-
 
         > info
 
@@ -8274,7 +7924,7 @@ components:
         - invocationCount
         - timeframeEnd
     RuleQuery:
-      description: My New Query description
+      description: The query to execute
       type: string
     RuleReferenceArray:
       description: >-
@@ -8380,7 +8030,10 @@ components:
         - conflict
       type: string
     SavedQueryId:
-      description: Kibana saved search used by the rule to create alerts.
+      description: >-
+        Kibana [saved
+        search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html)
+        used by the rule to create alerts.
       type: string
     SavedQueryRule:
       allOf:
@@ -8479,23 +8132,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -8672,23 +8308,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -8880,23 +8499,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -9071,23 +8673,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -9426,23 +9011,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -9619,23 +9187,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -9843,23 +9394,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -10043,23 +9577,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -10125,7 +9642,6 @@ components:
     ThreatSubtechnique:
       description: >
         Array containing more specific information on the attack technique.
-
 
         > info
 
@@ -10329,23 +9845,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -10522,23 +10021,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -10732,23 +10214,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for
@@ -10926,23 +10391,6 @@ components:
 
                 several integrations; in this case, `integration` should be
                 specified.
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'windows',
-                  version: '1.5.x',
-                };
-
-
-                @example
-
-                const x: RelatedIntegration = {
-                  package: 'azure',
-                  version: '~1.1.6',
-                  integration: 'activitylogs',
-                };
             required_fields:
               description: >
                 Elasticsearch fields and their types that need to be present for

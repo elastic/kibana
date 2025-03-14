@@ -9,7 +9,8 @@ components:
     AnomalyThreshold:
       type: integer
       minimum: 0
-      description: Anomaly score threshold above which the rule creates an alert. Valid values are from 0 to 100.
+      maximum: 100
+      description: Anomaly score threshold above which the rule creates an alert.
     MachineLearningJobId:
       oneOf:
         - type: string

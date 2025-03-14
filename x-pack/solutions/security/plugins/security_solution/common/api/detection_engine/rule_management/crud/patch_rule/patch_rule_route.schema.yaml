@@ -32,8 +32,8 @@ paths:
               example1:
                 summary: Patch query rule
                 value:
-                  id: "14b7b513-3d8d-4b22-b7da-a7ae632f7e76"
-                  name: "New name"
+                  id: '14b7b513-3d8d-4b22-b7da-a7ae632f7e76'
+                  name: 'New name'
               example2:
                 summary: Patch EQL rule
                 value:
@@ -48,11 +48,11 @@ paths:
                         - id: 'T1193'
                           name: 'Spearphishing Attachment'
                           reference: 'https://attack.mitre.org/techniques/T1193'
-              example3: 
+              example3:
                 summary: Patch threshold rule
                 value:
-                  id: "005d2c4f-51ca-493d-a2bd-20ef076339b1"
-                  query: "agent.version : * and agent.id : \"243d9b4f-ca01-4311-8e5c-9abbee91afd8\""
+                  id: '005d2c4f-51ca-493d-a2bd-20ef076339b1'
+                  query: 'agent.version : * and agent.id : "243d9b4f-ca01-4311-8e5c-9abbee91afd8"'
                   threshold:
                     field: []
                     value: 600
@@ -60,14 +60,14 @@ paths:
               example4:
                 summary: Patch new terms rule
                 value:
-                  id: "569aac91-40dc-4807-a8ae-a2c8698089c4"
+                  id: '569aac91-40dc-4807-a8ae-a2c8698089c4'
                   new_terms_fields:
-                    - "Endpoint.policy.applied.artifacts.global.identifiers.name"
-                  history_window_start: "now-3d"
+                    - 'Endpoint.policy.applied.artifacts.global.identifiers.name'
+                  history_window_start: 'now-3d'
               example5:
                 summary: Patch esql rule
                 value:
-                  id: "0b15e8a2-49b6-47e0-a8e6-d63a6cc335bd"
+                  id: '0b15e8a2-49b6-47e0-a8e6-d63a6cc335bd'
                   query: |
                     FROM logs-abc*
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
@@ -76,8 +76,8 @@ paths:
               example6:
                 summary: Patch indicator match rule
                 value:
-                  id: "462f1986-10fe-40a3-a22c-2b1c9c4c48fd"
-                  threat_query: "@timestamp >= \"now-30d/d\" and event.module:(threatintel or ti_*) and threat.indicator.ip:* and not labels.is_ioc_transform_source:\"false\""
+                  id: '462f1986-10fe-40a3-a22c-2b1c9c4c48fd'
+                  threat_query: '@timestamp >= "now-30d/d" and event.module:(threatintel or ti_*) and threat.indicator.ip:* and not labels.is_ioc_transform_source:"false"'
               example7:
                 summary: Patch machine learning rule
                 value:

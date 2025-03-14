@@ -159,21 +159,7 @@ components:
             There are Fleet packages like `windows` that contain only one integration; in this case,
             `integration` should be unspecified. There are also packages like `aws` and `azure` that contain
             several integrations; in this case, `integration` should be specified.
-
-            @example
-            const x: RelatedIntegration = {
-              package: 'windows',
-              version: '1.5.x',
-            };
-
-            @example
-            const x: RelatedIntegration = {
-              package: 'azure',
-              version: '~1.1.6',
-              integration: 'activitylogs',
-            };
           $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
-
         # Required fields
         required_fields:
           type: array
@@ -308,7 +294,6 @@ components:
           description: Rule type
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
-          description: EQL query to execute
         language:
           $ref: '#/components/schemas/EqlQueryLanguage'
           description: Query language to use
@@ -863,7 +848,6 @@ components:
           $ref: '#/components/schemas/EsqlQueryLanguage'
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
-          description: ESQL query to execute
       required:
         - type
         - language
