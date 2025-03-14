@@ -138,6 +138,7 @@ export function regenerateNxProjects() {
           });
         } else {
           delete projectConfig.targets.typecheck;
+          delete projectConfig.targets.typecheck_fast;
           log.warning(`Skipping ${pkg.name} - no tsconfig.json found.`);
         }
 
