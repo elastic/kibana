@@ -9,9 +9,9 @@
 
 import { UserMouseEvent } from './mouse';
 
-const DEADZONE = 0.35; // percent of the distance from the center of the screen on either side of the middle is considered deadzone and will not scroll
-const MAX_DISTANCE = 0.5; // percent of the distance from the center of the screen on either side of the middle is considered max distance and will scroll at max speed
-const PIXELS_PER_SECOND = 10; // how many pixels to scroll per second
+const DEADZONE = 0.35; // percent of the distance from the center of the screen on either side of the middle is considered deadzone and will not scroll.
+const MAX_DISTANCE = 0.5; // percent of the distance from the center of the screen on either side of the middle is considered max distance and will scroll at max speed.
+const PIXELS_PER_SECOND = 3000; // how many pixels to scroll per second when at max distance.
 
 let shouldAutoScroll = false;
 let latestMouseEvent: UserMouseEvent | null = null;
@@ -24,8 +24,12 @@ export const startAutoScroll = () => {
   if (shouldAutoScroll) return;
   shouldAutoScroll = true;
 
-  const autoScroll: FrameRequestCallback = (elapsed: number) => {
+  let lastFrameTime: number = +(document.timeline.currentTime ?? 0);
+
+  const autoScroll: FrameRequestCallback = (now: number) => {
     if (!shouldAutoScroll) return;
+
+    const deltaTime = now - lastFrameTime;
 
     if (latestMouseEvent) {
       const distanceFromCenterOfScreen = window.innerHeight / 2 - latestMouseEvent.clientY;
@@ -40,12 +44,13 @@ export const startAutoScroll = () => {
         )
       );
 
-      const pixelsToScroll = PIXELS_PER_SECOND * scrollSpeedMult * (elapsed / 1000);
+      const pixelsToScroll = PIXELS_PER_SECOND * scrollSpeedMult * (deltaTime / 1000);
       if (pixelsToScroll > 0) {
         window.scrollBy({ top: scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll });
       }
     }
 
+    lastFrameTime = now;
     window.requestAnimationFrame(autoScroll);
   };
   window.requestAnimationFrame(autoScroll);
