@@ -107,7 +107,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const [
         { renderApp },
         { getSubPluginRoutesByCapabilities },
-        ManagementSettings,
+        { ManagementSettings },
         { registerActions },
         store,
         services,
