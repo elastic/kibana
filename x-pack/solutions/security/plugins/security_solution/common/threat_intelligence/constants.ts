@@ -13,8 +13,8 @@ export const BARCHART_AGGREGATION_NAME = 'barchartAggregation';
  * Used inside custom search strategy
  */
 export enum FactoryQueryType {
-  IndicatorGrid = 'indicatorGrid',
-  Barchart = 'barchart',
+  IndicatorGrid = 'threatIntelligenceIndicatorGrid',
+  Barchart = 'threatIntelligenceBarchart',
 }
 
 export const CASE_ATTACHMENT_TYPE_ID = 'indicator';
