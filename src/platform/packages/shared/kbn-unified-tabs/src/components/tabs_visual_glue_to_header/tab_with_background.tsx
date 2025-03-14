@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
 
-export interface TabWithBackgroundProps {
+export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isSelected: boolean;
   children: React.ReactNode;
 }
 
-export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({ isSelected, children }) => {
+export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({
+  isSelected,
+  children,
+  ...otherProps
+}) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const selectedTabBackgroundColor = document.querySelector(
@@ -29,8 +33,10 @@ export const TabWithBackground: React.FC<TabWithBackgroundProps> = ({ isSelected
 
   return (
     <div
+      {...otherProps}
       // tab main background and another background color on hover
       css={css`
+        display: inline-block;
         background-color: ${isSelected
           ? selectedTabBackgroundColor
           : euiTheme.colors.lightestShade};

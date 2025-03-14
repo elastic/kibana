@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { HTMLAttributes, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
@@ -24,11 +24,14 @@ const globalCss = cssString`
   }
 `;
 
-export interface TabsBarWithBackgroundProps {
+export interface TabsBarWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
 }
 
-export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({ children }) => {
+export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
+  children,
+  ...otherProps
+}) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
@@ -42,6 +45,7 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({ ch
 
   return (
     <div
+      {...otherProps}
       // tabs bar background
       css={css`
         background: ${euiTheme.colors.lightestShade};

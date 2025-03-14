@@ -76,8 +76,6 @@ export const TabsBar: React.FC<TabsBarProps> = ({
 
   const mainTabsBarContent = (
     <EuiFlexGroup
-      role="tablist"
-      data-test-subj="unifiedTabs_tabsBar"
       responsive={false}
       alignItems="center"
       gutterSize="s"
@@ -139,5 +137,9 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     </EuiFlexGroup>
   );
 
-  return <TabsBarWithBackground>{mainTabsBarContent}</TabsBarWithBackground>;
+  return (
+    <TabsBarWithBackground role="tablist" data-test-subj="unifiedTabs_tabsBar">
+      {mainTabsBarContent}
+    </TabsBarWithBackground>
+  );
 };

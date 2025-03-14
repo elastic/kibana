@@ -50,7 +50,6 @@ export const Tab: React.FC<TabProps> = (props) => {
   const containerRef = useRef<HTMLDivElement>();
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
 
-  const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
   });
@@ -88,16 +87,12 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onSelectEvent]
   );
 
-  const mainContent = (
+  const mainTabContent = (
     <EuiFlexGroup
       ref={containerRef}
-      {...getTabAttributes(item, tabContentId)}
-      role="tab"
-      aria-selected={isSelected}
       alignItems="center"
       direction="row"
       css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
-      data-test-subj={tabContainerDataTestSubj}
       responsive={false}
       gutterSize="none"
       onClick={onClickEvent}
@@ -152,7 +147,17 @@ export const Tab: React.FC<TabProps> = (props) => {
     </EuiFlexGroup>
   );
 
-  return <TabWithBackground isSelected={isSelected}>{mainContent}</TabWithBackground>;
+  return (
+    <TabWithBackground
+      {...getTabAttributes(item, tabContentId)}
+      role="tab"
+      aria-selected={isSelected}
+      data-test-subj={`unifiedTabs_tab_${item.id}`}
+      isSelected={isSelected}
+    >
+      {mainTabContent}
+    </TabWithBackground>
+  );
 };
 
 function getTabContainerCss(
