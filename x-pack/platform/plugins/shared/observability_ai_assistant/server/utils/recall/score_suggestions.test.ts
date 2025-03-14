@@ -21,6 +21,7 @@ const suggestions: RecalledSuggestion[] = [
 ];
 
 const userPrompt = 'What is my favourite color?';
+const context = 'Some context';
 
 describe('scoreSuggestions', () => {
   const mockLogger = { error: jest.fn(), debug: jest.fn() } as unknown as Logger;
@@ -45,7 +46,7 @@ describe('scoreSuggestions', () => {
       suggestions,
       messages: normalConversationMessages,
       userPrompt,
-      context: 'Some context',
+      context,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -82,7 +83,7 @@ describe('scoreSuggestions', () => {
       messages: normalConversationMessages,
       userPrompt,
       userMessageFunctionName: 'score',
-      context: 'Somecontext',
+      context,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -108,9 +109,8 @@ describe('scoreSuggestions', () => {
     const result = await scoreSuggestions({
       suggestions,
       messages: normalConversationMessages,
-      userPrompt: 'Explain AI',
-      userMessageFunctionName: 'score',
-      context: 'General AI context',
+      userPrompt,
+      context,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -134,9 +134,8 @@ describe('scoreSuggestions', () => {
       scoreSuggestions({
         suggestions,
         messages: normalConversationMessages,
-        userPrompt: 'Explain AI',
-        userMessageFunctionName: 'score',
-        context: 'General AI context',
+        userPrompt,
+        context,
         chat: mockChat,
         signal: new AbortController().signal,
         logger: mockLogger,
@@ -154,7 +153,7 @@ describe('scoreSuggestions', () => {
       messages: contextualInsightsMessages,
       userPrompt: lastUserMessage?.message.content!,
       userMessageFunctionName: lastUserMessage?.message.name,
-      context: 'Some context',
+      context,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -165,20 +164,5 @@ describe('scoreSuggestions', () => {
       { id: 'doc2', score: 5 },
       { id: 'doc3', score: 3 },
     ]);
-  });
-
-  it('should log relevant documents', async () => {
-    await scoreSuggestions({
-      suggestions,
-      messages: normalConversationMessages,
-      userPrompt: 'Explain AI',
-      userMessageFunctionName: 'score',
-      context: 'General AI context',
-      chat: mockChat,
-      signal: new AbortController().signal,
-      logger: mockLogger,
-    });
-
-    expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
   });
 });

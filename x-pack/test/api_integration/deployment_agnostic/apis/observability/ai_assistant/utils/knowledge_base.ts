@@ -15,6 +15,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_c
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
+import { setAdvancedSettings } from './advanced_settings';
 
 export const TINY_ELSER = {
   ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
@@ -84,17 +85,6 @@ export async function clearKnowledgeBase(es: Client) {
   });
 }
 
-export async function clearConversations(es: Client) {
-  const KB_INDEX = '.kibana-observability-ai-assistant-conversations-*';
-
-  return es.deleteByQuery({
-    index: KB_INDEX,
-    conflicts: 'proceed',
-    query: { match_all: {} },
-    refresh: true,
-  });
-}
-
 export async function deleteInferenceEndpoint({
   es,
   name = AI_ASSISTANT_KB_INFERENCE_ID,
@@ -125,5 +115,46 @@ export async function addSampleDocsToInternalKb(
         entries: sampleDocs,
       },
     },
+  });
+}
+
+export async function addSampleDocsToCustomIndex(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  sampleDocs: Array<Instruction & { title: string }>,
+  customSearchConnectorIndex: string
+) {
+  const es = getService('es');
+  const supertest = getService('supertest');
+  const log = getService('log');
+
+  // create index with semantic_text mapping for `text` field
+  log.info('Creating custom index with sample animal docs...');
+  await es.indices.create({
+    index: customSearchConnectorIndex,
+    mappings: {
+      properties: {
+        title: { type: 'text' },
+        text: { type: 'semantic_text', inference_id: AI_ASSISTANT_KB_INFERENCE_ID },
+      },
+    },
+  });
+
+  log.info('Indexing sample animal docs...');
+  // ingest sampleDocs
+  await Promise.all(
+    sampleDocs.map(async (doc) => {
+      const { id, ...restDoc } = doc;
+      return es.index({
+        refresh: 'wait_for',
+        index: customSearchConnectorIndex,
+        id,
+        body: restDoc,
+      });
+    })
+  );
+
+  // update the advanced settings (`observability:aiAssistantSearchConnectorIndexPattern`) to include the custom index
+  await setAdvancedSettings(supertest, {
+    'observability:aiAssistantSearchConnectorIndexPattern': customSearchConnectorIndex,
   });
 }

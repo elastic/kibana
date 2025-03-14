@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { first, uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import {
@@ -14,8 +13,8 @@ import {
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   addSampleDocsToInternalKb,
-} from '../../knowledge_base/helpers';
-import { setAdvancedSettings } from '../../utils/advanced_settings';
+  addSampleDocsToCustomIndex,
+} from '../../utils/knowledge_base';
 
 const customSearchConnectorIndex = 'animals_kb';
 
@@ -37,6 +36,34 @@ const sampleDocsForInternalKb = [
   },
 ];
 
+const sampleDocsForCustomIndex = [
+  {
+    id: 'animal_elephants_social_structure',
+    title: 'Elephants and Their Social Structure',
+    text: 'Elephants are highly social animals that live in matriarchal herds led by the oldest female. These animals communicate through low-frequency sounds, called infrasound, that travel long distances. They are known for their intelligence, strong memory, and deep emotional bonds with each other.',
+  },
+  {
+    id: 'animal_cheetah_life_speed',
+    title: 'The Life of a Cheetah',
+    text: 'Cheetahs are the fastest land animals, capable of reaching speeds up to 60 miles per hour in short bursts. They rely on their speed to catch prey, such as gazelles. Unlike other big cats, cheetahs cannot roar, but they make distinctive chirping sounds, especially when communicating with their cubs.',
+  },
+  {
+    id: 'animal_whale_migration_patterns',
+    title: 'Whales and Their Migration Patterns',
+    text: 'Whales are known for their long migration patterns, traveling thousands of miles between feeding and breeding grounds.',
+  },
+  {
+    id: 'animal_giraffe_habitat_feeding',
+    title: 'Giraffes: Habitat and Feeding Habits',
+    text: 'Giraffes are the tallest land animals, with long necks that help them reach leaves high up in trees. They live in savannas and grasslands, where they feed on leaves, twigs, and fruits from acacia trees.',
+  },
+  {
+    id: 'animal_penguin_antarctic_adaptations',
+    title: 'Penguins and Their Antarctic Adaptations',
+    text: 'Penguins are flightless birds that have adapted to life in the cold Antarctic environment. They have a thick layer of blubber to keep warm, and their wings have evolved into flippers for swimming in the icy waters.',
+  },
+];
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
@@ -45,7 +72,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('recall', function () {
     before(async () => {
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
-      await addSampleDocsToCustomIndex(getService);
+      await addSampleDocsToCustomIndex(
+        getService,
+        sampleDocsForCustomIndex,
+        customSearchConnectorIndex
+      );
     });
 
     after(async () => {
@@ -123,73 +154,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     return body.entries;
   }
-}
-
-async function addSampleDocsToCustomIndex(
-  getService: DeploymentAgnosticFtrProviderContext['getService']
-) {
-  const es = getService('es');
-  const supertest = getService('supertest');
-  const log = getService('log');
-
-  const sampleDocs = [
-    {
-      id: 'animal_elephants_social_structure',
-      title: 'Elephants and Their Social Structure',
-      text: 'Elephants are highly social animals that live in matriarchal herds led by the oldest female. These animals communicate through low-frequency sounds, called infrasound, that travel long distances. They are known for their intelligence, strong memory, and deep emotional bonds with each other.',
-    },
-    {
-      id: 'animal_cheetah_life_speed',
-      title: 'The Life of a Cheetah',
-      text: 'Cheetahs are the fastest land animals, capable of reaching speeds up to 60 miles per hour in short bursts. They rely on their speed to catch prey, such as gazelles. Unlike other big cats, cheetahs cannot roar, but they make distinctive chirping sounds, especially when communicating with their cubs.',
-    },
-    {
-      id: 'animal_whale_migration_patterns',
-      title: 'Whales and Their Migration Patterns',
-      text: 'Whales are known for their long migration patterns, traveling thousands of miles between feeding and breeding grounds.',
-    },
-    {
-      id: 'animal_giraffe_habitat_feeding',
-      title: 'Giraffes: Habitat and Feeding Habits',
-      text: 'Giraffes are the tallest land animals, with long necks that help them reach leaves high up in trees. They live in savannas and grasslands, where they feed on leaves, twigs, and fruits from acacia trees.',
-    },
-    {
-      id: 'animal_penguin_antarctic_adaptations',
-      title: 'Penguins and Their Antarctic Adaptations',
-      text: 'Penguins are flightless birds that have adapted to life in the cold Antarctic environment. They have a thick layer of blubber to keep warm, and their wings have evolved into flippers for swimming in the icy waters.',
-    },
-  ];
-
-  // create index with semantic_text mapping for `text` field
-  log.info('Creating custom index with sample animal docs...');
-  await es.indices.create({
-    index: customSearchConnectorIndex,
-    mappings: {
-      properties: {
-        title: { type: 'text' },
-        text: { type: 'semantic_text', inference_id: AI_ASSISTANT_KB_INFERENCE_ID },
-      },
-    },
-  });
-
-  log.info('Indexing sample animal docs...');
-  // ingest sampleDocs
-  await Promise.all(
-    sampleDocs.map(async (doc) => {
-      const { id, ...restDoc } = doc;
-      return es.index({
-        refresh: 'wait_for',
-        index: customSearchConnectorIndex,
-        id,
-        body: restDoc,
-      });
-    })
-  );
-
-  // update the advanced settings (`observability:aiAssistantSearchConnectorIndexPattern`) to include the custom index
-  await setAdvancedSettings(supertest, {
-    'observability:aiAssistantSearchConnectorIndexPattern': customSearchConnectorIndex,
-  });
 }
 
 function formatScore(score: number) {

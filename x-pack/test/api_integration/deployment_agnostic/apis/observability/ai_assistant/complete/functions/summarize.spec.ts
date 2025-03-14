@@ -12,7 +12,7 @@ import {
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { invokeChatCompleteWithFunctionRequest } from './helpers';
+import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
   clearKnowledgeBase,
   importTinyElserModel,
@@ -20,7 +20,7 @@ import {
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
-} from '../../knowledge_base/helpers';
+} from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');

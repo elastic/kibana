@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { first, last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
   KnowledgeBaseEntry,
@@ -25,8 +26,8 @@ import {
   clearKnowledgeBase,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
-} from '../../knowledge_base/helpers';
-import { chatComplete } from './helpers';
+} from '../../utils/knowledge_base';
+import { chatComplete } from '../../utils/conversation';
 
 const screenContexts = [
   {
@@ -137,11 +138,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains the system message as the first message in the request', () => {
-          expect(firstRequestBody.messages[0].role === MessageRole.System);
+          expect(first(firstRequestBody.messages)?.role === MessageRole.System);
         });
 
         it('contains a message with the prompt for scoring', () => {
-          expect(firstRequestBody.messages[1].content).to.contain(
+          expect(last(firstRequestBody.messages)?.content).to.contain(
             'score the documents that are relevant to the prompt on a scale from 0 to 7'
           );
         });
@@ -150,7 +151,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           // @ts-expect-error
           expect(firstRequestBody.tool_choice?.function?.name).to.be('score');
           expect(firstRequestBody.tools?.length).to.be(1);
-          expect(firstRequestBody.tools?.[0].function.name).to.be('score');
+          expect(first(firstRequestBody.tools)?.function.name).to.be('score');
         });
       });
 
@@ -160,7 +161,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains the system message as the first message in the request', () => {
-          expect(secondRequestBody.messages[0].role === MessageRole.System);
+          expect(first(secondRequestBody.messages)?.role === MessageRole.System);
         });
 
         it('contains the user prompt', () => {
@@ -180,9 +181,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             CONTEXT_FUNCTION_NAME
           );
 
-          expect(secondRequestBody.messages[3].role).to.be('tool');
+          expect(last(secondRequestBody.messages)?.role).to.be('tool');
           // @ts-expect-error
-          expect(secondRequestBody.messages[3].tool_call_id).to.equal(
+          expect(last(secondRequestBody.messages)?.tool_call_id).to.equal(
             // @ts-expect-error
             secondRequestBody.messages[2].tool_calls[0].id
           );
