@@ -63,6 +63,7 @@ export function UXActionMenu({
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
+            <UxInspectorHeaderLink isDev={isDev} />
             <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
               <EuiHeaderLink
                 data-test-subj="uxAnalyzeBtn"
@@ -77,7 +78,6 @@ export function UXActionMenu({
                 defaultMessage: 'Add data',
               })}
             </EuiHeaderLink>
-            <UxInspectorHeaderLink isDev={isDev} />
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -29,7 +29,7 @@ export function Labs() {
     <>
       <EuiButtonEmpty
         data-test-subj="apmLabsLabsButton"
-        color="text"
+        color="primary"
         onClick={toggleFlyoutVisibility}
       >
         {i18n.translate('xpack.apm.labs', { defaultMessage: 'Labs' })}

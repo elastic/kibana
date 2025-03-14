@@ -33,7 +33,7 @@ export function AnomalyDetectionSetupLink() {
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
   let tooltipText: string = '';
-  let color: 'warning' | 'text' | 'accentSecondary' | 'danger' = 'text';
+  let color: 'warning' | 'primary' | 'success' | 'danger' = 'primary';
   let icon: IconType | undefined;
 
   if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Failure) {
@@ -50,30 +50,22 @@ export function AnomalyDetectionSetupLink() {
     tooltipText = getNoJobsMessage(anomalyDetectionSetupState, environment);
     icon = 'machineLearningApp';
   } else if (anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs) {
-    color = 'accentSecondary';
+    color = 'success';
     tooltipText = i18n.translate('xpack.apm.anomalyDetectionSetup.upgradeableJobsText', {
       defaultMessage: 'Updates available for existing anomaly detection jobs.',
     });
     icon = 'wrench';
   }
 
-  let pre: React.ReactElement | null = null;
-
-  if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Loading) {
-    pre = <EuiLoadingSpinner size="s" />;
-  } else if (icon) {
-    pre = <EuiIcon type={icon} color={color} size="s" />;
-  }
-
   const element = (
     <EuiHeaderLink
       color={color}
+      iconType={icon ? icon : undefined}
+      isLoading={anomalyDetectionSetupState === AnomalyDetectionSetupState.Loading}
       href={getLegacyApmHref({ basePath, path: '/settings/anomaly-detection' })}
-      style={{ whiteSpace: 'nowrap' }}
       data-test-subj="apmAnomalyDetectionHeaderLink"
     >
-      {pre}
-      <span style={{ marginInlineStart: euiTheme.size.s }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
+      {ANOMALY_DETECTION_LINK_LABEL}
     </EuiHeaderLink>
   );
 

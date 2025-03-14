@@ -47,10 +47,13 @@ export function ApmHeaderActionMenu() {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
+      {canCreateMlJobs && <AnomalyDetectionSetupLink />}
+
       {isLabsButtonEnabled && <Labs />}
+
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
-          color="text"
+          color="primary"
           href={apmHref('/storage-explorer')}
           data-test-subj="apmStorageExplorerHeaderLink"
         >
@@ -64,7 +67,6 @@ export function ApmHeaderActionMenu() {
         </EuiHeaderLink>
       )}
 
-      {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
           canReadAlerts={canReadAlerts}
@@ -72,23 +74,9 @@ export function ApmHeaderActionMenu() {
           canReadMlJobs={canReadMlJobs}
         />
       )}
-      {isEntityCentricExperienceEnabled ? (
-        <AddDataContextMenu />
-      ) : (
-        <EuiHeaderLink
-          color="primary"
-          href={kibanaHref('/app/apm/tutorial')}
-          iconType="indexOpen"
-          data-test-subj="apmAddDataHeaderLink"
-        >
-          {i18n.translate('xpack.apm.addDataButtonLabel', {
-            defaultMessage: 'Add data',
-          })}
-        </EuiHeaderLink>
-      )}
 
       <EuiHeaderLink
-        color="text"
+        color="primary"
         href={apmHref('/settings')}
         data-test-subj="apmSettingsHeaderLink"
       >
@@ -97,6 +85,19 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+      {isEntityCentricExperienceEnabled ? (
+        <AddDataContextMenu />
+      ) : (
+        <EuiHeaderLink
+          color="primary"
+          href={kibanaHref('/app/apm/tutorial')}
+          data-test-subj="apmAddDataHeaderLink"
+        >
+          {i18n.translate('xpack.apm.addDataButtonLabel', {
+            defaultMessage: 'Add data',
+          })}
+        </EuiHeaderLink>
+      )}
     </EuiHeaderLinks>
   );
 }
