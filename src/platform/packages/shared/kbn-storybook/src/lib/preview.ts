@@ -8,7 +8,11 @@
  */
 
 import type { Preview } from '@storybook/react';
+import * as jest from 'jest-mock';
 import { decorators } from './decorators';
+
+// @ts-expect-error
+window.jest = jest;
 
 const preview: Preview = {
   decorators,
