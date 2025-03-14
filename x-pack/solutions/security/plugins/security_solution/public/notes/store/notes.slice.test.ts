@@ -30,14 +30,14 @@ import {
   selectNoteById,
   selectNoteIds,
   selectNotesByDocumentId,
+  selectNotesByDocumentIdReversed,
   selectNotesBySavedObjectId,
   selectNotesPagination,
   selectNotesTablePendingDeleteIds,
   selectNotesTableSearch,
   selectNotesTableSelectedIds,
   selectNotesTableSort,
-  selectSortedNotesByDocumentId,
-  selectSortedNotesBySavedObjectId,
+  selectNotesBySavedObjectIdReversed,
   selectNotesTableCreatedByFilter,
   selectNotesTableAssociatedFilter,
   userClosedDeleteModal,
@@ -117,7 +117,8 @@ describe('notesSlice', () => {
       expect(notesReducer(initalEmptyState, { type: 'unknown' })).toEqual(initalEmptyState);
     });
 
-    describe('fetchNotesByDocumentIds', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/213905
+    describe.skip('fetchNotesByDocumentIds', () => {
       it('should set correct status state when fetching notes by document ids', () => {
         const action = { type: fetchNotesByDocumentIds.pending.type };
 
@@ -174,7 +175,7 @@ describe('notesSlice', () => {
             [newMockNote.noteId]: newMockNote,
             [mockNote2.noteId]: mockNote2,
           },
-          ids: [newMockNote.noteId, mockNote2.noteId],
+          ids: [mockNote2.noteId, newMockNote.noteId],
           status: {
             ...initalEmptyState.status,
             fetchNotesByDocumentIds: ReqStatus.Succeeded,
@@ -199,7 +200,8 @@ describe('notesSlice', () => {
       });
     });
 
-    describe('fetchNotesBySavedObjectIds', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/213906
+    describe.skip('fetchNotesBySavedObjectIds', () => {
       it('should set correct status state when fetching notes by saved object ids', () => {
         const action = { type: fetchNotesBySavedObjectIds.pending.type };
 
@@ -256,7 +258,7 @@ describe('notesSlice', () => {
             [newMockNote.noteId]: newMockNote,
             [mockNote2.noteId]: mockNote2,
           },
-          ids: [newMockNote.noteId, mockNote2.noteId],
+          ids: [mockNote2.noteId, newMockNote.noteId],
           status: {
             ...initalEmptyState.status,
             fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
@@ -712,31 +714,17 @@ describe('notesSlice', () => {
         },
       };
 
-      const ascResult = selectSortedNotesByDocumentId(state, {
-        documentId: '1',
-        sort: { field: 'created', direction: 'asc' },
-      });
+      const ascResult = selectNotesByDocumentId(state, '1');
       expect(ascResult[0]).toEqual(oldestNote);
       expect(ascResult[1]).toEqual(newestNote);
 
-      const descResult = selectSortedNotesByDocumentId(state, {
-        documentId: '1',
-        sort: { field: 'created', direction: 'desc' },
-      });
+      const descResult = selectNotesByDocumentIdReversed(state, '1');
       expect(descResult[0]).toEqual(newestNote);
       expect(descResult[1]).toEqual(oldestNote);
     });
 
     it('should also return no notes if document id does not exist', () => {
-      expect(
-        selectSortedNotesByDocumentId(mockGlobalState, {
-          documentId: 'wrong-document-id',
-          sort: {
-            field: 'created',
-            direction: 'desc',
-          },
-        })
-      ).toHaveLength(0);
+      expect(selectNotesByDocumentId(mockGlobalState, 'wrong-document-id')).toHaveLength(0);
     });
 
     it('should return all notes for an existing saved object id', () => {
@@ -783,43 +771,23 @@ describe('notesSlice', () => {
         },
       };
 
-      const ascResult = selectSortedNotesBySavedObjectId(state, {
-        savedObjectId: 'timeline-1',
-        sort: { field: 'created', direction: 'asc' },
-      });
+      const ascResult = selectNotesBySavedObjectId(state, 'timeline-1');
       expect(ascResult[0]).toEqual(oldestNote);
       expect(ascResult[1]).toEqual(newestNote);
 
-      const descResult = selectSortedNotesBySavedObjectId(state, {
-        savedObjectId: 'timeline-1',
-        sort: { field: 'created', direction: 'desc' },
-      });
+      const descResult = selectNotesBySavedObjectIdReversed(state, 'timeline-1');
       expect(descResult[0]).toEqual(newestNote);
       expect(descResult[1]).toEqual(oldestNote);
     });
 
     it('should also return no notes if saved object id does not exist', () => {
-      expect(
-        selectSortedNotesBySavedObjectId(mockGlobalState, {
-          savedObjectId: 'wrong-document-id',
-          sort: {
-            field: 'created',
-            direction: 'desc',
-          },
-        })
-      ).toHaveLength(0);
+      expect(selectNotesBySavedObjectIdReversed(mockGlobalState, 'wrong-document-id')).toHaveLength(
+        0
+      );
     });
 
     it('should also return no notes if saved object id is empty string', () => {
-      expect(
-        selectSortedNotesBySavedObjectId(mockGlobalState, {
-          savedObjectId: '',
-          sort: {
-            field: 'created',
-            direction: 'desc',
-          },
-        })
-      ).toHaveLength(0);
+      expect(selectNotesBySavedObjectIdReversed(mockGlobalState, '')).toHaveLength(0);
     });
 
     it('should select notes pagination', () => {

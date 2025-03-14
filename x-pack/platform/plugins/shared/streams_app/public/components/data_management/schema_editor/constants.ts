@@ -45,6 +45,11 @@ export const FIELD_TYPE_MAP = {
       defaultMessage: 'IP',
     }),
   },
+  system: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableSystemType', {
+      defaultMessage: 'System managed',
+    }),
+  },
 } as const;
 
 export type FieldTypeOption = keyof typeof FIELD_TYPE_MAP;

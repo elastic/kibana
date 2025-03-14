@@ -121,6 +121,7 @@ export const StorybookContext: React.FC<{
           addFleetServers: true,
         },
         integrations: {
+          all: true,
           readPackageInfo: true,
           readInstalledPackages: true,
           installPackages: true,
