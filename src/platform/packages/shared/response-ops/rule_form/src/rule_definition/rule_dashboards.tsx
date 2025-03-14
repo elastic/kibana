@@ -17,13 +17,14 @@ import {
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-types';
-import { RuleFormPlugins } from '../types';
 import { dashboardServiceProvider, type DashboardItem } from './dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
+import { type RuleDashboardsPlugins } from '../types';
 
-interface RuleFormPluginsProps {
-  plugins: Pick<RuleFormPlugins, 'dashboard' | 'featureFlags'>;
+
+export interface RuleDashboardsPluginsProps {
+  plugins: RuleDashboardsPlugins;
 }
 
 interface DashboardOption {
@@ -35,10 +36,11 @@ interface RuleTypeParamsWithDashboards extends RuleTypeParams {
   dashboards?: Array<{ id: string }>;
 }
 
-export const RuleDashboards = ({ plugins }: RuleFormPluginsProps) => {
+export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   const { featureFlags, dashboard: dashboardService } = plugins;
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
+  // const dashboardsFormData = formData.dashboards;
   const params = formData.params as RuleTypeParamsWithDashboards;
   const isLinkedDashboardsEnabled = featureFlags.getBooleanValue('rca.linkedDashboards', false);
 

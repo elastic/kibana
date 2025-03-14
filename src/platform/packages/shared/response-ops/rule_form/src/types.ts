@@ -111,3 +111,6 @@ export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
 export interface ValidationResult {
   errors: Record<string, any>;
 }
+
+export interface RuleDashboardsPlugins extends Pick<RuleFormPlugins, 'dashboard' | 'featureFlags'> {}
+

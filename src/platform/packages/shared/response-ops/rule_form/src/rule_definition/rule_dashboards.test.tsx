@@ -11,7 +11,6 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDashboards } from './rule_dashboards';
-// import { dashboardServiceProvider } from './dashboard_service';
 
 const mockOnChange = jest.fn();
 
@@ -46,6 +45,21 @@ const { dashboardServiceProvider: mockDashboardServiceProvider } =
   jest.requireMock('./dashboard_service');
 
 describe('RuleDashboards', () => {
+  const plugins = {
+    featureFlags: {
+      getBooleanValue: jest.fn(),
+      appendContext: jest.fn(),
+      getStringValue: jest.fn(),
+      getNumberValue: jest.fn(),
+      getBooleanValue$: jest.fn(),
+      getStringValue$: jest.fn(),
+      getNumberValue$: jest.fn(),
+    },
+    dashboard: {
+      findDashboardsService: jest.fn(),
+      registerDashboardPanelPlacementSetting: jest.fn(),
+    }
+  };
   beforeEach(() => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
     useRuleFormState.mockReturnValue({
@@ -62,11 +76,7 @@ describe('RuleDashboards', () => {
   });
 
   it('does not render linked dashboards combo box when feature flag is disabled', () => {
-    const plugins = {
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(false),
-      },
-    };
+    plugins.featureFlags.getBooleanValue.mockReturnValue(false);
 
     render(<RuleDashboards plugins={plugins} />);
 
@@ -75,13 +85,9 @@ describe('RuleDashboards', () => {
     expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
     expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
   });
-
+      
   it('renders linked dashboards combo box when feature flag is enabled', async () => {
-    const plugins = {
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(true),
-      },
-    };
+    plugins.featureFlags.getBooleanValue.mockReturnValue(true);
 
     render(
       <IntlProvider locale="en">
@@ -89,7 +95,7 @@ describe('RuleDashboards', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByText(/Link dashboard\(s\)/i)).toBeInTheDocument();
+    expect(screen.getByText('Link dashboards')).toBeInTheDocument();
     expect(useRuleFormState).toHaveBeenCalledTimes(1);
     expect(useRuleFormDispatch).toHaveBeenCalledTimes(1);
     expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);
@@ -98,6 +104,8 @@ describe('RuleDashboards', () => {
   });
 
   it('fetches and displays dashboard titles', async () => {
+    plugins.featureFlags.getBooleanValue.mockReturnValue(true);
+
     useRuleFormState.mockReturnValue({
       formData: {
         params: {
@@ -109,13 +117,6 @@ describe('RuleDashboards', () => {
         },
       },
     });
-
-    const plugins = {
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(true),
-      },
-      dashboard: {},
-    };
 
     render(
       <IntlProvider locale="en">
@@ -132,6 +133,8 @@ describe('RuleDashboards', () => {
   });
 
   it('dispatches selected dashboards on change', async () => {
+    plugins.featureFlags.getBooleanValue.mockReturnValue(true);
+
     useRuleFormState.mockReturnValue({
       formData: {
         params: {
@@ -143,13 +146,6 @@ describe('RuleDashboards', () => {
         },
       },
     });
-
-    const plugins = {
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(true),
-      },
-      dashboard: {},
-    };
 
     render(
       <IntlProvider locale="en">
