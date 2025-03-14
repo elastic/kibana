@@ -18,8 +18,8 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SortDirection } from '../types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { SortDirection } from '../types';
 
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
