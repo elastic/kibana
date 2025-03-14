@@ -103,6 +103,7 @@
     "globby/fast-glob": "^3.3.2"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11.9.1",
     "@appland/sql-parser": "^1.5.1",
     "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-crypto/util": "^5.2.0",
@@ -115,7 +116,7 @@
     "@elastic/apm-rum": "^5.16.3",
     "@elastic/apm-rum-core": "^5.22.1",
     "@elastic/apm-rum-react": "^2.0.5",
-    "@elastic/charts": "69.1.0",
+    "@elastic/charts": "69.1.1",
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "^1.1.1",
     "@elastic/ecs": "^8.11.5",
