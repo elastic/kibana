@@ -22,8 +22,12 @@ export default function ({
 
   describe('Screenshotting Example', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
+      );
       await PageObjects.common.navigateToApp('screenshottingExample');
 
       await testSubjects.setValue(
@@ -43,9 +47,11 @@ export default function ({
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/visualize.json'
+        'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     it('should capture a screenshot ', async () => {
