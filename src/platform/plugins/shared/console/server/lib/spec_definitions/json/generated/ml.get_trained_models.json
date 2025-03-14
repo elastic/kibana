@@ -16,6 +16,7 @@
         "total_feature_importance",
         "definition_status"
       ],
+      "include_model_definition": "__flag__",
       "size": [
         "100"
       ],
