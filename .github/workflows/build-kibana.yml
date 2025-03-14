@@ -37,6 +37,9 @@ jobs:
       - name: Build Kibana
         run: yarn build --release --skip-os-packages --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
 
+      - name: List all files in build directory (Debugging)
+        run: ls -R build/
+
       - name: Locate Dockerfile
         run: |
           if [ -f build/kibana/Dockerfile ]; then
