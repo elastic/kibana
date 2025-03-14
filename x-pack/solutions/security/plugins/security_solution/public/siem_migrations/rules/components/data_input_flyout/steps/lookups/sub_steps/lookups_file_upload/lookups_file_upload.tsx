@@ -110,7 +110,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
     const isButtonDisabled = showLoader || lookupResources.length === 0;
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow
             helpText={errors.map((error) => (
