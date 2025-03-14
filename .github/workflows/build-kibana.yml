@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Repository and Ensure Correct Branch
         uses: actions/checkout@v4
         with:
-          ref: openai_pki_connector_8_15  # Ensure we are on the right branch
+          ref: openai_pki_connector_8_15
 
       - name: Verify Git Branch Being Used
         run: |
@@ -30,9 +30,16 @@ jobs:
           echo "Using Node.js version: $NODE_VERSION"
           echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_ENV
 
-      - name: Remove Any Existing Node.js Versions
+      - name: **Force Remove Any Existing Node.js Versions**
         run: |
-          sudo rm -rf /opt/hostedtoolcache/Node*
+          sudo apt-get remove --purge -y nodejs npm
+          sudo rm -rf /usr/local/lib/node_modules
+          sudo rm -rf /usr/local/bin/node
+          sudo rm -rf /usr/local/include/node
+          sudo rm -rf /usr/local/share/man/man1/node.1
+          sudo rm -rf /usr/local/lib/node
+          sudo rm -rf ~/.npm
+          sudo rm -rf ~/.nvm
           node -v || echo "Node.js is not installed"
 
       - name: Install Correct Node.js Version
