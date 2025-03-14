@@ -31,7 +31,6 @@ export const startAutoScroll = () => {
     if (!shouldAutoScroll) return;
 
     const deltaTime = (now - lastFrameTime) / 1000;
-    const FPS = 1 / deltaTime;
 
     if (latestMouseEvent) {
       // Scroll faster depending on how far the user's drag is from the center of the screen.
