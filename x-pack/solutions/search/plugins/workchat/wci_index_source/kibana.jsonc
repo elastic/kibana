@@ -1,17 +1,17 @@
 {
   "type": "plugin",
-  "id": "@kbn/wci-salesforce",
+  "id": "@kbn/wci-index-source",
   "owner": "@elastic/search-kibana",
   "group": "search",
   "visibility": "private",
-  "description": "WorkChat Salesforce Integration plugin",
+  "description": "WorkChat Index Source Integration plugin",
   "plugin": {
-    "id": "wciSalesforce",
+    "id": "wciIndexSource",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "wciSalesforce"],
-    "requiredPlugins": ["inference", "workchatApp"],
+    "configPath": ["xpack", "wciIndexSource"],
+    "requiredPlugins": ["workchatApp"],
     "optionalPlugins": [],
     "requiredBundles": []
   }
-}
+} 

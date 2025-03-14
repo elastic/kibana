@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export enum IntegrationType {
-  salesforce = 'salesforce',
-  index_source = 'index_source',
-  external_server = 'external_server',
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/wci_index_source/server'],
+  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+}; 

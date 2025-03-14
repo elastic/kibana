@@ -13,20 +13,20 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type {
-  WCISalesforcePluginStart,
-  WCISalesforcePluginSetup,
-  WCISalesforcePluginSetupDependencies,
-  WCISalesforcePluginStartDependencies,
+  WCIExternalServerPluginStart,
+  WCIExternalServerPluginSetup,
+  WCIExternalServerPluginSetupDependencies,
+  WCIExternalServerPluginStartDependencies,
 } from './types';
-import { getSalesforceIntegrationDefinition } from './integration';
+import { getExternalServerIntegrationDefinition } from './integration';
 
-export class WCISalesforcePlugin
+export class WCIExternalServerPlugin
   implements
     Plugin<
-      WCISalesforcePluginSetup,
-      WCISalesforcePluginStart,
-      WCISalesforcePluginSetupDependencies,
-      WCISalesforcePluginStartDependencies
+      WCIExternalServerPluginSetup,
+      WCIExternalServerPluginStart,
+      WCIExternalServerPluginSetupDependencies,
+      WCIExternalServerPluginStartDependencies
     >
 {
   private readonly logger: Logger;
@@ -37,10 +37,10 @@ export class WCISalesforcePlugin
 
   public setup(
     core: CoreSetup,
-    { workchatApp }: WCISalesforcePluginSetupDependencies
-  ): WCISalesforcePluginSetup {
+    { workchatApp }: WCIExternalServerPluginSetupDependencies
+  ): WCIExternalServerPluginSetup {
     workchatApp.integrations.register(
-      getSalesforceIntegrationDefinition({
+      getExternalServerIntegrationDefinition({
         core,
         logger: this.logger,
       })
@@ -51,8 +51,8 @@ export class WCISalesforcePlugin
 
   public start(
     core: CoreStart,
-    pluginsDependencies: WCISalesforcePluginStartDependencies
-  ): WCISalesforcePluginStart {
+    pluginsDependencies: WCIExternalServerPluginStartDependencies
+  ): WCIExternalServerPluginStart {
     return {};
   }
-}
+} 

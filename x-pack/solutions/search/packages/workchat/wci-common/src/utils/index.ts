@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export enum IntegrationType {
-  salesforce = 'salesforce',
-  index_source = 'index_source',
-  external_server = 'external_server',
-}
+export { getClientForInternalServer } from './create_internal_client';
+export { getClientForExternalServer } from './create_external_client';

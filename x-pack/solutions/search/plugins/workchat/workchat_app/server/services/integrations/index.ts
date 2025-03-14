@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export enum IntegrationType {
-  salesforce = 'salesforce',
-  index_source = 'index_source',
-  external_server = 'external_server',
-}
+export { IntegrationRegistry } from './integration_registry';
+export { IntegrationsService } from './integrations_service';

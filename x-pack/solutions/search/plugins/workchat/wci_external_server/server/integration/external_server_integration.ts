@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import {
+  IntegrationType,
+  WorkchatIntegrationDefinition,
+  WorkChatIntegration,
+  getClientForExternalServer,
+} from '@kbn/wci-common';
+import { WCIExternalServerConfiguration } from '../types';
+
+export const getExternalServerIntegrationDefinition = ({
+  core,
+  logger,
+}: {
+  core: CoreSetup;
+  logger: Logger;
+}): WorkchatIntegrationDefinition<WCIExternalServerConfiguration> => {
+  return {
+    getType: () => IntegrationType.external_server,
+    createIntegration: async ({
+      configuration,
+    }): Promise<WorkChatIntegration> => {
+      const client = await getClientForExternalServer({ serverUrl: configuration.url });
+
+      return {
+        type: IntegrationType.external_server,
+        client,
+      };
+    },
+  };
+}; 
