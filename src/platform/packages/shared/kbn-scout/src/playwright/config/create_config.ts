@@ -27,9 +27,34 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     process.env.TEST_RUN_ID = runId;
   }
 
+  const scoutProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [
+    {
+      name: 'local',
+      use: { ...devices['Desktop Chrome'], configName: 'local' },
+    },
+  ];
+
+  /**
+   * For parallel tests, we need to add a setup project that runs before the tests project.
+   */
+  if (options.workers && options.workers > 1) {
+    const parentProject = scoutProjects.find((p) => p.use?.configName);
+
+    scoutProjects.unshift({
+      name: 'setup',
+      use: parentProject?.use ? { ...parentProject.use } : {},
+      testMatch: /global.setup\.ts/,
+    });
+
+    scoutProjects.forEach((project) => {
+      if (project.name !== 'setup') {
+        project.dependencies = ['setup'];
+      }
+    });
+  }
+
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
-    globalSetup: options.globalSetup,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -49,6 +74,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     use: {
       actionTimeout: 10000, // Shorten timeout for actions like `click()`
       navigationTimeout: 20000, // Shorter timeout for page navigations
+      // 'configName' is not defined by default to enforce using '--project' flag when running the tests
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
@@ -72,24 +98,6 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
 
     outputDir: './output/test-artifacts', // For other test artifacts (screenshots, videos, traces)
 
-    /* Configure projects for major browsers */
-    projects: [
-      {
-        name: 'chromium',
-        use: { ...devices['Desktop Chrome'] },
-      },
-
-      // {
-      //   name: 'firefox',
-      //   use: { ...devices['Desktop Firefox'] },
-      // },
-    ],
-
-    /* Run your local dev server before starting the tests */
-    // webServer: {
-    //   command: 'npm run start',
-    //   url: 'http://127.0.0.1:3000',
-    //   reuseExistingServer: !process.env.CI,
-    // },
+    projects: scoutProjects,
   });
 }

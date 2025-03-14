@@ -77,6 +77,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       ],
       category: 'kibana',
       producer: 'fecAlertsTestPlugin',
+      solution: 'stack',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
