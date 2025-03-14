@@ -4649,7 +4649,7 @@
             "description": "Indicates a rule with the given id does not exist."
           }
         },
-        "summary": "Delete a snooze schedule for a rule",
+        "summary": "Delete an existing snooze schedule for a rule",
         "tags": [
           "alerting"
         ]
