@@ -16,7 +16,6 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { RuleTypeParams } from '@kbn/alerting-types';
 import { dashboardServiceProvider, type DashboardItem } from './dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
@@ -31,16 +30,11 @@ interface DashboardOption {
   label: string;
 }
 
-interface RuleTypeParamsWithDashboards extends RuleTypeParams {
-  dashboards?: Array<{ id: string }>;
-}
-
 export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   const { featureFlags, dashboard: dashboardService } = plugins;
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
-  // const dashboardsFormData = formData.dashboards;
-  const params = formData.params as RuleTypeParamsWithDashboards;
+  const dashboardsFormData = formData.dashboards;
   const isLinkedDashboardsEnabled = featureFlags.getBooleanValue('rca.linkedDashboards', false);
 
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
@@ -50,10 +44,10 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   >();
 
   useEffect(() => {
-    if ((params.dashboards ?? []).length > 0) {
+    if ((dashboardsFormData ?? []).length > 0) {
       const fetchDashboardTitles = async () => {
         const dashboardsWithTitles = await Promise.all(
-          (params.dashboards ?? []).map(async (dashboard) => ({
+          (dashboardsFormData ?? []).map(async (dashboard) => ({
             label: (
               await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id)
             )?.attributes.title,
@@ -65,7 +59,7 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
 
       fetchDashboardTitles();
     }
-  }, [params.dashboards, dashboardService]);
+  }, [dashboardsFormData, dashboardService]);
 
   const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedDashboards(selectedOptions);
