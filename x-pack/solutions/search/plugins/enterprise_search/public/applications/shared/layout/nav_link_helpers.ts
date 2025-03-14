@@ -7,16 +7,14 @@
 
 import { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
-import {
-  GeneratedReactRouterProps,
-  generateReactRouterProps,
-  ReactRouterProps,
-} from '@kbn/search-connectors-plugin/public';
-
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
-import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
+import {
+  type GeneratedReactRouterProps,
+  generateReactRouterProps,
+} from '../react_router_helpers/generate_react_router_props';
+import { ReactRouterProps } from '../types';
 
 interface Params {
   items?: Array<EuiSideNavItemTypeEnhanced<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
@@ -34,12 +32,7 @@ export const generateNavLink = ({
   ...rest
 }: GenerateNavLinkParameters): NavLinkProps<unknown> => {
   const linkProps = {
-    ...generateReactRouterProps({
-      ...rest,
-      history: KibanaLogic.values.history,
-      http: HttpLogic.values.http,
-      navigateToUrl: KibanaLogic.values.navigateToUrl,
-    }),
+    ...generateReactRouterProps({ ...rest }),
     isSelected: getNavLinkActive({ items, ...rest }),
   };
   return items ? { ...linkProps, items } : linkProps;
@@ -57,19 +50,8 @@ export const getNavLinkActive = ({
   const { href: currentPathHref } = generateReactRouterProps({
     shouldNotCreateHref: false,
     to: currentPath,
-    history: KibanaLogic.values.history,
-    http: HttpLogic.values.http,
-    navigateToUrl: KibanaLogic.values.navigateToUrl,
   });
-
-  const { href: toHref } = generateReactRouterProps({
-    shouldNotCreateHref,
-    shouldNotPrepend,
-    to,
-    history: KibanaLogic.values.history,
-    http: HttpLogic.values.http,
-    navigateToUrl: KibanaLogic.values.navigateToUrl,
-  });
+  const { href: toHref } = generateReactRouterProps({ shouldNotCreateHref, shouldNotPrepend, to });
 
   if (currentPathHref === toHref) return true;
 

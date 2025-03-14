@@ -12,7 +12,7 @@ import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
 import '../../__mocks__/react_router';
 
-jest.mock('@kbn/search-connectors-plugin/public', () => ({
+jest.mock('../react_router_helpers/link_events', () => ({
   letBrowserHandleEvent: jest.fn(),
 }));
 

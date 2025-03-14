@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiAccordion, EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
 
-import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
+import { EuiLinkTo } from '../../react_router_helpers';
 
 import { SchemaType } from '../types';
 

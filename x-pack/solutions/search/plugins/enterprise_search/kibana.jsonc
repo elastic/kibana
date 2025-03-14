@@ -21,8 +21,7 @@
       "logsDataAccess",
       "esUiShared",
       "navigation",
-      "uiActions",
-      "searchConnectors",
+      "uiActions"
     ],
     "optionalPlugins": [
       "customIntegrations",
@@ -35,6 +34,7 @@
       "usageCollection",
       "guidedOnboarding",
       "console",
+      "searchConnectors",
       "searchNavigation",
       "searchPlayground",
       "embeddable",

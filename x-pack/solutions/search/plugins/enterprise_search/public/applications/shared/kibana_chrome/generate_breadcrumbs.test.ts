@@ -8,11 +8,11 @@
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
-jest.mock('@kbn/search-connectors-plugin/public', () => ({
+jest.mock('../react_router_helpers', () => ({
   letBrowserHandleEvent: jest.fn(() => false),
-  createHref: jest.requireActual('@kbn/search-connectors-plugin/public').createHref,
+  createHref: jest.requireActual('../react_router_helpers').createHref,
 }));
-import { letBrowserHandleEvent } from '@kbn/search-connectors-plugin/public';
+import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import {
   Breadcrumb,

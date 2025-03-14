@@ -23,8 +23,6 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
-
 import welcomeGraphicDark from '../../../assets/images/welcome_dark.svg';
 import welcomeGraphicLight from '../../../assets/images/welcome_light.svg';
 
@@ -33,6 +31,7 @@ import { docLinks } from '../doc_links';
 import './add_content_empty_prompt.scss';
 
 import { KibanaLogic } from '../kibana';
+import { EuiLinkTo } from '../react_router_helpers';
 
 export const AddContentEmptyPrompt: React.FC = () => {
   const { colorMode } = useEuiTheme();

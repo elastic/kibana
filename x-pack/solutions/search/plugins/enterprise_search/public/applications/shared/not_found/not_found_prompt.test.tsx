@@ -12,7 +12,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
-import { EuiButtonTo } from '@kbn/search-connectors-plugin/public';
+
+import { EuiButtonTo } from '../react_router_helpers';
 
 import { NotFoundPrompt } from '.';
 

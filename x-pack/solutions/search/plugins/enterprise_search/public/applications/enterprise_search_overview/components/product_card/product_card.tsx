@@ -22,8 +22,7 @@ import {
   IconSize,
 } from '@elastic/eui';
 
-import { EuiButtonTo, EuiButtonEmptyTo } from '@kbn/search-connectors-plugin/public';
-
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
 import './product_card.scss';

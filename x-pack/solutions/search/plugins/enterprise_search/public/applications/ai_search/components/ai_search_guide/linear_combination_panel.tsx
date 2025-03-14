@@ -22,10 +22,9 @@ import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiLinkTo } from '@kbn/search-connectors-plugin/public';
-
 import { DEV_TOOLS_CONSOLE_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
@@ -34,7 +33,6 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLink
-        data-test-subj="enterpriseSearchCombineApproximateKNnWithOtherFeaturesLink"
         data-telemetry-id="entSearch-aiSearch-rankAggregation-linearCombinationPanel-knnSearchCombineLink"
         href={docLinks.knnSearchCombine}
         target="_blank"
@@ -60,7 +58,7 @@ const steps: EuiContainedStepProps[] = [
         to={generatePath(DEV_TOOLS_CONSOLE_PATH)}
         shouldNotCreateHref
       >
-        <EuiButton data-test-subj="enterpriseSearchOpenConsoleButton">
+        <EuiButton>
           {i18n.translate(
             'xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step2.buttonLabel',
             {
