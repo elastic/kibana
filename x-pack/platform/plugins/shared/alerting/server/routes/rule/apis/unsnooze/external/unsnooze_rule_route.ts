@@ -6,14 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import {
   unsnoozeParamsSchema,
   type UnsnoozeParams,
 } from '../../../../../../common/routes/rule/apis/unsnooze';
-import { ILicenseState, RuleMutedError } from '../../../../../lib';
+import type { ILicenseState } from '../../../../../lib';
+import { RuleMutedError } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 export const unsnoozeRuleRoute = (
