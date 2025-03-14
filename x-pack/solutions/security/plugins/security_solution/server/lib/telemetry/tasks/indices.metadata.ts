@@ -42,7 +42,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
     type: taskType,
     title: 'Security Solution Telemetry Indices Metadata task',
     interval: '24h',
-    timeout: '1m',
+    timeout: '5m',
     version: '1.0.0',
     getLastExecutionTime: getPreviousDailyTaskTimestamp,
     runTask: async (
