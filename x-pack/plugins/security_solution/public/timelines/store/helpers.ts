@@ -35,6 +35,10 @@ import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
 import type { TimelineById, TimelineModelSettings } from './types';
 import { DEFAULT_FROM_MOMENT, DEFAULT_TO_MOMENT } from '../../common/utils/default_date_settings';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  RESIZED_COLUMN_MIN_WITH,
+} from '../components/timeline/body/constants';
 import { activeTimeline } from '../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
@@ -1309,6 +1313,56 @@ export const setInitializeTimelineSettings = ({
           ...timelineSettingsProps,
         },
       };
+};
+
+interface ApplyDeltaToTableColumnWidth {
+  id: string;
+  columnId: string;
+  delta: number;
+  timelineById: TimelineById;
+}
+
+export const applyDeltaToTableColumnWidth = ({
+  id,
+  columnId,
+  delta,
+  timelineById,
+}: ApplyDeltaToTableColumnWidth): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
+  if (columnIndex === -1) {
+    // the column was not found
+    return {
+      ...timelineById,
+      [id]: {
+        ...timeline,
+      },
+    };
+  }
+
+  const requestedWidth =
+    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
+  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
+
+  const columnWithNewWidth = {
+    ...timeline.columns[columnIndex],
+    initialWidth,
+  };
+
+  const columns = [
+    ...timeline.columns.slice(0, columnIndex),
+    columnWithNewWidth,
+    ...timeline.columns.slice(columnIndex + 1),
+  ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
 };
 
 export const updateTimelineColumnWidth = ({

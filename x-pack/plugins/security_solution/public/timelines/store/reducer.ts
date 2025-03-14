@@ -53,6 +53,7 @@ import {
   initializeTimelineSettings,
   updateItemsPerPage,
   updateItemsPerPageOptions,
+  applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
   updateSavedSearchId,
@@ -100,6 +101,7 @@ import {
   setSelectedTableEvents,
   setDeletedTableEvents,
   setInitializeTimelineSettings,
+  applyDeltaToTableColumnWidth,
   updateTimelinePerPageOptions,
   updateTimelineItemsPerPage,
   updateTimelineColumnWidth,
@@ -472,6 +474,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: updateTimelinePerPageOptions({
       id,
       itemsPerPageOptions,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
+    ...state,
+    timelineById: applyDeltaToTableColumnWidth({
+      id,
+      columnId,
+      delta,
       timelineById: state.timelineById,
     }),
   }))
