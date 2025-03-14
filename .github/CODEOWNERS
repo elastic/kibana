@@ -1163,6 +1163,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test_serverless/functional/test_suites/common/examples/search @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/examples/unified_tabs_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
