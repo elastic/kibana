@@ -288,8 +288,11 @@ export function registerErrorCountRuleType({
           ALERT_RULE_PARAMETERS
         ] as ErrorCountRuleTypeParams;
         const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
-
-        const groupByFields: Record<string, string> = groupByFieldsOfRecoveredAlert.reduce(
+        const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
+          ApmRuleType.ErrorCount,
+          groupByFieldsOfRecoveredAlert
+        );
+        const groupByFields: Record<string, string> = allGroupByFieldsOfRecoveredAlert.reduce(
           (acc, sourceField: string) => {
             if (alertHits?.[sourceField] !== undefined) {
               acc[sourceField] = alertHits[sourceField];

@@ -337,8 +337,11 @@ export function registerTransactionErrorRateRuleType({
           ALERT_RULE_PARAMETERS
         ] as TransactionErrorRateRuleTypeParams;
         const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
-
-        const groupByFields: Record<string, string> = groupByFieldsOfRecoveredAlert.reduce(
+        const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
+          ApmRuleType.TransactionErrorRate,
+          groupByFieldsOfRecoveredAlert
+        );
+        const groupByFields: Record<string, string> = allGroupByFieldsOfRecoveredAlert.reduce(
           (acc, sourceField: string) => {
             if (alertHits?.[sourceField] !== undefined) {
               acc[sourceField] = alertHits[sourceField];
