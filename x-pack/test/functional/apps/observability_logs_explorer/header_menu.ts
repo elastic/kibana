@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Header menu', () => {
     before(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
