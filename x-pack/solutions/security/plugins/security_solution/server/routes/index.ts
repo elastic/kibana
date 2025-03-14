@@ -54,6 +54,7 @@ import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
+import { getTriggerIndicesMetadataTaskRoute } from '../lib/telemetry/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -141,4 +142,7 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
   registerAssetInventoryRoutes({ router, config, logger, getStartServices });
+
+  // TODO: just to test the PR, remove
+  getTriggerIndicesMetadataTaskRoute(router, logger, previewTelemetryReceiver, telemetrySender);
 };
