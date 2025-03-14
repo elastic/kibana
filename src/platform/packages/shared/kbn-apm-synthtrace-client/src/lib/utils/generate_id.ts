@@ -8,14 +8,22 @@
  */
 
 let seq = 0;
-const pid = String(process.pid);
+// reset the sequence every 1_000_000 to avoid overflow
+const MAX_SEQ = 1_000_000;
 
 const LONG_ID_LENGTH = 32;
 const SHORT_ID_LENGTH = 16;
 
 function generateId(length: number = LONG_ID_LENGTH) {
-  const id = String(seq++);
-  const generatedId = pid + id.padStart(length - pid.length, '0');
+  const seqId = String(seq++ % MAX_SEQ);
+  const timestamp = Date.now().toString(16);
+  // additional entropy to avoid collisions
+  const randomPart = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16);
+
+  const id = `${seqId}${timestamp}${randomPart}`;
+
+  const generatedId = id.length < length ? id.padStart(length, '0') : id.slice(0, length);
+
   if (generatedId.length > length) {
     throw new Error(`generated id is longer than ${length} characters: ${generatedId.length}`);
   }
