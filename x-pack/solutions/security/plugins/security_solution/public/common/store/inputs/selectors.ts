@@ -36,11 +36,6 @@ const selectSocTrends = (state: State): InputsState['socTrends'] | undefined =>
 const selectGlobalQuery = (state: State, id: string): GlobalQuery =>
   state.inputs.global.queries.find((q) => q.id === id) || defaultQuery;
 
-const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
-  state.inputs.timeline.queries.find((q) => q.id === id) ||
-  state.inputs.global.queries.find((q) => q.id === id) ||
-  defaultQuery;
-
 export const inputsSelector = () => createSelector(selectInputs, (inputs) => inputs);
 
 export const timelineTimeRangeSelector = createSelector(

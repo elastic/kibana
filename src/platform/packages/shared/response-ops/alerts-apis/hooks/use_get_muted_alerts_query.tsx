@@ -54,8 +54,6 @@ export const useGetMutedAlertsQuery = (
       }
     },
     enabled: ruleIds.length > 0 && enabled !== false,
-    refetchOnMount: false,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
   });
 };
