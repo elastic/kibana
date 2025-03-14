@@ -13,6 +13,7 @@ import { getDashboardContentManagementService } from '../services/dashboard_cont
 import { DashboardCreationOptions, DashboardState, UnsavedPanelState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
+import { renderTimeTracking } from './performance/rendering_time';
 import { coreServices } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import {
@@ -119,6 +120,7 @@ export async function loadDashboardApi({
     firstLoad: true,
     creationStartTime,
   });
+  renderTimeTracking(api);
 
   if (savedObjectId && !incomingEmbeddable) {
     // We count a new view every time a user opens a dashboard, both in view or edit mode
@@ -137,6 +139,7 @@ export async function loadDashboardApi({
     cleanup: () => {
       cleanup();
       performanceSubscription.unsubscribe();
+      //renderTimeCleanup();
     },
     internalApi,
   };
