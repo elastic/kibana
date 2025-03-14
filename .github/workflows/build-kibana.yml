@@ -35,7 +35,7 @@ jobs:
         run: yarn kbn bootstrap
 
       - name: Build Kibana
-        run: yarn build --release
+        run: yarn build --release --skip-os-packages --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
 
       - name: Locate Dockerfile
         run: |
