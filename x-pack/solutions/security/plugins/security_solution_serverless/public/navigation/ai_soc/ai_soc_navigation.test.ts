@@ -7,19 +7,20 @@
 
 import { applyAiSocNavigation, aiGroup } from './ai_soc_navigation';
 import { alertSummaryLink } from './links';
-import { ProductLine } from '../../../common/product';
+import { ProductLine, ProductTier } from '../../../common/product';
 import * as utils from './utils'; // We'll spy on the named export from here
 import type { WritableDraft } from 'immer/dist/internal';
 import type {
   AppDeepLinkId,
+  GroupDefinition,
   NavigationTreeDefinition,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
 
-const nonAiProduct = { product_line: 'other' };
-const aiProduct = { product_line: ProductLine.aiSoc };
+const nonAiProduct = { product_line: ProductLine.security, product_tier: ProductTier.essentials };
+const aiProduct = { product_line: ProductLine.aiSoc, product_tier: ProductTier.essentials };
 
-const getSampleDraft = () => ({
+const getSampleDraft = (): WritableDraft<NavigationTreeDefinition<AppDeepLinkId>> => ({
   body: [
     {
       type: 'navGroup',
@@ -51,16 +52,6 @@ const getSampleDraft = () => ({
                   id: 'detection_response',
                   link: 'securitySolutionUI:detection_response',
                   title: 'Detection & Response',
-                },
-                {
-                  id: 'cloud_security_posture-dashboard',
-                  link: 'securitySolutionUI:cloud_security_posture-dashboard',
-                  title: 'Cloud Security Posture',
-                },
-                {
-                  id: 'cloud_security_posture-vulnerability_dashboard',
-                  link: 'securitySolutionUI:cloud_security_posture-vulnerability_dashboard',
-                  title: 'Cloud Native Vulnerability Management',
                 },
                 {
                   id: 'entity_analytics',
@@ -134,7 +125,10 @@ describe('applyAiSocNavigation', () => {
       ]);
 
       // Check that filterFromWhitelist was called with the original children plus alertSummaryLink
-      const originalChildren = getSampleDraft().body[0].children; // the initial children
+      const securityGroup = getSampleDraft().body[0] as WritableDraft<
+        GroupDefinition<AppDeepLinkId, string, string>
+      >;
+      const originalChildren = securityGroup.children;
       const expectedChildrenForFiltering = [...originalChildren, alertSummaryLink];
 
       expect(filterSpy).toHaveBeenCalledWith(expectedChildrenForFiltering, expect.any(Array));
