@@ -81,5 +81,15 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
         });
       });
     }
+
+    it('archiving unexistent maintenance window returns 404', async () => {
+      const space1 = UserAtSpaceScenarios[1].space.id;
+
+      await supertest
+        .post(`${getUrlPrefix(space1)}/api/alerting/maintenance_window/foobar-id/_archive`)
+        .set('kbn-xsrf', 'foo')
+        .send({ archive: true })
+        .expect(404);
+    });
   });
 }
