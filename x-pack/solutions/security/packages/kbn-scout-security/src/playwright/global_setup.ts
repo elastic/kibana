@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { ingestTestDataHook } from '@kbn/scout';
-import { type FullConfig } from '@playwright/test';
+import { globalSetupHook } from '@kbn/scout';
 import { archives } from './constants';
 
-async function globalSetup(config: FullConfig) {
-  const data = [archives.ES.AUDITBEAT];
+globalSetupHook('Ingest archives to Elasticsearch', async ({ esArchiver, log }) => {
+  const archivesToIngest = [archives.ES.AUDITBEAT];
 
-  return ingestTestDataHook(config, data);
-}
-
-// eslint-disable-next-line import/no-default-export
-export default globalSetup;
+  log.debug('[setup] loading archives test data (only if indexes do not exist)...');
+  for (const archive of archivesToIngest) {
+    await esArchiver.loadIfNeeded(archive);
+  }
+});

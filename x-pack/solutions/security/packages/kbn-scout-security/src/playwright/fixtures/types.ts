@@ -28,7 +28,10 @@ export interface SecurityWorkerFixtures extends ScoutWorkerFixtures {
 }
 
 export interface SecurityParallelTestFixtures extends ScoutParallelTestFixtures {
+  browserAuth: SecurityBrowserAuthFixture;
   pageObjects: SecurityPageObjects;
 }
 
-export type SecurityParallelWorkerFixtures = ScoutParallelWorkerFixtures;
+export interface SecurityParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
+  detectionRuleApi: DetectionRuleFixture;
+}

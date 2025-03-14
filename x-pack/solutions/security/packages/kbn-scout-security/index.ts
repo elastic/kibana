@@ -8,13 +8,7 @@
 export { test, spaceTest } from './src/playwright';
 
 // re-export from @kbn/scout
-export {
-  expect,
-  tags,
-  createPlaywrightConfig,
-  createLazyPageObject,
-  ingestTestDataHook,
-} from '@kbn/scout';
+export { expect, tags, createPlaywrightConfig, createLazyPageObject } from '@kbn/scout';
 
 export type {
   EsClient,

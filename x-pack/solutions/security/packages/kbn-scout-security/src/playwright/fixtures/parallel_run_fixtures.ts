@@ -6,8 +6,15 @@
  */
 
 import { spaceTest as spaceBase } from '@kbn/scout';
+import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
 import { extendPageObjects } from './test/page_objects';
-import { SecurityParallelTestFixtures, SecurityParallelWorkerFixtures } from './types';
+import {
+  SecurityParallelTestFixtures,
+  SecurityParallelWorkerFixtures,
+  SecurityBrowserAuthFixture,
+} from './types';
+import { extendBrowserAuth } from './test/authentication';
+import { createDetectionRuleFixture } from './worker/apis/detection_rule';
 
 /**
  * Should be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance.
@@ -16,6 +23,13 @@ export const spaceTest = spaceBase.extend<
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures
 >({
+  browserAuth: async (
+    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    use: (auth: SecurityBrowserAuthFixture) => Promise<void>
+  ) => {
+    const extendedAuth = await extendBrowserAuth(browserAuth);
+    await use(extendedAuth);
+  },
   pageObjects: async (
     {
       pageObjects,
@@ -29,4 +43,11 @@ export const spaceTest = spaceBase.extend<
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
+  detectionRuleApi: [
+    async ({ kbnClient, log }, use) => {
+      const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient, log });
+      await use(detectionRuleHelper);
+    },
+    { scope: 'worker' },
+  ],
 });
