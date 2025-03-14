@@ -1,4 +1,3 @@
-[[dependencies-versions]]
-== List of dependencies
+# List of dependencies [dependencies-versions]
 
-Go to https://artifacts.elastic.co/reports/dependencies/dependencies-current.html[Elastic stack third-party dependencies] for a complete list of dependencies for Kibana.
+Refer to [{{stack}} third-party dependencies](https://artifacts.elastic.co/reports/dependencies/dependencies-current.html) for a list of the external dependencies you can leverage.
