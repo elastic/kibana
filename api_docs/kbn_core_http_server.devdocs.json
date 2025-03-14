@@ -3077,18 +3077,6 @@
                 "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts"
               },
               {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/info.ts"
-              },
-              {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/feature_usage.ts"
-              },
-              {
-                "plugin": "features",
-                "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
-              },
-              {
                 "plugin": "customIntegrations",
                 "path": "src/platform/plugins/shared/custom_integrations/server/routes/define_routes.ts"
               },
@@ -3103,6 +3091,18 @@
               {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/list.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/info.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/feature_usage.ts"
+              },
+              {
+                "plugin": "features",
+                "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
               },
               {
                 "plugin": "spaces",
@@ -5237,20 +5237,20 @@
                 "path": "src/platform/plugins/shared/content_management/server/rpc/routes/routes.ts"
               },
               {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/notify_feature_usage.ts"
-              },
-              {
-                "plugin": "licensing",
-                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/register_feature.ts"
-              },
-              {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/install.ts"
               },
               {
                 "plugin": "home",
                 "path": "src/platform/plugins/shared/home/server/routes/fetch_es_hits_status.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/notify_feature_usage.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/register_feature.ts"
               },
               {
                 "plugin": "spaces",
@@ -5426,7 +5426,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/internal/snooze_rule_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6794,18 +6798,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
               },
               {
@@ -6839,6 +6831,38 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/external/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/internal/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/internal/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/internal/snooze_rule_route.test.ts"
               },
               {
                 "plugin": "securitySolution",
