@@ -51703,7 +51703,7 @@ paths:
                     }
               schema:
                 type: object
-          description: Successful request
+          description: A successful response.
       summary: Get monitors
       tags:
         - synthetics
@@ -51770,7 +51770,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful request
+          description: A successful response.
       summary: Create a monitor
       tags:
         - synthetics
@@ -52006,55 +52006,502 @@ paths:
       tags:
         - synthetics
   /api/synthetics/params:
-    post:
-      description: Add one or more parameters to the Synthetics app.
-      operationId: post-parameters
-      summary: Add parameters
+    get:
+      description: |
+        Get a list of all parameters. You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-parameters
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getParametersResponseExample1:
+                  description: A successful response for a user with read-only permissions to get a list of parameters.
+                  summary: Read access
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"]
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"]
+                      }
+                    ]
+                getParametersResponseExample2:
+                  description: A successful response for a user with write permissions to get a list of parameters.
+                  summary: Write access
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"],
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"],
+                        "value": "value2"
+                      }
+                    ]
+              schema:
+                items:
+                  - $ref: '#/components/schemas/Synthetics_getParameterResponse'
+                type: array
+          description: A successful response.
+      summary: Get parameters
       tags:
         - synthetics
-    put:
-      operationId: put-parameter
-      summary: Update a parameter
+    post:
+      description: |
+        Add one or more parameters to the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: post-parameters
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postParametersRequestExample1:
+                description: Add a single parameter.
+                summary: Single parameter
+                value: |-
+                  {
+                    "key": "your-key-name",
+                    "value": "your-parameter-value",
+                    "description": "Param to use in browser monitor",
+                    "tags": ["authentication", "security"],
+                    "share_across_spaces": true
+                  }
+              postParametersRequestExample2:
+                description: Add multiple parameters.
+                summary: Multiple parameters
+                value: |-
+                  [
+                    {
+                      "key": "param1",
+                      "value": "value1"
+                    },
+                    {
+                      "key": "param2",
+                      "value": "value2"
+                    }
+                  ]
+            schema:
+              oneOf:
+                - items:
+                    - $ref: '#/components/schemas/Synthetics_parameterRequest'
+                  type: array
+                - $ref: '#/components/schemas/Synthetics_parameterRequest'
+        description: The request body can contain either a single parameter object or an array of parameter objects.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postParametersResponseExample1:
+                  description: A successful response for a single added parameter.
+                  summary: Single parameter
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-key-name",
+                      "value": "your-param-value",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "share_across_spaces": true
+                    }
+                postParametersResponseExample2:
+                  description: A successful response for multiple added parameters.
+                  summary: Multiple parameters
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "value": "value2"
+                      }
+                    ]
+              schema:
+                oneOf:
+                  - items:
+                      - $ref: '#/components/schemas/Synthetics_postParameterResponse'
+                    type: array
+                  - $ref: '#/components/schemas/Synthetics_postParameterResponse'
+          description: A successful response.
+      summary: Add parameters
       tags:
         - synthetics
   /api/synthetics/params/_bulk_delete:
     delete:
+      description: |
+        Delete parameters from the Synthetics app. You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: delete-parameters
+      requestBody:
+        content:
+          application/json:
+            examples:
+              deleteParametersRequestExample1:
+                description: Run `POST /api/synthetics/params/_bulk_delete` to delete multiple parameters.
+                value: |-
+                  {
+                    "ids": ["param1-id", "param2-id"]
+                  }
+            schema:
+              property:
+                ids:
+                  description: An array of parameter IDs to delete.
+                  items:
+                    type: string
+                  type: array
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteParametersResponseExample1:
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "deleted": true
+                      }
+                    ]
+              schema:
+                items:
+                  type: object
+                  properties:
+                    deleted:
+                      description: |
+                        Indicates whether the parameter was successfully deleted. It is `true` if it was deleted. It is `false` if it was not deleted.
+                      type: boolean
+                    id:
+                      description: The unique identifier for the deleted parameter.
+                      type: string
+                type: array
+          description: A successful response.
       summary: Delete parameters
       tags:
         - synthetics
   /api/synthetics/params/{id}:
     delete:
+      description: |
+        Delete a parameter from the Synthetics app. You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: delete-parameter
+      parameters:
+        - description: The ID for the parameter to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
       summary: Delete a parameter
       tags:
         - synthetics
     get:
+      description: You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: get-parameter
+      parameters:
+        - description: The unique identifier for the parameter.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getParameterResponseExample1:
+                  description: A successful response for a user with read-only permissions to get a single parameter.
+                  summary: Read access
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-api-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"]
+                    }
+                getParameterResponseExample2:
+                  description: A successful response for a user with write permissions to get a single parameter.
+                  summary: Write access
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-param-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"],
+                      "value": "your-param-value"
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getParameterResponse'
+          description: A successful response.
       summary: Get a parameter
+      tags:
+        - synthetics
+    put:
+      description: You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: put-parameter
+      parameters:
+        - description: The unique identifier for the parameter.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putParameterRequestExample1:
+                value: |-
+                  {
+                    "key": "updated_param_key",
+                    "value": "updated-param-value",
+                    "description": "Updated Param to be used in browser monitor",
+                    "tags": ["authentication", "security", "updated"]
+                  }
+            schema:
+              type: object
+              properties:
+                description:
+                  description: The updated description of the parameter.
+                  type: string
+                key:
+                  description: The key of the parameter.
+                  type: string
+                tags:
+                  description: An array of updated tags to categorize the parameter.
+                  items:
+                    - type: string
+                  type: array
+                value:
+                  description: The updated value associated with the parameter.
+                  type: string
+        description: The request body cannot be empty; at least one attribute is required.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putParameterResponseExample1:
+                  value: |-
+                    {
+                      "id": "param_id1",
+                      "key": "updated_param_key",
+                      "value": "updated-param-value",
+                      "description": "Updated Param to be used in browser monitor",
+                      "tags": ["authentication", "security", "updated"]
+                    }
+              schema:
+                type: object
+          description: A successful response.
+      summary: Update a parameter
       tags:
         - synthetics
   /api/synthetics/private_locations:
     get:
       description: |
         Get a list of private locations.
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
       operationId: get-private-locations
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPrivateLocationsResponseExample1:
+                  value: |-
+                    [
+                        {
+                            "label": "Test private location",
+                            "id": "fleet-server-policy",
+                            "agentPolicyId": "fleet-server-policy",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "default"
+                        },
+                        {
+                            "label": "Test private location 2",
+                            "id": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "agentPolicyId": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "test"
+                        }
+                    ]
+              schema:
+                items:
+                  - $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+                type: array
+          description: A successful response.
       summary: Get private locations
       tags:
         - synthetics
     post:
+      description: You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
       operationId: post-private-location
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postPrivateLocationRequestExample1:
+                description: Run `POST /api/private_locations` to create a private location.
+                value: |-
+                  {
+                    "label": "Private Location 1",
+                    "agentPolicyId": "abcd1234",
+                    "tags": ["private", "testing"],
+                    "geo": {
+                      "lat": 40.7128,
+                      "lon": -74.0060
+                    }
+                    "spaces": ["default"]
+                  }
+            schema:
+              type: object
+              properties:
+                agentPolicyId:
+                  description: The ID of the agent policy associated with the private location.
+                  type: string
+                geo:
+                  description: Geographic coordinates (WGS84) for the location.
+                  type: object
+                  properties:
+                    lat:
+                      description: The latitude of the location.
+                      type: number
+                    lon:
+                      description: The longitude of the location.
+                      type: number
+                  required:
+                    - lat
+                    - lon
+                label:
+                  description: A label for the private location.
+                  type: string
+                spaces:
+                  description: |
+                    An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.
+                  items:
+                    type: string
+                  type: array
+                tags:
+                  description: An array of tags to categorize the private location.
+                  items:
+                    type: string
+                  type: array
+              required:
+                - agentPolicyId
+                - label
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "id": "abcd1234",
+                      "label": "Private Location 1",
+                      "agentPolicyId": "abcd1234",
+                      "tags": ["private", "testing"],
+                      "geo": {
+                        "lat": 40.7128,
+                        "lon": -74.0060
+                      }
+                    }
+              schema:
+                type: object
+          description: A successful response.
+        '400':
+          description: If the `agentPolicyId` is already used by an existing private location or if the `label` already exists, the API will return a 400 Bad Request response with a corresponding error message.
       summary: Create a private location
       tags:
         - synthetics
-  /api/synthetics/private_locations/{location_id}:
+  /api/synthetics/private_locations/{id}:
     delete:
+      description: |
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+        The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.
+        A location cannot be deleted if it has associated monitors in use. You must delete all monitors associated with the location before deleting the location.
       operationId: delete-private-location
+      parameters:
+        - description: The unique identifier of the private location to be deleted.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
       summary: Delete a private location
       tags:
         - synthetics
     get:
+      description: |
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
       operationId: get-private-location
+      parameters:
+        - description: A private location identifier or label.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                        "label": "Test private location",
+                        "id": "test-private-location-id",
+                        "agentPolicyId": "test-private-location-id",
+                        "isServiceManaged": false,
+                        "isInvalid": false,
+                        "geo": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "namespace": "default"
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+          description: A successful response.
       summary: Get a private location
       tags:
         - synthetics
@@ -74741,6 +75188,71 @@ components:
           type: number
       required:
         - name
+    Synthetics_getParameterResponse:
+      title: Get parameter response
+      type: object
+      properties:
+        description:
+          description: |
+            The description of the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          type: string
+        id:
+          description: The unique identifier of the parameter.
+          type: string
+        key:
+          description: The key of the parameter.
+          type: string
+        namespaces:
+          description: |
+            The namespaces associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          items:
+            - type: string
+          type: array
+        tags:
+          description: |
+            An array of tags associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          items:
+            - type: string
+          type: array
+        value:
+          description: |
+            The value associated with the parameter. It will be included in the response if the user has write permissions.  
+          type: string
+      required: null
+    Synthetics_getPrivateLocation:
+      additionalProperties: true
+      properties:
+        agentPolicyId:
+          description: The ID of the agent policy associated with the private location.
+          type: string
+        geo:
+          description: Geographic coordinates (WGS84) for the location.
+          type: object
+          properties:
+            lat:
+              description: The latitude of the location.
+              type: number
+            lon:
+              description: The longitude of the location.
+              type: number
+          required:
+            - lat
+            - lon
+        id:
+          description: The unique identifier of the private location.
+          type: string
+        isInvalid:
+          description: |
+            Indicates whether the location is invalid. If `true`, the location is invalid, which means the agent policy associated with the location is deleted.
+          type: boolean
+        label:
+          description: A label for the private location.
+          type: string
+        namespace:
+          description: The namespace of the location, which is the same as the namespace of the agent policy associated with the location.
+          type: string
+      title: Post a private location
+      type: object
     Synthetics_httpMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
@@ -74856,6 +75368,54 @@ components:
             - host
             - type
       title: ICMP monitor fields
+    Synthetics_parameterRequest:
+      title: Parameter request
+      type: object
+      properties:
+        description:
+          description: A description of the parameter.
+          type: string
+        key:
+          description: The key of the parameter.
+          type: string
+        share_across_spaces:
+          description: Specify whether the parameter should be shared across spaces.
+          type: boolean
+        tags:
+          description: An array of tags to categorize the parameter.
+          items:
+            type: string
+          type: array
+        value:
+          description: The value associated with the parameter.
+          type: string
+      required:
+        - key
+        - value
+    Synthetics_postParameterResponse:
+      title: Post parameter response
+      type: object
+      properties:
+        description:
+          description: A description of the parameter.
+          type: string
+        id:
+          description: The unique identifier for the parameter.
+          type: string
+        key:
+          description: The parameter key.
+          type: string
+        share_across_spaces:
+          description: Indicates whether the parameter is shared across spaces.
+          type: boolean
+        tags:
+          description: An array of tags associated with the parameter.
+          items:
+            type: string
+          type: array
+        value:
+          description: The value associated with the parameter.
+          type: string
     Synthetics_tcpMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
