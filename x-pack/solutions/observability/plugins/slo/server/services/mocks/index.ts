@@ -11,6 +11,7 @@ import { SLORepository } from '../slo_repository';
 import { SummaryClient } from '../summary_client';
 import { SummarySearchClient } from '../summary_search_client/types';
 import { TransformManager } from '../transform_manager';
+import { SLOValidator } from '../slo_validator';
 
 const createResourceInstallerMock = (): jest.Mocked<ResourceInstaller> => {
   return {
@@ -50,6 +51,11 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
     findAllByIds: jest.fn(),
     deleteById: jest.fn(),
     search: jest.fn(),
+  };
+};
+
+const createSLOValidatorMock = (): jest.Mocked<SLOValidator> => {
+  return {
     exists: jest.fn(),
   };
 };
@@ -77,6 +83,7 @@ export {
   createTransformManagerMock,
   createSummaryTransformManagerMock,
   createSLORepositoryMock,
+  createSLOValidatorMock,
   createSummaryClientMock,
   createSummarySearchClientMock,
   createBurnRatesClientMock,

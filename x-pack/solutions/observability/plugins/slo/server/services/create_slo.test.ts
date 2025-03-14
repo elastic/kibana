@@ -18,18 +18,21 @@ import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
 import {
   createSLORepositoryMock,
+  createSLOValidatorMock,
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SLOValidator } from './slo_validator';
 
 describe('CreateSLO', () => {
   let mockEsClient: ElasticsearchClientMock;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<MockedLogger>;
   let mockRepository: jest.Mocked<SLORepository>;
+  let mockValidator: jest.Mocked<SLOValidator>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let createSLO: CreateSLO;
@@ -41,12 +44,14 @@ describe('CreateSLO', () => {
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockLogger = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
+    mockValidator = createSLOValidatorMock();
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     createSLO = new CreateSLO(
       mockEsClient,
       mockScopedClusterClient,
       mockRepository,
+      mockValidator,
       mockTransformManager,
       mockSummaryTransformManager,
       mockLogger,
@@ -58,7 +63,7 @@ describe('CreateSLO', () => {
 
   describe('happy path', () => {
     beforeEach(() => {
-      mockRepository.exists.mockResolvedValue(false);
+      mockValidator.exists.mockResolvedValue(false);
       mockEsClient.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
@@ -168,14 +173,14 @@ describe('CreateSLO', () => {
 
   describe('unhappy path', () => {
     beforeEach(() => {
-      mockRepository.exists.mockResolvedValue(false);
+      mockValidator.exists.mockResolvedValue(false);
       mockEsClient.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
     });
 
     it('throws a SLOIdConflict error when the SLO already exists', async () => {
-      mockRepository.exists.mockResolvedValue(true);
+      mockValidator.exists.mockResolvedValue(true);
 
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 

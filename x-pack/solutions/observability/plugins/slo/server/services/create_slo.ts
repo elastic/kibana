@@ -26,6 +26,7 @@ import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
+import { SLOValidator } from './slo_validator';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
@@ -36,6 +37,7 @@ export class CreateSLO {
     private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
+    private validator: SLOValidator,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
@@ -123,7 +125,7 @@ export class CreateSLO {
   }
 
   private async assertSLOInexistant(slo: SLODefinition) {
-    const exists = await this.repository.exists(slo.id, ['*']);
+    const exists = await this.validator.exists(slo.id, ['*']);
     if (exists) {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }
