@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TabsBar } from './tabs_bar';
+import { TabsBar, TabsBarProps } from './tabs_bar';
 
 const items = Array.from({ length: 5 }).map((_, i) => ({
   id: `tab-${i}`,
@@ -17,6 +17,10 @@ const items = Array.from({ length: 5 }).map((_, i) => ({
 }));
 
 const tabContentId = 'test-content-id';
+
+const services: TabsBarProps['services'] = {
+  core: {},
+};
 
 describe('TabsBar', () => {
   it('renders tabs bar', async () => {
@@ -32,6 +36,7 @@ describe('TabsBar', () => {
         tabContentId={tabContentId}
         items={items}
         selectedItem={selectedItem}
+        services={services}
         onAdd={onAdd}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
