@@ -14,17 +14,10 @@ interface ScoredDocument {
 }
 
 export interface RecallRanking {
-  prompt: string;
   scoredDocuments: ScoredDocument[];
 }
 
 const schema: RootSchema<RecallRanking> = {
-  prompt: {
-    type: 'text',
-    _meta: {
-      description: 'The user prompt that was used for the ELSER text_expansion',
-    },
-  },
   scoredDocuments: {
     type: 'array',
     items: {
