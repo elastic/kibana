@@ -10,8 +10,9 @@
 import { UserMouseEvent } from './mouse';
 
 const DEADZONE = 0.35; // percent of the distance from the center of the screen on either side of the middle is considered deadzone and will not scroll.
-const MAX_DISTANCE = 0.5; // percent of the distance from the center of the screen on either side of the middle is considered max distance and will scroll at max speed.
-const PIXELS_PER_SECOND = 3000; // how many pixels to scroll per second when at max distance.
+const MAX_DISTANCE = 0.6; // percent of the distance from the center of the screen on either side of the middle is considered max distance and will scroll at max speed.
+const PIXELS_PER_SECOND = 4000; // how many pixels to scroll per second when at max distance.
+const EDGE_SLOWDOWN_THRESHOLD = 500; // how many pixels from the bottom or top of the scroll height to start slowing down the scroll.
 
 let shouldAutoScroll = false;
 let latestMouseEvent: UserMouseEvent | null = null;
@@ -29,14 +30,15 @@ export const startAutoScroll = () => {
   const autoScroll: FrameRequestCallback = (now: number) => {
     if (!shouldAutoScroll) return;
 
-    const deltaTime = now - lastFrameTime;
+    const deltaTime = (now - lastFrameTime) / 1000;
 
     if (latestMouseEvent) {
+      // Scroll faster depending on how far the user's drag is from the center of the screen.
       const distanceFromCenterOfScreen = window.innerHeight / 2 - latestMouseEvent.clientY;
       const scrollDirection = distanceFromCenterOfScreen > 0 ? 'up' : 'down';
       const distanceFromCenterOfScreenPercentage = distanceFromCenterOfScreen / window.innerHeight;
 
-      const scrollSpeedMult = Math.min(
+      const dragDistanceSpeedMultiplier = Math.min(
         1,
         Math.max(
           0,
@@ -44,7 +46,21 @@ export const startAutoScroll = () => {
         )
       );
 
-      const pixelsToScroll = PIXELS_PER_SECOND * scrollSpeedMult * (deltaTime / 1000);
+      // scroll slower as we approach the bottom or the top of the page.
+      const distanceToTop = scrollDirection === 'up' ? window.scrollY : Number.MAX_VALUE;
+      const distanceToBottom =
+        scrollDirection === 'down'
+          ? document.body.scrollHeight - window.innerHeight - window.scrollY
+          : Number.MAX_VALUE;
+      const nearestScrollEdgeDistance = Math.min(distanceToTop, distanceToBottom);
+      const edgeSlowdownMultiplier = Math.min(
+        1,
+        Math.max(0, nearestScrollEdgeDistance / EDGE_SLOWDOWN_THRESHOLD)
+      );
+
+      // apply scroll
+      const pixelsToScroll =
+        PIXELS_PER_SECOND * (dragDistanceSpeedMultiplier * edgeSlowdownMultiplier) * deltaTime;
       if (pixelsToScroll > 0) {
         window.scrollBy({ top: scrollDirection === 'up' ? -pixelsToScroll : pixelsToScroll });
       }
