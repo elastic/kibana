@@ -8,11 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  resolveWithMissingImage,
-  getElasticOutline,
-  isValidUrl,
-} from '@kbn/presentation-util-plugin/common';
 import { ExpressionRevealImageFunction, Origin, Position } from '../types';
 import { BASE64, URL } from '../constants';
 
@@ -108,11 +103,14 @@ export const revealImageFunction: ExpressionRevealImageFunction = () => {
         throw errors.invalidPercent(percent);
       }
 
+      const { resolveWithMissingImage, elasticOutline, isValidUrl } = await import(
+        '@kbn/expression-utils'
+      );
+
       if (args.image && !isValidUrl(args.image)) {
         throw errors.invalidImageUrl(args.image);
       }
 
-      const { elasticOutline } = await getElasticOutline();
       return {
         type: 'render',
         as: 'revealImage',

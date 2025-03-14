@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AlertInstanceContext, MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { AlertInstanceContext } from '../types';
+import { MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
@@ -16,7 +17,7 @@ import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
 import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
@@ -99,6 +100,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   validate: {

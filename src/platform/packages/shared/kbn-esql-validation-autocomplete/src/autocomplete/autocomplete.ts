@@ -22,7 +22,6 @@ import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByType
 import {
   getColumnForASTNode,
   getCommandDefinition,
-  getCommandOption,
   getFunctionDefinition,
   isAssignment,
   isAssignmentComplete,
@@ -36,7 +35,6 @@ import {
   isTimeIntervalItem,
   getAllFunctions,
   isSingleItem,
-  nonNullable,
   getColumnExists,
   findPreviousWord,
   correctQuerySyntax,
@@ -59,7 +57,6 @@ import {
   getFunctionSuggestions,
   getCompatibleLiterals,
   buildConstantsDefinitions,
-  buildVariablesDefinitions,
   buildOptionDefinition,
   buildValueDefinitions,
   getDateLiterals,
@@ -172,13 +169,7 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
-  if (
-    astContext.type === 'expression' ||
-    (astContext.type === 'option' && astContext.command?.name === 'join') ||
-    (astContext.type === 'option' && astContext.command?.name === 'dissect') ||
-    (astContext.type === 'option' && astContext.command?.name === 'from') ||
-    (astContext.type === 'option' && astContext.command?.name === 'enrich')
-  ) {
+  if (astContext.type === 'expression') {
     return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
@@ -193,20 +184,6 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
-  }
-  if (astContext.type === 'option') {
-    // need this wrap/unwrap thing to make TS happy
-    const { option, ...rest } = astContext;
-    if (option && isOptionItem(option)) {
-      return getOptionArgsSuggestions(
-        innerText,
-        ast,
-        { option, ...rest },
-        getFieldsByType,
-        getFieldsMap,
-        getPolicyMetadata
-      );
-    }
   }
   if (astContext.type === 'function') {
     return getFunctionArgsSuggestions(
@@ -1184,74 +1161,6 @@ async function getListArgsSuggestions(
             },
             { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
           ))
-        );
-      }
-    }
-  }
-  return suggestions;
-}
-
-/**
- * @deprecated — this will disappear when https://github.com/elastic/kibana/issues/195418 is complete
- * because "options" will be handled in imperative command-specific routines instead of being independent.
- */
-async function getOptionArgsSuggestions(
-  innerText: string,
-  commands: ESQLCommand[],
-  {
-    command,
-    option,
-    node,
-  }: {
-    command: ESQLCommand;
-    option: ESQLCommandOption;
-    node: ESQLSingleAstItem | undefined;
-  },
-  getFieldsByType: GetColumnsByTypeFn,
-  getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
-) {
-  const optionDef = getCommandOption(option.name);
-  if (!optionDef || !optionDef.signature) {
-    return [];
-  }
-  const { nodeArg, lastArg } = extractArgMeta(option, node);
-  const suggestions = [];
-  const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
-
-  const fieldsMap = await getFieldsMaps();
-  const anyVariables = collectVariables(commands, fieldsMap, innerText);
-
-  if (command.name === 'rename') {
-    if (option.args.length < 2) {
-      suggestions.push(...buildVariablesDefinitions([findNewVariable(anyVariables)]));
-    }
-  }
-
-  if (optionDef) {
-    if (!suggestions.length) {
-      const argDefIndex = optionDef.signature.multipleParams
-        ? 0
-        : Math.max(option.args.length - 1, 0);
-      const types = [optionDef.signature.params[argDefIndex].type].filter(nonNullable);
-      // If it's a complete expression then proposed some final suggestions
-      // A complete expression is either a function or a column: <COMMAND> <OPTION> field <here>
-      // Or an assignment complete: <COMMAND> <OPTION> field = ... <here>
-      if (
-        (option.args.length && !isNewExpression && !isAssignment(lastArg)) ||
-        (isAssignment(lastArg) && isAssignmentComplete(lastArg))
-      ) {
-        suggestions.push(
-          ...getFinalSuggestions({
-            comma: optionDef.signature.multipleParams,
-          })
-        );
-      } else if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
-        suggestions.push(
-          ...(await getFieldsByType(types[0] === 'column' ? ['any'] : types, [], {
-            advanceCursor: true,
-            openSuggestions: true,
-          }))
         );
       }
     }

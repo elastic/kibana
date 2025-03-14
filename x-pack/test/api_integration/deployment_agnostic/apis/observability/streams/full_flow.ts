@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IngestStreamUpsertRequest } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -18,6 +19,7 @@ import {
   forkStream,
   indexAndAssertTargetStream,
   indexDocument,
+  putStream,
 } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -352,6 +354,89 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         await indexAndAssertTargetStream(esClient, 'logs.weird-characters', doc1);
         await indexAndAssertTargetStream(esClient, 'logs', doc2);
+      });
+
+      it('should allow to update field type to incompatible type', async () => {
+        const body: IngestStreamUpsertRequest = {
+          dashboards: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: {
+                fields: {
+                  myfield: {
+                    type: 'boolean',
+                  },
+                },
+                routing: [],
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.rollovertest', body, 200);
+        await putStream(
+          apiClient,
+          'logs.rollovertest',
+          {
+            ...body,
+            stream: {
+              ingest: {
+                ...body.stream.ingest,
+                wired: {
+                  ...body.stream.ingest.wired,
+                  fields: {
+                    myfield: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          200
+        );
+      });
+
+      it('should not allow to update field type to system', async () => {
+        const body: IngestStreamUpsertRequest = {
+          dashboards: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: {
+                fields: {
+                  myfield: {
+                    type: 'system',
+                  },
+                },
+                routing: [],
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.willfail', body, 400);
+      });
+
+      it('should not roll over more often than necessary', async () => {
+        const expectedIndexCounts: Record<string, number> = {
+          logs: 1,
+          'logs.nginx': 1,
+          'logs.nginx.access': 1,
+          'logs.nginx.error': 1,
+          'logs.number-test': 1,
+          'logs.string-test': 1,
+          'logs.weird-characters': 1,
+          'logs.rollovertest': 2,
+        };
+        const dataStreams = await esClient.indices.getDataStream({
+          name: Object.keys(expectedIndexCounts).join(','),
+        });
+        const actualIndexCounts = Object.fromEntries(
+          dataStreams.data_streams.map((stream) => [stream.name, stream.indices.length])
+        );
+        expect(actualIndexCounts).to.eql(expectedIndexCounts);
       });
     });
   });

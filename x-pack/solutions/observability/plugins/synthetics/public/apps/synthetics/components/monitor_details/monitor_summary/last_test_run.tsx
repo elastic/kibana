@@ -156,7 +156,7 @@ const PanelHeader = ({
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const formatter = useDateFormat();
-  const lastRunTimestamp = formatter(latestPing?.timestamp);
+  const lastRunTimestamp = formatter(latestPing?.['@timestamp']);
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
 
