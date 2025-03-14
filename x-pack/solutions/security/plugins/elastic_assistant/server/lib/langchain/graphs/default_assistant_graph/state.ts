@@ -8,7 +8,7 @@
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { BaseMessage } from '@langchain/core/messages';
 import { Annotation } from '@langchain/langgraph';
-import { AgentStep, AgentAction, AgentFinish } from 'langchain/agents';
+import { AgentStep } from 'langchain/agents';
 
 export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: () => string }) => {
   const graphAnnotation = Annotation.Root({
@@ -28,15 +28,18 @@ export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: ()
       reducer: (x: boolean, y?: boolean) => y ?? x,
       default: () => false,
     }),
-    agentOutcome: Annotation<AgentAction | AgentFinish | undefined>({
-      reducer: (
-        x: AgentAction | AgentFinish | undefined,
-        y?: AgentAction | AgentFinish | undefined
-      ) => y ?? x,
-      default: () => undefined,
-    }),
+    /**
+     * Messages is a list of messages that were created during the graph execution
+     */
     messages: Annotation<BaseMessage[]>({
-      reducer: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
+      reducer: (currentState, updateValue) => currentState.concat(updateValue),
+      default: () => [],
+    }),
+    /**
+     * Chat history is a list of messages that have been sent and received in the chat prior to the graph execution
+     */
+    chatHistory: Annotation<BaseMessage[]>({
+      reducer: (currentState, updateValue) => updateValue ?? currentState,
       default: () => [],
     }),
     chatTitle: Annotation<string>({
