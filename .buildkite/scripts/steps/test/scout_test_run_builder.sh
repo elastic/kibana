@@ -15,9 +15,8 @@ EXIT_CODE=$?
 set -e;
 
 if [[ $EXIT_CODE -ne 0 ]]; then
-  echo "Exiting with code $EXIT_CODE without retrying"
-  buildkite-agent meta-data set "${BUILDKITE_STEP_ID}" "Scout Test Run Builder failed, check logs for details"
-  exit 10  # Exit with the specific code 10
+  echo "Exiting with code 10 without retrying"
+  exit 10
 fi
 
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
