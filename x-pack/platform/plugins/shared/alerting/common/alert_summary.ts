@@ -30,7 +30,7 @@ export interface AlertSummary {
   alerts: Record<string, AlertStatus>;
   executionDuration: ExecutionDuration;
   revision: number;
-  dashboards?: Array<{ id: string; }>;
+  dashboards?: Array<{ id: string }>;
 }
 
 export interface AlertStatus {

@@ -277,7 +277,5 @@ export const rawRuleSchema = schema.object({
   params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
   typeVersion: schema.maybe(schema.number()),
   alertDelay: schema.maybe(alertDelaySchema),
-  dashboards: schema.maybe(
-    schema.arrayOf(schema.object({ id: schema.string()}))
-  ),
+  dashboards: schema.maybe(schema.arrayOf(schema.object({ id: schema.string() }))),
 });

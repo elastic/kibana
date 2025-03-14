@@ -317,7 +317,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       properties: {
         id: {
           type: 'keyword',
-        }
+        },
       },
     },
   },

@@ -103,6 +103,6 @@ export const transformCreateBody = <Params extends RuleParams = never>({
     ...(createBody.flapping !== undefined
       ? { flapping: transformCreateBodyFlapping(createBody.flapping) }
       : {}),
-      dashboards: createBody.dashboards,
+    dashboards: createBody.dashboards,
   };
 };
