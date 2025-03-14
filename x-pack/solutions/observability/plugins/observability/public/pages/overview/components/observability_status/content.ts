@@ -41,7 +41,7 @@ export const getContent = (
           'Fast, easy, and scalable centralized log monitoring with out-of-the-box support for common data sources.',
       }),
       addTitle: i18n.translate('xpack.observability.statusVisualization.logs.link', {
-        defaultMessage: 'Add integrations',
+        defaultMessage: 'Add logs',
       }),
       addLink: http.basePath.prepend('/app/integrations/browse?q=logs'),
       learnMoreLink: docLinks.links.observability.monitorLogs,
@@ -82,7 +82,7 @@ export const getContent = (
         defaultMessage: 'Stream, visualize, and analyze your infrastructure metrics.',
       }),
       addTitle: i18n.translate('xpack.observability.statusVisualization.metrics.link', {
-        defaultMessage: 'Add integrations',
+        defaultMessage: 'Add metrics',
       }),
       addLink: http.basePath.prepend('/app/integrations/browse?q=metrics'),
       learnMoreLink: docLinks.links.observability.analyzeMetrics,

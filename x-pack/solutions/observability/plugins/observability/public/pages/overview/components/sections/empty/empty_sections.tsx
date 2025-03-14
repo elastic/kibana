@@ -10,7 +10,6 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../../../../utils/kibana_react';
@@ -19,14 +18,11 @@ import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 
 export function EmptySections() {
-  const { http, share, serverless: isServerless } = useKibana().services;
-  const onboardingMetricsHref = share?.url.locators
-    .get(OBSERVABILITY_ONBOARDING_LOCATOR)
-    ?.useUrl({ category: 'host' });
+  const { http, serverless: isServerless } = useKibana().services;
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ http, onboardingMetricsHref })
+  const appEmptySections = getEmptySections({ http })
     .filter(({ id }) => {
       const app = hasDataMap[id];
       if (app) {
@@ -63,13 +59,7 @@ export function EmptySections() {
   );
 }
 
-const getEmptySections = ({
-  http,
-  onboardingMetricsHref,
-}: {
-  http: HttpSetup;
-  onboardingMetricsHref?: string;
-}): Section[] => {
+const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
   return [
     {
       id: 'infra_logs',
@@ -84,7 +74,7 @@ const getEmptySections = ({
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.logs.link', {
         defaultMessage: 'Add logs',
       }),
-      href: http.basePath.prepend('/app/home#/tutorial_directory/logging'),
+      href: http.basePath.prepend('/app/integrations/browse?q=logs'),
       showInServerless: true,
     },
     {
@@ -115,7 +105,7 @@ const getEmptySections = ({
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.metrics.link', {
         defaultMessage: 'Add metrics',
       }),
-      href: onboardingMetricsHref ?? http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
+      href: http.basePath.prepend('/app/integrations/browse?q=metrics'),
       showInServerless: true,
     },
     {
