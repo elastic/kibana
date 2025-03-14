@@ -7,7 +7,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLicense } from '../../../common/hooks/use_license';
-import { isArtifactGlobal } from '../../../../common/endpoint/service/artifacts';
+import {
+  isArtifactByPolicy,
+  isArtifactGlobal,
+} from '../../../../common/endpoint/service/artifacts';
 import type { ArtifactFormComponentProps } from '../../components/artifact_list_page';
 
 /**
@@ -21,22 +24,22 @@ import type { ArtifactFormComponentProps } from '../../components/artifact_list_
 export const useCanAssignArtifactPerPolicy = (
   item: ArtifactFormComponentProps['item'],
   mode: ArtifactFormComponentProps['mode'],
-  hasFormChanged: boolean
+  hasItemBeenUpdated: boolean
 ): boolean => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
-  const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
+  const [wasByPolicy, setWasByPolicy] = useState(isArtifactByPolicy(item));
 
   useEffect(() => {
-    if (!hasFormChanged && item.tags) {
+    if (!hasItemBeenUpdated && item.tags) {
       setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
     }
-  }, [item.tags, hasFormChanged]);
+  }, [item.tags, hasItemBeenUpdated]);
 
   return useMemo(() => {
     return (
       isPlatinumPlus ||
-      (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
+      (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasItemBeenUpdated)))
     );
-  }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+  }, [mode, isGlobal, hasItemBeenUpdated, isPlatinumPlus, wasByPolicy]);
 };
