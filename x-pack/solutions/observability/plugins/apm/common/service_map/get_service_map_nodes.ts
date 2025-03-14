@@ -26,7 +26,7 @@ import type {
 } from './types';
 
 import { groupResourceNodes } from './group_resource_nodes';
-import { getEdgeId, isExitSpan } from './utils';
+import { getEdgeId, getExitSpanNodeId, isExitSpan } from './utils';
 
 const FORBIDDEN_SERVICE_NAMES = ['constructor'];
 
@@ -178,8 +178,10 @@ function mapNodes({
       const exitSpanNodes = exitSpans.get(id) ?? [];
       if (exitSpanNodes.length > 0) {
         const exitSpanSample = exitSpanNodes[0];
+
         mappedNodes.set(id, {
           ...exitSpanSample,
+          id: getExitSpanNodeId(exitSpanSample),
           label: exitSpanSample[SPAN_DESTINATION_SERVICE_RESOURCE],
           [SPAN_TYPE]: exitSpanNodes.map((n) => n[SPAN_TYPE]).sort()[0],
           [SPAN_SUBTYPE]: exitSpanNodes.map((n) => n[SPAN_SUBTYPE]).sort()[0],
