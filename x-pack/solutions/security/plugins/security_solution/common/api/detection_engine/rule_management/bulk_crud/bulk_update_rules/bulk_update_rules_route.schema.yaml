@@ -42,7 +42,7 @@ paths:
                       - "new_tag"
                     description: "Detects when a previously suspended user's account is renewed in Google Workspace. An adversary may renew a suspended user account to maintain access to the Google Workspace organization with a valid account."
                     risk_score: 21
-                    severity: "critical"
+                    severity: "low"
                     type: "query"
                   - id: "43b2dc3b-4f21-4a10-95e2-0dbc19e6e974"
                     name: "Updated AWS Redshift Cluster Creation"
@@ -50,7 +50,7 @@ paths:
                       - "new_tag"
                     description: "Identifies the creation of an Amazon Redshift cluster. Unexpected creation of this cluster by a non-administrative user may indicate a permission or role issue with current users. If unexpected, the resource may not properly be configured and could introduce security vulnerabilities."
                     risk_score: 21
-                    severity: "medium"
+                    severity: "low"
                     type: "query"
       responses:
         200:
