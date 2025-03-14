@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/160062
-  describe.skip('dashboard filtering', function () {
+  describe.only('dashboard filtering', function () {
     const populateDashboard = async () => {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
