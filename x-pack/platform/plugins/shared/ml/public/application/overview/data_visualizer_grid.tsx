@@ -9,11 +9,64 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGrid } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { MLOverviewCard } from './overview_ml_page';
+import { ML_PAGES } from '../../locator';
 
-export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full' }> = ({ buttonType }) => (
+export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabled: boolean }> = ({
+  buttonType,
+  isEsqlEnabled,
+}) => (
   <EuiFlexGrid gutterSize="m" columns={3}>
+    {isEsqlEnabled ? (
+      <MLOverviewCard
+        layout="horizontal"
+        path={ML_PAGES.DATA_VISUALIZER_ESQL}
+        title={
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.selectESQLTitle"
+                    defaultMessage="ES|QL"
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label=""
+                iconType="beaker"
+                size="m"
+                color="hollow"
+                tooltipContent={
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
+                    defaultMessage="ES|QL data visualizer is in technical preview."
+                  />
+                }
+                tooltipPosition={'right'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        description={i18n.translate(
+          'xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg',
+          {
+            defaultMessage:
+              'The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elastic Search.',
+          }
+        )}
+        iconType="esqlVis"
+        buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.tryESQLNowButtonLabel', {
+          defaultMessage: 'Try it now!',
+        })}
+        cardDataTestSubj="mlDataVisualizerSelectESQLCard"
+        buttonDataTestSubj="mlDataVisualizerSelectESQLButton"
+        buttonType={buttonType}
+      />
+    ) : null}
     <MLOverviewCard
       layout="horizontal"
       path="/filedatavisualizer"

@@ -285,7 +285,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               isEsqlEnabled
             );
 
-            if (pluginsSetup.management && fullLicense) {
+            if (pluginsSetup.management && fullLicense && mlCapabilities.canGetMlInfo) {
               registerManagementSections(
                 pluginsSetup.management,
                 core,

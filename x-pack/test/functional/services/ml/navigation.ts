@@ -55,12 +55,9 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async assertStackManagementMlSectionUnauthorized(sectionId: string) {
+    async assertStackManagementMlSectionNotExist() {
       await PageObjects.common.navigateToApp('management');
-      await testSubjects.click(sectionId);
-      await retry.tryForTime(5 * 1000, async () => {
-        await testSubjects.existOrFail('mlAccessDenied');
-      });
+      await testSubjects.missingOrFail('ml');
     },
 
     async navigateToDiscoverViaAppsMenu() {

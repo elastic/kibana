@@ -25,7 +25,6 @@ import {
   useJobInfoFlyouts,
 } from '../../../../jobs/components/job_details_flyout/job_details_flyout_context';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../locator';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 interface Props {
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -97,10 +96,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
 }) => {
   const [canCreateDataFrameAnalytics] = usePermissionCheck(['canCreateDataFrameAnalytics']);
 
-  const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
-    ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION,
-    'analytics'
-  );
+  const redirectToDfaJobManagement = useCreateAndNavigateToManagementMlLink('', 'analytics');
 
   return (
     <>
@@ -138,19 +134,17 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
         <EuiFlexItem />
 
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             size="s"
-            iconType="plusInCircle"
-            fill
             color="primary"
-            onClick={redirectToCreateJobSelectIndexPage}
+            onClick={redirectToDfaJobManagement}
             disabled={!canCreateDataFrameAnalytics}
           >
             <FormattedMessage
-              id="xpack.ml.embeddables.jobSelector.createJobButtonLabel"
-              defaultMessage="Create job"
+              id="xpack.ml.embeddables.jobSelector.manageJobsLinkLabel"
+              defaultMessage="Manage jobs"
             />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule />

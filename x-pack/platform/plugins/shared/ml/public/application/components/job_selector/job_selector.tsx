@@ -155,10 +155,7 @@ export function JobSelector({
 
   const [canCreateJob] = usePermissionCheck(['canCreateJob']);
 
-  const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
-    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
-    'anomaly_detection'
-  );
+  const redirectToADJobManagement = useCreateAndNavigateToManagementMlLink('', 'anomaly_detection');
 
   function renderJobSelectionBar() {
     return (
@@ -212,19 +209,17 @@ export function JobSelector({
             <FeedBackButton jobIds={selectedIds} page={page} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
               size="s"
-              iconType="plusInCircle"
-              fill
               color="primary"
-              onClick={redirectToCreateJobSelectIndexPage}
+              onClick={redirectToADJobManagement}
               disabled={!canCreateJob}
             >
               <FormattedMessage
-                id="xpack.ml.embeddables.jobSelector.createJobButtonLabel"
-                defaultMessage="Create job"
+                id="xpack.ml.embeddables.jobSelector.manageJobsLinkLabel"
+                defaultMessage="Manage jobs"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />

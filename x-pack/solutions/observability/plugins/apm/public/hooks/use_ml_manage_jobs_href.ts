@@ -34,7 +34,5 @@ export function useMlManageJobsHref({ jobId }: { jobId?: string } = {}) {
     },
   });
 
-  // @TODO: remove
-  console.log(`--@@mlADLink`, mlADLink);
   return mlADLink;
 }

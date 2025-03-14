@@ -32,7 +32,6 @@ import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_ove
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
 import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
-import { ESQLTryItNowCard } from '../datavisualizer/datavisualizer_selector';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -322,12 +321,7 @@ export const OverviewPage: FC = () => {
                 })}
               </h2>
             </EuiTitle>
-            <EuiFlexGroup direction="column">
-              {isEsqlEnabled ? <ESQLTryItNowCard /> : null}
-              <EuiFlexItem>
-                <DataVisualizerGrid buttonType="full" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <DataVisualizerGrid buttonType="full" isEsqlEnabled={isEsqlEnabled} />
           </EuiFlexGroup>
         </EuiFlexGroup>
         <HelpMenu docLink={helpLink} />
