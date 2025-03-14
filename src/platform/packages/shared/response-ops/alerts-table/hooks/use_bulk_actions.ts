@@ -39,7 +39,7 @@ interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alertsCount: number;
   casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
-  additionalBulkActions?: PublicAlertsDataGridProps['externalBulkActions'];
+  additionalBulkActions?: PublicAlertsDataGridProps['additionalBulkActions'];
   refresh: () => void;
   hideBulkActions?: boolean;
   application: ApplicationStart;
