@@ -271,7 +271,7 @@ describe('fetchEsqlQuery', () => {
       'Your alerts do not appear to be unique, which will delay recovery of your alerts. There are duplicates for alert IDs: 1.2.0'
     );
     expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
-      'Your alerts dont appear to be unique which will delay recovery of your alerts. There are duplicates for alert ID(s): 1.2.0'
+      'Your alerts do not appear to be unique, which will delay recovery of your alerts. There are duplicates for alert IDs: 1.2.0'
     );
   });
 });
