@@ -97,7 +97,7 @@ export const validateWithScoutCiConfig = (
   log: ToolingLog,
   pluginsWithConfigs: Map<string, PluginScoutConfig>
 ) => {
-  const scoutCiConfigRelPath = path.resolve('.buildkite', 'scout_ci_config.yml');
+  const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
   const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
   const ciConfig = yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
     ui_tests: {
@@ -122,14 +122,13 @@ export const validateWithScoutCiConfig = (
   }
 
   if (unregisteredPlugins.length > 0) {
-    log.warning(
-      `The following plugins with Playwright tests are not registered in Scout CI config:\n${unregisteredPlugins
+    throw createFailError(
+      `The following plugins are not registered in Scout CI config '${scoutCiConfigRelPath}':\n${unregisteredPlugins
         .map((plugin) => {
           return `- ${plugin}`;
         })
         .join('\n')}`
     );
-    throw createFailError(`Add missing plugins in '${scoutCiConfigRelPath}'`);
   }
 
   if (disabledPlugins.size > 0) {

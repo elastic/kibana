@@ -10,14 +10,20 @@ source .buildkite/scripts/common/util.sh
 echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
 
 set +e;
-node scripts/scout discover-playwright-configs --save --validate
+OUTPUT=$(node scripts/scout discover-playwright-configs --save --validate 2>&1)
 EXIT_CODE=$?
 set -e;
 
 if [[ $EXIT_CODE -ne 0 ]]; then
   echo "Exiting with code 10 without retrying"
+  ERROR_MSG=$(echo "$OUTPUT" | grep -A 10 "ERROR" | tail -n +1)
+{
+  echo "$ERROR_MSG"
+} | buildkite-agent annotate --style "error" --context "unregistered-playwright-configs"
   exit 10
 fi
+
+echo "$OUTPUT"
 
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
