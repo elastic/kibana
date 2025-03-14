@@ -14,11 +14,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('edit field', function () {
     before(async function () {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     after(async function afterAll() {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     describe('field preview', function fieldPreview() {
