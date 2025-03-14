@@ -13,14 +13,23 @@ jobs:
     runs-on: ubuntu-latest  # GitHub-hosted runner
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository and Ensure Correct Branch
         uses: actions/checkout@v4
         with:
-          ref: openai_pki_connector_8_15  # Ensure correct branch
+          ref: openai_pki_connector_8_15  # Ensure we are on the right branch
+
+      - name: Verify Git Branch Being Used
+        run: |
+          echo "Currently checked out branch:"
+          git branch --show-current
+          git log --oneline -1
 
       - name: Read Node.js Version from .node-version
         id: node_version
         run: echo "NODE_VERSION=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
+
+      - name: Debug Node.js Version Read from File
+        run: echo "Node.js Version from .node-version: $NODE_VERSION"
 
       - name: Remove Any Existing Node.js Versions
         run: |
@@ -33,8 +42,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Verify Node.js Version
-        run: node -v  # Print Node.js version for debugging
+      - name: Verify Installed Node.js Version
+        run: |
+          echo "Node.js version after setup:"
+          node -v
+          which node
+          ls -l $(which node)
 
       - name: Check Disk Space Before Cleanup
         run: df -h
@@ -55,6 +68,11 @@ jobs:
           path: ~/.yarn
           key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: yarn-${{ runner.os }}-
+
+      - name: Verify Kibana Version Being Built
+        run: |
+          echo "Kibana Version Being Built:"
+          cat package.json | grep '"version"'
 
       - name: Bootstrap Kibana
         run: yarn kbn bootstrap
