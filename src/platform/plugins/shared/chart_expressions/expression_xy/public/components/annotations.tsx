@@ -67,7 +67,7 @@ const TooltipAnnotationDetails = ({
   return extraFields.length > 0 ? (
     <div css={styles.tooltipExtraFields}>
       {extraFields.map((field) => (
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" key={`${field.key}-${field.name}`}>
           <EuiFlexItem css={styles.tooltipExtraFieldsKey}>{field.name}:</EuiFlexItem>
           <EuiFlexItem css={styles.tooltipExtraFieldsValue}>
             {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
