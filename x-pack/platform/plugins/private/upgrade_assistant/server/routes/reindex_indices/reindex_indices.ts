@@ -83,12 +83,6 @@ export function registerReindexIndicesRoutes(
   router.get(
     {
       path: `${BASE_PATH}/{indexName}`,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Relies on es and saved object clients for authorization',
-        },
-      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -146,12 +140,6 @@ export function registerReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/{indexName}/cancel`,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Relies on es and saved object clients for authorization',
-        },
-      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
