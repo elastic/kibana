@@ -34,7 +34,7 @@ import {
 import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
-import { listFleetServerHosts } from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
 import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
 import {
@@ -336,7 +336,7 @@ class AgentlessAgentService {
       kuery: `policy_id:"${policyId}"`,
     });
 
-    const { items: fleetHosts } = await listFleetServerHosts(soClient);
+    const { items: fleetHosts } = await fleetServerHostService.list(soClient);
     // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
     // https://github.com/elastic/security-team/issues/9695
     const defaultFleetHost =

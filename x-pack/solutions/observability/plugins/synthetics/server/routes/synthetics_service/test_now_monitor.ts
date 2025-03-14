@@ -58,7 +58,6 @@ export const triggerTestNow = async (
         id: monitorId,
         testRunId,
       },
-      savedObjectsClient,
       privateLocations,
       spaceId
     );

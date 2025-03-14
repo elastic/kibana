@@ -21,10 +21,13 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
-import { useConfirmModal, useConversationsByDate } from '../hooks';
+import { useConfirmModal, useConversationsByDate, useConversationContextMenu } from '../hooks';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { NewChatButton } from '../buttons/new_chat_button';
+import { ConversationListItemLabel } from './conversation_list_item_label';
+import { isConversationOwnedByUser } from '../utils/is_conversation_owned_by_current_user';
 
 const panelClassName = css`
   max-height: 100%;
@@ -44,18 +47,24 @@ export function ConversationList({
   conversations,
   isLoading,
   selectedConversationId,
+  currentUser,
   onConversationSelect,
-  onConversationDeleteClick,
   newConversationHref,
   getConversationHref,
+  setIsUpdatingConversationList,
+  refreshConversations,
+  updateDisplayedConversation,
 }: {
   conversations: UseConversationListResult['conversations'];
   isLoading: boolean;
   selectedConversationId?: string;
+  currentUser: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
   onConversationSelect?: (conversationId?: string) => void;
-  onConversationDeleteClick: (conversationId: string) => void;
   newConversationHref?: string;
   getConversationHref?: (conversationId: string) => string;
+  setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
+  updateDisplayedConversation: (id?: string) => void;
 }) {
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
@@ -73,13 +82,13 @@ export function ConversationList({
 
   const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
     title: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationTitle', {
-      defaultMessage: 'Delete this conversation?',
+      defaultMessage: 'Delete conversation',
     }),
     children: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationContent', {
-      defaultMessage: 'This action cannot be undone.',
+      defaultMessage: 'This action is permanent and cannot be undone.',
     }),
     confirmButtonText: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteButtonText', {
-      defaultMessage: 'Delete conversation',
+      defaultMessage: 'Delete',
     }),
   });
 
@@ -98,6 +107,11 @@ export function ConversationList({
       onConversationSelect(conversationId);
     }
   };
+
+  const { deleteConversation } = useConversationContextMenu({
+    setIsUpdatingConversationList,
+    refreshConversations,
+  });
 
   return (
     <>
@@ -142,9 +156,7 @@ export function ConversationList({
                   <EuiFlexItem grow={false} key={category}>
                     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
                       <EuiText className={titleClassName} size="s">
-                        {i18n.translate('xpack.aiAssistant.conversationList.dateGroup', {
-                          defaultMessage: DATE_CATEGORY_LABELS[category],
-                        })}
+                        {DATE_CATEGORY_LABELS[category]}
                       </EuiText>
                     </EuiPanel>
                     <EuiListGroup flush={false} gutterSize="none">
@@ -152,28 +164,52 @@ export function ConversationList({
                         <EuiListGroupItem
                           data-test-subj="observabilityAiAssistantConversationsLink"
                           key={conversation.id}
-                          label={conversation.label}
+                          label={
+                            <ConversationListItemLabel
+                              labelText={conversation.label}
+                              isPublic={conversation.public}
+                            />
+                          }
                           size="s"
                           isActive={conversation.id === selectedConversationId}
                           isDisabled={isLoading}
-                          wrapText
                           showToolTip
+                          toolTipText={conversation.label}
                           href={conversation.href}
                           onClick={(event) => onClickConversation(event, conversation.id)}
                           extraAction={{
                             iconType: 'trash',
+                            color: 'danger',
                             'aria-label': i18n.translate(
                               'xpack.aiAssistant.conversationList.deleteConversationIconLabel',
                               {
                                 defaultMessage: 'Delete',
                               }
                             ),
+                            disabled: !isConversationOwnedByUser({
+                              conversationId: conversation.id,
+                              conversationUser: conversation.conversation.user,
+                              currentUser,
+                            }),
                             onClick: () => {
-                              confirmDeleteCallback().then((confirmed) => {
+                              confirmDeleteCallback(
+                                i18n.translate(
+                                  'xpack.aiAssistant.flyout.confirmDeleteCheckboxLabel',
+                                  {
+                                    defaultMessage: 'Delete "{title}"',
+                                    values: { title: conversation.label },
+                                  }
+                                )
+                              ).then((confirmed) => {
                                 if (!confirmed) {
                                   return;
                                 }
-                                onConversationDeleteClick(conversation.id);
+
+                                deleteConversation(conversation.id).then(() => {
+                                  if (conversation.id === selectedConversationId) {
+                                    updateDisplayedConversation();
+                                  }
+                                });
                               });
                             },
                           }}

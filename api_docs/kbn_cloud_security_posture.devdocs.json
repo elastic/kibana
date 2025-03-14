@@ -560,6 +560,42 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.BaseEsQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseEsQuery",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.BaseEsQuery.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ bool: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BoolQuery",
+                "text": "BoolQuery"
+              },
+              "; } | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.CspBaseEsQuery",
         "type": "Interface",
         "tags": [],
@@ -1057,42 +1093,6 @@
               "<",
               "AggregationsStringRareTermsBucketKeys",
               ">"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.FindingsBaseEsQuery",
-        "type": "Interface",
-        "tags": [],
-        "label": "FindingsBaseEsQuery",
-        "description": [],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingsBaseEsQuery.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "{ bool: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.BoolQuery",
-                "text": "BoolQuery"
-              },
-              "; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,

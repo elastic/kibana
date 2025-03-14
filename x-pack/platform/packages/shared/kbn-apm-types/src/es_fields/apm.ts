@@ -48,6 +48,7 @@ export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
+export const USER_AGENT_VERSION = 'user_agent.version';
 
 export const OBSERVER_VERSION = 'observer.version';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
@@ -192,6 +193,11 @@ export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
+
+// OpenTelemetry span links
+
+export const LINKS_SPAN_ID = 'links.span_id';
+export const LINKS_TRACE_ID = 'links.trace_id';
 
 // Metadata
 export const TIER = '_tier';

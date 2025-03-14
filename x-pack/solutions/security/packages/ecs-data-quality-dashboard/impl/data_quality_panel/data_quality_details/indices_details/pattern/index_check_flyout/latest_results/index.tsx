@@ -32,9 +32,11 @@ export interface Props {
   indexName: string;
   patternRollup: PatternRollup | undefined;
   stats: Record<string, MeteringStatsIndex> | null;
+  checkedAt?: number;
 }
 
 const LatestResultsComponent: React.FC<Props> = ({
+  checkedAt,
   indexName,
   patternRollup,
   stats,
@@ -80,6 +82,7 @@ const LatestResultsComponent: React.FC<Props> = ({
       <IndexStatsPanel docsCount={docsCount} sizeInBytes={sizeInBytes ?? 0} ilmPhase={ilmPhase} />
       <EuiSpacer />
       <LatestCheckFields
+        checkedAt={checkedAt}
         docsCount={docsCount}
         ilmPhase={ilmPhase}
         indexName={indexName}

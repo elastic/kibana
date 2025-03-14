@@ -29184,7 +29184,7 @@
                 "section": "def-common.DataViewLazy",
                 "text": "DataViewLazy"
               },
-              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
+              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; clearDataViewLazyCache: (id: string) => void; getCache: () => Promise<",
               "SavedObject",
               "<",
               {
@@ -39753,9 +39753,9 @@
               },
               " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
@@ -40104,9 +40104,9 @@
               },
               " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },

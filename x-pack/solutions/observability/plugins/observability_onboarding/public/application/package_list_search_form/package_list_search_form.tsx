@@ -77,7 +77,9 @@ const PackageListGridWrapper = ({
         }}
         query={searchQuery}
       />
-      {searchQuery !== '' && <PackageList list={list} searchTerm={searchQuery} />}
+      {searchQuery !== '' && (
+        <PackageList list={list} searchTerm={searchQuery} showCardLabels={false} />
+      )}
     </div>
   );
 };

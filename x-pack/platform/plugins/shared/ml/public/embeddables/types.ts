@@ -8,7 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
@@ -192,8 +191,9 @@ export interface SingleMetricViewerEmbeddableCustomInput
   timeRange: TimeRange | undefined;
 }
 
-export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
-  SingleMetricViewerEmbeddableCustomInput;
+export type SingleMetricViewerEmbeddableInput = SingleMetricViewerEmbeddableCustomInput & {
+  title?: string;
+};
 
 /**
  * Persisted state for the Single Metric Embeddable.

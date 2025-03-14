@@ -19,9 +19,9 @@ import {
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import { getThemeTag } from '../theme';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
-import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
 import { getBundlesHref } from '../render_utils';
 
@@ -89,7 +89,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     }
 
     const themeTag = getThemeTag({
-      name: !themeName || themeName === 'amsterdam' ? 'v8' : themeName,
+      name: themeName,
       darkMode,
     });
     const bundlesHref = getBundlesHref(baseHref);

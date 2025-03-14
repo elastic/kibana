@@ -15,7 +15,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
 import { BulkResponse, long } from '@elastic/elasticsearch/lib/api/types';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
-import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
+import {
+  AggregateOptionsType,
+  FindOptionsType,
+  QueryOptionsType,
+  FindOptionsSearchAfterType,
+} from '../event_log_client';
 import { ParsedIndexAlias } from './init';
 import { EsNames } from './names';
 
@@ -93,6 +98,10 @@ export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObje
   findOptions: FindOptionsType;
 };
 
+export type FindEventsOptionsSearchAfter = QueryOptionsEventsBySavedObjectFilter & {
+  findOptions: FindOptionsSearchAfterType;
+};
+
 export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
   aggregateOptions: AggregateOptionsType;
 };
@@ -113,6 +122,13 @@ type GetQueryBodyWithAuthFilterOpts =
 type AliasAny = any;
 
 const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
+
+export interface QueryEventsBySavedObjectSearchAfterResult {
+  data: IValidatedEventInternalDocInfo[];
+  total: number;
+  search_after?: estypes.SortResults;
+  pit_id?: string;
+}
 
 export class ClusterClientAdapter<
   TDoc extends {
@@ -677,6 +693,100 @@ export class ClusterClientAdapter<
       throw err;
     }
   }
+
+  public async queryEventsBySavedObjectsSearchAfter(
+    queryOptions: FindEventsOptionsSearchAfter
+  ): Promise<QueryEventsBySavedObjectSearchAfterResult> {
+    const { index, type, ids, findOptions } = queryOptions;
+    const {
+      per_page: perPage,
+      sort,
+      pit_id: existingPitId,
+      search_after: searchAfter,
+    } = findOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    let pitId = existingPitId;
+    // Create new PIT if not provided
+    if (!pitId) {
+      const pitResponse = await esClient.openPointInTime({
+        index,
+        keep_alive: '1m',
+      });
+      pitId = pitResponse.id;
+    }
+
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.findOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest = {
+      size: perPage,
+      query,
+      pit: {
+        id: pitId,
+        keep_alive: '1m',
+      },
+      ...(sort
+        ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
+        : { sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'desc' } }] }), // default sort
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    };
+
+    try {
+      const {
+        hits: { hits, total },
+      } = await esClient.search<IValidatedEventInternalDocInfo>({
+        ...body,
+        track_total_hits: true,
+        seq_no_primary_term: true,
+      });
+
+      // Get the sort values from the last hit to use as search_after for next page
+      const lastHit = hits[hits.length - 1];
+      const nextSearchAfter = lastHit?.sort;
+
+      return {
+        data: hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id!,
+          _index: hit._index,
+          _seq_no: hit._seq_no!,
+          _primary_term: hit._primary_term!,
+        })),
+        total: isNumber(total) ? total : total!.value,
+        search_after: nextSearchAfter,
+        pit_id: pitId,
+      };
+    } catch (err) {
+      try {
+        if (pitId) {
+          await esClient.closePointInTime({ id: pitId });
+        }
+      } catch (closeErr) {
+        this.logger.error(`Failed to close point in time: ${closeErr.message}`);
+      }
+
+      throw new Error(
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
+  public async closePointInTime(pitId: string): Promise<void> {
+    if (!pitId) return;
+
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.closePointInTime({ id: pitId });
+    } catch (err) {
+      this.logger.error(`Failed to close point in time: ${err.message}`);
+      throw err;
+    }
+  }
 }
 
 export function getQueryBodyWithAuthFilter(
@@ -845,7 +955,10 @@ function getNamespaceQuery(namespace?: string) {
 
 export function getQueryBody(
   logger: Logger,
-  opts: FindEventsOptionsBySavedObjectFilter | AggregateEventsOptionsBySavedObjectFilter,
+  opts:
+    | FindEventsOptionsBySavedObjectFilter
+    | AggregateEventsOptionsBySavedObjectFilter
+    | FindEventsOptionsSearchAfter,
   queryOptions: QueryOptionsType
 ) {
   const { namespace, type, ids, legacyIds } = opts;

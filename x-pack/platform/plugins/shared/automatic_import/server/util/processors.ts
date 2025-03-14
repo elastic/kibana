@@ -70,11 +70,11 @@ export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProce
   });
   const template = env.getTemplate('kv.yml.njk');
   if (kvInput.trim_key) {
-    kvInput.trim_key = kvInput.trim_key.replace(/['"]/g, '\\$&');
+    kvInput.trim_key = kvInput.trim_key.replace(/\\/g, '\\\\').replace(/['"]/g, '\\$&');
   }
 
   if (kvInput.trim_value) {
-    kvInput.trim_value = kvInput.trim_value.replace(/['"]/g, '\\$&');
+    kvInput.trim_value = kvInput.trim_value.replace(/\\/g, '\\\\').replace(/['"]/g, '\\$&');
   }
   const renderedTemplate = template.render({
     kvInput,

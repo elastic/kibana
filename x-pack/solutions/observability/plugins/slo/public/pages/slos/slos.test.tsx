@@ -80,7 +80,10 @@ const mockNavigate = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockLocator = jest.fn();
-const mockGetAddRuleFlyout = jest.fn().mockReturnValue(() => <div>Add rule flyout</div>);
+
+jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
+  RuleFormFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
+}));
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -127,7 +130,7 @@ const mockKibana = () => {
       storage: {
         get: () => {},
       },
-      triggersActionsUi: { getAddRuleFlyout: mockGetAddRuleFlyout },
+      triggersActionsUi: {},
       uiSettings: {
         get: (settings: string) => {
           if (settings === 'dateFormat') return 'YYYY-MM-DD';
@@ -324,7 +327,7 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        expect(mockGetAddRuleFlyout).toBeCalled();
+        expect(screen.getByTestId('add-rule-flyout')).toBeInTheDocument();
       });
 
       it('allows managing rules for an SLO', async () => {

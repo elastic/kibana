@@ -319,25 +319,6 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/appex-sharedux react-18 dependencies",
-      "matchDepNames": [
-        "react-18",
-        "react-dom-18"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:SharedUX",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "react-markdown",
       "matchDepNames": [
         "react-markdown"
@@ -703,8 +684,7 @@
     {
       "groupName": "lru-cache",
       "matchDepNames": [
-        "lru-cache",
-        "@types/lru-cache"
+        "lru-cache"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -972,6 +952,27 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/elasticsearch (CI clients)",
+      "matchDepNames": [
+        "elasticsearch-8.x"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:appex-qa"
+      ],
+      "allowedVersions": "<9.0.0",
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor",
+        "Team:Operations",
+        "Team:QA"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/elasticsearch",
       "matchDepNames": [
         "@elastic/elasticsearch"
@@ -980,6 +981,28 @@
         "team:kibana-operations",
         "team:kibana-core"
       ],
+      "allowedVersions": "<9.0.0",
+      "matchBaseBranches": [
+        "8.x"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Operations",
+        "Team:Core"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/elasticsearch",
+      "matchDepNames": [
+        "@elastic/elasticsearch"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:kibana-core"
+      ],
+      "allowedVersions": "<8.0.0",
       "matchBaseBranches": [
         "7.17"
       ],
@@ -3116,7 +3139,9 @@
         "redux-thunk"
       ],
       "reviewers": [
-        "team:kibana-visualizations"
+        "team:kibana-presentation",
+        "team:kibana-management",
+        "team:security-solution"
       ],
       "matchBaseBranches": [
         "main"
@@ -3654,25 +3679,6 @@
       "matchDepNames": [
         "fnv-plus",
         "@types/fnv-plus"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "react-syntax-highlighter",
-      "matchDepNames": [
-        "react-syntax-highlighter",
-        "@types/react-syntax-highlighter"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"

@@ -173,6 +173,7 @@ export function useRadioInput(defaultValue: string, disabled = false) {
     setValue,
     value,
     hasChanged,
+    validate: () => true,
   };
 }
 

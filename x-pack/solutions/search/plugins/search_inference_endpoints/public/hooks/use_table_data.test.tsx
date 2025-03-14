@@ -7,14 +7,18 @@
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { renderHook } from '@testing-library/react';
-import { QueryParams } from '../components/all_inference_endpoints/types';
+import {
+  QueryParams,
+  SortFieldInferenceEndpoint,
+  SortOrder,
+} from '../components/all_inference_endpoints/types';
 import { useTableData } from './use_table_data';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../components/all_inference_endpoints/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../common/constants';
 
-const inferenceEndpoints = [
+const inferenceEndpoints: InferenceAPIConfigResponse[] = [
   {
     inference_id: 'my-elser-model-04',
     task_type: 'sparse_embedding',
@@ -47,14 +51,14 @@ const inferenceEndpoints = [
     },
     task_settings: {},
   },
-] as InferenceAPIConfigResponse[];
+];
 
-const queryParams = {
+const queryParams: QueryParams = {
   page: 1,
   perPage: 10,
-  sortField: 'endpoint',
-  sortOrder: 'desc',
-} as QueryParams;
+  sortField: SortFieldInferenceEndpoint.inference_id,
+  sortOrder: SortOrder.desc,
+};
 
 const filterOptions = {
   provider: ['elasticsearch', 'openai'],
@@ -102,7 +106,7 @@ describe('useTableData', () => {
     expect(result.current.sorting).toEqual({
       sort: {
         direction: 'desc',
-        field: 'endpoint',
+        field: 'inference_id',
       },
     });
   });
@@ -117,7 +121,7 @@ describe('useTableData', () => {
       b.inference_id.localeCompare(a.inference_id)
     );
 
-    const sortedEndpoints = result.current.sortedTableData.map((item) => item.endpoint);
+    const sortedEndpoints = result.current.sortedTableData.map((item) => item.inference_id);
     const expectedModelIds = expectedSortedData.map((item) => item.inference_id);
 
     expect(sortedEndpoints).toEqual(expectedModelIds);
@@ -137,8 +141,8 @@ describe('useTableData', () => {
     expect(
       filteredData.every(
         (endpoint) =>
-          filterOptions.provider.includes(endpoint.provider) &&
-          filterOptions.type.includes(endpoint.type)
+          filterOptions.provider.includes(endpoint.service) &&
+          filterOptions.type.includes(endpoint.task_type)
       )
     ).toBeTruthy();
   });
@@ -150,6 +154,6 @@ describe('useTableData', () => {
       { wrapper }
     );
     const filteredData = result.current.sortedTableData;
-    expect(filteredData.every((item) => item.endpoint.includes(searchKey))).toBeTruthy();
+    expect(filteredData.every((item) => item.inference_id.includes(searchKey))).toBeTruthy();
   });
 });
