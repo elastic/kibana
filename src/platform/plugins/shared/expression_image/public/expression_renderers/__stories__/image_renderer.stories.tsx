@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import type { Meta } from '@storybook/react';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
 
@@ -31,10 +31,11 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   );
 };
 
-storiesOf('renderers/image', module).add(
-  'default',
-  (_, props) => {
+export const Default = {
+  render: (_, props) => {
     return <Renderer elasticLogo={props?.elasticLogo} />;
   },
-  { decorators: [waitFor(getElasticLogo())] }
-);
+
+  name: 'default',
+  decorators: [waitFor(getElasticLogo())],
+} as Meta;
