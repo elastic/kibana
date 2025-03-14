@@ -129,11 +129,14 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     } catch (err) {
       if (err?.attributes?.type === OutputInvalidError.name) {
         notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
-            defaultMessage: 'Error creating a Fleet Server policy',
-          }),
+          title: i18n.translate(
+            'xpack.fleet.fleetServerSetup.errorCreatingFleetServerPolicyTitle',
+            {
+              defaultMessage: 'Error creating a Fleet Server policy',
+            }
+          ),
           toastMessage: i18n.translate(
-            'xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle',
+            'xpack.fleet.fleetServerSetup.errorCreatingFleetServerPolicyMessage',
             {
               defaultMessage:
                 'Fleet Server policy creation failed as your default output is not an elasticsearch output. Use the advanced section to use an elasticsearch output to create that policy.',
