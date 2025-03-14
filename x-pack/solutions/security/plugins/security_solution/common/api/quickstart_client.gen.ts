@@ -1942,7 +1942,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Pin an event to an existing Timeline.
+   * Pin/unpin an event to/from an existing Timeline.
    */
   async persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistPinnedEventRoute`);
