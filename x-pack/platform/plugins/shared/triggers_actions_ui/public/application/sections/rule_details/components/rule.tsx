@@ -225,7 +225,6 @@ export function RuleComponent({
           actionTypeRegistry,
           ruleTypeRegistry,
           hideEditButton: true,
-          useNewRuleForm: true,
           onEditRule: requestRefresh,
         })}
       </EuiFlexGroup>

@@ -275,5 +275,11 @@ export interface DownloadSourceSOAttributes {
   is_default: boolean;
   source_id?: string;
   proxy_id?: string | null;
+  ssl?: string | null; // encrypted ssl field
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];

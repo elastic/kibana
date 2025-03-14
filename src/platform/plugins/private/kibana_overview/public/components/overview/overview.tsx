@@ -167,8 +167,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
   const mainAppsUserHasAccessTo = useMemo(() => {
     const applications = [];
-
-    if (application.capabilities.dashboards_v2?.show) {
+    if (application.capabilities.dashboard_v2?.show) {
       applications.push('dashboards');
     }
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
 import {
   AlertingAuthorizationEntity,
   ReadOperations,
-  RegistryAlertTypeWithAuth,
   WriteOperations,
 } from '../../../../authorization';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 
 export async function listRuleTypes(
   context: RulesClientContext

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   QueryDslQueryContainer,
   SearchRequest,
   SearchTotalHits,
   AggregationsAggregationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -23,9 +23,10 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { AlertsFilter, ISO_WEEKDAYS, RuleAlertData } from '../../../common';
-import {
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { AlertsFilter, RuleAlertData } from '../../../common';
+import { ISO_WEEKDAYS } from '../../../common';
+import type {
   GetLifecycleAlertsQueryByExecutionUuidParams,
   GetLifecycleAlertsQueryByTimeRangeParams,
   GetAlertsQueryParams,
@@ -36,8 +37,8 @@ import {
   ScopedQueryAggregationResult,
   SearchResult,
 } from '../types';
-import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
-import { FormatAlert } from '../../types';
+import type { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
+import type { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
@@ -473,7 +474,7 @@ const getLifecycleAlertsQueries = ({
   maxAlertLimit,
 }: GetAlertsQueryParams): SearchRequest[] => {
   let queryBodies;
-  if (!!executionUuid) {
+  if (executionUuid) {
     queryBodies = getLifecycleAlertsQueryByExecutionUuid({
       executionUuid: executionUuid!,
       ruleId,
@@ -505,7 +506,7 @@ const getContinualAlertsQuery = ({
   maxAlertLimit,
 }: GetAlertsQueryParams): SearchRequest => {
   let queryBody;
-  if (!!executionUuid) {
+  if (executionUuid) {
     queryBody = getQueryByExecutionUuid({
       executionUuid,
       ruleId,

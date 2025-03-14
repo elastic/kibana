@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import {
   isGroupStreamDefinitionBase,
+  isUnwiredStreamDefinition,
   StreamGetResponse,
   WiredStreamGetResponse,
 } from '@kbn/streams-schema';
@@ -40,24 +41,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('checks whether deeply nested stream is created correctly', async () => {
       function getChildNames(stream: StreamGetResponse['stream']): string[] {
-        if (isGroupStreamDefinitionBase(stream)) return [];
-        return stream.ingest.routing.map((r) => r.destination);
+        if (isGroupStreamDefinitionBase(stream) || isUnwiredStreamDefinition(stream)) return [];
+        return stream.ingest.wired.routing.map((r) => r.destination);
       }
-      const logs = await apiClient.fetch('GET /api/streams/{name}', {
+      const logs = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: 'logs' },
         },
       });
       expect(getChildNames(logs.body.stream)).to.contain('logs.deeply');
 
-      const logsDeeply = await apiClient.fetch('GET /api/streams/{name}', {
+      const logsDeeply = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: 'logs.deeply' },
         },
       });
       expect(getChildNames(logsDeeply.body.stream)).to.contain('logs.deeply.nested');
 
-      const logsDeeplyNested = await apiClient.fetch('GET /api/streams/{name}', {
+      const logsDeeplyNested = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: 'logs.deeply.nested' },
         },
@@ -65,11 +66,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(getChildNames(logsDeeplyNested.body.stream)).to.contain(
         'logs.deeply.nested.streamname'
       );
-      const logsDeeplyNestedStreamname = await apiClient.fetch('GET /api/streams/{name}', {
-        params: {
-          path: { name: 'logs.deeply.nested.streamname' },
-        },
-      });
+      const logsDeeplyNestedStreamname = await apiClient.fetch(
+        'GET /api/streams/{name} 2023-10-31',
+        {
+          params: {
+            path: { name: 'logs.deeply.nested.streamname' },
+          },
+        }
+      );
       expect(
         (logsDeeplyNestedStreamname.body as WiredStreamGetResponse).stream.ingest.wired.fields
       ).to.eql({
