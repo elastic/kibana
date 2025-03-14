@@ -8,7 +8,6 @@
 import { RootSchema, EventTypeOpts } from '@kbn/core/server';
 
 interface ScoredDocument {
-  content: string;
   elserScore: number;
   llmScore: number;
 }
@@ -22,12 +21,6 @@ const schema: RootSchema<RecallRanking> = {
     type: 'array',
     items: {
       properties: {
-        content: {
-          type: 'text',
-          _meta: {
-            description: 'The raw content of the recalled document',
-          },
-        },
         elserScore: {
           type: 'float',
           _meta: {
