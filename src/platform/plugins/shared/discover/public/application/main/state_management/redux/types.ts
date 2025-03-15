@@ -42,15 +42,12 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative?: TimeRange;
 }
 
-export interface DiscoverInternalState {
+export interface TabState {
+  tabId: string;
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
-  savedDataViews: DataViewListItem[];
-  defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  isESQLToDataViewTransitionModalVisible: boolean;
   resetDefaultProfileState: {
     resetId: string;
     columns: boolean;
@@ -60,4 +57,16 @@ export interface DiscoverInternalState {
   documentsRequest: DocumentsRequest;
   totalHitsRequest: TotalHitsRequest;
   chartRequest: ChartRequest;
+}
+
+export interface DiscoverInternalState {
+  savedDataViews: DataViewListItem[];
+  defaultProfileAdHocDataViewIds: string[];
+  expandedDoc: DataTableRecord | undefined;
+  isESQLToDataViewTransitionModalVisible: boolean;
+  tabs: {
+    byId: Record<string, TabState>;
+    allIds: string[];
+    currentId: string;
+  };
 }
