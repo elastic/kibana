@@ -465,7 +465,12 @@ export function useOnSubmit({
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
-        onSaveNavigate(data!.item);
+
+        if (isAgentlessConfigured) {
+          onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+        } else {
+          onSaveNavigate(data!.item);
+        }
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
