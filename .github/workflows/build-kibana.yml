@@ -42,9 +42,9 @@ jobs:
 
       - name: Locate Dockerfile
         run: |
-          if [ -f build/kibana/Dockerfile ]; then
-            echo "Using Dockerfile at build/kibana/Dockerfile"
-            echo "DOCKERFILE_PATH=build/kibana/Dockerfile" >> $GITHUB_ENV
+          if [ -f build/kibana-docker/Dockerfile ]; then
+            echo "Using Dockerfile at build/kibana-docker/default/Dockerfile"
+            echo "DOCKERFILE_PATH=build/kibana-docker/default/Dockerfile" >> $GITHUB_ENV
           elif [ -f build/default/Dockerfile ]; then
             echo "Using Dockerfile at build/default/Dockerfile"
             echo "DOCKERFILE_PATH=build/default/Dockerfile" >> $GITHUB_ENV
@@ -61,8 +61,8 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15 -f $DOCKERFILE_PATH .
+          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15.6 -f $DOCKERFILE_PATH .
 
       - name: Push Docker Image to GHCR
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/kibana:8.15
+          docker push ghcr.io/${{ github.repository_owner }}/kibana:8.15.6
