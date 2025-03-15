@@ -8,7 +8,7 @@
 import type { PropsOf } from '@elastic/eui';
 import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { MockIndexPatternSpec } from '../../../hooks/use_kibana_index_patterns.mock';
@@ -65,7 +65,7 @@ type IndicesConfigurationPanelStoryArgs = Pick<
   logIndices: LogIndicesFormState;
 };
 
-const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArgs> = ({
+const IndicesConfigurationPanelTemplate: StoryFn<IndicesConfigurationPanelStoryArgs> = ({
   isLoading,
   isReadOnly,
   logIndices,
