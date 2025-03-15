@@ -23,7 +23,6 @@ describe('Use get case hook', () => {
     await waitFor(() =>
       expect(spy).toHaveBeenCalledWith({
         caseId: 'case-1',
-        includeComments: true,
         signal: expect.any(AbortSignal),
       })
     );
