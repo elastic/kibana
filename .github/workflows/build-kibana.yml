@@ -44,10 +44,6 @@ jobs:
             echo "ERROR: kibana-8.15.6-linux-x86_64.tar.gz is missing in target/!"
             exit 1
           fi
-          if [ ! -f "build/default/bin/kibana-docker" ]; then
-            echo "ERROR: bin/kibana-docker is missing!"
-            exit 1
-          fi
           echo "All required files are present."
 
       - name: Locate Dockerfile
@@ -55,12 +51,6 @@ jobs:
           if [ -f build/kibana-docker/default/Dockerfile ]; then
             echo "Using Dockerfile at build/kibana-docker/default/Dockerfile"
             echo "DOCKERFILE_PATH=build/kibana-docker/default/Dockerfile" >> $GITHUB_ENV
-          elif [ -f build/default/Dockerfile ]; then
-            echo "Using Dockerfile at build/default/Dockerfile"
-            echo "DOCKERFILE_PATH=build/default/Dockerfile" >> $GITHUB_ENV
-          elif [ -f build/kibana-docker/Dockerfile ]; then
-            echo "Using Dockerfile at build/kibana-docker/Dockerfile"
-            echo "DOCKERFILE_PATH=build/kibana-docker/Dockerfile" >> $GITHUB_ENV
           else
             echo "ERROR: Dockerfile not found in expected locations!"
             exit 1
