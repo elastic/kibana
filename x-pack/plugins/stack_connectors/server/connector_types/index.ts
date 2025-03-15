@@ -106,7 +106,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
-  actions.registerSubActionConnectorType(getOpenAIPkiConnectorType());
+  actions.registerSubActionConnectorType(getOpenAiPkiConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getGeminiConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
