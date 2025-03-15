@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -62,7 +62,7 @@ const coreMock = {
 
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
-const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
+const DataSourceSelectorTemplate: StoryFn<DataSourceSelectorProps> = (args) => {
   const [dataSourceSelection, setDataSourceSelection] = useState<DataSourceSelection>(() =>
     AllDatasetSelection.create({ indices: 'logs-*-*' })
   );
