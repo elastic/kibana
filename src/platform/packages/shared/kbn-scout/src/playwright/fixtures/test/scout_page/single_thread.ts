@@ -60,7 +60,7 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
     for (const char of text) {
       await page.keyboard.insertText(char);
       // it is important to delay characters input to avoid flakiness, default is 25 ms
-      // eslint-disable-next-line playwright/no-wait-for-timeout
+
       await page.waitForTimeout(delay);
     }
   };
