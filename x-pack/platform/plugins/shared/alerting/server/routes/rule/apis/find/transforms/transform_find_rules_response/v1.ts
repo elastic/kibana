@@ -80,6 +80,7 @@ export const transformPartialRule = <Params extends RuleParams = never>(
       : {}),
     ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
+    ...(rule.dashboards !== undefined ? { dashboards: rule.dashboards } : {}),
   };
 
   type RuleKeys = keyof RuleResponseV1<RuleParamsV1>;
