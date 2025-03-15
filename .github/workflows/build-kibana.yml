@@ -35,7 +35,20 @@ jobs:
         run: yarn kbn bootstrap
 
       - name: Build Kibana
-        run: yarn build --release --skip-os-packages --skip-archives="darwin-x86_64,darwin-aarch64,windows-x86_64,linux-aarch64"
+        run: yarn build --release --skip-os-packages
+
+      - name: Ensure Required Files Exist
+        run: |
+          echo "Checking required build artifacts..."
+          if [ ! -f "build/default/kibana-8.15.6-linux-x86_64.tar.gz" ]; then
+            echo "ERROR: kibana-8.15.6-linux-x86_64.tar.gz is missing!"
+            exit 1
+          fi
+          if [ ! -f "build/default/bin/kibana-docker" ]; then
+            echo "ERROR: bin/kibana-docker is missing!"
+            exit 1
+          fi
+          echo "All required files are present."
 
       - name: Locate Dockerfile
         run: |
