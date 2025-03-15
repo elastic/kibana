@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { useParams } from 'react-router-dom';
@@ -45,6 +45,7 @@ import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
 import type { MainRouteInitializationState } from '../../types';
 import { useAsyncFunction } from '../../hooks/use_async_function';
+import { addLog } from '../../../../utils/add_log';
 
 export interface DiscoverSessionViewProps {
   mainRouteInitializationState: MainRouteInitializationState;
@@ -53,6 +54,10 @@ export interface DiscoverSessionViewProps {
   urlStateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+}
+
+export interface DiscoverSessionViewRef {
+  stopSyncing: () => void;
 }
 
 type SessionInitializationState =
@@ -70,124 +75,150 @@ type InitializeSession = (options?: {
   defaultUrlState?: DiscoverAppState;
 }) => Promise<SessionInitializationState>;
 
-export const DiscoverSessionView = ({
-  mainRouteInitializationState,
-  customizationContext,
-  customizationCallbacks,
-  urlStateStorage,
-  internalState,
-  runtimeStateManager,
-}: DiscoverSessionViewProps) => {
-  const dispatch = useInternalStateDispatch();
-  const services = useDiscoverServices();
-  const { core, history, getScopedHistory } = services;
-  const { id: discoverSessionId } = useParams<{ id?: string }>();
-  const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
-    async ({ dataViewSpec, defaultUrlState } = {}) => {
-      const stateContainer = getDiscoverStateContainer({
-        services,
-        customizationContext,
-        stateStorageContainer: urlStateStorage,
-        internalState,
-        runtimeStateManager,
-      });
-      const { showNoDataPage } = await dispatch(
-        internalStateActions.initializeSession({
-          stateContainer,
-          mainRouteInitializationState,
-          discoverSessionId,
-          dataViewSpec,
-          defaultUrlState,
-        })
-      );
-
-      return showNoDataPage ? { showNoDataPage } : { showNoDataPage, stateContainer };
-    }
-  );
-  const initializeSessionWithDefaultLocationState = useLatest(() => {
-    const historyLocationState = getScopedHistory<
-      MainHistoryLocationState & { defaultState?: DiscoverAppState }
-    >()?.location.state;
-    initializeSession({
-      dataViewSpec: historyLocationState?.dataViewSpec,
-      defaultUrlState: historyLocationState?.defaultState,
-    });
-  });
-  const customizationService = useDiscoverCustomizationService({
-    customizationCallbacks,
-    stateContainer: initializeSessionState.value?.stateContainer,
-  });
-  const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
-  const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
-
-  useEffect(() => {
-    initializeSessionWithDefaultLocationState.current();
-  }, [discoverSessionId, initializeSessionWithDefaultLocationState]);
-
-  useUrl({
-    history,
-    savedSearchId: discoverSessionId,
-    onNewUrl: () => {
-      initializeSessionWithDefaultLocationState.current();
+export const DiscoverSessionView = forwardRef<DiscoverSessionViewRef, DiscoverSessionViewProps>(
+  (
+    {
+      mainRouteInitializationState,
+      customizationContext,
+      customizationCallbacks,
+      urlStateStorage,
+      internalState,
+      runtimeStateManager,
     },
-  });
+    ref
+  ) => {
+    const dispatch = useInternalStateDispatch();
+    const services = useDiscoverServices();
+    const { core, history, getScopedHistory } = services;
+    const { id: discoverSessionId } = useParams<{ id?: string }>();
+    const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
+      async ({ dataViewSpec, defaultUrlState } = {}) => {
+        const stateContainer = getDiscoverStateContainer({
+          services,
+          customizationContext,
+          stateStorageContainer: urlStateStorage,
+          internalState,
+          runtimeStateManager,
+        });
+        const { showNoDataPage } = await dispatch(
+          internalStateActions.initializeSession({
+            stateContainer,
+            mainRouteInitializationState,
+            discoverSessionId,
+            dataViewSpec,
+            defaultUrlState,
+          })
+        );
 
-  useAlertResultsToast();
+        return showNoDataPage ? { showNoDataPage } : { showNoDataPage, stateContainer };
+      }
+    );
+    const initializeSessionWithDefaultLocationState = useLatest(() => {
+      const historyLocationState = getScopedHistory<
+        MainHistoryLocationState & { defaultState?: DiscoverAppState }
+      >()?.location.state;
+      initializeSession({
+        dataViewSpec: historyLocationState?.dataViewSpec,
+        defaultUrlState: historyLocationState?.defaultState,
+      });
+    });
+    const customizationService = useDiscoverCustomizationService({
+      customizationCallbacks,
+      stateContainer: initializeSessionState.value?.stateContainer,
+    });
+    const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
+    const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
+    const stopSyncing = useRef(() => {});
 
-  useExecutionContext(core.executionContext, {
-    type: 'application',
-    page: 'app',
-    id: discoverSessionId || 'new',
-  });
+    useImperativeHandle(
+      ref,
+      () => ({
+        stopSyncing: () => stopSyncing.current(),
+      }),
+      []
+    );
 
-  if (initializeSessionState.loading) {
-    return <BrandedLoadingIndicator />;
-  }
+    /**
+     * Start state syncing and fetch data if necessary
+     */
+    useEffect(() => {
+      if (!initializeSessionState.value?.stateContainer) return;
+      const stateContainer = initializeSessionState.value.stateContainer;
+      stopSyncing.current = stateContainer.actions.initializeAndSync();
+      addLog('[DiscoverMainApp] state container initialization triggers data fetching');
+      stateContainer.actions.fetchData(true);
+      return () => stopSyncing.current();
+    }, [initializeSessionState.value?.stateContainer]);
 
-  if (initializeSessionState.error) {
-    if (initializeSessionState.error instanceof SavedObjectNotFound) {
+    useEffect(() => {
+      initializeSessionWithDefaultLocationState.current();
+    }, [discoverSessionId, initializeSessionWithDefaultLocationState]);
+
+    useUrl({
+      history,
+      savedSearchId: discoverSessionId,
+      onNewUrl: () => {
+        initializeSessionWithDefaultLocationState.current();
+      },
+    });
+
+    useAlertResultsToast();
+
+    useExecutionContext(core.executionContext, {
+      type: 'application',
+      page: 'app',
+      id: discoverSessionId || 'new',
+    });
+
+    if (initializeSessionState.loading) {
+      return <BrandedLoadingIndicator />;
+    }
+
+    if (initializeSessionState.error) {
+      if (initializeSessionState.error instanceof SavedObjectNotFound) {
+        return (
+          <RedirectWhenSavedObjectNotFound
+            error={initializeSessionState.error}
+            discoverSessionId={discoverSessionId}
+          />
+        );
+      }
+
+      return <DiscoverError error={initializeSessionState.error} />;
+    }
+
+    if (initializeSessionState.value.showNoDataPage) {
       return (
-        <RedirectWhenSavedObjectNotFound
-          error={initializeSessionState.error}
-          discoverSessionId={discoverSessionId}
+        <NoDataPage
+          {...mainRouteInitializationState}
+          onDataViewCreated={async (dataViewUnknown) => {
+            await dispatch(internalStateActions.loadDataViewList());
+            const dataView = dataViewUnknown as DataView;
+            initializeSession({
+              defaultUrlState: dataView.id
+                ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
+                : undefined,
+            });
+          }}
+          onESQLNavigationComplete={() => {
+            initializeSession();
+          }}
         />
       );
     }
 
-    return <DiscoverError error={initializeSessionState.error} />;
-  }
+    if (!customizationService || !currentDataView) {
+      return <BrandedLoadingIndicator />;
+    }
 
-  if (initializeSessionState.value.showNoDataPage) {
     return (
-      <NoDataPage
-        {...mainRouteInitializationState}
-        onDataViewCreated={async (dataViewUnknown) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          const dataView = dataViewUnknown as DataView;
-          initializeSession({
-            defaultUrlState: dataView.id
-              ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
-              : undefined,
-          });
-        }}
-        onESQLNavigationComplete={() => {
-          initializeSession();
-        }}
-      />
+      <DiscoverCustomizationProvider value={customizationService}>
+        <DiscoverMainProvider value={initializeSessionState.value.stateContainer}>
+          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+            <DiscoverMainApp stateContainer={initializeSessionState.value.stateContainer} />
+          </RuntimeStateProvider>
+        </DiscoverMainProvider>
+      </DiscoverCustomizationProvider>
     );
   }
-
-  if (!customizationService || !currentDataView) {
-    return <BrandedLoadingIndicator />;
-  }
-
-  return (
-    <DiscoverCustomizationProvider value={customizationService}>
-      <DiscoverMainProvider value={initializeSessionState.value.stateContainer}>
-        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-          <DiscoverMainApp stateContainer={initializeSessionState.value.stateContainer} />
-        </RuntimeStateProvider>
-      </DiscoverMainProvider>
-    </DiscoverCustomizationProvider>
-  );
-};
+);
