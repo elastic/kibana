@@ -10,6 +10,12 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { differenceBy } from 'lodash';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import { createInternalStateAsyncThunk } from '../utils';
+
+export const loadDataViewList = createInternalStateAsyncThunk(
+  'internalState/loadDataViewList',
+  async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
+);
 
 export const setDataView: InternalStateThunkActionCreator<[DataView]> =
   (dataView) =>
