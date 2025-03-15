@@ -8,7 +8,7 @@
 import type { PropsOf } from '@elastic/eui';
 import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { MockIndexPatternSpec } from '../../../hooks/use_kibana_index_patterns.mock';
@@ -140,15 +140,19 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
   ],
 };
 
-export const IndexNameWithDefaultFields = IndicesConfigurationPanelTemplate.bind({});
+export const IndexNameWithDefaultFields: StoryObj<IndicesConfigurationPanelStoryArgs> = {
+  render: IndicesConfigurationPanelTemplate,
 
-IndexNameWithDefaultFields.args = {
-  ...defaultArgs,
+  args: {
+    ...defaultArgs,
+  },
 };
 
-export const IndexPattern = IndicesConfigurationPanelTemplate.bind({});
+export const IndexPattern: StoryObj<IndicesConfigurationPanelStoryArgs> = {
+  render: IndicesConfigurationPanelTemplate,
 
-IndexPattern.args = {
-  ...defaultArgs,
-  logIndices: undefined,
+  args: {
+    ...defaultArgs,
+    logIndices: undefined,
+  },
 };
