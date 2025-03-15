@@ -24,13 +24,13 @@ import {
 } from '../../../common/openai/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
 import { Config, Secrets } from '../../../common/openai/types';
-import { OpenAIConnector } from './openai';
+import { OpenAIPkiConnector } from './openai_pki';
 import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: OPENAI_CONNECTOR_ID,
   name: OPENAI_TITLE,
-  getService: (params) => new OpenAIConnector(params),
+  getService: (params) => new OpenAIPkiConnector(params),
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,
@@ -62,7 +62,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.genAi.configurationErrorApiProvider', {
-        defaultMessage: 'Error configuring OpenAI action: {err}',
+        defaultMessage: 'Error configuring OpenAIPKI action: {err}',
         values: {
           err: err.toString(),
         },
