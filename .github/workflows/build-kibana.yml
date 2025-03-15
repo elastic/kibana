@@ -37,6 +37,17 @@ jobs:
       - name: Build Kibana
         run: yarn build --release --skip-os-packages
 
+      - name: Free Up Disk Space (Remove Unnecessary Builds)
+        run: |
+          echo "Removing unnecessary tarballs to free up space..."
+          rm -v target/kibana-8.15.6-linux-aarch64.tar.gz
+          rm -v target/kibana-8.15.6-darwin-x86_64.tar.gz
+          rm -v target/kibana-8.15.6-darwin-aarch64.tar.gz
+          rm -v target/kibana-8.15.6-windows-x86_64.zip
+          rm -v target/kibana-serverless-8.15.6-linux-x86_64.tar.gz
+          rm -v target/kibana-serverless-8.15.6-linux-aarch64.tar.gz
+          echo "Disk space freed. Only keeping linux-x86_64 tarball."
+
       - name: Ensure Required Files Exist
         run: |
           echo "Checking required build artifacts..."
