@@ -24,7 +24,7 @@ import {
 } from '../../../common/openai/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
 import { Config, Secrets } from '../../../common/openai/types';
-import { OpenAIPkiConnector } from './openai_pki';
+import { OpenAIPkiConnector } from './openai_pki_connector';
 import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
