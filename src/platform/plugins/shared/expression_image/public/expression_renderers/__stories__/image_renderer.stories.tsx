@@ -31,7 +31,8 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   );
 };
 
-export const Default = {
+export default {
+  title: 'renderers/image',
   render: (_, props) => {
     return <Renderer elasticLogo={props?.elasticLogo} />;
   },
