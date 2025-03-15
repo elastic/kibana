@@ -56,7 +56,7 @@ const titleConfigBase: FieldConfig<string> = {
 
 // --- SIMPLE
 
-const SimpleStory = (args: Args) => {
+const SimpleStoryComponent = (args: Args) => {
   const { form } = useForm();
 
   return (
@@ -74,7 +74,7 @@ const SimpleStory = (args: Args) => {
 };
 
 export const Simple: StoryObj<Args> = {
-  render: (args) => <SimpleStory {...args} />,
+  render: (args) => <SimpleStoryComponent {...args} />,
   parameters: {
     docs: {
       source: {
@@ -118,7 +118,7 @@ const formSchema = {
   },
 };
 
-export const SchemaStory = (args: Args) => {
+const SchemaStoryComponent = (args: Args) => {
   const { form } = useForm({
     schema: formSchema,
   });
@@ -132,7 +132,7 @@ export const SchemaStory = (args: Args) => {
 };
 
 export const Schema: StoryObj<Args> = {
-  render: (args) => <SchemaStory {...args} />,
+  render: (args) => <SchemaStoryComponent {...args} />,
   parameters: {
     docs: {
       source: {
