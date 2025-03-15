@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css, ThemeProvider } from '@emotion/react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
@@ -213,4 +213,6 @@ const Template: StoryFn = () => {
   );
 };
 
-export const LargeGraphWithPopovers = Template.bind({});
+export const LargeGraphWithPopovers: StoryObj = {
+  render: Template,
+};
