@@ -47,7 +47,7 @@ jobs:
           if [ ! -f "build/default/bin/kibana-docker" ]; then
             echo "ERROR: bin/kibana-docker is missing! Copying it from build directory..."
             mkdir -p build/default/bin
-            cp -v target/kibana-8.15.6-linux-x86_64/bin/kibana-docker build/default/bin/
+            cp -v target/kibana-8.15.6-linux-x86_64.tar.gz build/default/bin/
           fi
           echo "All required files are present."
 
