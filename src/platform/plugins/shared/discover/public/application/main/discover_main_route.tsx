@@ -18,7 +18,6 @@ import {
   InternalStateProvider,
   createInternalStateStore,
   createRuntimeStateManager,
-  internalStateActions,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -78,7 +77,6 @@ export const DiscoverMainRoute = ({
         dataViews.hasData.hasESData().catch(() => false),
         dataViews.hasData.hasUserDataView().catch(() => false),
         dataViews.defaultDataViewExists().catch(() => false),
-        internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
 

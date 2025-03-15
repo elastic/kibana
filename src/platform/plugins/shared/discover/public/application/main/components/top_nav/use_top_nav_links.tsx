@@ -75,7 +75,6 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
-        await dispatch(internalStateActions.loadDataViewList());
         dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
       },
     }),

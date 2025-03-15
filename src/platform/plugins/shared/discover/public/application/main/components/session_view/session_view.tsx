@@ -162,7 +162,6 @@ export const DiscoverSessionView = ({
       <NoDataPage
         {...mainRouteInitializationState}
         onDataViewCreated={async (dataViewUnknown) => {
-          await dispatch(internalStateActions.loadDataViewList());
           const dataView = dataViewUnknown as DataView;
           initializeSession({
             dataSource: dataView.id

@@ -41,7 +41,6 @@ async function getHookProps(
   stateContainer.appState.update({ columns: [], ...appState });
   const dataViewList = [dataViewMock as DataViewListItem];
   jest.spyOn(dataViewsService, 'getIdsWithTitle').mockResolvedValue(dataViewList);
-  await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
 
   const msgLoading = {
     fetchStatus: defaultFetchStatus,

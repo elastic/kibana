@@ -15,7 +15,6 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
-  createAsyncThunk,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
@@ -31,7 +30,6 @@ const initialState: DiscoverInternalState = {
   dataViewId: undefined,
   isDataViewLoading: false,
   defaultProfileAdHocDataViewIds: [],
-  savedDataViews: [],
   expandedDoc: undefined,
   dataRequestParams: {},
   overriddenVisContextAfterInvalidation: undefined,
@@ -55,17 +53,6 @@ const initialState: DiscoverInternalState = {
     result: {},
   },
 };
-
-const createInternalStateAsyncThunk = createAsyncThunk.withTypes<{
-  state: DiscoverInternalState;
-  dispatch: InternalStateDispatch;
-  extra: InternalStateThunkDependencies;
-}>();
-
-export const loadDataViewList = createInternalStateAsyncThunk(
-  'internalState/loadDataViewList',
-  async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
-);
 
 export const internalStateSlice = createSlice({
   name: 'internalState',
@@ -127,11 +114,6 @@ export const internalStateSlice = createSlice({
       state.overriddenVisContextAfterInvalidation = undefined;
       state.expandedDoc = undefined;
     },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(loadDataViewList.fulfilled, (state, action) => {
-      state.savedDataViews = action.payload;
-    });
   },
 });
 
