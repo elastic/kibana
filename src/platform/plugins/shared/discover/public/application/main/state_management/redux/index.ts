@@ -20,7 +20,11 @@ import {
 
 export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export {
+  type InternalStateStore,
+  createInternalStateStore,
+  selectCurrentTab,
+} from './internal_state';
 
 export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),

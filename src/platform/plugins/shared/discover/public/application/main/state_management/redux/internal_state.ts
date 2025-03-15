@@ -18,6 +18,7 @@ import {
   createAsyncThunk,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { v4 as uuid } from 'uuid';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from './runtime_state';
@@ -25,18 +26,17 @@ import {
   LoadingStatus,
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
+  type TabState,
 } from './types';
 
-const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+const DEFAULT_TAB_ID = uuid();
+
+const defaultTabState: TabState = {
+  tabId: DEFAULT_TAB_ID,
   dataViewId: undefined,
   isDataViewLoading: false,
-  defaultProfileAdHocDataViewIds: [],
-  savedDataViews: [],
-  expandedDoc: undefined,
   dataRequestParams: {},
   overriddenVisContextAfterInvalidation: undefined,
-  isESQLToDataViewTransitionModalVisible: false,
   resetDefaultProfileState: {
     resetId: '',
     columns: false,
@@ -55,6 +55,30 @@ const initialState: DiscoverInternalState = {
     loadingStatus: LoadingStatus.Uninitialized,
     result: {},
   },
+};
+
+const initialState: DiscoverInternalState = {
+  initializationState: { hasESData: false, hasUserDataView: false },
+  defaultProfileAdHocDataViewIds: [],
+  savedDataViews: [],
+  expandedDoc: undefined,
+  isESQLToDataViewTransitionModalVisible: false,
+  tabs: {
+    byId: { [DEFAULT_TAB_ID]: defaultTabState },
+    allIds: [DEFAULT_TAB_ID],
+    currentId: DEFAULT_TAB_ID,
+  },
+};
+
+export const selectCurrentTab = (state: DiscoverInternalState) =>
+  state.tabs.byId[state.tabs.currentId];
+
+const withCurrentTab = (state: DiscoverInternalState, fn: (tab: TabState) => void) => {
+  const currentTab = selectCurrentTab(state);
+
+  if (currentTab) {
+    fn(currentTab);
+  }
 };
 
 const createInternalStateAsyncThunk = createAsyncThunk.withTypes<{
@@ -79,17 +103,19 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setDataViewId: (state, action: PayloadAction<string | undefined>) => {
-      if (action.payload !== state.dataViewId) {
-        state.expandedDoc = undefined;
-      }
+    setDataViewId: (state, action: PayloadAction<string | undefined>) =>
+      withCurrentTab(state, (tab) => {
+        if (action.payload !== tab.dataViewId) {
+          state.expandedDoc = undefined;
+        }
 
-      state.dataViewId = action.payload;
-    },
+        tab.dataViewId = action.payload;
+      }),
 
-    setIsDataViewLoading: (state, action: PayloadAction<boolean>) => {
-      state.isDataViewLoading = action.payload;
-    },
+    setIsDataViewLoading: (state, action: PayloadAction<boolean>) =>
+      withCurrentTab(state, (tab) => {
+        tab.isDataViewLoading = action.payload;
+      }),
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
@@ -99,16 +125,18 @@ export const internalStateSlice = createSlice({
       state.expandedDoc = action.payload;
     },
 
-    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) => {
-      state.dataRequestParams = action.payload;
-    },
+    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) =>
+      withCurrentTab(state, (tab) => {
+        tab.dataRequestParams = action.payload;
+      }),
 
     setOverriddenVisContextAfterInvalidation: (
       state,
-      action: PayloadAction<DiscoverInternalState['overriddenVisContextAfterInvalidation']>
-    ) => {
-      state.overriddenVisContextAfterInvalidation = action.payload;
-    },
+      action: PayloadAction<TabState['overriddenVisContextAfterInvalidation']>
+    ) =>
+      withCurrentTab(state, (tab) => {
+        tab.overriddenVisContextAfterInvalidation = action.payload;
+      }),
 
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
@@ -116,23 +144,24 @@ export const internalStateSlice = createSlice({
 
     setResetDefaultProfileState: {
       prepare: (
-        resetDefaultProfileState: Omit<DiscoverInternalState['resetDefaultProfileState'], 'resetId'>
+        resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>
       ) => ({
         payload: {
           ...resetDefaultProfileState,
           resetId: uuidv4(),
         },
       }),
-      reducer: (
-        state,
-        action: PayloadAction<DiscoverInternalState['resetDefaultProfileState']>
-      ) => {
-        state.resetDefaultProfileState = action.payload;
-      },
+      reducer: (state, action: PayloadAction<TabState['resetDefaultProfileState']>) =>
+        withCurrentTab(state, (tab) => {
+          tab.resetDefaultProfileState = action.payload;
+        }),
     },
 
     resetOnSavedSearchChange: (state) => {
-      state.overriddenVisContextAfterInvalidation = undefined;
+      withCurrentTab(state, (tab) => {
+        tab.overriddenVisContextAfterInvalidation = undefined;
+      });
+
       state.expandedDoc = undefined;
     },
   },
