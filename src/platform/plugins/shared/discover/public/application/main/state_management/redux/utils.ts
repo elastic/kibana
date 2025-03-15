@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_views';
-export * from './initialize_session';
-export * from './tabs';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import type { DiscoverInternalState } from './types';
+import type { InternalStateDispatch, InternalStateThunkDependencies } from './internal_state';
+
+export const createInternalStateAsyncThunk = createAsyncThunk.withTypes<{
+  state: DiscoverInternalState;
+  dispatch: InternalStateDispatch;
+  extra: InternalStateThunkDependencies;
+}>();

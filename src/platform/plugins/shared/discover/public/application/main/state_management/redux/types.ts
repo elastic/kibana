@@ -11,6 +11,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { TabItem } from '@kbn/unified-tabs';
 
 export enum LoadingStatus {
   Uninitialized = 'uninitialized',
@@ -42,8 +43,9 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative?: TimeRange;
 }
 
-export interface TabState {
-  tabId: string;
+export interface TabState extends TabItem {
+  globalState?: Record<string, unknown>;
+  appState?: Record<string, unknown>;
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;

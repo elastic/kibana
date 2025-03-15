@@ -8,23 +8,21 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice, loadDataViewList } from './internal_state';
+import { internalStateSlice } from './internal_state';
 import {
+  loadDataViewList,
   appendAdHocDataViews,
   initializeSession,
   replaceAdHocDataViewWithId,
   setAdHocDataViews,
   setDataView,
   setDefaultProfileAdHocDataViews,
+  updateTabs,
 } from './actions';
 
 export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
 
-export {
-  type InternalStateStore,
-  createInternalStateStore,
-  selectCurrentTab,
-} from './internal_state';
+export { type InternalStateStore, createInternalStateStore, createTab } from './internal_state';
 
 export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),
@@ -35,6 +33,7 @@ export const internalStateActions = {
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
   initializeSession,
+  updateTabs,
 };
 
 export {
@@ -43,6 +42,8 @@ export {
   useInternalStateSelector,
   useDataViewsForPicker,
 } from './hooks';
+
+export { selectAllTabs, selectCurrentTab } from './selectors';
 
 export {
   type RuntimeStateManager,

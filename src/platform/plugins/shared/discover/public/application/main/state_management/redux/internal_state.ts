@@ -15,7 +15,6 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
-  createAsyncThunk,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { v4 as uuid } from 'uuid';
@@ -28,11 +27,16 @@ import {
   type InternalStateDataRequestParams,
   type TabState,
 } from './types';
+import { loadDataViewList, updateTabs } from './actions';
+import { selectCurrentTab } from './selectors';
 
 const DEFAULT_TAB_ID = uuid();
+const DEFAULT_TAB_LABEL = 'Untitled session';
+const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
 
 const defaultTabState: TabState = {
-  tabId: DEFAULT_TAB_ID,
+  id: DEFAULT_TAB_ID,
+  label: DEFAULT_TAB_LABEL,
   dataViewId: undefined,
   isDataViewLoading: false,
   dataRequestParams: {},
@@ -70,8 +74,14 @@ const initialState: DiscoverInternalState = {
   },
 };
 
-export const selectCurrentTab = (state: DiscoverInternalState) =>
-  state.tabs.byId[state.tabs.currentId];
+export const createTab = (allTabs: TabState[]) => {
+  const id = uuid();
+  const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
+  const label =
+    untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
+
+  return { ...defaultTabState, id, label };
+};
 
 const withCurrentTab = (state: DiscoverInternalState, fn: (tab: TabState) => void) => {
   const currentTab = selectCurrentTab(state);
@@ -80,17 +90,6 @@ const withCurrentTab = (state: DiscoverInternalState, fn: (tab: TabState) => voi
     fn(currentTab);
   }
 };
-
-const createInternalStateAsyncThunk = createAsyncThunk.withTypes<{
-  state: DiscoverInternalState;
-  dispatch: InternalStateDispatch;
-  extra: InternalStateThunkDependencies;
-}>();
-
-export const loadDataViewList = createInternalStateAsyncThunk(
-  'internalState/loadDataViewList',
-  async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
-);
 
 export const internalStateSlice = createSlice({
   name: 'internalState',
@@ -166,6 +165,15 @@ export const internalStateSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(updateTabs.fulfilled, (state, action) => {
+      action.payload.updatedTabs.forEach((updatedTab) => {
+        state.tabs.byId[updatedTab.id] = updatedTab;
+      });
+
+      state.tabs.allIds = action.payload.updatedTabs.map((tab) => tab.id);
+      state.tabs.currentId = action.payload.selectedTabId;
+    });
+
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
       state.savedDataViews = action.payload;
     });
