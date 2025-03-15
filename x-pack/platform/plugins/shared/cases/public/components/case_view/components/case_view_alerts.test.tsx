@@ -23,19 +23,48 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
+const getAlertsStateTableMock = jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />);
+const getAlertConfigIdPerRuleTypesMock = jest
+  .fn()
+  .mockReturnValue('case-details-alerts-observability');
+
 describe('CaseUI View Page activity tab', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render the alerts table', async () => {
-    renderWithTestingProviders(<CaseViewAlerts caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewAlerts caseData={caseData} />, {
+      wrapperProps: {
+        services: {
+          triggersActionsUi: {
+            getAlertsStateTable: getAlertsStateTableMock,
+            // @ts-expect-error: not all services are required
+            alertsTableConfigurationRegistry: {
+              getAlertConfigIdPerRuleTypes: getAlertConfigIdPerRuleTypesMock,
+            },
+          },
+        },
+      },
+    });
 
     expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
   });
 
   it('should call the alerts table with correct props for security solution', async () => {
-    renderWithTestingProviders(<CaseViewAlerts caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewAlerts caseData={caseData} />, {
+      wrapperProps: {
+        services: {
+          triggersActionsUi: {
+            getAlertsStateTable: getAlertsStateTableMock,
+            // @ts-expect-error: not all services are required
+            alertsTableConfigurationRegistry: {
+              getAlertConfigIdPerRuleTypes: getAlertConfigIdPerRuleTypesMock,
+            },
+          },
+        },
+      },
+    });
 
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
@@ -69,7 +98,20 @@ describe('CaseUI View Page activity tab', () => {
           ...caseData,
           owner: OBSERVABILITY_OWNER,
         }}
-      />
+      />,
+      {
+        wrapperProps: {
+          services: {
+            triggersActionsUi: {
+              getAlertsStateTable: getAlertsStateTableMock,
+              // @ts-expect-error: not all services are required
+              alertsTableConfigurationRegistry: {
+                getAlertConfigIdPerRuleTypes: getAlertConfigIdPerRuleTypesMock,
+              },
+            },
+          },
+        },
+      }
     );
 
     await waitFor(async () => {
@@ -97,7 +139,20 @@ describe('CaseUI View Page activity tab', () => {
           ...caseData,
           owner: OBSERVABILITY_OWNER,
         }}
-      />
+      />,
+      {
+        wrapperProps: {
+          services: {
+            triggersActionsUi: {
+              getAlertsStateTable: getAlertsStateTableMock,
+              // @ts-expect-error: not all services are required
+              alertsTableConfigurationRegistry: {
+                getAlertConfigIdPerRuleTypes: getAlertConfigIdPerRuleTypesMock,
+              },
+            },
+          },
+        },
+      }
     );
 
     await waitFor(async () => {
@@ -119,7 +174,20 @@ describe('CaseUI View Page activity tab', () => {
           ...caseData,
           comments: [],
         }}
-      />
+      />,
+      {
+        wrapperProps: {
+          services: {
+            triggersActionsUi: {
+              getAlertsStateTable: getAlertsStateTableMock,
+              // @ts-expect-error: not all services are required
+              alertsTableConfigurationRegistry: {
+                getAlertConfigIdPerRuleTypes: getAlertConfigIdPerRuleTypesMock,
+              },
+            },
+          },
+        },
+      }
     );
 
     expect(await screen.findByTestId('caseViewAlertsEmpty')).toBeInTheDocument();
