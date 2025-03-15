@@ -18,7 +18,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
 
-// Failing: See https://github.com/elastic/kibana/issues/207955
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();

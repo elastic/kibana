@@ -169,7 +169,7 @@ describe('EditableMarkdown', () => {
       jest.clearAllMocks();
     });
 
-    it.skip('Save button click clears session storage', async () => {
+    it('Save button click clears session storage', async () => {
       renderWithTestingProviders(<EditableMarkdown {...defaultProps} />);
 
       fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
@@ -196,7 +196,7 @@ describe('EditableMarkdown', () => {
       expect(window.sessionStorage.getItem(draftStorageKey)).toBe(null);
     });
 
-    it.skip('Cancel button click clears session storage', async () => {
+    it('Cancel button click clears session storage', async () => {
       renderWithTestingProviders(<EditableMarkdown {...defaultProps} />);
 
       expect(window.sessionStorage.getItem(draftStorageKey)).toBe('');

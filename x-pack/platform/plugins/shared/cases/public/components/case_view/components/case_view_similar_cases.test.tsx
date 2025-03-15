@@ -19,7 +19,6 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/207056
 describe('Case View Page similar cases tab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
