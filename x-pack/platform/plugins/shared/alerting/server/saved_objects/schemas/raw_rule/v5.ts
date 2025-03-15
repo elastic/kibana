@@ -11,4 +11,3 @@ import { rawRuleSchema as rawRuleSchemaV4 } from './v4';
 export const rawRuleSchema = rawRuleSchemaV4.extends({
   dashboards: schema.maybe(schema.arrayOf(schema.object({ id: schema.string() }))),
 });
-  
