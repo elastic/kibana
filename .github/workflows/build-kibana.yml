@@ -40,15 +40,29 @@ jobs:
       - name: Ensure Required Files Exist
         run: |
           echo "Checking required build artifacts..."
+          
+          # Ensure the tarball exists
           if [ ! -f "target/kibana-8.15.6-linux-x86_64.tar.gz" ]; then
             echo "ERROR: kibana-8.15.6-linux-x86_64.tar.gz is missing in target/!"
             exit 1
           fi
-          if [ ! -f "build/default/bin/kibana-docker" ]; then
-            echo "ERROR: bin/kibana-docker is missing! Copying it from build directory..."
-            mkdir -p build/default/bin
-            cp -v target/kibana-8.15.6-linux-x86_64.tar.gz build/default/bin/
+
+          # Ensure the Docker context directory exists
+          mkdir -p build/kibana-docker/default/bin
+
+          # Move the tarball to the expected Docker build location
+          echo "Copying tarball to Docker build context..."
+          cp -v target/kibana-8.15.6-linux-x86_64.tar.gz build/kibana-docker/default/
+
+          # Extract the `kibana-docker` binary
+          echo "Extracting kibana-docker binary..."
+          tar -xzf target/kibana-8.15.6-linux-x86_64.tar.gz -C build/kibana-docker/default/ --strip-components=1
+          
+          if [ ! -f "build/kibana-docker/default/bin/kibana-docker" ]; then
+            echo "ERROR: kibana-docker binary is missing after extraction!"
+            exit 1
           fi
+
           echo "All required files are present."
 
       - name: Locate Dockerfile
@@ -66,7 +80,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15.6 -f $DOCKERFILE_PATH .
+          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15.6 -f $DOCKERFILE_PATH build/kibana-docker/default/
 
       - name: Push Docker Image to GHCR
         run: |
