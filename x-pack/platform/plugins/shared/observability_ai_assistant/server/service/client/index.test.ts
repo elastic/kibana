@@ -336,6 +336,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: undefined,
             tools: undefined,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });
@@ -856,6 +861,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });
@@ -1005,6 +1015,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });
