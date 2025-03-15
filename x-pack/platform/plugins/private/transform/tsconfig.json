@@ -84,7 +84,8 @@
     "@kbn/response-ops-rule-params",
     "@kbn/fields-metadata-plugin",
     "@kbn/dashboard-plugin",
-    "@kbn/core-feature-flags-browser"
+    "@kbn/core-feature-flags-browser",
+    "@kbn/core-feature-flags-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
