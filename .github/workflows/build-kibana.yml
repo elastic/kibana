@@ -40,8 +40,8 @@ jobs:
       - name: Ensure Required Files Exist
         run: |
           echo "Checking required build artifacts..."
-          if [ ! -f "build/default/kibana-8.15.6-linux-x86_64.tar.gz" ]; then
-            echo "ERROR: kibana-8.15.6-linux-x86_64.tar.gz is missing!"
+          if [ ! -f "target/kibana-8.15.6-linux-x86_64.tar.gz" ]; then
+            echo "ERROR: kibana-8.15.6-linux-x86_64.tar.gz is missing in target/!"
             exit 1
           fi
           if [ ! -f "build/default/bin/kibana-docker" ]; then
