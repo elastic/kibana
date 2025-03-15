@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutFixtures, scoutParallelFixtures, globalSetup } from './fixtures';
+import { scoutFixtures, scoutParallelFixtures, lighthouseFixtures, globalSetup } from './fixtures';
 
 // Scout core fixtures: worker & test scope
 export const test = scoutFixtures;
+
+export const lighthouseTest = lighthouseFixtures;
 
 // Scout core 'space aware' fixtures: worker & test scope
 export const spaceTest = scoutParallelFixtures;

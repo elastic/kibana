@@ -12,6 +12,7 @@ export {
   expect,
   test,
   spaceTest,
+  lighthouseTest,
   globalSetupHook,
   tags,
   createPlaywrightConfig,
@@ -39,6 +40,6 @@ export type {
 } from './src/types';
 
 // re-export from Playwright
-export type { Locator } from 'playwright/test';
+export type { Locator, CDPSession } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';

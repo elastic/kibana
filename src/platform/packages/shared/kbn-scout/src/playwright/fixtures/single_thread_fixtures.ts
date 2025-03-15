@@ -14,6 +14,7 @@ import {
   esArchiverFixture,
   uiSettingsFixture,
   synthtraceFixture,
+  lighthouseFixture,
 } from './worker';
 import type {
   ApiServicesFixture,
@@ -31,10 +32,12 @@ import {
   browserAuthFixture,
   pageObjectsFixture,
   validateTagsFixture,
+  persistentContext,
+  perfTrackerFixture,
 } from './test';
-import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
+import type { BrowserAuthFixture, ScoutPage, PageObjects, PerfTrackerFixture } from './test';
 export type { ScoutPage, PageObjects } from './test';
-export type { ApiServicesFixture } from './worker';
+export type { ApiServicesFixture, LighthouseAuditOptions } from './worker';
 
 export const scoutFixtures = mergeTests(
   // worker scope fixtures
@@ -48,13 +51,16 @@ export const scoutFixtures = mergeTests(
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
-  validateTagsFixture
+  validateTagsFixture,
+  // performance fixtures
+  perfTrackerFixture
 );
 
 export interface ScoutTestFixtures {
   browserAuth: BrowserAuthFixture;
   page: ScoutPage;
   pageObjects: PageObjects;
+  perfTracker: PerfTrackerFixture;
 }
 
 export interface ScoutWorkerFixtures extends ApiServicesFixture {
@@ -70,3 +76,5 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
   otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }
+
+export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);
