@@ -7,7 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import OpenAI from 'openai';
+import OpenAIPki from 'openai_pki';
 import fs from 'fs';
 import https from 'https';
 import { removeEndpointFromUrl } from './lib/openai_utils';
@@ -38,7 +38,7 @@ import {
   InvokeAIActionResponse,
 } from '../../../common/openai/types';
 
-export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
+export class OpenAIPkiConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private certPath;
   private keyPath;
