@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
@@ -35,7 +35,7 @@ const tabsSizeConfig = {
   regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
-const TabTemplate: React.FC<TabProps> = (args) => (
+const TabTemplate: StoryFn<TabProps> = (args) => (
   <Tab
     {...args}
     tabsSizeConfig={tabsSizeConfig}

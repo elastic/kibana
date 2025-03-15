@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { useNewTabProps } from '../../hooks/use_new_tab_props';
@@ -23,7 +23,7 @@ export default {
   },
 } as Meta;
 
-const TabbedContentTemplate: React.FC<TabbedContentProps> = (args) => {
+const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
   const { getNewTabDefaultProps } = useNewTabProps({
     numberOfInitialItems: args.initialItems.length,
   });
