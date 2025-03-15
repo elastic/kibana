@@ -22,6 +22,8 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 import type { AppDependencies } from '../app_dependencies';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -105,6 +107,8 @@ const appDependencies: AppDependencies = {
   savedSearch: savedSearchPluginMock.createStartContract(),
   contentManagement: contentManagementMock.createStartContract(),
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+  dashboard: dashboardPluginMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
 };
 
 export const useAppDependencies = () => {
