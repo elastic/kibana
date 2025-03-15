@@ -274,7 +274,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
 
     updateModelDeployment(modelId: string, deploymentId: string, params: UpdateAllocationParams) {
-      return httpService.http<{ acknowledge: boolean }>({
+      return httpService.http<estypes.MlUpdateTrainedModelDeploymentResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
         method: 'POST',
         body: JSON.stringify(params),
@@ -298,10 +298,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    trainedModelPipelineSimulate(
-      pipeline: estypes.IngestPipeline,
-      docs: estypes.IngestSimulateDocument[]
-    ) {
+    trainedModelPipelineSimulate(pipeline: estypes.IngestPipeline, docs: estypes.IngestDocument[]) {
       const body = JSON.stringify({
         pipeline,
         docs,

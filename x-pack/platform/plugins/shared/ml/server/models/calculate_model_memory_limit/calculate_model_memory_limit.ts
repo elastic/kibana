@@ -153,9 +153,12 @@ export function calculateModelMemoryLimitProvider(
     datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
     const info = await mlClient.info();
-    const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
-    const effectiveMaxModelMemoryLimit =
-      info.limits.effective_max_model_memory_limit?.toUpperCase();
+    const maxModelMemoryLimit = info.limits.max_model_memory_limit
+      ? `${info.limits.max_model_memory_limit}`.toUpperCase()
+      : undefined;
+    const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit
+      ? `${info.limits.effective_max_model_memory_limit}`?.toUpperCase()
+      : undefined;
 
     const { overallCardinality, maxBucketCardinality } = await getCardinalities(
       analysisConfig,

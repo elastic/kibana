@@ -228,16 +228,17 @@ export class DeploymentParamsMapper {
     input: MlTrainedModelAssignmentTaskParametersAdaptive
   ): DeploymentParamsUI {
     let optimized: DeploymentParamsUI['optimized'] = 'optimizedForIngest';
-    if (input.threads_per_allocation > 1) {
+    const threadsPerAllocation = input.threads_per_allocation ?? 0;
+    if (threadsPerAllocation > 1) {
       optimized = 'optimizedForSearch';
     }
     const adaptiveResources = !!input.adaptive_allocations?.enabled;
 
     const vCPUs =
-      input.threads_per_allocation *
+      threadsPerAllocation *
       (adaptiveResources
         ? input.adaptive_allocations!.max_number_of_allocations!
-        : input.number_of_allocations);
+        : input.number_of_allocations ?? 0);
 
     // The deployment can be created via API with a number of allocations that do not exactly match our vCPU ranges.
     // In this case, we should find the closest vCPU range that does not exceed the max or static value of the range.

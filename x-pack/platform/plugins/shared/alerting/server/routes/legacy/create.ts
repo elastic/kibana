@@ -9,15 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from '../lib/error_handler';
-import {
-  SanitizedRule,
-  RuleNotifyWhenType,
-  RuleTypeParams,
-  LEGACY_BASE_ALERT_API_PATH,
-  validateNotifyWhenType,
-} from '../../types';
+import type { SanitizedRule, RuleNotifyWhenType, RuleTypeParams } from '../../types';
+import { LEGACY_BASE_ALERT_API_PATH, validateNotifyWhenType } from '../../types';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { RouteOptions } from '..';
+import type { RouteOptions } from '..';
 import { countUsageOfPredefinedIds } from '../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';

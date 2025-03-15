@@ -53,6 +53,9 @@ const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids`
 // kibana.alert.consecutive_matches - count of consecutive times the alert has been active
 const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as const;
 
+// kibana.alert.pending_recovered_count - count of consecutive times the alert has been recovered
+const ALERT_PENDING_RECOVERED_COUNT = `${ALERT_NAMESPACE}.pending_recovered_count` as const;
+
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 
@@ -139,6 +142,7 @@ const fields = {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
@@ -186,6 +190,7 @@ export {
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_PREVIOUS_ACTION_GROUP,

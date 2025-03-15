@@ -6,46 +6,43 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
-import type {
-  RuleFilterArray,
-  TimestampOverride,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleFilterArray } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
+import type { SecuritySharedParams } from '../types';
+import type { EqlRuleParams } from '../../rule_schema';
 
 interface BuildEqlSearchRequestParams {
+  sharedParams: SecuritySharedParams<EqlRuleParams>;
   query: string;
-  index: string[];
   from: string;
   to: string;
   size: number;
   filters: RuleFilterArray | undefined;
-  primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverride | undefined;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   eventCategoryOverride?: string;
   timestampField?: string;
   tiebreakerField?: string;
-  exceptionFilter: Filter | undefined;
 }
 
 export const buildEqlSearchRequest = ({
+  sharedParams,
   query,
-  index,
   from,
   to,
   size,
   filters,
-  primaryTimestamp,
-  secondaryTimestamp,
-  runtimeMappings,
   eventCategoryOverride,
   timestampField,
   tiebreakerField,
-  exceptionFilter,
 }: BuildEqlSearchRequestParams): estypes.EqlSearchRequest => {
+  const {
+    inputIndex: index,
+    primaryTimestamp,
+    secondaryTimestamp,
+    exceptionFilter,
+    runtimeMappings,
+  } = sharedParams;
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];

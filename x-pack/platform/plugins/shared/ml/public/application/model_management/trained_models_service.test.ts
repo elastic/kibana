@@ -34,7 +34,7 @@ describe('TrainedModelsService', () => {
   let mockTelemetryService: jest.Mocked<ITelemetryClient>;
   let mockDeploymentParamsMapper: jest.Mocked<DeploymentParamsMapper>;
 
-  const startModelAllocationResponseMock = {
+  const startModelAllocationResponseMock: StartTrainedModelDeploymentResponse = {
     assignment: {
       task_parameters: {
         model_id: 'deploy-model',
@@ -47,6 +47,7 @@ describe('TrainedModelsService', () => {
         deployment_id: 'my-deployment-id',
         cache_size: '1mb',
       },
+      // @ts-expect-error `node_count` not available in the types. Is it removed?
       node_count: 1,
       routing_table: {
         'node-1': {
@@ -87,7 +88,7 @@ describe('TrainedModelsService', () => {
 
     mockTelemetryService = {
       trackTrainedModelsDeploymentCreated: jest.fn(),
-    };
+    } as unknown as jest.Mocked<ITelemetryClient>;
 
     mockTrainedModelsApiService = {
       getTrainedModelsList: jest.fn(),
@@ -321,7 +322,31 @@ describe('TrainedModelsService', () => {
   });
 
   it('updates model deployment successfully', async () => {
-    mockTrainedModelsApiService.updateModelDeployment.mockResolvedValueOnce({ acknowledge: true });
+    mockTrainedModelsApiService.updateModelDeployment.mockResolvedValueOnce({
+      assignment: {
+        assignment_state: 'started',
+        routing_table: {
+          'node-1': {
+            routing_state: 'started',
+            reason: '',
+            current_allocations: 1,
+            target_allocations: 1,
+          },
+        },
+        start_time: 1234567890,
+        task_parameters: {
+          model_id: 'test-model',
+          model_bytes: 1000,
+          priority: 'normal',
+          number_of_allocations: 1,
+          threads_per_allocation: 1,
+          queue_capacity: 1024,
+          deployment_id: 'my-deployment-id',
+          per_deployment_memory_bytes: '1mb',
+          per_allocation_memory_bytes: '1mb',
+        },
+      },
+    });
 
     trainedModelsService.updateModelDeployment('test-model', deploymentParamsUiMock);
     await flushPromises();

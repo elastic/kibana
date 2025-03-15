@@ -12,6 +12,7 @@ export type {
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
+  ChatCompleteRetryConfiguration,
 } from './api';
 export type {
   BoundChatCompleteAPI,

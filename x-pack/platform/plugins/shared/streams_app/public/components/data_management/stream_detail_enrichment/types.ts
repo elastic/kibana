@@ -16,14 +16,13 @@ import {
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
   id: string;
   type: ProcessorTypeOf<T>;
-  status: 'draft' | 'saved' | 'updated';
 };
 
 export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
 
 export interface DetectedField {
   name: string;
-  type?: FieldDefinitionType;
+  type?: FieldDefinitionType | 'system';
 }
 
 interface BaseFormState {

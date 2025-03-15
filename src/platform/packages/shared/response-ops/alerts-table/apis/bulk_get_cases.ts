@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CaseStatuses } from '@kbn/cases-components';
-import { HttpStart } from '@kbn/core-http-browser';
+import type { CaseStatuses } from '@kbn/cases-components';
+import type { HttpStart } from '@kbn/core-http-browser';
 
 const INTERNAL_BULK_GET_CASES_URL = '/internal/cases/_bulk_get';
 

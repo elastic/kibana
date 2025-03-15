@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { ValidatorServices } from '../../types';
+import type { ValidatorServices } from '../../types';
 
 const validProtocols: string[] = ['http:', 'https:'];
 export const assertURL = (url: string) => {

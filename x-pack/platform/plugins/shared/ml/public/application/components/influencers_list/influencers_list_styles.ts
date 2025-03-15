@@ -23,7 +23,7 @@ export const useInfluencersListStyles = () => {
     fieldLabel: css({
       fontSize: euiTheme.euiFontSizeXS,
       textAlign: 'left',
-      maxHeight: euiTheme.euiFontSizeS,
+      maxHeight: euiTheme.euiFontSizeM,
       maxWidth: 'calc(100% - 102px)',
     }),
     progress: css({
