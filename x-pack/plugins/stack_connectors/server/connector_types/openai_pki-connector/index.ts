@@ -18,18 +18,17 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import {
-  OPENAI_CONNECTOR_ID,
-  OPENAI_TITLE,
-} from '../../../common/openai/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
 import { Config, Secrets } from '../../../common/openai/types';
 import { OpenAIPkiConnector } from './openai_pki';
 import { renderParameterTemplates } from './render';
 
+export const OPENAI_PKI_CONNECTOR_ID = '.gen-ai-pki';
+export const OPENAI_PKI_TITLE = 'OpenAI PKI';
+
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
-  id: OPENAI_CONNECTOR_ID,
-  name: OPENAI_TITLE,
+  id: OPENAI_PKI_CONNECTOR_ID,
+  name: OPENAI_PKI_TITLE,
   getService: (params) => new OpenAIPkiConnector(params),
   schema: {
     config: ConfigSchema,
