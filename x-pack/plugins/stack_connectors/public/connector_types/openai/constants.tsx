@@ -64,6 +64,26 @@ export const openAiConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_OPENAI_MODEL,
   },
+  {
+    id: 'certPath',
+    label: i18n.CERT_PATH_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Optional. Path to the SSL certificate file for PKI authentication."
+        id="xpack.stackConnectors.components.genAi.certPathHelp"
+      />
+    ),
+  },
+  {
+    id: 'keyPath',
+    label: i18n.KEY_PATH_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Optional. Path to the SSL private key file for PKI authentication."
+        id="xpack.stackConnectors.components.genAi.keyPathHelp"
+      />
+    ),
+  },
 ];
 
 export const azureAiConfig: ConfigFieldSchema[] = [
@@ -152,5 +172,56 @@ export const providerOptions = [
     value: OpenAiProviderType.AzureAi,
     text: i18n.AZURE_AI,
     label: i18n.AZURE_AI,
+  },
+  {
+    value: OpenAiProviderType.PkiOpenAi,
+    text: i18n.PKI_OPENAI,
+    label: i18n.PKI_OPENAI,
+  },
+];
+
+export const pkiOpenAiConfig: ConfigFieldSchema[] = [
+  {
+    id: 'apiUrl',
+    label: i18n.API_URL_LABEL,
+    isUrlField: true,
+    defaultValue: DEFAULT_URL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="The OpenAI API endpoint URL with PKI authentication."
+        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentation"
+      />
+    ),
+  },
+  {
+    id: 'defaultModel',
+    label: i18n.DEFAULT_MODEL_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="If a request does not include a model, it uses the default."
+        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentationModel"
+      />
+    ),
+    defaultValue: DEFAULT_OPENAI_MODEL,
+  },
+  {
+    id: 'certPath',
+    label: i18n.CERT_PATH_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the SSL certificate file for PKI authentication."
+        id="xpack.stackConnectors.components.genAi.certPathHelp"
+      />
+    ),
+  },
+  {
+    id: 'keyPath',
+    label: i18n.KEY_PATH_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the SSL private key file for PKI authentication."
+        id="xpack.stackConnectors.components.genAi.keyPathHelp"
+      />
+    ),
   },
 ];

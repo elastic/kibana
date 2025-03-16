@@ -18,6 +18,14 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
   defaultMessage: 'API key',
 });
 
+export const CERT_PATH_LABEL = i18n.translate('xpack.stackConnectors.components.genAi.certPathLabel', {
+  defaultMessage: 'Certificate path',
+});
+
+export const KEY_PATH_LABEL = i18n.translate('xpack.stackConnectors.components.genAi.keyPathLabel', {
+  defaultMessage: 'Private key path',
+});
+
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel',
   {
@@ -45,6 +53,10 @@ export const OPENAI = i18n.translate('xpack.stackConnectors.components.genAi.ope
 
 export const AZURE_AI = i18n.translate('xpack.stackConnectors.components.genAi.azureAi', {
   defaultMessage: 'Azure OpenAI',
+});
+
+export const PKI_OPENAI = i18n.translate('xpack.stackConnectors.components.genAi.pkiOpenAi', {
+  defaultMessage: 'PKI OpenAI',
 });
 
 export const DOCUMENTATION = i18n.translate(

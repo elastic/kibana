@@ -26,6 +26,7 @@ import {
   azureAiSecrets,
   openAiConfig,
   openAiSecrets,
+  pkiOpenAiConfig,
   providerOptions,
 } from './constants';
 const { emptyField } = fieldValidators;
@@ -83,6 +84,14 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           readOnly={readOnly}
           configFormSchema={azureAiConfig}
           secretsFormSchema={azureAiSecrets}
+        />
+      )}
+      {config != null && config.apiProvider === OpenAiProviderType.PkiOpenAi && (
+        <SimpleConnectorForm
+          isEdit={isEdit}
+          readOnly={readOnly}
+          configFormSchema={pkiOpenAiConfig}
+          secretsFormSchema={openAiSecrets}
         />
       )}
       {isEdit && (

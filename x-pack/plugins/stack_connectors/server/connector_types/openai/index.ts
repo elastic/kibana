@@ -53,12 +53,26 @@ export const configValidator = (configObject: Config, validatorServices: Validat
 
     const { apiProvider } = configObject;
 
-    if (apiProvider !== OpenAiProviderType.OpenAi && apiProvider !== OpenAiProviderType.AzureAi) {
+    if (
+      apiProvider !== OpenAiProviderType.OpenAi && 
+      apiProvider !== OpenAiProviderType.AzureAi &&
+      apiProvider !== OpenAiProviderType.PkiOpenAi
+    ) {
       throw new Error(
         `API Provider is not supported${
           apiProvider && (apiProvider as OpenAiProviderType).length ? `: ${apiProvider}` : ``
         }`
       );
+    }
+
+    // Validate PKI configuration when PKI OpenAI provider is selected
+    if (apiProvider === OpenAiProviderType.PkiOpenAi) {
+      if (!configObject.certPath) {
+        throw new Error('Certificate path is required for PKI OpenAI provider');
+      }
+      if (!configObject.keyPath) {
+        throw new Error('Private key path is required for PKI OpenAI provider');
+      }
     }
 
     return configObject;

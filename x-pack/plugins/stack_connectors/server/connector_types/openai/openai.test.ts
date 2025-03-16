@@ -826,6 +826,90 @@ describe('OpenAIConnector', () => {
       expect(response).toEqual({ available: false });
     });
   });
+
+  describe('PKI OpenAI', () => {
+    const connector = new OpenAIConnector({
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      config: {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: OpenAiProviderType.PkiOpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
+        certPath: '/path/to/cert.pem',
+        keyPath: '/path/to/key.pem',
+      },
+      secrets: { apiKey: '123' },
+      logger: loggingSystemMock.createLogger(),
+      services: actionsMock.createServices(),
+    });
+
+    const samplePkiBody = {
+      messages: [
+        {
+          role: 'user',
+          content: 'Hello world',
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      // @ts-ignore
+      connector.request = mockRequest;
+      jest.clearAllMocks();
+    });
+
+    describe('runApi', () => {
+      it('test the PKI OpenAI API call is successful with correct parameters', async () => {
+        const response = await connector.runApi({ body: JSON.stringify(samplePkiBody) });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          ...mockDefaults,
+          data: JSON.stringify({ ...samplePkiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+          httpsAgent: expect.any(Object),
+        });
+        expect(response).toEqual(mockResponse.data);
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(connector.runApi({ body: JSON.stringify(samplePkiBody) })).rejects.toThrow(
+          'API Error'
+        );
+      });
+    });
+
+    describe('streamApi', () => {
+      it('the PKI OpenAI API call is successful with correct parameters when stream = true', async () => {
+        const response = await connector.streamApi({
+          body: JSON.stringify(samplePkiBody),
+          stream: true,
+        });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          responseType: 'stream',
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          data: JSON.stringify({ ...samplePkiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+          httpsAgent: expect.any(Object),
+        });
+        expect(response).toEqual({
+          headers: { 'Content-Type': 'dont-compress-this' },
+          ...mockResponse.data,
+        });
+      });
+    });
+  });
 });
 
 function createStreamMock() {

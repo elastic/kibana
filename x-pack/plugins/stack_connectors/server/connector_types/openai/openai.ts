@@ -52,6 +52,7 @@ import {
   pipeStreamingResponse,
   sanitizeRequest,
 } from './lib/utils';
+import axios from 'axios';
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -61,29 +62,36 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
+    this.url = params.config.apiUrl;
+    this.provider = params.config.apiProvider;
+    this.key = params.secrets.apiKey;
 
-    this.url = this.config.apiUrl;
-    this.provider = this.config.apiProvider;
-    this.key = this.secrets.apiKey;
+    const axiosOptions = getAxiosOptions(this.provider, this.key, false, {
+      certPath: params.config.certPath,
+      keyPath: params.config.keyPath,
+    });
 
-    this.openAI =
-      this.config.apiProvider === OpenAiProviderType.AzureAi
-        ? new OpenAI({
-            apiKey: this.secrets.apiKey,
-            baseURL: this.config.apiUrl,
-            defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
-            defaultHeaders: {
-              ...this.config.headers,
-              'api-key': this.secrets.apiKey,
-            },
-          })
-        : new OpenAI({
-            baseURL: removeEndpointFromUrl(this.config.apiUrl),
-            apiKey: this.secrets.apiKey,
-            defaultHeaders: {
-              ...this.config.headers,
-            },
-          });
+    if (this.provider === OpenAiProviderType.AzureAi) {
+      this.openAI = new OpenAI({
+        apiKey: this.key,
+        baseURL: this.url,
+        defaultQuery: { 'api-version': getAzureApiVersionParameter(this.url) },
+        defaultHeaders: {
+          ...params.config.headers,
+          'api-key': this.key,
+        },
+      });
+    } else {
+      // For both OpenAI and PKI OpenAI
+      this.openAI = new OpenAI({
+        baseURL: removeEndpointFromUrl(this.url),
+        apiKey: this.key,
+        defaultHeaders: {
+          ...params.config.headers,
+        },
+        httpAgent: axiosOptions.httpsAgent,
+      });
+    }
 
     this.registerSubActions();
   }

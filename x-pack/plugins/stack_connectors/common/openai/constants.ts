@@ -27,6 +27,7 @@ export enum SUB_ACTION {
 export enum OpenAiProviderType {
   OpenAi = 'OpenAI',
   AzureAi = 'Azure OpenAI',
+  PkiOpenAi = 'PKI OpenAI',
 }
 
 export const DEFAULT_TIMEOUT_MS = 120000;
