@@ -190,7 +190,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const { form } = useForm<FormProps>({
     defaultValue: initialValue,
-    options: { stripEmptyFields: false },
+    options: { stripEmptyFields: true },
     schema,
     onSubmit: submitMaintenanceWindow,
   });
@@ -396,17 +396,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <RecurringSchedule data-test-subj="recurring-form" />
           </EuiFlexItem>
         )}
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="xl" />
-          <UseField path="scopedQuery">
-            {() => (
-              <MaintenanceWindowScopedQuerySwitch
-                checked={isScopedQueryEnabled}
-                onEnabledChange={onScopeQueryToggle}
-              />
-            )}
-          </UseField>
-        </EuiFlexItem>
+        {availableSolutions.length > 0 && (
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <UseField path="scopedQuery">
+              {() => (
+                <MaintenanceWindowScopedQuerySwitch
+                  checked={isScopedQueryEnabled}
+                  onEnabledChange={onScopeQueryToggle}
+                />
+              )}
+            </UseField>
+          </EuiFlexItem>
+        )}
         <EuiHorizontalRule margin="xl" />
         <EuiFlexItem>
           <UseField path="solutionId">

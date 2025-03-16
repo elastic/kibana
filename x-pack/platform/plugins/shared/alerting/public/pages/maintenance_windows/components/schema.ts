@@ -13,6 +13,7 @@ import * as i18n from '../translations';
 import type { MaintenanceWindowFrequency } from '../constants';
 import { EndsOptions } from '../constants';
 import type { ScopedQueryAttributes } from '../../../../common';
+import { VALID_CATEGORIES } from '../constants';
 
 const { emptyField } = fieldValidators;
 
@@ -50,7 +51,23 @@ export const schema: FormSchema<FormProps> = {
   },
   solutionId: {
     type: FIELD_TYPES.TEXT,
-    validations: [],
+    defaultValue: undefined,
+    validations: [
+      {
+        validator: ({ value }: { value: string }) => {
+          if (value === undefined) {
+            return;
+          }
+          if (!VALID_CATEGORIES.includes(value)) {
+            return {
+              message: `Value must be one of: ${VALID_CATEGORIES.join(', ')}`,
+            };
+          }
+        },
+      },
+    ],
+    // The empty string appears by default because of how form libraries typically handle form inputs
+    deserializer: (value) => (value === '' ? undefined : value),
   },
   scopedQuery: {
     defaultValue: {
