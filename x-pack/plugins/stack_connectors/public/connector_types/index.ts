@@ -12,6 +12,7 @@ import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
 import { getOpenAIConnectorType } from './openai';
+import { getOpenAIPkiConnectorType } from './openai_pki';
 import { getBedrockConnectorType } from './bedrock';
 import { getGeminiConnectorType } from './gemini';
 import { getOpsgenieConnectorType } from './opsgenie';
@@ -65,6 +66,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
+  connectorTypeRegistry.register(getOpenAIPkiConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getGeminiConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
