@@ -3,11 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ * 
+ * By: Antonio Piazza @antman1p
  */
 
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
+import { SUB_ACTION } from '../../../common/openai/constants';
 import { RunActionParams } from '../../../common/openai/types';
 
 export interface ActionParams {
@@ -16,10 +18,11 @@ export interface ActionParams {
 }
 
 export interface Config {
-  apiProvider: OpenAiProviderType;
   apiUrl: string;
-  certPath?: string;
-  keyPath?: string;
+  defaultModel?: string;
+  certPath: string;
+  keyPath: string;
+  headers?: Record<string, string>;
 }
 
 export interface Secrets {

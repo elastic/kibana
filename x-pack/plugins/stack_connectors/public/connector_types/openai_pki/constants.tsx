@@ -3,13 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ * 
+ * By: Antonio Piazza @antman1p
  */
 
 import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { DEFAULT_OPENAI_MODEL } from '../../../common/openai/constants';
 import * as i18n from './translations';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
@@ -48,6 +50,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
   {
     id: 'certPath',
     label: i18n.CERT_PATH_LABEL,
+    required: true,
     helpText: (
       <FormattedMessage
         defaultMessage="Path to the PKI certificate file (.pem)"
@@ -58,6 +61,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
   {
     id: 'keyPath',
     label: i18n.KEY_PATH_LABEL,
+    required: true,
     helpText: (
       <FormattedMessage
         defaultMessage="Path to the PKI private key file (.pem)"
@@ -100,13 +104,5 @@ export const openAiSecrets: SecretsFieldSchema[] = [
         }}
       />
     ),
-  },
-];
-
-export const providerOptions = [
-  {
-    value: OpenAiProviderType.OpenAi,
-    text: i18n.OPENAI,
-    label: i18n.OPENAI,
   },
 ];
