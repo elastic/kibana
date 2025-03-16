@@ -20,8 +20,8 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
-import { Config, Secrets } from '../../../common/openai/types';
+import { ConfigSchema, SecretsSchema } from '../../../common/openai_pki/schema';
+import { Config, Secrets } from '../../../common/openai_pki/types';
 import { OpenAIPkiConnector } from './openai_pki';
 import { renderParameterTemplates } from './render';
 

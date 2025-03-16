@@ -67,21 +67,21 @@ export function getRequestWithStreamOption(
 }
 
 /**
- * Returns Axios options, now supporting PKI authentication
+ * Returns Axios options with PKI authentication
  */
 export const getAxiosOptions = (
-  provider: string,
-  certPath: string | undefined,
-  keyPath: string | undefined,
+  certPath: string,
+  keyPath: string,
   stream: boolean
-): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
+): { headers: Record<string, string>; httpsAgent: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
 
-  // Apply PKI authentication if cert & key paths are provided
-  const httpsAgent = certPath && keyPath ? new https.Agent({
+  // Create HTTPS agent with PKI certificates
+  const httpsAgent = new https.Agent({
     cert: fs.readFileSync(certPath),
     key: fs.readFileSync(keyPath),
-  }) : undefined;
+    rejectUnauthorized: true // Enforce SSL verification
+  });
 
   return {
     headers: { ['content-type']: 'application/json' },
