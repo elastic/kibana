@@ -6,5 +6,3 @@
  */
 
 export type VulnSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
-
-export const VALID_SEVERITIES: VulnSeverity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'UNKNOWN'];

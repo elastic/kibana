@@ -8,14 +8,13 @@ import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
 import { VALID_SEVERITIES } from '@kbn/cloud-security-posture-common';
 
 const isVulnSeverity = (severity: string): severity is VulnSeverity =>
-  VALID_SEVERITIES.includes(severity as VulnSeverity);
+  VALID_SEVERITIES.some((validSeverity) => validSeverity === severity);
 
-export const getNormalizedSeverity = (severity?: string): VulnSeverity => {
+export const getNormalizedSeverity = (severity?: string): string | undefined => {
   if (!severity) {
-    return 'UNKNOWN';
+    return severity;
   }
 
-  return (
-    isVulnSeverity(severity.toUpperCase()) ? severity.toUpperCase() : 'UNKNOWN'
-  ) as VulnSeverity;
+  const upperCasedSeverity = severity.toUpperCase();
+  return isVulnSeverity(upperCasedSeverity) ? upperCasedSeverity : severity;
 };
