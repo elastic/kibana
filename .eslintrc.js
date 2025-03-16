@@ -1344,6 +1344,10 @@ module.exports = {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
+    {
+      files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
+      extends: ['plugin:testing-library/react'],
+    },
 
     /**
      * Lists overrides. These rules below are maintained and owned by
