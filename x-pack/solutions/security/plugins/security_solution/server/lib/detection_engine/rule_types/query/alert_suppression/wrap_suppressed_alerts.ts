@@ -19,10 +19,7 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../../config';
-import type { CompleteRule, RuleParams } from '../../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { SignalSource } from '../../types';
+import type { SecuritySharedParams, SignalSource } from '../../types';
 import { transformHitToAlert } from '../../factories/utils/transform_hit_to_alert';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 
@@ -47,28 +44,15 @@ export const createSuppressedAlertInstanceId = ({
 };
 
 export const wrapSuppressedAlerts = ({
+  sharedParams,
   suppressionBuckets,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  indicesToQuery,
   buildReasonMessage,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  intendedTimestamp,
 }: {
+  sharedParams: SecuritySharedParams;
   suppressionBuckets: SuppressionBucket[];
-  spaceId: string;
-  completeRule: CompleteRule<RuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+  const { completeRule, spaceId } = sharedParams;
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
       bucket.event._index,
@@ -85,20 +69,11 @@ export const wrapSuppressedAlerts = ({
       spaceId,
     });
     const baseAlert: BaseFieldsLatest = transformHitToAlert({
-      spaceId,
-      completeRule,
+      sharedParams,
       doc: bucket.event,
-      mergeStrategy,
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
       alertUuid: id,
-      publicBaseUrl,
-      intendedTimestamp,
     });
 
     return {
