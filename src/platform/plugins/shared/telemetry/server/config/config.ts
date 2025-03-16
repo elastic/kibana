@@ -29,7 +29,7 @@ const configSchema = schema.object({
     schema.contextRef('dist'),
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' }),
-    schema.oneOf(clusterEnvSchema, { defaultValue: 'prod' })
+    schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
