@@ -6,9 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import classNames from 'classnames';
 import { useActions, useValues } from 'kea';
-import '../shared/page_template.scss';
 
 import {
   EuiButton,
@@ -25,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { ConnectorStats } from './connector_stats';
@@ -40,6 +37,7 @@ import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../routes';
 import { LEARN_MORE_LINK } from './translations';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
+import { SearchConnectorsPageTemplateWrapper } from '../shared/page_template';
 
 export const connectorsBreadcrumbs = [
   {
@@ -76,7 +74,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     services: { application, http },
   } = useKibana();
 
-  const navIcon = 'logoElasticsearch';
   useEffect(() => {
     setIsFirstRequest();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,8 +87,8 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
   return !isLoading && isEmpty && !isCrawler ? (
     <CreateConnector />
   ) : (
-    <KibanaPageTemplate
-      // isLoading={isLoading}
+    <SearchConnectorsPageTemplateWrapper
+      isLoading={isLoading}
       pageHeader={{
         pageTitle: !isCrawler
           ? i18n.translate('xpack.searchConnectors.title', {
@@ -122,7 +119,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
             </p>
           </EuiText>,
         ],
-
         rightSideGroupProps: {
           gutterSize: 's',
           responsive: false,
@@ -168,12 +164,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
             ]
           : undefined,
       }}
-      className={classNames('enterpriseSearchPageTemplate')}
-      mainProps={{
-        // ...pageTemplateProps.mainProps,
-        className: classNames('enterpriseSearchPageTemplate__content'),
-      }}
-      // solutionNav={solutionNav && solutionNav.items ? { icon: navIcon, ...solutionNav } : undefined}
     >
       <DeleteConnectorModal isCrawler={isCrawler} />
       <>
@@ -253,6 +243,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
           )}
         </EuiFlexGroup>
       </>
-    </KibanaPageTemplate>
+    </SearchConnectorsPageTemplateWrapper>
   );
 };

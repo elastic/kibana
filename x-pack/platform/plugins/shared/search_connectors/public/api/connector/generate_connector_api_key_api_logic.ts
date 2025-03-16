@@ -25,7 +25,7 @@ export const generateApiKey = async ({
   isNative,
   http,
 }: GenerateConnectorApiKeyApiArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/api_key`;
+  const route = `/internal/search_connectors/indices/${indexName}/api_key`;
   const params = {
     is_native: isNative,
   };

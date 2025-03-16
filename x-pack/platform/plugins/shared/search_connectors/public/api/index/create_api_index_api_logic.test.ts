@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockHttpValues } from '../../../../../../../solutions/search/plugins/enterprise_search/public/applications/__mocks__/kea_logic';
+import { mockHttpValues } from '../../../../../../../solutions/search/plugins/search_connectors/public/applications/__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -22,7 +22,7 @@ describe('createApiIndexApiLogic', () => {
       http.post.mockReturnValue(promise);
       const result = createApiIndex({ indexName: 'indexName', language: 'en' });
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/indices', {
+      expect(http.post).toHaveBeenCalledWith('/internal/search_connectors/indices', {
         body: JSON.stringify({ index_name: 'indexName', language: 'en' }),
       });
       await expect(result).resolves.toEqual({ indexName: 'indexName' });

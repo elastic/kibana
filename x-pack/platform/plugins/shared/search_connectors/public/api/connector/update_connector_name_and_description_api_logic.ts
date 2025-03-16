@@ -27,7 +27,7 @@ export const putConnectorNameAndDescription = async ({
   description = null,
   name = '',
 }: PutConnectorNameAndDescriptionArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/name_and_description`;
+  const route = `/internal/search_connectors/connectors/${connectorId}/name_and_description`;
 
   await http?.put(route, {
     body: JSON.stringify({ description, name }),

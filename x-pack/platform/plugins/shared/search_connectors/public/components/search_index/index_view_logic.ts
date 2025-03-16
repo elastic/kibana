@@ -16,7 +16,6 @@ import {
   SyncStatus,
   IngestionStatus,
   IngestionMethod,
-  ElasticsearchViewIndex,
 } from '@kbn/search-connectors';
 
 import { HttpSetup } from '@kbn/core/public';
@@ -181,12 +180,9 @@ export const IndexViewLogic = kea<
       if (values.recheckIndexLoading) {
         actions.resetRecheckIndexLoading();
         flashSuccessToast(
-          i18n.translate(
-            'xpack.searchConnectorscontent.searchIndex.index.recheckSuccess.message',
-            {
-              defaultMessage: 'Your connector has been rechecked.',
-            }
-          )
+          i18n.translate('xpack.searchConnectorsContent.searchIndex.index.recheckSuccess.message', {
+            defaultMessage: 'Your connector has been rechecked.',
+          })
         );
       }
     },
@@ -227,7 +223,7 @@ export const IndexViewLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'index_view_logic'],
+  path: ['search_connectors', 'content', 'index_view_logic'],
   reducers: {
     recheckIndexLoading: [
       false,

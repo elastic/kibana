@@ -177,7 +177,7 @@ export const SyncJobsViewLogic = kea<
     },
   }),
 
-  path: ['enterprise_search', 'content', 'sync_jobs_view_logic'],
+  path: ['search_connectors', 'content', 'sync_jobs_view_logic'],
   reducers: {
     connectorId: [
       null,

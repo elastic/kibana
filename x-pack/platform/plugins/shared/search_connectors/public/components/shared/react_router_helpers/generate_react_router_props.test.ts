@@ -17,7 +17,7 @@ describe('generateReactRouterProps', () => {
 
   it('generates React-Router-friendly href and onClick props', () => {
     expect(generateReactRouterProps({ to: '/hello/world' })).toEqual({
-      href: '/app/enterprise_search/hello/world',
+      href: '/app/search_connectors/hello/world',
       onClick: expect.any(Function),
     });
     expect(mockHistory.createHref).toHaveBeenCalled();
@@ -56,13 +56,13 @@ describe('generateReactRouterProps', () => {
       } as any;
 
       const { onClick } = generateReactRouterProps({
-        to: '/app/enterprise_search/test',
+        to: '/app/search_connectors/test',
         shouldNotCreateHref: true,
       });
       onClick(mockEvent);
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/app/enterprise_search/test', {
+      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/app/search_connectors/test', {
         shouldNotCreateHref: true,
         shouldNotPrepend: false,
       });

@@ -11,6 +11,7 @@ import { isDeepEqual } from 'react-use/lib/util';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   FetchDefaultPipelineApiLogic,
   FetchDefaultPipelineResponse,
@@ -45,7 +46,12 @@ interface PipelinesValues {
   status: Status;
 }
 
+export interface NewConnectorLogicProps {
+  http?: HttpSetup;
+}
+
 export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions>>({
+  key: (props) => props.http,
   actions: {
     setPipeline: (pipeline: IngestPipelineParams) => ({ pipeline }),
   },
@@ -67,9 +73,9 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
       ['status'],
     ],
   },
-  events: ({ actions }) => ({
+  events: ({ actions, props }) => ({
     afterMount: () => {
-      actions.fetchDefaultPipeline(undefined);
+      actions.fetchDefaultPipeline(props.http);
     },
   }),
   listeners: ({ actions }) => ({
@@ -80,7 +86,7 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
       actions.setPipeline(pipeline);
     },
   }),
-  path: ['enterprise_search', 'content', 'settings'],
+  path: ['search_connectors', 'content', 'settings'],
   reducers: () => ({
     pipelineState: [
       DEFAULT_PIPELINE_VALUES,

@@ -88,7 +88,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'connector_name_and_description'],
+  path: ['search_connectors', 'content', 'connector_name_and_description'],
   reducers: () => ({
     isEditing: [
       false,

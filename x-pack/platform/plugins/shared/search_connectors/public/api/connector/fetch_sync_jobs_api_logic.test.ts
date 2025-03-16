@@ -23,7 +23,7 @@ describe('FetchSyncJobs', () => {
       const result = fetchSyncJobs({ connectorId: 'connectorId1' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        '/internal/enterprise_search/connectors/connectorId1/sync_jobs',
+        '/internal/search_connectors/connectors/connectorId1/sync_jobs',
         { query: { from: 0, size: 10 } }
       );
       await expect(result).resolves.toEqual('result');
@@ -34,7 +34,7 @@ describe('FetchSyncJobs', () => {
       const result = fetchSyncJobs({ connectorId: 'connectorId1', from: 10, size: 20 });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        '/internal/enterprise_search/connectors/connectorId1/sync_jobs',
+        '/internal/search_connectors/connectors/connectorId1/sync_jobs',
         { query: { from: 10, size: 20 } }
       );
       await expect(result).resolves.toEqual('result');

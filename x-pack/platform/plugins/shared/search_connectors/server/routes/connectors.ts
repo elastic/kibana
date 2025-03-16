@@ -68,7 +68,7 @@ export function registerConnectorRoutes({
 }: SearchConnectorsPluginSetupDependencies) {
   router.post(
     {
-      path: '/internal/enterprise_search/connectors',
+      path: '/internal/search_connectors/connectors',
       validate: {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
@@ -117,7 +117,7 @@ export function registerConnectorRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/cancel_syncs',
+      path: '/internal/search_connectors/connectors/{connectorId}/cancel_syncs',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -133,7 +133,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{syncJobId}/cancel_sync',
+      path: '/internal/search_connectors/connectors/{syncJobId}/cancel_sync',
       validate: {
         params: schema.object({
           syncJobId: schema.string(),
@@ -167,7 +167,7 @@ export function registerConnectorRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/configuration',
+      path: '/internal/search_connectors/connectors/{connectorId}/configuration',
       validate: {
         body: schema.recordOf(
           schema.string(),
@@ -191,7 +191,7 @@ export function registerConnectorRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/scheduling',
+      path: '/internal/search_connectors/connectors/{connectorId}/scheduling',
       validate: {
         body: schema.object({
           access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
@@ -216,7 +216,7 @@ export function registerConnectorRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
+      path: '/internal/search_connectors/connectors/{connectorId}/start_sync',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -232,7 +232,7 @@ export function registerConnectorRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/start_incremental_sync',
+      path: '/internal/search_connectors/connectors/{connectorId}/start_incremental_sync',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -248,7 +248,7 @@ export function registerConnectorRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/start_access_control_sync',
+      path: '/internal/search_connectors/connectors/{connectorId}/start_access_control_sync',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -282,7 +282,7 @@ export function registerConnectorRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/sync_jobs',
+      path: '/internal/search_connectors/connectors/{connectorId}/sync_jobs',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -309,7 +309,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/pipeline',
+      path: '/internal/search_connectors/connectors/{connectorId}/pipeline',
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
@@ -332,7 +332,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/default_pipeline',
+      path: '/internal/search_connectors/connectors/default_pipeline',
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
@@ -351,7 +351,7 @@ export function registerConnectorRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/connectors/default_pipeline',
+      path: '/internal/search_connectors/connectors/default_pipeline',
       validate: {},
     },
     elasticsearchErrorHandler(log, async (context, _, response) => {
@@ -363,7 +363,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/service_type',
+      path: '/internal/search_connectors/connectors/{connectorId}/service_type',
       validate: {
         body: schema.object({ serviceType: schema.string() }),
         params: schema.object({
@@ -384,7 +384,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/status',
+      path: '/internal/search_connectors/connectors/{connectorId}/status',
       validate: {
         body: schema.object({ status: schema.string() }),
         params: schema.object({
@@ -405,7 +405,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/name_and_description',
+      path: '/internal/search_connectors/connectors/{connectorId}/name_and_description',
       validate: {
         body: schema.object({
           description: schema.nullable(schema.string()),
@@ -433,7 +433,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/filtering/draft',
+      path: '/internal/search_connectors/connectors/{connectorId}/filtering/draft',
       validate: {
         body: schema.object({
           advanced_snippet: schema.string(),
@@ -472,7 +472,7 @@ export function registerConnectorRoutes({
 
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/filtering',
+      path: '/internal/search_connectors/connectors/{connectorId}/filtering',
       validate: {
         body: schema.maybe(
           schema.object({
@@ -505,7 +505,7 @@ export function registerConnectorRoutes({
   );
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/native',
+      path: '/internal/search_connectors/connectors/{connectorId}/native',
       validate: {
         body: schema.object({
           is_native: schema.boolean(),
@@ -526,7 +526,7 @@ export function registerConnectorRoutes({
   );
   router.get(
     {
-      path: '/internal/enterprise_search/connectors',
+      path: '/internal/search_connectors/connectors',
       validate: {
         query: schema.object({
           fetchCrawlersOnly: schema.maybe(schema.boolean()),
@@ -603,7 +603,7 @@ export function registerConnectorRoutes({
   );
   router.get(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}',
+      path: '/internal/search_connectors/connectors/{connectorId}',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -624,7 +624,7 @@ export function registerConnectorRoutes({
   );
   router.delete(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}',
+      path: '/internal/search_connectors/connectors/{connectorId}',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -697,7 +697,7 @@ export function registerConnectorRoutes({
   );
   router.put(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/index_name/{indexName}',
+      path: '/internal/search_connectors/connectors/{connectorId}/index_name/{indexName}',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -738,7 +738,7 @@ export function registerConnectorRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/connectors/available_indices',
+      path: '/internal/search_connectors/connectors/available_indices',
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
@@ -776,7 +776,7 @@ export function registerConnectorRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/{connectorId}/generate_config',
+      path: '/internal/search_connectors/connectors/{connectorId}/generate_config',
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -839,7 +839,7 @@ export function registerConnectorRoutes({
   );
   router.post(
     {
-      path: '/internal/enterprise_search/connectors/generate_connector_name',
+      path: '/internal/search_connectors/connectors/generate_connector_name',
       validate: {
         body: schema.object({
           connectorName: schema.maybe(schema.string()),
@@ -884,7 +884,7 @@ export function registerConnectorRoutes({
 
   router.get(
     {
-      path: '/internal/enterprise_search/{connectorId}/agentless_policy',
+      path: '/internal/search_connectors/{connectorId}/agentless_policy',
       validate: {
         params: schema.object({
           connectorId: schema.string(),

@@ -200,7 +200,7 @@ export const ConnectorViewLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'connector_view_logic'],
+  path: ['search_connectors', 'content', 'connector_view_logic'],
   selectors: ({ selectors }) => ({
     connector: [
       () => [selectors.connectorData],

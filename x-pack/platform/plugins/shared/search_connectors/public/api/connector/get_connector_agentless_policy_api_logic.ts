@@ -29,7 +29,7 @@ export const getConnectorAgentlessPolicy = async ({
 }: GetConnectorAgentlessPolicyApiArgs): Promise<
   GetConnectorAgentlessPolicyApiResponse | undefined
 > => {
-  const route = `/internal/enterprise_search/${connectorId}/agentless_policy`;
+  const route = `/internal/search_connectors/${connectorId}/agentless_policy`;
 
   return await http?.get<GetConnectorAgentlessPolicyApiResponse>(route);
 };

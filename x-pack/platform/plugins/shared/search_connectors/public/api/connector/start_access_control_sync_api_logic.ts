@@ -16,7 +16,7 @@ export interface StartAccessControlSyncArgs {
 }
 
 export const startAccessControlSync = async ({ connectorId, http }: StartAccessControlSyncArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/start_access_control_sync`;
+  const route = `/internal/search_connectors/connectors/${connectorId}/start_access_control_sync`;
   return await http?.post(route);
 };
 

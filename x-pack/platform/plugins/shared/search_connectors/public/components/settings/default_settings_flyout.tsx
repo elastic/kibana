@@ -49,16 +49,18 @@ const Callout = (
   </EuiCallOut>
 );
 export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ closeFlyout }) => {
-  const { makeRequest, setPipeline } = useActions(SettingsLogic);
-  const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { makeRequest, setPipeline } = useActions(SettingsLogic({ http }));
+  const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(
+    SettingsLogic({ http })
+  );
   const {
     extract_binary_content: extractBinaryContent,
     reduce_whitespace: reduceWhitespace,
     run_ml_inference: runMLInference,
   } = pipelineState;
-  const {
-    services: { http },
-  } = useKibana();
   // Reference the first focusable element in the flyout for accessibility on click or Enter key action either Reset or Save button
   const firstFocusInFlyoutRef = useRef<HTMLAnchorElement>(null);
   return (
@@ -66,10 +68,9 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h4>
-            {i18n.translate(
-              'xpack.searchConnectorsdefaultSettingsFlyout.h2.defaultSettingsLabel',
-              { defaultMessage: 'Default Settings' }
-            )}
+            {i18n.translate('xpack.searchConnectorsdefaultSettingsFlyout.h2.defaultSettingsLabel', {
+              defaultMessage: 'Default Settings',
+            })}
           </h4>
         </EuiTitle>
       </EuiFlyoutHeader>

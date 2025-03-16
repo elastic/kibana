@@ -15,7 +15,7 @@ export type FetchDefaultPipelineResponse = IngestPipelineParams;
 export const getDefaultPipeline = async (
   http?: HttpSetup
 ): Promise<FetchDefaultPipelineResponse | undefined> => {
-  const route = '/internal/enterprise_search/connectors/default_pipeline';
+  const route = '/internal/search_connectors/connectors/default_pipeline';
 
   return await http?.get(route);
 };

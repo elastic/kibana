@@ -42,7 +42,7 @@ describe('SearchDocumentsApiLogic', () => {
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/indices/indexName/search',
+        '/internal/search_connectors/indices/indexName/search',
         {
           body: JSON.stringify({}),
           query: { page: 0, size: 10 },
@@ -70,7 +70,7 @@ describe('SearchDocumentsApiLogic', () => {
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/indices/d%C3%BCsseldorf/search',
+        '/internal/search_connectors/indices/d%C3%BCsseldorf/search',
         {
           body: JSON.stringify({
             searchQuery: 'abcd',
@@ -100,7 +100,7 @@ describe('SearchDocumentsApiLogic', () => {
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/indices/indexName/search',
+        '/internal/search_connectors/indices/indexName/search',
         {
           body: JSON.stringify({}),
           query: { page: 0, size: 25 },

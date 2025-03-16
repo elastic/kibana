@@ -45,7 +45,7 @@ export const addConnector = async ({
   uiFlags,
   http,
 }: AddConnectorApiLogicArgs): Promise<AddConnectorApiLogicResponse> => {
-  const route = '/internal/enterprise_search/connectors';
+  const route = '/internal/search_connectors/connectors';
 
   const deleteParam = deleteExistingConnector
     ? { delete_existing_connector: deleteExistingConnector }

@@ -23,7 +23,7 @@ export const fetchAvailableIndices = async ({
   searchQuery,
   http,
 }: FetchAvailabeIndicesApiParams): Promise<FetchAvailableIndicesApiResponse | undefined> => {
-  const route = '/internal/enterprise_search/connectors/available_indices';
+  const route = '/internal/search_connectors/connectors/available_indices';
   const query = { search_query: searchQuery || null };
   const response = await http?.get<FetchAvailableIndicesApiResponse>(route, { query });
   return response;

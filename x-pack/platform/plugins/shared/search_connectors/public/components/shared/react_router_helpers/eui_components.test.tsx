@@ -7,7 +7,7 @@
 
 jest.mock('.', () => ({
   generateReactRouterProps: ({ to }: { to: string }) => ({
-    href: `/app/enterprise_search${to}`,
+    href: `/app/search_connectors${to}`,
     onClick: () => {},
   }),
 }));
@@ -95,6 +95,6 @@ describe('React Router EUI component helpers', () => {
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('onClick')).toBeInstanceOf(Function);
-    expect(link.prop('href')).toEqual('/app/enterprise_search/hello/world');
+    expect(link.prop('href')).toEqual('/app/search_connectors/hello/world');
   });
 });

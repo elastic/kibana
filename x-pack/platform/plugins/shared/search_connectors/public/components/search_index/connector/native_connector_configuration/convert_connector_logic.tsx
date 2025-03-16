@@ -69,7 +69,7 @@ export const ConvertConnectorLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'convert_connector_modal'],
+  path: ['search_connectors', 'convert_connector_modal'],
   reducers: {
     isModalVisible: [
       false,

@@ -142,7 +142,7 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       actions.makeRequest({ ...input });
     },
   }),
-  path: ['enterprise_search', 'content', 'connectors_logic'],
+  path: ['search_connectors', 'content', 'connectors_logic'],
   reducers: () => ({
     deleteModalConnectorId: [
       '',

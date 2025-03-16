@@ -23,7 +23,7 @@ export const updateConnectorScheduling = async ({
   scheduling,
   http,
 }: UpdateConnectorSchedulingArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/scheduling`;
+  const route = `/internal/search_connectors/connectors/${connectorId}/scheduling`;
 
   await http?.post<undefined>(route, {
     body: JSON.stringify(scheduling),

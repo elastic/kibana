@@ -23,7 +23,7 @@ describe('CancelSyncsLogic', () => {
       const result = cancelSyncs({ connectorId: 'connectorId1' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/connectors/connectorId1/cancel_syncs'
+        '/internal/search_connectors/connectors/connectorId1/cancel_syncs'
       );
       await expect(result).resolves.toEqual('result');
     });

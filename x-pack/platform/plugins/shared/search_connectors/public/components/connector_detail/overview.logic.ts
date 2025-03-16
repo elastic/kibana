@@ -23,7 +23,7 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, {}>>({
   connect: {
     values: [CachedFetchIndexApiLogic, ['indexData', 'status']],
   },
-  path: ['enterprise_search', 'connector_detail', 'overview'],
+  path: ['search_connectors', 'connector_detail', 'overview'],
   selectors: ({ selectors }) => ({
     isError: [() => [selectors.status], (status) => status === Status.ERROR],
   }),

@@ -16,7 +16,7 @@ export interface StartIncrementalSyncArgs {
 }
 
 export const startIncrementalSync = async ({ connectorId, http }: StartIncrementalSyncArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/start_incremental_sync`;
+  const route = `/internal/search_connectors/connectors/${connectorId}/start_incremental_sync`;
   return await http?.post(route);
 };
 

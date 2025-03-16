@@ -18,7 +18,7 @@ describe('createHref', () => {
   };
 
   it('generates a path with the React Router basename included', () => {
-    expect(createHref('/test', dependencies)).toEqual('/app/enterprise_search/test');
+    expect(createHref('/test', dependencies)).toEqual('/app/search_connectors/test');
   });
 
   describe('shouldNotCreateHref', () => {

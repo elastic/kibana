@@ -24,7 +24,7 @@ import { ConnectorStats } from './connector_stats';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { generateEncodedPath } from '../shared/encode_path_params';
 import { IndexViewLogic } from '../search_index/index_view_logic';
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+import { search_connectors_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { EuiButtonTo } from '../shared/react_router_helpers';
 import { ConvertConnectorLogic } from '../search_index/connector/native_connector_configuration/convert_connector_logic';
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
@@ -208,7 +208,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       )}
       {connector &&
         !connector.is_native &&
-        connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
+        connector.service_type !== search_connectors_CONNECTOR_CRAWLER_SERVICE_TYPE && (
           <ConnectorStats
             connector={connector}
             indexData={indexData || undefined}
@@ -217,7 +217,7 @@ export const ConnectorDetailOverview: React.FC = () => {
         )}
       {connector &&
         !connector.is_native &&
-        connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
+        connector.service_type !== search_connectors_CONNECTOR_CRAWLER_SERVICE_TYPE && (
           <>
             <EuiSpacer />
             <SyncJobs connector={connector} />

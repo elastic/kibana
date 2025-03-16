@@ -111,7 +111,7 @@ export const CachedFetchConnectorByIdApiLogic = kea<
       actions.clearPollTimeout();
     },
   }),
-  path: ['enterprise_search', 'content', 'api', 'fetch_connector_by_id_api_wrapper'],
+  path: ['search_connectors', 'content', 'api', 'fetch_connector_by_id_api_wrapper'],
   reducers: {
     connectorData: [
       null,

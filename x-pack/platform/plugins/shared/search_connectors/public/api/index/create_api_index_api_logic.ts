@@ -28,7 +28,7 @@ export const createApiIndex = async ({
   language,
   http,
 }: CreateApiIndexApiLogicArgs): Promise<CreateApiIndexApiLogicResponse | undefined> => {
-  const route = '/internal/enterprise_search/indices';
+  const route = '/internal/search_connectors/indices';
   const params = {
     index_name: indexName,
     language,

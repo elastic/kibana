@@ -48,7 +48,7 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
       }
     },
   },
-  path: ['enterprise_search', 'content', 'add_connector'],
+  path: ['search_connectors', 'content', 'add_connector'],
   reducers: {
     isModalVisible: [
       false,

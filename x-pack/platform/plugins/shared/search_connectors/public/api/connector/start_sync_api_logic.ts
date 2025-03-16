@@ -16,7 +16,7 @@ export interface StartSyncArgs {
 }
 
 export const startSync = async ({ connectorId, http }: StartSyncArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/start_sync`;
+  const route = `/internal/search_connectors/connectors/${connectorId}/start_sync`;
   return await http?.post(route);
 };
 

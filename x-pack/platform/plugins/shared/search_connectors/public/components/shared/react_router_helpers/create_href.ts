@@ -10,11 +10,11 @@ import { HttpSetup, ScopedHistory } from '@kbn/core/public';
 /**
  * This helper uses React Router's createHref function to generate links with router basenames included.
  * For example, if we perform navigateToUrl('/engines') within App Search, we expect the app basename
- * to be taken into account & intelligently routed to '/app/enterprise_search/app_search/engines'.
+ * to be taken into account & intelligently routed to '/app/search_connectors/app_search/engines'.
  *
  * This helper accomplishes that, while still giving us an escape hatch for navigation *between* apps.
  * For example, if we want to navigate the user from App Search to Enterprise Search we could
- * navigateToUrl('/app/enterprise_search', { shouldNotCreateHref: true })
+ * navigateToUrl('/app/search_connectors', { shouldNotCreateHref: true })
  *
  * Said escape hatch should still contain all of Kibana's basepaths - for example,
  * 'localhost:5601/xyz' when developing locally, or '/s/some-custom-space/' for space basepaths.

@@ -117,7 +117,7 @@ export const AttachIndexLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'attach_index_logic'],
+  path: ['search_connectors', 'content', 'attach_index_logic'],
   reducers: {
     connector: [
       null,

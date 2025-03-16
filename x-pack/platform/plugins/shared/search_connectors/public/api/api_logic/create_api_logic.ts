@@ -84,7 +84,7 @@ export const createApiLogic = <Result, Args>(
         }
       },
     }),
-    path: ['enterprise_search', 'api', ...path],
+    path: ['search_connectors', 'api', ...path],
     reducers: () => ({
       apiStatus: [
         {

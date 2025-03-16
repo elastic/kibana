@@ -22,7 +22,7 @@ describe('FetchIndexApiLogic', () => {
       http.get.mockReturnValue(promise);
       const result = fetchIndex({ indexName: 'indexName' });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices/indexName');
+      expect(http.get).toHaveBeenCalledWith('/internal/search_connectors/indices/indexName');
       await expect(result).resolves.toEqual('result');
     });
   });

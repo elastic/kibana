@@ -22,7 +22,7 @@ describe('deleteIndexApiLogic', () => {
       http.post.mockReturnValue(promise);
       const result = deleteIndex({ indexName: 'deleteIndex' });
       await nextTick();
-      expect(http.delete).toHaveBeenCalledWith('/internal/enterprise_search/indices/deleteIndex');
+      expect(http.delete).toHaveBeenCalledWith('/internal/search_connectors/indices/deleteIndex');
       await expect(result).resolves;
     });
   });

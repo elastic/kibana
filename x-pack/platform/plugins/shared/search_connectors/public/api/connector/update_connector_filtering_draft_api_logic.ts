@@ -27,7 +27,7 @@ export const putConnectorFilteringDraft = async ({
   filteringRules,
   http,
 }: PutConnectorFilteringDraftArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/filtering/draft`;
+  const route = `/internal/search_connectors/connectors/${connectorId}/filtering/draft`;
 
   return await http?.put(route, {
     body: JSON.stringify({

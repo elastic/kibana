@@ -22,7 +22,7 @@ export const fetchIndex = async ({
   indexName,
   http,
 }: FetchIndexApiParams): Promise<FetchIndexApiResponse | undefined> => {
-  const route = `/internal/enterprise_search/indices/${indexName}`;
+  const route = `/internal/search_connectors/indices/${indexName}`;
 
   return await http?.get<FetchIndexApiResponse>(route);
 };

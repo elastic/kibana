@@ -29,7 +29,7 @@ describe('updateDefaultPipelineApiLogic', () => {
       const result = updateDefaultPipeline(pipeline);
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
-        '/internal/enterprise_search/connectors/default_pipeline',
+        '/internal/search_connectors/connectors/default_pipeline',
         {
           body: JSON.stringify(pipeline),
         }

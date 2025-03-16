@@ -18,7 +18,7 @@ export const updateDefaultPipeline = async (
   pipeline: IngestPipelineParams,
   http?: HttpSetup
 ): Promise<PostDefaultPipelineResponse> => {
-  const route = '/internal/enterprise_search/connectors/default_pipeline';
+  const route = '/internal/search_connectors/connectors/default_pipeline';
 
   await http?.put(route, { body: JSON.stringify(pipeline) });
 

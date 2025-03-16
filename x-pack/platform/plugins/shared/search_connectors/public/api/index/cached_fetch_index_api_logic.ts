@@ -110,7 +110,7 @@ export const CachedFetchIndexApiLogic = kea<
       actions.clearPollTimeout();
     },
   }),
-  path: ['enterprise_search', 'content', 'api', 'fetch_index_api_wrapper'],
+  path: ['search_connectors', 'content', 'api', 'fetch_index_api_wrapper'],
   reducers: {
     indexData: [
       null,

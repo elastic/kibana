@@ -17,12 +17,12 @@ export interface FetchSyncJobsStatsApiLogicArgs {
 }
 
 export const fetchSyncJobsStats = async ({ isCrawler, http }: FetchSyncJobsStatsApiLogicArgs) => {
-  const route = '/internal/enterprise_search/stats/sync_jobs';
+  const route = '/internal/search_connectors/stats/sync_jobs';
   const options = isCrawler !== undefined ? { query: { isCrawler } } : undefined;
   return await http?.get<FetchSyncJobsStatsResponse>(route, options);
 };
 
 export const FetchSyncJobsStatsApiLogic = createApiLogic(
-  ['enterprise_search_content', 'fetch_sync_jobs_stats_api_logic'],
+  ['search_connectors_content', 'fetch_sync_jobs_stats_api_logic'],
   fetchSyncJobsStats
 );

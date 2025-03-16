@@ -19,7 +19,7 @@ export type GetMappingsResponse = IndicesGetMappingIndexMappingRecord;
 export type GetMappingsActions = Actions<GetMappingsArgs, GetMappingsResponse>;
 
 export const getMappings = async ({ indexName, http }: GetMappingsArgs) => {
-  const route = `/internal/enterprise_search/mappings/${indexName}`;
+  const route = `/internal/search_connectors/mappings/${indexName}`;
 
   return await http?.get<IndicesGetMappingIndexMappingRecord>(route);
 };

@@ -15,6 +15,7 @@ import type {
   SearchConnectorsPluginStartDependencies,
 } from './types';
 import { registerConnectorRoutes } from './routes/connectors';
+import { registerStatsRoutes } from './routes/stats';
 
 export class SearchConnectorsPlugin
   implements
@@ -38,14 +39,16 @@ export class SearchConnectorsPlugin
     const http = coreSetup.http;
 
     this.connectors = getConnectorTypes(http.staticAssets);
+    const router = http.createRouter();
+
     // Enterprise Search Routes
     if (this.connectors.length > 0) {
       /**
        * Register routes
        */
-      const router = http.createRouter();
       registerConnectorRoutes({ ...plugins, router });
     }
+    registerStatsRoutes({ ...plugins, router });
     return {
       getConnectorTypes: () => this.connectors,
     };

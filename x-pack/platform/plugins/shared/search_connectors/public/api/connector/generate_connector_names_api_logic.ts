@@ -28,7 +28,7 @@ export const generateConnectorNames = async (
   if (connectorType === '') {
     connectorType = 'custom';
   }
-  const route = `/internal/enterprise_search/connectors/generate_connector_name`;
+  const route = `/internal/search_connectors/connectors/generate_connector_name`;
   return await http?.post(route, {
     body: JSON.stringify({ connectorName, connectorType, isManagedConnector }),
   });

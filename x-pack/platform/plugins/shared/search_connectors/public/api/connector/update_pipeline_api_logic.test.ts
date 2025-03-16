@@ -29,7 +29,7 @@ describe('updatePipelineApiLogic', () => {
       const result = updatePipeline({ connectorId: 'connector_id', pipeline });
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
-        '/internal/enterprise_search/connectors/connector_id/pipeline',
+        '/internal/search_connectors/connectors/connector_id/pipeline',
         {
           body: JSON.stringify(pipeline),
         }

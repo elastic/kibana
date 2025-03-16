@@ -19,7 +19,7 @@ export interface CancelSyncApiResponse {
 }
 
 export const cancelSync = async ({ syncJobId, http }: CancelSyncApiArgs) => {
-  const route = `/internal/enterprise_search/connectors/${syncJobId}/cancel_sync`;
+  const route = `/internal/search_connectors/connectors/${syncJobId}/cancel_sync`;
   return await http?.put(route);
 };
 

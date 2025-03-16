@@ -200,7 +200,7 @@ export const ConnectorFilteringLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'connector_filtering'],
+  path: ['search_connectors', 'content', 'connector_filtering'],
   reducers: () => ({
     filteringConfig: [
       null,

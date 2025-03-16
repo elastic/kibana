@@ -211,7 +211,7 @@ export const NewConnectorLogic = kea<
       }
     },
   }),
-  path: ['enterprise_search', 'content', 'new_search_connector'],
+  path: ['search_connectors', 'content', 'new_search_connector'],
   reducers: {
     connectorId: [
       '',

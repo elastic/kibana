@@ -45,7 +45,7 @@ export const FlashMessagesLogic = kea<
     setHistoryListener: (historyListener) => ({ historyListener }),
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
   },
-  path: ['enterprise_search', 'flash_messages_logic'],
+  path: ['search_connectors', 'flash_messages_logic'],
   reducers: ({ props }) => ({
     historyListener: [
       null,
