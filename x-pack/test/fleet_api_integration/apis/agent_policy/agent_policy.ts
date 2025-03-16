@@ -2094,7 +2094,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(statusCode).to.eql(400);
 
-        assertPolicyDoNotExists(policyId);
+        await assertPolicyDoNotExists(policyId);
       });
 
       it('should not allow to create a fleet server policies if provided output is not an ES output', async () => {
@@ -2113,7 +2113,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(statusCode).to.eql(400);
         expect(body.message).to.match(/Output of type "logstash" is not usable with policy/);
 
-        assertPolicyDoNotExists(policyId);
+        await assertPolicyDoNotExists(policyId);
       });
 
       it('should allow to create a fleet server policies if provided output is an ES output', async () => {
