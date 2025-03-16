@@ -202,14 +202,10 @@ export class LlmProxy {
       when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
       arguments: (requestBody) => {
         const messageWithFieldIds = last(requestBody.messages);
-        relevantFields = (messageWithFieldIds?.content as string)
-          .split('\n\n')
-          .slice(1)
-          .join('')
-          .trim()
-          .split('\n')
+        const matches = (messageWithFieldIds?.content as string).match(/\{[\s\S]*?\}/g)!;
+        relevantFields = matches
           .slice(from, to)
-          .map((line) => JSON.parse(line) as RelevantField);
+          .map((jsonStr) => JSON.parse(jsonStr) as RelevantField);
 
         return JSON.stringify({ fieldIds: relevantFields.map(({ id }) => id) });
       },
@@ -386,27 +382,15 @@ function sseEvent(chunk: unknown) {
 }
 
 function extractDocumentsFromMessage(content: string, log: ToolingLog): any[] {
-  const startIndex = content.indexOf('Documents:\n');
+  const matches = content.match(/\{[\s\S]*?\}/g);
 
-  if (startIndex === -1) {
-    log.error('Documents section not found in content.');
+  if (!matches || !matches.length) {
+    log.debug('No documents found.');
     return [];
   }
-
-  const documentSection = content.substring(startIndex + 'Documents:\n'.length).trim();
-
-  const startBracketIndex = documentSection.indexOf('[');
-  const endBracketIndex = documentSection.lastIndexOf(']');
-
-  if (startBracketIndex === -1 || endBracketIndex === -1 || endBracketIndex < startBracketIndex) {
-    log.error('Malformed documents array in content.');
-    return [];
-  }
-
-  const documentsString = documentSection.substring(startBracketIndex, endBracketIndex + 1).trim();
 
   try {
-    return JSON.parse(documentsString);
+    return JSON.parse(`[${matches.join(',')}]`);
   } catch (error) {
     log.error(`Error parsing documents: ${error}`);
     return [];
