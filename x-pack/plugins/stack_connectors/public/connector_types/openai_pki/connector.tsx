@@ -13,10 +13,15 @@ import {
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import DashboardLink from './dashboard_link';
 import { openAiConfig, openAiSecrets } from './constants';
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+  const [{ id, name }] = useFormData({
+    watch: [],
+  });
+
   return (
     <>
       <SimpleConnectorForm
