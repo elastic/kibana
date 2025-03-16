@@ -47,14 +47,16 @@ export class InferenceTaskError<
   }
 }
 
-export type InferenceTaskErrorEvent = InferenceTaskEventBase<InferenceTaskEventType.error> & {
-  error: {
-    code: string;
-    message: string;
-    meta?: Record<string, any>;
-  };
-};
-
+export type InferenceTaskErrorEvent = InferenceTaskEventBase<
+  InferenceTaskEventType.error,
+  {
+    error: {
+      code: string;
+      message: string;
+      meta?: Record<string, any>;
+    };
+  }
+>;
 /**
  * Inference error thrown when an unexpected internal error occurs while handling the request.
  */

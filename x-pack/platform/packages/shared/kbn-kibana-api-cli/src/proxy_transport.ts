@@ -22,7 +22,7 @@ export function createProxyTransport({
 }: {
   pathname: string;
   headers?: Record<string, any>;
-}) {
+}): typeof Transport {
   return class ProxyTransport extends Transport {
     constructor(options: TransportOptions) {
       super(options);
