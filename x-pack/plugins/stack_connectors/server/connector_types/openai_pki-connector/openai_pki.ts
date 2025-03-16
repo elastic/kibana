@@ -68,7 +68,7 @@ export class OpenAIPkiConnector extends SubActionConnector<Config, Secrets> {
         httpsAgent = new https.Agent({
           cert: fs.readFileSync(this.certPath),
           key: fs.readFileSync(this.keyPath),
-          rejectUnauthorized: true // Enforce SSL verification
+          rejectUnauthorized: false, // Allow self-signed certificates
         });
       } catch (error) {
         throw new Error(`Failed to load PKI certificates: ${error.message}`);
@@ -81,6 +81,9 @@ export class OpenAIPkiConnector extends SubActionConnector<Config, Secrets> {
       baseURL: removeEndpointFromUrl(this.config.apiUrl),
       defaultHeaders: {
         ...this.config.headers,
+        'Authorization': `Bearer ${this.secrets.apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       httpAgent: httpsAgent, // Use our certificate-enabled agent
     });
@@ -107,15 +110,28 @@ export class OpenAIPkiConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    */
   public async runApi({ body, signal, timeout }: RunActionParams): Promise<RunActionResponse> {
-    const sanitizedBody = JSON.parse(body);
-    const response = await this.openAI.chat.completions.create({
-      ...sanitizedBody,
-      model: sanitizedBody.model ?? ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-    }, {
-      signal,
-      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-    });
-    return response;
+    try {
+      const sanitizedBody = JSON.parse(body);
+      const response = await this.openAI.chat.completions.create({
+        ...sanitizedBody,
+        model: sanitizedBody.model ?? ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+      }, {
+        signal,
+        timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+      });
+      return response;
+    } catch (error) {
+      if (error.code === 'ECONNREFUSED') {
+        throw new Error(`Connection refused. Please check if the API endpoint ${this.url} is accessible and the PKI certificates are valid.`);
+      }
+      if (error.code === 'ETIMEDOUT') {
+        throw new Error(`Connection timed out. Please check if the API endpoint ${this.url} is accessible and the PKI certificates are valid.`);
+      }
+      if (error.code === 'CERT_HAS_EXPIRED' || error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
+        throw new Error(`Certificate error: ${error.message}. Please check if your PKI certificates are valid and not expired.`);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -183,7 +199,7 @@ export class OpenAIPkiConnector extends SubActionConnector<Config, Secrets> {
       model: rest.model ?? ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
     }, {
       signal,
-      timeout,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
     });
 
     if (response.choices && response.choices.length > 0 && response.choices[0].message?.content) {

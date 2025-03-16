@@ -72,7 +72,8 @@ export function getRequestWithStreamOption(
 export const getAxiosOptions = (
   certPath: string,
   keyPath: string,
-  stream: boolean
+  stream: boolean,
+  apiKey?: string
 ): { headers: Record<string, string>; httpsAgent: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
 
@@ -80,11 +81,20 @@ export const getAxiosOptions = (
   const httpsAgent = new https.Agent({
     cert: fs.readFileSync(certPath),
     key: fs.readFileSync(keyPath),
-    rejectUnauthorized: true // Enforce SSL verification
+    rejectUnauthorized: false, // Allow self-signed certificates
   });
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
+  if (apiKey) {
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  }
+
   return {
-    headers: { ['content-type']: 'application/json' },
+    headers,
     httpsAgent,
     ...responseType,
   };
