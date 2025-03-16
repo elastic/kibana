@@ -18,6 +18,8 @@ export interface ActionParams {
 export interface Config {
   apiProvider: OpenAiProviderType;
   apiUrl: string;
+  certPath?: string;
+  keyPath?: string;
 }
 
 export interface Secrets {

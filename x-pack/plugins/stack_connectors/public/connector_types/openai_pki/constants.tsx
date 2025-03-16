@@ -46,6 +46,26 @@ export const openAiConfig: ConfigFieldSchema[] = [
     ),
   },
   {
+    id: 'certPath',
+    label: i18n.CERT_PATH_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the PKI certificate file (.pem)"
+        id="xpack.stackConnectors.components.genAi.certPathDocumentation"
+      />
+    ),
+  },
+  {
+    id: 'keyPath',
+    label: i18n.KEY_PATH_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the PKI private key file (.pem)"
+        id="xpack.stackConnectors.components.genAi.keyPathDocumentation"
+      />
+    ),
+  },
+  {
     id: 'defaultModel',
     label: i18n.DEFAULT_MODEL_LABEL,
     helpText: (

@@ -96,3 +96,17 @@ export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string)
     values: { apiProvider, connectorName },
     defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
   });
+
+export const CERT_PATH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certPathLabel',
+  {
+    defaultMessage: 'Certificate Path',
+  }
+);
+
+export const KEY_PATH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.keyPathLabel',
+  {
+    defaultMessage: 'Private Key Path',
+  }
+);
