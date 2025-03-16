@@ -69,6 +69,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
+import { identical } from 'lodash/fp';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -107,7 +108,8 @@ export class AlertsClient<
     recovered: Record<string, Alert & AlertData>;
     seqNo: Record<string, number | undefined>;
     primaryTerm: Record<string, number | undefined>;
-    get: (id: string) => Alert & AlertData;
+    get: (uuid: string) => Alert & AlertData;
+    getById: (id: string) => (Alert & AlertData) | undefined;
   };
 
   private startedAtString: string | null = null;
@@ -149,8 +151,14 @@ export class AlertsClient<
       recovered: {},
       seqNo: {},
       primaryTerm: {},
-      get(id: string) {
-        return this.active[id] ?? this.recovered[id];
+      get(uuid: string) {
+        return this.active[uuid] ?? this.recovered[uuid];
+      },
+      getById(id: string) {
+        return (
+          Object.values(this.active).find((alert) => alert[ALERT_INSTANCE_ID] === id) ??
+          Object.values(this.recovered).find((alert) => alert[ALERT_INSTANCE_ID] === id)
+        );
       },
     };
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
@@ -221,13 +229,12 @@ export class AlertsClient<
         for (const hit of results.flat()) {
           const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
           const alertUuid = get(alertHit, ALERT_UUID);
-          const alertId = get(alertHit, ALERT_INSTANCE_ID);
 
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
-            this.trackedAlerts.active[alertId] = alertHit;
+            this.trackedAlerts.active[alertUuid] = alertHit;
           }
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
-            this.trackedAlerts.recovered[alertId] = alertHit;
+            this.trackedAlerts.recovered[alertUuid] = alertHit;
           }
           this.trackedAlerts.indices[alertUuid] = hit._index;
           this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
@@ -290,7 +297,7 @@ export class AlertsClient<
     return {
       uuid: legacyAlert.getUuid(),
       start: legacyAlert.getStart() ?? this.startedAtString,
-      alertDoc: this.trackedAlerts.get(alert.id),
+      alertDoc: this.trackedAlerts.getById(alert.id),
     };
   }
 
@@ -319,7 +326,7 @@ export class AlertsClient<
   }
 
   public isTrackedAlert(id: string) {
-    return !!this.trackedAlerts.get(id);
+    return !!this.trackedAlerts.getById(id);
   }
 
   public hasReachedAlertLimit(): boolean {
@@ -449,9 +456,10 @@ export class AlertsClient<
     for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
       if (activeAlerts[id]) {
+        const alertUuid = activeAlerts[id].getUuid();
         if (
-          Object.hasOwn(this.trackedAlerts.active, id) &&
-          get(this.trackedAlerts.active[id], ALERT_STATUS) === ALERT_STATUS_ACTIVE
+          Object.hasOwn(this.trackedAlerts.active, alertUuid) &&
+          get(this.trackedAlerts.active[alertUuid], ALERT_STATUS) === ALERT_STATUS_ACTIVE
         ) {
           const isImproving = isAlertImproving<
             AlertData,
@@ -459,7 +467,7 @@ export class AlertsClient<
             LegacyContext,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(this.trackedAlerts.active[id], activeAlerts[id], this.ruleType.actionGroups);
+          >(this.trackedAlerts.get(alertUuid), activeAlerts[id], this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -468,7 +476,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              alert: this.trackedAlerts.active[id],
+              alert: this.trackedAlerts.active[alertUuid],
               legacyAlert: activeAlerts[id],
               rule: this.rule,
               isImproving,
@@ -511,9 +519,10 @@ export class AlertsClient<
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawRecoveredAlerts)) {
+      const alertUuid = recoveredAlerts[id].getUuid();
       // See if there's an existing alert document
       // If there is not, log an error because there should be
-      if (this.trackedAlerts.get(id)) {
+      if (this.trackedAlerts.get(alertUuid)) {
         recoveredAlertsToIndex.push(
           recoveredAlerts[id]
             ? buildRecoveredAlert<
@@ -523,7 +532,7 @@ export class AlertsClient<
                 ActionGroupIds,
                 RecoveryActionGroupId
               >({
-                alert: this.trackedAlerts.get(id),
+                alert: this.trackedAlerts.get(alertUuid),
                 legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
                 runTimestamp: this.runTimestampString,
@@ -533,7 +542,7 @@ export class AlertsClient<
                 kibanaVersion: this.options.kibanaVersion,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
-                alert: this.trackedAlerts.get(id),
+                alert: this.trackedAlerts.get(alertUuid),
                 legacyRawAlert: rawRecoveredAlerts[id],
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
@@ -829,7 +838,7 @@ export class AlertsClient<
         const recoveredLegacyAlerts = getRecoveredAlerts() ?? [];
         return recoveredLegacyAlerts.map((alert) => ({
           alert,
-          hit: this.trackedAlerts.get(alert.getId()),
+          hit: this.trackedAlerts.get(alert.getUuid()),
         }));
       },
     };
