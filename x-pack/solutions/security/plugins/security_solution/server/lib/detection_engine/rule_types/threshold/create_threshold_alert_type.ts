@@ -59,6 +59,7 @@ export const createThresholdAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     async executor(execOptions) {
       const { sharedParams, services, startedAt, state } = execOptions;
       const result = await thresholdExecutor({
