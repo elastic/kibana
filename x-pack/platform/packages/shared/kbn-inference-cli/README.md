@@ -27,7 +27,6 @@ const response = await inferenceClient.output({
       city: { type: 'string' },
     },
     required: ['name'],
-    required: ['prompts'],
   } as const,
 });
 
