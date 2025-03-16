@@ -104,11 +104,10 @@ export function registerContextFunction({
   resources,
   knowledgeBaseStatus,
 }: FunctionRegistrationParameters & { knowledgeBaseStatus: KnowledgeBaseStatus }) {
-  functions.registerAdhocInstruction({
-    instruction_type: 'application_instruction',
-    text: `When citing sources from what is returned from the ${CONTEXT_FUNCTION_NAME},
-      make sure to link to them, using the URL of the source.`,
-  });
+  functions.registerInstruction(
+    `When citing sources from what is returned from the ${CONTEXT_FUNCTION_NAME},
+    make sure to link to them, using the URL of the source.`
+  );
 
   functions.registerFunction(
     {

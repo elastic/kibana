@@ -15,6 +15,7 @@ import {
   ToolSchema,
   ToolSchemaType,
 } from '@kbn/inference-common';
+import { compact } from 'lodash';
 import type { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
@@ -137,11 +138,11 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           description: def.description,
           ...(def.enum || def.const
             ? {
-                enum: def.enum || def.const,
+                enum: def.enum || compact([def.const]),
                 format: 'enum',
               }
             : {}),
-        } as Gemini.StringSchema | Gemini.EnumStringSchema;
+        } as Gemini.Schema;
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,

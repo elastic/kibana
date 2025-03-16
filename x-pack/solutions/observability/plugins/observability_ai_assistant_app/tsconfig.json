@@ -86,7 +86,6 @@
     "@kbn/alerts-ui-shared",
     "@kbn/traced-es-client",
     "@kbn/discover-plugin",
-    "@kbn/search-connectors-plugin"
   ],
   "exclude": ["target/**/*"]
 }
