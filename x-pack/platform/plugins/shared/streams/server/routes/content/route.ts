@@ -19,7 +19,7 @@ import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
 const exportContentRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/content/export 2023-10-31',
+  endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
   options: {
     access: 'public',
     summary: 'Export stream content',
@@ -65,9 +65,7 @@ const exportContentRoute = createServerRoute({
     ]);
 
     return response.ok({
-      body: {
-        content: savedObjects.join('\n'),
-      },
+      body: { content: savedObjects.join('\n') },
       headers: {
         'Content-Disposition': `attachment; filename="content.json"`,
         'Content-Type': 'application/json',
