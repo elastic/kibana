@@ -130,7 +130,7 @@ describe('unsnoozeAlertRoute', () => {
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 
-  it('should throw bad request when snooze schedule is empty', async () => {
+  it('should throw error when snooze schedule is empty', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     rulesClient.get.mockResolvedValueOnce({ ...mockedAlert, snoozeSchedule: [] });
@@ -150,7 +150,7 @@ describe('unsnoozeAlertRoute', () => {
     );
   });
 
-  it('should throw bad request for invalid snooze schedule id', async () => {
+  it('should throw error for invalid snooze schedule id', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     rulesClient.get.mockResolvedValueOnce(mockedAlert);

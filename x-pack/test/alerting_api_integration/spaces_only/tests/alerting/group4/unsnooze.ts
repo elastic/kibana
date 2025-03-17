@@ -124,7 +124,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         expect(response.body.message).to.eql('Rule has no snooze schedules.');
       });
 
-      it('should return 400 for when invalid snooze schedule id', async () => {
+      it('should return 404 for when invalid snooze schedule id', async () => {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -158,7 +158,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
         const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, 'random_id');
 
-        expect(response.statusCode).to.eql(400);
+        expect(response.statusCode).to.eql(404);
         expect(response.body.message).to.eql('Rule has no snooze schedule with id random_id.');
       });
     });

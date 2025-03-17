@@ -72,7 +72,7 @@ export const unsnoozeRuleRoute = (
           );
 
           if (!scheduleToUnsnooze) {
-            throw Boom.badRequest(`Rule has no snooze schedule with id ${scheduleId}.`);
+            throw Boom.notFound(`Rule has no snooze schedule with id ${scheduleId}.`);
           }
 
           await rulesClient.unsnooze({ id: ruleId, scheduleIds: [scheduleId] });
