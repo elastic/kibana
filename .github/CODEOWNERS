@@ -1168,8 +1168,9 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
-src/platform/plugins/shared/discover/public/context_awareness/profile_providers/traces_document_profile @elastic/obs-ux-infra_services-team
-src/platform/plugins/shared/discover/public/context_awareness/profile_providers/traces_data_source_profile @elastic/obs-ux-infra_services-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-ux-infra_services-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-ux-infra_services-team
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_root_profile @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 
 # Platform Docs
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/index.ts @elastic/platform-docs
@@ -1616,6 +1617,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.devcontainer/ @elastic/kibana-operations
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
+/.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
 /x-pack/test/.gitignore @elastic/appex-qa

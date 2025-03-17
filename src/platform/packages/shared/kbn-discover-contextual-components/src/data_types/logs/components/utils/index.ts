@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.tsx'],
-};
+export * from './truncate_preserve_highlight_tags';
