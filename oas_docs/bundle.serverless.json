@@ -5261,6 +5261,59 @@
         ]
       }
     },
+    "/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}": {
+      "delete": {
+        "operationId": "delete-alerting-rule-ruleid-snooze-schedule-scheduleid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the rule.",
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the snooze schedule.",
+            "in": "path",
+            "name": "scheduleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given id does not exist."
+          }
+        },
+        "summary": "Delete a snooze schedule for a rule",
+        "tags": [
+          "alerting"
+        ]
+      }
+    },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",
@@ -39546,7 +39599,6 @@
                                     }
                                   },
                                   "required": [
-                                    "id",
                                     "data_stream"
                                   ],
                                   "type": "object"

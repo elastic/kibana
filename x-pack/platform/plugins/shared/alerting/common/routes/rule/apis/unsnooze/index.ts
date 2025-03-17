@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-export { unsnoozeParamsSchema, unsnoozeBodySchema } from './schemas/latest';
+export {
+  unsnoozeParamsInternalSchema,
+  unsnoozeBodyInternalSchema,
+} from './internal/schemas/latest';
+export { unsnoozeParamsSchema } from './external/schemas/latest';
+export type { UnsnoozeParams } from './external/types/latest';
 
 export {
-  unsnoozeParamsSchema as unsnoozeParamsSchemaV1,
-  unsnoozeBodySchema as unsnoozeBodySchemaV1,
-} from './schemas/v1';
+  unsnoozeParamsInternalSchema as unsnoozeParamsInternalSchemaV1,
+  unsnoozeBodyInternalSchema as unsnoozeBodyInternalSchemaV1,
+} from './internal/schemas/v1';
+export { unsnoozeParamsSchema as unsnoozeParamsSchemaV1 } from './external/schemas/v1';
+export type { UnsnoozeParams as UnsnoozeParamsV1 } from './external/types/v1';
