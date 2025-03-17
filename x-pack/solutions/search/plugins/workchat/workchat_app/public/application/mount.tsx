@@ -12,13 +12,11 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Router } from '@kbn/shared-ux-router';
 import type { WorkChatServices } from '../services';
 import type { WorkChatAppPluginStartDependencies } from '../types';
 import { WorkChatServicesContext } from './context/workchat_services_context';
-import { WorkchatChatPage } from './pages/chat';
-import { WorkChatAgentsPage } from './pages/agents';
-import { WorkChatAgentEditOrCreatePage } from './pages/agent_edit_or_create';
+import { WorkchatAppRoutes } from './routes';
 
 export const mountApp = async ({
   core,
@@ -42,25 +40,7 @@ export const mountApp = async ({
           <QueryClientProvider client={queryClient}>
             <WorkChatServicesContext.Provider value={services}>
               <Router history={history}>
-                <Routes>
-                  <Route path="/chat/:conversationId">
-                    <WorkchatChatPage />
-                  </Route>
-
-                  <Route path="/agents/create">
-                    <WorkChatAgentEditOrCreatePage />
-                  </Route>
-                  <Route path="/agents/:agentId">
-                    <WorkChatAgentEditOrCreatePage />
-                  </Route>
-                  <Route path="/agents" strict>
-                    <WorkChatAgentsPage />
-                  </Route>
-
-                  <Route path="/">
-                    <WorkchatChatPage />
-                  </Route>
-                </Routes>
+                <WorkchatAppRoutes />
               </Router>
             </WorkChatServicesContext.Provider>
           </QueryClientProvider>
