@@ -362,8 +362,6 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
-  const getBulkActions = useMemo(() => getBulkActionsByTableType(tableType), [tableType]);
-
   useEffect(() => {
     if (isDataTableInitialized) return;
     dispatch(
@@ -377,6 +375,8 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       })
     );
   }, [dispatch, tableType, finalColumns, isDataTableInitialized]);
+
+  const getBulkActions = useMemo(() => getBulkActionsByTableType(tableType), [tableType]);
 
   const { Navigation } = useSessionViewNavigation({
     scopeId: tableType,

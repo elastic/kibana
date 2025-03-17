@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const ACTIONS_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+export const TIMESTAMP_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.timeStamp',
+  {
+    defaultMessage: 'Timestamp',
+  }
+);
+export const RELATION_INTEGRATION_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.relatedIntegrationName',
+  {
+    defaultMessage: 'Source',
+  }
+);
+export const SEVERITY_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.severity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+export const RULE_NAME_COLUMN = i18n.translate(
+  'xpack.securitySolution.alertSummary.table.column.ruleName',
+  {
+    defaultMessage: 'Rule',
+  }
+);

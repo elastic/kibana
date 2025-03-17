@@ -20,7 +20,7 @@ import * as i18n from './translations';
  * a situation where core http client will initiate same request again and again.
  * To avoid this, we abort http request after timeout which is slightly below two minutes.
  */
-const EXECUTE_ACTION_TIMEOUT = 110 * 1000; // in milliseconds
+export const EXECUTE_ACTION_TIMEOUT = 110 * 1000; // in milliseconds
 
 interface SendMessageProps {
   apiConfig: ApiConfig;

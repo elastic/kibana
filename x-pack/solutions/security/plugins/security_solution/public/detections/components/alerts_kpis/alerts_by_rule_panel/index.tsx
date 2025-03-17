@@ -25,6 +25,7 @@ export const AlertsByRulePanel: React.FC<ChartsPanelProps> = ({
   signalIndexName,
   runtimeMappings,
   skip,
+  showCellActions = true,
 }) => {
   const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid()}`, []);
 
@@ -50,7 +51,7 @@ export const AlertsByRulePanel: React.FC<ChartsPanelProps> = ({
           titleSize="xs"
           hideSubtitle
         />
-        <AlertsByRule data={data} isLoading={isLoading} />
+        <AlertsByRule data={data} isLoading={isLoading} showCellActions={showCellActions} />
       </EuiPanel>
     </InspectButtonContainer>
   );

@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataView, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
@@ -34,8 +34,10 @@ import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/con
 import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
+const DEFAULT_FILTERS: Filter[] = [];
 
 interface OwnProps {
+  dataView?: DataView;
   currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   from: string;
@@ -65,8 +67,9 @@ interface OwnProps {
 export type AlertsTableComponentProps = OwnProps;
 
 export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
+  dataView,
   currentAlertStatusFilterValue,
-  defaultFilters = [],
+  defaultFilters = DEFAULT_FILTERS,
   from,
   getGrouping,
   globalFilters,
@@ -99,7 +102,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          indexPattern: sourcererDataView,
+          indexPattern: dataView ? dataView.toSpec() : sourcererDataView,
           browserFields,
           filters: [
             ...(defaultFilters ?? []),

@@ -19,3 +19,5 @@ export type { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
 
 export { withSuspense, LazyReplacementCard } from './components';
 export { filterCustomIntegrations } from './services/find';
+
+export type { CustomIntegration } from '../common';

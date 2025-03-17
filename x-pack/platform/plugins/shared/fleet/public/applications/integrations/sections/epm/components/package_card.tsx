@@ -32,12 +32,12 @@ import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../screens/home';
 
 import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
-import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
+import { useIsGuidedOnboardingActive, useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 
 import {
-  InstallationStatus,
   getLineClampStyles,
+  InstallationStatus,
   shouldShowInstallationStatus,
 } from './installation_status';
 
@@ -201,6 +201,7 @@ export function PackageCard({
           // This keeps the cards from looking overly unbalanced because of content differences.
           css={css`
             position: relative;
+
             [class*='euiCard__content'] {
               display: flex;
               flex-direction: column;

@@ -33,6 +33,13 @@ export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
   defaultMessage: 'Notes',
 });
 
+export const ALERT_SUMMARY = i18n.translate(
+  'xpack.securitySolution.navLinks.investigations.alertSummary',
+  {
+    defaultMessage: 'Alert summary',
+  }
+);
+
 export const ASSET_CRITICALITY = i18n.translate(
   'xpack.securitySolution.navigation.assetCriticality',
   {

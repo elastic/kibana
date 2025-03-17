@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { capitalize } from 'lodash';
@@ -24,10 +25,16 @@ import {
 } from '../../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../../helpers';
 
-export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => {
+/**
+ * Returns the list of columns for the severity table for the KPI charts
+ * @param showCellActions if true, add a third column for cell actions
+ */
+export const useGetSeverityTableColumns = (
+  showCellActions: boolean
+): Array<EuiBasicTableColumn<SeverityData>> => {
   const severityColors = useRiskSeverityColors();
-  return useMemo(
-    () => [
+  return useMemo(() => {
+    const baseColumns: Array<EuiBasicTableColumn<SeverityData>> = [
       {
         field: 'key',
         name: i18n.SEVERITY_LEVEL_COLUMN_TITLE,
@@ -50,7 +57,9 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
           </EuiText>
         ),
       },
-      {
+    ];
+    if (showCellActions) {
+      baseColumns.push({
         field: 'key',
         name: '',
         'data-test-subj': 'severityTable-actions',
@@ -68,8 +77,8 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
             extraActionsColor="text"
           />
         ),
-      },
-    ],
-    [severityColors]
-  );
+      });
+    }
+    return baseColumns;
+  }, [severityColors, showCellActions]);
 };

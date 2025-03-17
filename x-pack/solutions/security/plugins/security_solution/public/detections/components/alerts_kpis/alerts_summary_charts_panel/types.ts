@@ -32,4 +32,8 @@ export interface ChartsPanelProps {
   runtimeMappings?: MappingRuntimeFields;
   skip?: boolean;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  /**
+   * If true, make the cell action interactions visible
+   */
+  showCellActions?: boolean;
 }

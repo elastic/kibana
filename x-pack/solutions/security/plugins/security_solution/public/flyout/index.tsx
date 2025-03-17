@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
+import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
 import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
 import { UniversalEntityPanel } from './entity_details/universal_right';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
@@ -58,6 +59,8 @@ import type { ServicePanelExpandableFlyoutProps } from './entity_details/service
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
+import { AIForSOCDetailsProvider } from './ai_for_soc/context';
+import { AIForSOCPanel } from './ai_for_soc';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -185,6 +188,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: UniversalEntityPanelKey,
     component: (props) => (
       <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: IOCPanelKey,
+    component: (props) => (
+      <AIForSOCDetailsProvider {...(props as IOCDetailsProps).params}>
+        <AIForSOCPanel />
+      </AIForSOCDetailsProvider>
     ),
   },
 ];

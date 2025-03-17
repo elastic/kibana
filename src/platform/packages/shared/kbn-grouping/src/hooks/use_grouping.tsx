@@ -141,8 +141,8 @@ export const useGrouping = <T,>({
      *
      * @param props {@link DynamicGroupingProps}
      */
-    (props: DynamicGroupingProps<T>): React.ReactElement =>
-      isNoneGroup([props.selectedGroup]) ? (
+    (props: DynamicGroupingProps<T>): React.ReactElement => {
+      return isNoneGroup([props.selectedGroup]) ? (
         props.renderChildComponent([])
       ) : (
         <GroupingComponent
@@ -152,7 +152,8 @@ export const useGrouping = <T,>({
           groupingId={groupingId}
           tracker={tracker}
         />
-      ),
+      );
+    },
     [componentProps, groupSelector, groupingId, tracker]
   );
 

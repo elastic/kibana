@@ -27,19 +27,25 @@ const DONUT_HEIGHT = 150;
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin: auto;
 `;
+
 export interface SeverityLevelProps {
   data: SeverityData[];
   isLoading: boolean;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  /**
+   * If true, render the last column for cell actions (like filter for, out, add to timeline, copy...)
+   */
+  showCellActions: boolean;
 }
 
 export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   data,
   isLoading,
   addFilter,
+  showCellActions,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const columns = useGetSeverityTableColumns();
+  const columns = useGetSeverityTableColumns(showCellActions);
 
   const count = useMemo(() => {
     return data
