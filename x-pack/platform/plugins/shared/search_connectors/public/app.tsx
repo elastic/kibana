@@ -31,7 +31,8 @@ export const renderApp = (
   plugins: SearchConnectorsPluginStartDependencies,
   pluginStart: SearchConnectorsPluginStart,
   params: ManagementAppMountParams,
-  connectorTypes: ConnectorDefinition[]
+  connectorTypes: ConnectorDefinition[],
+  kibanaVersion: string
 ) => {
   resetContext({
     createStore: true,
@@ -49,6 +50,7 @@ export const renderApp = (
       pluginStart={pluginStart}
       connectorTypes={connectorTypes}
       store={store}
+      kibanaVersion={kibanaVersion}
     />,
     params.element
   );
@@ -76,12 +78,14 @@ const AppWithExecutionContext = ({
   connectorTypes,
   params,
   store,
+  kibanaVersion,
 }: {
   core: CoreStart;
   plugins: SearchConnectorsPluginStartDependencies;
   params: ManagementAppMountParams;
   connectorTypes: ConnectorDefinition[];
   store: Store;
+  kibanaVersion: string;
 }) => {
   const { executionContext } = core;
 
@@ -106,7 +110,7 @@ const AppWithExecutionContext = ({
     hasPlatinumLicense: true,
     plugins,
     isAgentlessEnabled,
-    kibanaVersion: 'main',
+    kibanaVersion,
     indexMappingComponent,
   };
   return (
@@ -127,9 +131,18 @@ interface AppProps {
   params: ManagementAppMountParams;
   connectorTypes: ConnectorDefinition[];
   store: Store;
+  kibanaVersion: string;
 }
 
-const App = ({ core, plugins, pluginStart, params, connectorTypes, store }: AppProps) => {
+const App = ({
+  core,
+  plugins,
+  pluginStart,
+  params,
+  connectorTypes,
+  store,
+  kibanaVersion,
+}: AppProps) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -146,6 +159,7 @@ const App = ({ core, plugins, pluginStart, params, connectorTypes, store }: AppP
           connectorTypes={connectorTypes}
           plugins={plugins}
           store={store}
+          kibanaVersion={kibanaVersion}
         />
       </KibanaContextProviderForPlugin>
     </KibanaRenderContextProvider>

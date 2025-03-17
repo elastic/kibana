@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
@@ -27,28 +27,46 @@ export class SearchConnectorsPlugin
       SearchConnectorsPluginStartDependencies
     >
 {
+  private readonly isServerless: boolean;
+  private readonly kibanaVersion: string;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
+
   public setup(
     core: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
     dependencies: SearchConnectorsPluginSetupDependencies
   ): SearchConnectorsPluginSetup {
     const { management } = dependencies;
     const connectorTypes = getConnectorTypes(core.http.staticAssets);
+    const kibanaVersion = this.kibanaVersion;
 
-    management.sections.section.data.registerApp({
-      id: PLUGIN_ID,
-      title: PLUGIN_NAME,
-      order: 6,
-      keywords: ['search connectors', 'search'],
-      async mount(params: ManagementAppMountParams) {
-        const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
-          import('./app'),
-          core.getStartServices(),
-        ]);
+    if (this.isServerless) {
+      management.sections.section.data.registerApp({
+        id: PLUGIN_ID,
+        title: PLUGIN_NAME,
+        order: 6,
+        keywords: ['search connectors', 'search'],
+        async mount(params: ManagementAppMountParams) {
+          const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
+            import('./app'),
+            core.getStartServices(),
+          ]);
 
-        const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
-        return renderApp(coreStart, pluginsStartDeps, pluginStart, params, connectorsDefinitions);
-      },
-    });
+          const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
+          return renderApp(
+            coreStart,
+            pluginsStartDeps,
+            pluginStart,
+            params,
+            connectorsDefinitions,
+            kibanaVersion
+          );
+        },
+      });
+    }
     return {
       getConnectorTypes: () => connectorTypes,
     };
