@@ -8,11 +8,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
-import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../data_management/stream_detail_management';
+import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
+import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
+import { StreamDetailCriticalEventsView } from '../stream_detail_critical_events_view';
 
 export function StreamDetailView() {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
@@ -51,6 +52,13 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
       content: <StreamDetailDashboardsView definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
+      }),
+    },
+    {
+      name: 'critical_events',
+      content: <StreamDetailCriticalEventsView definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.criticalEventsTab', {
+        defaultMessage: 'Critical events',
       }),
     },
     {

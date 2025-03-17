@@ -65,7 +65,7 @@ export const disableStreamsRoute = createServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
+  handler: async ({ request, params, getScopedClients }): Promise<DisableStreamsResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
     return await streamsClient.disableStreams();
