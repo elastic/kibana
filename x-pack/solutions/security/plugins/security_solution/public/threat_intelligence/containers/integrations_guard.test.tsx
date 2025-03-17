@@ -23,6 +23,7 @@ jest.mock('../modules/indicators/hooks/use_total_count');
 jest.mock('../hooks/use_integrations_page_link');
 jest.mock('../hooks/use_documentation_link');
 jest.mock('../hooks/use_integrations');
+jest.mock('./security_solution_plugin_template_wrapper');
 
 describe('IntegrationsGuard', () => {
   it('should render loading when indicator count and integrations are being loaded', async () => {

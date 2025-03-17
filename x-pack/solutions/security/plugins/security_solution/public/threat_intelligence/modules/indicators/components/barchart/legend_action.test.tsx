@@ -6,21 +6,14 @@
  */
 
 import { render } from '@testing-library/react';
-import moment from 'moment';
 import React from 'react';
 import { IndicatorBarchartLegendAction } from './legend_action';
+import { timestampToIsoString } from './utils';
 
-jest.mock('moment');
+jest.mock('./utils');
 
 describe('IndicatorBarchartLegendAction', () => {
   const mockDate = '14182940000';
-
-  const mockToIsoString = jest.fn();
-  beforeAll(() => {
-    (moment as unknown as jest.Mock).mockReturnValue({
-      toISOString: mockToIsoString,
-    });
-  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +24,7 @@ describe('IndicatorBarchartLegendAction', () => {
       value: 'date',
     };
     render(<IndicatorBarchartLegendAction data={mockDate} field={mockField} />);
-    expect(mockToIsoString).toHaveBeenCalled();
+    expect(jest.mocked(timestampToIsoString)).toHaveBeenCalled();
   });
 
   it('should render group name without formation', () => {
@@ -40,6 +33,6 @@ describe('IndicatorBarchartLegendAction', () => {
       value: 'string',
     };
     render(<IndicatorBarchartLegendAction data={mockDate} field={mockField} />);
-    expect(mockToIsoString).not.toHaveBeenCalled();
+    expect(jest.mocked(timestampToIsoString)).not.toHaveBeenCalled();
   });
 });

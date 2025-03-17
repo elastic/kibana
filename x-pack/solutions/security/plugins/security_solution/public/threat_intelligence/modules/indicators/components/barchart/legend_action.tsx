@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
-import {
-  EuiButtonIcon,
-  EuiComboBoxOptionOption,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
-import moment from 'moment';
+import type { VFC } from 'react';
+import React, { useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { CopyToClipboardContextMenu } from '../common/copy_to_clipboard';
 import { FilterInContextMenu } from '../../../query_bar/components/filter_in';
 import { FilterOutContextMenu } from '../../../query_bar/components/filter_out';
@@ -26,6 +21,7 @@ import {
   TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 import { BUTTON_LABEL } from './translations';
+import { timestampToIsoString } from './utils';
 
 export interface IndicatorBarchartLegendActionProps {
   /**
@@ -44,7 +40,7 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const group = field.value === 'date' ? moment(data).toISOString() : data;
+  const group = field.value === 'date' ? timestampToIsoString(data) : data;
   const popoverItems = [
     <FilterInContextMenu
       key={FILTER_IN_BUTTON_TEST_ID}
