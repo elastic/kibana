@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationSummary } from '../conversations';
-
-export interface ListConversationResponse {
-  conversations: ConversationSummary[];
+export interface UserNameAndId {
+  /** id */
+  id: string;
+  /** username */
+  name: string;
 }
-
-export type GetConversationResponse = Conversation;

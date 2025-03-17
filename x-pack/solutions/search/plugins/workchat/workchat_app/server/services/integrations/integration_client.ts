@@ -12,6 +12,7 @@ import type { IntegrationCreateRequest } from './types';
 import { integrationTypeName, type IntegrationAttributes } from '../../saved_objects/integrations';
 import type { ClientUser } from './types';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
+
 interface IntegrationClientOptions {
   logger: Logger;
   client: SavedObjectsClientContract;
@@ -33,6 +34,7 @@ export interface IntegrationClient {
 export class IntegrationClientImpl implements IntegrationClient {
   private readonly client: SavedObjectsClientContract;
   private readonly user: ClientUser;
+  // @ts-ignore will be used later
   private readonly logger: Logger;
 
   constructor({ client, user, logger }: IntegrationClientOptions) {

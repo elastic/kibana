@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationSummary } from '../conversations';
-
-export interface ListConversationResponse {
-  conversations: ConversationSummary[];
-}
-
-export type GetConversationResponse = Conversation;
+export const workchatAppId = 'workchat';

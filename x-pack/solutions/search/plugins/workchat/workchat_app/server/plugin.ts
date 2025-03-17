@@ -20,6 +20,7 @@ import {
   ConversationServiceImpl,
   AgentFactory,
   ChatService,
+  AgentServiceImpl,
 } from './services';
 import { IntegrationRegistry } from './services/integrations';
 import type {
@@ -94,6 +95,12 @@ export class WorkChatAppPlugin
       logger: this.logger.get('services.conversations'),
     });
 
+    const agentService = new AgentServiceImpl({
+      savedObjects: core.savedObjects,
+      security: core.security,
+      logger: this.logger.get('services.agent'),
+    });
+
     const agentFactory = new AgentFactory({
       inference: pluginsDependencies.inference,
       logger: this.logger.get('services.agentFactory'),
@@ -109,6 +116,7 @@ export class WorkChatAppPlugin
 
     this.services = {
       conversationService,
+      agentService,
       agentFactory,
       integrationsService,
       chatService,

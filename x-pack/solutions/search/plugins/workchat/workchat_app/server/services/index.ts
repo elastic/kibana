@@ -10,3 +10,4 @@ export { IntegrationsService } from './integrations/integrations_service';
 export { ConversationServiceImpl } from './conversations';
 export { ChatService } from './chat';
 export { AgentFactory } from './orchestration';
+export { AgentServiceImpl, type AgentService } from './agents';

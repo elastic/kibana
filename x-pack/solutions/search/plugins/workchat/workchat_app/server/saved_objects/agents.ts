@@ -6,28 +6,24 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import type { ConversationEvent } from '../../common/conversation_events';
 
-export const conversationTypeName = 'workchat_conversation' as const;
+export const agentTypeName = 'workchat_agent' as const;
 
-export const conversationSoType: SavedObjectsType<ConversationAttributes> = {
+export const agentSoType: SavedObjectsType<AgentAttributes> = {
   // TODO: specific SO index for workchat
-  name: conversationTypeName,
+  name: agentTypeName,
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {
     dynamic: 'strict',
     properties: {
-      conversation_id: { type: 'keyword' },
       agent_id: { type: 'keyword' },
-      title: { type: 'text' },
+      agent_name: { type: 'text' },
+      description: { type: 'text' },
       last_updated: { type: 'date' },
-
-      events: { dynamic: false, type: 'object', properties: {} },
-
+      configuration: { dynamic: false, type: 'object', properties: {} },
       user_id: { type: 'keyword' },
       user_name: { type: 'keyword' },
-
       access_control: {
         properties: {
           public: { type: 'boolean' },
@@ -37,17 +33,14 @@ export const conversationSoType: SavedObjectsType<ConversationAttributes> = {
   },
 };
 
-export interface ConversationAttributes {
-  conversation_id: string;
+export interface AgentAttributes {
   agent_id: string;
-  title: string;
+  agent_name: string;
+  description: string;
   last_updated: string;
-
+  configuration: Record<string, unknown>;
   user_id: string;
   user_name: string;
-
-  events: ConversationEvent[];
-
   access_control: {
     public: boolean;
   };
