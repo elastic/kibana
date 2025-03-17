@@ -878,6 +878,8 @@
     "@kbn/server-route-repository-client": "link:src/platform/packages/shared/kbn-server-route-repository-client",
     "@kbn/server-route-repository-utils": "link:src/platform/packages/shared/kbn-server-route-repository-utils",
     "@kbn/serverless": "link:x-pack/platform/plugins/shared/serverless",
+    "@kbn/serverless-chat": "link:x-pack/solutions/chat/plugins/serverless_chat",
+    "@kbn/serverless-chat-settings": "link:src/platform/packages/shared/serverless/settings/chat_project",
     "@kbn/serverless-common-settings": "link:src/platform/packages/shared/serverless/settings/common",
     "@kbn/serverless-observability": "link:x-pack/solutions/observability/plugins/serverless_observability",
     "@kbn/serverless-observability-settings": "link:src/platform/packages/shared/serverless/settings/observability_project",

@@ -4078,10 +4078,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/module-groups@link:packages/kbn-module-groups":
-  version "0.0.0"
-  uid ""
-
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""
@@ -6318,6 +6314,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/module-groups@link:packages/kbn-module-groups":
+  version "0.0.0"
+  uid ""
+
 "@kbn/monaco@link:src/platform/packages/shared/kbn-monaco":
   version "0.0.0"
   uid ""
@@ -7155,6 +7155,14 @@
   uid ""
 
 "@kbn/server-route-repository@link:src/platform/packages/shared/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-chat-settings@link:src/platform/packages/shared/serverless/settings/chat_project":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-chat@link:x-pack/solutions/chat/plugins/serverless_chat":
   version "0.0.0"
   uid ""
 
