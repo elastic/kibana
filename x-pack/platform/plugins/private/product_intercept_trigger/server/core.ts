@@ -21,6 +21,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { parseIntervalAsMillisecond } from '@kbn/task-manager-plugin/server/lib/intervals';
 import { schema } from '@kbn/config-schema';
 import semverLt from 'semver/functions/lt';
+import { TRIGGER_API_ENDPOINT } from '../common/constants';
 
 export interface ProductInterceptTriggerCoreInitDeps {
   core: CoreSetup;
@@ -181,7 +182,7 @@ export class ProductInterceptTriggerCore {
 
     router.get(
       {
-        path: '/internal/product_intercept/trigger_info',
+        path: TRIGGER_API_ENDPOINT,
         validate: false,
         security: {
           authz: {
