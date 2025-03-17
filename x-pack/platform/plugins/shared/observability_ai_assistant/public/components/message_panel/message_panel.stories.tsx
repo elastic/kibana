@@ -5,21 +5,21 @@
  * 2.0.
  */
 import { EuiPanel } from '@elastic/eui';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import dedent from 'dedent';
 import React from 'react';
 import { FeedbackButtons } from '../buttons/feedback_buttons';
 import { MessagePanel as Component } from './message_panel';
 import { MessageText } from './message_text';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/MessagePanel',
 };
 
 export default meta;
 
-export const ContentLoading: ComponentStoryObj<typeof Component> = {
+export const ContentLoading: StoryObj<typeof Component> = {
   render: (props, context) => {
     return (
       <EuiPanel>
@@ -50,7 +50,7 @@ This text is loa`}
   },
 };
 
-export const ContentLoaded: ComponentStoryObj<typeof Component> = {
+export const ContentLoaded: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText
@@ -62,7 +62,7 @@ export const ContentLoaded: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const ContentFailed: ComponentStoryObj<typeof Component> = {
+export const ContentFailed: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText
@@ -75,7 +75,7 @@ export const ContentFailed: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const ContentTable: ComponentStoryObj<typeof Component> = {
+export const ContentTable: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText
@@ -102,7 +102,7 @@ export const ContentTable: ComponentStoryObj<typeof Component> = {
   },
 };
 
-export const Controls: ComponentStoryObj<typeof Component> = {
+export const Controls: StoryObj<typeof Component> = {
   args: {
     body: (
       <MessageText
