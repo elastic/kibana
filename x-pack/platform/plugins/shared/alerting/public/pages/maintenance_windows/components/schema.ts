@@ -50,8 +50,7 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   solutionId: {
-    type: FIELD_TYPES.TEXT,
-    defaultValue: undefined,
+    type: FIELD_TYPES.SELECT,
     validations: [
       {
         validator: ({ value }: { value: string }) => {

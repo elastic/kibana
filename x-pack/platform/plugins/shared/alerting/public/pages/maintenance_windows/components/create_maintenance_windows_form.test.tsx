@@ -240,4 +240,19 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(managementInput).not.toBeChecked();
     expect(securityInput).not.toBeChecked();
   });
+
+  it('should hide "Filter alerts" toggle when do not have access to any solutions', async () => {
+    loadRuleTypes.mockResolvedValue([]);
+    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('maintenanceWindowScopedQuerySwitch')).not.toBeInTheDocument();
+    });
+  });
 });
