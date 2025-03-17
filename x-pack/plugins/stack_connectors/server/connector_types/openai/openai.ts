@@ -244,6 +244,170 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       timeout,
     });
     return stream ? pipeStreamingResponse(response) : response.data;
+  }/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { AxiosError } from 'axios';
+import OpenAI from 'openai';
+import { PassThrough } from 'stream';
+import { IncomingMessage } from 'http';
+import {
+  ChatCompletionChunk,
+  ChatCompletionCreateParamsStreaming,
+  ChatCompletionMessageParam,
+} from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
+import { removeEndpointFromUrl, validatePKICertificates } from './lib/openai_utils';
+import {
+  RunActionParamsSchema,
+  RunActionResponseSchema,
+  DashboardActionParamsSchema,
+  StreamActionParamsSchema,
+  StreamingResponseSchema,
+  InvokeAIActionParamsSchema,
+} from '../../../common/openai/schema';
+import type {
+  Config,
+  Secrets,
+  RunActionParams,
+  RunActionResponse,
+  StreamActionParams,
+} from '../../../common/openai/types';
+import {
+  DEFAULT_OPENAI_MODEL,
+  DEFAULT_TIMEOUT_MS,
+  OpenAiProviderType,
+  SUB_ACTION,
+} from '../../../common/openai/constants';
+import {
+  DashboardActionParams,
+  DashboardActionResponse,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
+} from '../../../common/openai/types';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+import {
+  getAxiosOptions,
+  getAzureApiVersionParameter,
+  getRequestWithStreamOption,
+  pipeStreamingResponse,
+  sanitizeRequest,
+} from './lib/utils';
+import fs from 'fs';
+import https from 'https';
+
+export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
+  private url;
+  private provider;
+  private key;
+  private openAI;
+
+  constructor(params: ServiceParams<Config, Secrets>) {
+    super(params);
+
+    this.url = this.config.apiUrl;
+    this.provider = this.config.apiProvider;
+    this.key = this.secrets.apiKey;
+
+    try {
+      if (this.provider === OpenAiProviderType.PkiOpenAi) {
+        if (!this.config.certPath || !this.config.keyPath) {
+          throw new Error('Certificate and key paths are required for PKI authentication');
+        }
+
+        // Validate PKI certificates
+        if (!validatePKICertificates(this.config.certPath, this.config.keyPath)) {
+          throw new Error('Invalid or inaccessible PKI certificates');
+        }
+
+        // Create HTTPS agent with certificates
+        const httpsAgent = new https.Agent({
+          cert: fs.readFileSync(this.config.certPath),
+          key: fs.readFileSync(this.config.keyPath),
+          rejectUnauthorized: false, // Allow self-signed certificates
+        });
+
+        this.openAI = new OpenAI({
+          apiKey: this.key,
+          baseURL: removeEndpointFromUrl(this.url),
+          defaultHeaders: this.config.headers, // Use config headers only
+          httpAgent: httpsAgent,
+        });
+      } else {
+        this.openAI = new OpenAI({
+          apiKey: this.key,
+          baseURL: removeEndpointFromUrl(this.url),
+          defaultHeaders: this.config.headers,
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Error initializing OpenAI client: ${error.message}`);
+      throw error;
+    }
+
+    this.registerSubActions();
+  }
+
+  // Rest of the file remains unchanged up to runApi
+  public async runApi({ body, signal, timeout }: RunActionParams): Promise<RunActionResponse> {
+    const sanitizedBody = sanitizeRequest(
+      this.provider,
+      this.url,
+      body,
+      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+    );
+    const axiosOptions = getAxiosOptions(this.provider, this.key, false, this.config);
+    const response = await this.request({
+      url: this.url,
+      method: 'post',
+      responseSchema: RunActionResponseSchema,
+      data: sanitizedBody,
+      signal,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+      ...axiosOptions,
+      headers: {
+        ...this.config.headers,
+        ...axiosOptions.headers,
+      },
+    });
+    return response.data;
+  }
+
+  public async streamApi({
+    body,
+    stream,
+    signal,
+    timeout,
+  }: StreamActionParams): Promise<RunActionResponse> {
+    const executeBody = getRequestWithStreamOption(
+      this.provider,
+      this.url,
+      body,
+      stream,
+      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+    );
+
+    const axiosOptions = getAxiosOptions(this.provider, this.key, stream, this.config);
+
+    const response = await this.request({
+      url: this.url,
+      method: 'post',
+      responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
+      data: executeBody,
+      signal,
+      ...axiosOptions,
+      headers: {
+        ...this.config.headers,
+        ...axiosOptions.headers,
+      },
+      timeout,
+    });
+    return stream ? pipeStreamingResponse(response) : response.data;
   }
 
   /**
