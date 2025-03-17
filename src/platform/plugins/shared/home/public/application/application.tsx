@@ -16,7 +16,6 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
-import './index.scss';
 
 export const renderApp = async (
   element: HTMLElement,

@@ -8,8 +8,9 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, MouseEvent } from 'react';
-import { EuiCard, EuiFlexItem } from '@elastic/eui';
+import React, { FC, MouseEvent, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiCard, EuiFlexItem, useEuiTheme, useEuiMinBreakpoint } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/kibana-react-plugin/public';
 import { FeatureCatalogueSolution } from '../../..';
@@ -21,19 +22,46 @@ interface Props {
   solution: FeatureCatalogueSolution;
 }
 
+const getSolutionGraphicURL = (solutionId: string) =>
+  `/plugins/kibanaReact/assets/solutions_${solutionId}.svg`;
+
 export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
   const { trackUiMetric } = getServices();
+  const { euiTheme } = useEuiTheme();
+  const euiMinBreakpointM = useEuiMinBreakpoint('m');
 
-  const getSolutionGraphicURL = (solutionId: string) =>
-    `/plugins/kibanaReact/assets/solutions_${solutionId}.svg`;
+  const homeSolutionPanelstyles = useMemo(
+    () => css`
+      ${euiMinBreakpointM} {
+        max-inline-size: calc(33.33% - ${euiTheme.size.m} * 10);
+      }
+      .homeSolutionPanel {
+        img {
+          background-color: ${euiTheme.colors.primary};
+          max-block-size: $euiSize * 10;
+          object-fit: cover;
+        }
+
+        &--enterpriseSearch img {
+          background-color: ${euiTheme.colors.warning};
+        }
+
+        &--observability img {
+          background-color: ${euiTheme.colors.accent};
+        }
+
+        &--securitySolution img {
+          background-color: ${euiTheme.colors.accentSecondary};
+        }
+      }
+    `,
+    [euiTheme, euiMinBreakpointM]
+  );
 
   return (
-    <EuiFlexItem
-      className="homSolutions__item"
-      data-test-subj={`homSolutionPanel homSolutionPanel_${solution.id}`}
-    >
+    <EuiFlexItem css={homeSolutionPanelstyles} data-test-subj={`homeSolutionPanel_${solution.id}`}>
       <EuiCard
-        className={`homSolutionPanel homSolutionPanel--${solution.id}`}
+        className={`homeSolutionPanel homeSolutionPanel--${solution.id}`}
         description={solution.description}
         href={addBasePath(solution.path)}
         icon={
