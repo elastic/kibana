@@ -45,6 +45,12 @@ export const registerFindRoute = (
         access,
         deprecated: deprecationInfo,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       validate: {
         query: schema.object({
           per_page: schema.number({ min: 0, defaultValue: 20 }),
