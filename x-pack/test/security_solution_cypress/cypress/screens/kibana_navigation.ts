@@ -41,3 +41,5 @@ export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="space-a
 
 export const STACK_MANAGEMENT_PAGE =
   '[data-test-subj="collapsibleNavAppLink"] [title="Stack Management"]';
+
+export const ATTACK_DISCOVERY = '[data-test-subj="solutionSideNavItemLink-attack_discovery"]';
