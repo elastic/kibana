@@ -7,5 +7,6 @@
 
 export enum IntegrationType {
   salesforce = 'salesforce',
-  custom = 'custom',
+  index_source = 'index_source',
+  external_server = 'external_server',
 }

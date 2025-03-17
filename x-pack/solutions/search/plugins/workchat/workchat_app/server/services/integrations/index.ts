@@ -7,4 +7,4 @@
 
 export { IntegrationRegistry } from './integration_registry';
 export { IntegrationsService } from './integrations_service';
-export { registerInternalIntegrationTypes } from './integration_types';
+export type { IntegrationClient } from './integration_client';

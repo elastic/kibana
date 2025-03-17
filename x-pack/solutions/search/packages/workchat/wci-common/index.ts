@@ -12,5 +12,6 @@ export type {
   WorkChatIntegration,
   WorkchatIntegrationDefinition,
   IntegrationConfiguration,
+  Integration,
 } from './src/types';
 export { getClientForInternalServer, getClientForExternalServer } from './src/utils';

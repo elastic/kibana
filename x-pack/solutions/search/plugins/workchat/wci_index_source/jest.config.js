@@ -8,6 +8,6 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/wci_salesforce/server'],
+  roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/wci_index_source/server'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
 };

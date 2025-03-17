@@ -9,6 +9,7 @@ import type { RouteDependencies } from './types';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversation';
 import { registerConnectorRoutes } from './connectors';
+import { registerIntegrationsRoutes } from './integrations';
 import { registerAgentRoutes } from './agents';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -16,4 +17,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerConversationRoutes(dependencies);
   registerConnectorRoutes(dependencies);
   registerAgentRoutes(dependencies);
+  registerIntegrationsRoutes(dependencies);
 };

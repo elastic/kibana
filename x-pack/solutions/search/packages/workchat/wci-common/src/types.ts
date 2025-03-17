@@ -17,7 +17,9 @@ import type { IntegrationType } from './constants';
  * of all things related to this integration type, such as being
  * able to create an actual integration instance.
  */
-export interface WorkchatIntegrationDefinition {
+export interface WorkchatIntegrationDefinition<
+  T extends IntegrationConfiguration = IntegrationConfiguration
+> {
   /**
    * Returns the type of integration.
    */
@@ -26,14 +28,15 @@ export interface WorkchatIntegrationDefinition {
   /**
    * Creates an integration instance based on the provided context
    */
-  createIntegration(context: IntegrationContext): MaybePromise<WorkChatIntegration>;
+  createIntegration(context: IntegrationContext<T>): MaybePromise<WorkChatIntegration>;
 }
 
 export type IntegrationConfiguration = Record<string, any>;
 
-export interface IntegrationContext {
+export interface IntegrationContext<T extends IntegrationConfiguration> {
   request: KibanaRequest;
-  configuration: IntegrationConfiguration;
+  description: string;
+  configuration: T;
 }
 
 /**
