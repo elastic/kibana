@@ -8,7 +8,7 @@ page_description: |
   
   1. [Set up {{kib}} to work with {{stack}} {{security-features}}](docs-content://deploy-manage/security/secure-your-cluster-deployment.md).
   2. [Set up TLS encryption between {{kib}} and {{es}}](docs-content://deploy-manage/security/set-up-basic-security-plus-https.  md#encrypt-kibana-http).
-  3. If you are using an **on-premises** Elastic Stack deployment, [specify a value for `xpack.encryptedSavedObjects.encryptionKey`]  (#general-alert-action-settings).
+  3. If you are using an **on-premises** Elastic Stack deployment, [specify a value for `xpack.encryptedSavedObjects.encryptionKey`](#general-alert-action-settings).
   
   You can configure the following settings in the `kibana.yml` file.
 
@@ -42,8 +42,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
   - group: Action settings
@@ -71,8 +73,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.customHostSettings
@@ -95,8 +100,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
         example: |
           In the following example, two custom host settings are defined.  The first provides a custom host setting for mail server `mail.example.com` using port 465 that supplies server certificate authentication data from both a file and inline, and requires TLS for the connection.  The second provides a custom host setting for https server `webhook.example.com` which turns off server certificate authentication, that will allow Kibana to connect to the server if it's using a self-signed certificate.  The individual properties that can be used in the settings are documented below.
           
@@ -139,8 +147,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.ignoreTLS
@@ -159,8 +170,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].smtp.requireTLS
@@ -179,8 +193,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.verificationMode
@@ -201,8 +218,11 @@ groups:
         - option: none
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesFiles
@@ -221,8 +241,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData
@@ -241,8 +263,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.email.domain_allowlist
@@ -303,8 +328,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.microsoftExchangeUrl
@@ -323,8 +351,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.microsoftGraphApiUrl
@@ -343,8 +373,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.microsoftGraphApiScope
@@ -363,8 +395,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.proxyUrl
@@ -389,8 +423,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
         example: |
           To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the proxy in tunneling mode, and display some of the interaction between the client and the proxy.
           
@@ -416,8 +453,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
         example: |
           For example:
           
@@ -446,8 +486,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
         example: |
           For example:
           
@@ -473,8 +516,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.ssl.proxyVerificationMode
@@ -499,8 +545,11 @@ groups:
           - option: none
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.ssl.verificationMode
@@ -525,8 +574,11 @@ groups:
           - option: none
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.maxResponseContentLength
@@ -545,8 +597,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.responseTimeout
@@ -565,8 +620,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.run.maxAttempts
@@ -585,8 +643,11 @@ groups:
           - option: minimum 1 and maximum 10
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.run.connectorTypeOverrides
@@ -605,8 +666,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
         example: |
           For example:
 
@@ -634,8 +698,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
   - group: Preconfigured connector settings
@@ -672,8 +739,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.actions.preconfigured
@@ -692,8 +762,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.actionTypeId
@@ -718,8 +790,10 @@ groups:
           - option: .webhook
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config
@@ -738,8 +812,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiProvider
@@ -759,8 +835,10 @@ groups:
           - option: Azure OpenAI
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.apiUrl
@@ -789,8 +867,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.appId
@@ -811,8 +891,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.clientId
@@ -834,8 +916,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.configUrl
@@ -854,8 +938,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentJson
@@ -874,8 +960,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentMethod
@@ -896,8 +984,10 @@ groups:
           - option: patch
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createCommentUrl
@@ -916,8 +1006,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentJson
@@ -936,8 +1028,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod
@@ -958,8 +1052,10 @@ groups:
           - option: patch
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentUrl
@@ -978,8 +1074,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey
@@ -998,8 +1096,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.defaultModel
@@ -1022,8 +1122,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.executionTimeField
@@ -1042,8 +1144,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.from
@@ -1062,8 +1166,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentResponseExternalTitleKey
@@ -1082,8 +1188,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.getIncidentUrl
@@ -1102,8 +1210,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.hasAuth
@@ -1122,8 +1232,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.headers
@@ -1142,8 +1254,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.host
@@ -1162,8 +1276,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.index
@@ -1182,8 +1298,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.isOAuth
@@ -1202,8 +1320,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.jwtKeyId
@@ -1222,8 +1342,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings
@@ -1242,8 +1364,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig
@@ -1262,8 +1386,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig
@@ -1282,8 +1408,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig
@@ -1302,8 +1430,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig
@@ -1322,8 +1452,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig
@@ -1342,8 +1474,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig
@@ -1362,8 +1496,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig
@@ -1382,8 +1518,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.method
@@ -1403,8 +1541,10 @@ groups:
           - option: put
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.orgId
@@ -1423,8 +1563,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.port
@@ -1443,8 +1585,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.projectKey
@@ -1463,8 +1607,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.secure
@@ -1483,8 +1629,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.service
@@ -1503,8 +1651,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.tenantId
@@ -1523,8 +1673,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson
@@ -1543,8 +1695,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentMethod
@@ -1565,8 +1719,10 @@ groups:
           - option: patch
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.updateIncidentUrl
@@ -1585,8 +1741,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.url
@@ -1609,8 +1767,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue
@@ -1629,8 +1789,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesBasic
@@ -1649,8 +1811,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.usesTableApi
@@ -1669,8 +1833,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl
@@ -1689,8 +1855,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl
@@ -1709,8 +1877,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.name
@@ -1729,8 +1899,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets
@@ -1749,8 +1921,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.accessKey
@@ -1769,8 +1943,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apikey
@@ -1789,8 +1965,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson
@@ -1812,8 +1990,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeyId
@@ -1832,8 +2012,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiKeySecret
@@ -1852,8 +2034,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.apiToken
@@ -1872,8 +2056,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.clientSecret
@@ -1895,8 +2081,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.email
@@ -1918,8 +2106,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.password
@@ -1942,8 +2132,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKey
@@ -1962,8 +2154,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.privateKeyPassword
@@ -1982,8 +2176,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.routingKey
@@ -2002,8 +2198,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secret
@@ -2022,8 +2220,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl
@@ -2042,8 +2242,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.token
@@ -2067,8 +2269,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.user
@@ -2091,8 +2295,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl
@@ -2114,8 +2320,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.actions.preconfigured.<connector-id>.secrets.username
@@ -2134,8 +2342,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
   - group: Alerting settings
@@ -2160,8 +2370,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.alerting.rules.maxScheduledPerMinute
@@ -2180,8 +2393,10 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        # platforms:
-        #   - cloud/serverless/self-managed
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
          # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.value
@@ -2200,8 +2415,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.alerting.rules.minimumScheduleInterval.enforce
@@ -2220,8 +2438,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.alerting.rules.run.actions.max
@@ -2240,8 +2461,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.alerting.rules.run.alerts.max
@@ -2260,8 +2484,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.alerting.rules.run.timeout
@@ -2280,8 +2507,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
          # example: |
 
       - setting: xpack.alerting.rules.run.ruleTypeOverrides
@@ -2300,8 +2530,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
         example: |
           For example:
           
@@ -2329,8 +2562,11 @@ groups:
         #   - option:
         #     description: ""
         # type: static/dynamic
-        platforms:
-          - cloud
+        applies_to:
+          stack: ga
+          deployment:
+            self: ga
+            ess: ga
         example: |
           For example:
           
