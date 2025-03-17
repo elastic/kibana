@@ -80,7 +80,7 @@ export function createIngestStatsTaskConfig() {
           elapsed: performance.now() - start,
         } as LogMeta);
 
-        return 0;
+        return ingestStats.length;
       } catch (err) {
         log.warn(`Error running ingest stats task`, {
           error: err.message,
