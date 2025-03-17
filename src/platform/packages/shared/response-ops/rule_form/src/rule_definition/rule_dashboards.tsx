@@ -44,7 +44,7 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   >();
 
   useEffect(() => {
-    if ((dashboardsFormData ?? []).length > 0) {
+    if ((dashboardsFormData ?? []).length > 0 && dashboardService) {
       const fetchDashboardTitles = async () => {
         const dashboardsWithTitles = await Promise.all(
           (dashboardsFormData ?? []).map(async (dashboard) => ({
@@ -80,11 +80,13 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   });
 
   const loadDashboards = useCallback(async () => {
-    const dashboards = await dashboardServiceProvider(dashboardService).fetchDashboards();
-    const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
-      getDashboardItem(dashboard)
-    );
-    setDashboardList(dashboardOptions);
+    if (dashboardService) {
+      const dashboards = await dashboardServiceProvider(dashboardService).fetchDashboards();
+      const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
+        getDashboardItem(dashboard)
+      );
+      setDashboardList(dashboardOptions);
+    }
   }, [dashboardService]);
 
   useEffect(() => {

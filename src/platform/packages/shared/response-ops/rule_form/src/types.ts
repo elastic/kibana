@@ -73,7 +73,7 @@ export interface RuleFormPlugins {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
-  dashboard: DashboardStart;
+  dashboard?: DashboardStart;
   featureFlags: FeatureFlagsStart;
 }
 
