@@ -33,8 +33,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover esql grid with legacy setting', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
@@ -42,8 +46,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({});
     });
 

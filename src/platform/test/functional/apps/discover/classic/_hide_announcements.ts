@@ -19,8 +19,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('test hide announcements', function () {
     before(async function () {
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         'doc_table:legacy': true,

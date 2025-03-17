@@ -22,8 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('classic table doc link', function contextSize() {
     before(async () => {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
@@ -32,7 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     after(async () => {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({});
     });
 

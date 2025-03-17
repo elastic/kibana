@@ -21,7 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover doc table newline handling', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_message_with_newline']);
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/message_with_newline');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/message_with_newline'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/message_with_newline.json'
       );
@@ -34,7 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/message_with_newline');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/message_with_newline'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
     });

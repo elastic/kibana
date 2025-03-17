@@ -31,8 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
