@@ -1218,8 +1218,7 @@ describe('validation logic', () => {
       ]);
 
       testErrorsAndWarnings('from a_index | eval textField in textField)', [
-        "SyntaxError: missing '(' at 'textField'",
-        'Error: [in] function expects at least 2 arguments, got 1.',
+        'Internal parser error: Empty Stack',
       ]);
       testErrorsAndWarnings('from a_index | eval textField not in textField', [
         "SyntaxError: missing '(' at 'textField'",

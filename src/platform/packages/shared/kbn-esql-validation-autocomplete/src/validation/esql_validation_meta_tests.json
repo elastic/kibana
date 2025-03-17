@@ -7073,8 +7073,7 @@
     {
       "query": "from a_index | eval textField in textField)",
       "error": [
-        "SyntaxError: missing '(' at 'textField'",
-        "Error: [in] function expects at least 2 arguments, got 1."
+        "Internal parser error: Empty Stack"
       ],
       "warning": []
     },

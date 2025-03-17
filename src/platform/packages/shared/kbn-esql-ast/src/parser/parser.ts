@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { CharStreams, type Token } from 'antlr4';
 import { CommonTokenStream, type CharStream, type ErrorListener } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
@@ -149,10 +151,6 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
 
     return { root, ast: commands, errors, tokens: tokens.tokens };
   } catch (error) {
-    /**
-     * Parsing should never fail, meaning this branch should never execute. But
-     * if it does fail, we want to log the error message for easier debugging.
-     */
     // eslint-disable-next-line no-console
     console.error(error);
 
@@ -167,9 +165,12 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
           endLineNumber: 0,
           startColumn: 0,
           endColumn: 0,
-          message:
-            'Parsing internal error: ' +
-            (!!error && typeof error === 'object' ? String(error.message) : String(error)),
+          message: i18n.translate('foo.bar', {
+            defaultMessage: 'Internal parser error: {error}',
+            values: {
+              error: !!error && typeof error === 'object' ? String(error.message) : String(error),
+            },
+          }),
           severity: 'error',
         },
       ],
