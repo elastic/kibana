@@ -1163,7 +1163,6 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test_serverless/functional/test_suites/common/examples/search @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/test_suites/common/examples/unified_tabs_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
@@ -1516,8 +1515,6 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /src/platform/test/functional/screenshots/baseline/tsvb_dashboard.png @elastic/kibana-presentation
 /src/platform/test/functional/screenshots/baseline/dashboard_*.png @elastic/kibana-presentation
 /src/platform/test/functional/screenshots/baseline/area_chart.png @elastic/kibana-presentation
-/test/functional/screenshots/baseline/unified_tabs_*.png @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/screenshots/baseline/unified_tabs_*.png @elastic/kibana-data-discovery
 /x-pack/test/disable_ems @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/165986
 /x-pack/test/functional/fixtures/kbn_archiver/dashboard* @elastic/kibana-presentation
 /src/platform/test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
