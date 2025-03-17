@@ -9,7 +9,10 @@ import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { IndicatorsTable, IndicatorsTableProps } from './table';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
-import { generateMockIndicator, Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import {
+  generateMockIndicator,
+  Indicator,
+} from '../../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 import { INDICATORS_FLYOUT_TITLE_TEST_ID } from '../flyout/test_ids';
 
@@ -79,8 +82,6 @@ describe('<IndicatorsTable />', () => {
         </TestProvidersComponent>
       );
     });
-
-    screen.debug();
 
     expect(screen.queryByTestId(TABLE_UPDATE_PROGRESS_TEST_ID)).toBeInTheDocument();
   });
