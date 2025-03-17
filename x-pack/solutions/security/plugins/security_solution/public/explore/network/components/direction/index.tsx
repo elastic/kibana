@@ -60,8 +60,10 @@ export const DirectionBadge = React.memo<{
   contextId: string;
   direction?: string | null;
   eventId: string;
-}>(({ contextId, eventId, direction }) => (
+  scopeId: string;
+}>(({ contextId, eventId, direction, scopeId }) => (
   <DraggableBadge
+    scopeId={scopeId}
     contextId={contextId}
     eventId={eventId}
     field={NETWORK_DIRECTION_FIELD_NAME}
