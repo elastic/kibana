@@ -6,12 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
-import { EuiSpacer, useEuiTheme, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import { EuiSpacer, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { JobsListView } from './components/jobs_list_view';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { HelpMenu } from '../../components/help_menu';
@@ -29,7 +29,6 @@ import { NewJobButton } from './components/new_job_button';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
 import { ExportJobsFlyout } from '../../components/import_export_jobs';
-import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -66,37 +65,12 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
   const [canCreateJob] = usePermissionCheck(['canCreateJob']);
-  const [showSyncFlyout, setShowSyncFlyout] = useState(false);
-
-  function onCloseSyncFlyout() {
-    if (typeof refreshJobs === 'function') {
-      refreshJobs();
-    }
-    setShowSyncFlyout(false);
-  }
 
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <>
-              <EuiButtonEmpty
-                onClick={() => setShowSyncFlyout(true)}
-                data-test-subj="mlStackMgmtSyncButton"
-              >
-                {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                  defaultMessage: 'Synchronize saved objects',
-                })}
-              </EuiButtonEmpty>
-              {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-              <EuiSpacer size="s" />
-            </>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiFlexGroup>
-          <EuiFlexItem grow={true}>
+        <EuiFlexGroup wrap={true}>
+          <EuiFlexItem grow={true} css={css({ minWidth: '200px' })}>
             <FormattedMessage
               id="xpack.ml.jobsList.title"
               defaultMessage="Anomaly Detection Jobs"
