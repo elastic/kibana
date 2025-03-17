@@ -13,6 +13,7 @@ import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { TimelineId } from '../../../../common/types/timeline';
 import { selectTimelineById } from '../../../timelines/store/selectors';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import type { State } from '../../store';
 
 interface UseInspectModalProps {
@@ -38,7 +39,9 @@ export const useInspect = ({
 
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
-  const { activeTab } = useSelector((state: State) => selectTimelineById(state, TimelineId.active));
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
 
   const { loading, inspect, selectedInspectIndex, isInspected, searchSessionId } =
     useDeepEqualSelector((state) =>

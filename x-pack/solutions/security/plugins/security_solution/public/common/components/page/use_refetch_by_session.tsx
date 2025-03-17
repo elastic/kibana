@@ -18,7 +18,7 @@ import type { Refetch } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import type { State } from '../../store';
-
+import { timelineDefaults } from '../../../timelines/store/defaults';
 interface UseRefetchByRestartingSessionProps {
   inputId?: InputsModelId;
   queryId: string;
@@ -39,7 +39,9 @@ export const useRefetchByRestartingSession = ({
 
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
-  const { activeTab } = useSelector((state: State) => selectTimelineById(state, TimelineId.active));
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
 
   const { selectedInspectIndex } = useDeepEqualSelector((state) =>
     inputId === InputsModelId.global

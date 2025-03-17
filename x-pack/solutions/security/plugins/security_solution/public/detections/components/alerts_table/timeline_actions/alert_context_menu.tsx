@@ -52,7 +52,7 @@ import type { Rule } from '../../../../detection_engine/rule_management/logic/ty
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
-
+import { timelineDefaults } from '../../../../timelines/store/defaults';
 interface AlertContextMenuProps {
   ariaLabel?: string;
   ariaRowindex: number;
@@ -80,7 +80,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
-  const { activeTab } = useSelector((state: State) => selectTimelineById(state, TimelineId.active));
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
   const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
   const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
   const globalQuery = useSelector((state: State) => getGlobalQueries(state));
