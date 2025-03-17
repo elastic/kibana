@@ -219,6 +219,9 @@ describe('getESUpgradeStatus', () => {
           details: 'This index was created using version: 6.8.13',
           // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: {
+            reindex_required: true,
+          },
         },
         {
           level: 'critical',
@@ -227,6 +230,9 @@ describe('getESUpgradeStatus', () => {
           details: 'This index was created using version: 6.8.13',
           // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: {
+            reindex_required: true,
+          },
         },
       ],
       ml_settings: [],
@@ -394,6 +400,9 @@ describe('getESUpgradeStatus', () => {
           details: 'This index was created using version: 6.8.13',
           // @ts-ignore
           resolve_during_rolling_upgrade: false,
+          _meta: {
+            reindex_required: true,
+          },
         },
       ],
       ml_settings: [],

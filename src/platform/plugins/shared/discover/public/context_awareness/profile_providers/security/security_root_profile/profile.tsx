@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RootProfileProvider, SolutionType } from '../../../profiles';
-import { ProfileProviderServices } from '../../profile_provider_services';
-import { SecurityProfileProviderFactory } from '../types';
+import type { RootProfileProvider } from '../../../profiles';
+import { SolutionType } from '../../../profiles';
+import type { ProfileProviderServices } from '../../profile_provider_services';
+import type { SecurityProfileProviderFactory } from '../types';
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   RootProfileProvider

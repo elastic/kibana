@@ -4062,6 +4062,176 @@ paths:
       summary: Update the API key for a rule
       tags:
         - alerting
+  /api/alerting/rule/{id}/snooze_schedule:
+    post:
+      description: When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.
+      operationId: post-alerting-rule-id-snooze-schedule
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Identifier of the rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                schedule:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    custom:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        duration:
+                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                          type: string
+                        recurring:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            end:
+                              description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                              type: string
+                            every:
+                              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                              type: string
+                            occurrences:
+                              description: The total number of recurrences of the schedule.
+                              minimum: 1
+                              type: number
+                            onMonth:
+                              description: The specific months for a recurring schedule. Valid values are 1-12.
+                              items:
+                                maximum: 12
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onMonthDay:
+                              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                              items:
+                                maximum: 31
+                                minimum: 1
+                                type: number
+                              minItems: 1
+                              type: array
+                            onWeekDay:
+                              description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                              items:
+                                type: string
+                              minItems: 1
+                              type: array
+                        start:
+                          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                          type: string
+                        timezone:
+                          description: The timezone of the schedule. The default timezone is UTC.
+                          type: string
+                      required:
+                        - start
+                        - duration
+              required:
+                - schedule
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  body:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      schedule:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          custom:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              duration:
+                                description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+                                type: string
+                              recurring:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  end:
+                                    description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+                                    type: string
+                                  every:
+                                    description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+                                    type: string
+                                  occurrences:
+                                    description: The total number of recurrences of the schedule.
+                                    minimum: 1
+                                    type: number
+                                  onMonth:
+                                    description: The specific months for a recurring schedule. Valid values are 1-12.
+                                    items:
+                                      maximum: 12
+                                      minimum: 1
+                                      type: number
+                                    minItems: 1
+                                    type: array
+                                  onMonthDay:
+                                    description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+                                    items:
+                                      maximum: 31
+                                      minimum: 1
+                                      type: number
+                                    minItems: 1
+                                    type: array
+                                  onWeekDay:
+                                    description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+                                    items:
+                                      type: string
+                                    minItems: 1
+                                    type: array
+                              start:
+                                description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+                                type: string
+                              timezone:
+                                description: The timezone of the schedule. The default timezone is UTC.
+                                type: string
+                            required:
+                              - start
+                              - duration
+                          id:
+                            description: Identifier of the snooze schedule.
+                            type: string
+                        required:
+                          - id
+                    required:
+                      - schedule
+                required:
+                  - body
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given id does not exist.
+      summary: Schedule a snooze for the rule
+      tags:
+        - alerting
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
@@ -10880,11 +11050,50 @@ paths:
   /api/detection_engine/rules/_bulk_create:
     post:
       deprecated: true
-      description: Create new detection rules in bulk.
+      description: |
+        Create new detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: BulkCreateRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - description: Process started by MS Office program - possible payload
+                    enabled: false
+                    filters:
+                      - query:
+                          match:
+                            event.action:
+                              query: 'Process Create (rule: ProcessCreate)'
+                              type: phrase
+                    from: now-6m
+                    interval: 5m
+                    language: kuery
+                    name: MS Office child process
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or process.parent.name:OUTLOOK.EXE or process.parent.name:POWERPNT.EXE or process.parent.name:VISIO.EXE or process.parent.name:WINWORD.EXE
+                    risk_score: 50
+                    rule_id: process_started_by_ms_office_program_possible_payload
+                    severity: low
+                    tags:
+                      - child process
+                      - ms office
+                    type: query
+                  - description: Query with a rule_id for referencing an external id
+                    from: now-6m
+                    name: Second bulk rule
+                    query: 'user.name: root or user.name: admin'
+                    risk_score: 2
+                    rule_id: query-rule-id-2
+                    severity: low
+                    type: query
             schema:
               items:
                 $ref: '#/components/schemas/Security_Detections_API_RuleCreateProps'
@@ -10904,11 +11113,19 @@ paths:
   /api/detection_engine/rules/_bulk_delete:
     delete:
       deprecated: true
-      description: Delete detection rules in bulk.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkDeleteRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
             schema:
               items:
                 type: object
@@ -10952,11 +11169,19 @@ paths:
         - Security Detections API
     post:
       deprecated: true
-      description: Deletes multiple rules.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkDeleteRulesPost
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
             schema:
               items:
                 type: object
@@ -11001,11 +11226,35 @@ paths:
   /api/detection_engine/rules/_bulk_update:
     patch:
       deprecated: true
-      description: Update specific fields of existing detection rules using the `rule_id` or `id` field.
+      description: |
+        Update specific fields of existing detection rules using the `rule_id` or `id` field.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: BulkPatchRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                    threat:
+                      - framework: MITRE ATT&CK
+                        id: TA0001
+                        name: Initial Access
+                        reference: https://attack.mitre.org/tactics/TA0001
+                        tactic: null
+                        technique:
+                          - id: T1193
+                            name: Spearphishing Attachment
+                            reference: https://attack.mitre.org/techniques/T1193
+                  - id: 56b22b65-173e-4a5b-b27a-82599cb1433e
+                    name: New name
             schema:
               items:
                 $ref: '#/components/schemas/Security_Detections_API_RulePatchProps'
@@ -11026,17 +11275,44 @@ paths:
       deprecated: true
       description: |
         Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
-        > info
-        > You cannot modify the `id` or `rule_id` values.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: BulkUpdateRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - description: Detects when a previously suspended user's account is renewed in Google Workspace. An adversary may renew a suspended user account to maintain access to the Google Workspace organization with a valid account.
+                    id: 7d2f5ed8-6c05-44ab-81ce-9160ae147057
+                    name: Updated Google Workspace Suspended User Account Renewed
+                    risk_score: 21
+                    severity: low
+                    tags:
+                      - new_tag
+                    type: query
+                  - description: Identifies the creation of an Amazon Redshift cluster. Unexpected creation of this cluster by a non-administrative user may indicate a permission or role issue with current users. If unexpected, the resource may not properly be configured and could introduce security vulnerabilities.
+                    id: 43b2dc3b-4f21-4a10-95e2-0dbc19e6e974
+                    name: Updated AWS Redshift Cluster Creation
+                    risk_score: 21
+                    severity: low
+                    tags:
+                      - new_tag
+                    type: query
             schema:
               items:
                 $ref: '#/components/schemas/Security_Detections_API_RuleUpdateProps'
               type: array
-        description: A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.
+        description: |
+          A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to be specified in this rule.
+          > info
+          > All unspecified fields are deleted. You cannot modify the `id` or `rule_id` values.
         required: true
       responses:
         '200':
