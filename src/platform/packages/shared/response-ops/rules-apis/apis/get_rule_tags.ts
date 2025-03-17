@@ -51,7 +51,7 @@ export async function getRuleTags({
         search,
         per_page: perPage,
         page,
-        rule_type_ids: ruleTypeIds,
+        rule_type_ids: ruleTypeIds ? JSON.stringify(ruleTypeIds) : undefined,
       },
     }
   );
