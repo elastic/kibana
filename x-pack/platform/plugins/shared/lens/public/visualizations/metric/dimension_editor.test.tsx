@@ -53,6 +53,16 @@ describe('dimension editor', () => {
     collapseFn: 'sum',
     subtitle: faker.lorem.word(5),
     secondaryPrefix: faker.lorem.word(3),
+    secondaryColorMode: 'static',
+    secondaryColor: faker.color.rgb(),
+    secondaryTrend: {
+      visuals: 'both',
+      baselineValue: 0,
+      palette: {
+        name: faker.lorem.word(),
+        stops: [faker.color.rgb(), faker.color.rgb(), faker.color.rgb()],
+      },
+    },
     progressDirection: 'vertical',
     maxCols: 5,
     color: faker.internet.color(),
