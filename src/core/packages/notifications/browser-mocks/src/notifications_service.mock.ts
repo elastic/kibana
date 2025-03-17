@@ -11,6 +11,7 @@ import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { NotificationsServiceContract } from '@kbn/core-notifications-browser-internal';
 import { toastsServiceMock } from './toasts_service.mock';
+import { productInterceptServiceMock } from './product_intercept_service.mock';
 
 const createSetupContractMock = () => {
   const setupContract: MockedKeys<NotificationsSetup> = {
@@ -24,6 +25,7 @@ const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<NotificationsStart> = {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
+    productIntercepts: productInterceptServiceMock.createStartContract(),
     showErrorDialog: jest.fn(),
   };
   return startContract;
