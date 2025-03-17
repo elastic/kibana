@@ -40,6 +40,7 @@ export const DashboardViewport = ({
     description,
     expandedPanelId,
     panels,
+    sections,
     viewMode,
     useMargins,
     fullScreenMode,
@@ -49,6 +50,7 @@ export const DashboardViewport = ({
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
     dashboardApi.panels$,
+    dashboardApi.sections$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
@@ -133,16 +135,19 @@ export const DashboardViewport = ({
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
         </EuiPortal>
       )}
-      {panelCount === 0 && <DashboardEmptyScreen />}
-      <div
-        className={classes}
-        data-shared-items-container
-        data-title={dashboardTitle}
-        data-description={description}
-        data-shared-items-count={panelCount}
-      >
-        <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
-      </div>
+      {panelCount === 0 && (sections ?? []).length === 0 ? (
+        <DashboardEmptyScreen />
+      ) : (
+        <div
+          className={classes}
+          data-shared-items-container
+          data-title={dashboardTitle}
+          data-description={description}
+          data-shared-items-count={panelCount}
+        >
+          <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        </div>
+      )}
     </div>
   );
 };

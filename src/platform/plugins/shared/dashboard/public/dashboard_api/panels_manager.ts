@@ -395,6 +395,7 @@ export function initializePanelsManager(
       },
       reset: (lastSavedState: DashboardState) => {
         setPanels(lastSavedState.panels);
+        setSections(lastSavedState.sections);
         restoredRuntimeState = {};
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;

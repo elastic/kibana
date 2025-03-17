@@ -113,7 +113,7 @@ export const DashboardGrid = ({
         Object.values(section.panels).forEach((panelLayout) => {
           updatedPanels[panelLayout.id] = {
             ...currentPanels[panelLayout.id],
-            sectionIndex,
+            ...(sectionIndex === firstRowId.current ? {} : { sectionIndex }),
             gridData: {
               i: panelLayout.id,
               y: panelLayout.row,
@@ -128,6 +128,7 @@ export const DashboardGrid = ({
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
+      console.log(currentSections, updatedSections);
       if (!deepEqual(currentSections ?? [], updatedSections ?? [])) {
         dashboardApi.setSections(updatedSections);
       }
