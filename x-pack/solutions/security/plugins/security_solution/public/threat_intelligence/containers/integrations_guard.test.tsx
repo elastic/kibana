@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { IntegrationsGuard } from './integrations_guard';
 import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
-import { Integration, useIntegrations } from '../hooks/use_integrations';
+import type { Integration } from '../hooks/use_integrations';
+import { useIntegrations } from '../hooks/use_integrations';
 import { useIntegrationsPageLink } from '../hooks/use_integrations_page_link';
 import { useTIDocumentationLink } from '../hooks/use_documentation_link';
 import { useIndicatorsTotalCount } from '../modules/indicators/hooks/use_total_count';
@@ -42,9 +43,12 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-      wrapper: TestProvidersComponent,
-    });
+    const { getByTestId } = render(
+      <IntegrationsGuard>{'should be restricted'}</IntegrationsGuard>,
+      {
+        wrapper: TestProvidersComponent,
+      }
+    );
 
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
@@ -68,9 +72,12 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-      wrapper: TestProvidersComponent,
-    });
+    const { getByTestId } = render(
+      <IntegrationsGuard>{'should be restricted'}</IntegrationsGuard>,
+      {
+        wrapper: TestProvidersComponent,
+      }
+    );
 
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
@@ -95,9 +102,12 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-      wrapper: TestProvidersComponent,
-    });
+    const { getByTestId } = render(
+      <IntegrationsGuard>{'should be restricted'}</IntegrationsGuard>,
+      {
+        wrapper: TestProvidersComponent,
+      }
+    );
 
     expect(getByTestId(LOADING_LOGO_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
@@ -121,9 +131,12 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { getByTestId } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-      wrapper: TestProvidersComponent,
-    });
+    const { getByTestId } = render(
+      <IntegrationsGuard>{'should be restricted'}</IntegrationsGuard>,
+      {
+        wrapper: TestProvidersComponent,
+      }
+    );
     expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
   });
@@ -140,7 +153,7 @@ describe('IntegrationsGuard', () => {
       data: [],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+    const { asFragment } = render(<IntegrationsGuard>{'should be restricted'}</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
     expect(asFragment()).toMatchInlineSnapshot(`
@@ -168,7 +181,7 @@ describe('IntegrationsGuard', () => {
       ],
     } as unknown as UseQueryResult<Integration[]>);
 
-    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+    const { asFragment } = render(<IntegrationsGuard>{'should be restricted'}</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
     });
     expect(asFragment()).toMatchInlineSnapshot(`
