@@ -38,14 +38,34 @@ export function registerInternalGetRoute(router: InternalUiSettingsRouter) {
     }
   };
   router.get(
-    { path: '/internal/kibana/settings', validate: false, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/settings',
+      validate: false,
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await getFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.get(
-    { path: '/internal/kibana/global_settings', validate: false, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/global_settings',
+      validate: false,
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await getFromRequest(uiSettingsClient, context, request, response);

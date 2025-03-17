@@ -39,13 +39,11 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { BulkCreate, BulkResponse, WrapHits } from '../types';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../rule_schema/mocks';
+import type { BulkCreate, BulkResponse } from '../types';
+import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { bulkCreateFactory } from '../factories/bulk_create_factory';
-import { wrapHitsFactory } from '../factories/wrap_hits_factory';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
-import type { QueryRuleParams } from '../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
 
@@ -60,20 +58,7 @@ describe('searchAfterAndBulkCreate', () => {
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
   const sampleParams = getQueryRuleParams();
-  const queryCompleteRule = getCompleteRuleMock<QueryRuleParams>(sampleParams);
   const inputIndex = ['auditbeat-*'];
-  const wrapHits: WrapHits = wrapHitsFactory({
-    completeRule: queryCompleteRule,
-    mergeStrategy: 'missingFields',
-    ignoreFields: {},
-    ignoreFieldsRegexes: [],
-    spaceId: 'default',
-    indicesToQuery: inputIndex,
-    alertTimestampOverride: undefined,
-    ruleExecutionLogger,
-    publicBaseUrl: 'http://testkibanabaseurl.com',
-    intendedTimestamp: undefined,
-  });
   const bulkCreate: BulkCreate = bulkCreateFactory(
     mockPersistenceServices.alertWithPersistence,
     false,
@@ -102,7 +87,6 @@ describe('searchAfterAndBulkCreate', () => {
     rewrites: {
       inputIndex,
       bulkCreate,
-      wrapHits,
       searchAfterSize: 1,
       listClient,
     },

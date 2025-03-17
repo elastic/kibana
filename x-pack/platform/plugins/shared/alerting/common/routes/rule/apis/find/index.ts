@@ -11,6 +11,7 @@ export type { FindRulesRequestQuery, FindRulesResponse } from './types/latest';
 export {
   findRulesRequestQuerySchema as findRulesRequestQuerySchemaV1,
   findRulesInternalRequestBodySchema as findRulesInternalRequestBodySchemaV1,
+  findRuleParamsExamples as findRuleParamsExamplesV1,
 } from './schemas/v1';
 
 export type {

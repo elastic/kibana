@@ -332,6 +332,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -381,6 +382,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -430,6 +432,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -479,6 +482,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -529,6 +533,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -578,6 +583,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -627,6 +633,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -676,6 +683,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -725,6 +733,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -774,6 +783,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -823,6 +833,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -872,6 +883,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -921,6 +933,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -970,6 +983,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -1019,6 +1033,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -1069,6 +1084,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -1119,6 +1135,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -1169,6 +1186,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())
@@ -1218,6 +1236,7 @@ describe('SourceDestinationIp', () => {
     render(
       <TestProviders>
         <SourceDestinationIp
+          scopeId="some_scope"
           contextId="test"
           destinationGeoContinentName={asArrayIfExists(
             get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, getMockNetflowData())

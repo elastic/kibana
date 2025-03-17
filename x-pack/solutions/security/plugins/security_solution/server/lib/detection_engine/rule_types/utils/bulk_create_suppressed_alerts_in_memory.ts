@@ -35,6 +35,7 @@ import type {
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
 import type { EqlRuleParams } from '../../rule_schema';
+import { wrapHits } from '../factories';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
@@ -97,7 +98,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
       mergeSourceAndFields
     );
 
-    unsuppressibleWrappedDocs = sharedParams.wrapHits(partitionedEvents[1], buildReasonMessage);
+    unsuppressibleWrappedDocs = wrapHits(sharedParams, partitionedEvents[1], buildReasonMessage);
     suppressibleEvents = partitionedEvents[0];
   }
 

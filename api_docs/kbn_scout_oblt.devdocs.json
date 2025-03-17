@@ -1201,6 +1201,14 @@
           "ScoutSpaceParallelFixture",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
+          "; config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
           "; } & ",
           {
             "pluginId": "@kbn/scout",
@@ -1257,7 +1265,9 @@
             "section": "def-common.PageObjects",
             "text": "PageObjects"
           },
-          "; } & { validateTags: void; } & ",
+          "; } & { validateTags: void; } & { perfTracker: ",
+          "PerformanceTracker",
+          "; } & ",
           {
             "pluginId": "@kbn/scout-oblt",
             "scope": "common",
@@ -1326,6 +1336,14 @@
             "docId": "kibKbnScoutPluginApi",
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
+          },
+          "; } & { config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
           },
           "; } & ",
           {
@@ -6350,6 +6368,20 @@
             "type": "Array",
             "tags": [],
             "label": "DEPLOYMENT_AGNOSTIC",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.tags.PERFORMANCE",
+            "type": "Array",
+            "tags": [],
+            "label": "PERFORMANCE",
             "description": [],
             "signature": [
               "string[]"

@@ -10,8 +10,7 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { usePersistConfiguration } from './use_persist_configuration';
 import * as api from './api';
 import { useToasts } from '../../common/lib/kibana';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { ConnectorTypes } from '../../../common';
 import { casesQueriesKeys } from '../constants';
 import {
@@ -19,6 +18,8 @@ import {
   observableTypesMock,
   templatesConfigurationMock,
 } from '../mock';
+import { TestProviders, createTestQueryClient } from '../../common/mock';
+import React from 'react';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
@@ -49,10 +50,7 @@ describe('usePersistConfiguration', () => {
     observableTypes: observableTypesMock,
   };
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -61,7 +59,7 @@ describe('usePersistConfiguration', () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -87,7 +85,7 @@ describe('usePersistConfiguration', () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -112,7 +110,7 @@ describe('usePersistConfiguration', () => {
     const spyPost = jest.spyOn(api, 'postCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newRequest = {
@@ -142,7 +140,7 @@ describe('usePersistConfiguration', () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -167,7 +165,7 @@ describe('usePersistConfiguration', () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const newRequest = {
@@ -196,7 +194,7 @@ describe('usePersistConfiguration', () => {
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
 
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const { observableTypes, ...rest } = request;
@@ -223,9 +221,11 @@ describe('usePersistConfiguration', () => {
   });
 
   it('invalidates the queries correctly', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {
@@ -239,7 +239,7 @@ describe('usePersistConfiguration', () => {
 
   it('shows the success toaster', async () => {
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -257,7 +257,7 @@ describe('usePersistConfiguration', () => {
       .mockRejectedValue(new Error('useCreateAttachments: Test error'));
 
     const { result } = renderHook(() => usePersistConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

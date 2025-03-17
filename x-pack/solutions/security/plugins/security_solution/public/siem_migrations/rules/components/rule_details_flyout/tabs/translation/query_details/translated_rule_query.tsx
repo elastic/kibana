@@ -45,46 +45,38 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
     const isInstalled = !!ruleMigration.elastic_rule?.id;
     const canEdit = !matchedPrebuiltRule && !isInstalled;
 
-    const ruleName = useMemo(
-      () => matchedPrebuiltRule?.name ?? ruleMigration.elastic_rule?.title ?? '',
-      [matchedPrebuiltRule?.name, ruleMigration.elastic_rule?.title]
-    );
-
     const translatedData = useMemo(() => {
-      let title = i18n.TRANSLATION_QUERY_TITLE('ES|QL');
+      let ruleName = ruleMigration.elastic_rule?.title ?? '';
+      let title = i18n.CUSTOM_TRANSLATION_TITLE;
       let titleTooltip = i18n.TRANSLATION_QUERY_TOOLTIP;
       let query = ruleMigration.elastic_rule?.query ?? '';
       let language = ruleMigration.elastic_rule?.query_language ?? '';
       let queryPlaceholder = i18n.TRANSLATION_QUERY_PLACEHOLDER;
       if (matchedPrebuiltRule) {
+        ruleName = matchedPrebuiltRule.name;
         if (matchedPrebuiltRule.type === 'machine_learning') {
           title = i18n.MACHINE_LEARNING_RULE_TITLE;
           titleTooltip = i18n.MACHINE_LEARNING_RULE_TOOLTIP;
           queryPlaceholder = i18n.MACHINE_LEARNING_RULE_QUERY_PLACEHOLDER;
         } else {
-          title = i18n.TRANSLATION_QUERY_TITLE(
-            transformQueryLanguage(matchedPrebuiltRule.language)
-          );
+          title = i18n.PREBUILT_RULE_TITLE(transformQueryLanguage(matchedPrebuiltRule.language));
           query = matchedPrebuiltRule.query ?? '';
           language = matchedPrebuiltRule.language;
         }
       }
       return {
+        ruleName,
         title,
         titleTooltip,
         query,
         language,
         queryPlaceholder,
       };
-    }, [
-      matchedPrebuiltRule,
-      ruleMigration.elastic_rule?.query,
-      ruleMigration.elastic_rule?.query_language,
-    ]);
+    }, [matchedPrebuiltRule, ruleMigration.elastic_rule]);
 
     const formDefaultValue: RuleTranslationSchema = useMemo(() => {
       return {
-        ruleName,
+        ruleName: translatedData.ruleName,
         queryBar: {
           query: {
             query: translatedData.query,
@@ -92,7 +84,7 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
           },
         },
       };
-    }, [ruleName, translatedData.query]);
+    }, [translatedData.query, translatedData.ruleName]);
     const { form } = useFormWithWarnings<RuleTranslationSchema>({
       defaultValue: formDefaultValue,
       options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
@@ -119,14 +111,14 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
         <EuiHorizontalRule margin="xs" />
         {isEditing ? (
           <QueryEditor
+            ruleName={translatedData.ruleName}
             query={translatedData.query}
-            ruleName={ruleName}
             onSave={onSave}
             onCancel={onCancel}
           />
         ) : (
           <QueryViewer
-            ruleName={ruleName}
+            ruleName={translatedData.ruleName}
             language={translatedData.language}
             query={translatedData.query}
             queryPlaceholder={translatedData.queryPlaceholder}

@@ -1091,6 +1091,26 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
               },
               {
+                "plugin": "@kbn/storybook",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/decorators.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/server/plugin.ts"
+              },
+              {
                 "plugin": "@kbn/shared-ux-chrome-navigation",
                 "path": "src/platform/packages/shared/shared-ux/chrome/navigation/mocks/storybook.ts"
               },
@@ -1991,6 +2011,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/core",

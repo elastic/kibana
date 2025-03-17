@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
@@ -530,4 +530,4 @@ export default {
     },
   },
   component: GeneralLayoutStructure,
-} as ComponentMeta<typeof GeneralLayoutStructure>;
+} as Meta<typeof GeneralLayoutStructure>;

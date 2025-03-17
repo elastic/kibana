@@ -7,8 +7,8 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { TestProviders } from '../../common/mock';
 import { useGetActionTypes } from './use_action_types';
 import { useToasts } from '../../common/lib/kibana';
 
@@ -16,17 +16,15 @@ jest.mock('./api');
 jest.mock('../../common/lib/kibana');
 
 describe('useActionTypes', () => {
-  let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('should fetch action types', async () => {
     const spy = jest.spyOn(api, 'fetchActionTypes');
 
     renderHook(() => useGetActionTypes(), {
-      wrapper: appMockRenderer.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
@@ -44,7 +42,7 @@ describe('useActionTypes', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
 
     renderHook(() => useGetActionTypes(), {
-      wrapper: appMockRenderer.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(addErrorMock).toHaveBeenCalled());

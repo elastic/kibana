@@ -9600,6 +9600,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.apmEnableServiceMapApiV2",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableServiceMapApiV2",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMapApiV2\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.apmEnableTableSearchBar",
         "type": "string",
         "tags": [],
@@ -22480,6 +22495,132 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmEnableServiceMapApiV2",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmEnableServiceMapApiV2]",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.solution",
+                "type": "string",
+                "tags": [],
+                "label": "solution",
+                "description": [],
+                "signature": [
+                  "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.uiSettings.apmAWSLambdaPriceFactor",
             "type": "Object",
             "tags": [],
@@ -25748,6 +25889,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableServiceInventoryTableSearchBar\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmEnableServiceMapApiV2",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableServiceMapApiV2",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMapApiV2\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,

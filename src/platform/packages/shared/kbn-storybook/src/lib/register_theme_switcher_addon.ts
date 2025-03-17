@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { addons, types } from '@storybook/addons';
+import { addons, types } from '@storybook/manager-api';
 import { ThemeSwitcher } from './theme_switcher';
 
 export const THEME_SWITCHER_ADDON_ID = 'kibana/eui-theme-switcher';
@@ -16,7 +16,7 @@ export function registerThemeSwitcherAddon() {
   addons.register(THEME_SWITCHER_ADDON_ID, (api) => {
     const channel = api.getChannel();
 
-    channel.on('globalsUpdated', ({ globals }) => {
+    channel?.on('globalsUpdated', ({ globals }) => {
       const previewFrame = document.getElementById(
         'storybook-preview-iframe'
       ) as HTMLIFrameElement | null;

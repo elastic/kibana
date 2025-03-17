@@ -27,6 +27,7 @@ export {
   actionSchema as actionSchemaV1,
   createParamsSchema as createParamsSchemaV1,
   createBodySchema as createBodySchemaV1,
+  createRuleParamsExamplesV1,
 } from './schemas/v1';
 
 export type {
