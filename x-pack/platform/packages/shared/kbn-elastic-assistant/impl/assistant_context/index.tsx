@@ -87,7 +87,6 @@ export interface AssistantProviderProps {
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
-  spaceId: string;
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
@@ -138,7 +137,6 @@ export interface UseAssistantContext {
     langSmithProject: string;
     langSmithApiKey: string;
   }) => void;
-  spaceId: string;
   title: string;
   toasts: IToasts | undefined;
   traceOptions: TraceOptions;
@@ -169,7 +167,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   productDocBase,
-  spaceId,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
   currentAppId,
@@ -388,7 +385,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
-      spaceId,
       title,
       toasts,
       traceOptions: sessionStorageTraceOptions,
@@ -430,7 +426,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setContentReferencesVisible,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
-      spaceId,
       title,
       toasts,
       sessionStorageTraceOptions,

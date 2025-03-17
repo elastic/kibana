@@ -53,6 +53,7 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from './conversations/utils';
+import { useAssistantSpaceId } from './use_space_id';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -95,7 +96,6 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     currentUserAvatar,
     setLastConversation,
-    spaceId,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
@@ -134,6 +134,7 @@ const AssistantComponent: React.FC<Props> = ({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const spaceId = useAssistantSpaceId();
   const {
     currentConversation,
     currentSystemPrompt,
