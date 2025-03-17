@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '../../../../../utils/kibana_react.storybook_decorator';
@@ -19,7 +19,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => {
+const Template: StoryFn<typeof Component> = (props: Props) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
@@ -36,5 +36,7 @@ const defaultProps: Omit<Props, 'control'> = {
   label: 'Service name',
 };
 
-export const FieldSelector = Template.bind({});
-FieldSelector.args = defaultProps;
+export const FieldSelector = {
+  render: Template,
+  args: defaultProps,
+};
