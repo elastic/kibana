@@ -23,6 +23,7 @@ import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
 import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
+import { ExportJobsFlyout, ImportJobsFlyout } from '../../../components/import_export_jobs';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
@@ -73,11 +74,22 @@ export const Page: FC = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} justifyContent="flexEnd">
-            <CreateAnalyticsButton
-              size="m"
-              navigateToSourceSelection={navigateToSourceSelection}
-              isDisabled={!canCreateAnalytics}
-            />
+            <EuiFlexGroup direction="row" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <ExportJobsFlyout
+                  isDisabled={!canCreateAnalytics}
+                  currentTab={'data-frame-analytics'}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ImportJobsFlyout isDisabled={!canCreateAnalytics} onImportComplete={refresh} />
+              </EuiFlexItem>
+              <CreateAnalyticsButton
+                size="m"
+                navigateToSourceSelection={navigateToSourceSelection}
+                isDisabled={!canCreateAnalytics}
+              />
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>

@@ -279,8 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.navigation.navigateToStackManagement();
-      await ml.navigation.navigateToStackManagementJobsListPage();
+      await ml.navigation.navigateToJobManagement();
     });
 
     after(async () => {
@@ -296,6 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('opens export flyout and exports anomaly detector jobs', async () => {
+      await ml.navigation.navigateToJobManagement();
       await ml.stackManagementJobs.openExportFlyout();
       await ml.stackManagementJobs.selectExportJobType('anomaly-detector');
       await ml.stackManagementJobs.selectExportJobSelectAll('anomaly-detector');
@@ -304,6 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('opens export flyout and exports data frame analytics jobs', async () => {
+      await ml.navigation.navigateToDataFrameAnalytics();
       await ml.stackManagementJobs.openExportFlyout();
       await ml.stackManagementJobs.selectExportJobType('data-frame-analytics');
       await ml.stackManagementJobs.selectExportJobSelectAll('data-frame-analytics');

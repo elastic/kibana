@@ -34,6 +34,30 @@ export function MachineLearningStackManagementJobsProvider({
   const PageObjects = getPageObjects(['common']);
 
   return {
+    getTableContainerDataTestSubj(mlSavedObjectType: MlSavedObjectType) {
+      const SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ = {
+        'anomaly-detector': 'ml-jobs-list',
+        'data-frame-analytics': 'mlAnalyticsTableContainer',
+        'trained-model': 'mlModelsTableContainer',
+      };
+      return SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ[mlSavedObjectType];
+    },
+    getTableDataTestSubj(mlSavedObjectType: MlSavedObjectType) {
+      const SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ = {
+        'anomaly-detector': 'mlJobListTable loaded',
+        'data-frame-analytics': 'mlAnalyticsTable loaded',
+        'trained-model': 'mlModelsTable loaded',
+      };
+      return SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ[mlSavedObjectType];
+    },
+    getTableRowDataTestSubj(mlSavedObjectType: MlSavedObjectType, jobId: string) {
+      const SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ = {
+        'anomaly-detector': `mlJobListRow row-${jobId}`,
+        'data-frame-analytics': `mlAnalyticsTableRow row-${jobId}`,
+        'trained-model': `mlModelsTableRow row-${jobId}`,
+      };
+      return SAVED_OBJ_TYPE_TO_DATA_TEST_SUBJ[mlSavedObjectType];
+    },
     async openSyncFlyout() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click('mlStackMgmtSyncButton', 1000);
@@ -96,7 +120,7 @@ export function MachineLearningStackManagementJobsProvider({
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
       await this.refreshList();
-      const spaces = await this.getSpacesFromTable(adJobId);
+      const spaces = await this.getSpacesFromTable('anomaly-detector', adJobId);
       expect(spaces!.sort()).to.eql(
         expectedSpaces.sort(),
         `Expected spaces for AD job '${adJobId}' to be '${JSON.stringify(
@@ -107,7 +131,7 @@ export function MachineLearningStackManagementJobsProvider({
 
     async assertDFAJobRowSpaces(dfaJobId: string, expectedSpaces: string[]) {
       await this.refreshList();
-      const spaces = await this.getSpacesFromTable(dfaJobId);
+      const spaces = await this.getSpacesFromTable('data-frame-analytics', dfaJobId);
       expect(spaces!.sort()).to.eql(
         expectedSpaces.sort(),
         `Expected spaces for DFA job '${dfaJobId}' to be '${JSON.stringify(
@@ -124,11 +148,9 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async openJobSpacesFlyout(mlSavedObjectType: MlSavedObjectType, jobId: string) {
+      const dataTestSubj = this.getTableRowDataTestSubj(mlSavedObjectType, jobId);
       await retry.tryForTime(5000, async () => {
-        await testSubjects.click(
-          `mlSpacesManagementTable-${mlSavedObjectType} row-${jobId} > mlJobListRowManageSpacesButton`,
-          5000
-        );
+        await testSubjects.click(`${dataTestSubj} > mlJobListRowManageSpacesButton`, 5000);
         await testSubjects.existOrFail('share-to-space-flyout', { timeout: 5000 });
       });
     },
@@ -291,13 +313,13 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async selectExportJobType(jobType: JobType) {
-      if (jobType === 'anomaly-detector') {
-        await testSubjects.click('mlJobMgmtExportJobsADTab');
-        await testSubjects.existOrFail('mlJobMgmtExportJobsADJobList');
-      } else {
-        await testSubjects.click('mlJobMgmtExportJobsDFATab');
-        await testSubjects.existOrFail('mlJobMgmtExportJobsDFAJobList');
-      }
+      await retry.tryForTime(3000, async () => {
+        if (jobType === 'anomaly-detector') {
+          await testSubjects.existOrFail('mlJobMgmtExportJobsADJobList');
+        } else {
+          await testSubjects.existOrFail('mlJobMgmtExportJobsDFAJobList');
+        }
+      });
     },
 
     async selectExportJobSelectAll(jobType: JobType) {
@@ -419,19 +441,25 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async waitForSpacesManagementTableToLoad(mlSavedObjectType: MlSavedObjectType) {
-      await testSubjects.existOrFail('mlSpacesManagementTable', { timeout: 60 * 1000 });
-      await testSubjects.existOrFail(`mlSpacesManagementTable-${mlSavedObjectType} loaded`, {
+      const dataTestSubj = this.getTableDataTestSubj(mlSavedObjectType);
+      await testSubjects.existOrFail(`${dataTestSubj}`, {
         timeout: 30 * 1000,
       });
     },
 
-    async getSpaceManagementTableSearchInput(): Promise<WebElementWrapper> {
-      const tableListContainer = await testSubjects.find('mlSpacesManagementTable');
+    async getSpaceManagementTableSearchInput(
+      savedObjectType: MlSavedObjectType
+    ): Promise<WebElementWrapper> {
+      const dataTestSubj = this.getTableContainerDataTestSubj(savedObjectType);
+      const tableListContainer = await testSubjects.find(dataTestSubj);
       return await tableListContainer.findByClassName('euiFieldSearch');
     },
 
-    async assertSpaceManagementTableSearchInputValue(expectedSearchValue: string) {
-      const searchBarInput = await this.getSpaceManagementTableSearchInput();
+    async assertSpaceManagementTableSearchInputValue(
+      mlSavedObjectType: MlSavedObjectType,
+      expectedSearchValue: string
+    ) {
+      const searchBarInput = await this.getSpaceManagementTableSearchInput(mlSavedObjectType);
       const actualSearchValue = await searchBarInput.getAttribute('value');
       expect(actualSearchValue).to.eql(
         expectedSearchValue,
@@ -439,8 +467,9 @@ export function MachineLearningStackManagementJobsProvider({
       );
     },
 
-    async getIdsFromTable() {
-      const tableListContainer = await testSubjects.find('mlSpacesManagementTable');
+    async getIdsFromTables(mlSavedObjectType: MlSavedObjectType) {
+      const dataTestSubj = this.getTableDataTestSubj(mlSavedObjectType);
+      const tableListContainer = await testSubjects.find(dataTestSubj);
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
 
       const ids: string[] = [];
@@ -453,8 +482,9 @@ export function MachineLearningStackManagementJobsProvider({
       return ids;
     },
 
-    async getSpacesFromTable(id: string) {
-      const tableListContainer = await testSubjects.find('mlSpacesManagementTable');
+    async getSpacesFromTable(mlSavedObjectType: MlSavedObjectType, id: string) {
+      const dataTestSubj = this.getTableDataTestSubj(mlSavedObjectType);
+      const tableListContainer = await testSubjects.find(dataTestSubj);
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
 
       const spaces: string[] = [];
@@ -488,11 +518,11 @@ export function MachineLearningStackManagementJobsProvider({
       expectedRowCount: number = 1
     ) {
       await this.waitForSpacesManagementTableToLoad(mlSavedObjectType);
-      const searchBarInput = await this.getSpaceManagementTableSearchInput();
+      const searchBarInput = await this.getSpaceManagementTableSearchInput(mlSavedObjectType);
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
-      await this.assertSpaceManagementTableSearchInputValue(filter);
-      const ids = await this.getIdsFromTable();
+      await this.assertSpaceManagementTableSearchInputValue(mlSavedObjectType, filter);
+      const ids = await this.getIdsFromTables(mlSavedObjectType);
       const filteredIds = ids.filter((id) => id === filter);
 
       expect(filteredIds).to.have.length(

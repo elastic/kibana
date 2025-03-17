@@ -104,6 +104,10 @@ interface DatePickerWrapperProps {
    * Tooltip message for the update button
    */
   tooltipMessage?: string;
+  /**
+   * Data test subject for the refresh button
+   */
+  dataTestSubj?: string;
 }
 
 /**
@@ -123,6 +127,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     needsUpdate,
     onRefresh,
     tooltipMessage,
+    dataTestSubj = 'mlDatePickerRefreshPageButton',
   } = props;
   const {
     data,
@@ -337,7 +342,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
               color={needsUpdate ? 'accentSecondary' : 'primary'}
               iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
               onClick={handleRefresh}
-              data-test-subj={`mlDatePickerRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
+              data-test-subj={`${dataTestSubj}${isLoading ? ' loading' : ' loaded'}`}
               isLoading={isLoading}
               isDisabled={isDisabled}
             >

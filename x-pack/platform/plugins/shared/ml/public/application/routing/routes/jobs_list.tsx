@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
@@ -63,6 +63,12 @@ const PageWrapper: FC = () => {
   const refreshValue = refresh.value ?? 0;
   const refreshPause = refresh.pause ?? true;
 
+  const refreshList = useCallback(() => {
+    mlTimefilterRefresh$.next({
+      lastRefresh: Date.now(),
+    });
+  }, []);
+
   useEffect(() => {
     const refreshInterval =
       refreshValue === 0 || refreshPause === true
@@ -77,7 +83,7 @@ const PageWrapper: FC = () => {
   return (
     <PageLoader context={context}>
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-        <JobsPage lastRefresh={lastRefresh} />
+        <JobsPage lastRefresh={lastRefresh} refreshList={refreshList} />
       </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );

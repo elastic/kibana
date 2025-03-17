@@ -6,11 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
-import { EuiSpacer, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiSpacer, useEuiTheme, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import { i18n } from '@kbn/i18n';
 import { JobsListView } from './components/jobs_list_view';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { HelpMenu } from '../../components/help_menu';
@@ -26,6 +27,9 @@ import {
 } from './components/supplied_configurations_button';
 import { NewJobButton } from './components/new_job_button';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
+import { ExportJobsFlyout } from '../../components/import_export_jobs';
+import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -35,6 +39,7 @@ interface PageUrlState {
 interface JobsPageProps {
   isMlEnabledInSpace?: boolean;
   lastRefresh?: number;
+  refreshList: () => void;
 }
 
 export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState => ({
@@ -44,7 +49,7 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortDirection: 'asc',
 });
 
-export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
+export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, refreshList }) => {
   const [pageState, setPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()
@@ -61,10 +66,35 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
   const [canCreateJob] = usePermissionCheck(['canCreateJob']);
+  const [showSyncFlyout, setShowSyncFlyout] = useState(false);
+
+  function onCloseSyncFlyout() {
+    if (typeof refreshJobs === 'function') {
+      refreshJobs();
+    }
+    setShowSyncFlyout(false);
+  }
 
   return (
     <>
       <MlPageHeader>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <>
+              <EuiButtonEmpty
+                onClick={() => setShowSyncFlyout(true)}
+                data-test-subj="mlStackMgmtSyncButton"
+              >
+                {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                  defaultMessage: 'Synchronize saved objects',
+                })}
+              </EuiButtonEmpty>
+              {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+              <EuiSpacer size="s" />
+            </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <FormattedMessage
@@ -79,6 +109,13 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
             <EuiFlexItem grow={false}>
               <AnomalyDetectionSettingsButton />
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ExportJobsFlyout isDisabled={!canCreateJob} currentTab={'anomaly-detector'} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ImportJobsFlyout isDisabled={!canCreateJob} onImportComplete={refreshList} />
+            </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <NewJobButton size="m" />
             </EuiFlexItem>

@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should display the initial job space correctly in the AD and DFA jobs lists', async () => {
           await ml.commonUI.changeToSpace(testData.initialSpace);
           await ml.navigation.navigateToStackManagementViaAppsMenu(); // use apps menu to keep the selected space
-          await ml.navigation.navigateToStackManagementJobsListPage();
+          await ml.navigation.navigateToJobManagement();
 
           // AD
           await ml.stackManagementJobs.filterTableWithSearchString(
@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
 
           // DFA
-          await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
+          await ml.navigation.navigateToDataFrameAnalytics();
           await ml.stackManagementJobs.assertDFAJobRowSpaces(testData.dfaJobId, [
             testData.initialSpace,
           ]);
@@ -198,13 +198,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should edit job space assignment', async () => {
           // AD
-          await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
+          await ml.navigation.navigateToAnomalyDetection();
           await ml.stackManagementJobs.openJobSpacesFlyout('anomaly-detector', testData.adJobId);
           await selectSpaces(testData);
           await ml.stackManagementJobs.saveAndCloseSpacesFlyout();
 
           // DFA
-          await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
+          await ml.navigation.navigateToDataFrameAnalytics();
           await ml.stackManagementJobs.openJobSpacesFlyout(
             'data-frame-analytics',
             testData.dfaJobId
@@ -218,8 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
             // initial space has been removed so job is not displayed here anymore to
             // validate the spaces, so we're changing to the first added space
             await ml.commonUI.changeToSpace(testData.spacesToAdd[0]);
-            await ml.navigation.navigateToStackManagementViaAppsMenu(); // use apps menu to keep the selected space
-            await ml.navigation.navigateToStackManagementJobsListPage();
+            await ml.navigation.navigateToJobManagement();
           }
 
           const expectedJobRowSpaces = testData.assignToAllSpaces
@@ -238,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, expectedJobRowSpaces);
 
           // DFA
-          await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
+          await ml.navigation.navigateToDataFrameAnalytics();
           await ml.stackManagementJobs.filterTableWithSearchString(
             'data-frame-analytics',
             testData.dfaJobId

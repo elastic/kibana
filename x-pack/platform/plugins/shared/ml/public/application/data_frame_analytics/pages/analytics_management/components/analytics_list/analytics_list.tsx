@@ -23,7 +23,6 @@ import {
   type DataFrameAnalyticsId,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { ImportJobsFlyout } from '../../../../../components/import_export_jobs';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 
@@ -40,7 +39,6 @@ import { useTableSettings } from './use_table_settings';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
 import { SpaceManagementContextWrapper } from '../../../../../components/space_management_context_wrapper';
-import { ExportJobsFlyout } from '../../../../../components/import_export_jobs';
 import { DatePicker } from '../../../../../components/ml_page/date_picker';
 
 const filters: EuiSearchBarProps['filters'] = [
@@ -260,15 +258,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
         <EuiFlexGroup justifyContent="spaceBetween">
           {stats}
-          <EuiFlexGroup direction="row" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <ExportJobsFlyout isDisabled={disabled} currentTab={'data-frame-analytics'} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ImportJobsFlyout isDisabled={disabled} onImportComplete={getAnalyticsCallback} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
