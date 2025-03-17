@@ -14,5 +14,10 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/serverless",
+    "@kbn/config-schema",
+    "@kbn/serverless-chat-settings",
+  ]
 }
