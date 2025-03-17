@@ -161,6 +161,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                       title: 'Item 14',
                       href: '/app/kibana',
                       icon: 'iInCircle',
+                      badge: 'beaker',
                     },
                     {
                       id: 'sub2',
@@ -218,12 +219,14 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                       path: '',
                       title: 'Item-Beta',
                       href: '/app/kibana',
+                      badge: 'beaker',
                     },
                     {
                       id: 'sub2',
                       path: '',
                       title: 'Item-Labs',
                       href: '/app/kibana',
+                      badge: 'bell',
                     },
                   ],
                 },
@@ -367,17 +370,14 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               path: '',
               title: 'Item-Beta',
               href: '/app/kibana',
-              withBadge: true,
+              badge: 'beaker',
             },
             {
               id: 'item-labs',
               path: '',
               title: 'Item-Labs',
               href: '/app/kibana',
-              withBadge: true,
-              badgeOptions: {
-                text: 'bell',
-              },
+              badge: 'bell',
             },
             {
               id: 'item27',

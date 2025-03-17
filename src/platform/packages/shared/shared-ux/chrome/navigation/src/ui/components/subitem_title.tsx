@@ -10,15 +10,18 @@
 import React from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { LabelBadge } from './label_badge';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SubItemBadge } from './subitem_badge';
 
-export const NavItemLabel: React.FC<{
+export const SubItemTitle: React.FC<{
   item: ChromeProjectNavigationNode;
-}> = ({ item: { title, withBadge, badgeOptions } }) => {
-  return (
-    <>
-      {title}
-      {withBadge && <LabelBadge text={badgeOptions?.text} />}
-    </>
-  );
-};
+}> = ({ item: { title, badge } }) => (
+  <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+    <EuiFlexItem grow={!badge}>{title}</EuiFlexItem>
+    {badge && (
+      <EuiFlexItem>
+        <SubItemBadge badge={badge} />
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);

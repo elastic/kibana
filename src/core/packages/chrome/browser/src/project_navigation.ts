@@ -197,17 +197,9 @@ interface NodeDefinitionBase {
    */
   openInNewTab?: boolean;
   /**
-   * ["item" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
-   * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
+   * ["item" nodes only] Optional property to indicate if a badge should be rendered next to the text. The string is the icon type.
    */
-  withBadge?: boolean;
-  /**
-   * ["item" nodes only] If `withBadge` is true, this object can be used to customize the badge.
-   */
-  badgeOptions?: {
-    /** The text of the badge. Default: "Beta" */
-    text?: string;
-  };
+  badge?: string;
 }
 
 /** @public */

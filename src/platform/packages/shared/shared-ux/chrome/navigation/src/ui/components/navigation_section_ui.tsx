@@ -15,14 +15,12 @@ import {
   EuiSpacer,
   type EuiCollapsibleNavItemProps,
   type EuiCollapsibleNavSubItemProps,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
+import { SubItemTitle } from './subitem_title';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../types';
@@ -406,22 +404,7 @@ function nodeToEuiCollapsibleNavProps(
       onClick,
       icon: navNode.icon,
       // @ts-ignore title accepts JSX elements and they render correctly but the type definition expects a string
-      title:
-        !subItems && navNode.withBadge ? (
-          <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>{navNode.title}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiBetaBadge
-                size="s"
-                label=""
-                iconType={navNode.badgeOptions?.text ?? 'beaker'}
-                alignment="middle"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          navNode.title
-        ),
+      title: !subItems && navNode.badge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
