@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { isEqual } from 'lodash';
 
 import { ElasticsearchIndexWithIngestion } from '@kbn/search-connectors';
+import { HttpSetup } from '@kbn/core/public';
 import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 
 import {
@@ -44,8 +45,15 @@ export interface CachedFetchIndexApiLogicValues {
   status: Status;
 }
 
+export interface CachedFetchIndexApiLogicProps {
+  http?: HttpSetup;
+}
 export const CachedFetchIndexApiLogic = kea<
-  MakeLogicType<CachedFetchIndexApiLogicValues, CachedFetchIndexApiLogicActions>
+  MakeLogicType<
+    CachedFetchIndexApiLogicValues,
+    CachedFetchIndexApiLogicActions,
+    CachedFetchIndexApiLogicProps
+  >
 >({
   actions: {
     clearPollTimeout: true,
@@ -70,7 +78,7 @@ export const CachedFetchIndexApiLogic = kea<
       }
     },
   }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     apiError: () => {
       if (values.pollTimeoutId) {
         actions.createPollTimeout(FETCH_INDEX_POLLING_DURATION_ON_FAILURE);
@@ -87,7 +95,7 @@ export const CachedFetchIndexApiLogic = kea<
       }
 
       const timeoutId = setTimeout(() => {
-        actions.makeRequest({ indexName: values.indexName });
+        actions.makeRequest({ indexName: values.indexName, http: props.http });
       }, duration);
       actions.setTimeoutId(timeoutId);
     },
@@ -98,7 +106,7 @@ export const CachedFetchIndexApiLogic = kea<
         clearTimeout(values.pollTimeoutId);
       }
       if (indexName) {
-        actions.makeRequest({ indexName });
+        actions.makeRequest({ indexName, http: props.http });
 
         actions.createPollTimeout(FETCH_INDEX_POLLING_DURATION);
       }

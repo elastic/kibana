@@ -50,7 +50,7 @@ export const generateReactRouterProps = ({
 
     // Perform SPA navigation.
     if (navigateToUrl) {
-      navigateToUrl(to, { shouldNotCreateHref, shouldNotPrepend });
+      navigateToUrl(href, { shouldNotCreateHref, shouldNotPrepend });
     }
   };
 

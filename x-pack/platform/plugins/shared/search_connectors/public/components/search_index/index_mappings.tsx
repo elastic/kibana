@@ -49,7 +49,8 @@ export const SearchIndexIndexMappings: React.FC = () => {
   const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic({ http }));
   const { indexMappingComponent } = useAppContext();
 
-  const IndexMappingComponent = useMemo(() => indexMappingComponent, [indexMappingComponent]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const IndexMappingComponent = useMemo(() => indexMappingComponent, []);
 
   const [selectedIndexType, setSelectedIndexType] =
     useState<AccessControlSelectorOption['value']>('content-index');

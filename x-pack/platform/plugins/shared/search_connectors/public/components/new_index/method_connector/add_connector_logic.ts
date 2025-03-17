@@ -40,7 +40,7 @@ export const AddConnectorLogic = kea<MakeLogicType<AddConnectorValues, AddConnec
     apiSuccess: async ({ id, navigateToUrl }) => {
       if (navigateToUrl) {
         navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+          generateEncodedPath(`app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`, {
             connectorId: id,
             tabId: SearchIndexTabId.CONFIGURATION,
           })

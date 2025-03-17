@@ -16,6 +16,8 @@ import type {
 } from './types';
 import { registerConnectorRoutes } from './routes/connectors';
 import { registerStatsRoutes } from './routes/stats';
+import { registerMappingRoute } from './routes/mapping';
+import { registerSearchRoute } from './routes/search';
 
 export class SearchConnectorsPlugin
   implements
@@ -49,6 +51,8 @@ export class SearchConnectorsPlugin
       registerConnectorRoutes({ ...plugins, router });
     }
     registerStatsRoutes({ ...plugins, router });
+    registerMappingRoute({ ...plugins, router });
+    registerSearchRoute({ ...plugins, router });
     return {
       getConnectorTypes: () => this.connectors,
     };

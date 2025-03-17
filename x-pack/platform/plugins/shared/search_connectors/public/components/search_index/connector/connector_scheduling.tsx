@@ -19,6 +19,8 @@ import { ConnectorStatus, SchedulingConfiguraton } from '@kbn/search-connectors'
 import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { ScopedHistory } from '@kbn/core/public';
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
@@ -27,6 +29,7 @@ import { Status } from '../../../../common/types/api';
 import { generateEncodedPath } from '../../shared/encode_path_params';
 import { useAppContext } from '../../../app_context';
 import { UnsavedChangesPrompt } from '../../shared/unsaved_changes_prompt';
+import { generateReactRouterProps } from '../../shared/react_router_helpers';
 
 interface SchedulePanelProps {
   description: string;
@@ -61,6 +64,7 @@ export const ConnectorScheduling: React.FC = () => {
   const {
     services: { application, http },
   } = useKibana();
+  const history = useHistory();
   const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } = useValues(
     ConnectorViewLogic({ http })
   );
@@ -116,10 +120,15 @@ export const ConnectorScheduling: React.FC = () => {
         connector={connector}
         configurationPathOnClick={() =>
           application?.navigateToUrl(
-            generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-              connectorId: connector.id,
-              tabId: ConnectorDetailTabId.CONFIGURATION,
-            })
+            generateReactRouterProps({
+              to: generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                connectorId: connector.id,
+                tabId: ConnectorDetailTabId.CONFIGURATION,
+              }),
+              http,
+              navigateToUrl: application?.navigateToUrl as any,
+              history: history as ScopedHistory,
+            }).href
           )
         }
         dataTelemetryIdPrefix="entSearchContent"

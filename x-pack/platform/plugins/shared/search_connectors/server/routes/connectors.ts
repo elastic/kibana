@@ -60,6 +60,7 @@ import {
 } from '../utils/identify_exceptions';
 import { ErrorCode } from '../../common/types/error_codes';
 import { AgentlessConnectorsInfraService } from '../services';
+import { fetchIndex } from '../lib/indices/fetch_index';
 
 export function registerConnectorRoutes({
   router,
@@ -981,6 +982,46 @@ export function registerConnectorRoutes({
           response,
           statusCode: 500,
         });
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/search_connectors/indices/{indexName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const index = await fetchIndex(client, indexName, log);
+        return response.ok({
+          body: index,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not find index',
+            response,
+            statusCode: 404,
+          });
+        }
+
+        throw error;
       }
     })
   );

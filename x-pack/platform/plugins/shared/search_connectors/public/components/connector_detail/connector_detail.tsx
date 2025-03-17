@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiTabProps } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
@@ -27,6 +26,7 @@ import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { ConnectorName } from './connector_name';
 import { ConnectorDescription } from './connector_description';
+import { SearchConnectorsPageTemplateWrapper } from '../shared/page_template';
 
 export enum ConnectorDetailTabId {
   // all indices
@@ -87,12 +87,14 @@ export const ConnectorDetail: React.FC = () => {
         }
       ),
       onClick: () => {
-        const url = share?.url.locators.get('CONNECTORS_ENDPOINTS')?.getUrl({});
         application?.navigateToUrl(
-          `${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.OVERVIEW,
-          })}`
+          `${generateEncodedPath(
+            `/app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId,
+              tabId: ConnectorDetailTabId.OVERVIEW,
+            }
+          )}`
         );
       },
     },
@@ -108,15 +110,14 @@ export const ConnectorDetail: React.FC = () => {
         }
       ),
       onClick: () => {
-        const url = share?.url.locators.get('CONNECTORS_ENDPOINTS');
-        url?.navigate(
-          {
-
-          }
-          `${url}${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.DOCUMENTS,
-          })}`
+        application?.navigateToUrl(
+          `${generateEncodedPath(
+            `/app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId,
+              tabId: ConnectorDetailTabId.DOCUMENTS,
+            }
+          )}`
         );
       },
     },
@@ -133,10 +134,13 @@ export const ConnectorDetail: React.FC = () => {
       ),
       onClick: () =>
         application?.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.INDEX_MAPPINGS,
-          })
+          generateEncodedPath(
+            `/app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId,
+              tabId: ConnectorDetailTabId.INDEX_MAPPINGS,
+            }
+          )
         ),
     },
   ];
@@ -157,10 +161,13 @@ export const ConnectorDetail: React.FC = () => {
             ),
             onClick: () =>
               application?.navigateToUrl(
-                generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                  connectorId,
-                  tabId: ConnectorDetailTabId.SYNC_RULES,
-                })
+                generateEncodedPath(
+                  `/app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+                  {
+                    connectorId,
+                    tabId: ConnectorDetailTabId.SYNC_RULES,
+                  }
+                )
               ),
           },
         ]
@@ -178,10 +185,13 @@ export const ConnectorDetail: React.FC = () => {
       ),
       onClick: () =>
         application?.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.SCHEDULING,
-          })
+          generateEncodedPath(
+            `/app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId,
+              tabId: ConnectorDetailTabId.SCHEDULING,
+            }
+          )
         ),
     },
   ];
@@ -200,10 +210,13 @@ export const ConnectorDetail: React.FC = () => {
       ),
       onClick: () =>
         application?.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-            connectorId,
-            tabId: ConnectorDetailTabId.CONFIGURATION,
-          })
+          generateEncodedPath(
+            `/app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId,
+              tabId: ConnectorDetailTabId.CONFIGURATION,
+            }
+          )
         ),
     },
   ];
@@ -250,7 +263,7 @@ export const ConnectorDetail: React.FC = () => {
   const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
 
   return (
-    <KibanaPageTemplate
+    <SearchConnectorsPageTemplateWrapper
       // pageChrome={[...connectorsBreadcrumbs, connector?.name ?? '...']}
       // isLoading={isLoading}
       pageHeader={{
@@ -261,11 +274,10 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        // rightSideItems: getHeaderActions(index, connector),
         tabs: tabs as Array<EuiTabProps & { label: React.ReactNode }>,
       }}
     >
       {selectedTab?.content || null}
-    </KibanaPageTemplate>
+    </SearchConnectorsPageTemplateWrapper>
   );
 };

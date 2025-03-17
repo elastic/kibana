@@ -143,7 +143,7 @@ export const NewConnectorLogic = kea<
     connectorCreated: ({ id, uiFlags }) => {
       if (uiFlags?.shouldNavigateToConnectorAfterCreate && props.navigateToUrl) {
         props.navigateToUrl(
-          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+          generateEncodedPath(`app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`, {
             connectorId: id,
             tabId: SearchIndexTabId.CONFIGURATION,
           })

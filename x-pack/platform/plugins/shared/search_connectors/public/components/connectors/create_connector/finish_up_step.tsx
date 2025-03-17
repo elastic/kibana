@@ -249,10 +249,13 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             onClick={() => {
                               if (connector) {
                                 application?.navigateToUrl(
-                                  generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                                    connectorId: connector.id,
-                                    tabId: ConnectorDetailTabId.CONFIGURATION,
-                                  })
+                                  generateEncodedPath(
+                                    `app/management/data/search_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+                                    {
+                                      connectorId: connector.id,
+                                      tabId: ConnectorDetailTabId.CONFIGURATION,
+                                    }
+                                  )
                                 );
                               }
                             }}

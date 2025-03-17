@@ -84,33 +84,21 @@ const seeDocumentsLabel = i18n.translate(
   }
 );
 
-const pipelinesLabel = i18n.translate(
-  'xpack.searchConnectors.connectorStats.managePipelines',
-  {
-    defaultMessage: 'Manage pipelines',
-  }
-);
+const pipelinesLabel = i18n.translate('xpack.searchConnectors.connectorStats.managePipelines', {
+  defaultMessage: 'Manage pipelines',
+});
 
-const configureLabel = i18n.translate(
-  'xpack.searchConnectors.connectorStats.configureLink',
-  {
-    defaultMessage: 'Configure',
-  }
-);
+const configureLabel = i18n.translate('xpack.searchConnectors.connectorStats.configureLink', {
+  defaultMessage: 'Configure',
+});
 
-const noAgentLabel = i18n.translate(
-  'xpack.searchConnectors.connectorStats.noAgentFound',
-  {
-    defaultMessage: 'No agent found',
-  }
-);
+const noAgentLabel = i18n.translate('xpack.searchConnectors.connectorStats.noAgentFound', {
+  defaultMessage: 'No agent found',
+});
 
-const noPolicyLabel = i18n.translate(
-  'xpack.searchConnectors.connectorStats.noPolicyFound',
-  {
-    defaultMessage: 'No policy found',
-  }
-);
+const noPolicyLabel = i18n.translate('xpack.searchConnectors.connectorStats.noPolicyFound', {
+  defaultMessage: 'No policy found',
+});
 
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
   connector,
@@ -180,12 +168,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
     <EuiFlexGrid columns={columns} direction="row">
       <EuiFlexItem>
         <StatCard
-          title={i18n.translate(
-            'xpack.searchConnectors.connectorStats.h4.connectorLabel',
-            {
-              defaultMessage: 'Connector',
-            }
-          )}
+          title={i18n.translate('xpack.searchConnectors.connectorStats.h4.connectorLabel', {
+            defaultMessage: 'Connector',
+          })}
           content={
             <EuiFlexGroup
               gutterSize="m"
@@ -301,12 +286,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 </EuiFlexGroup>
               ) : (
                 <EuiText size="s" color="warning">
-                  {i18n.translate(
-                    'xpack.searchConnectors.connectorStats.indexDoesntExistLabel',
-                    {
-                      defaultMessage: "Index doesn't exist",
-                    }
-                  )}
+                  {i18n.translate('xpack.searchConnectors.connectorStats.indexDoesntExistLabel', {
+                    defaultMessage: "Index doesn't exist",
+                  })}
                 </EuiText>
               )
             ) : (
@@ -327,15 +309,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
                       <p>
-                        {i18n.translate(
-                          'xpack.searchConnectors.connectorStats.p.DocumentsLabel',
-                          {
-                            defaultMessage: '{documentAmount} Documents',
-                            values: {
-                              documentAmount: indexData?.count ?? 0,
-                            },
-                          }
-                        )}
+                        {i18n.translate('xpack.searchConnectors.connectorStats.p.DocumentsLabel', {
+                          defaultMessage: '{documentAmount} Documents',
+                          values: {
+                            documentAmount: indexData?.count ?? 0,
+                          },
+                        })}
                       </p>
                     </EuiText>
                   </EuiFlexItem>
@@ -396,12 +375,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
       {connector.is_native && (
         <EuiFlexItem>
           <StatCard
-            title={i18n.translate(
-              'xpack.searchConnectors.connectorStats.integrationTitle',
-              {
-                defaultMessage: 'Integration',
-              }
-            )}
+            title={i18n.translate('xpack.searchConnectors.connectorStats.integrationTitle', {
+              defaultMessage: 'Integration',
+            })}
             content={
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
@@ -442,10 +418,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       discover?.locator?.navigate(navigateToDiscoverPayload);
                     }}
                   >
-                    {i18n.translate(
-                      'xpack.searchConnectors.connectorStats.viewLogsButtonLabel',
-                      { defaultMessage: 'View logs' }
-                    )}
+                    {i18n.translate('xpack.searchConnectors.connectorStats.viewLogsButtonLabel', {
+                      defaultMessage: 'View logs',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -459,12 +434,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                         })
                       )}
                     >
-                      {i18n.translate(
-                        'xpack.searchConnectors.connectorStats.hostOverview',
-                        {
-                          defaultMessage: 'Host overview',
-                        }
-                      )}
+                      {i18n.translate('xpack.searchConnectors.connectorStats.hostOverview', {
+                        defaultMessage: 'Host overview',
+                      })}
                     </EuiButtonEmpty>
                   )}
                 </EuiFlexItem>
@@ -479,12 +451,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                         })
                       )}
                     >
-                      {i18n.translate(
-                        'xpack.searchConnectors.connectorStats.managePolicy',
-                        {
-                          defaultMessage: 'Manage policy',
-                        }
-                      )}
+                      {i18n.translate('xpack.searchConnectors.connectorStats.managePolicy', {
+                        defaultMessage: 'Manage policy',
+                      })}
                     </EuiButtonEmpty>
                   ) : (
                     <EuiText size="s" color="warning">

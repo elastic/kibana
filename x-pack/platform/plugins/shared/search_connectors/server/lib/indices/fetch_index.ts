@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-
-import {} from '../..';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 
 import {
+  Connector,
   CONNECTORS_JOBS_INDEX,
   ConnectorSyncJobDocument,
+  ElasticsearchIndexWithIngestion,
   fetchConnectorByIndexName,
   SyncStatus,
 } from '@kbn/search-connectors';
@@ -20,7 +20,6 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../commo
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 import { mapIndexStats } from './utils/map_index_stats';
-import { ElasticsearchIndexWithIngestion } from '../../types/indices';
 
 const hasInProgressSyncs = async (
   client: IScopedClusterClient,
@@ -60,7 +59,8 @@ const hasInProgressSyncs = async (
 
 export const fetchIndex = async (
   client: IScopedClusterClient,
-  index: string
+  index: string,
+  logger: Logger
 ): Promise<ElasticsearchIndexWithIngestion> => {
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
@@ -72,8 +72,12 @@ export const fetchIndex = async (
     throw new Error('404');
   }
   const indexStats = indices[index];
-
-  const connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
+  let connector: Connector | undefined;
+  try {
+    connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
+  } catch (error) {
+    logger.error(`Error fetching connector for index ${index}: ${error}`);
+  }
   const hasInProgressSyncsResult = connector
     ? await hasInProgressSyncs(client, connector.id)
     : { inProgress: false, pending: false };

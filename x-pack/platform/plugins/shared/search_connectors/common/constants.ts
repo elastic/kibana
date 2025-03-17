@@ -66,3 +66,4 @@ export const ELASTICSEARCH_PLUGIN = {
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 export const INPUT_THROTTLE_DELAY_MS = 1000;
+export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;

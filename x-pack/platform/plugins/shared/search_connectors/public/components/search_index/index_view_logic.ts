@@ -16,6 +16,7 @@ import {
   SyncStatus,
   IngestionStatus,
   IngestionMethod,
+  ElasticsearchViewIndex,
 } from '@kbn/search-connectors';
 
 import { HttpSetup } from '@kbn/core/public';
@@ -164,6 +165,7 @@ export const IndexViewLogic = kea<
       CachedFetchIndexApiLogic,
       ['fetchIndexApiData', 'status as fetchIndexApiStatus', 'indexData', 'isInitialLoading'],
     ],
+    keys: [CachedFetchIndexApiLogic, 'http'],
   },
   events: ({ actions }) => ({
     beforeUnmount: () => {

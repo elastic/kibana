@@ -33,7 +33,6 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { ScopedHistory } from '@kbn/core/public';
 import { useActions, useValues } from 'kea';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useAppContext } from '../../../app_context';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
@@ -50,7 +49,7 @@ import { errorToText } from '../utils/error_to_text';
 
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
-import '../../shared/page_template.scss';
+import { SearchConnectorsPageTemplateWrapper } from '../../shared/page_template';
 
 export const CreateConnector: React.FC = () => {
   const {
@@ -179,11 +178,7 @@ export const CreateConnector: React.FC = () => {
   });
 
   return (
-    <KibanaPageTemplate
-      className={'searchConnectorsPageTemplate'}
-      mainProps={{
-        className: 'searchConnectorsPageTemplate__content',
-      }}
+    <SearchConnectorsPageTemplateWrapper
       pageHeader={{
         description: i18n.translate('xpack.searchConnectorscreateConnector.description', {
           defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
@@ -193,112 +188,110 @@ export const CreateConnector: React.FC = () => {
         }),
       }}
     >
-      <KibanaPageTemplate.Section>
-        <EuiFlexGroup gutterSize="m">
-          {/* Col 1 */}
-          <EuiFlexItem grow={2}>
-            <EuiPanel
-              hasShadow={false}
-              hasBorder
-              color="subdued"
-              paddingSize="l"
-              css={css`
-                ${currentStep === 'start'
-                  ? `background-image: url(${connectorsBackgroundImage});`
-                  : ''}
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: bottom center;
-                min-height: 550px;
-                border: 1px solid ${euiTheme.colors.lightShade};
+      <EuiFlexGroup gutterSize="m">
+        {/* Col 1 */}
+        <EuiFlexItem grow={2}>
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
+            color="subdued"
+            paddingSize="l"
+            css={css`
+              ${currentStep === 'start'
+                ? `background-image: url(${connectorsBackgroundImage});`
+                : ''}
+              background-size: contain;
+              background-repeat: no-repeat;
+              background-position: bottom center;
+              min-height: 550px;
+              border: 1px solid ${euiTheme.colors.lightShade};
+            `}
+          >
+            <EuiSteps
+              titleSize="xxs"
+              steps={getSteps(selfManagePreference === 'selfManaged')}
+              css={() => css`
+                .euiStep__content {
+                  padding-block-end: ${euiTheme.size.xs};
+                }
               `}
-            >
-              <EuiSteps
-                titleSize="xxs"
-                steps={getSteps(selfManagePreference === 'selfManaged')}
-                css={() => css`
-                  .euiStep__content {
-                    padding-block-end: ${euiTheme.size.xs};
-                  }
-                `}
-              />
-              <EuiSpacer size="xl" />
-              {selectedConnector?.docsUrl && selectedConnector?.docsUrl !== '' && (
-                <>
-                  <EuiText size="s">
-                    <p>
-                      <EuiLink
-                        external
-                        data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
-                        href={selectedConnector?.docsUrl}
-                        target="_blank"
-                      >
-                        {'Elastic '}
-                        {selectedConnector?.name}
-                        {i18n.translate(
-                          'xpack.searchConnectorscreateConnector.connectorDocsLinkLabel',
-                          { defaultMessage: ' connector reference' }
-                        )}
-                      </EuiLink>
-                    </p>
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                </>
-              )}
-              {currentStep !== 'start' && (
-                <>
-                  <EuiFormRow
-                    label={i18n.translate(
-                      'xpack.searchConnectorscreateConnector.euiFormRow.connectorLabel',
-                      { defaultMessage: 'Connector' }
-                    )}
-                  >
-                    <EuiSuperSelect
-                      readOnly
-                      valueOfSelected="item1"
-                      options={[
+            />
+            <EuiSpacer size="xl" />
+            {selectedConnector?.docsUrl && selectedConnector?.docsUrl !== '' && (
+              <>
+                <EuiText size="s">
+                  <p>
+                    <EuiLink
+                      external
+                      data-test-subj="enterpriseSearchCreateConnectorConnectorDocsLink"
+                      href={selectedConnector?.docsUrl}
+                      target="_blank"
+                    >
+                      {'Elastic '}
+                      {selectedConnector?.name}
+                      {i18n.translate(
+                        'xpack.searchConnectorscreateConnector.connectorDocsLinkLabel',
+                        { defaultMessage: ' connector reference' }
+                      )}
+                    </EuiLink>
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            )}
+            {currentStep !== 'start' && (
+              <>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.searchConnectorscreateConnector.euiFormRow.connectorLabel',
+                    { defaultMessage: 'Connector' }
+                  )}
+                >
+                  <EuiSuperSelect
+                    readOnly
+                    valueOfSelected="item1"
+                    options={[
+                      {
+                        inputDisplay: (
+                          <>
+                            <EuiIcon
+                              size="l"
+                              type={selectedConnector?.iconPath ?? ''}
+                              css={css`
+                                margin-right: ${euiTheme.size.m};
+                              `}
+                            />
+                            {selectedConnector?.name}
+                          </>
+                        ),
+                        value: 'item1',
+                      },
+                    ]}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+                <EuiBadge color="hollow">
+                  {selfManagePreference === 'selfManaged'
+                    ? i18n.translate(
+                        'xpack.searchConnectorscreateConnector.badgeType.selfManaged',
                         {
-                          inputDisplay: (
-                            <>
-                              <EuiIcon
-                                size="l"
-                                type={selectedConnector?.iconPath ?? ''}
-                                css={css`
-                                  margin-right: ${euiTheme.size.m};
-                                `}
-                              />
-                              {selectedConnector?.name}
-                            </>
-                          ),
-                          value: 'item1',
-                        },
-                      ]}
-                    />
-                  </EuiFormRow>
-                  <EuiSpacer size="s" />
-                  <EuiBadge color="hollow">
-                    {selfManagePreference === 'selfManaged'
-                      ? i18n.translate(
-                          'xpack.searchConnectorscreateConnector.badgeType.selfManaged',
-                          {
-                            defaultMessage: 'Self-managed',
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.searchConnectorscreateConnector.badgeType.ElasticManaged',
-                          {
-                            defaultMessage: 'Elastic managed',
-                          }
-                        )}
-                  </EuiBadge>
-                </>
-              )}
-            </EuiPanel>
-          </EuiFlexItem>
-          {/* Col 2 */}
-          <EuiFlexItem grow={7}>{stepContent[currentStep]}</EuiFlexItem>
-        </EuiFlexGroup>
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+                          defaultMessage: 'Self-managed',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.searchConnectorscreateConnector.badgeType.ElasticManaged',
+                        {
+                          defaultMessage: 'Elastic managed',
+                        }
+                      )}
+                </EuiBadge>
+              </>
+            )}
+          </EuiPanel>
+        </EuiFlexItem>
+        {/* Col 2 */}
+        <EuiFlexItem grow={7}>{stepContent[currentStep]}</EuiFlexItem>
+      </EuiFlexGroup>
+    </SearchConnectorsPageTemplateWrapper>
   );
 };

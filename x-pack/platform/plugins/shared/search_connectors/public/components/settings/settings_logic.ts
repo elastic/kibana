@@ -72,6 +72,7 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
       UpdateDefaultPipelineApiLogic,
       ['status'],
     ],
+    keys: [UpdateDefaultPipelineApiLogic, 'http'],
   },
   events: ({ actions, props }) => ({
     afterMount: () => {
