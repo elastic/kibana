@@ -34,7 +34,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
-        - PKI OpenAI # Added
+        - PKI OpenAI
 
     MessageRole:
       type: string
