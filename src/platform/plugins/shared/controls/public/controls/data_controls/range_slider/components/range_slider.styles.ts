@@ -15,13 +15,14 @@ import { euiFormControlDefaultShadow } from '@elastic/eui/lib/components/form/fo
 
 export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
+  const isExperimental = euiTheme.flags?.formVariant === 'experimental';
 
   return {
     // Wrapper
     // NOTE: This component is used by a ControlPanel component that already sets its own
     // EuiFormControlLayout, so unfortunately there is some double nesting going on here
     // that we need to account for via height inheritence & unsetting EuiDualRange's
-    // form control layout colors/borders
+    // form control layout borders
     rangeSliderControl: css`
       &,
       .euiPopover,
@@ -30,6 +31,7 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       }
 
       .euiFormControlLayout {
+        background-color: ${isExperimental ? '' : 'transparent'};
         border: none;
         border-radius: 0;
       }

@@ -770,7 +770,10 @@ export const QueryBarTopRow = React.memo(
       );
     }
     const { euiTheme } = useEuiTheme();
+    const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
     const isScreenshotMode = props.isScreenshotMode === true;
+
+    const classes = classNames('kbnQueryBar', [isAmsterdam && 'euiTheme--amsterdam']);
 
     return (
       <>
@@ -782,7 +785,7 @@ export const QueryBarTopRow = React.memo(
         {!isScreenshotMode && (
           <>
             <EuiFlexGroup
-              className="kbnQueryBar"
+              className={classes}
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"
@@ -810,7 +813,7 @@ export const QueryBarTopRow = React.memo(
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderUpdateButton()}
+              {renderUpdateButton(isAmsterdam)}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}
             {renderTextLangEditor()}

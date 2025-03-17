@@ -2167,9 +2167,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.1.1.tgz#2829b0f3cc750c582baa683c2f503594676ba08a"
   integrity sha512-dCoXcCT8V1djwWrP0XSG0gXN5fYDtAw5aF88BPArVBbuCQSWPEBpR9avaWJ6uVjAsOteQ7tdwLMtzrvMKgKKIA==
 
-"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_04.tgz":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_05.tgz":
   version "0.0.11"
-  resolved "file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_04.tgz#332be16b0fa400fd90dcd71ea35f145c00773d36"
+  resolved "file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_05.tgz#e2ff0a3d9e2270ca6779004d9f720a78e07a3eac"
 
 "@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.11_v_2_poc_03.tgz":
   version "0.0.11"
@@ -2179,9 +2179,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_100.0.0_borealis.0_v_2_poc_07.tgz":
+"@elastic/eui@file:./elastic_eui_100.0.0_borealis.0_v_2_poc_10.tgz":
   version "100.0.0"
-  resolved "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_07.tgz#c0f95bcbfc6c3418daaf7563c580c99c0a953462"
+  resolved "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_10.tgz#046a3cf1e95e67be26eedd4437fbbf14d6b74b77"
   dependencies:
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
@@ -26845,10 +26845,19 @@ react-shortcuts@^2.1.0:
     platform "^1.3.0"
     prop-types "^15.5.8"
 
-react-style-singleton@^2.2.0, react-style-singleton@^2.2.1:
+react-style-singleton@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/react-style-singleton/-/react-style-singleton-2.2.1.tgz#f99e420492b2d8f34d38308ff660b60d0b1205b4"
   integrity sha512-ZWj0fHEMyWkHzKYUr2Bs/4zU6XLmq9HsgBURm7g5pAVfyn49DgUiNgY2d4lXRlYSiCif9YBGpQleewkcqddc7g==
+  dependencies:
+    get-nonce "^1.0.0"
+    invariant "^2.2.4"
+    tslib "^2.0.0"
+
+react-style-singleton@^2.2.2, react-style-singleton@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/react-style-singleton/-/react-style-singleton-2.2.3.tgz#4265608be69a4d70cfe3047f2c6c88b2c3ace388"
+  integrity sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==
   dependencies:
     get-nonce "^1.0.0"
     tslib "^2.0.0"
@@ -30869,7 +30878,7 @@ unist-util-visit@^1.4.1:
   dependencies:
     unist-util-visit-parents "^2.0.0"
 
-unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-util-visit@^2.0.3:
+unist-util-visit@^2.0.0, unist-util-visit@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/unist-util-visit/-/unist-util-visit-2.0.3.tgz#c3703893146df47203bb8a9795af47d7b971208c"
   integrity sha512-iJ4/RczbJMkD0712mGktuGpm/U4By4FfDonL7N/9tATGIF4imikjOuagyMY53tnZq3NP6BcmlrHhEKAfGWjh7Q==
