@@ -415,16 +415,30 @@ export function getOrphanItemsIds(waterfall: IWaterfallSpanOrTransaction[]) {
 export function reparentOrphanItems(
   orphanItemsIds: string[],
   waterfallItems: IWaterfallSpanOrTransaction[],
-  newParentId?: string
+  entryWaterfallTransaction?: IWaterfallTransaction
 ) {
   const orphanIdsMap = new Set(orphanItemsIds);
-  return waterfallItems.map((item) => {
-    if (orphanIdsMap.has(item.id)) {
-      item.parentId = newParentId;
-      item.isOrphan = true;
-    }
-    return item;
-  });
+  return (
+    waterfallItems
+      // we need to filter out the orphan item if it's longer or if it has started before the entry transaction
+      // as this means it's a parent of the entry transaction
+      .filter(
+        (item) =>
+          !(
+            orphanIdsMap.has(item.id) &&
+            entryWaterfallTransaction &&
+            (item.duration > entryWaterfallTransaction.duration ||
+              item.doc.timestamp.us < entryWaterfallTransaction.doc.timestamp.us)
+          )
+      )
+      .map((item) => {
+        if (orphanIdsMap.has(item.id)) {
+          item.parentId = entryWaterfallTransaction?.id;
+          item.isOrphan = true;
+        }
+        return item;
+      })
+  );
 }
 
 export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
@@ -459,11 +473,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
 
   const orphanItemsIds = getOrphanItemsIds(waterfallItems);
   const childrenByParentId = getChildrenGroupedByParentId(
-    reparentOrphanItems(
-      orphanItemsIds,
-      reparentSpans(waterfallItems),
-      entryWaterfallTransaction?.id
-    )
+    reparentOrphanItems(orphanItemsIds, reparentSpans(waterfallItems), entryWaterfallTransaction)
   );
 
   const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
