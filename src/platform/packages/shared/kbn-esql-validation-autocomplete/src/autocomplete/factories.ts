@@ -26,7 +26,6 @@ import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
-import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 
@@ -411,7 +410,6 @@ export function getUnitDuration(unit: number = 1) {
  * definition property...
  */
 export function getCompatibleLiterals(
-  commandName: string,
   types: string[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
@@ -421,16 +419,6 @@ export function getCompatibleLiterals(
   getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.some(isNumericType)) {
-    if (commandName === 'limit') {
-      // suggest 10/100/1000 for limit
-      suggestions.push(
-        ...buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
-          advanceCursorAndOpenSuggestions: true,
-        })
-      );
-    }
-  }
   if (types.includes('time_literal')) {
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
