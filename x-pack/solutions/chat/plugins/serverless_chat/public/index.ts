@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { ChatServerlessPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ChatServerlessPlugin(initializerContext);
+export function plugin() {
+  return new ChatServerlessPlugin();
 }
 
 export type { ChatServerlessPluginSetup, ChatServerlessPluginStart } from './types';
