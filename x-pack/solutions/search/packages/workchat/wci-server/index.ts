@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getClientForInternalServer, getClientForExternalServer } from './src/utils/index';
-export { SSEClientTransport, type SSEClientTransportOptions } from './src/mcp/sse_client'; 
+export { getClientForInternalServer, getClientForExternalServer } from './src/utils';
+export { SSEClientTransport, type SSEClientTransportOptions } from './src/mcp/sse_client';
