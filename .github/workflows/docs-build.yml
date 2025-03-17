@@ -12,6 +12,7 @@ on:
 
 jobs:
   docs-preview:
+    if: github.event.repository.fork == false
     uses: elastic/docs-builder/.github/workflows/preview-build.yml@main
     with:
       path-pattern: docs/**
