@@ -8,23 +8,22 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { useNewTabProps } from '../../hooks/use_new_tab_props';
-import { STORYBOOK_TITLE } from './storybook_constants';
 
 export default {
-  title: `${STORYBOOK_TITLE}/Tabs`,
+  title: 'Unified Tabs/Tabs',
   parameters: {
     backgrounds: {
       default: 'white',
       values: [{ name: 'white', value: '#fff' }],
     },
   },
-};
+} as Meta;
 
-const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (args) => {
+const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
   const { getNewTabDefaultProps } = useNewTabProps({
     numberOfInitialItems: args.initialItems.length,
   });
