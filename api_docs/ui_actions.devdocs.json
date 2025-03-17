@@ -781,6 +781,14 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/platform/plugins/private/input_control_vis/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
               }
             ],
             "children": [
