@@ -33,15 +33,7 @@ export const useLayoutStyles = () => {
       --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
         ${euiTheme.colors.vis.euiColorVis0};
 
-      &.kbnGrid {
-        // remove margin top + bottom on grid in favour of padding in row
-        padding-bottom: 0px;
-      }
-
       .kbnGridRow {
-        // use padding in grid row so that dotted grid is not cut off
-        padding-bottom: calc(var(--kbnGridGutterSize) * 1px);
-
         &--targeted {
           background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
             calc((var(--kbnGridGutterSize) / 2) * -1px);
