@@ -53,6 +53,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmEnableServiceMapApiV2,
   profilingFetchTopNFunctionsFromStacktraces,
 } from './ui_settings_keys';
 
