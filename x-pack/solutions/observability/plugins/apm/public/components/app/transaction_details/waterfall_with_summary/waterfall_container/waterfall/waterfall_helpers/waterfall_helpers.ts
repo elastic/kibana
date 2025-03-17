@@ -419,9 +419,9 @@ export function reparentOrphanItems(
 ) {
   const orphanIdsMap = new Set(orphanItemsIds);
   return waterfallItems.reduce<IWaterfallSpanOrTransaction[]>((acc, item) => {
-    // we need to filter out the orphan item if it's longer or if it has started before the entry transaction
-    // as this means it's a parent of the entry transaction
     if (orphanIdsMap.has(item.id)) {
+      // we need to filter out the orphan item if it's longer or if it has started before the entry transaction
+      // as this means it's a parent of the entry transaction
       const isLongerThanEntryTransaction =
         entryWaterfallTransaction && item.duration > entryWaterfallTransaction?.duration;
       const hasStartedBeforeEntryTransaction =
