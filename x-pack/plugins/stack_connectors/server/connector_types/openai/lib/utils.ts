@@ -3,11 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ *
+ * PKI functionality added by: Antonio Piazza @antman1p
  */
 
 import { AxiosResponse, ResponseType } from 'axios';
 import { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
+import { Config } from '../../../../common/openai/types'; // Import Config type
 import {
   sanitizeRequest as openAiSanitizeRequest,
   getRequestWithStreamOption as openAiGetRequestWithStreamOption,
@@ -82,49 +85,6 @@ export const getAxiosOptions = (
   config?: Config
 ): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
-  
-  switch (provider) {
-    case OpenAiProviderType.OpenAi:
-      return {
-        headers: { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' },
-        ...responseType,
-      };
-    case OpenAiProviderType.AzureAi:
-      return {
-        headers: { ['api-key']: apiKey, ['content-type']: 'application/json' },
-        ...responseType,
-      };
-    case OpenAiProviderType.PkiOpenAi:
-      // Add PKI specific options
-      if (!config?.certPath || !config?.keyPath) {
-        throw new Error('Certificate and key paths are required for PKI authentication');
-      }
-      
-      const httpsAgent = new https.Agent({
-        cert: fs.readFileSync(config.certPath),
-        key: fs.readFileSync(config.keyPath),
-        rejectUnauthorized: false,
-      });
-
-      return {
-        headers: { 
-          Authorization: `Bearer ${apiKey}`, 
-          ['content-type']: 'application/json',
-          ['Accept']: 'application/json',
-        },
-        httpsAgent,
-        ...responseType,
-      };
-    default:
-      return { headers: {} };
-  }
-};export const getAxiosOptions = (
-  provider: string,
-  apiKey: string,
-  stream: boolean,
-  config?: Config
-): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
-  const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
 
   switch (provider) {
     case OpenAiProviderType.OpenAi:
@@ -144,7 +104,7 @@ export const getAxiosOptions = (
       const httpsAgent = new https.Agent({
         cert: fs.readFileSync(config.certPath),
         key: fs.readFileSync(config.keyPath),
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // Allow self-signed certificates
       });
       return {
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -158,9 +118,9 @@ export const getAxiosOptions = (
 
 export const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) => {
   // Streaming responses are compressed by the Hapi router by default
-  // Set content-type to something that's not recognized by Hapi in order to circumvent this
+  // Set content-type to something that's not recognized by Hapi to circumvent this
   response.data.headers = {
-    ['Content-Type']: 'dont-compress-this',
+    'Content-Type': 'dont-compress-this',
   };
   return response.data;
 };
