@@ -9,3 +9,4 @@ export const PLUGIN_ID = 'embeddableAlertsTable';
 export const PLUGIN_NAME = 'Embeddable alerts table';
 export const EMBEDDABLE_ALERTS_TABLE_ID = 'alerts_table';
 export const CREATE_ALERTS_TABLE_ACTION_ID = 'create_alerts_table';
+export const LOCAL_STORAGE_KEY_PREFIX = 'embeddable-alerts-table';

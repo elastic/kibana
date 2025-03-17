@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
   initializeTitleManager,
@@ -18,15 +18,15 @@ import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/aler
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import { BehaviorSubject } from 'rxjs';
-import { StartDependencies } from './types';
-import { EMBEDDABLE_ALERTS_TABLE_ID } from './constants';
-import {
+import type { StartDependencies } from './types';
+import { EMBEDDABLE_ALERTS_TABLE_ID, LOCAL_STORAGE_KEY_PREFIX } from './constants';
+import type {
   EmbeddableAlertsTableApi,
   EmbeddableAlertsTableRuntimeState,
   EmbeddableAlertsTableSerializedState,
 } from './types';
 
-export const getAlertsTableFactory = (
+export const getEmbeddableAlertsTableFactory = (
   core: CoreStart,
   deps: StartDependencies
 ): ReactEmbeddableFactory<
@@ -65,7 +65,7 @@ export const getAlertsTableFactory = (
 
         return (
           <AlertsTable
-            id={`embeddable-alerts-table-${uuid}`}
+            id={`${LOCAL_STORAGE_KEY_PREFIX}-${uuid}`}
             // Showing es query alerts for testing purposes
             // This will be replaced by the actual filters chosen by the user at creation time
             ruleTypeIds={['.es-query']}

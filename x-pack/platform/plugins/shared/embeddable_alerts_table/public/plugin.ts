@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EMBEDDABLE_ALERTS_TABLE_ID } from './constants';
-import {
+import type {
   EmbeddableAlertsTablePluginSetup,
   EmbeddableAlertsTablePluginStart,
   SetupDependencies,
@@ -21,9 +21,9 @@ export class EmbeddableAlertsTablePlugin
     embeddable.registerReactEmbeddableFactory(EMBEDDABLE_ALERTS_TABLE_ID, async () => {
       const startServicesPromise = core.getStartServices();
 
-      const { getAlertsTableFactory } = await import('./alerts_table_embeddable');
+      const { getEmbeddableAlertsTableFactory } = await import('./embeddable_alerts_table_factory');
       const [coreStart, deps] = await startServicesPromise;
-      return getAlertsTableFactory(coreStart, deps);
+      return getEmbeddableAlertsTableFactory(coreStart, deps);
     });
 
     return {};
