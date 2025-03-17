@@ -14,7 +14,7 @@ import {
   MessageAddEvent,
   type StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       conversationResponse,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
-      instructions?: AdHocInstruction[];
+      instructions?: Array<string | Instruction>;
       format?: 'openai' | 'default';
       conversationResponse: string | ToolMessage;
     }) {
@@ -160,12 +160,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         const { conversationSimulator } = await addInterceptorsAndCallComplete({
-          instructions: [
-            {
-              text: 'This is a random instruction',
-              instruction_type: 'user_instruction',
-            },
-          ],
+          instructions: ['This is a random instruction'],
           actions: [action],
           conversationResponse: {
             tool_calls: [toolCallMock],

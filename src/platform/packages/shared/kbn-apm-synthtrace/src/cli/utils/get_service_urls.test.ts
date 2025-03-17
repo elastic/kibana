@@ -178,7 +178,7 @@ describe('getServiceUrls', () => {
       const target = 'https://elastic_serverless:changeme@127.0.0.1:9200';
       const kibana = 'https://elastic_serverless:changeme@localhost:5601';
 
-      const warnSpy = jest.spyOn(logger, 'warn');
+      const warnSpy = jest.spyOn(logger, 'warning');
       mockFetchWithAllowedSegments([target, kibana]);
       await expectServiceUrls(target, kibana, {
         esUrl: 'https://elastic_serverless:changeme@127.0.0.1:9200',

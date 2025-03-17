@@ -93,6 +93,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               currentAppId={'securitySolutionUI'}
               userProfileService={jest.fn() as unknown as UserProfileService}
               chrome={chrome}
+              spaceId="default"
             >
               {children}
             </AssistantProvider>

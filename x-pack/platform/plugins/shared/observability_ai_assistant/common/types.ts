@@ -94,14 +94,6 @@ export interface Instruction {
   text: string;
 }
 
-export interface AdHocInstruction {
-  id?: string;
-  text: string;
-  instruction_type: 'user_instruction' | 'application_instruction';
-}
-
-export type InstructionOrPlainText = string | Instruction;
-
 export enum KnowledgeBaseType {
   // user instructions are included in the system prompt regardless of the user's input
   UserInstruction = 'user_instruction',
@@ -152,4 +144,9 @@ export interface ObservabilityAIAssistantScreenContext {
   }>;
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
+}
+
+export enum ConversationAccess {
+  SHARED = 'shared',
+  PRIVATE = 'private',
 }
