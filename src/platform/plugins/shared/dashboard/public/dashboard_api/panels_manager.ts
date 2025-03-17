@@ -7,45 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, merge } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import { filter, map, max } from 'lodash';
+import { BehaviorSubject, merge } from 'rxjs';
 import { v4 } from 'uuid';
-import { asyncForEach } from '@kbn/std';
-import type { Reference } from '@kbn/content-management-utils';
+
 import { METRIC_TYPE } from '@kbn/analytics';
-import { PanelPackage } from '@kbn/presentation-containers';
+import type { Reference } from '@kbn/content-management-utils';
 import {
   DefaultEmbeddableApi,
   EmbeddablePackageState,
   PanelNotFoundError,
 } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { PanelPackage } from '@kbn/presentation-containers';
 import {
   StateComparators,
   apiHasLibraryTransforms,
+  apiHasSerializableState,
   apiPublishesTitle,
   apiPublishesUnsavedChanges,
-  apiHasSerializableState,
   getTitle,
 } from '@kbn/presentation-publishing';
-import { i18n } from '@kbn/i18n';
-import { coreServices, usageCollectionService } from '../services/kibana_services';
+import { asyncForEach } from '@kbn/std';
+
 import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
-import type { initializeTrackPanel } from './track_panel';
-import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
-import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
-import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
-import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
-import { DashboardState, UnsavedPanelState } from './types';
-import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
+import { DashboardSectionMap } from '../../common/dashboard_container/types';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
+import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
+import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';
+import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { PanelPlacementStrategy } from '../plugin_constants';
+import { coreServices, usageCollectionService } from '../services/kibana_services';
+import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
+import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
+import type { initializeTrackPanel } from './track_panel';
+import { DashboardState, UnsavedPanelState } from './types';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
   initialPanelsRuntimeState: UnsavedPanelState,
+  initialSections: DashboardSectionMap | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
   pushReferences: (references: Reference[]) => void
@@ -58,6 +63,11 @@ export function initializePanelsManager(
     if (panels !== panels$.value) panels$.next(panels);
   }
   let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
+
+  const sections$ = new BehaviorSubject<DashboardSectionMap | undefined>(initialSections);
+  function setSections(sections?: DashboardSectionMap) {
+    if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
+  }
 
   function setRuntimeStateForChild(childId: string, state: object) {
     restoredRuntimeState[childId] = state;
@@ -104,6 +114,7 @@ export function initializePanelsManager(
           ...newPanelPlacement,
           i: incomingPanelId,
         },
+        // panels can currently only be added to the first section; so, no need to add sectionIndex
       };
     }
 
@@ -265,6 +276,7 @@ export function initializePanelsManager(
             ...newPanelPlacement,
             i: id,
           },
+          ...(panelToClone.sectionIndex ? { sectionIndex: panelToClone.sectionIndex } : {}),
         };
 
         setPanels({
@@ -338,11 +350,38 @@ export function initializePanelsManager(
       },
       setPanels,
       setRuntimeStateForChild,
+
+      sections$,
+      addNewSection: () => {
+        setSections([
+          ...(sections$.getValue() ?? {}),
+          {
+            title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+              defaultMessage: 'New collapsible section',
+            }),
+            collapsed: false,
+          },
+        ]);
+
+        // // scroll to bottom after row is added
+        // layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
+        //   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        // });
+      },
+      setSections,
+
       untilEmbeddableLoaded,
     },
     comparators: {
       panels: [panels$, setPanels, arePanelLayoutsEqual],
-    } as StateComparators<Pick<DashboardState, 'panels'>>,
+      sections: [
+        sections$,
+        setSections,
+        (a, b) => {
+          return fastIsEqual(a ?? [], b ?? []);
+        },
+      ],
+    } as StateComparators<Pick<DashboardState, 'panels' | 'sections'>>,
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {
         children$.next({
@@ -378,6 +417,7 @@ export function initializePanelsManager(
       },
       getState: (): {
         panels: DashboardState['panels'];
+        sections: DashboardState['sections'];
         references: Reference[];
       } => {
         const references: Reference[] = [];
@@ -394,7 +434,7 @@ export function initializePanelsManager(
           return acc;
         }, {} as DashboardPanelMap);
 
-        return { panels, references };
+        return { panels, sections: sections$.getValue(), references };
       },
     },
   };

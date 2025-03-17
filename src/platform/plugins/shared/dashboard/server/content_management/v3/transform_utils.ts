@@ -134,11 +134,22 @@ function optionsOut(optionsJSON: string): DashboardAttributes['options'] {
 function panelsOut(panelsJSON: string): DashboardAttributes['panels'] {
   const panels = JSON.parse(panelsJSON) as SavedDashboardPanel[];
   return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
+    ({
+      embeddableConfig,
+      gridData,
+      id,
+      panelIndex,
+      sectionIndex,
+      panelRefName,
+      title,
+      type,
+      version,
+    }) => ({
       gridData,
       id,
       panelConfig: embeddableConfig,
       panelIndex,
+      sectionIndex,
       panelRefName,
       title,
       type,
@@ -156,6 +167,7 @@ export function dashboardAttributesOut(
     kibanaSavedObjectMeta,
     optionsJSON,
     panelsJSON,
+    sections,
     refreshInterval,
     timeFrom,
     timeRestore,
@@ -172,6 +184,7 @@ export function dashboardAttributesOut(
     }),
     ...(optionsJSON && { options: optionsOut(optionsJSON) }),
     ...(panelsJSON && { panels: panelsOut(panelsJSON) }),
+    sections,
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),

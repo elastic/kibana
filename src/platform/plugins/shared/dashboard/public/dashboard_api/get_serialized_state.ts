@@ -63,6 +63,7 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
+    sections,
 
     // Dashboard options
     useMargins,
@@ -122,6 +123,7 @@ export const getSerializedState = ({
     timeRestore,
     options,
     panels: savedPanels,
+    sections,
     timeFrom,
     title,
     timeTo,

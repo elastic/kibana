@@ -8,15 +8,17 @@
  */
 
 import classNames from 'classnames';
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { useEuiTheme } from '@elastic/eui';
 
+import { DashboardSectionMap } from '../../../common/dashboard_container/types';
 import { DashboardPanelState } from '../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import { arePanelLayoutsEqual } from '../../dashboard_api/are_panel_layouts_equal';
@@ -36,9 +38,10 @@ export const DashboardGrid = ({
   const { euiTheme } = useEuiTheme();
   const firstRowId = useRef(uuidv4());
 
-  const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
+  const [expandedPanelId, panels, sections, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
     dashboardApi.panels$,
+    dashboardApi.sections$,
     dashboardApi.settings.useMargins$,
     dashboardApi.viewMode$
   );
@@ -46,17 +49,31 @@ export const DashboardGrid = ({
   const appFixedViewport = useAppFixedViewport();
 
   const currentLayout: GridLayoutData = useMemo(() => {
-    const singleRow: GridLayoutData[string] = {
-      id: firstRowId.current,
-      order: 0,
-      title: '', // we only support a single section currently, and it does not have a title
-      isCollapsed: false,
-      panels: {},
+    const newLayout: GridLayoutData = {
+      [firstRowId.current]: {
+        id: firstRowId.current,
+        title: '', // first, non-collapsible section
+        isCollapsed: false,
+        order: 0,
+        panels: {},
+      },
     };
+
+    (sections ?? []).forEach((section) => {
+      const sectionId = section.id ?? uuidv4();
+      newLayout[sectionId] = {
+        id: sectionId,
+        title: section.title,
+        isCollapsed: section.collapsed,
+        order: section.order,
+        panels: {},
+      };
+    });
 
     Object.keys(panels).forEach((panelId) => {
       const gridData = panels[panelId].gridData;
-      singleRow.panels[panelId] = {
+      const sectionId = panels[panelId].sectionIndex ?? 0;
+      newLayout[sectionId].panels[panelId] = {
         id: panelId,
         row: gridData.y,
         column: gridData.x,
@@ -70,31 +87,49 @@ export const DashboardGrid = ({
       }
     });
 
-    return { [firstRowId.current]: singleRow };
-  }, [panels]);
+    return newLayout;
+  }, [panels, sections]);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
       const currentPanels = dashboardApi.panels$.getValue();
-      const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
-        newLayout[firstRowId.current].panels
-      ).reduce((updatedPanelsAcc, panelLayout) => {
-        updatedPanelsAcc[panelLayout.id] = {
-          ...currentPanels[panelLayout.id],
-          gridData: {
-            i: panelLayout.id,
-            y: panelLayout.row,
-            x: panelLayout.column,
-            w: panelLayout.width,
-            h: panelLayout.height,
-          },
-        };
-        return updatedPanelsAcc;
-      }, {} as { [key: string]: DashboardPanelState });
+      const currentSections = dashboardApi.sections$.getValue();
+
+      const updatedSections: DashboardSectionMap = [];
+      const updatedPanels: { [key: string]: DashboardPanelState } = {};
+      Object.values(newLayout).forEach((section) => {
+        const sectionIndex = section.id;
+        if (section.order !== 0) {
+          updatedSections.push({
+            title: section.title,
+            collapsed: section.isCollapsed,
+            order: section.order,
+            id: sectionIndex,
+          });
+        }
+
+        Object.values(section.panels).forEach((panelLayout) => {
+          updatedPanels[panelLayout.id] = {
+            ...currentPanels[panelLayout.id],
+            sectionIndex,
+            gridData: {
+              i: panelLayout.id,
+              y: panelLayout.row,
+              x: panelLayout.column,
+              w: panelLayout.width,
+              h: panelLayout.height,
+            },
+          };
+        });
+      });
+
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
+      }
+      if (!deepEqual(currentSections ?? [], updatedSections ?? [])) {
+        dashboardApi.setSections(updatedSections);
       }
     },
     [dashboardApi, viewMode]

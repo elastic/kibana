@@ -12,6 +12,7 @@ import {
   controlGroupInputSchema as controlGroupInputSchemaV1,
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
 } from '../v1';
+import { sectionSchema } from '../../../content_management/v3/cm_services';
 
 export const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
   {
@@ -23,6 +24,7 @@ export const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
 export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
   {
     controlGroupInput: schema.maybe(controlGroupInputSchema),
+    sections: schema.maybe(sectionSchema),
   },
   { unknowns: 'ignore' }
 );

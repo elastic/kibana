@@ -40,6 +40,7 @@ export function convertPanelStateToSavedDashboardPanel(
       i: panelId,
     },
     panelIndex: panelId,
+    sectionIndex: panelState.sectionIndex,
     embeddableConfig: omit(
       panelState.explicitInput as { id: string; savedObjectId?: string; title?: string },
       ['id', 'savedObjectId', 'title']
