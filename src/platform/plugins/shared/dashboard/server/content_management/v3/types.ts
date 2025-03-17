@@ -33,6 +33,7 @@ import {
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import { SavedObjectToItemOptions } from './transform_utils';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
@@ -81,12 +82,23 @@ export type SavedObjectToItemReturn<T> =
       error: Error;
     };
 
-export type ItemAttrsToSavedObjectAttrsReturn =
+export interface ItemAttrsToSavedObjectParams {
+  attributes: DashboardAttributes;
+  replaceTagReferencesByName?: (
+    references: SavedObjectReference[],
+    tagNames: string[]
+  ) => SavedObjectReference[];
+  incomingReferences?: SavedObjectReference[];
+}
+
+export type ItemAttrsToSavedObjectReturn =
   | {
       attributes: DashboardSavedObjectAttributes;
+      references: SavedObjectReference[];
       error: null;
     }
   | {
       attributes: null;
+      references: null;
       error: Error;
     };

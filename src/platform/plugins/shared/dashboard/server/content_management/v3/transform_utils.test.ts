@@ -16,7 +16,7 @@ import type { DashboardAttributes, DashboardItem } from './types';
 import {
   dashboardAttributesOut,
   getResultV3ToV2,
-  itemAttrsToSavedObjectAttrs,
+  itemAttrsToSavedObject,
   savedObjectToItem,
 } from './transform_utils';
 import {

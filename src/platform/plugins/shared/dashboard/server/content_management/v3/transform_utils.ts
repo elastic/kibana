@@ -32,7 +32,8 @@ import type {
   DashboardGetOut,
   DashboardItem,
   DashboardOptions,
-  ItemAttrsToSavedObjectAttrsReturn,
+  ItemAttrsToSavedObjectParams,
+  ItemAttrsToSavedObjectReturn,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -148,7 +149,9 @@ function panelsOut(panelsJSON: string): DashboardAttributes['panels'] {
 }
 
 export function dashboardAttributesOut(
-  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>
+  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
+  references: SavedObjectReference[],
+  getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
     controlGroupInput,
@@ -164,6 +167,15 @@ export function dashboardAttributesOut(
     version,
   } = attributes;
   // try to maintain a consistent (alphabetical) order of keys
+
+  // Inject any tag names from references into the attributes
+  const tags = new Set<string>();
+  const tagRefs = references.filter(({ type }) => type === 'tag');
+  if (getTagNamesFromReferences && tagRefs.length) {
+    const tagNames = getTagNamesFromReferences(tagRefs);
+    tagNames.forEach((tagName) => tags.add(tagName));
+  }
+
   return {
     ...(controlGroupInput && { controlGroupInput: controlGroupInputOut(controlGroupInput) }),
     ...(description && { description }),
@@ -175,6 +187,7 @@ export function dashboardAttributesOut(
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
+    tags: Array.from(tags),
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
@@ -231,7 +244,9 @@ function kibanaSavedObjectMetaIn(
   return { searchSourceJSON: JSON.stringify(searchSource ?? {}) };
 }
 
-export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
+export const getResultV3ToV2 = async (
+  result: DashboardGetOut
+): Promise<DashboardCrudTypesV2['GetOut']> => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;
   const {
@@ -274,11 +289,13 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
   };
 };
 
-export const itemAttrsToSavedObjectAttrs = (
-  attributes: DashboardAttributes
-): ItemAttrsToSavedObjectAttrsReturn => {
+export const itemAttrsToSavedObject = ({
+  attributes,
+  replaceTagReferencesByName,
+  incomingReferences = [],
+}: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
   try {
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
+    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -294,9 +311,15 @@ export const itemAttrsToSavedObjectAttrs = (
         kibanaSavedObjectMeta: kibanaSavedObjectMetaIn(kibanaSavedObjectMeta),
       }),
     };
-    return { attributes: soAttributes, error: null };
+
+    // Tags can be specified as an attribute or in the incomingReferences.
+    const soReferences =
+      replaceTagReferencesByName && tags && tags.length
+        ? replaceTagReferencesByName(incomingReferences, tags)
+        : incomingReferences;
+    return { attributes: soAttributes, references: soReferences, error: null };
   } catch (e) {
-    return { attributes: null, error: e };
+    return { attributes: null, references: null, error: e };
   }
 };
 
@@ -304,7 +327,7 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-export interface SavedObjectToItemOptions {
+interface SavedObjectToItemOptions {
   /**
    * attributes to include in the output item
    */
@@ -313,6 +336,7 @@ export interface SavedObjectToItemOptions {
    * references to include in the output item
    */
   allowedReferences?: string[];
+  getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[];
 }
 
 export function savedObjectToItem(
@@ -332,7 +356,7 @@ export function savedObjectToItem(
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
   partial: boolean /* partial arg is used to enforce the correct savedObject type */,
-  { allowedAttributes, allowedReferences }: SavedObjectToItemOptions = {}
+  { allowedAttributes, allowedReferences, getTagNamesFromReferences }: SavedObjectToItemOptions = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
@@ -344,15 +368,18 @@ export function savedObjectToItem(
     attributes,
     error,
     namespaces,
-    references,
+    references = [],
     version,
     managed,
   } = savedObject;
 
   try {
     const attributesOut = allowedAttributes
-      ? pick(dashboardAttributesOut(attributes), allowedAttributes)
-      : dashboardAttributesOut(attributes);
+      ? pick(
+          dashboardAttributesOut(attributes, references, getTagNamesFromReferences),
+          allowedAttributes
+        )
+      : dashboardAttributesOut(attributes, references, getTagNamesFromReferences);
 
     // if includeReferences is provided, only include references of those types
     const referencesOut = allowedReferences

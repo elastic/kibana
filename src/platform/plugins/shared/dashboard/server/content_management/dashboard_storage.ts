@@ -14,10 +14,13 @@ import type { Logger } from '@kbn/logging';
 
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { StorageContext } from '@kbn/content-management-plugin/server';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
+import { itemAttrsToSavedObject, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -37,7 +40,7 @@ const searchArgsToSOFindOptions = (
   return {
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: options?.fields,
+    // fields: options?.fields,
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
@@ -60,21 +63,45 @@ export class DashboardStorage {
   constructor({
     logger,
     throwOnResultValidationError,
+    savedObjectsTagging,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
+    savedObjectsTagging?: SavedObjectTaggingStart;
   }) {
+    this.savedObjectsTagging = savedObjectsTagging;
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
   }
 
   private logger: Logger;
+  private savedObjectsTagging?: SavedObjectTaggingStart;
   private throwOnResultValidationError: boolean;
+
+  private getTagNamesFromReferences = (references: SavedObjectReference[], allTags: Tag[]) => {
+    return this.savedObjectsTagging
+      ? this.savedObjectsTagging
+          .getTagsFromReferences(references, allTags)
+          .tags.map((tag) => tag.name)
+      : [];
+  };
+
+  private replaceTagReferencesByName = (
+    references: SavedObjectReference[],
+    newTagNames: string[],
+    allTags: Tag[]
+  ) => {
+    const newTagsIds = newTagNames.flatMap(
+      (tagName) => this.savedObjectsTagging?.convertTagNameToId(tagName, allTags) ?? []
+    );
+    return this.savedObjectsTagging?.replaceTagReferences(references, newTagsIds) ?? references;
+  };
 
   async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
-
+    const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
+    const allTags = (await tagsClient?.getAll()) ?? [];
     // Save data in DB
     const {
       saved_object: savedObject,
@@ -83,7 +110,10 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    const { item, error: itemError } = savedObjectToItem(savedObject, false, {
+      getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+        this.getTagNamesFromReferences(references, allTags),
+    });
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -128,6 +158,8 @@ export class DashboardStorage {
   ): Promise<DashboardCreateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
+    const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
+    const allTags = tagsClient ? await tagsClient?.getAll() : [];
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
@@ -146,8 +178,16 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } =
-      itemAttrsToSavedObjectAttrs(dataToLatest);
+    const {
+      attributes: soAttributes,
+      references: soReferences,
+      error: attributesError,
+    } = itemAttrsToSavedObject({
+      attributes: dataToLatest,
+      replaceTagReferencesByName: (references: SavedObjectReference[], newTagNames: string[]) =>
+        this.replaceTagReferencesByName(references, newTagNames, allTags),
+      incomingReferences: options.references,
+    });
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -156,10 +196,13 @@ export class DashboardStorage {
     const savedObject = await soClient.create<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       soAttributes,
-      optionsToLatest
+      { ...optionsToLatest, references: soReferences }
     );
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    const { item, error: itemError } = savedObjectToItem(savedObject, false, {
+      getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+        this.getTagNamesFromReferences(references, allTags),
+    });
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -197,6 +240,8 @@ export class DashboardStorage {
   ): Promise<DashboardUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
+    const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
+    const allTags = (await tagsClient?.getAll()) ?? [];
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
@@ -215,8 +260,16 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } =
-      itemAttrsToSavedObjectAttrs(dataToLatest);
+    const {
+      attributes: soAttributes,
+      references: soReferences,
+      error: attributesError,
+    } = itemAttrsToSavedObject({
+      attributes: dataToLatest,
+      replaceTagReferencesByName: (references: SavedObjectReference[], newTagNames: string[]) =>
+        this.replaceTagReferencesByName(references, newTagNames, allTags),
+      incomingReferences: options.references,
+    });
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -226,10 +279,13 @@ export class DashboardStorage {
       DASHBOARD_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
-      optionsToLatest
+      { ...optionsToLatest, references: soReferences }
     );
 
-    const { item, error: itemError } = savedObjectToItem(partialSavedObject, true);
+    const { item, error: itemError } = savedObjectToItem(partialSavedObject, true, {
+      getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+        this.getTagNamesFromReferences(references, allTags),
+    });
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -278,6 +334,8 @@ export class DashboardStorage {
   ): Promise<DashboardSearchOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
+    const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
+    const allTags = (await tagsClient?.getAll()) ?? [];
 
     // Validate and UP transform the options
     const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
@@ -291,16 +349,20 @@ export class DashboardStorage {
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
-    const hits = soResponse.saved_objects
-      .map((so) => {
-        const { item } = savedObjectToItem(so, false, {
-          allowedAttributes: soQuery.fields,
-          allowedReferences: optionsToLatest?.includeReferences,
-        });
-        return item;
-      })
-      // Ignore any saved objects that failed to convert to items.
-      .filter((item) => item !== null);
+    const hits = await Promise.all(
+      soResponse.saved_objects
+        .map(async (so) => {
+          const { item } = savedObjectToItem(so, false, {
+            allowedAttributes: soQuery.fields,
+            allowedReferences: optionsToLatest?.includeReferences,
+            getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+              this.getTagNamesFromReferences(references, allTags),
+          });
+          return item;
+        })
+        // Ignore any saved objects that failed to convert to items.
+        .filter((item) => item !== null)
+    );
     const response = {
       hits,
       pagination: {
