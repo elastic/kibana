@@ -331,7 +331,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               </StyledEuiSelectable>
             </EuiFormRow>
           ))}
-        {artifactRestrictedPolicyIds.policyIds.length > 0 && (
+        {artifactRestrictedPolicyIds.policyIds.length > 0 && !isGlobal && (
           <>
             <EuiSpacer />
             <EuiCallOut size="s">
