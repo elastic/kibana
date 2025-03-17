@@ -260,7 +260,7 @@ const ActionsTableComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: getHitsTotal(actionsData?.data?.total),
+      totalItemCount: getHitsTotal(actionsData?.data?.total) ?? 0,
       pageSizeOptions: [20, 50, 100],
     }),
     [actionsData, pageIndex, pageSize]
