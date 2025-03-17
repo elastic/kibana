@@ -53,7 +53,7 @@ describe('<IndicatorField />', () => {
     );
     expect(asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
-        Dec 31, 2021 @ 20:01:01.000
+        Jan 1, 2022 @ 01:01:01.000
       </DocumentFragment>
     `);
   });

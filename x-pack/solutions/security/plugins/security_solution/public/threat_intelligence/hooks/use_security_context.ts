@@ -16,11 +16,9 @@ import { useSetUrlParams } from '../../management/components/artifact_list_page/
 import { BlockListForm } from '../../management/pages/blocklist/view/components/blocklist_form';
 import { BlocklistsApiClient } from '../../management/pages/blocklist/services';
 import { getStore, inputsSelectors } from '../../common/store';
-import { FiltersGlobal } from '../../common/components/filters_global';
 import { licenseService } from '../../common/hooks/use_license';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SiemSearchBar } from '../../common/components/search_bar';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { deleteOneQuery, setQuery } from '../../common/store/inputs/actions';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -44,7 +42,6 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
   const contextValue: SecuritySolutionPluginContext = useMemo(
     () => ({
       securitySolutionStore,
-      getFiltersGlobalComponent: () => FiltersGlobal,
       getPageWrapper: () => SecuritySolutionPageWrapper,
       licenseService,
       sourcererDataView: sourcererDataView as unknown as SelectedDataView,
@@ -81,8 +78,6 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
             id: query.id,
           })
         ),
-
-      SiemSearchBar,
     }),
     [canWriteBlocklist, http, securitySolutionStore, sourcererDataView, hasAccessToTimeline]
   );

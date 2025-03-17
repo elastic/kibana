@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType, NamedExoticComponent, ReactNode, VFC } from 'react';
+import type { ComponentType, NamedExoticComponent, ReactNode } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -91,11 +91,6 @@ export interface Blocking {
  */
 export interface SecuritySolutionPluginContext {
   /**
-   * Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application.
-   * */
-  getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
-
-  /**
    * Gets the `PageWrapper` component for embedding a filter bar in the security solution application.
    * */
   getPageWrapper: () => ComponentType<{ children: ReactNode }>;
@@ -125,8 +120,6 @@ export interface SecuritySolutionPluginContext {
   useFilters: () => Filter[];
 
   useGlobalTime: () => TimeRange;
-
-  SiemSearchBar: VFC<any>;
 
   /**
    * Register query in security solution store for tracking and centralized refresh support
