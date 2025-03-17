@@ -39,8 +39,6 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           display: inline-block;
           background: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
           transition: background ${euiTheme.animation.fast};
-          border-right: ${euiTheme.border.thin};
-          border-color: ${euiTheme.colors.lightShade};
 
           ${isSelected
             ? ''

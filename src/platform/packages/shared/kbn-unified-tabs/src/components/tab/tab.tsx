@@ -176,6 +176,8 @@ function getTabContainerCss(
     padding-inline: ${euiTheme.size.xs};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
+    border-right: ${euiTheme.border.thin};
+    border-color: ${euiTheme.colors.lightShade};
 
     color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
 
