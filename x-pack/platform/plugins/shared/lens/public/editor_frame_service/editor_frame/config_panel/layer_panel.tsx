@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
@@ -40,6 +41,7 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
+import { ESQLEditor } from './esql_editor';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -73,6 +75,7 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
+    ...editorProps
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -125,8 +128,8 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId;
-  let layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  const datasourceId = datasourcePublicAPI?.datasourceId! as 'formBased' | 'textBased';
+  let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
     const aliasId = datasourcePublicAPI.datasourceAliasIds.find(
@@ -284,7 +287,10 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
+  const isTextBasedLanguage =
+    datasource?.isTextBasedLanguage() ||
+    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
+    false;
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -400,7 +406,7 @@ export function LayerPanel(props: LayerPanelProps) {
               (layerDatasource || activeVisualization.LayerPanelComponent) && (
                 <EuiSpacer size="s" />
               )}
-            {layerDatasource && props.indexPatternService && (
+            {layerDatasource && props.indexPatternService && !isTextBasedLanguage && (
               <layerDatasource.LayerPanelComponent
                 {...{
                   layerId,
@@ -412,6 +418,14 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
+            <ESQLEditor
+              isTextBasedLanguage={isTextBasedLanguage}
+              framePublicAPI={framePublicAPI}
+              datasourceMap={datasourceMap}
+              layerId={layerId}
+              visualizationMap={visualizationMap}
+              {...editorProps}
+            />
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{
