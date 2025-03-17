@@ -6,13 +6,21 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { americanTypewriter } from '../../../../common/lib/fonts';
 import { FontPicker } from '../font_picker';
 
-storiesOf('components/FontPicker', module)
-  .add('default', () => <FontPicker onSelect={action('onSelect')} />)
-  .add('with value', () => (
-    <FontPicker onSelect={action('onSelect')} value={americanTypewriter.value} />
-  ));
+export default {
+  title: 'components/FontPicker',
+};
+
+export const Default = {
+  render: () => <FontPicker onSelect={action('onSelect')} />,
+  name: 'default',
+};
+
+export const WithValue = {
+  render: () => <FontPicker onSelect={action('onSelect')} value={americanTypewriter.value} />,
+
+  name: 'with value',
+};

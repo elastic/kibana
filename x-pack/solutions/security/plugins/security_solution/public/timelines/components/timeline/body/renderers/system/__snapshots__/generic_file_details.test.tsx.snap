@@ -10,6 +10,7 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
     message={null}
     outcome="failure"
     processPid={6278}
+    scopeId="some_scope"
     showMessage={true}
     skipRedundantFileDetails={false}
     skipRedundantProcessDetails={false}
@@ -70,7 +71,7 @@ exports[`SystemGenericFileDetails rendering it renders the default SystemGeneric
         },
       }
     }
-    timelineId="test"
+    timelineId="some_scope"
   />
 </Details>
 `;

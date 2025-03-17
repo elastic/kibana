@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { EditObservableModal, type EditObservableModalProps } from './edit_observable_modal';
 import { mockCase } from '../../containers/mock';
 import { patchObservable } from '../../containers/api';
@@ -16,7 +17,6 @@ import { patchObservable } from '../../containers/api';
 jest.mock('../../containers/api');
 
 describe('EditObservableModal', () => {
-  let appMock: AppMockRenderer;
   const props: EditObservableModalProps = {
     onCloseModal: jest.fn(),
     caseData: mockCase,
@@ -31,31 +31,30 @@ describe('EditObservableModal', () => {
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<EditObservableModal {...props} />);
+    renderWithTestingProviders(<EditObservableModal {...props} />);
 
-    expect(result.getByTestId('case-observables-edit-modal')).toBeInTheDocument();
-    expect(result.getByText('Save observable')).toBeInTheDocument();
+    expect(screen.getByTestId('case-observables-edit-modal')).toBeInTheDocument();
+    expect(screen.getByText('Save observable')).toBeInTheDocument();
   });
 
   it('calls handleUpdateObservable', async () => {
-    const result = appMock.render(<EditObservableModal {...props} />);
+    renderWithTestingProviders(<EditObservableModal {...props} />);
 
-    expect(result.getByText('Save observable')).toBeInTheDocument();
-    await userEvent.click(result.getByText('Save observable'));
+    expect(screen.getByText('Save observable')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Save observable'));
 
     expect(patchObservable).toHaveBeenCalled();
   });
 
   it('calls onCancel', async () => {
-    const result = appMock.render(<EditObservableModal {...props} />);
+    renderWithTestingProviders(<EditObservableModal {...props} />);
 
-    expect(result.getByText('Cancel')).toBeInTheDocument();
-    await userEvent.click(result.getByText('Cancel'));
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Cancel'));
 
     expect(props.onCloseModal).toHaveBeenCalled();
   });

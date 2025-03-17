@@ -12,6 +12,7 @@ import type {
   Plugin,
   SavedObjectsClientContract,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { APMDataAccessConfig } from '.';
 import type {
@@ -64,8 +65,8 @@ export class ApmDataAccessPlugin
       this.logger.error(e);
     });
 
-    const getApmIndicesWithInternalUserFn = async () => {
-      const soClient = core.savedObjects.createInternalRepository();
+    const getApmIndicesWithInternalUserFn = async (request: KibanaRequest) => {
+      const soClient = core.savedObjects.getScopedClient(request);
       return this.getApmIndices(soClient);
     };
 

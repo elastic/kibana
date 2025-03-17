@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Storybook react doesn't declare this in its typings, but it's there.
-declare module '@storybook/react/standalone';
-
 // Storybook uses this module and its types are defined in the source but not in the type output
 declare module 'file-system-cache' {
   interface Options {

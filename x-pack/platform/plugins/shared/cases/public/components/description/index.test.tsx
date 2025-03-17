@@ -12,8 +12,8 @@ import userEvent from '@testing-library/user-event';
 import { basicCase } from '../../containers/mock';
 
 import { Description } from '.';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
+
+import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
@@ -28,28 +28,22 @@ const defaultProps = {
 };
 
 // Failing: See https://github.com/elastic/kibana/issues/185879
-describe.skip('Description', () => {
+describe('Description', () => {
   const onUpdateField = jest.fn();
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
   });
 
   it('renders description correctly', async () => {
-    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+    renderWithTestingProviders(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
     expect(await screen.findByTestId('description')).toBeInTheDocument();
     expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });
 
   it('hides and shows the description correctly when collapse button clicked', async () => {
-    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+    renderWithTestingProviders(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
     await userEvent.click(await screen.findByTestId('description-collapse-icon'));
 
@@ -63,7 +57,7 @@ describe.skip('Description', () => {
   });
 
   it('shows textarea on edit click', async () => {
-    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+    renderWithTestingProviders(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
     await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
@@ -72,7 +66,7 @@ describe.skip('Description', () => {
 
   it('edits the description correctly when saved', async () => {
     const editedDescription = 'New updated description';
-    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+    renderWithTestingProviders(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
     await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
@@ -92,7 +86,7 @@ describe.skip('Description', () => {
 
   it('keeps the old description correctly when canceled', async () => {
     const editedDescription = 'New updated description';
-    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+    renderWithTestingProviders(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
     await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
@@ -114,7 +108,7 @@ describe.skip('Description', () => {
   it('shows an error when description is too long', async () => {
     const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
 
-    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+    renderWithTestingProviders(<Description {...defaultProps} onUpdateField={onUpdateField} />);
 
     await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
@@ -132,15 +126,16 @@ describe.skip('Description', () => {
   });
 
   it('should hide the edit button when the user does not have update permissions', async () => {
-    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
-    appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+    renderWithTestingProviders(<Description {...defaultProps} onUpdateField={onUpdateField} />, {
+      wrapperProps: { permissions: noUpdateCasesPermissions() },
+    });
 
     expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
   it('should display description when case is loading', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <Description {...defaultProps} onUpdateField={onUpdateField} isLoadingDescription={true} />
     );
 
@@ -155,7 +150,7 @@ describe.skip('Description', () => {
     });
 
     it('should not show unsaved draft message when loading', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <Description {...defaultProps} onUpdateField={onUpdateField} isLoadingDescription={true} />
       );
 
@@ -168,7 +163,7 @@ describe.skip('Description', () => {
         caseData: { ...defaultProps.caseData, description: 'value set in storage' },
       };
 
-      appMockRender.render(<Description {...props} onUpdateField={onUpdateField} />);
+      renderWithTestingProviders(<Description {...props} onUpdateField={onUpdateField} />);
 
       expect(screen.queryByTestId('description-unsaved-draft')).not.toBeInTheDocument();
     });

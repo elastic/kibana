@@ -219,7 +219,7 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
   version: forceTargetVersionDiffAlgorithm,
   name: singleLineStringDiffAlgorithm,
   tags: createScalarArrayDiffAlgorithm({
-    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.Merge,
+    missingBaseVersionStrategy: ScalarArrayDiffMissingBaseVersionStrategy.UseTarget,
   }),
   description: multiLineStringDiffAlgorithm,
   severity: singleLineStringDiffAlgorithm,

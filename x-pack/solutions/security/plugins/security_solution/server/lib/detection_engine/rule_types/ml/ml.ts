@@ -62,8 +62,6 @@ export const mlExecutor = async ({
     exceptionFilter,
     listClient,
     unprocessedExceptions,
-    bulkCreate,
-    wrapHits,
   } = sharedParams;
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -166,14 +164,9 @@ export const mlExecutor = async ({
       });
     } else {
       const createResult = await bulkCreateMlSignals({
+        sharedParams,
         anomalyHits: filteredAnomalyHits,
-        completeRule,
         services,
-        ruleExecutionLogger,
-        id: completeRule.alertId,
-        signalsIndex: ruleParams.outputIndex,
-        bulkCreate,
-        wrapHits,
       });
       addToSearchAfterReturn({ current: result, next: createResult });
     }

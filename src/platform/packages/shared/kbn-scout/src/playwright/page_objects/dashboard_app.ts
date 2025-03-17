@@ -25,6 +25,10 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
+  async waitForListingTableToLoad() {
+    return this.page.testSubj.waitForSelector('table-is-ready', { state: 'visible' });
+  }
+
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
     await this.page.testSubj.waitForSelector('emptyDashboardWidget', { state: 'visible' });
@@ -91,5 +95,25 @@ export class DashboardApp {
     await this.page.testSubj.waitForSelector(panelHeaderTestSubj, {
       state: 'hidden',
     });
+  }
+
+  async waitForPanelsToLoad(
+    expectedCount: number,
+    options: { timeout: number; selector: string } = {
+      timeout: 20000,
+      selector: '[data-test-subj="embeddablePanel"][data-render-complete="true"]',
+    }
+  ) {
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < options.timeout) {
+      const count = await this.page.locator(options.selector).count();
+      if (count === expectedCount) return;
+      // Short polling interval
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await this.page.waitForTimeout(100);
+    }
+
+    throw new Error(`Timeout waiting for ${expectedCount} elements matching ${options.selector}`);
   }
 }

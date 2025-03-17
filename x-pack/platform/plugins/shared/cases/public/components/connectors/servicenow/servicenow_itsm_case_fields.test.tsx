@@ -12,9 +12,9 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { connector, choices } from '../mock';
 import { useGetChoices } from './use_get_choices';
 import Fields from './servicenow_itsm_case_fields';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
 import { MockFormWrapperComponent } from '../test_utils';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_choices');
@@ -28,7 +28,6 @@ useGetChoicesMock.mockReturnValue({
 
 describe('ServiceNowITSM Fields', () => {
   let user: UserEvent;
-  const appMockRenderer: AppMockRenderer = createAppMockRenderer();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -59,7 +58,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('all params fields are rendered', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -74,7 +73,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('transforms the categories to options correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -90,7 +89,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('transforms the subcategories to options correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -100,7 +99,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('transforms the options correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -122,7 +121,7 @@ describe('ServiceNowITSM Fields', () => {
   it('shows the deprecated callout if the connector is deprecated', async () => {
     const tableApiConnector = { ...connector, isDeprecated: true };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={tableApiConnector} />
       </MockFormWrapperComponent>
@@ -132,7 +131,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('does not show the deprecated callout when the connector is not deprecated', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -141,7 +140,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('does not show the deprecated callout when the connector is preconfigured and not deprecated', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={{ ...connector, isPreconfigured: true }} />
       </MockFormWrapperComponent>
@@ -151,7 +150,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('shows the deprecated callout when the connector is preconfigured and deprecated', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={{ ...connector, isPreconfigured: true, isDeprecated: true }} />
       </MockFormWrapperComponent>
@@ -168,7 +167,7 @@ describe('ServiceNowITSM Fields', () => {
       subcategory: '',
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={customFields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -182,7 +181,7 @@ describe('ServiceNowITSM Fields', () => {
     const testers = ['severity', 'urgency', 'impact'];
     testers.forEach((subj) =>
       it(`${subj.toUpperCase()}`, async () => {
-        appMockRenderer.render(
+        renderWithTestingProviders(
           <MockFormWrapperComponent fields={fields}>
             <Fields connector={connector} />
           </MockFormWrapperComponent>
@@ -197,7 +196,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('should submit a service now itsm connector', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -236,7 +235,7 @@ describe('ServiceNowITSM Fields', () => {
   });
 
   it('resets subcategory when changing category', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>

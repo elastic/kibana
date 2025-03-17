@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('types with `visibleInManagement` ', () => {
     before(async () => {
       await esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
       await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
     });
 

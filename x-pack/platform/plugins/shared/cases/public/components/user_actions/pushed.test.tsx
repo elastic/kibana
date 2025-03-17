@@ -42,10 +42,7 @@ describe('createPushedUserActionBuilder ', () => {
     );
 
     expect(screen.getByText('pushed as new incident My SN connector')).toBeInTheDocument();
-    expect(screen.getByText('external title').closest('a')).toHaveAttribute(
-      'href',
-      'basicPush.com'
-    );
+    expect(screen.getByTestId('pushed-value')).toHaveAttribute('href', 'basicPush.com');
   });
 
   it('renders correctly if oldestUserActionPushDate is not defined', async () => {

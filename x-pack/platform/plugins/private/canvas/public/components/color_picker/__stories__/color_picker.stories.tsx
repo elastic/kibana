@@ -6,9 +6,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean } from '@storybook/addon-knobs';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import type { StoryObj } from '@storybook/react';
 import { ColorPicker } from '../color_picker';
 
 const THREE_COLORS = ['#fff', '#666', '#000'];
@@ -54,8 +53,10 @@ class Interactive extends React.Component<
   }
 }
 
-storiesOf('components/Color/ColorPicker', module)
-  .addParameters({
+export default {
+  title: 'components/Color/ColorPicker',
+
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -68,38 +69,62 @@ storiesOf('components/Color/ColorPicker', module)
         },
       },
     },
-  })
-  .add('three colors', () => (
+  },
+};
+
+export const ThreeColors: StoryObj = {
+  render: () => (
     <ColorPicker
       value="#fff"
       onAddColor={action('onAddColor')}
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={THREE_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
-  ))
-  .add('six colors', () => (
+  ),
+  args: {
+    hasButtons: true,
+  },
+  name: 'three colors',
+};
+
+export const SixColors: StoryObj = {
+  render: () => (
     <ColorPicker
       value="#fff"
       onAddColor={action('onAddColor')}
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
-  ))
-  .add('six colors, value missing', () => (
+  ),
+  args: {
+    hasButtons: true,
+  },
+  name: 'six colors',
+};
+
+export const SixColorsValueMissing: StoryObj = {
+  render: () => (
     <ColorPicker
       value="#a1b2c3"
       onAddColor={action('onAddColor')}
       onRemoveColor={action('onRemoveColor')}
       onChange={action('onChange')}
       colors={SIX_COLORS}
-      hasButtons={boolean('Has Buttons', true)}
     />
-  ))
-  .add('interactive', () => <Interactive />, {
+  ),
+  args: {
+    hasButtons: true,
+  },
+  name: 'six colors, value missing',
+};
+
+export const _Interactive = {
+  render: () => <Interactive />,
+  name: 'interactive',
+
+  parameters: {
     info: {
       inline: true,
       source: false,
@@ -114,4 +139,5 @@ storiesOf('components/Color/ColorPicker', module)
         },
       },
     },
-  });
+  },
+};
