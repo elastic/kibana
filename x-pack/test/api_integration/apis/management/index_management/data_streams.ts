@@ -204,7 +204,11 @@ export default function ({ getService }: FtrProviderContext) {
             // In stateful Kibana, when cluster.logsb.enabled setting is not set, the index mode is always standard
             // For versions 9.0+, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
             { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
-            { enabled: null, prior_logs_usage: false, indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : 'standard' },
+            {
+              enabled: null,
+              prior_logs_usage: false,
+              indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : 'standard',
+            },
           ];
 
           // eslint-disable-next-line @typescript-eslint/naming-convention
