@@ -17,6 +17,7 @@ export interface ESDocumentSource {
       case_number: string;
       priority: string;
       closed: boolean;
+      status: string;
     };
     object_type: string;
     owner: string;
