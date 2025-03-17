@@ -26,6 +26,10 @@ export const GENERATING = i18n.translate('xpack.elasticAssistant.alertSummary.ge
 export const GENERATE = i18n.translate('xpack.elasticAssistant.alertSummary.generate', {
   defaultMessage: 'Generate insights',
 });
+
+export const REGENERATE = i18n.translate('xpack.elasticAssistant.alertSummary.regenerate', {
+  defaultMessage: 'Regenerate insights',
+});
 // END SUMMARY
 
 // START SUGGESTED PROMPTS

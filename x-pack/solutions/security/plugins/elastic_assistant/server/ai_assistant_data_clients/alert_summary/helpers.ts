@@ -33,6 +33,10 @@ export const transformESToAlertSummary = (
       id: alertSummarySchema.id,
       createdBy: alertSummarySchema.created_by,
       updatedBy: alertSummarySchema.updated_by,
+      replacements: alertSummarySchema.replacements.reduce((acc: Record<string, string>, r) => {
+        acc[r.uuid] = r.value;
+        return acc;
+      }, {}),
     };
 
     return alertSummary;
@@ -63,6 +67,10 @@ export const transformESSearchToAlertSummary = (
         alertId: alertSummarySchema.alert_id,
         createdBy: alertSummarySchema.created_by,
         updatedBy: alertSummarySchema.updated_by,
+        replacements: alertSummarySchema.replacements.reduce((acc: Record<string, string>, r) => {
+          acc[r.uuid] = r.value;
+          return acc;
+        }, {}),
       };
 
       return alertSummary;
@@ -72,25 +80,28 @@ export const transformESSearchToAlertSummary = (
 export const transformToUpdateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { summary, id }: AlertSummaryUpdateProps
+  { summary, replacements, id }: AlertSummaryUpdateProps
 ): UpdateAlertSummarySchema => {
   return {
     id,
     updated_at: updatedAt,
-    summary: summary ?? '',
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
+    updated_by: user.username,
+    ...(summary ? { summary } : {}),
+    ...(replacements
+      ? {
+          replacements: Object.keys(replacements).map((key) => ({
+            uuid: key,
+            value: replacements[key],
+          })),
+        }
+      : {}),
   };
 };
 
 export const transformToCreateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { summary, alertId }: AlertSummaryCreateProps
+  { summary, alertId, replacements }: AlertSummaryCreateProps
 ): CreateAlertSummarySchema => {
   return {
     '@timestamp': updatedAt,
@@ -106,6 +117,10 @@ export const transformToCreateScheme = (
         name: user.username,
       },
     ],
+    replacements: Object.keys(replacements).map((key) => ({
+      uuid: key,
+      value: replacements[key],
+    })),
   };
 };
 

@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString, User } from '../common_attributes.gen';
+import { Replacements } from '../conversations/common_attributes.gen';
 
 export type AlertSummaryBulkActionSkipReason = z.infer<typeof AlertSummaryBulkActionSkipReason>;
 export const AlertSummaryBulkActionSkipReason = z.literal('ALERT_SUMMARY_NOT_MODIFIED');
@@ -48,6 +49,7 @@ export const AlertSummaryResponse = z.object({
   alertId: NonEmptyString,
   timestamp: NonEmptyString.optional(),
   summary: z.string(),
+  replacements: Replacements,
   updatedAt: z.string().optional(),
   updatedBy: z.string().optional(),
   createdAt: z.string().optional(),
@@ -104,12 +106,14 @@ export type AlertSummaryCreateProps = z.infer<typeof AlertSummaryCreateProps>;
 export const AlertSummaryCreateProps = z.object({
   alertId: z.string(),
   summary: z.string(),
+  replacements: Replacements,
 });
 
 export type AlertSummaryUpdateProps = z.infer<typeof AlertSummaryUpdateProps>;
 export const AlertSummaryUpdateProps = z.object({
   id: z.string(),
   summary: z.string().optional(),
+  replacements: Replacements.optional(),
 });
 
 export type PerformAlertSummaryBulkActionRequestBody = z.infer<
