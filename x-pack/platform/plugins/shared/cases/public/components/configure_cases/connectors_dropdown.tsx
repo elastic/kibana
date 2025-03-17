@@ -56,7 +56,7 @@ const noConnectorOption = {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <span data-test-subj={`dropdown-connector-no-connector`}>{i18n.NO_CONNECTOR}</span>
+        <span data-test-subj={`dropdown-connector-no-connector-label`}>{i18n.NO_CONNECTOR}</span>
       </EuiFlexItem>
     </EuiFlexGroup>
   ),
