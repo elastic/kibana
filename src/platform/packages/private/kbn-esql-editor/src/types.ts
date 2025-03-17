@@ -19,6 +19,17 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 
+export interface ControlsContext {
+  /** The editor supports the creation of controls,
+   * This flag should be set to true to display the "Create control" suggestion
+   **/
+  supportsControls?: boolean;
+  /** Function to be called after the control creation **/
+  onSaveControl?: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+  /** Function to be called after cancelling the control creation **/
+  onCancelControl?: () => void;
+}
+
 export interface ESQLEditorProps {
   /** The aggregate type query */
   query: AggregateQuery;
@@ -74,14 +85,7 @@ export interface ESQLEditorProps {
 
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
-  /** The editor supports the creation of controls,
-   * This flag should be set to true to display the "Create control" suggestion
-   **/
-  supportsControls?: boolean;
-  /** Function to be called after the control creation **/
-  onSaveControl?: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  /** Function to be called after cancelling the control creation **/
-  onCancelControl?: () => void;
+  controlsContext?: ControlsContext;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
 }
