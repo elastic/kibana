@@ -21,6 +21,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
