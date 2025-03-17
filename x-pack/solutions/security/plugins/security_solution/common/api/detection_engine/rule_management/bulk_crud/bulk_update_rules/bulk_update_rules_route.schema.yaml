@@ -12,12 +12,20 @@ paths:
       summary: Update multiple detection rules
       description: |
         Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
-        > info
-        > You cannot modify the `id` or `rule_id` values.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       tags:
         - Bulk API
       requestBody:
-        description: A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to modify.
+        description: |
+          A JSON array where each element includes the `id` or `rule_id` field of the rule you want to update and the fields you want to be specified in this rule.
+          > info
+          > All unspecified fields are deleted. You cannot modify the `id` or `rule_id` values.
         required: true
         content:
           application/json:
@@ -25,6 +33,25 @@ paths:
               type: array
               items:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleUpdateProps'
+            examples:
+              example1:
+                value:
+                  - id: "7d2f5ed8-6c05-44ab-81ce-9160ae147057"
+                    name: "Updated Google Workspace Suspended User Account Renewed"
+                    tags:
+                      - "new_tag"
+                    description: "Detects when a previously suspended user's account is renewed in Google Workspace. An adversary may renew a suspended user account to maintain access to the Google Workspace organization with a valid account."
+                    risk_score: 21
+                    severity: "low"
+                    type: "query"
+                  - id: "43b2dc3b-4f21-4a10-95e2-0dbc19e6e974"
+                    name: "Updated AWS Redshift Cluster Creation"
+                    tags:
+                      - "new_tag"
+                    description: "Identifies the creation of an Amazon Redshift cluster. Unexpected creation of this cluster by a non-administrative user may indicate a permission or role issue with current users. If unexpected, the resource may not properly be configured and could introduce security vulnerabilities."
+                    risk_score: 21
+                    severity: "low"
+                    type: "query"
       responses:
         200:
           description: Indicates a successful call.
