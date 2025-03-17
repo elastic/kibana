@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KIBANA_SOLUTIONS, type ModuleGroup, type ModuleVisibility } from '@kbn/projects-solutions-groups';
+import {
+  KIBANA_SOLUTIONS,
+  type ModuleGroup,
+  type ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 
 interface ModuleAttrs {
   group: ModuleGroup;
