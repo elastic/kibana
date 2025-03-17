@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import './skip_bottom_button.scss';
-import { EuiScreenReaderOnly, EuiButton } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiButton, type UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 export interface SkipBottomButtonProps {
   /**
@@ -23,10 +23,10 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
   return (
     <EuiScreenReaderOnly showOnFocus>
       <EuiButton
+        css={skipBottomButtonCss}
         fill
         size="s"
         onClick={onClick}
-        className="dscSkipButton"
         data-test-subj="discoverSkipTableButton"
       >
         <FormattedMessage
@@ -37,3 +37,13 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
     </EuiScreenReaderOnly>
   );
 }
+
+const skipBottomButtonCss = ({ euiTheme }: UseEuiTheme) => css`
+  z-index: ${euiTheme.levels.header};
+  transition: none !important;
+
+  &:focus {
+    animation: none !important;
+    position: absolute;
+  }
+`;

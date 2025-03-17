@@ -12,6 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import type { SkipBottomButtonProps } from './skip_bottom_button';
 import { SkipBottomButton } from './skip_bottom_button';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('Skip to Bottom Button', function () {
   let props: SkipBottomButtonProps;
@@ -24,7 +25,11 @@ describe('Skip to Bottom Button', function () {
   });
 
   it('should be clickable', function () {
-    component = mountWithIntl(<SkipBottomButton {...props} />);
+    component = mountWithIntl(
+      <EuiThemeProvider>
+        <SkipBottomButton {...props} />
+      </EuiThemeProvider>
+    );
     component.find('[data-test-subj="discoverSkipTableButton"]').last().simulate('click');
     expect(props.onClick).toHaveBeenCalled();
   });
