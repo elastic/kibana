@@ -10,18 +10,18 @@ import { StoredSLODefinition } from '../domain/models';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLOValidator {
-  exists(id: string, namespaces?: string[]): Promise<boolean>;
+  exists(id: string): Promise<boolean>;
 }
 
 export class KibanaSavedObjectsSLOValidator implements SLOValidator {
   constructor(private internalSOClient: SavedObjectsClientContract) {}
 
-  async exists(id: string, namespaces = []) {
+  async exists(id: string) {
     const findResponse = await this.internalSOClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       perPage: 0,
       filter: `slo.attributes.id:(${id})`,
-      namespaces: [...namespaces],
+      namespaces: ['*'],
     });
 
     return findResponse.total > 0;

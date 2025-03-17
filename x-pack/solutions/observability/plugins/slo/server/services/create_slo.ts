@@ -125,7 +125,7 @@ export class CreateSLO {
   }
 
   private async assertSLOInexistant(slo: SLODefinition) {
-    const exists = await this.validator.exists(slo.id, ['*']);
+    const exists = await this.validator.exists(slo.id);
     if (exists) {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }
