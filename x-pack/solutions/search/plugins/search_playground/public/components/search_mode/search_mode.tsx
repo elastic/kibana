@@ -64,6 +64,7 @@ export const SearchMode: React.FC = () => {
       }}
       paddingSize="xl"
       className="eui-fullHeight"
+      data-test-subj="playground-search-section"
     >
       <EuiFlexGroup direction="row" justifyContent="center">
         <EuiFlexItem

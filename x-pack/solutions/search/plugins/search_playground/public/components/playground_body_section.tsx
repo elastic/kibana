@@ -19,9 +19,11 @@ const PlaygroundBodySectionStyle = css({
 export const PlaygroundBodySection = ({
   color,
   children,
+  dataTestSubj,
 }: {
   color?: CSSProperties['backgroundColor'];
   children: React.ReactNode | React.ReactNode[];
+  dataTestSubj?: string;
 }) => (
   <KibanaPageTemplate.Section
     alignment="top"
@@ -33,6 +35,7 @@ export const PlaygroundBodySection = ({
     contentProps={{ css: PlaygroundBodySectionStyle }}
     paddingSize="none"
     className="eui-fullHeight"
+    data-test-subj={dataTestSubj}
   >
     {children}
   </KibanaPageTemplate.Section>

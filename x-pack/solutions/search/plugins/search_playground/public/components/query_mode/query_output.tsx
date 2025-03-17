@@ -66,7 +66,7 @@ export const ElasticsearchQueryOutput = ({
       <EuiSplitPanel.Inner paddingSize="none">
         {!!respJSON ? (
           <CodeEditor
-            data-test-subj="ViewElasticsearchQueryHits"
+            dataTestSubj="ViewElasticsearchQueryResponse"
             languageId="json"
             value={respJSON}
             options={{
@@ -78,7 +78,12 @@ export const ElasticsearchQueryOutput = ({
             isCopyable
           />
         ) : (
-          <EuiFlexGroup alignItems="center" justifyContent="center" css={FullHeight}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            css={FullHeight}
+            data-test-subj="ViewElasticsearchQueryResponseEmptyState"
+          >
             <EuiEmptyPrompt
               color="plain"
               title={

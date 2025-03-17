@@ -34,7 +34,10 @@ export const SearchQueryMode: React.FC = () => {
   const isLoading = fetchStatus !== 'idle';
 
   return (
-    <PlaygroundBodySection color={euiTheme.colors.backgroundBasePlain}>
+    <PlaygroundBodySection
+      color={euiTheme.colors.backgroundBasePlain}
+      dataTestSubj="queryModeSection"
+    >
       <EuiFlexGroup>
         <EuiFlexItem grow={6} css={QueryViewContainer(euiTheme)}>
           <EuiPanel

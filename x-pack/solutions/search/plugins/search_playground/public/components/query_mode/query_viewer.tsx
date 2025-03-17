@@ -71,7 +71,7 @@ export const ElasticsearchQueryViewer = ({
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="none">
         <CodeEditor
-          data-test-subj="ViewElasticsearchQueryResult"
+          dataTestSubj="ViewElasticsearchQueryResult"
           languageId="json"
           value={query}
           options={{

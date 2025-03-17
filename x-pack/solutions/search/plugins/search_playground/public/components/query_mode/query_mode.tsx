@@ -74,7 +74,7 @@ export const QueryMode: React.FC = () => {
   const query = useMemo(() => JSON.stringify(elasticsearchQuery, null, 2), [elasticsearchQuery]);
 
   return (
-    <PlaygroundBodySection>
+    <PlaygroundBodySection dataTestSubj="queryModeSection">
       <EuiFlexGroup>
         <EuiFlexItem grow={6} className="eui-yScroll" css={QueryViewContainer(euiTheme)}>
           <EuiCodeBlock
