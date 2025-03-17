@@ -14,7 +14,7 @@ type EmotionFn = (theme: UseEuiTheme) => SerializedStyles;
 const MAX_WIDTH = 575;
 
 const root: EmotionFn = ({ euiTheme: { size } }) => css`
-  padding: ${size.s} ${size.xl} ${size.xl} ${size.xl};
+  padding: 0 ${size.xl} ${size.xxxl} ${size.xl};
   max-width: ${MAX_WIDTH}px;
   margin: 0 auto;
 `;
