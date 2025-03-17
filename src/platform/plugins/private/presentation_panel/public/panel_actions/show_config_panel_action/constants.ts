@@ -8,7 +8,3 @@
  */
 
 export const ACTION_SHOW_CONFIG_PANEL = 'ACTION_SHOW_CONFIG_PANEL';
-
-export const servicesMock = {
-  core: {},
-};
