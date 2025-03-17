@@ -41,21 +41,19 @@ export function useFetchApmSuggestions({
     queryKey: ['fetchApmSuggestions', fieldName, search, serviceName],
     queryFn: async ({ signal }) => {
       try {
-        if (fieldName === 'service.name' || (serviceName && serviceName !== '*')) {
-          const { terms = [] } = await http.get<ApiResponse>('/internal/apm/suggestions', {
-            query: {
-              fieldName,
-              start: moment().subtract(2, 'days').toISOString(),
-              end: moment().toISOString(),
-              fieldValue: search,
-              ...(!!serviceName && fieldName !== 'service.name' && { serviceName }),
-            },
-            signal,
-          });
-          return terms;
-        } else {
-          return [];
-        }
+        const { terms = [] } = await http.get<ApiResponse>('/internal/apm/suggestions', {
+          query: {
+            fieldName,
+            start: moment().subtract(2, 'days').toISOString(),
+            end: moment().toISOString(),
+            fieldValue: search,
+            ...(!!serviceName &&
+              serviceName !== '*' &&
+              fieldName !== 'service.name' && { serviceName }),
+          },
+          signal,
+        });
+        return terms;
       } catch (error) {
         // ignore error
       }
