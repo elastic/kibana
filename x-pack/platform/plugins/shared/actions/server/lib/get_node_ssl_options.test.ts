@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

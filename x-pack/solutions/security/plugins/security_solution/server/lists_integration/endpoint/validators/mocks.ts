@@ -76,6 +76,10 @@ export class BaseValidatorMock extends BaseValidator {
   _validateCanDeleteItemInActiveSpace(currentSavedItem: ExceptionListItemSchema): Promise<void> {
     return this.validateCanDeleteItemInActiveSpace(currentSavedItem);
   }
+
+  _validateCanReadItemInActiveSpace(currentSavedItem: ExceptionListItemSchema): Promise<void> {
+    return this.validateCanReadItemInActiveSpace(currentSavedItem);
+  }
 }
 
 export const createExceptionItemLikeOptionsMock = (
