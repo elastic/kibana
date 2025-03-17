@@ -17,6 +17,8 @@ import { startEntityEngineRoute } from './start';
 import { stopEntityEngineRoute } from './stop';
 import { getEntityStoreStatusRoute } from './status';
 import { enableEntityStoreRoute } from './enablement';
+import { privilegedUsersRoute } from './privileged_users';
+import { privilegedUsersFlyoutRoute } from './privileged_users_flyout';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -35,4 +37,6 @@ export const registerEntityStoreRoutes = ({
   listEntitiesRoute(router, logger);
   applyDataViewIndicesEntityEngineRoute(router, logger);
   entityStoreInternalPrivilegesRoute(router, logger, getStartServices);
+  privilegedUsersRoute(router, logger);
+  privilegedUsersFlyoutRoute(router, logger);
 };

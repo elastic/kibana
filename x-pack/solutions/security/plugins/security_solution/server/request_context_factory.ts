@@ -18,6 +18,7 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
+import { PrivmonDataClient } from './lib/entity_analytics/privmon/privmon_data_client';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
@@ -37,6 +38,8 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
+
+
 
 export interface IRequestContextFactory {
   create(
@@ -268,6 +271,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           }),
         });
       }),
+      getPrivmonDataClient: memoize(
+        () =>
+          new PrivmonDataClient({
+            logger: options.logger,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            namespace: getSpaceId(),
+            dataViewsService,
+          })
+      ),
       getAssetInventoryClient: memoize(() => {
         const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;

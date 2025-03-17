@@ -18,6 +18,7 @@ import {
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
+  ENTITY_ANALYTICS_PRIVILEGED_USERS_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
@@ -38,6 +39,7 @@ import {
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
   ENTITY_STORE,
+  PRIVILEGED_USER_MONITORING,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -62,6 +64,7 @@ const categories = [
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
       SecurityPageName.entityAnalyticsEntityStoreManagement,
+      SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
     ],
   },
   {
@@ -197,6 +200,22 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+    },
+    {
+      id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
+      title: PRIVILEGED_USER_MONITORING,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.privilegedUserMonitoringDescription',
+        {
+          defaultMessage: 'Monitor privileged users',
+        }
+      ),
+      landingIcon: 'users',
+      path: ENTITY_ANALYTICS_PRIVILEGED_USERS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+      licenseType: 'platinum',
     },
     {
       id: SecurityPageName.responseActionsHistory,

@@ -258,6 +258,11 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type {
+  PrivmonGetSimilarUsersRequestBodyInput,
+  PrivmonGetSimilarUsersResponse,
+} from './entity_analytics/privmon/privmon_get_similar_users_route.gen';
+import type { InitPrivmonResponse } from './entity_analytics/privmon/privmon_init_route.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -1586,6 +1591,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Initializes Privileged User Monitoring by creating the necessary indices and mappings and starting the Privileged User Monitoring task
+   */
+  async initPrivmon() {
+    this.log.info(`${new Date().toISOString()} Calling API InitPrivmon`);
+    return this.kbnClient
+      .request<InitPrivmonResponse>({
+        path: '/api/privmon/init',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
    */
   async initRiskEngine() {
@@ -1794,6 +1814,22 @@ finalize it.
     return this.kbnClient
       .request<PreviewRiskScoreResponse>({
         path: '/internal/risk_score/preview',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Get similar users based on the provided user
+   */
+  async privmonGetSimilarUsers(props: PrivmonGetSimilarUsersProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PrivmonGetSimilarUsers`);
+    return this.kbnClient
+      .request<PrivmonGetSimilarUsersResponse>({
+        path: '/api/privmon/init',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2446,6 +2482,9 @@ export interface PersistPinnedEventRouteProps {
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
+}
+export interface PrivmonGetSimilarUsersProps {
+  body: PrivmonGetSimilarUsersRequestBodyInput;
 }
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;
