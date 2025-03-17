@@ -44,12 +44,6 @@ interface DataStreamActionMetadata extends CommonActionMetadata {
 
 export type EsMetadata = IndexActionMetadata | MlActionMetadata | DataStreamActionMetadata;
 
-// TODO(jloleysens): Replace these regexes once this issue is addressed https://github.com/elastic/elasticsearch/issues/118062
-const ES_INDEX_MESSAGES_REQUIRING_REINDEX = [
-  /Index created before/,
-  /index with a compatibility version \</,
-];
-
 export const isFrozenDeprecation = (message: string, indexName?: string): boolean =>
   Boolean(indexName) && message.includes(`Index [${indexName}] is a frozen index`);
 
@@ -62,9 +56,9 @@ export const getCorrectiveAction = (deprecation: BaseDeprecation): CorrectiveAct
   const clusterSettingDeprecation = metadata?.actions?.find(
     (action) => action.action_type === 'remove_settings' && typeof index === 'undefined'
   );
-  const requiresReindexAction = ES_INDEX_MESSAGES_REQUIRING_REINDEX.some((regexp) =>
-    regexp.test(message)
-  );
+  const requiresReindexAction =
+    (type === 'index_settings' || type === 'node_settings') &&
+    (deprecation.metadata as IndexActionMetadata)?.reindex_required === true;
   const requiresUnfreezeAction = isFrozenDeprecation(message, index);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
