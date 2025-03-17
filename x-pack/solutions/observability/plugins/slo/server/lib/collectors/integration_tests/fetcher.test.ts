@@ -141,7 +141,6 @@ describe('SLO usage collector fetcher', () => {
     soClient = new SavedObjectsClient(
       kibanaServer.coreStart.savedObjects.createInternalRepository()
     );
-
     loggerMock = createLoggerMock();
 
     sloRepository = new KibanaSavedObjectsSLORepository(soClient, loggerMock);
