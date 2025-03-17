@@ -61,7 +61,7 @@ export const AnomalyDetails: FC<Props> = ({
   tabIndex,
   job,
 }) => {
-  if (examples !== undefined && examples.length > 0 && definition !== undefined) {
+  if (examples !== undefined && examples.length > 0) {
     const tabs = [
       {
         id: 'Details',
@@ -302,7 +302,7 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] }> = ({
+const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[] }> = ({
   definition,
   examples,
 }) => {
