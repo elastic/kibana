@@ -381,18 +381,7 @@ function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
 }
 
-function extractDocumentsFromMessage(content: string, log: ToolingLog): any[] {
-  const matches = content.match(/\{[\s\S]*?\}/g);
-
-  if (!matches || !matches.length) {
-    log.debug('No documents found.');
-    return [];
-  }
-
-  try {
-    return JSON.parse(`[${matches.join(',')}]`);
-  } catch (error) {
-    log.error(`Error parsing documents: ${error}`);
-    return [];
-  }
+function extractDocumentsFromMessage(content: string, log: ToolingLog): KnowledgeBaseDocument[] {
+  const matches = content.match(/\{[\s\S]*?\}/g)!;
+  return matches.map((jsonStr) => JSON.parse(jsonStr));
 }

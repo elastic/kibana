@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { recallAndScore } from './recall_and_score';
+import { RecalledSuggestion, recallAndScore } from './recall_and_score';
 import { scoreSuggestions } from './score_suggestions';
 import { MessageRole, type Message } from '../../../common';
 import type { FunctionCallChatFunction } from '../../service/types';
@@ -86,6 +86,46 @@ describe('recallAndScore', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('when no documents are recalled', () => {
+    let result: {
+      relevantDocuments?: RecalledSuggestion[];
+      scores?: Array<{ id: string; score: number }>;
+      suggestions: RecalledSuggestion[];
+    };
+
+    beforeEach(async () => {
+      mockRecall.mockResolvedValue([]);
+
+      result = await recallAndScore({
+        recall: mockRecall,
+        chat: mockChat,
+        analytics: mockAnalytics,
+        userPrompt: 'What is my favorite color?',
+        context: 'Some context',
+        messages: sampleMessages,
+        logger: mockLogger,
+        signal,
+      });
+    });
+
+    it('returns empty suggestions', async () => {
+      expect(result).toEqual({ relevantDocuments: [], scores: [], suggestions: [] });
+    });
+
+    it('invokes recall with user prompt and screen context', async () => {
+      expect(mockRecall).toHaveBeenCalledWith({
+        queries: [
+          { text: 'What is my favorite color?', boost: 3 },
+          { text: 'Some context', boost: 1 },
+        ],
+      });
+    });
+
+    it('does not score the suggestions', async () => {
+      expect(scoreSuggestions).not.toHaveBeenCalled();
+    });
   });
 
   it('returns empty suggestions when no documents are recalled', async () => {
