@@ -22,6 +22,7 @@ interface Props {
 
 export function StreamDescription({ definition }: Props) {
   const { mutate } = useUpdateStream();
+
   if (!definition || isGroupStreamDefinition(definition.stream)) {
     return null;
   }
@@ -34,13 +35,15 @@ export function StreamDescription({ definition }: Props) {
           defaultValue={definition.stream.description ?? EMPTY_DESCRIPTION_LABEL}
           size="s"
           onSave={(value) => {
+            const sanitized = value.trim();
+
             mutate({
               name: definition.stream.name,
               request: {
                 dashboards: definition.dashboards,
                 stream: {
                   ingest: definition.stream.ingest as WiredIngest, // to please ts
-                  description: value,
+                  description: sanitized.length > 0 ? sanitized : undefined,
                 },
               },
             });
