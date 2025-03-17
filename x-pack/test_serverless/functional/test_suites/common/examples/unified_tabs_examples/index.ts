@@ -9,8 +9,6 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Unified Tabs Examples', function () {
-    this.tags(['skipSvlSearch', 'skipSvlSec']); // running once only for Observability solution view
-
     loadTestFile(require.resolve('./tabs_design'));
   });
 }

@@ -22,7 +22,9 @@ export default ({ getService, getPageObjects, updateBaselines }: FtrProviderCont
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
 
-  describe('Unified Tabs Design', () => {
+  describe('Unified Tabs Design', function () {
+    this.tags(['skipSvlSearch', 'skipSvlSec']); // running once only for Observability solution view
+
     before(async () => {
       await svlCommonPage.loginAsViewer();
       await browser.setWindowSize(1200, 800);
