@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
@@ -109,6 +109,11 @@ export function EntityDetailViewWithoutParams({
                   ) : null}
                   {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
+              }
+              description={
+                definition?.stream.description ? (
+                  <EuiText size="s">{definition?.stream.description}</EuiText>
+                ) : undefined
               }
             />
           }
