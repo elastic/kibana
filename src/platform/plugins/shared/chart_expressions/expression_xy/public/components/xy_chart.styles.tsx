@@ -15,7 +15,7 @@ export const GlobalXYChartStyles = () => {
     <Global
       styles={css`
         .echAnnotation {
-          max-width: 500px;
+          max-width: 500px !important;
         }
       `}
     />
