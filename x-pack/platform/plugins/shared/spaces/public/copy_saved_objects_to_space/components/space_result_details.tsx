@@ -18,6 +18,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 
@@ -31,7 +32,6 @@ import { CopyStatusIndicator } from './copy_status_indicator';
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
-import { css } from '@emotion/react';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;
