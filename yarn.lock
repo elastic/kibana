@@ -2179,9 +2179,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_100.0.0_borealis.0_v_2_poc_10.tgz":
+"@elastic/eui@file:./elastic_eui_100.0.0_borealis.0_v_2_poc_12.tgz":
   version "100.0.0"
-  resolved "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_10.tgz#046a3cf1e95e67be26eedd4437fbbf14d6b74b77"
+  resolved "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_12.tgz#b9ce75421a8f9b25fe588b7d31b678d812b88d3f"
   dependencies:
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
