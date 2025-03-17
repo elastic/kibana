@@ -14,9 +14,11 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { WorkChatServices } from '../services';
-import { WorkchatChatPage } from './pages/chat';
-import { WorkChatServicesContext } from './context/workchat_services_context';
 import type { WorkChatAppPluginStartDependencies } from '../types';
+import { WorkChatServicesContext } from './context/workchat_services_context';
+import { WorkchatChatPage } from './pages/chat';
+import { WorkChatAgentsPage } from './pages/agents';
+import { WorkChatAgentEditOrCreatePage } from './pages/agent_edit_or_create';
 
 export const mountApp = async ({
   core,
@@ -44,6 +46,17 @@ export const mountApp = async ({
                   <Route path="/chat/:conversationId">
                     <WorkchatChatPage />
                   </Route>
+
+                  <Route path="/agents/create">
+                    <WorkChatAgentEditOrCreatePage />
+                  </Route>
+                  <Route path="/agents/:agentId">
+                    <WorkChatAgentEditOrCreatePage />
+                  </Route>
+                  <Route path="/agents" strict>
+                    <WorkChatAgentsPage />
+                  </Route>
+
                   <Route path="/">
                     <WorkchatChatPage />
                   </Route>

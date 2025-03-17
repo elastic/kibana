@@ -16,9 +16,9 @@ export interface Agent {
   description: string;
   lastUpdated: string;
   user: UserNameAndId;
-  configuration: Record<string, unknown>;
+  configuration: Record<string, any>;
 }
 
-export type AgentCreateRequest = Omit<Agent, 'id' | 'lastUpdated' | 'userId'> & {
+export type AgentCreateRequest = Pick<Agent, 'name' | 'description' | 'configuration'> & {
   id?: string;
 };

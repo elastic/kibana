@@ -6,7 +6,14 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { GetAgentResponse, ListAgentResponse } from '../../../common/http_api/agents';
+import type {
+  GetAgentResponse,
+  ListAgentResponse,
+  CreateAgentPayload,
+  CreateAgentResponse,
+  UpdateAgentResponse,
+  UpdateAgentPayload,
+} from '../../../common/http_api/agents';
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -16,13 +23,23 @@ export class AgentService {
   }
 
   async list() {
-    const response = await this.http.post<ListAgentResponse>('/internal/workchat/agents', {
-      body: JSON.stringify({}),
-    });
+    const response = await this.http.get<ListAgentResponse>('/internal/workchat/agents');
     return response.agents;
   }
 
   async get(agentId: string) {
     return await this.http.get<GetAgentResponse>(`/internal/workchat/agents/${agentId}`);
+  }
+
+  async create(request: CreateAgentPayload) {
+    return await this.http.post<CreateAgentResponse>(`/internal/workchat/agents`, {
+      body: JSON.stringify(request),
+    });
+  }
+
+  async update(id: string, request: UpdateAgentPayload) {
+    return await this.http.put<UpdateAgentResponse>(`/internal/workchat/agents/${id}`, {
+      body: JSON.stringify(request),
+    });
   }
 }

@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import type { Agent } from '../agents';
+import type { Agent, AgentCreateRequest } from '../agents';
 
 export interface ListAgentResponse {
   agents: Agent[];
 }
 
 export type GetAgentResponse = Agent;
+
+export type CreateAgentPayload = Omit<AgentCreateRequest, 'id'>;
+
+export type CreateAgentResponse = { success: false } | { success: true; agent: Agent };
+
+export type UpdateAgentPayload = Omit<AgentCreateRequest, 'id'>;
+
+export type UpdateAgentResponse = { success: false } | { success: true; agent: Agent };
