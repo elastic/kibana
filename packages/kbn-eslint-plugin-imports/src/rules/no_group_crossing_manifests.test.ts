@@ -12,7 +12,7 @@ import dedent from 'dedent';
 import { NoGroupCrossingManifestsRule } from './no_group_crossing_manifests';
 import { formatSuggestions } from '../helpers/report';
 import { ModuleId } from '@kbn/repo-source-classifier/src/module_id';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/constants';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/module-groups';
 
 const makePlugin = (filename: string) => ({
   filename,

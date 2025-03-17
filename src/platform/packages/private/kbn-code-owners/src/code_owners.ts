@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import ignore, { Ignore } from 'ignore';
-import type { KibanaGroup } from '@kbn/constants';
+import type { KibanaGroup } from '@kbn/module-groups';
 import { CODE_OWNERS_FILE, throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
 import { findGroupByOwner } from './code_owner_group';
 

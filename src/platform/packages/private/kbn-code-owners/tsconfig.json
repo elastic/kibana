@@ -17,6 +17,6 @@
     "@kbn/repo-info",
     "@kbn/dev-cli-errors",
     "@kbn/dev-cli-runner",
-    "@kbn/constants"
+    "@kbn/module-groups"
   ]
 }

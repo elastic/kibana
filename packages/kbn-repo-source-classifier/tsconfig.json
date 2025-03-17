@@ -14,7 +14,7 @@
     "@kbn/import-resolver",
     "@kbn/repo-info",
     "@kbn/repo-packages",
-    "@kbn/constants",
+    "@kbn/module-groups",
   ],
   "exclude": [
     "target/**/*",

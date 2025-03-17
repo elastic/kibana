@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KIBANA_SOLUTIONS } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/module-groups';
 
 /**
  * These patterns are used to identify files that are not supposed

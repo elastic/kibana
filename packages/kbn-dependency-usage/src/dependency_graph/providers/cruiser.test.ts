@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KIBANA_SOLUTIONS } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/module-groups';
 import { identifyDependencyUsageWithCruiser as identifyDependencyUsage } from './cruiser.ts';
 import { cruise } from 'dependency-cruiser';
 

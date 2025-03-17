@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaGroup, ModuleVisibility } from '@kbn/constants';
+import type { KibanaGroup, ModuleVisibility } from '@kbn/module-groups';
 
 export interface KibanaPackageJson {
   name: string;

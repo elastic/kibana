@@ -9,22 +9,22 @@
 
 import { execSync } from 'child_process';
 import axios from 'axios';
-import type { KibanaSolution } from '@kbn/constants';
+import type { KibanaSolution } from '@kbn/module-groups';
 import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
-  // BOOKMARK - List of Kibana solutions
+  // BOOKMARK - List of Kibana project types
   const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|chat)$/;
   try {
     return (
-      // BOOKMARK - List of Kibana solutions
+      // BOOKMARK - List of Kibana project types
       (
         await Promise.all([
           // TODO ideally rename 'elasticsearch' to 'search'
           projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
           projectRequest.get('/api/v1/serverless/projects/security'),
           projectRequest.get('/api/v1/serverless/projects/observability'),
-          // BOOKMARK - List of Kibana solutions - TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
+          // BOOKMARK - List of Kibana project types - TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
         ])
       )
         .map((response) => response.data.items)
@@ -59,7 +59,7 @@ async function deleteProject({
   name: string;
 }) {
   try {
-    // BOOKMARK - List of Kibana solutions
+    // BOOKMARK - List of Kibana project types
     // TODO handle the new 'chat' project type, and ideally rename 'elasticsearch' to 'search'
     await projectRequest.delete(
       `/api/v1/serverless/projects/${

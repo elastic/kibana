@@ -27,7 +27,7 @@ import {
   getCodeOwnersEntries,
   findGroupByOwner,
 } from '@kbn/code-owners';
-import type { KibanaGroup } from '@kbn/constants';
+import type { KibanaGroup } from '@kbn/module-groups';
 import { Runner, Test } from '../../../fake_mocha_types';
 import { Config as FTRConfig } from '../../config';
 

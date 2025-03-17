@@ -4078,7 +4078,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/constants@link:packages/kbn-constants":
+"@kbn/module-groups@link:packages/kbn-module-groups":
   version "0.0.0"
   uid ""
 

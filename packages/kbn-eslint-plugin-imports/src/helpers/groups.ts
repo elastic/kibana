@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/constants';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/module-groups';
 import type { ModuleId } from '@kbn/repo-source-classifier';
 
 /**

@@ -10,7 +10,7 @@
 import { basename, join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { orderBy } from 'lodash';
-import { KIBANA_SOLUTIONS } from '@kbn/constants';
+import { KIBANA_SOLUTIONS } from '@kbn/module-groups';
 import type { Package } from '../types';
 import { HARDCODED_MODULE_PATHS, applyTransforms } from './transforms';
 import {

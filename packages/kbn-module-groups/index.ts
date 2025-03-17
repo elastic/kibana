@@ -63,3 +63,35 @@ export type ModuleGroup = KibanaGroup | 'common';
  * ModuleVisibility tells whether a module is accessible from any module (shared) or only from modules of the same group (private)
  */
 export type ModuleVisibility = 'private' | 'shared';
+
+/**
+ * Constant for the Kibana Observability (workchat) serverless project type.
+ */
+export const KIBANA_OBSERVABILITY_PROJECT = 'oblt' as const;
+/**
+ * Constant for the Kibana Security (workchat) serverless project type.
+ */
+export const KIBANA_SECURITY_PROJECT = 'security' as const;
+/**
+ * Constant for the Kibana Search (workchat) serverless project type.
+ */
+export const KIBANA_SEARCH_PROJECT = 'es' as const;
+/**
+ * Constant for the Kibana Chat (workchat) serverless project type.
+ */
+export const KIBANA_CHAT_PROJECT = 'chat' as const;
+
+/**
+ * A list of all Kibana serverless project types.
+ */
+export const KIBANA_PROJECTS = [
+  KIBANA_OBSERVABILITY_PROJECT,
+  KIBANA_SECURITY_PROJECT,
+  KIBANA_SEARCH_PROJECT,
+  KIBANA_CHAT_PROJECT,
+] as const; // BOOKMARK - List of Kibana project types
+
+/**
+ * A type that defines the existing serverless project types.
+ */
+export type KibanaProject = (typeof KIBANA_PROJECTS)[number];

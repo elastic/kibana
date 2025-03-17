@@ -46,6 +46,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/core-i18n-server-internal",
     "@kbn/code-owners",
-    "@kbn/constants",
+    "@kbn/module-groups",
   ]
 }

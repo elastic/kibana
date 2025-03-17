@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaGroup, KIBANA_GROUPS } from '@kbn/constants';
+import { type KibanaGroup, KIBANA_GROUPS } from '@kbn/module-groups';
 
 /**
  * Group => kibana team mappings

@@ -29,7 +29,7 @@ import {
   getOwningTeamsForPath,
   findGroupByOwner,
 } from '@kbn/code-owners';
-import type { KibanaGroup } from '@kbn/constants';
+import type { KibanaGroup } from '@kbn/module-groups';
 import {
   ScoutEventsReport,
   ScoutFileInfo,

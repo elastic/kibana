@@ -31,7 +31,7 @@ const createSAMLResponseSchema = schema.object({
   roles: schema.arrayOf(schema.string()),
 });
 
-// BOOKMARK - List of Kibana solutions
+// BOOKMARK - List of Kibana project types
 const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],

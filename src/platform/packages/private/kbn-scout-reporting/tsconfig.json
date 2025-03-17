@@ -21,6 +21,6 @@
     "@kbn/repo-info",
     "@kbn/code-owners",
     "@kbn/repo-packages",
-    "@kbn/constants",
+    "@kbn/module-groups",
   ]
 }
