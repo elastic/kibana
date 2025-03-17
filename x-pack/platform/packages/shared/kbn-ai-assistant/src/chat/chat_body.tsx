@@ -190,7 +190,12 @@ export function ChatBody({
     if (conversation.value?.conversation && 'user' in conversation.value) {
       const {
         messages: _removedMessages, // Exclude messages
-        conversation: { title: _removedTitle, id, last_updated: lastUpdated }, // Exclude title
+        conversation: {
+          title: _removedTitle,
+          id,
+          last_updated: lastUpdated,
+          token_count: tokenCount,
+        }, // Exclude title
         user,
         labels,
         numeric_labels: numericLabels,
@@ -206,7 +211,7 @@ export function ChatBody({
         numeric_labels: numericLabels,
         namespace,
         public: isPublic,
-        conversation: { id, last_updated: lastUpdated },
+        conversation: { id, last_updated: lastUpdated, token_count: tokenCount },
       };
 
       chatService.sendAnalyticsEvent({
