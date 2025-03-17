@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
@@ -96,17 +96,16 @@ export function EntityDetailViewWithoutParams({
             <StreamsAppPageHeaderTitle
               title={
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {entity.displayName}
+                  <EuiTitle size="l">
+                    <h1>{entity.displayName}</h1>
+                  </EuiTitle>
                   {definition && isUnwiredStreamDefinition(definition.stream) ? (
-                    <>
-                      {' '}
-                      <EuiBadge>
-                        {i18n.translate(
-                          'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
-                          { defaultMessage: 'Classic' }
-                        )}
-                      </EuiBadge>
-                    </>
+                    <EuiBadge>
+                      {i18n.translate(
+                        'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
+                        { defaultMessage: 'Classic' }
+                      )}
+                    </EuiBadge>
                   ) : null}
                   {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
