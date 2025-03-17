@@ -7,37 +7,51 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AlertReasonPanelContext } from './context';
-import { mockContextValue } from './mocks/mock_context';
-import { ALERT_REASON_BODY_TEST_ID } from './test_ids';
-import { AlertReason } from './alert_reason';
-import { TestProviders } from '../../../common/mock';
+import { AlertSummaryPage, LOADING_INTEGRATIONS_TEST_ID } from './alert_summary_page';
+import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integrations';
+import { LANDING_PAGE_PROMPT } from '../../components/alert_summary/landing_page/landing_page';
+import { DATA_VIEW_LOADING_PROMPT } from '../../components/alert_summary/wrapper';
+import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 
-const panelContextValue = {
-  ...mockContextValue,
-};
-
-const NO_DATA_MESSAGE = 'There was an error displaying data.';
+jest.mock('../../hooks/alert_summary/use_fetch_integrations');
+jest.mock('../../../common/hooks/use_add_integrations_url');
 
 describe('<AlertSummaryPage />', () => {
-  it('should render alert reason preview', () => {
-    const { getByTestId } = render(
-      <AlertReasonPanelContext.Provider value={panelContextValue}>
-        <AlertReason />
-      </AlertReasonPanelContext.Provider>,
-      { wrapper: TestProviders }
-    );
-    expect(getByTestId(ALERT_REASON_BODY_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ALERT_REASON_BODY_TEST_ID)).toHaveTextContent('Alert reason');
+  it('should render loading logo', () => {
+    (useFetchIntegrations as jest.Mock).mockReturnValue({
+      isLoading: true,
+    });
+
+    const { getByTestId } = render(<AlertSummaryPage />);
+    expect(getByTestId(LOADING_INTEGRATIONS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(LOADING_INTEGRATIONS_TEST_ID)).toHaveTextContent('Loading integrations');
   });
 
-  it('should render no data message if alert reason is not available', () => {
-    const { getByText } = render(
-      <AlertReasonPanelContext.Provider value={{} as unknown as AlertReasonPanelContext}>
-        <AlertReason />
-      </AlertReasonPanelContext.Provider>,
-      { wrapper: TestProviders }
-    );
-    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+  it('should render landing page if no packages are installed', () => {
+    (useFetchIntegrations as jest.Mock).mockReturnValue({
+      availableInstalledPackage: [],
+      installedPackages: [],
+      isLoading: false,
+    });
+    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({
+      onClick: jest.fn(),
+    });
+
+    const { getByTestId, queryByTestId } = render(<AlertSummaryPage />);
+    expect(queryByTestId(LOADING_INTEGRATIONS_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(LANDING_PAGE_PROMPT)).toBeInTheDocument();
+  });
+
+  it.only('should render wrapper if packages are installed', () => {
+    (useFetchIntegrations as jest.Mock).mockReturnValue({
+      availableInstalledPackage: [],
+      installedPackages: [{}],
+      isLoading: false,
+    });
+
+    const { getByTestId, queryByTestId } = render(<AlertSummaryPage />);
+    expect(getByTestId(LOADING_INTEGRATIONS_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(LANDING_PAGE_PROMPT)).toBeInTheDocument();
+    expect(queryByTestId(DATA_VIEW_LOADING_PROMPT)).toBeInTheDocument();
   });
 });

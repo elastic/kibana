@@ -7,10 +7,16 @@
 
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integrations';
 import { LandingPage } from '../../components/alert_summary/landing_page/landing_page';
 import { Wrapper } from '../../components/alert_summary/wrapper';
-import { LOADING_INTEGRATIONS } from './translations';
+
+export const LOADING_INTEGRATIONS_TEST_ID = 'alert-summary-loading-integrations';
+
+const LOADING_INTEGRATIONS = i18n.translate('xpack.securitySolution.alertSummary.loading', {
+  defaultMessage: 'Loading integrations',
+});
 
 /**
  *
@@ -21,6 +27,7 @@ export const AlertSummaryPage = () => {
   if (isLoading) {
     return (
       <EuiEmptyPrompt
+        data-test-subj={LOADING_INTEGRATIONS_TEST_ID}
         icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
         title={<h2>{LOADING_INTEGRATIONS}</h2>}
       />

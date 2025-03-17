@@ -13,6 +13,8 @@ import { useAddIntegrationsUrl } from '../../../../common/hooks/use_add_integrat
 import { IntegrationBadge } from './integration_badge';
 import { MORE_INTEGRATIONS, SUB_TITLE, TITLE } from './translations';
 
+export const LANDING_PAGE_PROMPT = 'alert-summary-landing-page-prompt';
+
 const PRIMARY_INTEGRATIONS = [
   'splunk', // doesnt yet exist
   'google_secops',
@@ -40,7 +42,6 @@ export const LandingPage = ({ packages }: LandingPageProps) => {
         ),
     [packages]
   );
-  console.log('primaryPackages', primaryPackages);
 
   return (
     <EuiFlexGroup direction="column" alignItems="center">
@@ -70,6 +71,7 @@ export const LandingPage = ({ packages }: LandingPageProps) => {
             </EuiFlexGroup>
           }
           body={<p>{SUB_TITLE}</p>}
+          data-test-subj={LANDING_PAGE_PROMPT}
           title={<h2>{TITLE}</h2>}
         />
       </EuiFlexItem>

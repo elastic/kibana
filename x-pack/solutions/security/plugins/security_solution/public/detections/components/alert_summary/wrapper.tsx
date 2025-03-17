@@ -22,6 +22,8 @@ import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import { KPIsSection } from './kpis/kpis_section';
 
+export const DATA_VIEW_LOADING_PROMPT = 'alert-summary-data-view-loading-prompt';
+
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
 export interface WrapperProps {
@@ -58,6 +60,7 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
 
   return (
     <EuiSkeletonLoading
+      data-test-subj={DATA_VIEW_LOADING_PROMPT}
       isLoading={loading}
       loadingContent={
         <>
