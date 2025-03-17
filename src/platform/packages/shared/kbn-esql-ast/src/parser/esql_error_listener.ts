@@ -13,6 +13,7 @@ import { getPosition } from './helpers';
 import type { EditorError } from '../types';
 
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
+const REPLACE_ORPHAN_COMMA = /{, /g;
 export class ESQLErrorListener extends ErrorListener<any> {
   protected errors: EditorError[] = [];
 
@@ -26,6 +27,11 @@ export class ESQLErrorListener extends ErrorListener<any> {
   ): void {
     // Remove any DEV_ tokens from the error message
     message = message.replace(REPLACE_DEV, '');
+
+    // Remove any trailing commas from the error message... this handles
+    // cases where the dev token was at the start of a list
+    // e.g. "mismatched input 'PROJECT' expecting {, 'enrich', 'dissect', 'eval', 'grok'}"
+    message = message.replace(REPLACE_ORPHAN_COMMA, '{');
 
     const textMessage = `SyntaxError: ${message}`;
 
