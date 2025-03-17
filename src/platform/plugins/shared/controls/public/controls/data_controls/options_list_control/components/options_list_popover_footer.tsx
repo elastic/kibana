@@ -89,7 +89,7 @@ export const OptionsListPopoverFooter = () => {
           {!allowExpensiveQueries && (
             <EuiFlexItem data-test-subj="optionsList-allow-expensive-queries-warning" grow={false}>
               <EuiIconTip
-                type="warningFilled"
+                type="warning"
                 color={euiTheme.colors.textWarning}
                 content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
                 aria-label={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
