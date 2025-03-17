@@ -190,7 +190,6 @@ export function ChatBody({
     if (conversation.value?.conversation && 'user' in conversation.value) {
       const {
         messages: _removedMessages, // Exclude messages
-        systemMessage: _removedSystemMessage, // Exclude systemMessage
         conversation: { title: _removedTitle, id, last_updated: lastUpdated }, // Exclude title
         user,
         labels,
