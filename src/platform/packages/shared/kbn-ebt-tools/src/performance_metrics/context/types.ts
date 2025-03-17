@@ -8,8 +8,9 @@
  */
 
 type ApmPageId = 'services' | 'traces' | 'dependencies';
-type InfraPageId = 'hosts' | 'onboarding';
+type InfraPageId = 'hosts';
+type OnboardingPageId = 'onboarding';
 
-export type Key = `${ApmPageId}` | `${InfraPageId}`;
+export type Key = `${ApmPageId}` | `${InfraPageId}` | `${OnboardingPageId}`;
 
 export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;
