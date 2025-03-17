@@ -7,7 +7,7 @@
 
 import { AsyncLocalStorage } from 'async_hooks';
 
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
 import type { AssetsMap, PackagePolicyAssetsMap } from '../../../../common/types';
 

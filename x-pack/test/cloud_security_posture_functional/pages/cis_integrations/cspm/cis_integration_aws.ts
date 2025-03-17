@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { testSubjectIds } from '../../../constants/test_subject_ids';
+import { policiesSavedObjects } from '../constants';
 
 const {
   CIS_AWS_OPTION_TEST_ID,
@@ -28,6 +29,7 @@ const {
 export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
@@ -36,6 +38,10 @@ export default function (providerContext: FtrProviderContext) {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
+
+    before(async () => {
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
+    });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
@@ -78,7 +84,6 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/187470
     describe('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';

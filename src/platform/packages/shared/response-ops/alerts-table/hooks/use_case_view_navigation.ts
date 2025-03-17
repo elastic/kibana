@@ -10,7 +10,7 @@
 import { generatePath } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { useCallback } from 'react';
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
 type NavigateToCaseView = (pathParams: { caseId: string }) => void;
 

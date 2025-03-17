@@ -127,11 +127,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
-      // Flapping value for alert doc should be false while flapping value for state should be true
-      // This is because we write out the alert doc BEFORE calculating the latest flapping state and
-      // persisting into task state
+      // Flapping value for alert doc and task state should be false
       expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
@@ -258,11 +256,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         state.alertRecoveredInstances.alertA.meta.flappingHistory
       );
 
-      // Flapping value for alert doc should be false while flapping value for state should be true
-      // This is because we write out the alert doc BEFORE calculating the latest flapping state and
-      // persisting into task state
+      // Flapping value for task state should be false
       expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
@@ -401,7 +397,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          // notify_when is not RuleNotifyWhen.CHANGE, so it's not added to activeCurrent
+          // notify_when is not RuleNotifyWhen.CHANGE, so it's not added to active
           getTestRuleData({
             rule_type_id: 'test.patternFiringAad',
             // set the schedule long so we can use "runSoon" to specify rule runs
@@ -539,11 +535,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         state.alertInstances.alertA.meta.flappingHistory
       );
 
-      // Flapping value for alert doc should be false while flapping value for state should be true
-      // This is because we write out the alert doc BEFORE calculating the latest flapping state and
-      // persisting into task state
+      // Flapping value for alert doc and task state should be false
       expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
+      expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
@@ -569,11 +563,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         state.alertInstances.alertA.meta.flappingHistory
       );
 
-      // Flapping value for alert doc should be true while flapping value for state should be false
-      // This is because we write out the alert doc BEFORE calculating the latest flapping state and
-      // persisting into task state
+      // Flapping value for alert doc and task state should be true
       expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
+      expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
 
       // Run the rule 3 more times
       for (let i = 0; i < 3; i++) {
