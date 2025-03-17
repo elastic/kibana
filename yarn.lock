@@ -7902,6 +7902,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/wci-server@link:x-pack/solutions/search/packages/workchat/wci-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/web-worker-stub@link:packages/kbn-web-worker-stub":
   version "0.0.0"
   uid ""

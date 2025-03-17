@@ -2112,6 +2112,8 @@
       "@kbn/wci-index-source/*": ["x-pack/solutions/search/plugins/workchat/wci_index_source/*"],
       "@kbn/wci-salesforce": ["x-pack/solutions/search/plugins/workchat/wci_salesforce"],
       "@kbn/wci-salesforce/*": ["x-pack/solutions/search/plugins/workchat/wci_salesforce/*"],
+      "@kbn/wci-server": ["x-pack/solutions/search/packages/workchat/wci-server"],
+      "@kbn/wci-server/*": ["x-pack/solutions/search/packages/workchat/wci-server/*"],
       "@kbn/web-worker-stub": ["packages/kbn-web-worker-stub"],
       "@kbn/web-worker-stub/*": ["packages/kbn-web-worker-stub/*"],
       "@kbn/whereis-pkg-cli": ["packages/kbn-whereis-pkg-cli"],

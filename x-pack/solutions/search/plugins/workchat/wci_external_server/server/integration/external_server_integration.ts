@@ -10,8 +10,8 @@ import {
   IntegrationType,
   WorkchatIntegrationDefinition,
   WorkChatIntegration,
-  getClientForExternalServer,
 } from '@kbn/wci-common';
+import { getClientForExternalServer } from '@kbn/wci-server';
 import { WCIExternalServerConfiguration } from '../types';
 
 export const getExternalServerIntegrationDefinition = ({
