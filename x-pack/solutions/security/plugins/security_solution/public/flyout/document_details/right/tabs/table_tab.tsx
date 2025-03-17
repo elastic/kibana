@@ -121,19 +121,25 @@ export const getColumns: ColumnsProvider = ({
     width: '70%',
     render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
-      return (
+      const isMapped = fieldFromBrowserField?.isMapped;
+      const ValueCell = (
+        <TableFieldValueCell
+          scopeId={scopeId}
+          data={data as EventFieldsData}
+          eventId={eventId}
+          fieldFromBrowserField={fieldFromBrowserField}
+          getLinkValue={getLinkValue}
+          ruleId={ruleId}
+          isPreview={isPreview}
+          values={values}
+        />
+      );
+      return isMapped ? (
         <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
-          <TableFieldValueCell
-            scopeId={scopeId}
-            data={data as EventFieldsData}
-            eventId={eventId}
-            fieldFromBrowserField={fieldFromBrowserField}
-            getLinkValue={getLinkValue}
-            ruleId={ruleId}
-            isPreview={isPreview}
-            values={values}
-          />
+          {ValueCell}
         </CellActions>
+      ) : (
+        ValueCell
       );
     },
   },
