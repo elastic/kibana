@@ -17,7 +17,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, isEmpty, keys } from 'lodash';
+import { flatMap, get, identity, isEmpty, keys } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -296,7 +296,7 @@ export class AlertsClient<
     return {
       uuid: legacyAlert.getUuid(),
       start: legacyAlert.getStart() ?? this.startedAtString,
-      alertDoc: this.trackedAlerts.getById(alert.id),
+      alertDoc: this.trackedAlerts.get(alert.id),
     };
   }
 
@@ -455,18 +455,15 @@ export class AlertsClient<
     for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
       if (activeAlerts[id]) {
-        const alertUuid = activeAlerts[id].getUuid();
-        if (
-          Object.hasOwn(this.trackedAlerts.active, alertUuid) &&
-          get(this.trackedAlerts.active[alertUuid], ALERT_STATUS) === ALERT_STATUS_ACTIVE
-        ) {
+        const trackedAlert = this.trackedAlerts.get(activeAlerts[id].getUuid());
+        if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
           const isImproving = isAlertImproving<
             AlertData,
             LegacyState,
             LegacyContext,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(this.trackedAlerts.get(alertUuid), activeAlerts[id], this.ruleType.actionGroups);
+          >(trackedAlert, activeAlerts[id], this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -475,7 +472,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              alert: this.trackedAlerts.active[alertUuid],
+              alert: trackedAlert,
               legacyAlert: activeAlerts[id],
               rule: this.rule,
               isImproving,
@@ -518,10 +515,10 @@ export class AlertsClient<
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawRecoveredAlerts)) {
-      const alertUuid = recoveredAlerts[id].getUuid();
+      const trackedAlert = this.trackedAlerts.getById(id);
       // See if there's an existing alert document
       // If there is not, log an error because there should be
-      if (this.trackedAlerts.get(alertUuid)) {
+      if (trackedAlert) {
         recoveredAlertsToIndex.push(
           recoveredAlerts[id]
             ? buildRecoveredAlert<
@@ -531,7 +528,7 @@ export class AlertsClient<
                 ActionGroupIds,
                 RecoveryActionGroupId
               >({
-                alert: this.trackedAlerts.get(alertUuid),
+                alert: trackedAlert,
                 legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
                 runTimestamp: this.runTimestampString,
@@ -541,7 +538,7 @@ export class AlertsClient<
                 kibanaVersion: this.options.kibanaVersion,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
-                alert: this.trackedAlerts.get(alertUuid),
+                alert: trackedAlert,
                 legacyRawAlert: rawRecoveredAlerts[id],
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
