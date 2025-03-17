@@ -164,7 +164,7 @@ export const createResourceFields = ({
       fieldFormats,
       dataView,
       dataView.getFieldByName(name),
-      'text'
+      'html'
     );
 
     return {

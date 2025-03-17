@@ -1,1 +1,5 @@
 # Security Search AI Lake tier config
+
+## Disable plugins
+xpack.osquery.enabled: false
+

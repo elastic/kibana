@@ -1929,7 +1929,9 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<any>; } | undefined; } | undefined; defaultActionGroupId: \"default\"; category: string; producer: string; actionVariables?: { context?: ",
+          "<any>; } | undefined; } | undefined; defaultActionGroupId: \"default\"; category: string; producer: string; solution: ",
+          "RuleTypeSolution",
+          "; actionVariables?: { context?: ",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",

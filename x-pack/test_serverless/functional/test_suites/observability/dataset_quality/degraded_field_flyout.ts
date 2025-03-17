@@ -574,6 +574,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.header.waitUntilLoadingHasFinished();
 
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutFieldValue-values'
+          );
+          const expandButtons = await testSubjects.findAll('truncatedTextToggle');
+
+          for (const button of expandButtons) {
+            await button.click();
+          }
+
           await retry.tryForTime(5000, async () => {
             const testFieldValue1Exists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-values',

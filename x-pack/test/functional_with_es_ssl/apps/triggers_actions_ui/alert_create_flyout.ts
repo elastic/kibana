@@ -127,7 +127,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const webhookConnectorName = 'webhook-test';
     before(async () => {
       await esArchiver.load(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
 
       await createWebhookConnector(webhookConnectorName);
@@ -170,7 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after(async () => {
       await apmSynthtraceEsClient?.clean();
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
 
       await deleteConnectorByName(webhookConnectorName);

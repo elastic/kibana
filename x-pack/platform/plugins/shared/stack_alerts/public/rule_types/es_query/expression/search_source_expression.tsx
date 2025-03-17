@@ -85,7 +85,7 @@ export const SearchSourceExpression = ({
           timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
           threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
           thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-          size: size ? size : isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
+          size: size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
           aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
           aggField,
           groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
@@ -123,7 +123,11 @@ export const SearchSourceExpression = ({
   }
 
   if (!searchSource) {
-    return <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />;
+    return (
+      <EuiEmptyPrompt
+        title={<EuiLoadingSpinner data-test-subj="searchSourceLoadingSpinner" size="xl" />}
+      />
+    );
   }
 
   return (

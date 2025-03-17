@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiLink } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { FlyoutTitle } from './flyout_title';
@@ -24,7 +24,7 @@ export default {
   title: 'Flyout/Title',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle title={'Title'} iconType={'warning'} data-test-subj={'test-title'} />
@@ -32,7 +32,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const WithoutIcon: Story<void> = () => {
+export const WithoutIcon: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle title={'Title'} data-test-subj={'test-title'} />
@@ -40,7 +40,7 @@ export const WithoutIcon: Story<void> = () => {
   );
 };
 
-export const MultipleLines: Story<void> = () => {
+export const MultipleLines: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle
@@ -52,7 +52,7 @@ export const MultipleLines: Story<void> = () => {
   );
 };
 
-export const MoreThanThreeLines: Story<void> = () => {
+export const MoreThanThreeLines: StoryFn = () => {
   return (
     <FixWidthWrapper>
       <FlyoutTitle
@@ -66,7 +66,7 @@ export const MoreThanThreeLines: Story<void> = () => {
   );
 };
 
-export const TitleInLink: Story<void> = () => {
+export const TitleInLink: StoryFn = () => {
   return (
     <FixWidthLinkWrapper>
       <FlyoutTitle title={'Title'} iconType={'warning'} data-test-subj={'test-title'} isLink />
@@ -74,7 +74,7 @@ export const TitleInLink: Story<void> = () => {
   );
 };
 
-export const MultipleLinesInLink: Story<void> = () => {
+export const MultipleLinesInLink: StoryFn = () => {
   return (
     <FixWidthLinkWrapper>
       <FlyoutTitle
@@ -87,7 +87,7 @@ export const MultipleLinesInLink: Story<void> = () => {
   );
 };
 
-export const MoreThanThreeLinesInLink: Story<void> = () => {
+export const MoreThanThreeLinesInLink: StoryFn = () => {
   return (
     <FixWidthLinkWrapper>
       <FlyoutTitle

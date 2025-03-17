@@ -148,8 +148,7 @@ describe('wrapSuppressedAlerts', () => {
     });
 
     expect(transformHitToAlertMock).toHaveBeenCalledWith({
-      spaceId: 'default',
-      completeRule: sharedParams.completeRule,
+      sharedParams,
       doc: {
         fields: {
           '@timestamp': [expectedTimestamp],
@@ -159,16 +158,9 @@ describe('wrapSuppressedAlerts', () => {
         _id: '1',
         _index: 'test*',
       },
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage,
-      indicesToQuery: ['test*'],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid: expect.any(String),
-      publicBaseUrl: 'public-url-mock',
     });
     expect(wrappedAlerts[0]._source).toEqual(
       expect.objectContaining({

@@ -25,7 +25,7 @@ elif [[ "$TEST_PACKAGE" == "docker" ]]; then
 fi
 cd ..
 
-export VAGRANT_CWD=$PWD/test/package
+export VAGRANT_CWD=$PWD/src/platform/test/package
 vagrant up "$TEST_PACKAGE" --no-provision
 
 node scripts/es snapshot \
@@ -57,4 +57,4 @@ export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
 cd x-pack
 
 echo "--- FTR - Reporting"
-node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+node scripts/functional_test_runner.js --config src/platform/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet

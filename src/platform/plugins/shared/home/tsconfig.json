@@ -36,6 +36,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-http-browser",
     "@kbn/core-saved-objects-api-browser",
+    "@kbn/deeplinks-observability",
   ],
   "exclude": [
     "target/**/*",

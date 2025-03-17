@@ -10,7 +10,6 @@ import {
   Subscription,
   of,
   from,
-  forkJoin,
   takeWhile,
   exhaustMap,
   firstValueFrom,
@@ -45,7 +44,6 @@ import type {
   StartAllocationParams,
 } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type { ITelemetryClient } from '../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
@@ -61,8 +59,6 @@ interface TrainedModelsServiceInit {
   setScheduledDeployments: (deployments: ScheduledDeployment[]) => void;
   displayErrorToast: (error: ErrorType, title?: string) => void;
   displaySuccessToast: (toast: { title: string; text: string }) => void;
-  savedObjectsApiService: SavedObjectsApiService;
-  canManageSpacesAndSavedObjects: boolean;
   telemetryService: ITelemetryClient;
   deploymentParamsMapper: DeploymentParamsMapper;
 }
@@ -92,8 +88,6 @@ export class TrainedModelsService {
   private _scheduledDeployments$ = new BehaviorSubject<ScheduledDeployment[]>([]);
   private destroySubscription?: Subscription;
   private readonly _isLoading$ = new BehaviorSubject<boolean>(true);
-  private savedObjectsApiService!: SavedObjectsApiService;
-  private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
   private telemetryService!: ITelemetryClient;
   private deploymentParamsMapper!: DeploymentParamsMapper;
@@ -105,8 +99,6 @@ export class TrainedModelsService {
     setScheduledDeployments,
     displayErrorToast,
     displaySuccessToast,
-    savedObjectsApiService,
-    canManageSpacesAndSavedObjects,
     telemetryService,
     deploymentParamsMapper,
   }: TrainedModelsServiceInit) {
@@ -120,14 +112,12 @@ export class TrainedModelsService {
 
     this.subscription = new Subscription();
     this.isInitialized = true;
-    this.canManageSpacesAndSavedObjects = canManageSpacesAndSavedObjects;
     this.deploymentParamsMapper = deploymentParamsMapper;
 
     this.setScheduledDeployments = setScheduledDeployments;
     this._scheduledDeployments$ = scheduledDeployments$;
     this.displayErrorToast = displayErrorToast;
     this.displaySuccessToast = displaySuccessToast;
-    this.savedObjectsApiService = savedObjectsApiService;
     this.telemetryService = telemetryService;
 
     this.setupFetchingSubscription();
@@ -368,27 +358,20 @@ export class TrainedModelsService {
     this.abortedDownloads.add(modelId);
   }
 
-  private mergeModelItems(
-    items: TrainedModelUIItem[],
-    spaces: Record<string, string[]>
-  ): TrainedModelUIItem[] {
+  private mergeModelItems(items: TrainedModelUIItem[]): TrainedModelUIItem[] {
     const existingItems = this._modelItems$.getValue();
 
     return items.map((item) => {
       const previous = existingItems.find((m) => m.model_id === item.model_id);
-      const merged = {
-        ...item,
-        spaces: spaces[item.model_id] ?? [],
-      };
 
       if (!previous || !isBaseNLPModelItem(previous) || !isBaseNLPModelItem(item)) {
-        return merged;
+        return item;
       }
 
       // Preserve "DOWNLOADING" state and the accompanying progress if still in progress
       if (previous.state === MODEL_STATE.DOWNLOADING) {
         return {
-          ...merged,
+          ...item,
           state: previous.state,
           downloadState: previous.downloadState,
         };
@@ -401,12 +384,12 @@ export class TrainedModelsService {
         item.state !== MODEL_STATE.STARTED
       ) {
         return {
-          ...merged,
+          ...item,
           state: previous.state,
         };
       }
 
-      return merged;
+      return item;
     });
   }
 
@@ -417,7 +400,7 @@ export class TrainedModelsService {
           tap(() => this._isLoading$.next(true)),
           debounceTime(100),
           switchMap(() => {
-            const modelsList$ = from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
+            return from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
               catchError((error) => {
                 this.displayErrorToast?.(
                   error,
@@ -426,29 +409,13 @@ export class TrainedModelsService {
                   })
                 );
                 return of([] as TrainedModelUIItem[]);
-              })
-            );
-
-            const spaces$ = this.canManageSpacesAndSavedObjects
-              ? from(this.savedObjectsApiService.trainedModelsSpaces()).pipe(
-                  catchError(() => of({})),
-                  map(
-                    (spaces) =>
-                      ('trainedModels' in spaces ? spaces.trainedModels : {}) as Record<
-                        string,
-                        string[]
-                      >
-                  )
-                )
-              : of({} as Record<string, string[]>);
-
-            return forkJoin([modelsList$, spaces$]).pipe(
+              }),
               finalize(() => this._isLoading$.next(false))
             );
           })
         )
-        .subscribe(([items, spaces]) => {
-          const updatedItems = this.mergeModelItems(items, spaces);
+        .subscribe((items) => {
+          const updatedItems = this.mergeModelItems(items);
           this._modelItems$.next(updatedItems);
           this.startDownloadStatusPolling();
         })

@@ -39,6 +39,12 @@ export const registerLegacyExportRoute = (
           dashboard: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       options: {
         access,
         deprecated: legacyDeprecationInfo,
