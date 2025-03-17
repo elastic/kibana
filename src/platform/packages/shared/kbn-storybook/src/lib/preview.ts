@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const STORYBOOK_TITLE = 'Unified Tabs';
+import type { Preview } from '@storybook/react';
+import * as jest from 'jest-mock';
+import { decorators } from './decorators';
+
+// @ts-expect-error
+window.jest = jest;
+
+const preview: Preview = {
+  decorators,
+  initialGlobals: { euiTheme: 'v8.light' },
+};
+
+// eslint-disable-next-line import/no-default-export
+export default preview;
