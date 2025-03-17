@@ -457,7 +457,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               timeRange,
               abortController,
               undefined,
-              esqlVariables
+              variablesService?.esqlVariables
             ).result;
             const columns: ESQLRealField[] =
               table?.columns.map((c) => {
@@ -500,7 +500,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
-    esqlVariables,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
