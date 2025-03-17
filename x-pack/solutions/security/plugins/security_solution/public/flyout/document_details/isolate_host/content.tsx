@@ -60,7 +60,7 @@ export const PanelContent: FC = () => {
 export const IsolateHostPanelContent: FC<{
   isIsolateActionSuccessBannerVisible: boolean;
   hostName: string;
-  alertId: string;
+  alertId?: string;
   isolateAction: 'isolateHost' | 'unisolateHost';
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   showAlertDetails: () => void;
