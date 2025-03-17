@@ -13,7 +13,7 @@ import { inputsSelectors } from '../../../../common/store';
 import { isActiveTimeline } from '../../../../helpers';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { selectTimelineById } from '../../../../timelines/store/selectors';
-
+import { timelineDefaults } from '../../../../timelines/store/defaults';
 export interface UseRefetchScopeQueryParams {
   /**
    * Scope ID
@@ -27,7 +27,9 @@ export interface UseRefetchScopeQueryParams {
 export const useRefetchByScope = ({ scopeId }: UseRefetchScopeQueryParams) => {
   const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
   const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
-  const { activeTab } = useSelector((state: State) => selectTimelineById(state, TimelineId.active));
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
 
   const { globalQuery, timelineQuery } = useDeepEqualSelector((state) => ({
     globalQuery: getGlobalQueries(state),
