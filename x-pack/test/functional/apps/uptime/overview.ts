@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export const UPTIME_HEARTBEAT_DATA = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
+const DEFAULT_NAVIGATION_SEARCH = `dateRangeEnd=2019-09-11T19:40:08.078Z&dateRangeStart=2019-09-10T12:40:08.078Z`;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime, common } = getPageObjects(['uptime', 'common']);
@@ -24,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await common.navigateToApp('uptime', {
-        search: `dateRangeEnd=2019-09-11T19:40:08.078Z&dateRangeStart=2019-09-10T12:40:08.078Z`,
+        search: DEFAULT_NAVIGATION_SEARCH,
       });
 
       await uptime.resetFilters();
@@ -55,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('pagination is cleared when filter criteria changes', async () => {
       await common.navigateToApp('uptime', {
-        search: `dateRangeEnd=2019-09-11T19:40:08.078Z&dateRangeStart=2019-09-10T12:40:08.078Z&pagination={"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}`,
+        search: `${DEFAULT_NAVIGATION_SEARCH}&pagination={"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}`,
       });
       await uptime.pageHasExpectedIds([
         '0010-down',
