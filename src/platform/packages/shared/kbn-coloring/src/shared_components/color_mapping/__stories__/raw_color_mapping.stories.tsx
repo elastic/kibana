@@ -10,7 +10,7 @@
 import React, { FC, useState } from 'react';
 import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { css } from '@emotion/react';
 import {
   MultiFieldKey,
@@ -39,7 +39,7 @@ const formatter = {
   },
 } as IFieldFormat;
 
-const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
+const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
   const [updatedModel, setUpdateModel] = useState<ColorMapping.Config>(
     DEFAULT_COLOR_MAPPING_CONFIG
   );
@@ -89,54 +89,56 @@ const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
     </EuiPage>
   );
 };
-export const Default = Template.bind({});
 
-Default.args = {
-  model: {
-    ...DEFAULT_COLOR_MAPPING_CONFIG,
-    paletteId: 'eui_amsterdam',
+export const Default = {
+  render: Template,
+  args: {
+    model: {
+      ...DEFAULT_COLOR_MAPPING_CONFIG,
+      paletteId: 'eui_amsterdam',
 
-    colorMode: {
-      type: 'categorical',
-    },
-    specialAssignments: [
-      {
-        rules: [
-          {
-            type: 'other',
-          },
-        ],
-        color: {
-          type: 'loop',
-        },
-        touched: false,
+      colorMode: {
+        type: 'categorical',
       },
-    ],
-    assignments: [],
-  },
-  isDarkMode: false,
-  formatter,
-  data: {
-    type: 'categories',
-    categories: getColorCategories(
-      [
-        { value: new MultiFieldKey({ key: ['US', 'Canada'] }) },
-        { value: new MultiFieldKey({ key: ['Mexico'] }) },
-        { value: new MultiFieldKey({ key: ['Brasil'] }) },
-        { value: new MultiFieldKey({ key: ['Canada'] }) },
-        { value: new MultiFieldKey({ key: ['Canada', 'US'] }) },
-        { value: new MultiFieldKey({ key: ['Italy', 'Germany'] }) },
-        { value: new MultiFieldKey({ key: ['France'] }) },
-        { value: new MultiFieldKey({ key: ['Spain', 'Portugal'] }) },
-        { value: new MultiFieldKey({ key: ['UK'] }) },
-        { value: new MultiFieldKey({ key: ['Sweden'] }) },
-        { value: new MultiFieldKey({ key: ['Sweden', 'Finland'] }) },
+      specialAssignments: [
+        {
+          rules: [
+            {
+              type: 'other',
+            },
+          ],
+          color: {
+            type: 'loop',
+          },
+          touched: false,
+        },
       ],
-      'value'
-    ),
-  },
+      assignments: [],
+    },
+    isDarkMode: false,
+    formatter,
+    data: {
+      type: 'categories',
+      categories: getColorCategories(
+        [
+          { value: new MultiFieldKey({ key: ['US', 'Canada'] }) },
+          { value: new MultiFieldKey({ key: ['Mexico'] }) },
+          { value: new MultiFieldKey({ key: ['Brasil'] }) },
+          { value: new MultiFieldKey({ key: ['Canada'] }) },
+          { value: new MultiFieldKey({ key: ['Canada', 'US'] }) },
+          { value: new MultiFieldKey({ key: ['Italy', 'Germany'] }) },
+          { value: new MultiFieldKey({ key: ['France'] }) },
+          { value: new MultiFieldKey({ key: ['Spain', 'Portugal'] }) },
+          { value: new MultiFieldKey({ key: ['UK'] }) },
+          { value: new MultiFieldKey({ key: ['Sweden'] }) },
+          { value: new MultiFieldKey({ key: ['Sweden', 'Finland'] }) },
+        ],
+        'value'
+      ),
+    },
 
-  specialTokens: new Map(),
-  // eslint-disable-next-line no-console
-  onModelUpdate: (model) => console.log(model),
+    specialTokens: new Map(),
+    // eslint-disable-next-line no-console
+    onModelUpdate: (model: any) => console.log(model),
+  },
 };
