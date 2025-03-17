@@ -23,12 +23,16 @@ export class IntegrationService {
   }
 
   async list() {
-    const response = await this.http.get<ListIntegrationsResponse>('/internal/workchat/integrations');
+    const response = await this.http.get<ListIntegrationsResponse>(
+      '/internal/workchat/integrations'
+    );
     return response.integrations;
   }
 
   async get(integrationId: string) {
-    return await this.http.get<GetIntegrationResponse>(`/internal/workchat/integrations/${integrationId}`);
+    return await this.http.get<GetIntegrationResponse>(
+      `/internal/workchat/integrations/${integrationId}`
+    );
   }
 
   async create(request: CreateIntegrationPayload) {
@@ -46,4 +50,4 @@ export class IntegrationService {
   async delete(integrationId: string) {
     return await this.http.delete(`/internal/workchat/integrations/${integrationId}`);
   }
-} 
+}

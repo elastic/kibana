@@ -32,4 +32,4 @@ export const useIntegrationList = () => {
     isLoading,
     refresh,
   };
-}; 
+};

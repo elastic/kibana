@@ -14,4 +14,4 @@ export const WorkChatIntegrationsPage: React.FC<{}> = () => {
   useBreadcrumb([{ text: 'WorkChat' }, { text: 'Integrations' }]);
   const { integrations } = useIntegrationList();
   return <IntegrationListView integrations={integrations} />;
-}; 
+};

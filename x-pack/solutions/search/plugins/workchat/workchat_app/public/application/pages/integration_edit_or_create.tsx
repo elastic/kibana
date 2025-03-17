@@ -21,4 +21,4 @@ export const WorkChatIntegrationEditOrCreatePage: React.FC<{}> = () => {
   }, [integrationIdFromParams]);
 
   return <IntegrationEditView integrationId={integrationId} />;
-}; 
+};
