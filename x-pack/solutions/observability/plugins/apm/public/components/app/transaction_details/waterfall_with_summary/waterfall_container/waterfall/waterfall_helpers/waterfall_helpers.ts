@@ -413,7 +413,7 @@ export function getOrphanItemsIds(
   return waterfall
     .filter(
       (item) =>
-        // the first item should never be orphan
+        // the root transaction should never be orphan
         entryWaterfallTransactionId !== item.id &&
         item.parentId &&
         !waterfallItemsIds.has(item.parentId)
