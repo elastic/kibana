@@ -24,6 +24,7 @@ describe('TabsBar', () => {
     const onSelect = jest.fn();
     const onLabelEdited = jest.fn();
     const onClose = jest.fn();
+    const getPreviewQuery = jest.fn();
 
     const selectedItem = items[0];
 
@@ -36,6 +37,7 @@ describe('TabsBar', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        getPreviewQuery={getPreviewQuery}
       />
     );
 
