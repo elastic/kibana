@@ -116,9 +116,6 @@ Refer to the corresponding {es} logs for potential write errors.
 .1+| `case_user_action_create_case`
 | `success` | User has created a case.
 
-.1+| `knowledge_base_entry_create`
-| `success` | User has created a knowledge base entry.
-
 .2+| `ml_put_ad_job`
 | `success` | Creating anomaly detection job.
 | `failure` | Failed to create anomaly detection job.
@@ -155,16 +152,8 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User requested to install the product documentation for use in AI Assistants.
 
 .2+| `knowledge_base_entry_create`
-| `success` | User has created knowledge base entry [id=x]
-| `failure` | Failed attempt to create a knowledge base entry
-
-.2+| `knowledge_base_entry_update`
-| `success` | User has updated knowledge base entry [id=x]
-| `failure` | Failed attempt to update a knowledge base entry
-
-.2+| `knowledge_base_entry_delete`
-| `success` | User has deleted knowledge base entry [id=x]
-| `failure` | Failed attempt to delete a knowledge base entry
+| `success` | User has created knowledge base entry [id=x].
+| `failure` | Failed attempt to create a knowledge base entry.
 
 3+a|
 ====== Type: change
@@ -192,9 +181,6 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `connector_update`
 | `unknown` | User is updating a connector.
 | `failure` | User is not authorized to update a connector.
-
-.1+| `knowledge_base_entry_update`
-| `success` | User has updated a knowledge base entry.
 
 .2+| `rule_update`
 | `unknown` | User is updating a rule.
@@ -358,6 +344,10 @@ Refer to the corresponding {es} logs for potential write errors.
 .1+| `product_documentation_update`
 | `unknown` | User requested to update the product documentation for use in AI Assistants.
 
+.2+| `knowledge_base_entry_update`
+| `success` | User has updated knowledge base entry [id=x].
+| `failure` | Failed attempt to update a knowledge base entry.
+
 3+a|
 ====== Type: deletion
 
@@ -413,9 +403,6 @@ Refer to the corresponding {es} logs for potential write errors.
 .1+| `case_user_action_delete_case_tags`
 | `success` | User has removed tags from a case.
 
-.1+| `knowledge_base_entry_delete`
-| `success` | User has deleted a knowledge base entry.
-
 .2+| `ml_delete_ad_job`
 | `success` | Deleting anomaly detection job.
 | `failure` | Failed to delete anomaly detection job.
@@ -454,6 +441,10 @@ Refer to the corresponding {es} logs for potential write errors.
 
 .1+| `product_documentation_delete`
 | `unknown` | User requested to delete the product documentation for use in AI Assistants.
+
+.2+| `knowledge_base_entry_delete`
+| `success` | User has deleted knowledge base entry [id=x].
+| `failure` | Failed attempt to delete a knowledge base entry.
 
 3+a|
 ====== Type: access
