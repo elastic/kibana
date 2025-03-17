@@ -101,7 +101,7 @@ export const useTabsView = ({ filterSettings }: Props): UseTabsView => {
   }, [selectedTab, tabs]);
 
   const actionButtons = useMemo(
-    () => (selectedTabId === 'settings' ? filterActionButtons : null),
+    () => (selectedTabId === 'settings' ? filterActionButtons : undefined),
     [filterActionButtons, selectedTabId]
   );
 
