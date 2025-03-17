@@ -67,7 +67,15 @@ export async function validateOutputForPolicy(
     allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
 
   if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
+      if (err instanceof OutputNotFoundError) {
+        return;
+      }
+      throw err;
+    });
+    if (!dataOutput) {
+      return;
+    }
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
       throw new OutputInvalidError(
         `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
@@ -117,7 +125,15 @@ export async function validateAgentPolicyOutputForIntegration(
     allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
 
   if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
+      if (err instanceof OutputNotFoundError) {
+        return;
+      }
+      throw err;
+    });
+    if (!dataOutput) {
+      return;
+    }
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
       if (isNewPackagePolicy) {
         throw new OutputInvalidError(
