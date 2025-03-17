@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
-import { DefaultEmbeddableApi, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import {
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import type { DefaultEmbeddableApi, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type {
   PublishesDataLoading,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePluginSetup {}
