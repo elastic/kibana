@@ -118,7 +118,7 @@ describe('reassignAgent', () => {
       expect((calledWith as estypes.BulkRequest).operations?.length).toBe(2);
       // @ts-expect-error
       expect(calledWith.operations[0].update._id).toEqual(agentInRegularDoc._id);
-      expect((calledWith.operations[1] as any)?.doc).toHaveProperty('namespaces', [
+      expect((calledWith.operations?.[1] as any)?.doc).toHaveProperty('namespaces', [
         'space1',
         'default',
       ]);
