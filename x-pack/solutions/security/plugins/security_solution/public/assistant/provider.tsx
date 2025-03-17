@@ -236,7 +236,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       inferenceEnabled={inferenceEnabled}
       navigateToApp={navigateToApp}
       productDocBase={productDocBase}
-      spaceId={spaceId}
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
