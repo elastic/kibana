@@ -15,6 +15,14 @@ export default {
   component: Component,
   argTypes: {
     onInstallKnowledgeBase: { action: 'onInstallKnowledgeBase' },
+    isInstallAvailable: {
+      control: 'boolean',
+      defaultValue: true,
+    },
+    isInstalling: {
+      control: 'boolean',
+      defaultValue: false,
+    },
   },
 } as Meta<typeof Component>;
 

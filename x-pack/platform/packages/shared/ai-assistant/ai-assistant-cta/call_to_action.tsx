@@ -82,7 +82,7 @@ export const AssistantCallToAction = ({
   const backgroundColor = color === 'plain' ? 'backgroundBasePlain' : 'backgroundBaseSubdued';
 
   return (
-    <EuiPanel css={styles.root} hasShadow={false} borderRadius="none" {...{ color }}>
+    <EuiPanel css={styles.root} hasShadow={false} borderRadius="none" grow={false} {...{ color }}>
       <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
         <Beacon {...{ backgroundColor }} />
         <Title {...{ title }} />
