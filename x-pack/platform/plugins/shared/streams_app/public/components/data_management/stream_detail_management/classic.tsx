@@ -34,7 +34,9 @@ export function ClassicStreamDetailManagement({
 
   const tabs: ManagementTabs = {
     overview: {
-      content: <UnmanagedStreamOverview definition={definition} />,
+      content: (
+        <UnmanagedStreamOverview definition={definition} refreshDefinition={refreshDefinition} />
+      ),
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
@@ -73,23 +75,45 @@ export function ClassicStreamDetailManagement({
   return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
 }
 
-function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetResponse }) {
+function UnmanagedStreamOverview({
+  definition,
+  refreshDefinition,
+}: {
+  definition: UnwiredStreamGetResponse;
+  refreshDefinition: () => void;
+}) {
   const {
     appParams: { history },
     dependencies: {
-      start: { indexManagement },
+      start: { indexManagement, ingestPipelines },
     },
     core: {
       http: { basePath },
     },
   } = useKibana();
 
-  const [currentComponentTemplate, setCurrentComponentTemplate] = useState<string | undefined>(
-    undefined
-  );
+  const [currentFlyout, setCurrentFlyout] = useState<
+    | {
+        type: 'data_stream' | 'component_template' | 'index_template' | 'ingest_pipeline';
+        name: string;
+      }
+    | undefined
+  >(undefined);
   const ComponentTemplateFlyout = useMemo(
     () => indexManagement.getComponentTemplateFlyoutComponent({ history }),
     [history, indexManagement]
+  );
+  const DatastreamFlyout = useMemo(
+    () => indexManagement.getDatastreamFlyoutComponent({ history }),
+    [history, indexManagement]
+  );
+  const IndexTemplateFlyout = useMemo(
+    () => indexManagement.getIndexTemplateFlyoutComponent({ history }),
+    [history, indexManagement]
+  );
+  const IngestPipelineFlyout = useMemo(
+    () => ingestPipelines.getIngestPipelineFlyoutComponent({ history }),
+    [history, ingestPipelines]
   );
 
   const groupedAssets = (definition.elasticsearch_assets ?? []).reduce((acc, asset) => {
@@ -137,11 +161,24 @@ function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetR
             <EuiListGroup
               listItems={assets.map((asset) => ({
                 label: asset.id,
+                key: asset.id,
                 href: basePath.prepend(assetToLink(asset)),
                 onClick: (e) => {
                   if (asset.type === 'component_template') {
                     e.preventDefault();
-                    setCurrentComponentTemplate(asset.id);
+                    setCurrentFlyout({ type: 'component_template', name: asset.id });
+                  }
+                  if (asset.type === 'data_stream') {
+                    e.preventDefault();
+                    setCurrentFlyout({ type: 'data_stream', name: asset.id });
+                  }
+                  if (asset.type === 'index_template') {
+                    e.preventDefault();
+                    setCurrentFlyout({ type: 'index_template', name: asset.id });
+                  }
+                  if (asset.type === 'ingest_pipeline') {
+                    e.preventDefault();
+                    setCurrentFlyout({ type: 'ingest_pipeline', name: asset.id });
                   }
                 },
                 iconType: 'index',
@@ -150,10 +187,30 @@ function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetR
           </div>
         ))}
       </EuiFlexGroup>
-      {currentComponentTemplate && (
+      {currentFlyout && currentFlyout.type === 'component_template' && (
         <ComponentTemplateFlyout
-          onClose={() => setCurrentComponentTemplate(undefined)}
-          componentTemplateName={currentComponentTemplate}
+          onClose={() => setCurrentFlyout(undefined)}
+          componentTemplateName={currentFlyout.name}
+        />
+      )}
+      {currentFlyout && currentFlyout.type === 'data_stream' && (
+        <DatastreamFlyout
+          onClose={() => setCurrentFlyout(undefined)}
+          datastreamName={currentFlyout.name}
+        />
+      )}
+      {currentFlyout && currentFlyout.type === 'index_template' && (
+        <IndexTemplateFlyout
+          onClose={() => setCurrentFlyout(undefined)}
+          indexTemplateName={currentFlyout.name}
+          reload={refreshDefinition}
+        />
+      )}
+      {currentFlyout && currentFlyout.type === 'ingest_pipeline' && (
+        <IngestPipelineFlyout
+          onClose={() => setCurrentFlyout(undefined)}
+          ingestPipelineName={currentFlyout.name}
+          reload={refreshDefinition}
         />
       )}
     </>

@@ -18,8 +18,11 @@ import {
   Capabilities,
 } from '@kbn/core/public';
 import {
+  ComponentTemplateFlyoutProps,
+  DatastreamFlyoutProps,
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
+  IndexTemplateFlyoutProps,
 } from '@kbn/index-management-shared-types';
 import { IndexManagementLocator } from '@kbn/index-management-shared-types';
 import { Subscription } from 'rxjs';
@@ -35,6 +38,8 @@ import { PublicApiService } from './services/public_api_service';
 import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
 import { IndexManagementLocatorDefinition } from './locator';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
+import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
+import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
 
 export class IndexMgmtUIPlugin
   implements
@@ -240,6 +245,8 @@ export class IndexMgmtUIPlugin
         const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
           coreStart;
         const { url } = share;
+        const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+          application.capabilities.index_management;
         const appDependencies = {
           core: {
             fatalErrors,
@@ -247,6 +254,9 @@ export class IndexMgmtUIPlugin
             executionContext,
             application,
             http,
+            i18n: coreStart.i18n,
+            theme: coreStart.theme,
+            chrome: coreStart.chrome,
           },
           plugins: {
             usageCollection,
@@ -260,6 +270,8 @@ export class IndexMgmtUIPlugin
           services: {
             extensionsService: this.extensionsService,
           },
+          canUseSyntheticSource: this.canUseSyntheticSource,
+          overlays: coreStart.overlays,
           config: this.config,
           history: deps.history,
           setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
@@ -269,11 +281,130 @@ export class IndexMgmtUIPlugin
           docLinks,
           kibanaVersion: this.kibanaVersion,
           theme$: coreStart.theme.theme$,
+          privs: {
+            monitor: !!monitor,
+            manageEnrich: !!manageEnrich,
+            monitorEnrich: !!monitorEnrich,
+            manageIndexTemplates: !!manageIndexTemplates,
+          },
         };
-        return (props: any) => {
+        return (props: ComponentTemplateFlyoutProps) => {
           return ComponentTemplateFlyout({
             dependencies: appDependencies,
             core: coreStart,
+            usageCollection,
+            ...props,
+          });
+        };
+      },
+      getIndexTemplateFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
+        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
+          coreStart;
+        const { url } = share;
+        const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+          application.capabilities.index_management;
+        const appDependencies = {
+          core: {
+            fatalErrors,
+            getUrlForApp: application.getUrlForApp,
+            executionContext,
+            application,
+            http,
+            i18n: coreStart.i18n,
+            theme: coreStart.theme,
+            chrome: coreStart.chrome,
+          },
+          plugins: {
+            usageCollection,
+            isFleetEnabled: Boolean(fleet),
+            share,
+            cloud,
+            console,
+            ml,
+            licensing,
+          },
+          services: {
+            extensionsService: this.extensionsService,
+          },
+          canUseSyntheticSource: this.canUseSyntheticSource,
+          overlays: coreStart.overlays,
+          config: this.config,
+          history: deps.history,
+          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
+          uiSettings,
+          settings,
+          url,
+          docLinks,
+          kibanaVersion: this.kibanaVersion,
+          theme$: coreStart.theme.theme$,
+          privs: {
+            monitor: !!monitor,
+            manageEnrich: !!manageEnrich,
+            monitorEnrich: !!monitorEnrich,
+            manageIndexTemplates: !!manageIndexTemplates,
+          },
+        };
+        return (props: IndexTemplateFlyoutProps) => {
+          return IndexTemplateFlyout({
+            dependencies: appDependencies,
+            core: coreStart,
+            usageCollection,
+            ...props,
+          });
+        };
+      },
+      getDatastreamFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
+        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
+          coreStart;
+        const { url } = share;
+        const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+          application.capabilities.index_management;
+        const appDependencies = {
+          core: {
+            fatalErrors,
+            getUrlForApp: application.getUrlForApp,
+            executionContext,
+            application,
+            http,
+            i18n: coreStart.i18n,
+            theme: coreStart.theme,
+            chrome: coreStart.chrome,
+          },
+          plugins: {
+            usageCollection,
+            isFleetEnabled: Boolean(fleet),
+            share,
+            cloud,
+            console,
+            ml,
+            licensing,
+          },
+          services: {
+            extensionsService: this.extensionsService,
+          },
+          canUseSyntheticSource: this.canUseSyntheticSource,
+          overlays: coreStart.overlays,
+          config: this.config,
+          history: deps.history,
+          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
+          uiSettings,
+          settings,
+          url,
+          docLinks,
+          kibanaVersion: this.kibanaVersion,
+          theme$: coreStart.theme.theme$,
+          privs: {
+            monitor: !!monitor,
+            manageEnrich: !!manageEnrich,
+            monitorEnrich: !!monitorEnrich,
+            manageIndexTemplates: !!manageIndexTemplates,
+          },
+        };
+        return (props: DatastreamFlyoutProps) => {
+          return DataStreamFlyout({
+            dependencies: appDependencies,
+            core: coreStart,
+            usageCollection,
             ...props,
           });
         };

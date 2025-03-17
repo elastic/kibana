@@ -22,6 +22,7 @@ import {
 import { AppMountParameters } from '@kbn/core/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -54,6 +55,7 @@ export interface StreamsAppStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   licensing: LicensingPluginStart;
   indexManagement: IndexManagementPluginStart;
+  ingestPipelines: IngestPipelinesPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

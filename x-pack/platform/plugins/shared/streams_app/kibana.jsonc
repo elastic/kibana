@@ -21,6 +21,7 @@
       "datasetQuality",
       "licensing",
       "indexManagement",
+      "ingestPipelines",
     ],
     "requiredBundles": [
       "kibanaReact"

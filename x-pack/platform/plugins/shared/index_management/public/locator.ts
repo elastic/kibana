@@ -14,7 +14,9 @@ import {
   getComponentTemplateDetailLink,
   getComponentTemplateEditLink,
   getDataStreamDetailsLink,
+  getTemplateCloneLink,
   getTemplateDetailsLink,
+  getTemplateEditLink,
 } from './application/services/routing';
 import { PLUGIN } from '../common/constants';
 
@@ -48,6 +50,18 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getTemplateDetailsLink(params.indexTemplate),
+        };
+      }
+      case 'index_template_edit': {
+        return {
+          ...location,
+          path: location.path + getTemplateEditLink(params.indexTemplate, false),
+        };
+      }
+      case 'index_template_clone': {
+        return {
+          ...location,
+          path: location.path + getTemplateCloneLink(params.indexTemplate),
         };
       }
       case 'component_template': {

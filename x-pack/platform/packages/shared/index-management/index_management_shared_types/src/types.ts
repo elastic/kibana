@@ -28,6 +28,14 @@ export type IndexManagementLocatorParams = SerializableRecord &
         indexTemplate: string;
       }
     | {
+        page: 'index_template_edit';
+        indexTemplate: string;
+      }
+    | {
+        page: 'index_template_clone';
+        indexTemplate: string;
+      }
+    | {
         page: 'component_template';
         componentTemplate: string;
       }
@@ -64,6 +72,12 @@ export interface IndexManagementPluginStart {
   getComponentTemplateFlyoutComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<ComponentTemplateFlyoutProps>;
+  getIndexTemplateFlyoutComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<IndexTemplateFlyoutProps>;
+  getDatastreamFlyoutComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<DatastreamFlyoutProps>;
 }
 
 export interface Index {
@@ -93,6 +107,17 @@ export interface Index {
 
 export interface ComponentTemplateFlyoutProps {
   componentTemplateName: string;
+  onClose: () => void;
+}
+
+export interface IndexTemplateFlyoutProps {
+  indexTemplateName: string;
+  onClose: () => void;
+  reload: () => void;
+}
+
+export interface DatastreamFlyoutProps {
+  datastreamName: string;
   onClose: () => void;
 }
 
