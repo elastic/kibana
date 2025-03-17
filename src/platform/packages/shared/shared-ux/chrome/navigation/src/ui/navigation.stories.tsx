@@ -367,14 +367,17 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               path: '',
               title: 'Item-Beta',
               href: '/app/kibana',
-              withBadge: true, // FIXME: show "beta" badge in circle
+              withBadge: true,
             },
             {
               id: 'item-labs',
               path: '',
               title: 'Item-Labs',
               href: '/app/kibana',
-              withBadge: true, // FIXME: show "beaker" badge
+              withBadge: true,
+              badgeOptions: {
+                text: 'bell',
+              },
             },
             {
               id: 'item27',
