@@ -50,7 +50,7 @@ export class AgentServiceImpl implements AgentService {
     return new AgentClientImpl({
       logger: this.logger.get('client'),
       client: soClient,
-      user: { id: user.profile_uid!, username: user.username },
+      user: { id: user.profile_uid!, name: user.username },
     });
   }
 }
