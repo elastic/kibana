@@ -1,3 +1,3 @@
-# @kbn/integrations-common
+# @kbn/wci-common
 
-Contains shared functionality for integrations. 
+Contains shared types and constants for WorkChat integrations. For server-side implementation, see the `@kbn/wci-server` package. 

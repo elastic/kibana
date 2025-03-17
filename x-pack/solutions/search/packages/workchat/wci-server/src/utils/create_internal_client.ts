@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { SSEClientTransport } from '../mcp/sse_client';
-import type { IntegrationClient } from '../types';
+import type { IntegrationClient } from '@kbn/wci-common';
 
-export const getClientForExternalServer = async ({
-  serverUrl,
+/**
+ * Returns a {@link IntegrationClient} that will run the provided server in memory
+ * and connect to it.
+ */
+export const getClientForInternalServer = async ({
+  server,
   clientName = 'unknown',
 }: {
-  serverUrl: string;
+  server: McpServer;
   clientName?: string;
 }): Promise<IntegrationClient> => {
   let _disconnect: () => Promise<void> | undefined;
@@ -26,26 +31,18 @@ export const getClientForExternalServer = async ({
       }
       connected = true;
 
-      const transport = new SSEClientTransport(new URL(serverUrl));
+      const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+      const client = new Client({
+        name: clientName,
+        version: '1.0.0',
+      });
 
-      const client = new Client(
-        {
-          name: clientName,
-          version: '1.0.0',
-        },
-        {
-          capabilities: {
-            prompts: {},
-            resources: {},
-            tools: {},
-          },
-        }
-      );
-
-      await client.connect(transport);
+      await server.connect(clientTransport);
+      await client.connect(serverTransport);
 
       _disconnect = async () => {
         await client.close();
+        await server.close();
       };
 
       return client;

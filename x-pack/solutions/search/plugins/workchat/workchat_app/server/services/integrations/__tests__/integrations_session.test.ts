@@ -8,7 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
-import { getClientForInternalServer } from '@kbn/wci-common';
+import { getClientForInternalServer } from '@kbn/wci-server';
 import { IntegrationToolInputSchema } from '../types';
 import { IntegrationWithMeta } from '../types';
 import { IntegrationsSession } from '../integrations_session';
