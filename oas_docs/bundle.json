@@ -48505,10 +48505,20 @@
       }
     },
     "/api/streams/{name}/content/export": {
-      "get": {
+      "post": {
         "description": "Exports the content associated to a stream.",
-        "operationId": "get-streams-name-content-export",
+        "operationId": "post-streams-name-content-export",
         "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "name",
