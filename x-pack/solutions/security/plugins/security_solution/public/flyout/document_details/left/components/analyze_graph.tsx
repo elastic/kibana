@@ -26,7 +26,7 @@ export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
     'xpack.securitySolution.flyout.left.visualizations.analyzer.panelPreviewTitle',
     {
-      defaultMessage: 'Preview analyzer panels',
+      defaultMessage: 'Preview analyzer panel',
     }
   ),
   backgroundColor: 'warning',
