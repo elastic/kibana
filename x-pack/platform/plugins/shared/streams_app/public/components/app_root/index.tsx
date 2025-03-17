@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   BreadcrumbsContextProvider,
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { StreamsAppContextProvider } from '../streams_app_context_provider';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { streamsAppRouter } from '../../routes/config';
-import { StreamsAppStartDependencies } from '../../types';
 import { StreamsAppServices } from '../../services/types';
+import { StreamsAppStartDependencies } from '../../types';
 import { HeaderMenuPortal } from '../header_menu';
+import { StreamsAppContextProvider } from '../streams_app_context_provider';
 
 export function AppRoot({
   coreStart,
@@ -44,12 +45,16 @@ export function AppRoot({
     isServerless,
   };
 
+  const queryClient = new QueryClient();
+
   return (
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
         <RouterProvider history={history} router={streamsAppRouter}>
           <BreadcrumbsContextProvider>
-            <RouteRenderer />
+            <QueryClientProvider client={queryClient}>
+              <RouteRenderer />
+            </QueryClientProvider>
           </BreadcrumbsContextProvider>
           <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
         </RouterProvider>
