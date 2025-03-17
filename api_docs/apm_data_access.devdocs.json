@@ -496,12 +496,31 @@
             "label": "getApmIndices",
             "description": [],
             "signature": [
-              "() => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "apmDataAccess",
+                "id": "def-server.ApmDataAccessPrivilegesCheck.getApmIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

@@ -41,7 +41,7 @@ export default createTestConfig({
   kbnServerArgs: [
     `--plugin-path=${resolve(
       __dirname,
-      '../../../../../test/analytics/plugins/analytics_ftr_helpers'
+      '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
     )}`,
   ],
 });
