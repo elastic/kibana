@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { generateMockIndicator, Indicator } from '../../../../common/types/indicator';
+import {
+  generateMockIndicator,
+  type Indicator,
+} from '../../../../../common/threat_intelligence/types/indicator';
 import { EMPTY_VALUE } from '../../../constants/common';
 import {
   AddToTimelineButtonEmpty,

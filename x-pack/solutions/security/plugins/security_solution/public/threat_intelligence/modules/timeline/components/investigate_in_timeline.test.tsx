@@ -10,8 +10,8 @@ import { render } from '@testing-library/react';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
-  Indicator,
-} from '../../../../common/types/indicator';
+  type Indicator,
+} from '../../../../../common/threat_intelligence/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import {
   InvestigateInTimelineContextMenu,
