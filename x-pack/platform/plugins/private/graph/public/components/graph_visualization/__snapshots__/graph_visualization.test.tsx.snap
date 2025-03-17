@@ -26,6 +26,11 @@ exports[`graph_visualization should render to svg elements 1`] = `
         <line
           className="gphEdge"
           strokeLinecap="round"
+          style={
+            Object {
+              "strokeWidth": 2,
+            }
+          }
           x1={5}
           x2={7}
           y1={5}
@@ -34,6 +39,11 @@ exports[`graph_visualization should render to svg elements 1`] = `
         <line
           className="gphEdge gphEdge--clickable"
           onClick={[Function]}
+          style={
+            Object {
+              "strokeWidth": 15,
+            }
+          }
           x1={5}
           x2={7}
           y1={5}
@@ -55,6 +65,11 @@ exports[`graph_visualization should render to svg elements 1`] = `
         <line
           className="gphEdge"
           strokeLinecap="round"
+          style={
+            Object {
+              "strokeWidth": 2.2,
+            }
+          }
           x1={7}
           x2={12}
           y1={9}
@@ -63,6 +78,11 @@ exports[`graph_visualization should render to svg elements 1`] = `
         <line
           className="gphEdge gphEdge--clickable"
           onClick={[Function]}
+          style={
+            Object {
+              "strokeWidth": 15,
+            }
+          }
           x1={7}
           x2={12}
           y1={9}
