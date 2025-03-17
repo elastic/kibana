@@ -98,6 +98,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
 
   const {
     dataOutputOptions,
+    dataOutputValueOfSelected,
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
   } = useOutputOptions(agentPolicy);
@@ -665,7 +666,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiSuperSelect
             disabled={disabled || isManagedPolicy}
-            valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
+            valueOfSelected={dataOutputValueOfSelected}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
