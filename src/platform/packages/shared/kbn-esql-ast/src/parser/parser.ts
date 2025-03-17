@@ -166,9 +166,9 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
           startColumn: 0,
           endColumn: 0,
           message: i18n.translate('foo.bar', {
-            defaultMessage: 'Internal parser error: {error}',
+            defaultMessage: 'Invalid query [{query}]',
             values: {
-              error: !!error && typeof error === 'object' ? String(error.message) : String(error),
+              query: text,
             },
           }),
           severity: 'error',

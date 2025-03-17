@@ -7073,7 +7073,7 @@
     {
       "query": "from a_index | eval textField in textField)",
       "error": [
-        "Internal parser error: Empty Stack"
+        "Invalid query [from a_index | eval textField in textField)]"
       ],
       "warning": []
     },
@@ -9794,7 +9794,7 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },

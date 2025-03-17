@@ -1218,7 +1218,7 @@ describe('validation logic', () => {
       ]);
 
       testErrorsAndWarnings('from a_index | eval textField in textField)', [
-        'Internal parser error: Empty Stack',
+        'Invalid query [from a_index | eval textField in textField)]',
       ]);
       testErrorsAndWarnings('from a_index | eval textField not in textField', [
         "SyntaxError: missing '(' at 'textField'",
