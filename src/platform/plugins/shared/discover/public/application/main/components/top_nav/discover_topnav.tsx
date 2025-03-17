@@ -21,7 +21,6 @@ import { useAppStateSelector } from '../../state_management/discover_app_state_c
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
-import './top_nav.scss';
 import {
   internalStateActions,
   useCurrentDataView,
@@ -166,7 +165,7 @@ export const DiscoverTopNav = ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
-      className: 'dscTopNav', // FIXME: Delete the scss file and pass `gutterSize="xxs"` instead (after next Eui release)
+      gutterSize: 'xxs',
     }),
     [setHeaderActionMenu, topNavBadges, topNavMenu]
   );
