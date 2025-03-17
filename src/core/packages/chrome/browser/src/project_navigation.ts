@@ -197,9 +197,18 @@ interface NodeDefinitionBase {
    */
   openInNewTab?: boolean;
   /**
-   * ["item" nodes only] Optional property to indicate if a badge should be rendered next to the text. The string is the icon type.
+   * ["subitem" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
    */
-  badge?: string;
+  withBadge?: boolean;
+  /**
+   * ["subitem" nodes only] If `withBadge` is true, this object can be used to customize the badge.
+   */
+  badgeOptions?: {
+    /** The text of the badge. Default: "Beaker" */
+    icon?: string;
+    /** Text shown on tooltip attached to the badge. */
+    tooltip?: string;
+  };
 }
 
 /** @public */

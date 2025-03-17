@@ -15,12 +15,12 @@ import { SubItemBadge } from './subitem_badge';
 
 export const SubItemTitle: React.FC<{
   item: ChromeProjectNavigationNode;
-}> = ({ item: { title, badge } }) => (
+}> = ({ item: { title, withBadge, badgeOptions } }) => (
   <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-    <EuiFlexItem grow={!badge}>{title}</EuiFlexItem>
-    {badge && (
+    <EuiFlexItem grow={!withBadge}>{title}</EuiFlexItem>
+    {withBadge && (
       <EuiFlexItem>
-        <SubItemBadge badge={badge} />
+        <SubItemBadge icon={badgeOptions?.icon} tooltip={badgeOptions?.tooltip} />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

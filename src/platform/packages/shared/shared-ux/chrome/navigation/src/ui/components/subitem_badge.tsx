@@ -11,6 +11,12 @@ import React from 'react';
 
 import { EuiBetaBadge } from '@elastic/eui';
 
-export const SubItemBadge = ({ badge }: { badge: string }) => (
-  <EuiBetaBadge size="s" label="" iconType={badge} alignment="middle" />
+export const SubItemBadge = ({ icon, tooltip }: { icon?: string; tooltip?: string }) => (
+  <EuiBetaBadge
+    size="s"
+    label=""
+    iconType={icon ?? 'beaker'}
+    alignment="middle"
+    tooltipContent={tooltip}
+  />
 );
