@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { RootCauseAnalysisEntityInvestigation } from '.';
 import { controllerEntityHealthAnalysis } from '../mock';
 
-const stories: Meta<{}> = {
+const stories: Meta = {
   title: 'RCA/EntityInvestigation',
   component: RootCauseAnalysisEntityInvestigation,
 };
 
 export default stories;
 
-export const Default: Story<{}> = () => {
+export const Default: StoryFn = () => {
   return (
     <RootCauseAnalysisEntityInvestigation
       entity={controllerEntityHealthAnalysis.response.entity}
