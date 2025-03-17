@@ -108,13 +108,11 @@ describe('RuleDashboards', () => {
 
     useRuleFormState.mockReturnValue({
       formData: {
-        params: {
-          dashboards: [
-            {
-              id: 1,
-            },
-          ],
-        },
+        dashboards: [
+          {
+            id: '1',
+          },
+        ],
       },
     });
 
@@ -137,13 +135,11 @@ describe('RuleDashboards', () => {
 
     useRuleFormState.mockReturnValue({
       formData: {
-        params: {
-          dashboards: [
-            {
-              id: '1',
-            },
-          ],
-        },
+        dashboards: [
+          {
+            id: '1',
+          },
+        ],
       },
     });
 
@@ -170,13 +166,10 @@ describe('RuleDashboards', () => {
     fireEvent.click(screen.getByText('Dashboard 2'));
 
     expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setParamsProperty',
+      type: 'setRuleProperty',
       payload: {
         property: 'dashboards',
-        value: [
-          { id: '1', title: 'Dashboard 1' },
-          { id: '2', title: 'Dashboard 2' },
-        ],
+        value: [{ id: '1' }, { id: '2' }],
       },
     });
 
