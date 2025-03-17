@@ -1342,6 +1342,10 @@ module.exports = {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
+    {
+      files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
+      extends: ['plugin:testing-library/react'],
+    },
 
     /**
      * Lists overrides. These rules below are maintained and owned by
@@ -1614,10 +1618,11 @@ module.exports = {
      */
     {
       files: [
-        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
-        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
           'error',

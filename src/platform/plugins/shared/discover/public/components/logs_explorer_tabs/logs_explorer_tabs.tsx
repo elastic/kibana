@@ -9,16 +9,18 @@
 
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
 import {
-  AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
   OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY,
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useEffect } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
+import type { DiscoverAppLocatorParams } from '../../../common';
+import { DISCOVER_APP_LOCATOR } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
 
 export interface LogsExplorerTabsProps {

@@ -11,8 +11,8 @@ import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FilterPopover } from '.';
 
-// Failing: See https://github.com/elastic/kibana/issues/206368
-describe.skip('FilterPopover ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/176679
+describe('FilterPopover ', () => {
   const onSelectedOptionsChanged = jest.fn();
   const tags: string[] = ['coke', 'pepsi'];
 
