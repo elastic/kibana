@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { ALL_PRODUCT_FEATURE_KEYS, ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features/keys';
+import {
+  ALL_PRODUCT_FEATURE_KEYS,
+  ProductFeatureSecurityKey,
+} from '@kbn/security-solution-features/keys';
 
 // List of product features that are disabled in different offering (eg. Serverless).
-const DISABLED_PRODUCT_FEATURES = [ProductFeatureKey.alertsSummary];
+const DISABLED_PRODUCT_FEATURES: ProductFeatureKeyType[] = [
+  ProductFeatureSecurityKey.alertsSummary,
+];
 
-export const DEFAULT_PRODUCT_FEATURES = ALL_PRODUCT_FEATURE_KEYS.filter(
-  (key) => !DISABLED_PRODUCT_FEATURES.includes(key)
-);
+export const DEFAULT_PRODUCT_FEATURES = ALL_PRODUCT_FEATURE_KEYS.filter((key) => {
+  return !DISABLED_PRODUCT_FEATURES.includes(key as ProductFeatureKeyType);
+});
