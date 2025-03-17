@@ -26,6 +26,7 @@ import {
   azureAiSecrets,
   openAiConfig,
   openAiSecrets,
+  pkiOpenAiConfig, // Add this import
   providerOptions,
 } from './constants';
 const { emptyField } = fieldValidators;
