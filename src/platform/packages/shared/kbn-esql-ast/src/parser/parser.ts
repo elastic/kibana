@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
 import { CharStreams, type Token } from 'antlr4';
 import { CommonTokenStream, type CharStream, type ErrorListener } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
@@ -165,12 +163,7 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
           endLineNumber: 0,
           startColumn: 0,
           endColumn: 0,
-          message: i18n.translate('foo.bar', {
-            defaultMessage: 'Invalid query [{query}]',
-            values: {
-              query: text,
-            },
-          }),
+          message: `Invalid query [${text}]`,
           severity: 'error',
         },
       ],
