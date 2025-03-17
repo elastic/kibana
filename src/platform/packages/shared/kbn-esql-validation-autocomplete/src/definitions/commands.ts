@@ -245,7 +245,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     modes: [],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
-    suggest: suggestForStats,
+    suggest: () => [],
   },
 
   {

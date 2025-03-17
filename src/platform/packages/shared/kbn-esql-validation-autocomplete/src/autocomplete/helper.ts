@@ -924,3 +924,38 @@ export async function suggestForExpression({
 
   return suggestions;
 }
+
+/**
+ * Builds a regex that matches partial strings starting
+ * from the beginning of the string.
+ *
+ * Example:
+ * "is null" -> /^i(?:s(?:\s+(?:n(?:u(?:l(?:l)?)?)?)?)?)?$/i
+ */
+export function buildPartialMatcher(str: string) {
+  // Split the string into characters
+  const chars = str.split('');
+
+  // Initialize the regex pattern
+  let pattern = '';
+
+  // Iterate through the characters and build the pattern
+  chars.forEach((char, index) => {
+    if (char === ' ') {
+      pattern += '\\s+';
+    } else {
+      pattern += char;
+    }
+    if (index < chars.length - 1) {
+      pattern += '(?:';
+    }
+  });
+
+  // Close the non-capturing groups
+  for (let i = 0; i < chars.length - 1; i++) {
+    pattern += ')?';
+  }
+
+  // Return the final regex pattern
+  return new RegExp(pattern + '$', 'i');
+}

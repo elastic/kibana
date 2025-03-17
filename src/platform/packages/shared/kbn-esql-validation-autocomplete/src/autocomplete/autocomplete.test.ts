@@ -1009,10 +1009,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
@@ -1023,10 +1019,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
@@ -1037,8 +1029,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      ', ',
-      '| ',
     ]);
 
     describe('dot-separated field names', () => {

@@ -11,7 +11,10 @@ import { type ESQLSingleAstItem } from '@kbn/esql-ast';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { pipeCompleteItem } from '../../complete_items';
-import { suggestForExpression } from '../../helper';
+import { buildPartialMatcher, suggestForExpression } from '../../helper';
+
+const isNullMatcher = buildPartialMatcher('is nul');
+const isNotNullMatcher = buildPartialMatcher('is not nul');
 
 export async function suggest(
   params: CommandSuggestParams<'where'>
@@ -23,11 +26,16 @@ export async function suggest(
     commandName: 'where',
   });
 
-  // WHERE-specific stuff
+  const isExpressionComplete =
+    expressionRoot &&
+    params.getExpressionType(expressionRoot) === 'boolean' &&
+    // see https://github.com/elastic/kibana/issues/199401
+    // for the reason we need this string check.
+    !(isNullMatcher.test(params.innerText) || isNotNullMatcher.test(params.innerText));
 
-  // Is this a complete expression of the right type?
+  // Is this a complete boolean expression?
   // If so, we can call it done and suggest a pipe
-  if (params.getExpressionType(expressionRoot) === 'boolean') {
+  if (isExpressionComplete) {
     suggestions.push(pipeCompleteItem);
   }
 
