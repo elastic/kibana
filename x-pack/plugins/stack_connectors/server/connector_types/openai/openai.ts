@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
- *
- * Added PKI functionality by Antonio Piazza @antman1p
+ * 
+ * PKI funcitonality added by Antonio Piazza @antman1p
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
@@ -76,12 +76,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           throw new Error('Certificate and key paths are required for PKI authentication');
         }
 
-        // Validate PKI certificates
         if (!validatePKICertificates(this.config.certPath, this.config.keyPath)) {
           throw new Error('Invalid or inaccessible PKI certificates');
         }
 
-        // Create HTTPS agent with certificates
         const httpsAgent = new https.Agent({
           cert: fs.readFileSync(this.config.certPath),
           key: fs.readFileSync(this.config.keyPath),
@@ -91,7 +89,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.openAI = new OpenAI({
           apiKey: this.key,
           baseURL: removeEndpointFromUrl(this.url),
-          defaultHeaders: this.config.headers, // Use config headers only
+          defaultHeaders: this.config.headers,
           httpAgent: httpsAgent,
         });
       } else {
@@ -173,27 +171,53 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async runApi({ body, signal, timeout }: RunActionParams): Promise<RunActionResponse> {
-    const sanitizedBody = sanitizeRequest(
-      this.provider,
-      this.url,
-      body,
-      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
-    );
-    const axiosOptions = getAxiosOptions(this.provider, this.key, false, this.config);
-    const response = await this.request({
-      url: this.url,
-      method: 'post',
-      responseSchema: RunActionResponseSchema,
-      data: sanitizedBody,
-      signal,
-      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-      ...axiosOptions,
-      headers: {
-        ...this.config.headers,
-        ...axiosOptions.headers,
-      },
-    });
-    return response.data;
+    if (this.provider === OpenAiProviderType.PkiOpenAi) {
+      try {
+        const sanitizedBody = JSON.parse(body);
+        const response = await this.openAI.chat.completions.create(
+          {
+            ...sanitizedBody,
+            model:
+              sanitizedBody.model ??
+              ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+          },
+          {
+            signal,
+            timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+          }
+        );
+        return response as RunActionResponse;
+      } catch (error) {
+        if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
+          throw new Error(
+            `Certificate error: ${error.message}. Please check if your PKI certificates are valid.`
+          );
+        }
+        throw error;
+      }
+    } else {
+      const sanitizedBody = sanitizeRequest(
+        this.provider,
+        this.url,
+        body,
+        ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+      );
+      const axiosOptions = getAxiosOptions(this.provider, this.key, false, this.config);
+      const response = await this.request({
+        url: this.url,
+        method: 'post',
+        responseSchema: RunActionResponseSchema,
+        data: sanitizedBody,
+        signal,
+        timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+        ...axiosOptions,
+        headers: {
+          ...this.config.headers,
+          ...axiosOptions.headers,
+        },
+      });
+      return response.data;
+    }
   }
 
   public async streamApi({
@@ -202,30 +226,49 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
   }: StreamActionParams): Promise<RunActionResponse> {
-    const executeBody = getRequestWithStreamOption(
-      this.provider,
-      this.url,
-      body,
-      stream,
-      ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
-    );
-
-    const axiosOptions = getAxiosOptions(this.provider, this.key, stream, this.config);
-
-    const response = await this.request({
-      url: this.url,
-      method: 'post',
-      responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
-      data: executeBody,
-      signal,
-      ...axiosOptions,
-      headers: {
-        ...this.config.headers,
-        ...axiosOptions.headers,
-      },
-      timeout,
-    });
-    return stream ? pipeStreamingResponse(response) : response.data;
+    if (this.provider === OpenAiProviderType.PkiOpenAi) {
+      const sanitizedBody = JSON.parse(body);
+      if (stream) {
+        const response = await this.openAI.chat.completions.create(
+          {
+            ...sanitizedBody,
+            model:
+              sanitizedBody.model ??
+              ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+            stream: true,
+          },
+          {
+            signal,
+            timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+          }
+        );
+        return response as RunActionResponse;
+      }
+      return this.runApi({ body, signal, timeout });
+    } else {
+      const executeBody = getRequestWithStreamOption(
+        this.provider,
+        this.url,
+        body,
+        stream,
+        ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+      );
+      const axiosOptions = getAxiosOptions(this.provider, this.key, stream, this.config);
+      const response = await this.request({
+        url: this.url,
+        method: 'post',
+        responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
+        data: executeBody,
+        signal,
+        ...axiosOptions,
+        headers: {
+          ...this.config.headers,
+          ...axiosOptions.headers,
+        },
+        timeout,
+      });
+      return stream ? pipeStreamingResponse(response) : response.data;
+    }
   }
 
   public async getDashboard({
@@ -261,14 +304,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
     const { signal, timeout, ...rest } = body;
-
     const res = (await this.streamApi({
       body: JSON.stringify(rest),
       stream: true,
       signal,
       timeout,
     })) as unknown as IncomingMessage;
-
     return res.pipe(new PassThrough());
   }
 
