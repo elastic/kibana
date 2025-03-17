@@ -34,6 +34,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
+        - PKI OpenAI # Added
 
     MessageRole:
       type: string
@@ -265,4 +266,3 @@ components:
           items:
               $ref: '#/components/schemas/Message'
           description: The conversation messages.
-
