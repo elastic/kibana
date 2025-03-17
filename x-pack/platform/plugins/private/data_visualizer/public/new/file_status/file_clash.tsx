@@ -17,9 +17,6 @@ interface Props {
 }
 
 export const FileClashResult: FC<Props> = ({ fileClash }) => {
-  // eslint-disable-next-line no-console
-  console.log(fileClash);
-
   return fileClash.clash === CLASH_ERROR_TYPE.ERROR ? (
     <>
       {fileClash.clashType === CLASH_TYPE.FORMAT ? (
