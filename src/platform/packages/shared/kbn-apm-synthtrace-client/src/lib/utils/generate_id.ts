@@ -8,21 +8,16 @@
  */
 
 let seq = 0;
-// reset the sequence every 1_000_000 to avoid overflow
-const MAX_SEQ = 1_000_000;
 
 const LONG_ID_LENGTH = 32;
 const SHORT_ID_LENGTH = 16;
 
 function generateId(length: number = LONG_ID_LENGTH) {
-  const seqId = String(seq++ % MAX_SEQ);
-  const timestamp = Date.now().toString(16);
-  // additional entropy to avoid collisions
-  const randomPart = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16);
+  const seqId = String(seq++);
+  const timestamp = Date.now();
 
-  const id = `${seqId}${timestamp}${randomPart}`;
-
-  const generatedId = id.length < length ? id.padStart(length, '0') : id.slice(0, length);
+  const randomHex = (timestamp * seq).toString(16).slice(0, length - seqId.length);
+  const generatedId = (randomHex + seqId.padStart(length - randomHex.length, '0')).slice(0, length);
 
   if (generatedId.length > length) {
     throw new Error(`generated id is longer than ${length} characters: ${generatedId.length}`);
