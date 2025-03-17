@@ -79,8 +79,16 @@ export const closeTab = ({ items, selectedItem }: TabsState, item: TabItem): Tab
 export const insertTabAfter = (
   { items, selectedItem }: TabsState,
   item: TabItem,
-  insertAfterItem: TabItem
+  insertAfterItem: TabItem,
+  maxItemsCount?: number
 ): TabsState => {
+  if (maxItemsCount && items.length >= maxItemsCount) {
+    return {
+      items,
+      selectedItem,
+    };
+  }
+
   const insertAfterIndex = items.findIndex((i) => i.id === insertAfterItem.id);
 
   if (insertAfterIndex === -1) {
