@@ -27,7 +27,7 @@ export function StreamListView() {
 
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      const { streams } = await streamsRepositoryClient.fetch('GET /api/streams', {
+      const { streams } = await streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
         signal,
       });
       return streams;
