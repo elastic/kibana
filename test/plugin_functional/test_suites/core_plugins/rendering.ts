@@ -349,6 +349,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean?)',
         'xpack.timelines.enableExperimental (array?)',
         'xpack.alerting.rules.run.alerts.max (number?)',
+        'xpack.alerting.maintenanceWindow.enabled (boolean?)',
+        'xpack.alerting.rulesSettings.enabled (boolean?)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
