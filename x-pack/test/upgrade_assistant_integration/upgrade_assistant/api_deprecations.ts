@@ -165,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits.hits.length).to.equal(6);
 
       const counters = hits.hits
-        .map((hit) => hit._source!['usage-counter'])
+        .map((hit) => hit._source!['usage-counter'] as any)
         // filter out the reindexing counters
         .filter(
           (counter) =>
