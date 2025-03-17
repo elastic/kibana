@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocViewerLegacyTable } from './table';
+import { CodeCoverageReportingPlugin } from './plugin';
 
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default DocViewerLegacyTable;
+export function plugin() {
+  return new CodeCoverageReportingPlugin();
+}
