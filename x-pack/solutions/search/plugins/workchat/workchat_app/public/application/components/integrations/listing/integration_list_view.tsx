@@ -18,7 +18,11 @@ interface IntegrationListViewProps {
 export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integrations }) => {
   const { navigateToWorkchatUrl } = useNavigation();
   const columns: Array<EuiBasicTableColumn<Integration>> = [
-    { field: 'type', name: 'Type', render: (type: IntegrationType) => integrationTypeToLabel(type) },
+    {
+      field: 'type',
+      name: 'Type',
+      render: (type: IntegrationType) => integrationTypeToLabel(type),
+    },
     { field: 'description', name: 'Description' },
     {
       name: 'Actions',
@@ -57,4 +61,4 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
-}; 
+};

@@ -20,7 +20,6 @@ export const useIntegrationDelete = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const { integrationService } = useWorkChatServices();
 
-
   const deleteIntegration = useCallback(
     async (integrationId: string) => {
       setIsDeleting(true);
@@ -44,4 +43,4 @@ export const useIntegrationDelete = ({
     deleteIntegration,
     isDeleting,
   };
-}; 
+};

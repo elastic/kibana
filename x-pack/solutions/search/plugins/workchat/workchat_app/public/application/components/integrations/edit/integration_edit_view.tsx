@@ -22,6 +22,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { IntegrationType } from '@kbn/wci-common';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
@@ -29,7 +30,6 @@ import { useIntegrationEdit } from '../../../hooks/use_integration_edit';
 import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { integrationLabels } from '../i18n';
 import { integrationTypeToLabel } from '../utils';
-import { IntegrationType } from '@kbn/wci-common';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -67,14 +67,14 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     navigateToWorkchatUrl('/integrations');
   }, [integrationId, navigateToWorkchatUrl, notifications]);
 
-  const onSaveError = useCallback((err: Error) => {
-    notifications.toasts.addError(
-      err,
-      {
+  const onSaveError = useCallback(
+    (err: Error) => {
+      notifications.toasts.addError(err, {
         title: 'Error',
-      }
-    )
-  }, [notifications]);
+      });
+    },
+    [notifications]
+  );
 
   const { editState, setFieldValue, submit, isSubmitting } = useIntegrationEdit({
     integrationId,
@@ -93,30 +93,31 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     [submit, isSubmitting]
   );
 
-  const integrationTypes = [{ value: '', text: 'Pick a type' }, ...Object.values(IntegrationType).map((type) => ({
-    value: type,
-    text: integrationTypeToLabel(type),
-  }))];
+  const integrationTypes = [
+    { value: '', text: 'Pick a type' },
+    ...Object.values(IntegrationType).map((type) => ({
+      value: type,
+      text: integrationTypeToLabel(type),
+    })),
+  ];
 
   const updateConfiguration = (configuration: string) => {
     setFieldValue('configuration', JSON.parse(configuration));
   };
 
   const onDeleteSuccess = useCallback(() => {
-    notifications.toasts.addSuccess(
-      integrationLabels.notifications.integrationDeletedToastText
-    );
+    notifications.toasts.addSuccess(integrationLabels.notifications.integrationDeletedToastText);
     navigateToWorkchatUrl('/integrations');
   }, [navigateToWorkchatUrl, notifications]);
 
-  const onDeleteError = useCallback((err: Error) => {
-    notifications.toasts.addError(
-      err,
-      {
+  const onDeleteError = useCallback(
+    (err: Error) => {
+      notifications.toasts.addError(err, {
         title: 'Error deleting integration',
-      }
-    )
-  }, [notifications]);
+      });
+    },
+    [notifications]
+  );
 
   const { deleteIntegration, isDeleting } = useIntegrationDelete({
     onDeleteSuccess,
@@ -182,7 +183,6 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
               title={<h3>Integration Configuration</h3>}
               description="Configure the integration details"
             >
-
               <EuiFormRow label="Additional Configuration">
                 <EuiTextArea
                   data-test-subj="workchatAppIntegrationEditViewAdditionalConfig"
@@ -254,4 +254,4 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
-}; 
+};

@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { useWorkChatServices } from './use_workchat_service';
 import type { Integration } from '@kbn/wci-common';
+import { useWorkChatServices } from './use_workchat_service';
 
 export interface IntegrationEditState {
   name: string;
@@ -54,24 +54,27 @@ export const useIntegrationEdit = ({
     fetchIntegration();
   }, [integrationId, integrationService]);
 
-  const setFieldValue = <T extends keyof IntegrationEditState>(key: T, value: IntegrationEditState[T]) => {
-    debugger
+  const setFieldValue = <T extends keyof IntegrationEditState>(
+    key: T,
+    value: IntegrationEditState[T]
+  ) => {
     setEditState((previous) => ({ ...previous, [key]: value }));
   };
 
   const submit = useCallback(() => {
     setSubmitting(true);
 
-    debugger;
-
-    (integrationId ? integrationService.update(integrationId, {
-      description: editState.description,
-      configuration: editState.configuration,
-    }) : integrationService.create({
-      type: editState.type,
-      description: editState.description,
-      configuration: editState.configuration,
-    })).then(
+    (integrationId
+      ? integrationService.update(integrationId, {
+          description: editState.description,
+          configuration: editState.configuration,
+        })
+      : integrationService.create({
+          type: editState.type,
+          description: editState.description,
+          configuration: editState.configuration,
+        })
+    ).then(
       (response) => {
         setSubmitting(false);
         onSaveSuccess(response);
@@ -89,4 +92,4 @@ export const useIntegrationEdit = ({
     setFieldValue,
     submit,
   };
-}; 
+};
