@@ -18,6 +18,8 @@
       "@kbn/ai-assistant/*": ["x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["x-pack/platform/packages/shared/ai-assistant/common"],
       "@kbn/ai-assistant-common/*": ["x-pack/platform/packages/shared/ai-assistant/common/*"],
+      "@kbn/ai-assistant-cta": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta"],
+      "@kbn/ai-assistant-cta/*": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/*"],
       "@kbn/ai-assistant-icon": ["x-pack/platform/packages/shared/ai-assistant/icon"],
       "@kbn/ai-assistant-icon/*": ["x-pack/platform/packages/shared/ai-assistant/icon/*"],
       "@kbn/ai-assistant-management-plugin": ["src/platform/plugins/shared/ai_assistant_management/selection"],

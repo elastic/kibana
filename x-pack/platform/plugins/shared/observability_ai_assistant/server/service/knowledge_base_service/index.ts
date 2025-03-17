@@ -46,6 +46,7 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
+  title?: string;
   text: string;
   score: number | null;
   is_correction?: boolean;
