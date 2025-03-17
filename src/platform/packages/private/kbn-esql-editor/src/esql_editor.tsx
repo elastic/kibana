@@ -890,6 +890,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               borderRadius: theme.euiTheme.border.radius.small,
               position: 'absolute',
               overflow: 'auto',
+              zIndex: 1001,
             }}
             ref={popoverRef}
             data-test-subj="ESQLEditor-timepicker-popover"
