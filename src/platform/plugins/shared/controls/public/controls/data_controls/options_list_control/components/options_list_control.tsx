@@ -15,8 +15,8 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInputPopover,
+  EuiToken,
   EuiToolTip,
   htmlIdGenerator,
   useEuiTheme,
@@ -123,10 +123,13 @@ export const OptionsListControl = ({
                 )}
                 delay="long"
               >
-                <EuiIcon
+                <EuiToken
                   tabIndex={0}
-                  type="warningFilled"
-                  color={euiTheme.colors.textWarning}
+                  iconType="alert"
+                  size="s"
+                  color="euiColorVis9"
+                  shape="square"
+                  fill="dark"
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
                     invalidSelections.size
                   )}
@@ -147,7 +150,6 @@ export const OptionsListControl = ({
     delimiter,
     invalidSelections,
     api.uuid,
-    euiTheme.colors.textWarning,
   ]);
 
   const button = (
