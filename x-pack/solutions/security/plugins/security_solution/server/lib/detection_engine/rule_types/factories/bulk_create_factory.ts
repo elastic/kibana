@@ -14,9 +14,9 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { EnrichEvents } from '../utils/enrichments/types';
+import type { EnrichEvents } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
-import { SecurityRuleServices, SecuritySharedParams } from '../types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 
 export interface BulkCreateParams<T extends BaseFieldsLatest> {
   wrappedAlerts: Array<WrappedFieldsLatest<T>>;
