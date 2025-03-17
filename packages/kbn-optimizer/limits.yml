@@ -150,6 +150,7 @@ pageLoadAssetSize:
   securitySolutionEss: 31781
   securitySolutionServerless: 62488
   serverless: 16573
+  serverlessChat: 22715
   serverlessObservability: 68747
   serverlessSearch: 72995
   sessionView: 77750
