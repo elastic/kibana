@@ -11,7 +11,7 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
 import { omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { DEFAULT_SLO, DEFAULT_SPACE_FOR_SLO } from './fixtures/slo';
+import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
 import { TransformHelper, createTransformHelper } from './helpers/transform';
 
@@ -126,7 +126,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('creates two SLOs with matching ids across different spaces', async () => {
       const spaceApiResponse = await spaceApi.create({
-        ...DEFAULT_SPACE_FOR_SLO,
         name: 'space1',
         id: 'space1',
         initials: '1',
@@ -146,7 +145,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const { id } = sloApiResponse;
       const spaceApiResponse2 = await spaceApi.create({
-        ...DEFAULT_SPACE_FOR_SLO,
         name: 'space2',
         id: 'space2',
         initials: '2',

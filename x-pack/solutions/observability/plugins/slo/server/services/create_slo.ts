@@ -6,7 +6,13 @@
  */
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  IBasePath,
+  IScopedClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
@@ -21,23 +27,23 @@ import {
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
-import { Duration, DurationUnit, SLODefinition } from '../domain/models';
+import { Duration, DurationUnit, SLODefinition, StoredSLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
-import { SLOValidator } from './slo_validator';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
+import { SO_SLO_TYPE } from '../saved_objects';
 
 export class CreateSLO {
   constructor(
     private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
-    private validator: SLOValidator,
+    private internalSOClient: SavedObjectsClientContract,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
@@ -125,7 +131,15 @@ export class CreateSLO {
   }
 
   private async assertSLOInexistant(slo: SLODefinition) {
-    const exists = await this.validator.exists(slo.id);
+    const findResponse = await this.internalSOClient.find<StoredSLODefinition>({
+      type: SO_SLO_TYPE,
+      perPage: 0,
+      filter: `slo.attributes.id:(${slo.id})`,
+      namespaces: ['*'],
+    });
+
+    const exists = findResponse.total > 0;
+
     if (exists) {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }

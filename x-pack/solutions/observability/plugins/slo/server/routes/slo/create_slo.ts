@@ -18,7 +18,6 @@ import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { getSpaceId } from './utils/get_space_id';
-import { KibanaSavedObjectsSLOValidator } from '../../services/slo_validator';
 
 export const createSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
@@ -45,7 +44,6 @@ export const createSLORoute = createSloServerRoute({
     );
     const basePath = corePlugins.http.basePath;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const validator = new KibanaSavedObjectsSLOValidator(internalSoClient);
 
     const [spaceId, dataViewsService] = await Promise.all([
       getSpaceId(plugins, request),
@@ -72,7 +70,7 @@ export const createSLORoute = createSloServerRoute({
       esClient,
       scopedClusterClient,
       repository,
-      validator,
+      internalSoClient,
       transformManager,
       summaryTransformManager,
       logger,
