@@ -181,45 +181,45 @@ describe('EsQueryRuleTypeExpression', () => {
   }
 
   test('should render EsQueryRuleTypeExpression with expected components', async () => {
-    const result = await setup(defaultEsQueryExpressionParams);
-    expect(result.getByTestId('indexSelectPopover')).toBeInTheDocument();
-    expect(result.getByTestId('sizeValueExpression')).toBeInTheDocument();
-    expect(result.getByTestId('queryJsonEditor')).toBeInTheDocument();
-    expect(result.getByTestId('thresholdPopover')).toBeInTheDocument();
-    expect(result.getByTestId('forLastExpression')).toBeInTheDocument();
-    expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
-    expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
+    await setup(defaultEsQueryExpressionParams);
+    expect(screen.getByTestId('indexSelectPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('sizeValueExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('queryJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
 
-    expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
 
-    expect(result.getByTestId('testQuery')).not.toBeDisabled();
+    expect(screen.getByTestId('testQuery')).not.toBeDisabled();
   });
 
   test('should render Test Query button disabled if alert params are invalid', async () => {
-    const result = await setup({
+    await setup({
       ...defaultEsQueryExpressionParams,
       timeField: null,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    expect(result.getByTestId('testQuery')).toBeDisabled();
+    expect(screen.getByTestId('testQuery')).toBeDisabled();
   });
 
   test('should show excludeHitsFromPreviousRun unchecked by default', async () => {
-    const result = await setup({
+    await setup({
       ...defaultEsQueryExpressionParams,
       excludeHitsFromPreviousRun: undefined,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).not.toBeChecked();
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).not.toBeChecked();
   });
 
   test('should render EsQueryRuleTypeExpression with chosen size field', async () => {
-    const result = await setup({
+    await setup({
       ...defaultEsQueryExpressionParams,
       size: 0,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
+    expect(screen.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {

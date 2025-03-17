@@ -298,25 +298,25 @@ describe('SearchSourceAlertTypeExpression', () => {
   });
 
   test('should render chosen size field', async () => {
-    const result = await act(async () =>
+    await act(async () =>
       setup({
         ...defaultSearchSourceExpressionParams,
         size: 0,
       })
     );
 
-    expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
+    expect(screen.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
   });
 
   test('should disable Test Query button if data view is not selected yet', async () => {
-    const result = await act(async () =>
+    await act(async () =>
       setup({
         ...defaultSearchSourceExpressionParams,
         searchConfiguration: undefined,
       })
     );
 
-    expect(result.getByTestId('testQuery')).toBeDisabled();
+    expect(screen.getByTestId('testQuery')).toBeDisabled();
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {
