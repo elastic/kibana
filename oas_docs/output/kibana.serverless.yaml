@@ -34917,7 +34917,6 @@ paths:
                                   id:
                                     type: string
                                 required:
-                                  - id
                                   - data_stream
                               type: array
                             type:
