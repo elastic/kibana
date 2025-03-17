@@ -131,11 +131,13 @@ class Otel extends Serializable<OtelDocument> {
       },
       resource: {
         attributes: {
-          'agent.name': 'otlp',
+          'agent.name': 'opentelemetry/nodejs',
           'agent.version': '1.28.0',
           'service.instance.id': '89117ac1-0dbf-4488-9e17-4c2c3b76943a',
           'service.name': 'sendotlp-synth',
           'metricset.interval': '10m',
+          'telemetry.sdk.name': 'opentelemetry',
+          'telemetry.sdk.language': 'nodejs',
         },
         dropped_attributes_count: 0,
       },

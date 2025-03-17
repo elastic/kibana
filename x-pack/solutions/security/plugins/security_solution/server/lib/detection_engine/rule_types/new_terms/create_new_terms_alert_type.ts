@@ -97,30 +97,25 @@ export const createNewTermsAlertType = (
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
+      const { sharedParams, services, params, spaceId, state } = execOptions;
+
       const {
-        runOpts: {
-          ruleExecutionLogger,
-          bulkCreate,
-          completeRule,
-          tuple,
-          mergeStrategy,
-          inputIndex,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          aggregatableTimestampField,
-          exceptionFilter,
-          unprocessedExceptions,
-          alertTimestampOverride,
-          publicBaseUrl,
-          alertWithSuppression,
-          intendedTimestamp,
-        },
-        services,
-        params,
-        spaceId,
-        state,
-      } = execOptions;
+        ruleExecutionLogger,
+        bulkCreate,
+        completeRule,
+        tuple,
+        mergeStrategy,
+        inputIndex,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        aggregatableTimestampField,
+        exceptionFilter,
+        unprocessedExceptions,
+        alertTimestampOverride,
+        publicBaseUrl,
+        intendedTimestamp,
+      } = sharedParams;
 
       const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
       const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -287,17 +282,13 @@ export const createNewTermsAlertType = (
 
             if (isAlertSuppressionActive) {
               bulkCreateResult = await bulkCreateSuppressedNewTermsAlertsInMemory({
+                sharedParams,
                 eventsAndTerms: eventAndTermsChunk,
                 toReturn: result,
                 wrapHits,
-                bulkCreate,
                 services,
-                ruleExecutionLogger,
-                tuple,
                 alertSuppression: params.alertSuppression,
                 wrapSuppressedHits,
-                alertTimestampOverride,
-                alertWithSuppression,
                 experimentalFeatures,
               });
             } else {
@@ -327,6 +318,7 @@ export const createNewTermsAlertType = (
         // it uses paging through composite aggregation
         if (params.newTermsFields.length > 1) {
           const bulkCreateResult = await multiTermsComposite({
+            sharedParams,
             filterArgs,
             buckets: bucketsForField,
             params,
@@ -335,7 +327,6 @@ export const createNewTermsAlertType = (
             services,
             result,
             logger,
-            runOpts: execOptions.runOpts,
             afterKey,
             createAlertsHook,
             isAlertSuppressionActive,

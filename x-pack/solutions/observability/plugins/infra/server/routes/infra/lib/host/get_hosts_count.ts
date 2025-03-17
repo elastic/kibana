@@ -25,8 +25,14 @@ export async function getHostsCount({
 }) {
   assertQueryStructure(query);
 
+  const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
+    start: from,
+    end: to,
+  });
+
   const documentsFilter = await getDocumentsFilter({
     apmDataAccessServices,
+    apmDocumentSources,
     from,
     to,
   });
@@ -38,8 +44,15 @@ export async function getHostsCount({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [query, ...rangeQuery(from, to)],
-          should: [...documentsFilter],
+          filter: [
+            query,
+            ...rangeQuery(from, to),
+            {
+              bool: {
+                should: [...documentsFilter],
+              },
+            },
+          ],
         },
       },
       aggs: {
