@@ -12,6 +12,7 @@ import {
   ASSET_INVENTORY_PATH,
   SecurityPageName,
   SECURITY_FEATURE_ID,
+  ENABLE_ASSET_INVENTORY_SETTING,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
@@ -23,7 +24,7 @@ export const links: LinkItem = {
       defaultMessage: 'Inventory',
     }),
   ],
-  experimentalKey: 'assetInventoryUXEnabled',
+  uiSettingRequired: ENABLE_ASSET_INVENTORY_SETTING,
   id: SecurityPageName.assetInventory,
   path: ASSET_INVENTORY_PATH,
   title: INVENTORY,

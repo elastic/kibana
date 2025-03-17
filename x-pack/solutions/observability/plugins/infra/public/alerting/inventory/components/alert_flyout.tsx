@@ -7,10 +7,14 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { InfraClientStartDeps } from '../../../types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
+import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 import { useAlertPrefillContext } from '../../use_alert_prefill';
 
 interface Props {
@@ -22,29 +26,35 @@ interface Props {
 }
 
 export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
+  const { services } = useKibana<CoreStart & InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const { inventoryPrefill } = useAlertPrefillContext();
   const { customMetrics = [], accountId, region } = inventoryPrefill;
 
   const AddAlertFlyout = useMemo(
-    () =>
-      triggersActionsUI &&
-      triggersActionsUI.getAddRuleFlyout({
-        consumer: 'infrastructure',
-        onClose: onCloseFlyout,
-        canChangeTrigger: false,
-        ruleTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-        metadata: {
-          accountId,
-          options,
-          nodeType,
-          filter,
-          customMetrics,
-          region,
-        },
-        useRuleProducer: true,
-      }),
+    () => {
+      if (!triggersActionsUI) return null;
+      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+      return (
+        <RuleFormFlyout
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+          consumer={'infrastructure'}
+          onCancel={onCloseFlyout}
+          onSubmit={onCloseFlyout}
+          ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+          initialMetadata={{
+            accountId,
+            options,
+            nodeType,
+            filter,
+            customMetrics,
+            region,
+          }}
+          shouldUseRuleProducer
+        />
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, visible]
   );

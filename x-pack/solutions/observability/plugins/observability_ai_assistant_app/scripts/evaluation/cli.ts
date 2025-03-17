@@ -26,7 +26,10 @@ export const elasticsearchOption = {
   string: true as const,
   default: format({
     ...parse(config.elasticsearch.hosts || 'http://localhost:9200'),
-    auth: `${config.elasticsearch.username}:${config.elasticsearch.password}`,
+    auth:
+      config.elasticsearch.username && config.elasticsearch.password
+        ? `${config.elasticsearch.username}:${config.elasticsearch.password}`
+        : '',
   }),
 };
 

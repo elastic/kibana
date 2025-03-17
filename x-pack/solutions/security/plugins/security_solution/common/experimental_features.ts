@@ -115,6 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
+   * Enables the Attack Discovery Scheduling functionality and API endpoint`.
+   */
+  assistantAttackDiscoverySchedulingEnabled: false,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -180,17 +185,6 @@ export const allowedExperimentalValues = Object.freeze({
   jamfDataInAnalyzerEnabled: true,
 
   /**
-   * Enables an ability to customize Elastic prebuilt rules.
-   *
-   * Ticket: https://github.com/elastic/kibana/issues/174168
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
-   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
-   * Turned: TBD
-   * Expires: TBD
-   */
-  prebuiltRulesCustomizationEnabled: false,
-
-  /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: true,
@@ -251,11 +245,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enables the Asset Inventory feature
-   */
-  assetInventoryUXEnabled: false,
 
   /**
    * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.

@@ -19,7 +19,6 @@ function generator(options: TemplateContext) {
   return Mustache.render(template.toString(), {
     wolfi: options.baseImage === 'wolfi',
     ubi: options.baseImage === 'ubi',
-    opensslLegacyProvider: !(options.cloud || options.serverless || options.fips),
     ...options,
   });
 }

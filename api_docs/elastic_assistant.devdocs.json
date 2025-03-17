@@ -132,9 +132,7 @@
                 "text": "AssistantToolParams"
               },
               ") => ",
-              "Tool",
-              " | ",
-              "DynamicStructuredTool",
+              "StructuredToolInterface",
               "<ZodObjectAny> | null"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
@@ -1442,7 +1440,7 @@
             "description": [],
             "signature": [
               "KibanaRequest",
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\"; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\"; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1532,7 +1530,7 @@
               "SavedObjectsClientContract",
               ", request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
               "AnomalyDetectionRuleState",
               " | undefined) => Promise<{ payload: ",
               "AnomalyDetectionAlertPayload",
@@ -2039,6 +2037,57 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "elasticAssistant",
+          "id": "def-server.ElasticAssistantPluginStart.registerCallback",
+          "type": "Function",
+          "tags": [],
+          "label": "registerCallback",
+          "description": [
+            "\nRegister a callback to be used by the elastic assistant."
+          ],
+          "signature": [
+            "(callbackId: ",
+            "CallbackIds",
+            ", callback: Function) => void"
+          ],
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "elasticAssistant",
+              "id": "def-server.ElasticAssistantPluginStart.registerCallback.$1",
+              "type": "string",
+              "tags": [],
+              "label": "callbackId",
+              "description": [],
+              "signature": [
+                "CallbackIds"
+              ],
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "elasticAssistant",
+              "id": "def-server.ElasticAssistantPluginStart.registerCallback.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "callback",
+              "description": [],
+              "signature": [
+                "Function"
+              ],
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

@@ -75,11 +75,11 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         );
       return prepareTemplate({
         packageInstallContext: {
-          assetsMap,
           archiveIterator: createArchiveIteratorFromMap(assetsMap),
           packageInfo,
           paths,
         },
+        fieldAssetsMap: assetsMap,
         dataStream,
         experimentalDataStreamFeature,
       });

@@ -49,10 +49,6 @@ export const ChatSend: React.FC<Props> = ({
 
   useAutosizeTextArea(promptTextAreaRef?.current, promptValue);
 
-  useEffect(() => {
-    setUserPrompt(promptValue);
-  }, [setUserPrompt, promptValue]);
-
   return (
     <EuiFlexGroup
       gutterSize="none"

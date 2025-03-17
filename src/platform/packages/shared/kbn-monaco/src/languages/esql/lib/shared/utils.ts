@@ -47,21 +47,24 @@ export const offsetRangeToMonacoRange = (
   let endLineNumber = 1;
   let currentLine = 1;
 
-  for (let i = 0; i < expression.length; i++) {
-    if (expression[i] === '\n') {
-      currentLine++;
-      currentOffset = i + 1;
-    }
+  const hasMultipleLines = expression.includes('\n');
+  const offset = hasMultipleLines ? 1 : 0;
 
-    if (i === range.start) {
+  for (let i = 0; i < expression.length; i++) {
+    if (i === range.start - offset) {
       startLineNumber = currentLine;
       startColumn = i - currentOffset;
     }
 
-    if (i === range.end) {
+    if (i === range.end - offset) {
       endLineNumber = currentLine;
       endColumn = i - currentOffset;
       break; // No need to continue once we find the end position
+    }
+
+    if (expression[i] === '\n') {
+      currentLine++;
+      currentOffset = i;
     }
   }
 

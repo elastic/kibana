@@ -363,6 +363,9 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    upgrade_attempts: {
+      type: 'date',
+    },
     // added to allow validation on status field
     status: {
       type: 'keyword',

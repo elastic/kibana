@@ -16,6 +16,7 @@ import type {
   SecuritySolutionEssPluginStartDeps,
 } from './types';
 import { setOnboardingSettings } from './onboarding';
+import { DEFAULT_PRODUCT_FEATURES } from '../common/constants';
 
 export class SecuritySolutionEssPlugin
   implements
@@ -28,8 +29,12 @@ export class SecuritySolutionEssPlugin
 {
   public setup(
     _core: CoreSetup,
-    _setupDeps: SecuritySolutionEssPluginSetupDeps
+    setupDeps: SecuritySolutionEssPluginSetupDeps
   ): SecuritySolutionEssPluginSetup {
+    const { securitySolution } = setupDeps;
+
+    securitySolution.setProductFeatureKeys(DEFAULT_PRODUCT_FEATURES);
+
     return {};
   }
 

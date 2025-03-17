@@ -37,7 +37,6 @@ import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 import { AssetImage } from '../asset_image';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
-import { useDateRange } from '../../hooks/use_date_range';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -59,9 +58,9 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
 
   const {
     timeRange,
-    absoluteTimeRange: { start, end },
     setTimeRange,
-  } = useDateRange({ data });
+    absoluteTimeRange: { start, end },
+  } = data.query.timefilter.timefilter.useTimefilter();
 
   const indexPatterns = useMemo(() => {
     return getIndexPatterns(definition?.stream);
@@ -138,7 +137,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
       ) {
         return undefined;
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/_details', {
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/_details', {
         signal,
         params: {
           path: {

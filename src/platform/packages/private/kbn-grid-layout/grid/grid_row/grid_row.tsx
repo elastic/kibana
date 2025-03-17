@@ -17,20 +17,20 @@ import { css } from '@emotion/react';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { getPanelKeysInOrder } from '../utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowProps {
-  rowIndex: number;
+  rowId: string;
 }
 
-export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
+export const GridRow = React.memo(({ rowId }: GridRowProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
-  const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
+  const currentRow = gridLayoutStateManager.gridLayout$.value[rowId];
 
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
-    getKeysInOrder(currentRow.panels)
+    getPanelKeysInOrder(currentRow.panels)
   );
   const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
@@ -40,10 +40,10 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       const interactionStyleSubscription = gridLayoutStateManager.interactionEvent$
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe((interactionEvent) => {
-          const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
+          const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
           if (!rowRef) return;
-          const targetRow = interactionEvent?.targetRowIndex;
-          if (rowIndex === targetRow && interactionEvent) {
+          const targetRow = interactionEvent?.targetRow;
+          if (rowId === targetRow && interactionEvent) {
             rowRef.classList.add('kbnGridRow--targeted');
           } else {
             rowRef.classList.remove('kbnGridRow--targeted');
@@ -63,8 +63,8 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
           map(([proposedGridLayout, gridLayout]) => {
             const displayedGridLayout = proposedGridLayout ?? gridLayout;
             return {
-              isCollapsed: displayedGridLayout[rowIndex]?.isCollapsed ?? false,
-              panelIds: Object.keys(displayedGridLayout[rowIndex]?.panels ?? {}),
+              isCollapsed: displayedGridLayout[rowId]?.isCollapsed ?? false,
+              panelIds: Object.keys(displayedGridLayout[rowId]?.panels ?? {}),
             };
           }),
           pairwise()
@@ -81,9 +81,9 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
             )
           ) {
             setPanelIdsInOrder(
-              getKeysInOrder(
+              getPanelKeysInOrder(
                 (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-                  gridLayoutStateManager.gridLayout$.getValue())[rowIndex]?.panels ?? {}
+                  gridLayoutStateManager.gridLayout$.getValue())[rowId]?.panels ?? {}
               )
             );
           }
@@ -95,8 +95,8 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
        * reasons (screen readers and focus management).
        */
       const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
-        if (!gridLayout[rowIndex]) return;
-        const newPanelIdsInOrder = getKeysInOrder(gridLayout[rowIndex].panels);
+        if (!gridLayout[rowId]) return;
+        const newPanelIdsInOrder = getPanelKeysInOrder(gridLayout[rowId].panels);
         if (panelIdsInOrder.join() !== newPanelIdsInOrder.join()) {
           setPanelIdsInOrder(newPanelIdsInOrder);
         }
@@ -109,14 +109,14 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rowIndex]
+    [rowId]
   );
 
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+    newLayout[rowId].isCollapsed = !newLayout[rowId].isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
-  }, [rowIndex, gridLayoutStateManager.gridLayout$]);
+  }, [rowId, gridLayoutStateManager.gridLayout$]);
 
   useEffect(() => {
     /**
@@ -134,29 +134,29 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
         'kbnGridRowContainer--collapsed': isCollapsed,
       })}
     >
-      {rowIndex !== 0 && (
+      {currentRow.order !== 0 && (
         <GridRowHeader
-          rowIndex={rowIndex}
+          rowId={rowId}
           toggleIsCollapsed={toggleIsCollapsed}
           collapseButtonRef={collapseButtonRef}
         />
       )}
       {!isCollapsed && (
         <div
-          id={`kbnGridRow-${rowIndex}`}
+          id={`kbnGridRow-${rowId}`}
           className={'kbnGridRow'}
           ref={(element: HTMLDivElement | null) =>
-            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
+            (gridLayoutStateManager.rowRefs.current[rowId] = element)
           }
           css={[styles.fullHeight, styles.grid]}
           role="region"
-          aria-labelledby={`kbnGridRowTile-${rowIndex}`}
+          aria-labelledby={`kbnGridRowTile-${rowId}`}
         >
           {/* render the panels **in order** for accessibility, using the memoized panel components */}
           {panelIdsInOrder.map((panelId) => (
-            <GridPanel key={panelId} panelId={panelId} rowIndex={rowIndex} />
+            <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
           ))}
-          <DragPreview rowIndex={rowIndex} />
+          <DragPreview rowId={rowId} />
         </div>
       )}
     </div>

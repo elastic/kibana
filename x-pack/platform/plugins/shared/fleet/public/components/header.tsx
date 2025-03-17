@@ -35,11 +35,12 @@ const Wrapper = styled.div<{ maxWidth?: number | string }>`
   padding-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
-const Tabs = styled(EuiTabs)`
+const Tabs = styled(EuiTabs)<{ $tabsCss?: string }>`
   top: 1px;
   &:before {
     height: 0px;
   }
+  ${({ $tabsCss }) => $tabsCss || ''}
 `;
 
 export interface HeaderProps {
@@ -49,7 +50,7 @@ export interface HeaderProps {
   rightColumnGrow?: EuiFlexItemProps['grow'];
   topContent?: JSX.Element;
   tabs?: Array<Omit<EuiTabProps, 'name'> & { name?: JSX.Element | string }>;
-  tabsClassName?: string;
+  tabsCss?: string;
   'data-test-subj'?: string;
 }
 
@@ -69,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
   topContent,
   tabs,
   maxWidth,
-  tabsClassName,
+  tabsCss,
   'data-test-subj': dataTestSubj,
 }) => (
   <Container data-test-subj={dataTestSubj}>
@@ -83,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiFlexGroup>
         {tabs ? (
           <EuiFlexItem>
-            <Tabs className={tabsClassName}>
+            <Tabs $tabsCss={tabsCss}>
               {tabs.map((props, index) => (
                 <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>
                   {props.name}

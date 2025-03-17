@@ -55,7 +55,7 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/security-ai-prompts",
-    "@kbn/datemath"
+    "@kbn/datemath",
   ],
   "exclude": [
     "target/**/*",

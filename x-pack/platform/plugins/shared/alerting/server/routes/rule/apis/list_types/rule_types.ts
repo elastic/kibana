@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import {
-  TypesRulesResponseBodyV1,
-  typesRulesResponseSchemaV1,
-} from '../../../../../common/routes/rule/apis/list_types';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { TypesRulesResponseBodyV1 } from '../../../../../common/routes/rule/apis/list_types';
+import { typesRulesResponseSchemaV1 } from '../../../../../common/routes/rule/apis/list_types';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformRuleTypesResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

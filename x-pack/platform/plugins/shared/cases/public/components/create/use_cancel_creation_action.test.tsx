@@ -6,22 +6,20 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { useCancelCreationAction } from './use_cancel_creation_action';
+import { TestProviders } from '../../common/mock';
 
 describe('UseConfirmationModal', () => {
-  let appMockRender: AppMockRenderer;
   const onConfirmationCallback = jest.fn();
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('init', async () => {
     const { result } = renderHook(() => useCancelCreationAction({ onConfirmationCallback }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.showConfirmationModal).toBe(false);
@@ -29,7 +27,7 @@ describe('UseConfirmationModal', () => {
 
   it('opens the modal', async () => {
     const { result } = renderHook(() => useCancelCreationAction({ onConfirmationCallback }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -41,7 +39,7 @@ describe('UseConfirmationModal', () => {
 
   it('closes the modal', async () => {
     const { result } = renderHook(() => useCancelCreationAction({ onConfirmationCallback }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -59,7 +57,7 @@ describe('UseConfirmationModal', () => {
 
   it('calls onConfirmationCallback on confirm', async () => {
     const { result } = renderHook(() => useCancelCreationAction({ onConfirmationCallback }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

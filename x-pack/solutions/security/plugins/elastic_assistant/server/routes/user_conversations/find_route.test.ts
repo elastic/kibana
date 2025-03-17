@@ -91,7 +91,7 @@ describe('Find user conversations route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        `sort_field: Invalid enum value. Expected 'created_at' | 'is_default' | 'title' | 'updated_at', received 'name'`
+        `sort_field: Invalid enum value. Expected 'created_at' | 'title' | 'updated_at', received 'name'`
       );
     });
 
