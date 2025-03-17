@@ -8,7 +8,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
@@ -33,10 +32,6 @@ interface HomePageProps {
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
-  const AIForSOCAlertSummaryPageEnabled = useIsExperimentalFeatureEnabled(
-    'AIForSOCAlertSummaryPageEnabled'
-  );
-
   const { pathname } = useLocation();
   const { browserFields } = useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
@@ -56,15 +51,10 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
       <ConsoleManager>
         <TourContextProvider>
           <>
-            {/* {AIForSOCAlertSummaryPageEnabled && (*/}
-            <>
-              <GlobalHeader />
-              <DragDropContextWrapper browserFields={browserFields}>
-                {children}
-              </DragDropContextWrapper>
-            </>
-            {/* )}*/}
-            {/* {children}*/}
+            <GlobalHeader />
+            <DragDropContextWrapper browserFields={browserFields}>
+              {children}
+            </DragDropContextWrapper>
             <HelpMenu />
             <TopValuesPopover />
             <AssistantOverlay />
