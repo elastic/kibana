@@ -23,6 +23,10 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   [ProductLine.security]: {
     search_ai_lake: [],
     essentials: [
+      ProductFeatureKey.dashboards,
+      ProductFeatureKey.detections,
+      ProductFeatureKey.timeline,
+      ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
     ],
@@ -66,5 +70,15 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     search_ai_lake: [], // cloud add-on not available in search_ai_lake tier
     essentials: [ProductFeatureKey.cloudSecurityPosture],
     complete: [ProductFeatureKey.cloudSecurityPosture],
+  },
+  ai: {
+    // Not split into essentials and complete, using essentials for now
+    essentials: [
+      // I am guessing here
+      ProductFeatureKey.attackDiscovery,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.threatIntelligence,
+    ],
+    complete: [],
   },
 } as const;
