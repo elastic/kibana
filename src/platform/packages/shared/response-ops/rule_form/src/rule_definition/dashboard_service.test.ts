@@ -31,6 +31,10 @@ describe('DashboardService', () => {
     expect(searchDashboard).toHaveBeenCalledWith({
       search: 'test*',
       size: 1000,
+      options: {
+        fields: ['title', 'description'],
+        spaces: ['*'],
+      },
     });
     expect(resp).toEqual([]);
   });
