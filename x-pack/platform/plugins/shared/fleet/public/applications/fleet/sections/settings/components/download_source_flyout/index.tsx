@@ -33,8 +33,9 @@ import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../ho
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import { SSLFormSection } from '../edit_output_flyout/ssl_form_section';
+
 import { useDowloadSourceFlyoutForm } from './use_download_source_flyout_form';
-import { SSLFormSection } from './ssl_form_section';
 
 export interface EditDownloadSourceFlyoutProps {
   downloadSource?: DownloadSource;
@@ -245,6 +246,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             useSecretsStorage={enableSSLSecrets && useSecretsStorage}
             isConvertedToSecret={isConvertedToSecret.sslKey}
             onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+            type="download_source"
           />
         </EuiForm>
       </EuiFlyoutBody>

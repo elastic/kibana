@@ -9,12 +9,13 @@ import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { v4 } from 'uuid';
 import { GridItem as Component } from '.';
+import type { GridItemProps } from '.';
 import { extendProps } from '../../../../../.storybook/extend_props';
 import { KibanaReactStorybookDecorator } from '../../../../../.storybook/storybook_decorator';
 
 type Props = React.ComponentProps<typeof Component>;
 
-interface Args {
+interface Args extends GridItemProps {
   props: Partial<Props> & { id: string; children: React.ReactNode };
 }
 
