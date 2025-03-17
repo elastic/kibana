@@ -21,7 +21,7 @@ import {
   startWith,
 } from 'rxjs';
 import { get, isEqual } from 'lodash';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { InfluencersFilterQuery, MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { ML_JOB_AGGREGATION, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
@@ -189,21 +189,24 @@ export class AnomalyTableStateService extends StateService {
         )
         .toPromise()
         .then((resp) => {
-          const anomalies = resp.anomalies;
+          if (!resp) return null;
+
           const detectorsByJob = this.mlJobService.detectorsByJob;
 
-          // @ts-ignore
-          anomalies.forEach((anomaly) => {
+          const anomalies = resp.anomalies.map((anomaly) => {
             const jobId = anomaly.jobId;
             const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
-            anomaly.detector = get(
+
+            const extendedAnomaly = { ...anomaly } as MlAnomaliesTableRecordExtended;
+
+            extendedAnomaly.detector = get(
               detector,
               ['detector_description'],
               anomaly.source.function_description
             );
 
             if (detector !== undefined && detector.custom_rules !== undefined) {
-              anomaly.rulesLength = detector.custom_rules.length;
+              extendedAnomaly.rulesLength = detector.custom_rules.length;
             }
 
             const job = this.mlJobService.getJob(jobId);
@@ -216,19 +219,22 @@ export class AnomalyTableStateService extends StateService {
               isChartable = isModelPlotEnabled(job, anomaly.detectorIndex, entityFields);
             }
 
-            anomaly.isTimeSeriesViewRecord = isChartable;
-            anomaly.isGeoRecord =
+            extendedAnomaly.isTimeSeriesViewRecord = isChartable;
+
+            extendedAnomaly.isGeoRecord =
               detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG;
 
             if (this.mlJobService.customUrlsByJob[jobId] !== undefined) {
-              anomaly.customUrls = this.mlJobService.customUrlsByJob[jobId];
+              extendedAnomaly.customUrls = this.mlJobService.customUrlsByJob[jobId];
             }
+
+            return extendedAnomaly;
           });
 
           resolve({
             anomalies,
             interval: resp.interval,
-            examplesByJobId: resp.examplesByJobId,
+            examplesByJobId: resp.examplesByJobId ?? {},
             showViewSeriesLink: true,
             jobIds,
           });
