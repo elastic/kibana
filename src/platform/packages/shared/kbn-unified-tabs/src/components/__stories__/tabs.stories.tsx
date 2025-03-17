@@ -12,7 +12,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { useNewTabProps } from '../../hooks/use_new_tab_props';
-import { servicesMock } from './storybook_constants';
+import { servicesMock } from '../../../__mocks__/services';
 
 export default {
   title: 'Unified Tabs/Tabs',
