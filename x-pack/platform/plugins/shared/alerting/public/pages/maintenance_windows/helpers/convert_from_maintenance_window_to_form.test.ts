@@ -338,7 +338,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
     });
   });
 
-  test('should convert categoryIds into solutionId', () => {
+  test('should convert categoryIds into solutionId when scopedQuery is on', () => {
     const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
@@ -351,6 +351,40 @@ describe('convertFromMaintenanceWindowToForm', () => {
         bymonthday: [22],
       },
       categoryIds: ['observability'],
+      scopedQuery: null,
+    } as MaintenanceWindow);
+
+    expect(maintenanceWindow).toEqual({
+      title,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      timezone: ['UTC'],
+      recurring: true,
+      recurringSchedule: {
+        customFrequency: Frequency.YEARLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 3,
+      },
+      solutionId: undefined,
+      scopedQuery: null,
+    });
+  });
+
+  test('should convert categoryIds into solutionId when scopedQuery is off', () => {
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
+      title,
+      duration,
+      rRule: {
+        dtstart: startDate.toISOString(),
+        tzid: 'UTC',
+        freq: Frequency.YEARLY,
+        interval: 3,
+        bymonth: [3],
+        bymonthday: [22],
+      },
+      categoryIds: ['observability'],
+      scopedQuery: { kql: '' },
     } as MaintenanceWindow);
 
     expect(maintenanceWindow).toEqual({
@@ -366,6 +400,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         interval: 3,
       },
       solutionId: 'observability',
+      scopedQuery: { kql: '' },
     });
   });
 

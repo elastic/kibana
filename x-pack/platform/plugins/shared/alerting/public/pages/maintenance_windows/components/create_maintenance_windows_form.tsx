@@ -395,51 +395,53 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <RecurringSchedule data-test-subj="recurring-form" />
           </EuiFlexItem>
         )}
+
         {availableSolutions.length > 0 && (
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="xl" />
-            <UseField path="scopedQuery">
-              {() => (
-                <MaintenanceWindowScopedQuerySwitch
-                  checked={isScopedQueryEnabled}
-                  onEnabledChange={onScopeQueryToggle}
-                />
-              )}
-            </UseField>
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="xl" />
+              <UseField path="scopedQuery">
+                {() => (
+                  <MaintenanceWindowScopedQuerySwitch
+                    checked={isScopedQueryEnabled}
+                    onEnabledChange={onScopeQueryToggle}
+                  />
+                )}
+              </UseField>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UseField path="solutionId">
+                {(field) => (
+                  <MaintenanceWindowSolutionSelection
+                    isScopedQueryEnabled={isScopedQueryEnabled}
+                    isLoading={isLoadingRuleTypes}
+                    selectedSolution={solutionId}
+                    availableSolutions={availableSolutions}
+                    errors={field.errors.map((error) => error.message)}
+                    onChange={onSolutionIdChange}
+                  />
+                )}
+              </UseField>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UseField path="scopedQuery">
+                {() => (
+                  <MaintenanceWindowScopedQuery
+                    ruleTypeIds={ruleTypeIds}
+                    query={query}
+                    filters={filters}
+                    isLoading={isLoadingRuleTypes}
+                    isEnabled={isScopedQueryEnabled}
+                    errors={scopedQueryErrors}
+                    onQueryChange={onQueryChange}
+                    onFiltersChange={setFilters}
+                  />
+                )}
+              </UseField>
+            </EuiFlexItem>
+          </>
         )}
         <EuiHorizontalRule margin="xl" />
-        <EuiFlexItem>
-          <UseField path="solutionId">
-            {(field) => (
-              <MaintenanceWindowSolutionSelection
-                isScopedQueryEnabled={isScopedQueryEnabled}
-                isLoading={isLoadingRuleTypes}
-                selectedSolution={solutionId ?? undefined}
-                availableSolutions={availableSolutions}
-                errors={field.errors.map((error) => error.message)}
-                onChange={onSolutionIdChange}
-              />
-            )}
-          </UseField>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <UseField path="scopedQuery">
-            {() => (
-              <MaintenanceWindowScopedQuery
-                ruleTypeIds={ruleTypeIds}
-                query={query}
-                filters={filters}
-                isLoading={isLoadingRuleTypes}
-                isEnabled={isScopedQueryEnabled}
-                errors={scopedQueryErrors}
-                onQueryChange={onQueryChange}
-                onFiltersChange={setFilters}
-              />
-            )}
-          </UseField>
-        </EuiFlexItem>
-        {isScopedQueryEnabled && <EuiHorizontalRule margin="xl" />}
       </EuiFlexGroup>
       {isEditMode && (
         <>
