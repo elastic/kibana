@@ -8,13 +8,15 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { PromptContext } from '@kbn/elastic-assistant';
 import {
   AlertSummary,
-  SuggestedPrompts,
   AttackDiscoveryWidget,
   Conversations,
+  SuggestedPrompts,
 } from '@kbn/elastic-assistant';
-import type { PromptContext } from '@kbn/elastic-assistant';
+import { useKibana } from '../../common/lib/kibana';
+import { getField } from '../document_details/shared/utils';
 import { getRawData } from '../../assistant/helpers';
 import { useAIForSOCDetailsContext } from './context';
 import { FlyoutBody } from '../shared/components/flyout_body';
@@ -23,12 +25,14 @@ import type { AIForSOCDetailsProps } from './types';
 import { PanelFooter } from './footer';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../shared/components/flyout_header';
+import { DEFAULT_AI_CONNECTOR } from '../../../common/constants';
 
 /**
  * Panel to be displayed in the document details expandable flyout right section
  */
 export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() => {
-  const { doc, dataFormattedForFieldBrowser } = useAIForSOCDetailsContext();
+  const { eventId, getFieldsData, dataFormattedForFieldBrowser } = useAIForSOCDetailsContext();
+
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
@@ -41,17 +45,16 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     suggestedUserPrompt: '_suggestedUserPrompt',
     tooltip: '_tooltip',
   };
+
   const ruleName = useMemo(
-    () =>
-      // @ts-ignore anyone have advice for this type?
-      doc?.flattened?.['kibana.alert.rule.name']?.[0] ?? doc?.raw?._source?.message?.[0] ?? 'Alert',
-    [doc?.flattened, doc?.raw?._source?.message]
+    () => getField(getFieldsData('kibana.alert.rule.name')) || '',
+    [getFieldsData]
   );
-  const timestamp = useMemo(
-    // @ts-ignore anyone have advice for this type?
-    () => doc?.flattened?.['@timestamp']?.[0] ?? doc?.raw?._source?.timestamp ?? '',
-    [doc?.flattened, doc?.raw?._source?.timestamp]
-  );
+  const { uiSettings } = useKibana().services;
+  // TODO will this be in non-serverless? because this value will not work if so
+  const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
+  const timestamp = useMemo(() => getField(getFieldsData('@timestamp')) || '', [getFieldsData]);
+
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
@@ -61,16 +64,17 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
           <EuiFlexItem>
             <AlertSummary
               alertId={eventId}
+              defaultConnectorId={defaultConnectorId}
               isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
               promptContext={promptContext}
             />
           </EuiFlexItem>
           <EuiFlexItem>{'Highlighted fields'}</EuiFlexItem>
           <EuiFlexItem>
-            <AttackDiscoveryWidget id={doc.id} />
+            <AttackDiscoveryWidget id={eventId} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <Conversations id={doc.id} />
+            <Conversations id={eventId} />
           </EuiFlexItem>
           <EuiFlexItem>
             <SuggestedPrompts

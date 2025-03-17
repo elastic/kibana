@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { EXECUTE_ACTION_TIMEOUT } from '../../use_send_message';
 import { ChatCompleteResponse, postChatComplete } from './post_chat_complete';
-import { useAssistantContext } from '../../../..';
+import { useAssistantContext, useLoadConnectors } from '../../../..';
 import { FETCH_MESSAGE_TIMEOUT_ERROR } from '../../use_send_message/translations';
 interface SendMessageProps {
   message: string;
@@ -23,10 +23,15 @@ interface UseChatComplete {
 
 // useChatComplete uses the same api as useSendMessage (post_actions_connector_execute) but without requiring conversationId/apiConfig
 // it is meant to be used for one-off messages that don't require a conversation
-export const useChatComplete = (): UseChatComplete => {
+export const useChatComplete = ({ connectorId }: { connectorId: string }): UseChatComplete => {
   const { alertsIndexPattern, http, traceOptions } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
+  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true });
+  const actionTypeId = useMemo(
+    () => connectors?.find(({ id }) => id === connectorId)?.actionTypeId ?? '.gen-ai',
+    [connectors, connectorId]
+  );
   const sendMessage = useCallback(
     async ({ message, replacements }: SendMessageProps) => {
       setIsLoading(true);
@@ -38,7 +43,9 @@ export const useChatComplete = (): UseChatComplete => {
 
       try {
         return await postChatComplete({
+          actionTypeId,
           alertsIndexPattern,
+          connectorId,
           http,
           message,
           replacements,
@@ -50,7 +57,7 @@ export const useChatComplete = (): UseChatComplete => {
         setIsLoading(false);
       }
     },
-    [alertsIndexPattern, http, traceOptions]
+    [actionTypeId, alertsIndexPattern, connectorId, http, traceOptions]
   );
 
   const cancelRequest = useCallback(() => {

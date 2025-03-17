@@ -11,7 +11,9 @@ import { TraceOptions } from '../../types';
 import { API_ERROR } from '../../translations';
 
 export interface PostChatCompleteParams {
+  actionTypeId: string;
   alertsIndexPattern?: string;
+  connectorId: string;
   http: HttpSetup;
   message: string;
   replacements: Replacements;
@@ -28,7 +30,9 @@ export interface ChatCompleteResponse {
   metadata?: MessageMetadata;
 }
 export const postChatComplete = async ({
+  actionTypeId,
   alertsIndexPattern,
+  connectorId,
   http,
   message,
   replacements,
@@ -36,9 +40,6 @@ export const postChatComplete = async ({
   traceOptions,
 }: PostChatCompleteParams): Promise<ChatCompleteResponse> => {
   try {
-    // TODO get connector id and actionTypeIdfrom configured LLM
-    const connectorId = 'my-gpt4o-ai';
-    const actionTypeId = '.gen-ai';
     const path = `/internal/elastic_assistant/actions/connector/${connectorId}/_execute`;
 
     const requestBody = {
