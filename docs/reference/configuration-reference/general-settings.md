@@ -66,7 +66,9 @@ Environment variables can be injected into configuration using `${MY_ENV_VAR}` s
 :   Add sources for the [Content Security Policy `report-to` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-to).
 
 $$$csp-strict$$$ `csp.strict`
-:   Blocks {{kib}} access to any browser that does not enforce even rudimentary CSP rules. In practice, this disables support for older, less safe browsers like Internet Explorer. For more information, refer to [Content Security Policy](docs-content://deploy-manage/security/secure-http-communications.md#csp-strict-mode). **Default: `true`**
+:   Blocks {{kib}} access to any browser that does not enforce even rudimentary CSP rules. In practice, this disables support for older, less safe browsers like Internet Explorer.
+
+% For more information, refer to [Content Security Policy](docs-content://deploy-manage/security/using-kibana-with-security.md.md#csp-strict-mode). **Default: `true`**
 
 `csp.warnLegacyBrowsers`
 :   Shows a warning message after loading {{kib}} to any browser that does not enforce even rudimentary CSP rules, though {{kib}} is still accessible. This configuration is effectively ignored when [`csp.strict`](#csp-strict) is enabled. **Default: `true`**
