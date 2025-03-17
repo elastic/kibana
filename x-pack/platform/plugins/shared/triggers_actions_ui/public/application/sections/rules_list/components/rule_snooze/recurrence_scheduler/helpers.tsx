@@ -109,7 +109,11 @@ export const recurrenceSummary = ({
       ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.bymonthSummary', {
           defaultMessage: 'on {date}',
           values: {
-            date: i18nMonthDayDate(moment().month(bymonth[0]).date(bymonthday[0])),
+            date: i18nMonthDayDate(
+              moment()
+                .month(bymonth[0] - 1)
+                .date(bymonthday[0])
+            ),
           },
         })
       : null;
