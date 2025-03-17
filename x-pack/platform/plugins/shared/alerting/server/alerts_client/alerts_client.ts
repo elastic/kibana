@@ -182,7 +182,7 @@ export class AlertsClient<
     if (this.ruleType.autoRecoverAlerts) {
       const getTrackedAlertsByExecutionUuid = async (uuid: string) => {
         const result = await this.search({
-          size: opts.maxAlerts || DEFAULT_MAX_ALERTS,
+          size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
           seq_no_primary_term: true,
           query: {
             bool: {

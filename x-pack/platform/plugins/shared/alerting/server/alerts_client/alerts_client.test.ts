@@ -498,7 +498,7 @@ describe('Alerts Client', () => {
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
             ignore_unavailable: true,
-            size: 1000,
+            size: 2000,
           });
 
           spy.mockRestore();
