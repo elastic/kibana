@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
@@ -18,7 +19,7 @@ import type {
 } from '../../../../../../common/routes/maintenance_window/external/apis/create';
 import { createMaintenanceWindowRequestBodySchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/create';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 import { transformCreateBodyV1 } from './transform_create_body';
 
 export const createMaintenanceWindowRoute = (
@@ -68,7 +69,7 @@ export const createMaintenanceWindowRoute = (
         });
 
         const response: CreateMaintenanceWindowResponseV1 =
-          transformMaintenanceWindowToResponseV1(maintenanceWindow);
+          transformInternalMaintenanceWindowToExternalV1(maintenanceWindow);
 
         return res.ok({
           body: response,

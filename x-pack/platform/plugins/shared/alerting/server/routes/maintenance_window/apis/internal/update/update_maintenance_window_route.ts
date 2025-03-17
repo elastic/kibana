@@ -22,7 +22,7 @@ import {
   updateParamsSchemaV1,
 } from '../../../../../../common/routes/maintenance_window/internal/apis/update';
 import { transformUpdateBodyV1 } from './transforms';
-import { transformMaintenanceWindowToResponseV1 } from '../transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
 
 export const updateMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -60,7 +60,7 @@ export const updateMaintenanceWindowRoute = (
         });
 
         const response: UpdateMaintenanceWindowResponseV1 = {
-          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+          body: transformInternalMaintenanceWindowToExternalV1(maintenanceWindow),
         };
 
         return res.ok(response);

@@ -17,7 +17,7 @@ import type {
   GetMaintenanceWindowResponseV1,
 } from '../../../../../../common/routes/maintenance_window/internal/apis/get';
 import { getParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/internal/apis/get';
-import { transformMaintenanceWindowToResponseV1 } from '../transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
 
 export const getMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -51,7 +51,7 @@ export const getMaintenanceWindowRoute = (
         });
 
         const response: GetMaintenanceWindowResponseV1 = {
-          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+          body: transformInternalMaintenanceWindowToExternalV1(maintenanceWindow),
         };
         return res.ok(response);
       })

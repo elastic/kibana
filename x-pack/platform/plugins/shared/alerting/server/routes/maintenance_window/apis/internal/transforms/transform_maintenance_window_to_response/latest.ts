@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformMaintenanceWindowToResponse } from './v1';
+export { transformInternalMaintenanceWindowToExternal } from './v1';

@@ -7,23 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-// TODO schedule schema
-const scheduleSchema = schema.object({
-  duration: schema.number(),
-  start: schema.string(),
-  recurring: schema.maybe(
-    schema.object({
-      end: schema.maybe(schema.string()),
-      every: schema.maybe(schema.string()),
-      onWeekDay: schema.maybe(schema.arrayOf(schema.string())),
-      onMonthDay: schema.maybe(schema.arrayOf(schema.number())),
-      onMonth: schema.maybe(schema.arrayOf(schema.string())),
-      occurrences: schema.maybe(schema.number()),
-    })
-  ),
-});
+import { scheduleRequestSchemaV1 } from '../../../../../schedule';
+import { maintenanceWindowCategoryIdTypesV1 } from '../../../../shared';
 
-export const bodySchema = schema.object({
+export const createMaintenanceWindowRequestBodySchema = schema.object({
   title: schema.string({
     meta: {
       description:
@@ -39,9 +26,17 @@ export const bodySchema = schema.object({
       defaultValue: true,
     })
   ),
+  schedule: schema.object({
+    custom: scheduleRequestSchemaV1,
+  }),
   scope: schema.maybe(
     schema.object({
       query: schema.object({
+        solutionId: schema.oneOf([
+          schema.literal(maintenanceWindowCategoryIdTypesV1.OBSERVABILITY),
+          schema.literal(maintenanceWindowCategoryIdTypesV1.SECURITY_SOLUTION),
+          schema.literal(maintenanceWindowCategoryIdTypesV1.MANAGEMENT),
+        ]),
         kql: schema.string({
           meta: { description: 'A filter written in Kibana Query Language (KQL).' },
         }),
@@ -49,8 +44,3 @@ export const bodySchema = schema.object({
     })
   ),
 });
-
-export const createMaintenanceWindowRequestBodySchema = schema.intersection([
-  bodySchema,
-  scheduleSchema,
-]);

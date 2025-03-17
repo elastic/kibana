@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { transformMaintenanceWindowToResponse } from './transform_maintenance_window_to_response/latest';
+export { transformInternalMaintenanceWindowToExternal } from './transform_maintenance_window_to_response/latest';
 
-export { transformMaintenanceWindowToResponse as transformMaintenanceWindowToResponseV1 } from './transform_maintenance_window_to_response/v1';
+export { transformInternalMaintenanceWindowToExternal as transformInternalMaintenanceWindowToExternalV1 } from './transform_maintenance_window_to_response/v1';

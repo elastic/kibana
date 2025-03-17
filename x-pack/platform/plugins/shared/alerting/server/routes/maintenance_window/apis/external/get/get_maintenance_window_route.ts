@@ -18,7 +18,7 @@ import type {
 } from '../../../../../../common/routes/maintenance_window/external/apis/get';
 import { getParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/get';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 
 export const getMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -35,9 +35,6 @@ export const getMaintenanceWindowRoute = (
           200: {
             body: () => maintenanceWindowResponseSchemaV1,
             description: 'Indicates a successful call.',
-          },
-          400: {
-            description: 'Indicates an invalid schema or parameters.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
@@ -70,7 +67,7 @@ export const getMaintenanceWindowRoute = (
         });
 
         const response: GetMaintenanceWindowResponseV1 =
-          transformMaintenanceWindowToResponseV1(maintenanceWindow);
+          transformInternalMaintenanceWindowToExternalV1(maintenanceWindow);
 
         return res.ok({
           body: response,

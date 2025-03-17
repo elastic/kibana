@@ -8,7 +8,7 @@
 import type { MaintenanceWindowResponseV1 } from '../../../../../../../common/routes/maintenance_window/internal/response';
 import type { MaintenanceWindow } from '../../../../../../application/maintenance_window/types';
 
-export const transformMaintenanceWindowToResponse = (
+export const transformInternalMaintenanceWindowToExternal = (
   maintenanceWindow: MaintenanceWindow
 ): MaintenanceWindowResponseV1 => {
   return {

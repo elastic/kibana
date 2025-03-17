@@ -17,7 +17,7 @@ import { MaintenanceWindowStatus } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type { CreateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/internal/apis/create';
 import { transformCreateBody } from './transforms';
-import { transformMaintenanceWindowToResponse } from '../transforms';
+import { transformInternalMaintenanceWindowToExternal } from '../transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -81,7 +81,7 @@ describe('createMaintenanceWindowRoute', () => {
       data: transformCreateBody(createParams),
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformMaintenanceWindowToResponse(mockMaintenanceWindow),
+      body: transformInternalMaintenanceWindowToExternal(mockMaintenanceWindow),
     });
   });
 

@@ -7,6 +7,7 @@
 
 import type { CreateMaintenanceWindowRequestBodyV1 } from '../../../../../../../common/routes/maintenance_window/external/apis/create';
 import type { CreateMaintenanceWindowParams } from '../../../../../../application/maintenance_window/methods/create/types';
+import { transformCustomScheduleToRRule } from '../../../../../../../common/routes/schedule';
 
 /**
  *  This function converts from the external, human readable, Maintenance Window creation/POST
@@ -15,17 +16,16 @@ import type { CreateMaintenanceWindowParams } from '../../../../../../applicatio
 export const transformCreateBody = (
   createBody: CreateMaintenanceWindowRequestBodyV1
 ): CreateMaintenanceWindowParams['data'] => {
+  const { rRule, duration } = transformCustomScheduleToRRule(createBody.schedule.custom);
   const kql = createBody.scope?.query.kql;
+  const solutionId = createBody.scope?.query.solutionId;
+
   return {
     title: createBody.title,
-    duration: createBody.duration,
     enabled: createBody.enabled,
-    scopedQuery: kql ? { kql, filters: [] } : null,
-
-    // TODO schedule schema
-    rRule: {
-      dtstart: createBody.start,
-      tzid: 'UTC',
-    },
+    ...(kql && { scopedQuery: { kql, filters: [] } }),
+    ...(solutionId && { categoryIds: [solutionId] }),
+    duration,
+    rRule,
   };
 };

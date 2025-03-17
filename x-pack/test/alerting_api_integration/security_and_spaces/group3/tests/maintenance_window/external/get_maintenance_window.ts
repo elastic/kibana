@@ -15,22 +15,30 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
+  const start = new Date();
+  const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
+
   describe('getMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createParams = {
       title: 'test-maintenance-window',
-      start: '2026-02-07T09:17:06.790Z',
-      duration: 3 * 60 * 60 * 1000, // 3 hr
-      // TODO schedule schema
-      // every possible field should be passed
-      // recurring: {
-      //   end: '',
-      //   every: '',
-      //   onWeekDay: '',
-      //   onMonthDay: '',
-      //   onMonth: '',
-      //   ocurrences: 1234,
-      // },
+      schedule: {
+        custom: {
+          duration: '1d',
+          start: start.toISOString(),
+          recurring: {
+            every: '2d',
+            end: end.toISOString(),
+            onWeekDay: ['MO', 'FR'],
+          },
+        },
+      },
+      scope: {
+        query: {
+          kql: "_id: '1234'",
+          solutionId: 'securitySolution',
+        },
+      },
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -75,23 +83,20 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.status).to.eql('upcoming');
+              expect(response.body.status).to.eql('running');
               expect(response.body.enabled).to.eql(true);
+
+              expect(response.body.scope.query.kql).to.eql("_id: '1234'");
+              expect(response.body.scope.query.solutionId).to.eql('securitySolution');
 
               expect(response.body.created_by).to.eql('elastic');
               expect(response.body.updated_by).to.eql('elastic');
 
-              // TODO schedule schema
-              // We want to guarantee every field is returned as expected
-              expect(response.body.duration).to.eql(createParams.duration);
-              expect(response.body.start).to.eql(createParams.start);
-              // expect(response.body.expiration_date).to.eql('???');
-              // expect(response.body.recurring.end).to.eql();
-              // expect(response.body.recurring.every).to.eql();
-              // expect(response.body.recurring.onWeekDay).to.eql();
-              // expect(response.body.recurring.onMonthDay).to.eql();
-              // expect(response.body.recurring.onMonth).to.eql();
-              // expect(response.body.recurring.occurrences).to.eql();
+              expect(response.body.schedule.custom.duration).to.eql('24h');
+              expect(response.body.schedule.custom.start).to.eql(start.toISOString());
+              expect(response.body.schedule.custom.recurring.every).to.eql('2d');
+              expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());
+              expect(response.body.schedule.custom.recurring.onWeekDay).to.eql(['MO', 'FR']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
