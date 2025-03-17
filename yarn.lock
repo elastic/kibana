@@ -6314,10 +6314,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/projects-solutions-groups@link:packages/kbn-projects-solutions-groups":
-  version "0.0.0"
-  uid ""
-
 "@kbn/monaco@link:src/platform/packages/shared/kbn-monaco":
   version "0.0.0"
   uid ""
@@ -6563,6 +6559,10 @@
   uid ""
 
 "@kbn/profiling-utils@link:src/platform/packages/shared/kbn-profiling-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/projects-solutions-groups@link:packages/kbn-projects-solutions-groups":
   version "0.0.0"
   uid ""
 
