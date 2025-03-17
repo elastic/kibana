@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/210245
-  describe.skip('uptime Accessibility', () => {
+  describe('uptime Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
