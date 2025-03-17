@@ -80,6 +80,17 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'stats',
   },
 
+  [AppIds.SEARCH_CONNECTORS]: {
+    category: appCategories.DATA,
+    description: i18n.translate(
+      'management.landing.withCardNavigation.searchConnectorsDescription',
+      {
+        defaultMessage: 'Manage Search Connectors.',
+      }
+    ),
+    icon: 'search',
+  },
+
   [AppIds.RULES]: {
     category: appCategories.ALERTS,
     description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {

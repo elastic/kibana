@@ -18,6 +18,7 @@ import { registerConnectorRoutes } from './routes/connectors';
 import { registerStatsRoutes } from './routes/stats';
 import { registerMappingRoute } from './routes/mapping';
 import { registerSearchRoute } from './routes/search';
+import { PLUGIN_ID } from '../common/constants';
 
 export class SearchConnectorsPlugin
   implements
@@ -39,6 +40,19 @@ export class SearchConnectorsPlugin
     plugins: SearchConnectorsPluginSetupDependencies
   ) {
     const http = coreSetup.http;
+
+    plugins.features.registerElasticsearchFeature({
+      id: PLUGIN_ID,
+      management: {
+        data: [PLUGIN_ID],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['monitor'],
+          ui: [],
+        },
+      ],
+    });
 
     this.connectors = getConnectorTypes(http.staticAssets);
     const router = http.createRouter();

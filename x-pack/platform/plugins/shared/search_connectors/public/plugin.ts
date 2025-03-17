@@ -43,11 +43,11 @@ export class SearchConnectorsPlugin
     const connectorTypes = getConnectorTypes(core.http.staticAssets);
     const kibanaVersion = this.kibanaVersion;
 
-    if (this.isServerless) {
+    if (this.isServerless === true) {
       management.sections.section.data.registerApp({
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
-        order: 6,
+        order: 8,
         keywords: ['search connectors', 'search'],
         async mount(params: ManagementAppMountParams) {
           const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([

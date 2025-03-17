@@ -18,6 +18,7 @@ import { IRouter, StartServicesAccessor, Logger } from '@kbn/core/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export interface SearchConnectorsPluginSetup {
   getConnectorTypes: () => ConnectorServerSideDefinition[];
@@ -38,6 +39,7 @@ export interface SearchConnectorsPluginStartDependencies {
   licensing: LicensingPluginStart;
 }
 export interface SearchConnectorsPluginSetupDependencies {
+  features: FeaturesPluginSetup;
   fleet: FleetSetupContract;
   taskManager: TaskManagerSetupContract;
   soClient: SavedObjectsServiceSetup;
