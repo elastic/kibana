@@ -228,7 +228,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           await esArchiver.loadIfNeeded(
-            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+            'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
           );
           break;
 
@@ -332,7 +332,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           await esArchiver.unload(
-            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+            'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
           );
           break;
 

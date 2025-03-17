@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AssistantCallToAction as Component } from '../call_to_action';
@@ -22,9 +22,9 @@ export default {
       control: 'text',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const CallToAction: ComponentStory<typeof Component> = (args) => (
+export const CallToAction: StoryFn<typeof Component> = (args) => (
   <Component {...args}>
     <EuiFlexGroup direction="row" gutterSize="m">
       <EuiFlexItem>
