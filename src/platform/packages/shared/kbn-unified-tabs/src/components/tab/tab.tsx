@@ -23,27 +23,7 @@ import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems, PreviewQuery } from '../../types';
 
-import { PreviewQueryLanguage, TabStatus } from '../../types';
 import { TabPreview } from '../tab_preview';
-
-// TODO: replace with real data when ready
-const TAB_CONTENT_MOCK: PreviewQuery[] = [
-  {
-    language: PreviewQueryLanguage.ESQL,
-    query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
-    status: TabStatus.SUCCESS,
-  },
-  {
-    language: PreviewQueryLanguage.ESQL,
-    query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
-    status: TabStatus.RUNNING,
-  },
-  {
-    language: PreviewQueryLanguage.KQL,
-    query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
-    status: TabStatus.ERROR,
-  },
-];
 
 export interface TabProps {
   item: TabItem;
@@ -54,6 +34,7 @@ export interface TabProps {
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
+  previewQuery: PreviewQuery;
 }
 
 export const Tab: React.FC<TabProps> = ({
@@ -65,6 +46,7 @@ export const Tab: React.FC<TabProps> = ({
   onLabelEdited,
   onSelect,
   onClose,
+  previewQuery,
 }) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>();
@@ -117,8 +99,6 @@ export const Tab: React.FC<TabProps> = ({
     setIsInlineEditActive(true);
     hidePreview();
   }, []);
-
-  const previewQuery = TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)];
 
   return (
     <TabPreview

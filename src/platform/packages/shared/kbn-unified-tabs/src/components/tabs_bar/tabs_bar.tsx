@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem } from '../../types';
+import type { TabItem, PreviewQuery } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 
@@ -28,6 +28,7 @@ export type TabsBarProps = Pick<
   selectedItem: TabItem | null;
   maxItemsCount?: number;
   onAdd: () => Promise<void>;
+  getPreviewQuery: (item: TabItem) => PreviewQuery;
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({
@@ -40,6 +41,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onLabelEdited,
   onSelect,
   onClose,
+  getPreviewQuery,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
@@ -106,6 +108,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                     onLabelEdited={onLabelEdited}
                     onSelect={onSelect}
                     onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                    previewQuery={getPreviewQuery(item)} // TODO consider performance improvements when real data ready
                   />
                 </EuiFlexItem>
               ))}
