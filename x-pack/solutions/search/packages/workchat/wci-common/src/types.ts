@@ -35,6 +35,7 @@ export type IntegrationConfiguration = Record<string, any>;
 
 export interface IntegrationContext<T extends IntegrationConfiguration> {
   request: KibanaRequest;
+  description: string;
   configuration: T;
 }
 

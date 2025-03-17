@@ -84,6 +84,8 @@ export class WorkChatAppPlugin
       logger: this.logger.get('services.integrations'),
       elasticsearch: core.elasticsearch,
       registry: this.integrationRegistry,
+      savedObjects: core.savedObjects,
+      security: core.security,
     });
 
     const conversationService = new ConversationServiceImpl({
