@@ -11,8 +11,8 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type {
   DataTableRecord,
   EsHitRecord,

@@ -49,10 +49,12 @@ describe('ReindexDetailsFlyoutStep', () => {
     loadingState: LoadingState.Success,
     meta: {
       indexName: 'some_index',
+      reindexName: 'some_index-reindexed-for-9',
       aliases: [],
+      isInDataStream: false,
       isFrozen: false,
       isReadonly: false,
-      reindexName: 'some_index-reindexed-for-9',
+      isClosedIndex: false,
     },
     hasRequiredPrivileges: true,
     reindexTaskPercComplete: null,
@@ -227,7 +229,15 @@ describe('ReindexDetailsFlyoutStep', () => {
         updateIndexState={defaultUpdateIndexState()}
         deprecation={{
           ...defaultDeprecation(),
-          correctiveAction: { type: 'reindex', transformIds: ['abc', 'def'] },
+          correctiveAction: {
+            type: 'reindex',
+            transformIds: ['abc', 'def'],
+            metadata: {
+              isFrozenIndex: false,
+              isInDataStream: false,
+              isClosedIndex: false,
+            },
+          },
         }}
       />
     );
@@ -239,6 +249,11 @@ describe('ReindexDetailsFlyoutStep', () => {
               deprecation={
                 Object {
                   "correctiveAction": Object {
+                    "metadata": Object {
+                      "isClosedIndex": false,
+                      "isFrozenIndex": false,
+                      "isInDataStream": false,
+                    },
                     "transformIds": Array [
                       "abc",
                       "def",
