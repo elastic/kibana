@@ -13,7 +13,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
-import { ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
+import { ASSET_INVENTORY_INDEX_PATTERN, QUERY_KEY_CHART_DATA } from '../constants';
 import { getMultiFieldsSort } from './fetch_utils';
 
 interface UseTopAssetsOptions extends BaseEsQuery {
@@ -159,7 +159,7 @@ export function useFetchChartData(options: UseTopAssetsOptions) {
     notifications: { toasts },
   } = useKibana().services;
   return useQuery(
-    ['asset_inventory_top_assets_chart', { params: options }],
+    [QUERY_KEY_CHART_DATA, { params: options }],
     async () => {
       const {
         rawResponse: { aggregations },

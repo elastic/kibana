@@ -44,7 +44,7 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
-import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
@@ -52,6 +52,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
@@ -102,12 +103,12 @@ export interface MlStartDependencies {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   telemetry: ITelemetryClient;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export interface MlSetupDependencies {
   alerting?: AlertingSetup;
   cases?: CasesPublicSetup;
-  dashboard: DashboardSetup;
   embeddable: EmbeddableSetup;
   fieldFormats: FieldFormatsSetup;
   home?: HomePublicPluginSetup;
@@ -223,6 +224,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             usageCollection: pluginsSetup.usageCollection,
             spaces: pluginsStart.spaces,
             telemetry: telemetryClient,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
           },
           params,
           this.isServerless,

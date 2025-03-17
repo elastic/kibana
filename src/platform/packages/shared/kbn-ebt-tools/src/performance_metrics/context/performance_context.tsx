@@ -13,13 +13,15 @@ import { useLocation } from 'react-router-dom';
 import { PerformanceApi, PerformanceContext } from './use_performance_context';
 import { PerformanceMetricEvent } from '../../performance_metric_events';
 import { measureInteraction } from './measure_interaction';
-
+import { DescriptionWithPrefix } from './types';
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
 export interface Meta {
   rangeFrom: string;
   rangeTo: string;
+  description?: DescriptionWithPrefix;
 }
+
 export interface EventData {
   customMetrics?: CustomMetrics;
   meta?: Meta;

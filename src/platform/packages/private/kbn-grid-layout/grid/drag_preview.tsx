@@ -13,7 +13,7 @@ import { combineLatest, skip } from 'rxjs';
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from './use_grid_layout_context';
 
-export const DragPreview = React.memo(({ rowIndex }: { rowIndex: number }) => {
+export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -29,10 +29,10 @@ export const DragPreview = React.memo(({ rowIndex }: { rowIndex: number }) => {
         .subscribe(([activePanel, proposedGridLayout]) => {
           if (!dragPreviewRef.current) return;
 
-          if (!activePanel || !proposedGridLayout?.[rowIndex].panels[activePanel.id]) {
+          if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = proposedGridLayout[rowIndex].panels[activePanel.id];
+            const panel = proposedGridLayout[rowId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;

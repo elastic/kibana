@@ -180,8 +180,10 @@ export const useLatestVulnerabilitiesGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
-    to: 'now',
+    timeRange: {
+      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      to: 'now',
+    },
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],

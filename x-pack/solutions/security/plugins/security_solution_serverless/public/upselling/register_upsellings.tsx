@@ -11,7 +11,7 @@ import type {
   SectionUpsellings,
 } from '@kbn/security-solution-upselling/service/types';
 import type { SecurityProductTypes } from '../../common/config';
-import { getProductProductFeatures } from '../../common/pli/pli_features';
+import { getEnabledProductFeatures } from '../../common/pli/pli_features';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import { upsellingPages, upsellingSections, upsellingMessages } from './upsellings';
@@ -30,7 +30,7 @@ const registerSecuritySolutionUpsellings = (
 ): UpsellingService => {
   const upsellingService = services.securitySolution.getUpselling();
 
-  const enabledPLIsSet = new Set(getProductProductFeatures(productTypes));
+  const enabledPLIsSet = new Set(getEnabledProductFeatures(productTypes));
 
   const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
     (pageUpsellings, { pageName, pli, component }) => {

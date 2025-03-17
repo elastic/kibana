@@ -6,12 +6,14 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import {
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  FINDINGS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
