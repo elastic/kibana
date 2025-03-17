@@ -17,6 +17,7 @@ import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   SLO_MODEL_VERSION,
   SUMMARY_TEMP_INDEX_NAME,
@@ -135,7 +136,7 @@ export class CreateSLO {
       type: SO_SLO_TYPE,
       perPage: 0,
       filter: `slo.attributes.id:(${slo.id})`,
-      namespaces: ['*'],
+      namespaces: [ALL_SPACES_ID],
     });
 
     const exists = findResponse.total > 0;
