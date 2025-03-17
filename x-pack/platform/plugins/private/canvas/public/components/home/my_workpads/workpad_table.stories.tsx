@@ -24,7 +24,7 @@ export default {
   parameters: {},
 };
 
-export const WorkpadTable = (args: { findWorkpads: number }) => {
+const WorkpadTableComponent = (args: { findWorkpads: number }) => {
   const { findWorkpads } = args;
   const [workpads, setWorkpads] = useState(getSomeWorkpads(findWorkpads));
 
@@ -39,4 +39,8 @@ export const WorkpadTable = (args: { findWorkpads: number }) => {
       </WorkpadsContext.Provider>
     </EuiPanel>
   );
+};
+
+export const WorkpadTable = {
+  render: (args: { findWorkpads: number }) => <WorkpadTableComponent {...args} />,
 };

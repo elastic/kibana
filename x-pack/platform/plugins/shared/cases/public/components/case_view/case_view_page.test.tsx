@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { useUrlParams } from '../../common/navigation/hooks';
 import { CaseViewPage } from './case_view_page';
 import { caseData, caseViewProps } from './mocks';
@@ -77,28 +77,25 @@ const caseProps: CaseViewPageProps = {
 };
 
 describe('CaseViewPage', () => {
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
     useUrlParamsMock.mockReturnValue({});
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('shows the header section', async () => {
-    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />);
 
     expect(await screen.findByTestId('test-case-view-header')).toBeInTheDocument();
   });
 
   it('shows the metrics section', async () => {
-    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />);
 
     expect(await screen.findByTestId('test-case-view-metrics')).toBeInTheDocument();
   });
 
   it('shows the activity section', async () => {
-    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />);
 
     expect(await screen.findByTestId('test-case-view-activity')).toBeInTheDocument();
   });
@@ -106,7 +103,7 @@ describe('CaseViewPage', () => {
   it('should set the breadcrumbs correctly', async () => {
     const onComponentInitialized = jest.fn();
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
     );
 
