@@ -22,7 +22,8 @@ import {
 } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import * as i18n from '../translations';
-import { MAINTENANCE_WINDOW_DATE_FORMAT, MaintenanceWindow } from '../../../../common';
+import type { MaintenanceWindow } from '../../../../common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { recurringSummary } from '../helpers/recurring_summary';
 import { getPresets } from '../helpers/get_presets';
