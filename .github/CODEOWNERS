@@ -1617,6 +1617,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.devcontainer/ @elastic/kibana-operations
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
+/.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
 /x-pack/test/.gitignore @elastic/appex-qa
