@@ -11,13 +11,13 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer, EuiFlexItem } f
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PageUrlParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { CISBenchmarkIcon } from '@kbn/cloud-security-posture';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { RulesContainer } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
-import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {

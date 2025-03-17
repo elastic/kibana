@@ -9,8 +9,11 @@ import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture
 import userEvent from '@testing-library/user-event';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
-import { TestProvider } from '../../../test/test_provider';
-import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
+import { TestProvider } from '../../../common/mock/cloud_security_posture/test_provider';
+import {
+  mockFindingsHit,
+  mockWizFinding,
+} from '../../../common/mock/cloud_security_posture/__mock__/findings';
 
 const onPaginate = jest.fn();
 

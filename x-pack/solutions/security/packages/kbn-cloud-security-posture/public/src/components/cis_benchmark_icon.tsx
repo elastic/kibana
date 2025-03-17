@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiIcon, EuiToolTip, IconSize } from '@elastic/eui';
 import { CSSInterpolation } from '@emotion/serialize';
 import type { BenchmarkId } from '@kbn/cloud-security-posture-common';
-import cisEksIcon from '../assets/icons/cis_eks_logo.svg';
-import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
+import googleCloudLogo from '../../assets/google_cloud_logo.svg';
+import cisEksIcon from '../../assets/cis_eks_logo.svg';
 
 interface Props {
   type: BenchmarkId;

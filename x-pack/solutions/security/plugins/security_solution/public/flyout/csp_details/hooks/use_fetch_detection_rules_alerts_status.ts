@@ -12,10 +12,6 @@ import {
   DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
   GET_DETECTION_RULE_ALERTS_STATUS_PATH,
 } from '@kbn/cloud-security-posture-common';
-// import {
-//   DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
-//   GET_DETECTION_RULE_ALERTS_STATUS_PATH,
-// } from '../../../common/constants'; // Fix this
 
 interface AlertStatus {
   acknowledged: number;

@@ -9,7 +9,7 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { HttpSetup } from '@kbn/core/public';
 import { DetectionRuleCounter } from './detection_rule_counter';
-import { TestProvider } from '../test/test_provider';
+import { TestProvider } from '../../../../common/mock/cloud_security_posture/test_provider';
 import { useFetchDetectionRulesAlertsStatus } from '../../hooks/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../../hooks/use_fetch_detection_rules_by_tags';
 import type { RuleResponse } from '@kbn/cloud-security-posture-common';

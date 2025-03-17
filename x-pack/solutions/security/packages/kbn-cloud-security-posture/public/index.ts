@@ -20,3 +20,4 @@ export {
 export { getSeverityText } from './src/utils/get_vulnerability_text';
 export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';
 export { CVSScoreBadge, SeverityStatusBadge } from './src/components/vulnerability_badges';
+export { CISBenchmarkIcon } from './src/components/cis_benchmark_icon';
