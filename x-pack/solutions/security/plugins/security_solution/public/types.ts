@@ -43,7 +43,6 @@ import type {
   SavedObjectsTaggingApi,
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -144,7 +143,6 @@ export interface StartPlugins {
   security: SecurityPluginStart;
   cloud?: CloudStart;
   cloudSecurityPosture: CspClientPluginStart;
-  threatIntelligence: ThreatIntelligencePluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
   discover: DiscoverStart;

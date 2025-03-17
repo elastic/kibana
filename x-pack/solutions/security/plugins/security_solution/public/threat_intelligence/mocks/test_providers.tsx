@@ -7,11 +7,9 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -20,6 +18,7 @@ import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context'
 import { FieldTypesContext } from '../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
 import { InspectorContext } from '../containers/inspector';
+import { TestProviders } from '../../common/mock/test_providers';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -53,19 +52,17 @@ export const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 export const EMPTY_PAGE_SECURITY_TEMPLATE = 'empty-page-security-template' as const;
 
 export const TestProvidersComponent: FC<PropsWithChildren<{}>> = ({ children }) => (
-  <MemoryRouter>
-    <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
-      <QueryClientProvider client={new QueryClient()}>
-        <FieldTypesContext.Provider value={generateFieldTypeMap()}>
-          <EuiThemeProvider>
-            <I18nProvider>
-              <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-                {children}
-              </IndicatorsFiltersContext.Provider>
-            </I18nProvider>
-          </EuiThemeProvider>
-        </FieldTypesContext.Provider>
-      </QueryClientProvider>
-    </InspectorContext.Provider>
-  </MemoryRouter>
+  <TestProviders>
+    <MemoryRouter>
+      <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
+        <QueryClientProvider client={new QueryClient()}>
+          <FieldTypesContext.Provider value={generateFieldTypeMap()}>
+            <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+              {children}
+            </IndicatorsFiltersContext.Provider>
+          </FieldTypesContext.Provider>
+        </QueryClientProvider>
+      </InspectorContext.Provider>
+    </MemoryRouter>
+  </TestProviders>
 );

@@ -9,16 +9,23 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
 import { EnterpriseGuard } from './enterprise_guard';
+import { useSecurityContext } from '../hooks/use_security_context';
+
+jest.mock('./security_solution_plugin_template_wrapper');
+jest.mock('../hooks/use_security_context');
 
 describe('<EnterpriseGuard />', () => {
   describe('when on enterprise plan', () => {
+    beforeEach(() => {
+      jest.mocked(useSecurityContext().licenseService.isEnterprise).mockReturnValue(true);
+    });
+
     it('should render specified children', () => {
       render(
-        <TestProvidersComponent>
-          <EnterpriseGuard>
-            <div>{'enterprise only content'}</div>
-          </EnterpriseGuard>
-        </TestProvidersComponent>
+        <EnterpriseGuard>
+          <div>{'enterprise only content'}</div>
+        </EnterpriseGuard>,
+        { wrapper: TestProvidersComponent }
       );
 
       expect(screen.queryByText('enterprise only content')).toBeInTheDocument();
@@ -28,13 +35,16 @@ describe('<EnterpriseGuard />', () => {
   });
 
   describe('when not on enterprise plan', () => {
-    it('should render specified children', () => {
+    beforeEach(() => {
+      jest.mocked(useSecurityContext().licenseService.isEnterprise).mockReturnValue(false);
+    });
+
+    it('should render the paywall', () => {
       render(
-        <TestProvidersComponent>
-          <EnterpriseGuard>
-            <div>{'enterprise only content'}</div>
-          </EnterpriseGuard>
-        </TestProvidersComponent>
+        <EnterpriseGuard>
+          <div>{'enterprise only content'}</div>
+        </EnterpriseGuard>,
+        { wrapper: TestProvidersComponent }
       );
 
       expect(screen.queryByText('enterprise only content')).not.toBeInTheDocument();

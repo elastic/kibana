@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
+import type { ComponentType, NamedExoticComponent, ReactNode, VFC } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -35,7 +35,6 @@ export interface ThreatIntelligencePluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
-  securityLayout: any;
   inspector: InspectorPluginStart;
 }
 

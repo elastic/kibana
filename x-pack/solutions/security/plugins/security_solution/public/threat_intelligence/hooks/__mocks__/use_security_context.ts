@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { SecuritySolutionTemplateWrapper } from '../../app/home/template_wrapper';
+const returnValue = {
+  licenseService: { isEnterprise: jest.fn().mockReturnValue(false) },
+};
 
-export const SecuritySolutionPluginTemplateWrapper = SecuritySolutionTemplateWrapper;
+export const useSecurityContext = () => returnValue;
