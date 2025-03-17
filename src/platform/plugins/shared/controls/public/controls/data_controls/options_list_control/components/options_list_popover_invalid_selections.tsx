@@ -12,7 +12,6 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiSelectable,
   EuiSelectableOption,
