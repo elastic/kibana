@@ -16,7 +16,7 @@ import {
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
 
-const POLL_INTERVAL = 1000;
+const POLL_INTERVAL = 3000;
 
 export interface ReindexState {
   loadingState: LoadingState;

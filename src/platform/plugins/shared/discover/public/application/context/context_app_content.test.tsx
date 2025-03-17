@@ -11,11 +11,11 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { ActionBar } from './components/action_bar/action_bar';
-import { GetStateReturn } from './services/context_state';
-import { SortDirection } from '@kbn/data-plugin/public';
+import type { GetStateReturn } from './services/context_state';
+import type { SortDirection } from '@kbn/data-plugin/public';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
-import { ContextAppContent, ContextAppContentProps } from './context_app_content';
+import type { ContextAppContentProps } from './context_app_content';
+import { ContextAppContent } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
@@ -23,6 +23,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { ActionBar } from './components/action_bar/action_bar';
 
 const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
