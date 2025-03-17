@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiInlineEditText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IngestStreamGetResponse, WiredIngest, isGroupStreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
-import { useUpdateStream } from '../../hooks/use_update_streams';
+import { useUpdateStreams } from '../../hooks/use_update_streams';
 
 const EMPTY_DESCRIPTION_LABEL = i18n.translate(
   'xpack.streams.streamDescription.emptyDescriptionLabel',
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export function StreamDescription({ definition }: Props) {
-  const { mutate } = useUpdateStream();
+  const updateStream = useUpdateStreams(definition?.stream.name);
 
   if (!definition || isGroupStreamDefinition(definition.stream)) {
     return null;
@@ -34,17 +34,14 @@ export function StreamDescription({ definition }: Props) {
           inputAriaLabel="Edit Stream description"
           defaultValue={definition.stream.description ?? EMPTY_DESCRIPTION_LABEL}
           size="s"
-          onSave={(value) => {
+          onSave={async (value) => {
             const sanitized = value.trim();
 
-            mutate({
-              name: definition.stream.name,
-              request: {
-                dashboards: definition.dashboards,
-                stream: {
-                  ingest: definition.stream.ingest as WiredIngest, // to please ts
-                  description: sanitized.length > 0 ? sanitized : undefined,
-                },
+            await updateStream({
+              dashboards: definition.dashboards,
+              stream: {
+                ingest: definition.stream.ingest as WiredIngest, // TODO: Fix types
+                description: sanitized,
               },
             });
           }}

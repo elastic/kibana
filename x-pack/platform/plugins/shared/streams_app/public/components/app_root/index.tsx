@@ -13,7 +13,6 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { streamsAppRouter } from '../../routes/config';
 import { StreamsAppServices } from '../../services/types';
@@ -45,16 +44,12 @@ export function AppRoot({
     isServerless,
   };
 
-  const queryClient = new QueryClient();
-
   return (
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
         <RouterProvider history={history} router={streamsAppRouter}>
           <BreadcrumbsContextProvider>
-            <QueryClientProvider client={queryClient}>
-              <RouteRenderer />
-            </QueryClientProvider>
+            <RouteRenderer />
           </BreadcrumbsContextProvider>
           <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
         </RouterProvider>
