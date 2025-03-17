@@ -121,14 +121,14 @@ class Package {
 
     /**
      * the group to which this package belongs
-     * @type {import('@kbn/module-groups').ModuleGroup}
+     * @type {import('@kbn/projects-solutions-groups').ModuleGroup}
      * @readonly
      */
 
     this.group = group;
     /**
      * the visibility of this package, i.e. whether it can be accessed by everybody or only modules in the same group
-     * @type {import('@kbn/module-groups').ModuleVisibility}
+     * @type {import('@kbn/projects-solutions-groups').ModuleVisibility}
      * @readonly
      */
     this.visibility = visibility;
@@ -159,7 +159,7 @@ class Package {
   /**
    * Returns the group to which this package belongs
    * @readonly
-   * @returns {import('@kbn/module-groups').ModuleGroup}
+   * @returns {import('@kbn/projects-solutions-groups').ModuleGroup}
    */
   getGroup() {
     return this.group;
@@ -168,7 +168,7 @@ class Package {
   /**
    * Returns the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
    * @readonly
-   * @returns {import('@kbn/module-groups').ModuleVisibility}
+   * @returns {import('@kbn/projects-solutions-groups').ModuleVisibility}
    */
   getVisibility() {
     return this.visibility;
@@ -203,9 +203,9 @@ class Package {
   determineGroupAndVisibility() {
     const dir = this.normalizedRepoRelativeDir;
 
-    /** @type {import('@kbn/module-groups').ModuleGroup} */
+    /** @type {import('@kbn/projects-solutions-groups').ModuleGroup} */
     let group = 'common';
-    /** @type {import('@kbn/module-groups').ModuleVisibility} */
+    /** @type {import('@kbn/projects-solutions-groups').ModuleVisibility} */
     let visibility = 'shared';
 
     if (dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/')) {

@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { KIBANA_SOLUTIONS } from '@kbn/module-groups';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 

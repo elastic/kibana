@@ -8,7 +8,7 @@
  */
 
 import type { JSONSchema } from 'json-schema-typed';
-import { KIBANA_GROUPS } from '@kbn/module-groups';
+import { KIBANA_GROUPS } from '@kbn/projects-solutions-groups';
 import { desc } from './desc';
 
 export const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;

@@ -19,7 +19,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
-import { KIBANA_SOLUTIONS, type KibanaGroup, type ModuleVisibility } from '@kbn/module-groups';
+import { KIBANA_SOLUTIONS, type KibanaGroup, type ModuleVisibility } from '@kbn/projects-solutions-groups';
 import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';

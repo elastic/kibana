@@ -9,7 +9,7 @@
 
 import { execSync } from 'child_process';
 import axios from 'axios';
-import type { KibanaSolution } from '@kbn/module-groups';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {

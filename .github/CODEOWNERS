@@ -74,7 +74,6 @@ packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
-packages/kbn-module-groups @elastic/kibana-core
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
@@ -82,6 +81,7 @@ packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
+packages/kbn-projects-solutions-groups @elastic/kibana-core
 packages/kbn-relocate @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
@@ -569,6 +569,7 @@ src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/respons
 src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
+src/platform/packages/shared/serverless/settings/chat_project
 src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
@@ -931,6 +932,7 @@ x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
+x-pack/solutions/chat/plugins/serverless_chat
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team

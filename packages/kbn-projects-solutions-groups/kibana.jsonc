@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/module-groups",
+  "id": "@kbn/projects-solutions-groups",
   "owner": "@elastic/kibana-core",
   "devOnly": true
 }

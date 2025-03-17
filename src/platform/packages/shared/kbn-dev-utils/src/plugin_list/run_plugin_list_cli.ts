@@ -12,7 +12,7 @@ import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { run } from '@kbn/dev-cli-runner';
-import { KIBANA_SOLUTIONS } from '@kbn/module-groups';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import { discoverPlugins } from './discover_plugins';
 import { generatePluginList } from './generate_plugin_list';
 

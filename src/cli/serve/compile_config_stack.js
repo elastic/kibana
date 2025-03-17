@@ -19,7 +19,7 @@ const isNotNull = _.negate(_.isNull);
 
 /**
  * BOOKMARK - List of Kibana project types
- * @type {import('@kbn/module-groups').KibanaProject[]}
+ * @type {import('@kbn/projects-solutions-groups').KibanaProject[]}
  * */
 const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'chat'];
 

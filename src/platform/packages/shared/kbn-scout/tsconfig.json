@@ -30,6 +30,6 @@
     "@kbn/scout-reporting",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
-    "@kbn/module-groups",
+    "@kbn/projects-solutions-groups",
   ]
 }

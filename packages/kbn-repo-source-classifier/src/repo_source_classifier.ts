@@ -8,7 +8,7 @@
  */
 
 import type { ImportResolver } from '@kbn/import-resolver';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/module-groups';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { KibanaPackageManifest } from '@kbn/repo-packages/modern/types';
 import type { ModuleId } from './module_id';
 import type { ModuleType } from './module_type';

@@ -6314,7 +6314,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/module-groups@link:packages/kbn-module-groups":
+"@kbn/projects-solutions-groups@link:packages/kbn-projects-solutions-groups":
   version "0.0.0"
   uid ""
 

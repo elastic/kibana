@@ -9,7 +9,7 @@
 
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import { KIBANA_PROJECTS } from '@kbn/module-groups';
+import { KIBANA_PROJECTS } from '@kbn/projects-solutions-groups';
 
 // Config validation for how to run Kibana in Serverless mode.
 // Clients need to specify the project type to run in.

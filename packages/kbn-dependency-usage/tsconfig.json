@@ -16,6 +16,6 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
-    "@kbn/module-groups",
+    "@kbn/projects-solutions-groups",
   ],
 }

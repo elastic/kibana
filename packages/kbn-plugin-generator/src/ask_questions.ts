@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import inquirer from 'inquirer';
-import { KIBANA_SOLUTIONS } from '@kbn/module-groups';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
 export interface Answers {
   name: string;
