@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiCanAddNewSection, CanAddNewSection } from '@kbn/presentation-containers';
-import {
-  apiHasParentApi,
-  apiHasUniqueId,
-  EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId,
-} from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { map, skip } from 'rxjs';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
+import { apiCanAddNewSection, CanAddNewSection } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_ADD_SECTION } from './constants';
 

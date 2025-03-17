@@ -10,7 +10,7 @@
 import fastIsEqual from 'fast-deep-equal';
 import { filter, map, max } from 'lodash';
 import { BehaviorSubject, merge } from 'rxjs';
-import { v4 } from 'uuid';
+import { v4 as uuidv4, v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
@@ -160,6 +160,7 @@ export function initializePanelsManager(
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
       gridData: panel.gridData,
+      sectionIndex: panel.sectionIndex,
       references: serialized.references,
     };
   }
@@ -353,9 +354,12 @@ export function initializePanelsManager(
 
       sections$,
       addNewSection: () => {
+        const oldSections = sections$.getValue() ?? [];
         setSections([
-          ...(sections$.getValue() ?? {}),
+          ...oldSections,
           {
+            id: uuidv4(),
+            order: oldSections.length + 1,
             title: i18n.translate('examples.gridExample.defaultSectionTitle', {
               defaultMessage: 'New collapsible section',
             }),
