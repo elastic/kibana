@@ -103,6 +103,7 @@ components:
         - id
         - alertId
         - summary
+        - replacements
       properties:
         id:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
@@ -112,6 +113,8 @@ components:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         summary:
           type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
         updatedAt:
           type: string
         updatedBy:
@@ -218,11 +221,14 @@ components:
       required:
         - alertId
         - summary
+        - replacements
       properties:
         alertId:
           type: string
         summary:
           type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
 
     AlertSummaryUpdateProps:
       type: object
@@ -233,3 +239,5 @@ components:
           type: string
         summary:
           type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'

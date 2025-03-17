@@ -12,7 +12,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { useChatComplete } from '../../assistant/api/chat_complete/use_chat_complete';
 import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import { ChatCompleteResponse } from '../../assistant/api/chat_complete/post_chat_complete';
 import { useFetchAlertSummary } from './use_fetch_alert_summary';
 import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
 import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
@@ -33,23 +32,29 @@ export const useAlertSummary = ({ alertId, isContextReady, promptContext }: Prop
   const { abortStream, isLoading, sendMessage } = useChatComplete();
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
     useFetchAnonymizationFields();
-  const [chatCompletionResponse, setChatCompletionResponse] = useState<ChatCompleteResponse>({
-    response: i18n.NO_SUMMARY_AVAILABLE,
-    isError: false,
-  });
+  const [alertSummary, setAlertSummary] = useState<string>(i18n.NO_SUMMARY_AVAILABLE);
   const [messageAndReplacements, setMessageAndReplacements] = useState<{
     message: string;
     replacements: Replacements;
   } | null>(null);
-  const [didFetch, setDidFetch] = useState<boolean>(false);
-  const { data: alertSummary, isFetched: isFetchedAlertSummary } = useFetchAlertSummary({
+  // indicates that an alert summary exists or is being created/fetched
+  const [hasAlertSummary, setHasAlertSummary] = useState<boolean>(false);
+  const { data: fetchedAlertSummary, isFetched: isFetchedAlertSummary } = useFetchAlertSummary({
     alertId,
   });
   const { bulkUpdate, isLoading: isUpdatingAlertSummary } = useBulkUpdateAlertSummary();
 
   useEffect(() => {
-    console.log('alertSummary', alertSummary);
-  }, [alertSummary]);
+    if (fetchedAlertSummary.data.length > 0) {
+      setHasAlertSummary(true);
+      setAlertSummary(
+        replaceAnonymizedValuesWithOriginalValues({
+          messageContent: fetchedAlertSummary.data[0].summary,
+          replacements: fetchedAlertSummary.data[0].replacements,
+        })
+      );
+    }
+  }, [fetchedAlertSummary]);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -84,30 +89,43 @@ export const useAlertSummary = ({ alertId, isContextReady, promptContext }: Prop
 
   const fetchAISummary = useCallback(() => {
     const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
-      setDidFetch(true);
+      setHasAlertSummary(true);
       const rawResponse = await sendMessage(content);
-      setChatCompletionResponse({
-        ...rawResponse,
-        response: replaceAnonymizedValuesWithOriginalValues({
+      setAlertSummary(
+        replaceAnonymizedValuesWithOriginalValues({
           messageContent: rawResponse.response,
           replacements: content.replacements,
-        }),
-      });
-      const bulkResponse = await bulkUpdate({
-        alertSummary: {
-          create: [
-            {
-              alertId,
-              summary: rawResponse.response,
-            },
-          ],
-        },
-      });
-      console.log('bulkResponse', bulkResponse);
+        })
+      );
+      if (fetchedAlertSummary.data.length > 0) {
+        const bulkResponse = await bulkUpdate({
+          alertSummary: {
+            update: [
+              {
+                id: fetchedAlertSummary.data[0].id,
+                summary: rawResponse.response,
+                replacements: content.replacements,
+              },
+            ],
+          },
+        });
+      } else {
+        const bulkResponse = await bulkUpdate({
+          alertSummary: {
+            create: [
+              {
+                alertId,
+                summary: rawResponse.response,
+                replacements: content.replacements,
+              },
+            ],
+          },
+        });
+      }
     };
 
     if (messageAndReplacements !== null) fetchSummary(messageAndReplacements);
-  }, [alertId, bulkUpdate, messageAndReplacements, sendMessage]);
+  }, [alertId, bulkUpdate, fetchedAlertSummary.data, messageAndReplacements, sendMessage]);
 
   useEffect(() => {
     return () => {
@@ -115,8 +133,8 @@ export const useAlertSummary = ({ alertId, isContextReady, promptContext }: Prop
     };
   }, [abortStream]);
   return {
-    chatCompletionResponse,
-    didFetch,
+    alertSummary,
+    hasAlertSummary,
     fetchAISummary,
     isLoading,
     messageAndReplacements,

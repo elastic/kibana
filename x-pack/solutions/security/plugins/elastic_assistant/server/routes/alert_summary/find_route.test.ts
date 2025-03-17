@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getCurrentUserPromptsRequest, requestMock } from '../../__mocks__/request';
+import { getCurrentUserAlertSummaryRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
-import { getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
-import { findPromptsRoute } from './find_route';
+import { getFindAlertSummaryResultWithSingleHit } from '../../__mocks__/response';
+import { findAlertSummaryRoute } from './find_route';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
@@ -30,8 +30,8 @@ describe('Find user prompts route', () => {
       },
     } as AuthenticatedUser;
 
-    clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
-      Promise.resolve(getFindPromptsResultWithSingleHit())
+    clients.elasticAssistant.getAlertSummaryDataClient.findDocuments.mockResolvedValue(
+      Promise.resolve(getFindAlertSummaryResultWithSingleHit())
     );
     context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
       username: 'my_username',
@@ -42,24 +42,24 @@ describe('Find user prompts route', () => {
     } as AuthenticatedUser);
     logger = loggingSystemMock.createLogger();
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
-    findPromptsRoute(server.router, logger);
+    findAlertSummaryRoute(server.router, logger);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
       const response = await server.inject(
-        getCurrentUserPromptsRequest(),
+        getCurrentUserAlertSummaryRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
     });
 
     test('catches error if search throws error', async () => {
-      clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockRejectedValueOnce(
+      clients.elasticAssistant.getAlertSummaryDataClient.findDocuments.mockRejectedValueOnce(
         new Error('Test error')
       );
       const response = await server.inject(
-        getCurrentUserPromptsRequest(),
+        getCurrentUserAlertSummaryRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);

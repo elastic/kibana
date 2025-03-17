@@ -84,7 +84,7 @@ export const bulkUpdateAlertSummary = async ({
       ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         body: JSON.stringify(alertSummary),
         signal,
       }

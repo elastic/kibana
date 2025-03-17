@@ -13,7 +13,7 @@ export const alertSummaryFieldsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  alertId: {
+  alert_id: {
     type: 'keyword',
     array: false,
     required: true,
