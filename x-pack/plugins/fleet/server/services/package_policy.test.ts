@@ -59,8 +59,6 @@ import {
   PackagePolicyValidationError,
 } from '../errors';
 
-import { PackagePolicySchema } from '../types/models/package_policy';
-
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
 import {
