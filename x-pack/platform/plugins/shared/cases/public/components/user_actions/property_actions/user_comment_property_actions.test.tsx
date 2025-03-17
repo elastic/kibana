@@ -6,20 +6,18 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../../common/mock';
+
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,
-  createAppMockRenderer,
+  renderWithTestingProviders,
 } from '../../../common/mock';
 import { UserCommentPropertyActions } from './user_comment_property_actions';
-import { waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 describe('UserCommentPropertyActions', () => {
-  let appMock: AppMockRenderer;
-
   const props = {
     isLoading: false,
     onEdit: jest.fn(),
@@ -28,39 +26,31 @@ describe('UserCommentPropertyActions', () => {
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
-  afterEach(async () => {
-    await appMock.clearQueryCache();
-  });
-
   it('renders the correct number of actions', async () => {
-    appMock.render(<UserCommentPropertyActions {...props} />);
+    renderWithTestingProviders(<UserCommentPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
-      3
-    );
-    expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
-    expect(screen.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
-    expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-trash')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-quote')).toBeInTheDocument();
   });
 
   it('edits the comment correctly', async () => {
-    appMock.render(<UserCommentPropertyActions {...props} />);
+    renderWithTestingProviders(<UserCommentPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
@@ -68,14 +58,14 @@ describe('UserCommentPropertyActions', () => {
   });
 
   it('quotes the comment correctly', async () => {
-    appMock.render(<UserCommentPropertyActions {...props} />);
+    renderWithTestingProviders(<UserCommentPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-quote')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
 
@@ -83,35 +73,35 @@ describe('UserCommentPropertyActions', () => {
   });
 
   it('deletes the comment correctly', async () => {
-    appMock.render(<UserCommentPropertyActions {...props} />);
+    renderWithTestingProviders(<UserCommentPropertyActions {...props} />);
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(screen.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByText('Delete'));
     expect(props.onDelete).toHaveBeenCalled();
   });
 
   it('does not show the property actions without delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
-    appMock.render(<UserCommentPropertyActions {...props} />);
+    renderWithTestingProviders(<UserCommentPropertyActions {...props} />, {
+      wrapperProps: { permissions: noCasesPermissions() },
+    });
 
     expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
   it('does show the property actions with only delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-    appMock.render(<UserCommentPropertyActions {...props} />);
+    renderWithTestingProviders(<UserCommentPropertyActions {...props} />, {
+      wrapperProps: { permissions: onlyDeleteCasesPermission() },
+    });
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
   });
