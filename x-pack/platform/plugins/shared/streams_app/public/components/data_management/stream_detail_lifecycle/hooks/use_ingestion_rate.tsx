@@ -211,7 +211,7 @@ export const useIngestionRatePerTier = ({
       }
 
       const ilmExplain = await streamsRepositoryClient.fetch(
-        'GET /api/streams/{name}/lifecycle/_explain',
+        'GET /internal/streams/{name}/lifecycle/_explain',
         {
           params: { path: { name: definition.stream.name } },
           signal,

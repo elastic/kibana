@@ -57,7 +57,7 @@ export function IlmSummary({
     ({ signal }) => {
       if (!definition) return;
 
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/lifecycle/_stats', {
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
         params: { path: { name: definition.stream.name } },
         signal,
       });
