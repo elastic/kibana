@@ -299,13 +299,13 @@ export const getXyVisualization = ({
   initialize(
     addNewLayer,
     state,
-    datasourceStates,
     mainPalette?,
+    datasourceState?,
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
     if (state) {
-      return convertToRuntime(state, datasourceStates, annotationGroups, references);
+      return convertToRuntime(state, datasourceState, annotationGroups, references);
     }
     return {
       title: 'Empty XY chart',

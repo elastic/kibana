@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import deepEqual from 'fast-deep-equal';
+
 import { i18n } from '@kbn/i18n';
 import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -30,6 +32,7 @@ import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { convertToRuntimeState } from './runtime_state';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -107,16 +110,22 @@ export const getTagcloudVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state, mainPalette) {
-    return (
-      state || {
-        layerId: addNewLayer(),
-        layerType: LayerTypes.DATA,
-        ...DEFAULT_STATE,
-        colorMapping:
-          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
-      }
-    );
+  initialize(addNewLayer, state, mainPalette, datasourceState) {
+    if (state) return convertToRuntimeState(state, datasourceState);
+
+    return {
+      layerId: addNewLayer(),
+      layerType: LayerTypes.DATA,
+      ...DEFAULT_STATE,
+      colorMapping:
+        mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
+    };
+  },
+
+  isEqual(state1, references1, datasourceState1, state2, references2, datasourceState2) {
+    const convertedState1 = convertToRuntimeState(state1, datasourceState1);
+    const convertedState2 = convertToRuntimeState(state2, datasourceState2);
+    return deepEqual(convertedState1, convertedState2);
   },
 
   getConfiguration({ state }) {

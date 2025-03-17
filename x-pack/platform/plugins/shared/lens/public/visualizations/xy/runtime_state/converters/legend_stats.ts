@@ -9,14 +9,20 @@ import { LegendValue } from '@elastic/charts';
 
 import { XYState } from '../../types';
 
-interface OldState extends XYState {
+/**
+ * Old color mapping state meant for type safety during runtime migrations of old configurations
+ *
+ * @deprecated
+ */
+interface DeprecatedLegendValueXYState extends XYState {
   valuesInLegend?: boolean;
 }
 
-export function convertToLegendStats(state: OldState): XYState {
+export function convertToLegendStats(state: DeprecatedLegendValueXYState | XYState): XYState {
   if ('valuesInLegend' in state) {
     const valuesInLegend = state.valuesInLegend;
     delete state.valuesInLegend;
+
     const result: XYState = {
       ...state,
       legend: {

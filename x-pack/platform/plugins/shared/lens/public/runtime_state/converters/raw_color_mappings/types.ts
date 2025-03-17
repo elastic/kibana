@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { XYDataLayerConfig, XYState } from '../../../types';
-
 /** @deprecated */
 interface DeprecatedColorMappingColorCode {
   type: 'colorCode';
@@ -116,18 +114,4 @@ export interface DeprecatedColorMappingConfig {
       | DeprecatedColorMappingLoopColor
     >
   >;
-}
-
-/** @deprecated */
-interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapping'> {
-  colorMapping: DeprecatedColorMappingConfig;
-}
-
-/**
- * Old color mapping state meant for type safety during runtime migrations of old configurations
- *
- * @deprecated Use respective vis state (i.e. `XYState`)
- */
-export interface DeprecatedColorMappingsState extends Omit<XYState, 'layers'> {
-  layers: Array<DeprecatedColorMappingLayer | XYDataLayerConfig>;
 }

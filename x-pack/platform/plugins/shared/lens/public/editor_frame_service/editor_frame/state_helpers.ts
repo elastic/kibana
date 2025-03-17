@@ -312,11 +312,11 @@ export function initializeVisualization({
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
         visualizationState.state,
+        COLORING_METHOD,
         'formBased' in datasourceStates
           ? (datasourceStates.formBased.state as FormBasedPersistedState)
           : undefined,
         // initialize a new visualization with the color mapping off
-        COLORING_METHOD,
         annotationGroups,
         references
       ) ?? visualizationState.state

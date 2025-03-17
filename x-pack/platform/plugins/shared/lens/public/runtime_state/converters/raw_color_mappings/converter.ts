@@ -7,67 +7,32 @@
 
 import { ColorMapping } from '@kbn/coloring';
 import { MultiFieldKey, RangeKey, SerializedValue } from '@kbn/data-plugin/common';
-import { XYDataLayerConfig, XYState } from '../../../types';
-import { DeprecatedColorMappingConfig, DeprecatedColorMappingsState } from './types';
-import {
-  FormBasedPersistedState,
-  GenericIndexPatternColumn,
-} from '../../../../../datasources/form_based/types';
+import { DeprecatedColorMappingConfig } from './types';
+import { GenericIndexPatternColumn } from '../../../async_services';
 
-export const convertToRawColorMappingsFn =
-  (datasourceState?: FormBasedPersistedState) =>
-  (state: DeprecatedColorMappingsState | XYState): XYState => {
-    const hasLayersToConvert = state.layers.some((layer) => {
-      return (
-        layer.layerType === 'data' &&
-        layer.colorMapping?.assignments &&
-        (layer.colorMapping.assignments.some((assignment) => 'rule' in assignment) ||
-          layer.colorMapping.specialAssignments.some(
-            (specialAssignment) => 'rule' in specialAssignment
-          ))
-      );
-    });
-
-    if (!hasLayersToConvert) return state as XYState;
-
-    const convertedLayers = state.layers.map((layer) => {
-      if (
-        layer.layerType === 'data' &&
-        (layer.colorMapping?.assignments || layer.colorMapping?.specialAssignments)
-      ) {
-        const accessor = layer.splitAccessor;
-        const column = accessor
-          ? datasourceState?.layers?.[layer.layerId]?.columns?.[accessor]
-          : null;
-
-        return {
-          ...layer,
-          colorMapping: {
-            ...layer.colorMapping,
-            assignments: layer.colorMapping.assignments.map((oldAssignment) => {
-              if (!('rule' in oldAssignment)) return oldAssignment;
-              return convertColorMappingAssignment(oldAssignment, column);
-            }),
-            specialAssignments: layer.colorMapping.specialAssignments.map((oldAssignment) => {
-              if (!('rule' in oldAssignment)) return oldAssignment;
-              return {
-                color: oldAssignment.color,
-                touched: oldAssignment.touched,
-                rules: [oldAssignment.rule],
-              };
-            }),
-          },
-        } satisfies XYDataLayerConfig;
-      }
-
-      return layer as XYDataLayerConfig;
-    });
-
-    return {
-      ...state,
-      layers: convertedLayers,
-    };
+/**
+ * Converts old stringified colorMapping configs to new raw value configs
+ */
+export function convertToRawColorMappings(
+  colorMapping: DeprecatedColorMappingConfig | ColorMapping.Config,
+  column?: Partial<GenericIndexPatternColumn> | null
+): ColorMapping.Config {
+  return {
+    ...colorMapping,
+    assignments: colorMapping.assignments.map((oldAssignment) => {
+      if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
+      return convertColorMappingAssignment(oldAssignment, column);
+    }),
+    specialAssignments: colorMapping.specialAssignments.map((oldAssignment) => {
+      if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
+      return {
+        color: oldAssignment.color,
+        touched: oldAssignment.touched,
+        rules: [oldAssignment.rule],
+      };
+    }),
   };
+}
 
 export function convertColorMappingAssignment(
   oldAssignment: DeprecatedColorMappingConfig['assignments'][number],
@@ -162,4 +127,33 @@ export function convertToRawValue(
     default:
       return NO_VALUE; // treat all other other dataType as custom match string values
   }
+}
+
+function isValidColorMappingAssignment<
+  T extends
+    | DeprecatedColorMappingConfig['assignments'][number]
+    | DeprecatedColorMappingConfig['specialAssignments'][number]
+    | ColorMapping.Config['assignments'][number]
+    | ColorMapping.Config['specialAssignments'][number]
+>(
+  assignment: T
+): assignment is Exclude<
+  T,
+  | DeprecatedColorMappingConfig['assignments'][number]
+  | DeprecatedColorMappingConfig['specialAssignments'][number]
+> {
+  return 'rules' in assignment;
+}
+
+export function isDeprecatedColorMapping<
+  T extends DeprecatedColorMappingConfig | ColorMapping.Config
+>(colorMapping?: T): colorMapping is Exclude<T, ColorMapping.Config> {
+  if (!colorMapping) return false;
+  return Boolean(
+    colorMapping.assignments &&
+      (colorMapping.assignments.some((assignment) => !isValidColorMappingAssignment(assignment)) ||
+        colorMapping.specialAssignments.some(
+          (specialAssignment) => !isValidColorMappingAssignment(specialAssignment)
+        ))
+  );
 }

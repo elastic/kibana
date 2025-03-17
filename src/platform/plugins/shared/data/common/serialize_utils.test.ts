@@ -8,12 +8,9 @@
  */
 
 import { MultiFieldKey, RangeKey } from '.';
-import {
-  SerializableType,
-  SerializedField,
-  deserializeField,
-  serializeField,
-} from './serialize_utils';
+import { SerializedRangeKey } from './search';
+import { SerializedMultiFieldKey } from './search/aggs/buckets/multi_field_key';
+import { SerializableType, deserializeField, serializeField } from './serialize_utils';
 
 describe('serializeField/deserializeField', () => {
   describe('MultiFieldKey', () => {
@@ -22,7 +19,7 @@ describe('serializeField/deserializeField', () => {
       ['multiple values', { key: ['one', 'two', 'three'] }],
     ])('should serialize and deserialize %s', (_, bucket) => {
       const initial = new MultiFieldKey(bucket);
-      const serialized = serializeField(initial) as SerializedField;
+      const serialized = serializeField(initial) as SerializedMultiFieldKey;
       expect(serialized.type).toBe(SerializableType.MultiFieldKey);
       const deserialized = deserializeField(serialized) as MultiFieldKey;
       expect(deserialized).toMatchObject(initial);
@@ -44,8 +41,9 @@ describe('serializeField/deserializeField', () => {
       ['fully closed range w/ label', { from: 0, to: 100 }, [{ from: 0, to: 100, label }]],
     ])('should serialize and deserialize %s', (_, bucket, ranges) => {
       const initial = new RangeKey(bucket, ranges);
-      const serialized = serializeField(initial) as SerializedField;
+      const serialized = serializeField(initial) as SerializedRangeKey;
       expect(serialized.type).toBe(SerializableType.RangeKey);
+      expect(serialized.ranges).toHaveLength(initial.label ? 1 : 0);
       const deserialized = deserializeField(serialized) as RangeKey;
       expect(RangeKey.idBucket(deserialized)).toBe(RangeKey.idBucket(initial));
       expect(deserialized.gte).toBe(initial.gte);

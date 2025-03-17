@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import deepEqual from 'fast-deep-equal';
+
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
@@ -61,6 +63,8 @@ import {
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
 import { getSimpleColumnType } from './components/table_actions';
+import { convertToRuntimeState } from './runtime_state';
+
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -126,14 +130,20 @@ export const getDatatableVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
-  initialize(addNewLayer, state) {
-    return (
-      state || {
-        columns: [],
-        layerId: addNewLayer(),
-        layerType: LayerTypes.DATA,
-      }
-    );
+  initialize(addNewLayer, state, mainPalette, datasourceState) {
+    if (state) return convertToRuntimeState(state, datasourceState);
+
+    return {
+      columns: [],
+      layerId: addNewLayer(),
+      layerType: LayerTypes.DATA,
+    };
+  },
+
+  isEqual(state1, references1, datasourceState1, state2, references2, datasourceState2) {
+    const convertedState1 = convertToRuntimeState(state1, datasourceState1);
+    const convertedState2 = convertToRuntimeState(state2, datasourceState2);
+    return deepEqual(convertedState1, convertedState2);
   },
 
   onDatasourceUpdate(state, frame) {

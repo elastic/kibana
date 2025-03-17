@@ -1074,14 +1074,14 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     (
       addNewLayer: () => string,
       nonPersistedState: T,
-      datasourceState?: FormBasedPersistedState,
-      mainPalette?: SuggestionRequest['mainPalette']
+      mainPalette?: SuggestionRequest['mainPalette'],
+      datasourceState?: FormBasedPersistedState
     ): T;
     (
       addNewLayer: () => string,
       persistedState: P,
-      datasourceState?: FormBasedPersistedState,
       mainPalette?: SuggestionRequest['mainPalette'],
+      datasourceState?: FormBasedPersistedState,
       annotationGroups?: AnnotationGroups,
       references?: SavedObjectReference[]
     ): T;

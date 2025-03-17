@@ -12,8 +12,8 @@ import { SerializableType } from '../../../serialize_utils';
 
 type Ranges = Array<
   Partial<{
-    from: string | number;
-    to: string | number;
+    from: string | number | null;
+    to: string | number | null;
     label: string;
   }>
 >;
@@ -29,8 +29,8 @@ interface BucketLike {
  */
 export interface SerializedRangeKey {
   type: typeof SerializableType.RangeKey;
-  from: string | number;
-  to: string | number;
+  from: string | number | null;
+  to: string | number | null;
   ranges: Ranges;
 }
 
@@ -77,6 +77,8 @@ export class RangeKey extends SerializableField<SerializedRangeKey> {
 
   /**
    * Returns `RangeKey` from stringified form. Cannot extract labels from stringified form.
+   *
+   * Only supports numerical (non-string) values.
    */
   static fromString(rangeKey: string): RangeKey {
     const [from, to] = (regex.exec(rangeKey) ?? [])
@@ -104,17 +106,22 @@ export class RangeKey extends SerializableField<SerializedRangeKey> {
   }
 
   serialize(): SerializedRangeKey {
+    const from = typeof this.gte === 'string' || isFinite(this.gte) ? this.gte : null;
+    const to = typeof this.lt === 'string' || isFinite(this.lt) ? this.lt : null;
     return {
       type: SerializableType.RangeKey,
-      from: this.gte,
-      to: this.lt,
-      ranges: [
-        {
-          from: this.gte,
-          to: this.lt,
-          label: this.label,
-        },
-      ],
+      from,
+      to,
+      ranges:
+        this.label === undefined
+          ? []
+          : [
+              {
+                from,
+                to,
+                label: this.label,
+              },
+            ],
     };
   }
 }
