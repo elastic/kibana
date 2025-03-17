@@ -121,7 +121,7 @@ describe('scoreSuggestions', () => {
     ]);
   });
 
-  it('should handle invalid function arguments gracefully', async () => {
+  it('should handle invalid function arguments', async () => {
     mockChat.mockReturnValueOnce(
       of({
         id: 'mock-id',
