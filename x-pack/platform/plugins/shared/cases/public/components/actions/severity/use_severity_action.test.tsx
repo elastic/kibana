@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useSeverityAction } from './use_severity_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
 import { CaseSeverity } from '../../../../common/types/domain';
+import { TestProviders } from '../../../common/mock';
+import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../../containers/api');
 
-// FLAKY: https://github.com/elastic/kibana/issues/207712
-describe.skip('useSeverityAction', () => {
-  let appMockRender: AppMockRenderer;
+describe('useSeverityAction', () => {
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -36,7 +34,7 @@ describe.skip('useSeverityAction', () => {
           isDisabled: false,
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -84,7 +82,7 @@ describe.skip('useSeverityAction', () => {
     const { result } = renderHook(
       () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -103,10 +101,11 @@ describe.skip('useSeverityAction', () => {
 
       await waitFor(() => {
         expect(onAction).toHaveBeenCalled();
-        expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith({
-          cases: [{ severity, id: basicCase.id, version: basicCase.version }],
-        });
+      });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({
+        cases: [{ severity, id: basicCase.id, version: basicCase.version }],
       });
     }
   });
@@ -121,10 +120,12 @@ describe.skip('useSeverityAction', () => {
   it.each(singleCaseTests)(
     'shows the success toaster correctly when updating the severity of the case: %s',
     async (_, index, expectedMessage) => {
+      const coreStart = coreMock.createStart();
+
       const { result } = renderHook(
         () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),
         {
-          wrapper: appMockRender.AppWrapper,
+          wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
         }
       );
 
@@ -136,7 +137,7 @@ describe.skip('useSeverityAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
           title: expectedMessage,
           className: 'eui-textBreakWord',
         });
@@ -154,10 +155,12 @@ describe.skip('useSeverityAction', () => {
   it.each(multipleCasesTests)(
     'shows the success toaster correctly when updating the severity of the case: %s',
     async (_, index, expectedMessage) => {
+      const coreStart = coreMock.createStart();
+
       const { result } = renderHook(
         () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),
         {
-          wrapper: appMockRender.AppWrapper,
+          wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
         }
       );
 
@@ -169,7 +172,7 @@ describe.skip('useSeverityAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
           title: expectedMessage,
           className: 'eui-textBreakWord',
         });
@@ -188,7 +191,7 @@ describe.skip('useSeverityAction', () => {
     const { result } = renderHook(
       () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -202,7 +205,7 @@ describe.skip('useSeverityAction', () => {
       const { result } = renderHook(
         () => useSeverityAction({ onAction, onActionSuccess, isDisabled: true }),
         {
-          wrapper: appMockRender.AppWrapper,
+          wrapper: TestProviders,
         }
       );
 
