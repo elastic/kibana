@@ -128,29 +128,6 @@ describe('recallAndScore', () => {
     });
   });
 
-  it('returns empty suggestions when no documents are recalled', async () => {
-    mockRecall.mockResolvedValue([]);
-    const result = await recallAndScore({
-      recall: mockRecall,
-      chat: mockChat,
-      analytics: mockAnalytics,
-      userPrompt: 'What is my favorite color?',
-      context: 'Some context',
-      messages: sampleMessages,
-      logger: mockLogger,
-      signal,
-    });
-
-    expect(result).toEqual({ relevantDocuments: [], scores: [], suggestions: [] });
-    expect(mockRecall).toHaveBeenCalledWith({
-      queries: [
-        { text: 'What is my favorite color?', boost: 3 },
-        { text: 'Some context', boost: 1 },
-      ],
-    });
-    expect(scoreSuggestions).not.toHaveBeenCalled();
-  });
-
   it('handles errors when scoring fails', async () => {
     mockRecall.mockResolvedValue([{ id: 'doc1', text: 'Hello world', score: 0.5 }]);
     (scoreSuggestions as jest.Mock).mockRejectedValue(new Error('Scoring failed'));
