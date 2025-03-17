@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  * 
- * PKI funcitonality added by Antonio Piazza @antman1p
+ * PKI functionality added by Antonio Piazza @antman1p
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
@@ -180,12 +180,14 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             model:
               sanitizedBody.model ??
               ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+            stream: false, // Force non-streaming for PKI
           },
           {
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
           }
         );
+        this.logger.debug(`PKI OpenAI Non-Streaming Response (runApi): ${JSON.stringify(response)}`);
         return response as RunActionResponse;
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
@@ -228,23 +230,21 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }: StreamActionParams): Promise<RunActionResponse> {
     if (this.provider === OpenAiProviderType.PkiOpenAi) {
       const sanitizedBody = JSON.parse(body);
-      if (stream) {
-        const response = await this.openAI.chat.completions.create(
-          {
-            ...sanitizedBody,
-            model:
-              sanitizedBody.model ??
-              ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-            stream: true,
-          },
-          {
-            signal,
-            timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-          }
-        );
-        return response as RunActionResponse;
-      }
-      return this.runApi({ body, signal, timeout });
+      const response = await this.openAI.chat.completions.create(
+        {
+          ...sanitizedBody,
+          model:
+            sanitizedBody.model ??
+            ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+          stream: false, // Force non-streaming for PKI
+        },
+        {
+          signal,
+          timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+        }
+      );
+      this.logger.debug(`PKI OpenAI Non-Streaming Response (streamApi): ${JSON.stringify(response)}`);
+      return response as RunActionResponse;
     } else {
       const executeBody = getRequestWithStreamOption(
         this.provider,
@@ -313,48 +313,28 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     return res.pipe(new PassThrough());
   }
 
-  public async invokeAsyncIterator(body: InvokeAIActionParams): Promise<{
-    consumerStream: Stream<ChatCompletionChunk>;
-    tokenCountStream: Stream<ChatCompletionChunk>;
-  }> {
+  public async invokeAsyncIterator(body: InvokeAIActionParams): Promise<RunActionResponse> {
     try {
       const { signal, timeout, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
-      const requestBody: ChatCompletionCreateParamsStreaming = {
+      const requestBody = {
         ...rest,
-        stream: true,
         messages,
         model:
           rest.model ??
           ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+        stream: this.provider === OpenAiProviderType.PkiOpenAi ? false : true, // Force non-streaming for PKI
       };
-      const stream = await this.openAI.chat.completions.create(requestBody, {
+      const response = await this.openAI.chat.completions.create(requestBody, {
         signal,
         timeout,
       });
-      const teed = stream.tee();
-      return { consumerStream: teed[0], tokenCountStream: teed[1] };
+      this.logger.debug(`PKI OpenAI Non-Streaming Response (invokeAsyncIterator): ${JSON.stringify(response)}`);
+      return response as RunActionResponse;
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
     }
   }
 
-  public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const { signal, timeout, ...rest } = body;
-    const res = await this.runApi({ body: JSON.stringify(rest), signal, timeout });
-
-    if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
-      const result = res.choices[0].message.content.trim();
-      return { message: result, usage: res.usage };
-    }
-
-    return {
-      message:
-        'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.',
-      ...(res.usage
-        ? { usage: res.usage }
-        : { usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } }),
-    };
-  }
-}
+  public async invokeAI(body:
