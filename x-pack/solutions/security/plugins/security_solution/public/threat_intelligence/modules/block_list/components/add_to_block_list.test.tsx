@@ -9,30 +9,23 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AddToBlockListContextMenu } from './add_to_block_list';
 import { BlockListProvider } from '../../indicators/containers/block_list_provider';
-import { SecuritySolutionContext } from '../../../containers/security_solution_context';
-import { SecuritySolutionPluginContext } from '../../..';
-import { getSecuritySolutionContextMock } from '../../../mocks/mock_security_context';
 import { I18nProvider } from '@kbn/i18n-react';
 const TEST_ID = 'test';
 
 describe('<AddToBlockListContextMenu />', () => {
   it('should render an EuiContextMenuItem', () => {
-    const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
-
     const mockIndicatorFileHashValue: string = 'abc';
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId, getAllByText } = render(
       <I18nProvider>
-        <SecuritySolutionContext.Provider value={mockSecurityContext}>
-          <BlockListProvider>
-            <AddToBlockListContextMenu
-              data={mockIndicatorFileHashValue}
-              onClick={mockOnClick}
-              data-test-subj={TEST_ID}
-            />
-          </BlockListProvider>
-        </SecuritySolutionContext.Provider>
+        <BlockListProvider>
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={mockOnClick}
+            data-test-subj={TEST_ID}
+          />
+        </BlockListProvider>
       </I18nProvider>
     );
 
@@ -41,22 +34,18 @@ describe('<AddToBlockListContextMenu />', () => {
   });
 
   it('should render a disabled EuiContextMenuItem if data is null', () => {
-    const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
-
     const mockIndicatorFileHashValue = null;
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
       <I18nProvider>
-        <SecuritySolutionContext.Provider value={mockSecurityContext}>
-          <BlockListProvider>
-            <AddToBlockListContextMenu
-              data={mockIndicatorFileHashValue}
-              onClick={mockOnClick}
-              data-test-subj={TEST_ID}
-            />
-          </BlockListProvider>
-        </SecuritySolutionContext.Provider>
+        <BlockListProvider>
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={mockOnClick}
+            data-test-subj={TEST_ID}
+          />
+        </BlockListProvider>
       </I18nProvider>
     );
 
@@ -64,23 +53,18 @@ describe('<AddToBlockListContextMenu />', () => {
   });
 
   it('should render a disabled EuiContextMenuItem if no write blocklist privilege', () => {
-    const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
-    mockSecurityContext.blockList.canWriteBlocklist = false;
-
     const mockIndicatorFileHashValue: string = 'abc';
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
       <I18nProvider>
-        <SecuritySolutionContext.Provider value={mockSecurityContext}>
-          <BlockListProvider>
-            <AddToBlockListContextMenu
-              data={mockIndicatorFileHashValue}
-              onClick={mockOnClick}
-              data-test-subj={TEST_ID}
-            />
-          </BlockListProvider>
-        </SecuritySolutionContext.Provider>
+        <BlockListProvider>
+          <AddToBlockListContextMenu
+            data={mockIndicatorFileHashValue}
+            onClick={mockOnClick}
+            data-test-subj={TEST_ID}
+          />
+        </BlockListProvider>
       </I18nProvider>
     );
 

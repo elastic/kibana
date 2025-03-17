@@ -10,7 +10,7 @@ import {
   generateMockIndicator,
   generateMockUrlIndicator,
   Indicator,
-} from '../../../../common/types/indicator';
+} from '../../../../../common/threat_intelligence/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { useFilterInOut, UseFilterInValue } from './use_filter_in_out';
 import { FilterIn } from '../utils/filter';

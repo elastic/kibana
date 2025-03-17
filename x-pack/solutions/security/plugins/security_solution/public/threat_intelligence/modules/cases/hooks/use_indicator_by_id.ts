@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { createFetchIndicatorById, FetchParams } from '../services/fetch_indicator_by_id';
 

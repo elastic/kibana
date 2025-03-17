@@ -9,7 +9,7 @@ import {
   generateMockFileIndicator,
   Indicator,
   RawIndicatorFieldId,
-} from '../../../../common/types/indicator';
+} from '../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from './can_add_to_block_list';
 import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 

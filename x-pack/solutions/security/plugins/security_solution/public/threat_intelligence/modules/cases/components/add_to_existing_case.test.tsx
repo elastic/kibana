@@ -9,9 +9,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AddToExistingCase } from './add_to_existing_case';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { generateMockFileIndicator, Indicator } from '../../../../common/types/indicator';
+import {
+  generateMockFileIndicator,
+  type Indicator,
+} from '../../../../../common/threat_intelligence/types/indicator';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { KibanaContext } from '../../../hooks/use_kibana';
 
 const TEST_ID = 'test';
 const indicator: Indicator = generateMockFileIndicator();
@@ -35,9 +37,7 @@ describe('AddToExistingCase', () => {
 
     const { getByTestId, getAllByText } = render(
       <TestProvidersComponent>
-        <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
-        </KibanaContext.Provider>
+        <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
       </TestProvidersComponent>
     );
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
@@ -66,13 +66,11 @@ describe('AddToExistingCase', () => {
     };
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          <AddToExistingCase
-            indicator={indicatorMissingName}
-            onClick={onClick}
-            data-test-subj={TEST_ID}
-          />
-        </KibanaContext.Provider>
+        <AddToExistingCase
+          indicator={indicatorMissingName}
+          onClick={onClick}
+          data-test-subj={TEST_ID}
+        />
       </TestProvidersComponent>
     );
     expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
@@ -94,9 +92,7 @@ describe('AddToExistingCase', () => {
 
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
-        </KibanaContext.Provider>
+        <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
       </TestProvidersComponent>
     );
     expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');

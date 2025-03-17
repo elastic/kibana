@@ -6,7 +6,7 @@
  */
 
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { generateMockFileIndicator, Indicator } from '../../../../common/types/indicator';
+import { generateMockFileIndicator, Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import {
   AttachmentMetadata,
   generateAttachmentsMetadata,

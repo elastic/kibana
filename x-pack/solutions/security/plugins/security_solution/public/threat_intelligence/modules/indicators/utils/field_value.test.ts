@@ -9,7 +9,7 @@ import { fieldAndValueValid, getIndicatorFieldAndValue } from './field_value';
 import {
   generateMockFileIndicator,
   generateMockUrlIndicator,
-} from '../../../../common/types/indicator';
+} from '../../../../../common/threat_intelligence/types/indicator';
 import { EMPTY_VALUE } from '../../../constants/common';
 
 describe('field_value', () => {

@@ -8,7 +8,7 @@
 import { ISearchStart } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { search } from '../../../utils/search';
-import { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 
 interface FetchIndicatorsDependencies {
   searchService: ISearchStart;

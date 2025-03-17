@@ -8,8 +8,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
-import { SecuritySolutionPluginContext } from '../types';
-import { SecuritySolutionContext } from './security_solution_context';
 import { EnterpriseGuard } from './enterprise_guard';
 
 describe('<EnterpriseGuard />', () => {
@@ -17,17 +15,9 @@ describe('<EnterpriseGuard />', () => {
     it('should render specified children', () => {
       render(
         <TestProvidersComponent>
-          <SecuritySolutionContext.Provider
-            value={
-              {
-                licenseService: { isEnterprise: jest.fn().mockReturnValue(true) },
-              } as unknown as SecuritySolutionPluginContext
-            }
-          >
-            <EnterpriseGuard>
-              <div>enterprise only content</div>
-            </EnterpriseGuard>
-          </SecuritySolutionContext.Provider>
+          <EnterpriseGuard>
+            <div>{'enterprise only content'}</div>
+          </EnterpriseGuard>
         </TestProvidersComponent>
       );
 
@@ -41,17 +31,9 @@ describe('<EnterpriseGuard />', () => {
     it('should render specified children', () => {
       render(
         <TestProvidersComponent>
-          <SecuritySolutionContext.Provider
-            value={
-              {
-                licenseService: { isEnterprise: jest.fn().mockReturnValue(false) },
-              } as unknown as SecuritySolutionPluginContext
-            }
-          >
-            <EnterpriseGuard>
-              <div>enterprise only content</div>
-            </EnterpriseGuard>
-          </SecuritySolutionContext.Provider>
+          <EnterpriseGuard>
+            <div>{'enterprise only content'}</div>
+          </EnterpriseGuard>
         </TestProvidersComponent>
       );
 
