@@ -12,6 +12,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
+import { PreviewQueryLanguage, TabStatus } from '../../types';
 
 const tabItem = {
   id: 'test-id',
@@ -25,6 +26,12 @@ const tabsSizeConfig = {
   isScrollable: false,
   regularTabMaxWidth: MAX_TAB_WIDTH,
   regularTabMinWidth: MIN_TAB_WIDTH,
+};
+
+const previewQuery = {
+  language: PreviewQueryLanguage.ESQL,
+  query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+  status: TabStatus.SUCCESS,
 };
 
 describe('Tab', () => {
@@ -42,6 +49,7 @@ describe('Tab', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        previewQuery={previewQuery}
       />
     );
 
@@ -86,6 +94,7 @@ describe('Tab', () => {
         onLabelEdited={jest.fn()}
         onSelect={jest.fn()}
         onClose={jest.fn()}
+        previewQuery={previewQuery}
       />
     );
 
@@ -114,6 +123,7 @@ describe('Tab', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        previewQuery={previewQuery}
       />
     );
 
@@ -147,6 +157,7 @@ describe('Tab', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        previewQuery={previewQuery}
       />
     );
 
