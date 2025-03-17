@@ -23,7 +23,7 @@ export class ChatServerlessPlugin
       ChatServerlessPluginStartDeps
     >
 {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(
     core: CoreSetup,

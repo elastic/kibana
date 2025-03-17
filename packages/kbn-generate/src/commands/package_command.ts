@@ -20,7 +20,7 @@ import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-erro
 import { sortPackageJson } from '@kbn/sort-package-json';
 
 import {
-  KIBANA_SOLUTIONS,
+  KIBANA_GROUPS,
   type KibanaGroup,
   type ModuleVisibility,
 } from '@kbn/projects-solutions-groups';
@@ -118,10 +118,9 @@ export const PackageCommand: GenerateCommand = {
         }>({
           type: 'list',
           choices: [
-            { name: 'platform', value: 'platform' },
-            ...KIBANA_SOLUTIONS.map((solution) => ({
-              name: solution,
-              value: solution,
+            ...KIBANA_GROUPS.map((groupName) => ({
+              name: groupName,
+              value: groupName,
             })),
           ],
           name: 'group',

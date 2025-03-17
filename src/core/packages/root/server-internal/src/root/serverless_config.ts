@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
+import { schema, TypeOf, type Type } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import { KIBANA_PROJECTS } from '@kbn/projects-solutions-groups';
+import { KIBANA_PROJECTS, type KibanaProject } from '@kbn/projects-solutions-groups';
 
 // Config validation for how to run Kibana in Serverless mode.
 // Clients need to specify the project type to run in.
@@ -22,7 +22,7 @@ import { KIBANA_PROJECTS } from '@kbn/projects-solutions-groups';
 const serverlessConfigSchema = schema.maybe(
   schema.oneOf(
     KIBANA_PROJECTS.map((projectName) => schema.literal(projectName)) as [
-      Type<(typeof KIBANA_PROJECTS)[number]> // This cast is needed because it's different to Type<T>[] :sight:
+      Type<KibanaProject> // This cast is needed because it's different to Type<T>[] :sight:
     ]
   )
 );
