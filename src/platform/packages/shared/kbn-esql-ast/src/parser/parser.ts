@@ -85,11 +85,6 @@ export const createParser = (src: string) => {
   return getParser(CharStreams.fromString(src), errorListener, parseListener);
 };
 
-// These will need to be manually updated whenever the relevant grammar changes.
-const SYNTAX_ERRORS_TO_IGNORE = [
-  `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'row', 'show'}`,
-];
-
 export interface ParseOptions {
   /**
    * Whether to collect and attach to AST nodes user's custom formatting:
@@ -138,9 +133,7 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
 
     parser[GRAMMAR_ROOT_RULE]();
 
-    const errors = errorListener.getErrors().filter((error) => {
-      return !SYNTAX_ERRORS_TO_IGNORE.includes(error.message);
-    });
+    const errors = errorListener.getErrors();
     const { ast: commands } = parseListener.getAst();
     const root = Builder.expression.query(commands, {
       location: {

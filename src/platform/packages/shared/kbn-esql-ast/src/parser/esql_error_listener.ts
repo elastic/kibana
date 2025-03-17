@@ -12,6 +12,11 @@ import { ErrorListener } from 'antlr4';
 import { getPosition } from './helpers';
 import type { EditorError } from '../types';
 
+// These will need to be manually updated whenever the relevant grammar changes.
+const SYNTAX_ERRORS_TO_IGNORE = [
+  `mismatched input '<EOF>' expecting {'explain', 'row', 'from', 'show'}`,
+];
+
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
 const REPLACE_ORPHAN_COMMA = /{, /g;
 export class ESQLErrorListener extends ErrorListener<any> {
@@ -32,6 +37,10 @@ export class ESQLErrorListener extends ErrorListener<any> {
     // cases where the dev token was at the start of a list
     // e.g. "mismatched input 'PROJECT' expecting {, 'enrich', 'dissect', 'eval', 'grok'}"
     message = message.replace(REPLACE_ORPHAN_COMMA, '{');
+
+    if (SYNTAX_ERRORS_TO_IGNORE.includes(message)) {
+      return;
+    }
 
     const textMessage = `SyntaxError: ${message}`;
 
