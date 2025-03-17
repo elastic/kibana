@@ -167,9 +167,10 @@ export default function ({ getService }: FtrProviderContext) {
       const counters = hits.hits
         .map((hit) => hit._source!['usage-counter'])
         // filter out the reindexing counters
-        .filter((counter) =>
-          counter.counterName !== 'unversioned|get|/api/upgrade_assistant/reindex/batch/queue' &&
-          counter.counterName !== 'unversioned|get|/api/upgrade_assistant/reindex/{indexName}'
+        .filter(
+          (counter) =>
+            counter.counterName !== 'unversioned|get|/api/upgrade_assistant/reindex/batch/queue' &&
+            counter.counterName !== 'unversioned|get|/api/upgrade_assistant/reindex/{indexName}'
         )
         .sort();
 
