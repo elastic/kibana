@@ -8,14 +8,14 @@
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { conversationSoType } from './conversations';
 import { agentSoType } from './agents';
-import { integrationType } from './integrations';
+import { integrationSoType } from './integrations';
 
 export const registerTypes = ({ savedObjects }: { savedObjects: SavedObjectsServiceSetup }) => {
   savedObjects.registerType(conversationSoType);
   savedObjects.registerType(agentSoType);
-  savedObjects.registerType(integrationType);
+  savedObjects.registerType(integrationSoType);
 };
 
 export { conversationTypeName, type ConversationAttributes } from './conversations';
 export { agentTypeName, type AgentAttributes } from './agents';
-export type { IntegrationAttributes } from './integrations';
+export { integrationTypeName, type IntegrationAttributes } from './integrations';
