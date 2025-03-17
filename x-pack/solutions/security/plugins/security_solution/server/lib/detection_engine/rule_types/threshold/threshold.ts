@@ -69,8 +69,6 @@ export const thresholdExecutor = async ({
     primaryTimestamp,
     secondaryTimestamp,
     runtimeMappings,
-    bulkCreate,
-    wrapHits,
   } = sharedParams;
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -146,8 +144,6 @@ export const thresholdExecutor = async ({
         buckets,
         services,
         startedAt,
-        from: tuple.from.toDate(),
-        to: tuple.to.toDate(),
         experimentalFeatures,
       });
       const createResult = suppressedResults.bulkCreateResult;
@@ -161,18 +157,10 @@ export const thresholdExecutor = async ({
       });
     } else {
       const createResult = await bulkCreateThresholdSignals({
+        sharedParams,
         buckets,
-        completeRule,
-        filter: esFilter,
         services,
-        inputIndexPattern: inputIndex,
-        signalsIndex: ruleParams.outputIndex,
         startedAt,
-        from: tuple.from.toDate(),
-        signalHistory: validSignalHistory,
-        bulkCreate,
-        wrapHits,
-        ruleExecutionLogger,
       });
 
       newSignalHistory = buildThresholdSignalHistory({
