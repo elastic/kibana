@@ -7,9 +7,11 @@
 import type { Capabilities } from '@kbn/core/public';
 import { SECURITY_FEATURE_ID } from '../common/constants';
 
-export function hasAccessToSecuritySolution(capabilities: Capabilities) {
-  return (
+export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean {
+  return Boolean(
     // Using `siemV2`
-    capabilities[SECURITY_FEATURE_ID]?.show === true
+    capabilities[SECURITY_FEATURE_ID]?.show ||
+      capabilities.securitySolutionCasesV2?.read_cases ||
+      capabilities.securitySolutionAttackDiscovery?.['attack-discovery']
   );
 }
