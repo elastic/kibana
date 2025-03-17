@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const USER_MESSAGE = 'Why the sky is blue?';
 
       before(async () => {
-        void llmProxy.interceptTitle('title');
+        void llmProxy.interceptTitle('Question about color of the sky');
         void llmProxy.interceptConversation(`The sky is blue because of Rayleigh scattering.`);
 
         const response = await chatComplete({
