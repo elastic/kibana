@@ -28,8 +28,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
 
-  // Failing: See https://github.com/elastic/kibana/issues/202564
-  describe.skip('test telemetry', () => {
+  describe('test telemetry', () => {
     const objectRemover = new ObjectRemover(supertest);
     const esQueryRuleId: { [key: string]: string } = {};
     const simulator = new OpenAISimulator({
@@ -592,8 +591,14 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_mw_with_repeat_toggle_on).to.equal(3);
 
       // AAD alert counts
-      expect(telemetry.count_alerts_total).to.be(6);
-      expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(6);
+      const numAADexecutions =
+        telemetry.count_rules_executions_by_type_per_day['test__always-firing-alert-as-data'];
+
+      // each rule execution reports 2 active alerts
+      expect(telemetry.count_alerts_total).to.be(numAADexecutions * 2);
+      expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(
+        numAADexecutions * 2
+      );
     }
 
     it('should retrieve telemetry data in the expected format', async () => {
