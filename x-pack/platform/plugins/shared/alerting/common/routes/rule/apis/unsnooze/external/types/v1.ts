@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypeOf } from '@kbn/config-schema';
+import type { unsnoozeParamsSchemaV1 } from '../..';
 
-export { unsnoozeRuleRoute as unsnoozeRuleInternalRoute } from './internal/unsnooze_rule_route';
-export { unsnoozeRuleRoute } from './external/unsnooze_rule_route';
+export type UnsnoozeParams = TypeOf<typeof unsnoozeParamsSchemaV1>;
