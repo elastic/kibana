@@ -118,6 +118,42 @@ export const getAxiosOptions = (
     default:
       return { headers: {} };
   }
+};export const getAxiosOptions = (
+  provider: string,
+  apiKey: string,
+  stream: boolean,
+  config?: Config
+): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
+  const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
+
+  switch (provider) {
+    case OpenAiProviderType.OpenAi:
+      return {
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        ...responseType,
+      };
+    case OpenAiProviderType.AzureAi:
+      return {
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+        ...responseType,
+      };
+    case OpenAiProviderType.PkiOpenAi:
+      if (!config?.certPath || !config?.keyPath) {
+        throw new Error('Certificate and key paths are required for PKI authentication');
+      }
+      const httpsAgent = new https.Agent({
+        cert: fs.readFileSync(config.certPath),
+        key: fs.readFileSync(config.keyPath),
+        rejectUnauthorized: false,
+      });
+      return {
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        httpsAgent,
+        ...responseType,
+      };
+    default:
+      return { headers: {} };
+  }
 };
 
 export const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) => {
