@@ -63,30 +63,34 @@ describe('<IndicatorsBarChart />', () => {
 
     expect(container).toMatchInlineSnapshot(`
       <div>
-        <div
-          class="echChart"
-          style="width: 100%; height: 200px;"
+        <span
+          class="euiThemeProvider emotion-euiColorMode-LIGHT"
         >
           <div
-            class="echChartContent"
+            class="echChart"
+            style="width: 100%; height: 200px;"
           >
             <div
-              class="echChartBackground"
-              style="background-color: transparent;"
-            />
-            <div
-              class="echChartStatus"
-              data-ech-render-complete="false"
-              data-ech-render-count="0"
-            />
-            <div
-              class="echChartResizer"
-            />
-            <div
-              class="echContainer"
-            />
+              class="echChartContent"
+            >
+              <div
+                class="echChartBackground"
+                style="background-color: transparent;"
+              />
+              <div
+                class="echChartStatus"
+                data-ech-render-complete="false"
+                data-ech-render-count="0"
+              />
+              <div
+                class="echChartResizer"
+              />
+              <div
+                class="echContainer"
+              />
+            </div>
           </div>
-        </div>
+        </span>
       </div>
     `);
   });
