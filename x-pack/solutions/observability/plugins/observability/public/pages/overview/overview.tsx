@@ -75,10 +75,11 @@ export function OverviewPage() {
     }
   );
 
-  const { data: newsFeed } = useFetcher(
-    () => getNewsFeed({ http, kibanaVersion }),
-    [http, kibanaVersion]
-  );
+  const { data: newsFeed } = useFetcher(() => {
+    if (!Boolean(isServerless)) {
+      return getNewsFeed({ http, kibanaVersion });
+    }
+  }, [http, kibanaVersion, isServerless]);
   const { hasAnyData, isAllRequestsComplete, hasDataMap } = useHasData();
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
@@ -273,9 +274,7 @@ export function OverviewPage() {
           {/* Resources / What's New sections */}
           <EuiFlexGroup direction={'column'}>
             <EuiFlexItem>
-              {!Boolean(isServerless) && !!newsFeed?.items?.length && (
-                <NewsFeed items={newsFeed.items.slice(0, 3)} />
-              )}
+              {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
             </EuiFlexItem>
             <EuiFlexItem>
               <ExternalResourceLinks />
