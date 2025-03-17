@@ -39270,7 +39270,6 @@
                                     }
                                   },
                                   "required": [
-                                    "id",
                                     "data_stream"
                                   ],
                                   "type": "object"

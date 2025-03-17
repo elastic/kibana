@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { RuleTagFilter } from './rule_tag_filter';
 
@@ -87,14 +87,18 @@ export default {
   },
 };
 
-const Template: Story<Args> = (args) => {
+const Template: StoryFn<Args> = (args) => {
   return <RuleTagFilter {...args} />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
+};
 
-export const Selected = Template.bind({});
+export const Selected = {
+  render: Template,
 
-Selected.args = {
-  selectedTags: ['tag1'],
+  args: {
+    selectedTags: ['tag1'],
+  },
 };
