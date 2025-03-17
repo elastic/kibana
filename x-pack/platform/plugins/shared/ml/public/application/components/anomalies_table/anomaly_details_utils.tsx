@@ -69,7 +69,7 @@ export function getInfluencersItems(
 
 export const DetailsItems: FC<{
   anomaly: MlAnomaliesTableRecord;
-  filter: EntityCellFilter;
+  filter?: EntityCellFilter;
   modelPlotEnabled: boolean;
 }> = ({ anomaly, filter, modelPlotEnabled }) => {
   const source = anomaly.source;
@@ -103,7 +103,11 @@ export const DetailsItems: FC<{
   }
 
   const items = [];
-  if (source.partition_field_value !== undefined && source.partition_field_name !== undefined) {
+  if (
+    source.partition_field_value !== undefined &&
+    source.partition_field_name !== undefined &&
+    filter !== undefined
+  ) {
     items.push({
       title: source.partition_field_name,
       description: getFilterEntity(
@@ -114,14 +118,22 @@ export const DetailsItems: FC<{
     });
   }
 
-  if (source.by_field_value !== undefined && source.by_field_name !== undefined) {
+  if (
+    source.by_field_value !== undefined &&
+    source.by_field_name !== undefined &&
+    filter !== undefined
+  ) {
     items.push({
       title: source.by_field_name,
       description: getFilterEntity(source.by_field_name, source.by_field_value, filter),
     });
   }
 
-  if (singleCauseByFieldName !== undefined && singleCauseByFieldValue !== undefined) {
+  if (
+    singleCauseByFieldName !== undefined &&
+    singleCauseByFieldValue !== undefined &&
+    filter !== undefined
+  ) {
     // Display byField of single cause.
     items.push({
       title: singleCauseByFieldName,
@@ -129,7 +141,11 @@ export const DetailsItems: FC<{
     });
   }
 
-  if (source.over_field_value !== undefined && source.over_field_name !== undefined) {
+  if (
+    source.over_field_value !== undefined &&
+    source.over_field_name !== undefined &&
+    filter !== undefined
+  ) {
     items.push({
       title: source.over_field_name,
       description: getFilterEntity(source.over_field_name, source.over_field_value, filter),

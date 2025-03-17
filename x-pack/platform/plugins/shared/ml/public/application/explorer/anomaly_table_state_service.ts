@@ -1,0 +1,241 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Observable } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  switchMap,
+  BehaviorSubject,
+  from,
+  of,
+  map,
+  catchError,
+  Subscription,
+  startWith,
+} from 'rxjs';
+import { get, isEqual } from 'lodash';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION, getEntityFieldList } from '@kbn/ml-anomaly-utils';
+import type { UrlStateService } from '@kbn/ml-url-state';
+import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { MlJobService } from '../services/job_service';
+import type { MlApi } from '../services/ml_api_service';
+import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
+import type { TableSeverity } from '../components/controls/select_severity/select_severity';
+import type { TableInterval } from '../components/controls/select_interval/select_interval';
+import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
+import type { AnomaliesTableData, AppStateSelectedCells, ExplorerJob } from './explorer_utils';
+import {
+  getDateFormatTz,
+  getSelectionInfluencers,
+  getSelectionJobIds,
+  getSelectionTimeRange,
+} from './explorer_utils';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { MAX_CATEGORY_EXAMPLES } from './explorer_constants';
+import {
+  isModelPlotChartableForDetector,
+  isModelPlotEnabled,
+  isSourceDataChartableForDetector,
+} from '../../../common/util/job_utils';
+import { StateService } from '../services/state_service';
+import type { Refresh } from '../routing/use_refresh';
+
+export class AnomalyTableStateService extends StateService {
+  private _tableData$ = new BehaviorSubject<AnomaliesTableData | null>(null);
+  private _tableDataLoading$ = new BehaviorSubject<boolean>(true);
+  private _timeBounds$: Observable<TimeRangeBounds>;
+  private _refreshSubject$: Observable<Refresh>;
+
+  constructor(
+    private readonly mlApi: MlApi,
+    private readonly mlJobService: MlJobService,
+    private readonly uiSettings: IUiSettingsClient,
+    private readonly timefilter: TimefilterContract,
+    private readonly anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
+    private readonly anomalyTimelineStateService: AnomalyTimelineStateService,
+    private readonly tableSeverityUrlStateService: UrlStateService<TableSeverity>,
+    private readonly tableIntervalUrlStateService: UrlStateService<TableInterval>
+  ) {
+    super();
+
+    this._timeBounds$ = this.timefilter.getTimeUpdate$().pipe(
+      startWith(null),
+      map(() => this.timefilter.getBounds())
+    );
+    this._refreshSubject$ = mlTimefilterRefresh$.pipe(startWith({ lastRefresh: 0 }));
+
+    this._init();
+  }
+
+  public readonly tableData$ = this._tableData$.asObservable();
+
+  public get tableData(): AnomaliesTableData | null {
+    return this._tableData$.getValue();
+  }
+
+  public readonly tableDataLoading$ = this._tableDataLoading$.asObservable();
+
+  public get tableDataLoading(): boolean {
+    return this._tableDataLoading$.getValue();
+  }
+
+  protected _initSubscriptions(): Subscription {
+    const subscriptions = new Subscription();
+
+    // Add the main subscription that updates tableData$
+    subscriptions.add(
+      combineLatest([
+        this.anomalyTimelineStateService.getSelectedCells$(),
+        this.anomalyExplorerCommonStateService.selectedJobs$,
+        this.anomalyTimelineStateService.getViewBySwimlaneFieldName$(),
+        this.tableIntervalUrlStateService.getUrlState$(),
+        this.tableSeverityUrlStateService.getUrlState$(),
+        this.anomalyExplorerCommonStateService.influencerFilterQuery$,
+        this._refreshSubject$,
+        this._timeBounds$,
+      ])
+        .pipe(
+          distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+          switchMap(
+            ([
+              selectedCells,
+              selectedJobs,
+              viewBySwimlaneFieldName,
+              tableInterval,
+              tableSeverity,
+              influencersFilterQuery,
+            ]) => {
+              if (
+                !selectedJobs ||
+                selectedJobs.length === 0 ||
+                !viewBySwimlaneFieldName ||
+                // Prevent unnecessary fetch on initial load when selectedCells is undefined
+                selectedCells === undefined
+              ) {
+                return of({ tableData: null, tableDataLoading: false });
+              }
+
+              // Set loading state
+              this._tableDataLoading$.next(true);
+
+              return from(
+                this.loadAnomaliesTableData(
+                  selectedCells,
+                  selectedJobs,
+                  viewBySwimlaneFieldName,
+                  tableInterval.val,
+                  tableSeverity.val,
+                  influencersFilterQuery
+                )
+              ).pipe(
+                map((tableData) => ({
+                  tableData,
+                  tableDataLoading: false,
+                })),
+                catchError((error) => {
+                  return of({ tableData: null, tableDataLoading: false });
+                })
+              );
+            }
+          )
+        )
+        .subscribe((result) => {
+          // Update the BehaviorSubject with new data
+          this._tableData$.next(result.tableData);
+          this._tableDataLoading$.next(result.tableDataLoading);
+        })
+    );
+
+    return subscriptions;
+  }
+
+  private async loadAnomaliesTableData(
+    selectedCells: AppStateSelectedCells | undefined | null,
+    selectedJobs: ExplorerJob[],
+    fieldName: string,
+    tableInterval: string,
+    tableSeverity: number,
+    influencersFilterQuery?: InfluencersFilterQuery
+  ): Promise<AnomaliesTableData> {
+    const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
+    const influencers = getSelectionInfluencers(selectedCells, fieldName);
+    const bounds = this.timefilter.getBounds();
+    const timeRange = getSelectionTimeRange(selectedCells, bounds);
+    const dateFormatTz = getDateFormatTz(this.uiSettings);
+
+    return new Promise((resolve, reject) => {
+      this.mlApi.results
+        .getAnomaliesTableData(
+          jobIds,
+          [],
+          influencers,
+          tableInterval,
+          tableSeverity,
+          timeRange.earliestMs,
+          timeRange.latestMs,
+          dateFormatTz,
+          ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+          MAX_CATEGORY_EXAMPLES,
+          influencersFilterQuery
+        )
+        .toPromise()
+        .then((resp) => {
+          const anomalies = resp.anomalies;
+          const detectorsByJob = this.mlJobService.detectorsByJob;
+
+          // @ts-ignore
+          anomalies.forEach((anomaly) => {
+            const jobId = anomaly.jobId;
+            const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+            anomaly.detector = get(
+              detector,
+              ['detector_description'],
+              anomaly.source.function_description
+            );
+
+            if (detector !== undefined && detector.custom_rules !== undefined) {
+              anomaly.rulesLength = detector.custom_rules.length;
+            }
+
+            const job = this.mlJobService.getJob(jobId);
+            let isChartable = isSourceDataChartableForDetector(job, anomaly.detectorIndex);
+            if (
+              isChartable === false &&
+              isModelPlotChartableForDetector(job, anomaly.detectorIndex)
+            ) {
+              const entityFields = getEntityFieldList(anomaly.source);
+              isChartable = isModelPlotEnabled(job, anomaly.detectorIndex, entityFields);
+            }
+
+            anomaly.isTimeSeriesViewRecord = isChartable;
+            anomaly.isGeoRecord =
+              detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG;
+
+            if (this.mlJobService.customUrlsByJob[jobId] !== undefined) {
+              anomaly.customUrls = this.mlJobService.customUrlsByJob[jobId];
+            }
+          });
+
+          resolve({
+            anomalies,
+            interval: resp.interval,
+            examplesByJobId: resp.examplesByJobId,
+            showViewSeriesLink: true,
+            jobIds,
+          });
+        })
+        .catch((resp) => {
+          reject(resp);
+        });
+    });
+  }
+}

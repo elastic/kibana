@@ -108,8 +108,8 @@ interface SelectionTimeRange {
 
 export interface AnomaliesTableData {
   anomalies: any[];
-  interval: number;
-  examplesByJobId: string[];
+  interval: number | string;
+  examplesByJobId: Record<string, Record<string, string[]>>;
   showViewSeriesLink: boolean;
   jobIds: string[];
 }
