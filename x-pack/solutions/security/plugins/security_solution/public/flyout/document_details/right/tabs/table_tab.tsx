@@ -223,7 +223,6 @@ export const TableTab = memo(() => {
       }),
     [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview]
   );
-
   return (
     <EuiInMemoryTable
       items={items}
