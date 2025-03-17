@@ -191,8 +191,12 @@ describe('filterByAgent', () => {
 
     it('opentelemetry/java/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/java/elastic')).toEqual([
-        'disable_instrumentations',
+        'deactivate_all_instrumentations',
+        'deactivate_instrumentations',
         'recording',
+        'send_logs',
+        'send_metrics',
+        'send_traces',
       ]);
     });
 

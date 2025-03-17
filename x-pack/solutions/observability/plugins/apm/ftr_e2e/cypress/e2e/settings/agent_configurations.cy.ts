@@ -170,7 +170,11 @@ describe('Agent configuration', () => {
 
       cy.contains('Next step').click();
       cy.contains('Create configuration');
-      cy.contains('Disable instrumentations');
+      cy.contains('Deactivate instrumentations');
+      cy.contains('Deactivate all instrumentations');
+      cy.contains('Send traces');
+      cy.contains('Send metrics');
+      cy.contains('Send logs');
       cy.contains('Recording');
       cy.get('[data-test-subj="apmSelectWithPlaceholderSelect"]').select('true');
       cy.contains('Save configuration').click();
