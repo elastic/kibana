@@ -49,14 +49,32 @@ export function createProxyTransport({
         },
       };
 
+      const esHeaders = {
+        ...options?.headers,
+        ...headers,
+      };
+
       return super
         .request(next, {
           ...options,
-          headers: {
-            ...options?.headers,
-            ...headers,
-          },
+          headers: esHeaders,
           meta: true,
+        })
+        .catch((error) => {
+          // the client will throw a ProductNotSupportedError when ES returns a 403
+          // and the proxy messes with the headers
+          if (error instanceof errors.ElasticsearchClientError) {
+            if ('meta' in error) {
+              const meta = error.meta as errors.ResponseError['meta'];
+              throw new errors.ResponseError({
+                ...meta,
+                statusCode: Number(
+                  meta.headers?.['x-console-proxy-status-code'] ?? meta.statusCode
+                ),
+              });
+            }
+          }
+          throw error;
         })
         .then((response) => {
           if (response.statusCode >= 400) {

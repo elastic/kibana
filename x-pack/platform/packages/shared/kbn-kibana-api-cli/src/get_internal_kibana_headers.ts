@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
+export function getInternalKibanaHeaders() {
+  return {
+    'kbn-xsrf': 'true',
+    'x-elastic-internal-origin': 'kibana',
+  };
 }
