@@ -203,7 +203,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         access,
         summary: options.summary,
         description: options.description,
-        // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
         security,
       }).addVersion(
