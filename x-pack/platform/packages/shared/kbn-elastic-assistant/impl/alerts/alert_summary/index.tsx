@@ -24,17 +24,19 @@ import * as i18n from '../translations';
 
 interface Props {
   alertId: string;
+  defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
 }
 
 export const AlertSummary: FunctionComponent<Props> = ({
   alertId,
+  defaultConnectorId,
   isContextReady,
   promptContext,
 }) => {
   const { alertSummary, hasAlertSummary, fetchAISummary, isLoading, messageAndReplacements } =
-    useAlertSummary({ alertId, isContextReady, promptContext });
+    useAlertSummary({ alertId, defaultConnectorId, isContextReady, promptContext });
   return (
     <>
       <EuiTitle size={'s'}>

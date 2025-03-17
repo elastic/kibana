@@ -21,6 +21,7 @@ import * as i18n from '../translations';
 
 interface Props {
   alertId: string;
+  defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
 }
@@ -28,8 +29,15 @@ const notActualPromptJustForTesting =
   'Highlight any host names or user names at the top of your summary.';
 const prompt = `Give a brief analysis of the event from the context above and format your output neatly in markdown syntax. Give only key observations in paragraph format. ${notActualPromptJustForTesting}`;
 
-export const useAlertSummary = ({ alertId, isContextReady, promptContext }: Props) => {
-  const { abortStream, isLoading, sendMessage } = useChatComplete();
+export const useAlertSummary = ({
+  alertId,
+  defaultConnectorId,
+  isContextReady,
+  promptContext,
+}: Props) => {
+  const { abortStream, isLoading, sendMessage } = useChatComplete({
+    connectorId: defaultConnectorId,
+  });
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
     useFetchAnonymizationFields();
   const [alertSummary, setAlertSummary] = useState<string>(i18n.NO_SUMMARY_AVAILABLE);
@@ -97,30 +105,33 @@ export const useAlertSummary = ({ alertId, isContextReady, promptContext }: Prop
           replacements: content.replacements,
         })
       );
-      if (fetchedAlertSummary.data.length > 0) {
-        const bulkResponse = await bulkUpdate({
-          alertSummary: {
-            update: [
-              {
-                id: fetchedAlertSummary.data[0].id,
-                summary: rawResponse.response,
-                replacements: content.replacements,
-              },
-            ],
-          },
-        });
-      } else {
-        const bulkResponse = await bulkUpdate({
-          alertSummary: {
-            create: [
-              {
-                alertId,
-                summary: rawResponse.response,
-                replacements: content.replacements,
-              },
-            ],
-          },
-        });
+
+      if (!rawResponse.isError) {
+        if (fetchedAlertSummary.data.length > 0) {
+          const bulkResponse = await bulkUpdate({
+            alertSummary: {
+              update: [
+                {
+                  id: fetchedAlertSummary.data[0].id,
+                  summary: rawResponse.response,
+                  replacements: content.replacements,
+                },
+              ],
+            },
+          });
+        } else {
+          const bulkResponse = await bulkUpdate({
+            alertSummary: {
+              create: [
+                {
+                  alertId,
+                  summary: rawResponse.response,
+                  replacements: content.replacements,
+                },
+              ],
+            },
+          });
+        }
       }
     };
 
