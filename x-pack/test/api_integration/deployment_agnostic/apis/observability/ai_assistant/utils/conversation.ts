@@ -84,11 +84,13 @@ export async function chatComplete({
   userPrompt,
   screenContexts = [],
   connectorId,
+  persist = false,
   observabilityAIAssistantAPIClient,
 }: {
   userPrompt: string;
   screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
   connectorId: string;
+  persist?: boolean;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
 }) {
   const { status, body } = await observabilityAIAssistantAPIClient.editor({
@@ -105,7 +107,7 @@ export async function chatComplete({
           },
         ],
         connectorId,
-        persist: false,
+        persist,
         screenContexts,
         scopes: ['observability' as const],
       },
