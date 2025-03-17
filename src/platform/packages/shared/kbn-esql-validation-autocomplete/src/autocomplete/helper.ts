@@ -882,7 +882,7 @@ export async function suggestForExpression({
         });
       }
       suggestions.push(
-        ...columnSuggestions,
+        ...pushItUpInTheList(columnSuggestions, true),
         ...getFunctionSuggestions({ command: commandName, ignored })
       );
 
