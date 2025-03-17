@@ -134,7 +134,7 @@ const namespaces = {
   ALERT_RULE_NAMESPACE,
 };
 
-const fields = {
+export const fields = {
   ALERT_ACTION_GROUP,
   ALERT_CASE_IDS,
   ALERT_DURATION,

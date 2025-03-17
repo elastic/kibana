@@ -8,3 +8,5 @@
  */
 
 export * from './use_truncate_text';
+export { customThresholdParamsSchema, type CustomThresholdParams } from './latest';
+export { customThresholdParamsSchema as customThresholdParamsSchemaV1 } from './v1';
