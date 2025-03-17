@@ -17,7 +17,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, identity, isEmpty, keys } from 'lodash';
+import { flatMap, get, isEmpty, keys } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
