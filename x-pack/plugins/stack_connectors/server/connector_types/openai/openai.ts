@@ -16,7 +16,7 @@ import {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
-import { removeEndpointFromUrl } from './lib/openai_utils';
+import { removeEndpointFromUrl, validatePKICertificates } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -52,7 +52,8 @@ import {
   pipeStreamingResponse,
   sanitizeRequest,
 } from './lib/utils';
-import axios from 'axios';
+import fs from 'fs';
+import https from 'https';
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -62,35 +63,51 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
-    this.url = params.config.apiUrl;
-    this.provider = params.config.apiProvider;
-    this.key = params.secrets.apiKey;
 
-    const axiosOptions = getAxiosOptions(this.provider, this.key, false, {
-      certPath: params.config.certPath,
-      keyPath: params.config.keyPath,
-    });
+    this.url = this.config.apiUrl;
+    this.provider = this.config.apiProvider;
+    this.key = this.secrets.apiKey;
 
-    if (this.provider === OpenAiProviderType.AzureAi) {
-      this.openAI = new OpenAI({
-        apiKey: this.key,
-        baseURL: this.url,
-        defaultQuery: { 'api-version': getAzureApiVersionParameter(this.url) },
-        defaultHeaders: {
-          ...params.config.headers,
-          'api-key': this.key,
-        },
-      });
-    } else {
-      // For both OpenAI and PKI OpenAI
-      this.openAI = new OpenAI({
-        baseURL: removeEndpointFromUrl(this.url),
-        apiKey: this.key,
-        defaultHeaders: {
-          ...params.config.headers,
-        },
-        httpAgent: axiosOptions.httpsAgent,
-      });
+    try {
+      if (this.provider === OpenAiProviderType.PkiOpenAi) {
+        if (!this.config.certPath || !this.config.keyPath) {
+          throw new Error('Certificate and key paths are required for PKI authentication');
+        }
+
+        // Validate PKI certificates
+        if (!validatePKICertificates(this.config.certPath, this.config.keyPath)) {
+          throw new Error('Invalid or inaccessible PKI certificates');
+        }
+
+        // Create HTTPS agent with certificates
+        const httpsAgent = new https.Agent({
+          cert: fs.readFileSync(this.config.certPath),
+          key: fs.readFileSync(this.config.keyPath),
+          rejectUnauthorized: false, // Allow self-signed certificates
+        });
+
+        this.openAI = new OpenAI({
+          apiKey: this.key,
+          baseURL: removeEndpointFromUrl(this.url),
+          defaultHeaders: {
+            ...this.config.headers,
+            'Authorization': `Bearer ${this.key}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          httpAgent: httpsAgent,
+        });
+      } else {
+        // Standard OpenAI or Azure initialization
+        this.openAI = new OpenAI({
+          apiKey: this.key,
+          baseURL: removeEndpointFromUrl(this.url),
+          defaultHeaders: this.config.headers,
+        });
+      }
+    } catch (error) {
+      this.logger.error(`Error initializing OpenAI client: ${error.message}`);
+      throw error;
     }
 
     this.registerSubActions();

@@ -53,11 +53,10 @@ export const configValidator = (configObject: Config, validatorServices: Validat
 
     const { apiProvider } = configObject;
 
-    if (
-      apiProvider !== OpenAiProviderType.OpenAi && 
-      apiProvider !== OpenAiProviderType.AzureAi &&
-      apiProvider !== OpenAiProviderType.PkiOpenAi
-    ) {
+    // Update validator to include PKI type
+    if (apiProvider !== OpenAiProviderType.OpenAi && 
+        apiProvider !== OpenAiProviderType.AzureAi && 
+        apiProvider !== OpenAiProviderType.PkiOpenAi) {
       throw new Error(
         `API Provider is not supported${
           apiProvider && (apiProvider as OpenAiProviderType).length ? `: ${apiProvider}` : ``
@@ -65,13 +64,13 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       );
     }
 
-    // Validate PKI configuration when PKI OpenAI provider is selected
+    // Add validation for PKI specific fields
     if (apiProvider === OpenAiProviderType.PkiOpenAi) {
-      if (!configObject.certPath) {
-        throw new Error('Certificate path is required for PKI OpenAI provider');
+      if (!configObject.certPath?.endsWith('.pem')) {
+        throw new Error('Certificate path must end with .pem');
       }
-      if (!configObject.keyPath) {
-        throw new Error('Private key path is required for PKI OpenAI provider');
+      if (!configObject.keyPath?.endsWith('.pem')) {
+        throw new Error('Private key path must end with .pem');
       }
     }
 

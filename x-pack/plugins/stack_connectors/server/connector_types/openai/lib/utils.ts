@@ -7,8 +7,6 @@
 
 import { AxiosResponse, ResponseType } from 'axios';
 import { IncomingMessage } from 'http';
-import { readFileSync } from 'fs';
-import { Agent } from 'https';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
 import {
   sanitizeRequest as openAiSanitizeRequest,
@@ -18,6 +16,8 @@ import {
   sanitizeRequest as azureAiSanitizeRequest,
   getRequestWithStreamOption as azureAiGetRequestWithStreamOption,
 } from './azure_openai_utils';
+import fs from 'fs';
+import https from 'https';
 
 export const sanitizeRequest = (
   provider: string,
@@ -79,32 +79,42 @@ export const getAxiosOptions = (
   provider: string,
   apiKey: string,
   stream: boolean,
-  config?: { certPath?: string; keyPath?: string }
-): { headers: Record<string, string>; responseType?: ResponseType; httpsAgent?: Agent } => {
+  config?: Config
+): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
-
+  
   switch (provider) {
-    case OpenAiProviderType.OpenAi: {
-      const headers = { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' };
-      return { headers, ...responseType };
-    }
-    case OpenAiProviderType.AzureAi: {
-      const headers = { ['api-key']: apiKey, ['content-type']: 'application/json' };
-      return { headers, ...responseType };
-    }
-    case OpenAiProviderType.PkiOpenAi: {
+    case OpenAiProviderType.OpenAi:
+      return {
+        headers: { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' },
+        ...responseType,
+      };
+    case OpenAiProviderType.AzureAi:
+      return {
+        headers: { ['api-key']: apiKey, ['content-type']: 'application/json' },
+        ...responseType,
+      };
+    case OpenAiProviderType.PkiOpenAi:
+      // Add PKI specific options
       if (!config?.certPath || !config?.keyPath) {
-        throw new Error('Certificate and key paths are required for PKI OpenAI provider');
+        throw new Error('Certificate and key paths are required for PKI authentication');
       }
-      const headers = { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' };
-      const httpsAgent = new Agent({
-        cert: readFileSync(config.certPath),
-        key: readFileSync(config.keyPath),
+      
+      const httpsAgent = new https.Agent({
+        cert: fs.readFileSync(config.certPath),
+        key: fs.readFileSync(config.keyPath),
         rejectUnauthorized: false,
-        keepAlive: true,
       });
-      return { headers, httpsAgent, ...responseType };
-    }
+
+      return {
+        headers: { 
+          Authorization: `Bearer ${apiKey}`, 
+          ['content-type']: 'application/json',
+          ['Accept']: 'application/json',
+        },
+        httpsAgent,
+        ...responseType,
+      };
     default:
       return { headers: {} };
   }

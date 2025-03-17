@@ -18,8 +18,19 @@ import {
   InvokeAIActionResponseSchema,
 } from './schema';
 
-export type Config = TypeOf<typeof ConfigSchema>;
-export type Secrets = TypeOf<typeof SecretsSchema>;
+export interface Config {
+  apiProvider: OpenAiProviderType;
+  apiUrl: string;
+  defaultModel?: string;
+  // Add optional PKI fields
+  certPath?: string;
+  keyPath?: string;
+  headers?: Record<string, string>;
+}
+
+export interface Secrets {
+  apiKey: string;
+}
 export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
 export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
 export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;

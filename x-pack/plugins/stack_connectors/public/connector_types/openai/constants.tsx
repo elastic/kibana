@@ -64,26 +64,6 @@ export const openAiConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_OPENAI_MODEL,
   },
-  {
-    id: 'certPath',
-    label: i18n.CERT_PATH_LABEL,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Optional. Path to the SSL certificate file for PKI authentication."
-        id="xpack.stackConnectors.components.genAi.certPathHelp"
-      />
-    ),
-  },
-  {
-    id: 'keyPath',
-    label: i18n.KEY_PATH_LABEL,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Optional. Path to the SSL private key file for PKI authentication."
-        id="xpack.stackConnectors.components.genAi.keyPathHelp"
-      />
-    ),
-  },
 ];
 
 export const azureAiConfig: ConfigFieldSchema[] = [
@@ -162,6 +142,66 @@ export const azureAiSecrets: SecretsFieldSchema[] = [
   },
 ];
 
+export const pkiOpenAiConfig: ConfigFieldSchema[] = [
+  {
+    id: 'apiUrl',
+    label: i18n.API_URL_LABEL,
+    isUrlField: true,
+    defaultValue: DEFAULT_URL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="The OpenAI API endpoint URL with PKI authentication."
+        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentation"
+        values={{
+          genAiAPIUrlDocs: (
+            <EuiLink
+              data-test-subj="pki-open-ai-api-doc"
+              href="https://platform.openai.com/docs/api-reference"
+              target="_blank"
+            >
+              {`${i18n.OPENAI} ${i18n.DOCUMENTATION}`}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+  {
+    id: 'certPath',
+    label: i18n.CERT_PATH_LABEL,
+    required: true,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the PKI certificate file (.pem)"
+        id="xpack.stackConnectors.components.genAi.certPathDocumentation"
+      />
+    ),
+  },
+  {
+    id: 'keyPath',
+    label: i18n.KEY_PATH_LABEL,
+    required: true,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the PKI private key file (.pem)"
+        id="xpack.stackConnectors.components.genAi.keyPathDocumentation"
+      />
+    ),
+  },
+  {
+    id: 'defaultModel',
+    label: i18n.DEFAULT_MODEL_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="If a request does not include a model, it uses the default."
+        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentationModel"
+      />
+    ),
+    defaultValue: DEFAULT_OPENAI_MODEL,
+  },
+];
+
+// Add PKI to provider options
 export const providerOptions = [
   {
     value: OpenAiProviderType.OpenAi,
@@ -177,51 +217,5 @@ export const providerOptions = [
     value: OpenAiProviderType.PkiOpenAi,
     text: i18n.PKI_OPENAI,
     label: i18n.PKI_OPENAI,
-  },
-];
-
-export const pkiOpenAiConfig: ConfigFieldSchema[] = [
-  {
-    id: 'apiUrl',
-    label: i18n.API_URL_LABEL,
-    isUrlField: true,
-    defaultValue: DEFAULT_URL,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="The OpenAI API endpoint URL with PKI authentication."
-        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentation"
-      />
-    ),
-  },
-  {
-    id: 'defaultModel',
-    label: i18n.DEFAULT_MODEL_LABEL,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="If a request does not include a model, it uses the default."
-        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentationModel"
-      />
-    ),
-    defaultValue: DEFAULT_OPENAI_MODEL,
-  },
-  {
-    id: 'certPath',
-    label: i18n.CERT_PATH_LABEL,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Path to the SSL certificate file for PKI authentication."
-        id="xpack.stackConnectors.components.genAi.certPathHelp"
-      />
-    ),
-  },
-  {
-    id: 'keyPath',
-    label: i18n.KEY_PATH_LABEL,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Path to the SSL private key file for PKI authentication."
-        id="xpack.stackConnectors.components.genAi.keyPathHelp"
-      />
-    ),
   },
 ];

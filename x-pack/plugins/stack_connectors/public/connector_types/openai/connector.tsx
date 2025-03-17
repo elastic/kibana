@@ -26,7 +26,6 @@ import {
   azureAiSecrets,
   openAiConfig,
   openAiSecrets,
-  pkiOpenAiConfig,
   providerOptions,
 } from './constants';
 const { emptyField } = fieldValidators;
@@ -77,7 +76,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           secretsFormSchema={openAiSecrets}
         />
       )}
-      {/* ^v These are intentionally not if/else because of the way the `config.defaultValue` renders */}
       {config != null && config.apiProvider === OpenAiProviderType.AzureAi && (
         <SimpleConnectorForm
           isEdit={isEdit}
