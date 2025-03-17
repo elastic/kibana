@@ -40,7 +40,7 @@ export const getTriggerIngestPipelinesStatsTaskRoute = (
 
       const taskConfig = telemetryConfiguration.ingest_pipelines_stats_config;
 
-      taskConfig.enabled = request.query.enabled;
+      taskConfig.enabled = request.query.enabled ?? true;
 
       logger.info('Triggering ingest pipelines stats task');
 
