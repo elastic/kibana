@@ -45,7 +45,7 @@ export const useFetchAlertSummary = ({ alertId, signal }: UseFetchAlertSummaryPa
     QUERY.page,
     QUERY.per_page,
     QUERY.filter,
-    API_VERSIONS.public.v1,
+    API_VERSIONS.internal.v1,
   ];
 
   return useQuery<FindAlertSummaryResponse, unknown, FindAlertSummaryResponse>(
@@ -53,7 +53,7 @@ export const useFetchAlertSummary = ({ alertId, signal }: UseFetchAlertSummaryPa
     async () =>
       http.fetch(ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND, {
         method: 'GET',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         query: QUERY,
         signal,
       }),

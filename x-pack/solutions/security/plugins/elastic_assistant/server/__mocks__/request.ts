@@ -11,10 +11,11 @@ import {
   ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
   CAPABILITIES,
 } from '../../common/constants';
-import type {
+import {
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
+  ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
   KnowledgeBaseEntryUpdateProps,
   UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
@@ -157,6 +158,12 @@ export const getCurrentUserPromptsRequest = () =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+  });
+
+export const getCurrentUserAlertSummaryRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
   });
 
 export const getCurrentUserAnonymizationFieldsRequest = () =>

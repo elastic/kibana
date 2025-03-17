@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { isSupportedConnector } from '@kbn/inference-common';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
@@ -45,7 +46,7 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
-import { initUiSettings } from './ui_settings';
+import { getDefaultAIConnectorSetting, initUiSettings } from './ui_settings';
 import { registerDeprecations } from './deprecations';
 import {
   APP_ID,
@@ -212,6 +213,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
+
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 
@@ -472,6 +474,30 @@ export class Plugin implements ISecuritySolutionPlugin {
     core
       .getStartServices()
       .then(async ([coreStart, depsStart]) => {
+        if (this.pluginContext.env.packageInfo.buildFlavor === 'serverless') {
+          await new Promise<void>(async (resolve) => {
+            try {
+              const availableTypes = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
+              const fakeRequest = { headers: {} } as KibanaRequest;
+              const actionsClient = await depsStart.actions.getActionsClientWithRequest(
+                fakeRequest
+              );
+              const aiConnectors = actionsClient.context.inMemoryConnectors.filter(
+                (connector) =>
+                  availableTypes.includes(connector.actionTypeId) && isSupportedConnector(connector)
+              );
+              const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
+              if (defaultAIConnectorSetting !== null) {
+                await core.uiSettings.register(defaultAIConnectorSetting);
+              }
+              resolve();
+            } catch (error) {
+              logger.error(`Error registering default AI connector: ${err}`);
+              resolve();
+            }
+          });
+        }
+
         appClientFactory.setup({
           getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
           config,

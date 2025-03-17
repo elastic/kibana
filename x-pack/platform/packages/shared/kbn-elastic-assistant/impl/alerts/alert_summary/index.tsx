@@ -24,24 +24,26 @@ import * as i18n from '../translations';
 
 interface Props {
   alertId: string;
+  defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
 }
 
 export const AlertSummary: FunctionComponent<Props> = ({
   alertId,
+  defaultConnectorId,
   isContextReady,
   promptContext,
 }) => {
-  const { chatCompletionResponse, didFetch, fetchAISummary, isLoading, messageAndReplacements } =
-    useAlertSummary({ alertId, isContextReady, promptContext });
+  const { alertSummary, hasAlertSummary, fetchAISummary, isLoading, messageAndReplacements } =
+    useAlertSummary({ alertId, defaultConnectorId, isContextReady, promptContext });
   return (
     <>
       <EuiTitle size={'s'}>
         <h2>{i18n.AI_SUMMARY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {didFetch ? (
+      {hasAlertSummary ? (
         isLoading ? (
           <>
             <EuiText
@@ -56,10 +58,29 @@ export const AlertSummary: FunctionComponent<Props> = ({
             <EuiSkeletonText lines={3} size="s" />
           </>
         ) : (
-          <MessageText
-            content={chatCompletionResponse.response}
-            contentReferences={chatCompletionResponse.metadata?.contentReferences}
-          />
+          <>
+            <MessageText content={alertSummary} contentReferences={null} />
+
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={fetchAISummary}
+                  color="primary"
+                  size="m"
+                  data-test-subj="generateInsights"
+                  isLoading={messageAndReplacements == null}
+                >
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+                    <EuiFlexItem grow={false}>
+                      <AssistantIcon size="m" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{i18n.REGENERATE}</EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         )
       ) : (
         <EuiFlexGroup gutterSize="s">

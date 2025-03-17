@@ -209,7 +209,8 @@ export const bulkAlertSummaryRoute = (router: ElasticAssistantPluginRouter, logg
             ),
             getUpdateScript: (document: UpdateAlertSummarySchema) =>
               getUpdateScript({ alertSummary: document, isPatch: true }),
-            authenticatedUser: authenticatedUser ?? undefined,
+            // any user can update any alert summary
+            authenticatedUser: undefined,
           });
           const created =
             docsCreated.length > 0

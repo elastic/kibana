@@ -15,6 +15,7 @@ import {
   Conversations,
   SuggestedPrompts,
 } from '@kbn/elastic-assistant';
+import { useKibana } from '../../common/lib/kibana';
 import { getField } from '../document_details/shared/utils';
 import { getRawData } from '../../assistant/helpers';
 import { useAIForSOCDetailsContext } from './context';
@@ -24,6 +25,7 @@ import type { AIForSOCDetailsProps } from './types';
 import { PanelFooter } from './footer';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../shared/components/flyout_header';
+import { DEFAULT_AI_CONNECTOR } from '../../../common/constants';
 
 /**
  * Panel to be displayed in the document details expandable flyout right section
@@ -48,6 +50,9 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     () => getField(getFieldsData('kibana.alert.rule.name')) || '',
     [getFieldsData]
   );
+  const { uiSettings } = useKibana().services;
+  // TODO will this be in non-serverless? because this value will not work if so
+  const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
   const timestamp = useMemo(() => getField(getFieldsData('@timestamp')) || '', [getFieldsData]);
 
   return (
@@ -59,6 +64,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
           <EuiFlexItem>
             <AlertSummary
               alertId={eventId}
+              defaultConnectorId={defaultConnectorId}
               isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
               promptContext={promptContext}
             />
