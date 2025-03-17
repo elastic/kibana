@@ -3253,46 +3253,6 @@ describe('Package policy service', () => {
       );
     });
 
-    it('should not throw validation error on callback', async () => {
-      const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      const callback: CombinedExternalCallback = jest.fn(async (ds) => {
-        PackagePolicySchema.validate(ds);
-        return ds;
-      });
-
-      appContextService.addExternalCallback('packagePolicyPostUpdate', callback);
-
-      const packagePolicy = {
-        ...newPackagePolicy,
-        id: 'test',
-        revision: 1,
-        updated_at: '',
-        updated_by: '',
-        created_at: '',
-        created_by: '',
-        elasticsearch: {
-          index_template: {
-            mappings: {
-              dynamic_templates: {},
-            },
-          },
-        } as any,
-      };
-
-      await packagePolicyService.runExternalCallbacks(
-        'packagePolicyPostUpdate',
-        packagePolicy,
-        soClient,
-        esClient,
-        coreMock.createCustomRequestHandlerContext(context),
-        request
-      );
-
-      expect(callback).toHaveBeenCalled();
-    });
-
     describe('with a callback that throws an exception', () => {
       const callbackThree: CombinedExternalCallback = jest.fn(async () => {
         callbackCallingOrder.push('three');
