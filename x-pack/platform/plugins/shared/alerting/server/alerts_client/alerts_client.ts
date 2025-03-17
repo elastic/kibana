@@ -17,7 +17,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, identity, isEmpty, keys } from 'lodash';
+import { flatMap, get, isEmpty, keys } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -69,6 +69,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
+import { DEFAULT_MAX_ALERTS } from '../config';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -155,8 +156,8 @@ export class AlertsClient<
       },
       getById(id: string) {
         return (
-          Object.values(this.active).find((alert) => alert[ALERT_INSTANCE_ID] === id) ??
-          Object.values(this.recovered).find((alert) => alert[ALERT_INSTANCE_ID] === id)
+          Object.values(this.active).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
+          Object.values(this.recovered).find((alert) => get(alert, ALERT_INSTANCE_ID) === id)
         );
       },
     };
@@ -174,12 +175,14 @@ export class AlertsClient<
       this.runTimestampString = opts.runTimestamp.toISOString();
     }
     await this.legacyAlertsClient.initializeExecution(opts);
-    const { executionUuid } = opts;
+
+    const { previousExecutionUuid } = opts;
 
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
       const getTrackedAlertsByExecutionUuid = async (uuid: string) => {
         const result = await this.search({
+          size: opts.maxAlerts || DEFAULT_MAX_ALERTS,
           seq_no_primary_term: true,
           query: {
             bool: {
@@ -221,8 +224,8 @@ export class AlertsClient<
       };
 
       try {
-        const results = executionUuid
-          ? await getTrackedAlertsByExecutionUuid(executionUuid)
+        const results = previousExecutionUuid
+          ? await getTrackedAlertsByExecutionUuid(previousExecutionUuid)
           : await getTrackedAlertsByAlertUuids();
 
         for (const hit of results.flat()) {
@@ -296,7 +299,7 @@ export class AlertsClient<
     return {
       uuid: legacyAlert.getUuid(),
       start: legacyAlert.getStart() ?? this.startedAtString,
-      alertDoc: this.trackedAlerts.get(alert.id),
+      alertDoc: this.trackedAlerts.getById(alert.id),
     };
   }
 

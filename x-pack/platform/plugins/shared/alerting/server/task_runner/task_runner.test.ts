@@ -3262,7 +3262,7 @@ describe('Task Runner', () => {
     });
   });
 
-  test('reschedules when persistAlerts returns a cluster_block_exception', async () => {
+  test('reschedules when persistAlerts returns an exception', async () => {
     const err = new ErrorWithType({
       message: 'Index is blocked',
       type: 'cluster_block_exception',
@@ -3291,6 +3291,35 @@ describe('Task Runner', () => {
       'Executing Rule default:test:1 has resulted in Error: Index is blocked',
       {
         tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
+      }
+    );
+  });
+
+  test('reschedules when getting tracked alerts returns an exception', async () => {
+    const err = new Error(GENERIC_ERROR_MESSAGE);
+    alertsClient.initializeExecution.mockRejectedValueOnce(err);
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
+    expect(runnerResult.state).toEqual(mockedTaskInstance.state);
+    expect(runnerResult.schedule!.interval).toEqual('10s');
+    expect(runnerResult.taskRunError).toMatchInlineSnapshot('[Error: GENERIC ERROR MESSAGE]');
+    expect(logger.debug).toHaveBeenCalledWith(
+      'ruleRunStatus for test:1: {"outcome":"failed","outcomeOrder":20,"warning":"unknown","outcomeMsg":["GENERIC ERROR MESSAGE"],"alertsCount":{}}',
+      {
+        tags: ['1', 'test'],
       }
     );
   });

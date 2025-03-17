@@ -129,7 +129,7 @@ export const initializeAlertsClient = async <
     runTimestamp,
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
-    executionUuid,
+    previousExecutionUuid: executionUuid,
   });
 
   return alertsClient;

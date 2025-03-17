@@ -479,11 +479,11 @@ describe('Alerts Client', () => {
 
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
-            executionUuid: '1234',
+            previousExecutionUuid: '1234',
           });
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
             ...defaultExecutionOpts,
-            executionUuid: '1234',
+            previousExecutionUuid: '1234',
           });
 
           expect(clusterClient.search).toHaveBeenCalledWith({
@@ -498,6 +498,7 @@ describe('Alerts Client', () => {
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
             ignore_unavailable: true,
+            size: 1000,
           });
 
           spy.mockRestore();
@@ -528,7 +529,7 @@ describe('Alerts Client', () => {
           const alertsClient = new AlertsClient(alertsClientParams);
           const executionOptionsWithUuid = {
             ...defaultExecutionOpts,
-            executionUuid: '1234',
+            previousExecutionUuid: '1234',
           };
 
           try {
@@ -2723,6 +2724,7 @@ describe('Alerts Client', () => {
             ...mockAlertPayload,
             [ALERT_INSTANCE_ID]: alertInstanceId,
             [ALERT_STATUS]: 'active',
+            [ALERT_UUID]: 'abc',
           };
           const newClusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
           newClusterClient.search.mockResolvedValue({
