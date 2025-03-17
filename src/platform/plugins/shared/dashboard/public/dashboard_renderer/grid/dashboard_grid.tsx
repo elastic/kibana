@@ -72,7 +72,7 @@ export const DashboardGrid = ({
 
     Object.keys(panels).forEach((panelId) => {
       const gridData = panels[panelId].gridData;
-      const sectionId = panels[panelId].sectionIndex ?? 0;
+      const sectionId = panels[panelId].sectionIndex ?? firstRowId.current;
       newLayout[sectionId].panels[panelId] = {
         id: panelId,
         row: gridData.y,
