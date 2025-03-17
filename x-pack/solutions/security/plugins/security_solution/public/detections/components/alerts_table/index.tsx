@@ -13,14 +13,9 @@ import type { AlertsTableProps, RenderContext } from '@kbn/response-ops-alerts-t
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import {
-  dataTableActions,
-  dataTableSelectors,
-  tableDefaults,
-  TableId,
-} from '@kbn/securitysolution-data-table';
+import { dataTableActions, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
@@ -59,10 +54,9 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { getColumns, CellValue } from '../../configurations/security_solution_detections';
 import { buildTimeRangeFilter } from './helpers';
-import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
@@ -197,28 +191,23 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-
+  const licenseDefaults = useMemo(() => getAlertsDefaultModel(license), [license]);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-  const isDataTableInitialized = useShallowEqualSelector(
-    (state) => (getTable(state, tableType) ?? tableDefaults).initialized
-  );
+  const {
+    initialized: isDataTableInitialized,
+    graphEventId,
+    sessionViewConfig,
+    viewMode: tableView = eventsDefaultModel.viewMode,
+    columns,
+    totalCount: count,
+  } = useSelector((state: State) => getTable(state, tableType) ?? licenseDefaults);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
   const allFilters = useMemo(() => {
     return [...inputFilters, ...(globalFilters ?? []), ...(timeRangeFilter ?? [])];
   }, [inputFilters, globalFilters, timeRangeFilter]);
-
-  const {
-    dataTable: {
-      graphEventId, // If truthy, the graph viewer (Resolver) is showing
-      sessionViewConfig,
-      viewMode: tableView = eventsDefaultModel.viewMode,
-      columns,
-      totalCount: count,
-    } = getAlertsDefaultModel(license),
-  } = useShallowEqualSelector((state: State) => eventsViewerSelector(state, tableType));
 
   const combinedQuery = useMemo(() => {
     if (browserFields != null && indexPatterns != null) {
@@ -293,7 +282,6 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
 
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
-      onLoad(context.alerts);
       setTableContext(context);
       dispatch(
         updateIsLoading({
@@ -314,7 +302,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
         inspect: null,
       });
     },
-    [dispatch, onLoad, setQuery, tableType]
+    [dispatch, setQuery, tableType]
   );
   const userProfiles = useFetchUserProfilesFromAlerts({
     alerts: tableContext?.alerts ?? [],
@@ -479,6 +467,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
                 columns={finalColumns}
                 browserFields={finalBrowserFields}
                 onUpdate={onUpdate}
+                onLoaded={onLoad}
                 additionalContext={additionalContext}
                 height={alertTableHeight}
                 initialPageSize={50}

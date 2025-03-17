@@ -36,7 +36,9 @@ describe('FeatureFlagsService Server', () => {
   });
 
   afterEach(async () => {
+    jest.useRealTimers();
     await featureFlagsService.stop();
+    jest.spyOn(OpenFeature, 'setProviderAndWait').mockRestore(); // Make sure that we clean up any previous mocked implementations
     jest.clearAllMocks();
     await OpenFeature.clearProviders();
   });
@@ -45,7 +47,7 @@ describe('FeatureFlagsService Server', () => {
     test('appends a provider (no async operation)', () => {
       expect.assertions(1);
       const { setProvider } = featureFlagsService.setup();
-      const spy = jest.spyOn(OpenFeature, 'setProvider');
+      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
       expect(spy).toHaveBeenCalledWith(fakeProvider);

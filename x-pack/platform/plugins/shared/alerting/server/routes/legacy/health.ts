@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { DocLinksServiceSetup } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
+import type { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { AlertingFrameworkHealth } from '../../types';
+import type { AlertingFrameworkHealth } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { getSecurityHealth } from '../../lib/get_security_health';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';

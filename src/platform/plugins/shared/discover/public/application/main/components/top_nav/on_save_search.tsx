@@ -11,13 +11,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import type { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { isLegacyTableEnabled } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
+import { internalStateActions } from '../../state_management/redux';
 
 async function saveDataSource({
   savedSearch,
@@ -94,7 +96,7 @@ export async function onSaveSearch({
   onSaveCb?: () => void;
 }) {
   const { uiSettings, savedObjectsTagging } = services;
-  const dataView = state.internalState.getState().dataView;
+  const dataView = savedSearch.searchSource.getField('index');
   const overriddenVisContextAfterInvalidation =
     state.internalState.getState().overriddenVisContextAfterInvalidation;
 
@@ -181,7 +183,7 @@ export async function onSaveSearch({
         savedSearch.tags = currentTags;
       }
     } else {
-      state.internalState.transitions.resetOnSavedSearchChange();
+      state.internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
       state.appState.resetInitialState();
     }
 

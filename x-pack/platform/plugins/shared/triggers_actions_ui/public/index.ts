@@ -86,10 +86,6 @@ export {
 
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
 
-export type { ActionGroupWithCondition } from './application/sections';
-
-export { AlertConditions, AlertConditionsGroup } from './application/sections';
-
 export function plugin(context: PluginInitializerContext) {
   return new Plugin(context);
 }
@@ -136,11 +132,6 @@ export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
 export type { TriggersAndActionsUiServices } from './application/rules_app';
 export type { BulkOperationAttributes, BulkOperationResponse } from './types';
-
-export const getNotifyWhenOptions = async () => {
-  const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
-  return NOTIFY_WHEN_OPTIONS;
-};
 
 export { transformRule } from './application/lib/rule_api/common_transformations';
 

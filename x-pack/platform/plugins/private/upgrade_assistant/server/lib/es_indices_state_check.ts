@@ -12,19 +12,16 @@ import { ResolveIndexResponseFromES } from '../../common/types';
 type StatusCheckResult = Record<string, 'open' | 'closed'>;
 
 export const esIndicesStateCheck = async (
-  asCurrentUser: ElasticsearchClient,
+  esClient: ElasticsearchClient,
   indices: string[]
 ): Promise<StatusCheckResult> => {
-  const response = await asCurrentUser.indices.resolveIndex({
+  const response = await esClient.indices.resolveIndex({
     name: '*',
     expand_wildcards: 'all',
   });
 
-  const result: StatusCheckResult = {};
-
-  indices.forEach((index) => {
-    result[index] = getIndexState(index, response as ResolveIndexResponseFromES);
-  });
-
-  return result;
+  return indices.reduce<StatusCheckResult>((acc, index) => {
+    acc[index] = getIndexState(index, response as ResolveIndexResponseFromES);
+    return acc;
+  }, {});
 };
