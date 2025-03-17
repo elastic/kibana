@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
@@ -16,7 +15,7 @@ import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { chatComplete, getMessageAddedEvents } from './helpers';
+import { chatComplete } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -45,7 +44,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     // Calling `title_conversation` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
-      let messageAddedEvents: MessageAddEvent[];
       let titleRequestBody: ChatCompletionStreamParams;
 
       const USER_MESSAGE = 'Why the sky is blue?';
@@ -54,7 +52,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptTitle('Question about color of the sky');
         void llmProxy.interceptConversation(`The sky is blue because of Rayleigh scattering.`);
 
-        const response = await chatComplete({
+        await chatComplete({
           userPrompt: USER_MESSAGE,
           connectorId,
           persist: true,
@@ -62,7 +60,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        messageAddedEvents = getMessageAddedEvents(response.body);
 
         titleRequestBody = llmProxy.interceptedRequests[0].requestBody;
       });
