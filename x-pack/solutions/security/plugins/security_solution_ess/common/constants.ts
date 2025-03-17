@@ -16,6 +16,6 @@ const DISABLED_PRODUCT_FEATURES: ProductFeatureKeyType[] = [
   ProductFeatureSecurityKey.alertsSummary,
 ];
 
-export const DEFAULT_PRODUCT_FEATURES = ALL_PRODUCT_FEATURE_KEYS.filter((key) => {
-  return !DISABLED_PRODUCT_FEATURES.includes(key as ProductFeatureKeyType);
-});
+export const DEFAULT_PRODUCT_FEATURES = ALL_PRODUCT_FEATURE_KEYS.filter(
+  (key) => !DISABLED_PRODUCT_FEATURES.includes(key as ProductFeatureKeyType)
+);
