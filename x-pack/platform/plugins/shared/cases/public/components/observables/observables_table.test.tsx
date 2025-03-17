@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import { screen } from '@testing-library/react';
 import { mockCase, mockObservables } from '../../containers/mock';
 import { ObservablesTable, type ObservablesTableProps } from './observables_table';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('ObservablesTable', () => {
-  let appMock: AppMockRenderer;
   const props: ObservablesTableProps = {
     caseData: {
       ...mockCase,
@@ -21,23 +21,22 @@ describe('ObservablesTable', () => {
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<ObservablesTable {...props} />);
+    renderWithTestingProviders(<ObservablesTable {...props} />);
 
-    expect(result.getByTestId('cases-observables-table')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-observables-table')).toBeInTheDocument();
 
-    expect(result.getByText('Showing 2 observables')).toBeInTheDocument();
-    expect(result.getByText('Observable type')).toBeInTheDocument();
-    expect(result.getByText('Observable value')).toBeInTheDocument();
+    expect(screen.getByText('Showing 2 observables')).toBeInTheDocument();
+    expect(screen.getByText('Observable type')).toBeInTheDocument();
+    expect(screen.getByText('Observable value')).toBeInTheDocument();
   });
 
   it('renders loading indicator when loading', async () => {
-    const result = appMock.render(<ObservablesTable {...props} isLoading={true} />);
-    expect(result.queryByTestId('cases-observables-table')).not.toBeInTheDocument();
-    expect(result.getByTestId('cases-observables-table-loading')).toBeInTheDocument();
+    renderWithTestingProviders(<ObservablesTable {...props} isLoading={true} />);
+    expect(screen.queryByTestId('cases-observables-table')).not.toBeInTheDocument();
+    expect(screen.getByTestId('cases-observables-table-loading')).toBeInTheDocument();
   });
 });
