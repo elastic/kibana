@@ -22,13 +22,7 @@ export const getEntityStorePrivileges = (
   securitySolutionIndices: string[]
 ) => {
   // The entity store needs access to all security solution indices
-  const indicesPrivileges = securitySolutionIndices.reduce<Record<string, string[]>>(
-    (acc, index) => {
-      acc[index] = ['read', 'view_index_metadata'];
-      return acc;
-    },
-    {}
-  );
+  const indicesPrivileges = getEntityStoreSourceIndicesPrivileges(securitySolutionIndices);
 
   // The entity store has to create the following indices
   indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
@@ -48,4 +42,11 @@ export const getEntityStorePrivileges = (
       },
     },
   });
+};
+
+export const getEntityStoreSourceIndicesPrivileges = (securitySolutionIndices: string[]) => {
+  return securitySolutionIndices.reduce<Record<string, string[]>>((acc, index) => {
+    acc[index] = ['read', 'view_index_metadata'];
+    return acc;
+  }, {});
 };
