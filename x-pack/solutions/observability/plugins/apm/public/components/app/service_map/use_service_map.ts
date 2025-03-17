@@ -7,8 +7,6 @@
 import { useEffect, useState } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type {
-  ServiceMapSpan,
-  ExitSpanDestination,
   ServiceMapRawResponse,
   ServiceMapTelemetry,
 } from '../../../../common/service_map/types';
@@ -16,13 +14,8 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import type { Environment } from '../../../../common/environment_rt';
-import {
-  getExternalConnectionNode,
-  getServiceConnectionNode,
-  getServiceMapNodes,
-  getConnections,
-} from '../../../../common/service_map';
-import type { ConnectionNode, GroupResourceNodesResponse } from '../../../../common/service_map';
+import { getServiceMapNodes, getPaths } from '../../../../common/service_map';
+import type { GroupResourceNodesResponse } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 type SeriviceMapState = GroupResourceNodesResponse & Pick<ServiceMapTelemetry, 'tracesCount'>;
@@ -38,6 +31,7 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
+  isServiceMapApiV2Enabled,
 }: {
   environment: Environment;
   kuery: string;
@@ -45,6 +39,7 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
+  isServiceMapApiV2Enabled: boolean;
 }) => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -74,7 +69,7 @@ export const useServiceMap = ({
             serviceName,
             serviceGroup: serviceGroupId,
             kuery,
-            useV2: config.ui.serviceMapApiV2Enabled,
+            useV2: isServiceMapApiV2Enabled,
           },
         },
       });
@@ -88,7 +83,7 @@ export const useServiceMap = ({
       serviceGroupId,
       kuery,
       config.serviceMapEnabled,
-      config.ui.serviceMapApiV2Enabled,
+      isServiceMapApiV2Enabled,
     ],
     { preservePreviousData: false }
   );
@@ -142,35 +137,9 @@ export const useServiceMap = ({
 const processServiceMapData = (data: ServiceMapRawResponse): GroupResourceNodesResponse => {
   const paths = getPaths({ spans: data.spans });
   return getServiceMapNodes({
-    connections: getConnections(paths.connections),
+    connections: paths.connections,
     exitSpanDestinations: paths.exitSpanDestinations,
     servicesData: data.servicesData,
     anomalies: data.anomalies,
   });
-};
-
-const getPaths = ({ spans }: { spans: ServiceMapSpan[] }) => {
-  const connections: ConnectionNode[][] = [];
-  const exitSpanDestinations: ExitSpanDestination[] = [];
-
-  for (const currentNode of spans) {
-    const exitSpanNode = getExternalConnectionNode(currentNode);
-    const serviceNode = getServiceConnectionNode(currentNode);
-
-    if (currentNode.destinationService) {
-      // maps an exit span to its destination service
-      exitSpanDestinations.push({
-        from: exitSpanNode,
-        to: getServiceConnectionNode(currentNode.destinationService),
-      });
-    }
-
-    // builds a connection between a service and an exit span
-    connections.push([serviceNode, exitSpanNode]);
-  }
-
-  return {
-    connections,
-    exitSpanDestinations,
-  };
 };

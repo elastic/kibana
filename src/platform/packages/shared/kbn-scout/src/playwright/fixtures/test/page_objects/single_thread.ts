@@ -8,6 +8,7 @@
  */
 
 import { PageObjects, createCorePageObjects } from '../../../page_objects';
+import { ScoutTestConfig } from '../../worker';
 import { scoutPageFixture } from '../scout_page';
 
 /**
@@ -18,11 +19,14 @@ import { scoutPageFixture } from '../scout_page';
  *
  * Note: Page Objects are lazily instantiated on first access.
  */
-export const pageObjectsFixture = scoutPageFixture.extend<{
-  pageObjects: PageObjects;
-}>({
-  pageObjects: async ({ page, log }, use) => {
-    const corePageObjects = createCorePageObjects(page);
+export const pageObjectsFixture = scoutPageFixture.extend<
+  {
+    pageObjects: PageObjects;
+  },
+  { config: ScoutTestConfig }
+>({
+  pageObjects: async ({ page, log, config }, use) => {
+    const corePageObjects = createCorePageObjects({ page, config, log });
     log.serviceLoaded('pageObjects');
     await use(corePageObjects);
   },

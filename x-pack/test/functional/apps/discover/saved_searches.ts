@@ -36,7 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover Saved Searches', () => {
     before('initialize tests', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.importExport.load(ecommerceSOPath);
       await kibanaServer.uiSettings.update(defaultSettings);
       await common.setTime({ from, to });
@@ -44,7 +46,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.importExport.unload(ecommerceSOPath);
       await common.unsetTime();
     });
