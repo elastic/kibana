@@ -6,26 +6,21 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiText, EuiPanel } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
-import { sendPostRetrieveAgentsByActions } from '../../../../../hooks';
+// import { sendPostRetrieveAgentsByActions } from '../../../../../hooks';
 
 import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
 import { ActivityItem } from './activity_item';
-const getTotalAgentsInActions = async (actions: ActionStatus[]) => {
-  // First get the agents ids by the action id
-  const { data } = await sendPostRetrieveAgentsByActions({
-    actionIds: actions.map((i) => i.actionId),
-  });
-  if (data?.items?.length) {
-    //  now we have a list of all agents ids
-    const agentIds = data.items;
-    return agentIds.length;
-  }
-  return 0;
-};
+// const getAllAgentsPerPolicy = async (actions: ActionStatus[]) => {
+//   // for every action, use the policy id to get the total count of agents in the policy
+//   const totalAgentsPerPolicy = {};
+//   actions.forEach((action) => {
+//     // need to get all agents in the policy
+//   });
+// };
 export const ActivitySection: React.FunctionComponent<{
   title: ReactNode;
   actions: ActionStatus[];
@@ -41,16 +36,16 @@ export const ActivitySection: React.FunctionComponent<{
   onClickManageAutoUpgradeAgents,
   numAgents,
 }) => {
-  const [totalAgentsInActions, setTotalAgentsInActions] = useState(0);
-  // gets the total count of agents in all the actions for this section
-  useEffect(() => {
-    const fetchTotalAgentsInActions = async () => {
-      const total = await getTotalAgentsInActions(actions);
+  // const [totalAgentsPerPolicy, setTotalAgentsPerPolicy] = useState({});
+  // // gets the total count of agents in all the actions for this section
+  // useEffect(() => {
+  //   const fetchTotalAgentsPerPolicy = async () => {
+  //     const total = await getAllAgentsPerPolicy(actions);
 
-      setTotalAgentsInActions(total);
-    };
-    fetchTotalAgentsInActions();
-  });
+  //     setTotalAgentsPerPolicy(total);
+  //   };
+  //   fetchTotalAgentsPerPolicy();
+  // });
 
   return (
     <>
@@ -67,10 +62,7 @@ export const ActivitySection: React.FunctionComponent<{
             key={currentAction.actionId}
             onClickViewAgents={onClickViewAgents}
             onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
-            progress={{
-              actionProgress: index / totalAgentsInActions,
-              totalProgress: totalAgentsInActions / numAgents,
-            }}
+            totalAgentsInPolicy={numAgents}
           />
         ) : (
           <ActivityItem

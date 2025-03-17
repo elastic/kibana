@@ -33,8 +33,15 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
-  progress: { actionProgress: number; totalProgress: number };
-}> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents, progress }) => {
+  totalAgentsInPolicy: number;
+}> = ({
+  action,
+  abortUpgrade,
+  onClickViewAgents,
+  onClickManageAutoUpgradeAgents,
+  totalAgentsInPolicy,
+}) => {
+  console.log('the action in activity item', action);
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
   const isAutomaticUpgrade = action.is_automatic;
@@ -131,25 +138,27 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                   <p>
                     {isAutomaticUpgrade ? 'Automatic' : 'NOT Automatic'} Upgraded{' '}
                     {(action.nbAgentsAck / action.nbAgentsActioned) * 100}% of the{' '}
-                    {progress.totalProgress * 100}% of agents in the policy
+                    {totalAgentsInPolicy}% of agents in the policy
                   </p>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={() => onClickManageAutoUpgradeAgents(action)}
-                  size="m"
-                  flush="left"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
-                    defaultMessage="Manage auto-upgrade agents"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              {isAutomaticUpgrade && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => onClickManageAutoUpgradeAgents(action)}
+                    size="m"
+                    flush="left"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
+                      defaultMessage="Manage auto-upgrade agents"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
 
             <EuiFlexItem grow={false}>

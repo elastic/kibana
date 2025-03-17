@@ -86,7 +86,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
       currentActions.map((a) => ({
         ...a,
         newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
-        policyId: getAgentPolicyName(a.policyId ?? ''),
+        policyId: a.policyId ? a.policyId : getAgentPolicyName(a.newPolicyId ?? ''),
       })),
     [currentActions, getAgentPolicyName]
   );
@@ -112,24 +112,9 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     }
   };
   const onClickManageAutoUpgradeAgents = async (action: ActionStatus) => {
-    // First get the agents ids by the action id
-    const { data } = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
-    if (data?.items?.length) {
-      const policyId = data.items[0];
-      // then need to get the agents by id
-      const kuery = getKuery({ selectedAgentIds: [policyId] });
-      const { data: agentsData } = await sendGetAgents({
-        kuery,
-        perPage: SO_SEARCH_LIMIT,
-        showInactive: false,
-      });
-
-      // then use the policy id of one of the agents (they should all be the same?) to open the modal and close the current one
-      onClose();
-      openManageAutoUpgradeModal(
-        agentsData?.items[0].policy_id ? agentsData.items[0].policy_id : ''
-      );
-    }
+    //  use the policy id from the action to manage
+    onClose();
+    openManageAutoUpgradeModal(action.policyId!);
   };
 
   const onClickShowMore = () => {
