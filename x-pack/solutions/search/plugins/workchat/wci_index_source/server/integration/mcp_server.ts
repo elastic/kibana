@@ -16,10 +16,12 @@ type SearchResult = any; // TODO: fix this
 
 export async function createMcpServer({
   configuration,
+  description,
   elasticsearchClient,
   logger,
 }: {
   configuration: WCIIndexSourceConfiguration;
+  description: string;
   elasticsearchClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<McpServer> {
@@ -105,7 +107,7 @@ export async function createMcpServer({
     }
   );
 
-  server.tool('search', configuration.description, filterSchema, async ({ query, ...filters }) => {
+  server.tool('search', description, filterSchema, async ({ query, ...filters }) => {
     logger.info(`Searching for "${query}" in index "${index}"`);
 
     let result = null;
@@ -121,16 +123,18 @@ export async function createMcpServer({
       }) || [];
 
     try {
+      const queryClause = query
+      ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
+      : {
+          match_all: {},
+        }
+
       result = await elasticsearchClient.search<SearchResult>({
         index,
         query: {
           bool: {
             must: [
-              query
-                ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
-                : {
-                    match_all: {},
-                  },
+              queryClause
             ],
             ...(esFilters.length > 0 ? { filter: esFilters } : {}),
           },

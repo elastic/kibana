@@ -39,7 +39,12 @@ export class AgentFactory {
   }): Promise<Agent> {
     this.logger.debug(`getAgent [agentId=${agentId}] [connectorId=${connectorId}]`);
 
-    const integrationsSession = await this.integrationsService.createSession({ request });
+    const integrationClient = await this.integrationsService.getScopedClient({ request });
+
+    const integrationsSession = await this.integrationsService.createSession({
+      request,
+      integrationClient,
+    });
 
     const chatModel = await this.inference.getChatModel({
       request,
