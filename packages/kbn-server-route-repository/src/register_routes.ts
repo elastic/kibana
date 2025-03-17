@@ -91,6 +91,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         }
 
         if (isKibanaResponse(result)) {
+          if (result.status >= 500) {
+            logger.error(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          } else if (result.status >= 400) {
+            logger.debug(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          }
+
           return result;
         } else if (isObservable(result)) {
           return response.ok({
@@ -101,8 +107,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return response.ok({ body });
         }
       } catch (error) {
-        logger.error(error);
-
         const opts = {
           statusCode: 500,
           body: {
@@ -120,6 +124,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(() => error);
+        } else {
+          logger.debug(() => error);
         }
 
         return response.custom(opts);
