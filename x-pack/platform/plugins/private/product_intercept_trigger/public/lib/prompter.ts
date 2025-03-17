@@ -14,6 +14,10 @@ import { TRIGGER_API_ENDPOINT } from '../../common/constants';
 type ProductInterceptPrompterArgs = Pick<CoreStart, 'http' | 'notifications' | 'userProfile'>;
 
 export class ProductInterceptPrompter {
+  setup() {
+    // register the event types this prompter will be reporting
+  }
+
   start({ http, notifications, userProfile }: ProductInterceptPrompterArgs) {
     http
       .get<{ triggerIntervalInMs: number; runs: number }>(TRIGGER_API_ENDPOINT)
@@ -34,37 +38,39 @@ export class ProductInterceptPrompter {
                   {
                     id: 'hello',
                     title: `Help us improve Kibana (${String(response.runs + runCount)})`,
-                    content: React.createElement(
-                      EuiText,
-                      {},
-                      "We'd love your feedback to make Kibana even better. It will take 10 seconds only."
-                    ),
+                    content: () =>
+                      React.createElement(
+                        EuiText,
+                        {},
+                        "We'd love your feedback to make Kibana even better. It will take 10 seconds only."
+                      ),
                   },
                   {
                     id: 'satisfaction',
                     title: 'Overall, how satisfied or dissatisfied are you with Kibana?',
-                    content: React.createElement(NPSScoreInput, {
-                      onSelectionChange: () => {
-                        // do something with the selection
-                      },
-                      lowerBoundHelpText: 'Very dissatisfied',
-                      upperBoundHelpText: 'Very satisfied',
-                    }),
+                    content: ({ onValue }) => {
+                      return React.createElement(NPSScoreInput, {
+                        lowerBoundHelpText: 'Very dissatisfied',
+                        upperBoundHelpText: 'Very satisfied',
+                        onChange: onValue,
+                      });
+                    },
                   },
                   {
                     id: 'ease',
                     title: `Overall, how difficult or easy is it to use Kibana?`,
-                    content: React.createElement(NPSScoreInput, {
-                      onSelectionChange: () => {
-                        // do something with the selection
-                      },
-                      lowerBoundHelpText: 'Very difficult',
-                      upperBoundHelpText: 'Very easy',
-                    }),
+                    content: ({ onValue }) => {
+                      return React.createElement(NPSScoreInput, {
+                        lowerBoundHelpText: 'Very difficult',
+                        upperBoundHelpText: 'Very easy',
+                        onChange: onValue,
+                      });
+                    },
                   },
                 ],
-                onFinish() {
+                onFinish({ response: feedbackResponse }) {
                   // maybe bump user profile run count and close the dialog
+                  // console.log({ feedbackResponse });
                 },
                 onDismiss() {
                   // maybe do something user

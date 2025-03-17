@@ -6,40 +6,47 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonGroup,
   EuiButtonGroupProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  useEuiTheme,
 } from '@elastic/eui';
 
-interface SecondStepProps {
+interface NPSScoreInputProps {
   /**
    * default value here is 5
    */
   upperBound?: number;
   lowerBoundHelpText?: string;
   upperBoundHelpText?: string;
-  onSelectionChange?: EuiButtonGroupProps['onChange'];
+  onChange?: EuiButtonGroupProps['onChange'];
 }
 
 export function NPSScoreInput({
-  onSelectionChange,
+  onChange,
   lowerBoundHelpText,
   upperBoundHelpText,
   upperBound = 5,
-}: SecondStepProps) {
-  const options: EuiButtonGroupProps['options'] = Array.from({ length: upperBound }, (_, i) => ({
-    id: `${i + 1}`,
-    label: `${i + 1}`,
-  }));
+}: NPSScoreInputProps) {
+  const options: EuiButtonGroupProps['options'] = Array.from({ length: upperBound }, (_, i) => {
+    const optionValue = i + 1;
 
-  const [selectedOption, setSelectedOption] = useState(options[0].id);
+    return {
+      id: `nps-${optionValue}`,
+      label: optionValue,
+      value: optionValue,
+    };
+  });
+
+  const [selectedOption, setSelectedOption] = useState('');
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFormRow
-      css={() => ({})}
       helpText={
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -52,13 +59,18 @@ export function NPSScoreInput({
       }
     >
       <EuiButtonGroup
+        css={css`
+          .euiButtonGroupButton:hover {
+            background-color: ${euiTheme.components.buttons.backgroundFilledText};
+          }
+        `}
         legend="Survey about user satisfaction"
         type="single"
         options={options}
         idSelected={selectedOption}
-        onChange={(id) => {
+        onChange={(id, value) => {
           setSelectedOption(id);
-          onSelectionChange?.(id);
+          onChange?.(value);
         }}
         isFullWidth
       />

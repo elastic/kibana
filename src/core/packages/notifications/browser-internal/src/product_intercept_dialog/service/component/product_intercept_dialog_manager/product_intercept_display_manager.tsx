@@ -72,6 +72,7 @@ export function ProductInterceptDisplayManager({
   const [currentProductIntercept, setCurrentProductIntercept] = useState<ProductIntercept | null>(
     null
   );
+  const feedbackStore = useRef<Record<string, unknown>>({});
 
   const processingProductIntercept = useRef(new Rx.BehaviorSubject(false));
 
@@ -94,18 +95,21 @@ export function ProductInterceptDisplayManager({
     return currentProductIntercept?.steps?.[currentStepIndex];
   }, [currentProductIntercept, currentStepIndex]);
 
-  const nextStep = useCallback(() => {
-    setCurrentStepIndex((prevStepIndex) => {
-      if (prevStepIndex === currentProductIntercept!.steps.length) {
-        currentProductIntercept?.onFinish?.();
-        setCurrentStepIndex(0);
-        // this will cause the component to unmount
-        ackProductIntercept(currentProductIntercept!.id, 'completed');
-      }
+  const nextStep = useCallback(
+    (isLastStep?: boolean) => {
+      setCurrentStepIndex((prevStepIndex) => {
+        if (isLastStep) {
+          currentProductIntercept?.onFinish?.({ response: feedbackStore.current });
+          setCurrentStepIndex(0);
+          // this will cause the component to unmount
+          ackProductIntercept(currentProductIntercept!.id, 'completed');
+        }
 
-      return Math.min(prevStepIndex + 1, currentProductIntercept!.steps.length);
-    });
-  }, [ackProductIntercept, currentProductIntercept]);
+        return Math.min(prevStepIndex + 1, currentProductIntercept!.steps.length);
+      });
+    },
+    [ackProductIntercept, currentProductIntercept]
+  );
 
   const dismissProductIntercept = useCallback(() => {
     currentProductIntercept?.onDismiss?.();
@@ -119,11 +123,23 @@ export function ProductInterceptDisplayManager({
     });
   }, [ackProductIntercept, currentProductIntercept]);
 
+  const onInputChange = useCallback(
+    (value: unknown) => {
+      feedbackStore.current[currentProductInterceptStep!.id] = value;
+      currentProductIntercept?.onProgress?.(currentProductInterceptStep!.id, value);
+      nextStep();
+    },
+    [currentProductIntercept, currentProductInterceptStep, nextStep]
+  );
+
+  let isLastStep = false;
+
   return currentProductIntercept && currentProductInterceptStep ? (
     <EuiPortal>
       <EuiSplitPanel.Outer
         grow
         role="dialog"
+        data-test-subj={`interceptStep-${currentProductInterceptStep.id}`}
         css={css`
           position: fixed;
           inline-size: 360px;
@@ -163,7 +179,11 @@ export function ProductInterceptDisplayManager({
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiForm fullWidth>{currentProductInterceptStep!.content}</EuiForm>
+              <EuiForm fullWidth>
+                {React.createElement(currentProductInterceptStep!.content, {
+                  onValue: onInputChange,
+                })}
+              </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
@@ -174,41 +194,43 @@ export function ProductInterceptDisplayManager({
             border-top: ${euiTheme.border.thin};
           `}
         >
-          <EuiFlexGroup>
-            <EuiFlexItem
-              css={css`
-                justify-content: center;
-              `}
-            >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
               <InterceptProgressIndicator
                 stepsTotal={currentProductIntercept.steps.length}
                 currentStep={currentStepIndex}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xs">
-                {currentStepIndex === 0 && (
+            {(currentStepIndex === 0 ||
+              (isLastStep = currentStepIndex === currentProductIntercept.steps.length - 1)) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="xs">
+                  {currentStepIndex === 0 && (
+                    <EuiFlexItem>
+                      <EuiButtonEmpty
+                        data-test-subj="productInterceptDismiss"
+                        onClick={dismissProductIntercept}
+                        color="text"
+                      >
+                        {i18n.translate('core.notifications.productIntercept.dismiss', {
+                          defaultMessage: 'Not now, thanks',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem>
-                    <EuiButtonEmpty
-                      data-test-subj="productInterceptDismiss"
-                      onClick={dismissProductIntercept}
-                      color="text"
+                    <EuiButton
+                      data-test-subj="productInterceptProgressionButton"
+                      onClick={() => nextStep(isLastStep)}
                     >
-                      {i18n.translate('core.notifications.productIntercept.dismiss', {
-                        defaultMessage: 'Not now, thanks',
+                      {i18n.translate('core.notifications.productIntercept.nextStep', {
+                        defaultMessage: 'Next',
                       })}
-                    </EuiButtonEmpty>
+                    </EuiButton>
                   </EuiFlexItem>
-                )}
-                <EuiFlexItem>
-                  <EuiButton data-test-subj="productInterceptProgressionButton" onClick={nextStep}>
-                    {i18n.translate('core.notifications.productIntercept.nextStep', {
-                      defaultMessage: 'Next',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>

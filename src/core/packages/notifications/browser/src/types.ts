@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC } from 'react';
 import type { Observable } from 'rxjs';
 import type { EuiGlobalToastListToast as EuiToast, EuiTourStepProps } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -78,16 +79,27 @@ export interface IToasts {
   addError: (error: Error, options: ErrorToastOptions) => Toast;
 }
 
-interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title' | 'content'> {
+interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title'> {
   id: string;
-  onNextClick?: (step: number) => void;
+  /**
+   * expects a react component that will be rendered in the dialog, and expects a callback to be called with the value
+   * of the step when the user is done with the step.
+   */
+  content: FC<{ onValue: (value: unknown) => void }>;
 }
 
 export interface ProductIntercept {
   id: string;
   title: string;
   steps: ProductInterceptSteps[];
-  onFinish: () => void;
+  /**
+   * Provides the response of the user interaction with the dialog for a particular step.
+   */
+  onProgress?: (stepId: string, stepResponse: unknown) => void;
+  /**
+   * Provides the response of the users interaction within the dialog as a object with keys corresponding to the id of the steps.
+   */
+  onFinish: ({ response }: { response: Record<string, unknown> }) => void;
   onDismiss?: () => void;
 }
 
