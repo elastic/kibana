@@ -10,10 +10,10 @@ import {
   IntegrationType,
   WorkchatIntegrationDefinition,
   WorkChatIntegration,
-  IntegrationContext,
   getClientForInternalServer,
 } from '@kbn/wci-common';
 import { createMcpServer } from './mcp_server';
+import { SalesforceConfiguration } from '../types';
 
 export const getSalesforceIntegrationDefinition = ({
   core,
@@ -21,13 +21,10 @@ export const getSalesforceIntegrationDefinition = ({
 }: {
   core: CoreSetup;
   logger: Logger;
-}): WorkchatIntegrationDefinition => {
+}): WorkchatIntegrationDefinition<SalesforceConfiguration> => {
   return {
     getType: () => IntegrationType.salesforce,
-    createIntegration: async ({
-      request,
-      configuration,
-    }: IntegrationContext): Promise<WorkChatIntegration> => {
+    createIntegration: async ({ request, configuration }): Promise<WorkChatIntegration> => {
       const [coreStart] = await core.getStartServices();
       const elasticsearchClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 

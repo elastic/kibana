@@ -20,8 +20,9 @@ import {
   ConversationServiceImpl,
   AgentFactory,
   ChatService,
+  AgentServiceImpl,
 } from './services';
-import { IntegrationRegistry, registerInternalIntegrationTypes } from './services/integrations';
+import { IntegrationRegistry } from './services/integrations';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -65,8 +66,6 @@ export class WorkChatAppPlugin
 
     registerTypes({ savedObjects: core.savedObjects });
 
-    registerInternalIntegrationTypes({ registry: this.integrationRegistry });
-
     return {
       integrations: {
         register: (integration) => {
@@ -86,12 +85,20 @@ export class WorkChatAppPlugin
       logger: this.logger.get('services.integrations'),
       elasticsearch: core.elasticsearch,
       registry: this.integrationRegistry,
+      savedObjects: core.savedObjects,
+      security: core.security,
     });
 
     const conversationService = new ConversationServiceImpl({
       savedObjects: core.savedObjects,
       security: core.security,
       logger: this.logger.get('services.conversations'),
+    });
+
+    const agentService = new AgentServiceImpl({
+      savedObjects: core.savedObjects,
+      security: core.security,
+      logger: this.logger.get('services.agent'),
     });
 
     const agentFactory = new AgentFactory({
@@ -109,6 +116,7 @@ export class WorkChatAppPlugin
 
     this.services = {
       conversationService,
+      agentService,
       agentFactory,
       integrationsService,
       chatService,

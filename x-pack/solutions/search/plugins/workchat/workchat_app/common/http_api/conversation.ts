@@ -7,8 +7,6 @@
 
 import type { Conversation, ConversationSummary } from '../conversations';
 
-export interface ListConversationPayload {}
-
 export interface ListConversationResponse {
   conversations: ConversationSummary[];
 }

@@ -10,4 +10,4 @@ module.exports = {
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/workchat_app'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
-}; 
+};

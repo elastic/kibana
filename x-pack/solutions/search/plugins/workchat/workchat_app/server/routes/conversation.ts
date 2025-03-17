@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ConversationSummary } from '../../common/conversations';
 import type {
   ListConversationResponse,
   GetConversationResponse,
@@ -49,7 +50,7 @@ export const registerConversationRoutes = ({ getServices, router }: RouteDepende
 
       const conversations = await client.list();
 
-      const summaries = conversations.map((conv) => {
+      const summaries = conversations.map<ConversationSummary>((conv) => {
         return {
           id: conv.id,
           agentId: conv.agentId,
