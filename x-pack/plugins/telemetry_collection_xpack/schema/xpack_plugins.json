@@ -74,6 +74,9 @@
             "[OpenAI]": {
               "type": "long"
             }
+            "[PKI OpenAI]": { 
+              "type": "long" 
+            }
           }
         },
         "count_active_total": {
