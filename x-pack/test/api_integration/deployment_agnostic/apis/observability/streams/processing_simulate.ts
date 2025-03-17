@@ -406,6 +406,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'The processor is not additive to the documents. It might update fields [log.level,message]',
           },
         ]);
+        // Non-additive changes are not counted as error
+        expect(grokMetrics.success_rate).to.be(1);
+        expect(grokMetrics.failure_rate).to.be(0);
       });
 
       it('should return the is_non_additive_simulation simulation flag', async () => {
