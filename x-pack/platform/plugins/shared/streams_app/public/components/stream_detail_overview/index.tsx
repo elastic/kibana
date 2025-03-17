@@ -137,7 +137,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
       ) {
         return undefined;
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/_details', {
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/_details', {
         signal,
         params: {
           path: {
@@ -282,6 +282,7 @@ function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
 
   return (
     <DashboardsTable
+      entityId={definition?.stream.name}
       dashboards={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
       loading={dashboardsFetch.loading}
     />
