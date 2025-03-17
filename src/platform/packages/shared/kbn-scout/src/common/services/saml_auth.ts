@@ -43,7 +43,7 @@ const createKibanaHostOptions = (config: ScoutTestConfig): HostOptions => {
 export const createSamlSessionManager = (
   config: ScoutTestConfig,
   log: ScoutLogger,
-  workerIndex?: number
+  customRoleName?: string
 ) => {
   const resourceDirPath = getResourceDirPath(config);
   const rolesDefinitionPath = path.resolve(resourceDirPath, 'roles.yml');
@@ -53,9 +53,7 @@ export const createSamlSessionManager = (
     unknown
   >;
 
-  const customRoleName = workerIndex ? `custom_role_${workerIndex + 1}` : 'custom_role';
-
-  const supportedRoles = [...Object.keys(supportedRoleDescriptors), customRoleName];
+  const supportedRoles = [...Object.keys(supportedRoleDescriptors)].concat(customRoleName || []);
 
   const sessionManager = new SamlSessionManager({
     hostOptions: createKibanaHostOptions(config),

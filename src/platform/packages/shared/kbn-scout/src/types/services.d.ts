@@ -13,6 +13,6 @@ export type {
   KibanaUrl,
   SamlSessionManager,
   ScoutLogger,
-  Role,
-  RoleDescriptor,
+  KibanaRole,
+  ElasticsearchRoleDescriptor,
 } from '../common';
