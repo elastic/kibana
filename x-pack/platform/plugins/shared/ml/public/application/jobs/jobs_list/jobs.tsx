@@ -24,7 +24,8 @@ import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import {
   AnomalyDetectionSettingsButton,
   SuppliedConfigurationsButton,
-} from './components/supplied_configurations_button';
+  SynchronizeSavedObjectsButton,
+} from './components/top_level_actions';
 import { NewJobButton } from './components/new_job_button';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
@@ -70,7 +71,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
     <>
       <MlPageHeader>
         <EuiFlexGroup wrap={true}>
-          <EuiFlexItem grow={true} css={css({ minWidth: '200px' })}>
+          <EuiFlexItem grow={true} css={css({ minWidth: '400px' })}>
             <FormattedMessage
               id="xpack.ml.jobsList.title"
               defaultMessage="Anomaly Detection Jobs"
@@ -83,6 +84,10 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
             <EuiFlexItem grow={false}>
               <AnomalyDetectionSettingsButton />
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SynchronizeSavedObjectsButton refreshJobs={refreshList} />
+            </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <ExportJobsFlyout isDisabled={!canCreateJob} currentTab={'anomaly-detector'} />
             </EuiFlexItem>

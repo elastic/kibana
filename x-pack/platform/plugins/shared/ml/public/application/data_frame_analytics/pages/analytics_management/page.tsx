@@ -24,6 +24,7 @@ import { MlPageHeader } from '../../../components/page_header';
 import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../components/import_export_jobs';
+import { SynchronizeSavedObjectsButton } from '../../../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
@@ -74,7 +75,10 @@ export const Page: FC = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false} justifyContent="flexEnd">
-            <EuiFlexGroup direction="row" gutterSize="none">
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <SynchronizeSavedObjectsButton refreshJobs={refresh} />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ExportJobsFlyout
                   isDisabled={!canCreateAnalytics}

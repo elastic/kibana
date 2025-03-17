@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should have nothing to sync initially', async () => {
       // no sync required warning displayed
-      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
       await ml.overviewPage.assertJobSyncRequiredWarningNotExists();
 
       // object counts in sync flyout are all 0, sync button is disabled
@@ -63,8 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not have objects to sync', async () => {
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToAnomalyDetection();
+      await ml.navigation.navigateToJobManagement();
       await ml.overviewPage.assertJobSyncRequiredWarningNotExists();
     });
 
@@ -107,7 +106,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should have objects to sync', async () => {
-      await ml.jobTable.refreshJobList();
+      await ml.navigation.navigateToJobManagement();
+      await ml.jobTable.refreshJobList('stackMgmtJobList');
 
       await ml.overviewPage.assertJobSyncRequiredWarningExists();
 
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.stackManagementJobs.closeSyncFlyout();
 
       // no sync required warning displayed
-      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
       await ml.overviewPage.assertJobSyncRequiredWarningNotExists();
     });
   });

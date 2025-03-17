@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { SuppliedConfigurationsButton } from './supplied_configurations_button';
-export { AnomalyDetectionSettingsButton } from './supplied_configurations_button';
+export {
+  SuppliedConfigurationsButton,
+  AnomalyDetectionSettingsButton,
+} from './anomaly_detection_actions';
+export { SynchronizeSavedObjectsButton } from './synchronize_saved_objects_button';
