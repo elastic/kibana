@@ -21,15 +21,9 @@ export interface QueryRuleState {
 
 export const createQueryAlertType = (
   createOptions: CreateQueryRuleOptions
-): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState, {}, 'default'> => {
-  const {
-    eventsTelemetry,
-    experimentalFeatures,
-    scheduleNotificationResponseActionsService,
-    licensing,
-    id,
-    name,
-  } = createOptions;
+): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState> => {
+  const { eventsTelemetry, scheduleNotificationResponseActionsService, licensing, id, name } =
+    createOptions;
   return {
     id,
     name,
@@ -73,7 +67,6 @@ export const createQueryAlertType = (
       const { sharedParams, services, state } = execOptions;
       return queryExecutor({
         sharedParams,
-        experimentalFeatures,
         eventsTelemetry,
         services,
         bucketHistory: state.suppressionGroupHistory,

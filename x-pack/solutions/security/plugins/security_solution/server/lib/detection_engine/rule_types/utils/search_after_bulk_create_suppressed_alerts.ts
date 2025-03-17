@@ -12,12 +12,10 @@ import type {
   WrapSuppressedHits,
 } from '../types';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
-  alertSuppression?: AlertSuppressionCamel;
-  experimentalFeatures: ExperimentalFeatures;
+  alertSuppression: AlertSuppressionCamel;
 }
 
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
@@ -31,14 +29,8 @@ import { bulkCreateSuppressedAlertsInMemory } from './bulk_create_suppressed_ale
 export const searchAfterAndBulkCreateSuppressedAlerts = async (
   params: SearchAfterAndBulkCreateSuppressedAlertsParams
 ): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const {
-    sharedParams,
-    services,
-    buildReasonMessage,
-    alertSuppression,
-    wrapSuppressedHits,
-    experimentalFeatures,
-  } = params;
+  const { sharedParams, services, buildReasonMessage, alertSuppression, wrapSuppressedHits } =
+    params;
 
   const bulkCreateExecutor: SearchAfterAndBulkCreateFactoryParams['bulkCreateExecutor'] = async ({
     enrichedEvents,
@@ -52,7 +44,6 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
       wrapSuppressedHits,
       enrichedEvents,
       toReturn,
-      experimentalFeatures,
     });
   };
 

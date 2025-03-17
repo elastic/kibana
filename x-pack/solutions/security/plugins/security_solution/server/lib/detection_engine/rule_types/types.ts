@@ -25,11 +25,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type {
-  PersistenceServices,
-  IRuleDataClient,
-  SuppressedAlertService,
-} from '@kbn/rule-registry-plugin/server';
+import type { PersistenceServices, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Filter } from '@kbn/es-query';
@@ -88,7 +84,6 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   listClient: ListClient;
   searchAfterSize: number;
-  bulkCreate: BulkCreate;
   ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -99,7 +94,6 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
   alertTimestampOverride: Date | undefined;
-  alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
   experimentalFeatures?: ExperimentalFeatures;
@@ -109,27 +103,37 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   ignoreFieldsRegexes: string[];
 }
 
-export type SecurityAlertType<
+interface SecurityInstanceContext {
+  [x: string]: unknown;
+}
+type SecurityActionGroupId = 'default';
+
+export type SecurityExecutorOptions<
   TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
-> = Omit<
-  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  TState extends RuleTypeState
+> = RuleExecutorOptions<
+  TParams,
+  TState,
+  AlertInstanceState,
+  SecurityInstanceContext,
+  WithoutReservedActionGroups<SecurityActionGroupId, never>
+> & {
+  services: PersistenceServices;
+  sharedParams: SecuritySharedParams<TParams>;
+};
+
+export type SecurityAlertType<TParams extends RuleParams, TState extends RuleTypeState> = Omit<
+  RuleType<
+    TParams,
+    TParams,
+    TState,
+    AlertInstanceState,
+    SecurityInstanceContext,
+    SecurityActionGroupId
+  >,
   'executor'
 > & {
-  executor: (
-    options: RuleExecutorOptions<
-      TParams,
-      TState,
-      AlertInstanceState,
-      TInstanceContext,
-      WithoutReservedActionGroups<TActionGroupIds, never>
-    > & {
-      services: PersistenceServices;
-      sharedParams: SecuritySharedParams<TParams>;
-    }
-  ) => Promise<
+  executor: (options: SecurityExecutorOptions<TParams, TState>) => Promise<
     SearchAfterAndBulkCreateReturnType & {
       state: TState;
       loggedRequests?: RulePreviewLoggedRequest[];
@@ -155,9 +159,10 @@ export interface CreateSecurityRuleTypeWrapperProps {
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <TParams extends RuleParams, TState extends RuleTypeState>(
-  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+  type: SecurityAlertType<TParams, TState>
 ) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
 
+// TODO: remove
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
@@ -346,15 +351,16 @@ export type WrapSuppressedHits = (
   buildReasonMessage: BuildReasonMessage
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
 
-export type RuleServices = RuleExecutorServices<
+export type SecurityRuleServices = RuleExecutorServices<
   AlertInstanceState,
   AlertInstanceContext,
   'default'
->;
+> &
+  PersistenceServices;
 
 export interface SearchAfterAndBulkCreateParams {
   sharedParams: SecuritySharedParams;
-  services: RuleServices;
+  services: SecurityRuleServices;
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filter: estypes.QueryDslQueryContainer;
   buildReasonMessage: BuildReasonMessage;

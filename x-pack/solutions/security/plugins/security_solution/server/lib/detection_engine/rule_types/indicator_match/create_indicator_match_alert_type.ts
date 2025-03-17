@@ -19,13 +19,8 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const {
-    eventsTelemetry,
-    licensing,
-    experimentalFeatures,
-    scheduleNotificationResponseActionsService,
-  } = createOptions;
+): SecurityAlertType<ThreatRuleParams, {}> => {
+  const { eventsTelemetry, licensing, scheduleNotificationResponseActionsService } = createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -85,7 +80,6 @@ export const createIndicatorMatchAlertType = (
         eventsTelemetry,
         wrapSuppressedHits,
         licensing,
-        experimentalFeatures,
         scheduleNotificationResponseActionsService,
       });
       return { ...result, state };

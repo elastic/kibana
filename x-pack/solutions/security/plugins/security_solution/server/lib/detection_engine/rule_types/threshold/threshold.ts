@@ -10,11 +10,6 @@ import { firstValueFrom } from 'rxjs';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
 import type { ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
@@ -27,6 +22,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SecuritySharedParams,
   CreateRuleOptions,
+  SecurityRuleServices,
 } from '../types';
 import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
 import {
@@ -37,7 +33,6 @@ import {
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
-import type { ExperimentalFeatures } from '../../../../../common';
 
 export const thresholdExecutor = async ({
   sharedParams,
@@ -45,15 +40,13 @@ export const thresholdExecutor = async ({
   startedAt,
   state,
   licensing,
-  experimentalFeatures,
   scheduleNotificationResponseActionsService,
 }: {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   startedAt: Date;
   state: ThresholdAlertState;
   licensing: LicensingPluginSetup;
-  experimentalFeatures: ExperimentalFeatures;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const {
@@ -144,7 +137,6 @@ export const thresholdExecutor = async ({
         buckets,
         services,
         startedAt,
-        experimentalFeatures,
       });
       const createResult = suppressedResults.bulkCreateResult;
 

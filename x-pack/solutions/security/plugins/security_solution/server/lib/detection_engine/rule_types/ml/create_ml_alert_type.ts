@@ -18,14 +18,8 @@ import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<
-  MachineLearningRuleParams,
-  { isLoggedRequestsEnabled?: boolean },
-  {},
-  'default'
-> => {
-  const { experimentalFeatures, ml, licensing, scheduleNotificationResponseActionsService } =
-    createOptions;
+): SecurityAlertType<MachineLearningRuleParams, { isLoggedRequestsEnabled?: boolean }> => {
+  const { ml, licensing, scheduleNotificationResponseActionsService } = createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
@@ -76,7 +70,6 @@ export const createMlAlertType = (
         services,
         wrapSuppressedHits,
         isAlertSuppressionActive,
-        experimentalFeatures,
         scheduleNotificationResponseActionsService,
         isLoggedRequestsEnabled,
       });
