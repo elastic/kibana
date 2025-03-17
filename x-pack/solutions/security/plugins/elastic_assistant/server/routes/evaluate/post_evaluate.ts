@@ -250,6 +250,9 @@ export const postEvaluateRoute = (
                   streaming: false,
                   maxRetries: 0,
                   convertSystemMessageToHumanContent: false,
+                  telemetryMetadata: {
+                    pluginId: 'security_ai_assistant',
+                  },
                 });
               const llm = createLlmInstance();
               const anonymizationFieldsRes =

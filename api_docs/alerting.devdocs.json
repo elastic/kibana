@@ -3955,6 +3955,20 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleType.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [],
+            "signature": [
+              "\"security\" | \"observability\" | \"stack\""
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleType.actionVariables",
             "type": "Object",
             "tags": [],
@@ -4788,7 +4802,15 @@
           "BulkDisableRulesResult",
           "<Record<string, any>>>; updateRuleApiKey: (params: { id: string; }) => Promise<void>; disableRule: (params: Readonly<{ untrack?: boolean | undefined; } & { id: string; }>) => Promise<void>; enableRule: (params: Readonly<{} & { id: string; }>) => Promise<void>; snooze: (options: ",
           "SnoozeRuleOptions",
-          ") => Promise<void>; unsnooze: (options: ",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<never>>; unsnooze: (options: ",
           "UnsnoozeParams",
           ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<",
           "RegistryAlertTypeWithAuth",

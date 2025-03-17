@@ -283,7 +283,7 @@ It accepts
 2. a list of expected errors (can be empty)
 3. a list of expected warnings (can be empty or omitted)
 
-Running the tests in `validation.test.ts` populates `src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
+Running the tests in `validation.test.ts` populates `src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `src/platform/test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
 
 #### Autocomplete
 
