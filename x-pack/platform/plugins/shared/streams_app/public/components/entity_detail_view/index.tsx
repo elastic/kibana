@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge, EuiTitle, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
   IngestStreamEffectiveLifecycle,
@@ -17,6 +16,8 @@ import {
   isIlmLifecycle,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
+import React from 'react';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -24,7 +25,7 @@ import { LoadingPanel } from '../loading_panel';
 import { StreamsAppPageBody } from '../streams_app_page_body';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
-import { useKibana } from '../../hooks/use_kibana';
+import { StreamDescription } from './stream_description';
 
 export interface EntityViewTab {
   name: string;
@@ -110,11 +111,7 @@ export function EntityDetailViewWithoutParams({
                   {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
               }
-              description={
-                definition?.stream.description ? (
-                  <EuiText size="s">{definition?.stream.description}</EuiText>
-                ) : undefined
-              }
+              description={<StreamDescription definition={definition} />}
             />
           }
         >
