@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './copy_status_summary_indicator.scss';
-
 import { EuiBadge, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
+import { type SerializedStyles } from '@emotion/react';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,6 +16,11 @@ import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 
+export type Styles = Record<
+  'missingReferencesIcon' | 'summaryCountBadge' | 'resolveAllConflictsLink',
+  SerializedStyles
+>;
+
 interface Props {
   space: SpacesDataEntry;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
@@ -24,6 +28,7 @@ interface Props {
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;
   onDestinationMapChange: (value?: Map<string, string>) => void;
+  styles: Styles;
 }
 
 const renderIcon = (props: Props) => {
@@ -34,6 +39,7 @@ const renderIcon = (props: Props) => {
     retries,
     onRetriesChange,
     onDestinationMapChange,
+    styles,
   } = props;
   const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${space.id}`;
 
@@ -83,7 +89,7 @@ const renderIcon = (props: Props) => {
   }
 
   const missingReferences = hasMissingReferences ? (
-    <span className="spcCopyToSpace__missingReferencesIcon">
+    <span css={styles.missingReferencesIcon}>
       <EuiIconTip
         type={'link'}
         color={'warning'}
@@ -109,6 +115,7 @@ const renderIcon = (props: Props) => {
           retries={retries}
           onRetriesChange={onRetriesChange}
           onDestinationMapChange={onDestinationMapChange}
+          resolveAllConflictsLinkStyle={styles.resolveAllConflictsLink}
         />
         <EuiIconTip
           type={'alert'}
@@ -133,14 +140,12 @@ const renderIcon = (props: Props) => {
 };
 
 export const CopyStatusSummaryIndicator = (props: Props) => {
-  const { summarizedCopyResult } = props;
+  const { summarizedCopyResult, styles } = props;
 
   return (
     <Fragment>
       {renderIcon(props)}
-      <EuiBadge className="spcCopyToSpace__summaryCountBadge">
-        {summarizedCopyResult.objects.length}
-      </EuiBadge>
+      <EuiBadge css={styles.summaryCountBadge}>{summarizedCopyResult.objects.length}</EuiBadge>
     </Fragment>
   );
 };

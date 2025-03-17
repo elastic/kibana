@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './spaces_description.scss';
-
-import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React from 'react';
 
@@ -26,9 +25,18 @@ interface Props {
 }
 
 export const SpacesDescription: FC<Props> = (props: Props) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = {
+    spcDescription: css({
+      maxWidth: `calc(${euiTheme.size.l} * 10)`,
+    }),
+    textAndWrapper: css({
+      padding: euiTheme.size.m,
+    }),
+  };
   const panelProps = {
     id: props.id,
-    className: 'spcDescription',
+    css: styles.spcDescription,
     title: 'Spaces',
   };
 
@@ -38,10 +46,10 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
 
   return (
     <EuiContextMenuPanel {...panelProps}>
-      <EuiText className="spcDescription__text">
+      <EuiText css={styles.textAndWrapper}>
         <p>{props.isLoading ? spacesLoadingMessage : getSpacesFeatureDescription()}</p>
       </EuiText>
-      <div key="manageSpacesButton" className="spcDescription__manageButtonWrapper">
+      <div key="manageSpacesButton" css={styles.textAndWrapper}>
         <ManageSpacesButton
           size="s"
           style={{ width: `100%` }}

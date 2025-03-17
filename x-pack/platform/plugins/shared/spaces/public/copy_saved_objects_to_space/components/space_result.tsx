@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './space_result.scss';
-
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -14,7 +12,10 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense, useState } from 'react';
 
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
@@ -82,12 +83,29 @@ export const SpaceResult = (props: Props) => {
   const onDestinationMapChange = (value?: Map<string, string>) => {
     setDestinationMap(value || getInitialDestinationMap(objects));
   };
+  const { euiTheme } = useEuiTheme();
+  const { fontSize } = useEuiFontSize('s');
+  const styles = {
+    spcCopyToSpaceResult: css({
+      paddingBottom: euiTheme.size.s,
+      borderBottom: euiTheme.border.thin,
+    }),
+    summaryCountBadge: css({
+      marginLeft: euiTheme.size.xs,
+    }),
+    missingReferencesIcon: css({
+      marginLeft: euiTheme.size.xs,
+    }),
+    resolveAllConflictsLink: css({
+      fontSize,
+    }),
+  };
 
   return (
     <EuiAccordion
       id={`copyToSpace-${space.id}`}
       data-test-subj={`cts-space-result-${space.id}`}
-      className="spcCopyToSpaceResult"
+      css={styles.spcCopyToSpaceResult}
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -108,6 +126,7 @@ export const SpaceResult = (props: Props) => {
           onDestinationMapChange={onDestinationMapChange}
           summarizedCopyResult={summarizedCopyResult}
           conflictResolutionInProgress={conflictResolutionInProgress && spaceHasPendingOverwrites}
+          styles={styles}
         />
       }
     >

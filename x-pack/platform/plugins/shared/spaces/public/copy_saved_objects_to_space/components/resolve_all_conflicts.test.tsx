@@ -73,6 +73,10 @@ describe('ResolveAllConflicts', () => {
     retries,
     onRetriesChange,
     onDestinationMapChange,
+    resolveAllConflictsLinkStyle: {
+      name: 'mock-style',
+      styles: 'font-size:1.0000rem;;label:copy_status_summary_indicator--resolveAllConflictsLink;',
+    },
   };
   const openPopover = async (wrapper: ReactWrapper) => {
     await act(async () => {
@@ -90,7 +94,12 @@ describe('ResolveAllConflicts', () => {
         anchorPosition="downLeft"
         button={
           <EuiLink
-            className="spcCopyToSpace__resolveAllConflictsLink"
+            css={
+              Object {
+                "name": "mock-style",
+                "styles": "font-size:1.0000rem;;label:copy_status_summary_indicator--resolveAllConflictsLink;",
+              }
+            }
             onClick={[Function]}
           >
             <Memo(MemoizedFormattedMessage)

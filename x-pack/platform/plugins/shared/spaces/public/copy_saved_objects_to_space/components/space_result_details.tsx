@@ -16,6 +16,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { Fragment } from 'react';
@@ -30,6 +31,7 @@ import { CopyStatusIndicator } from './copy_status_indicator';
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
+import { css } from '@emotion/react';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;
@@ -59,6 +61,32 @@ const isAmbiguousConflictError = (
 export const SpaceCopyResultDetails = (props: Props) => {
   const { destinationMap, onDestinationMapChange, summarizedCopyResult } = props;
   const { objects } = summarizedCopyResult;
+  const { euiTheme } = useEuiTheme();
+
+  const styles = {
+    spcCopyToSpaceResultDetails: css({
+      marginTop: euiTheme.size.s,
+      paddingLeft: euiTheme.size.l,
+    }),
+    spcCopyToSpaceResultDetailsRow: css({
+      marginBottom: euiTheme.size.xs,
+    }),
+    savedObjectName: css({
+      minWidth: 0,
+    }),
+    selectControl: css({
+      marginLeft: euiTheme.size.l,
+    }),
+    selectControlChildWrapper: css`
+      visibility: hidden;
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      transform: translateZ(0);
+      transition: height ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+        ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
+    `,
+  };
 
   return (
     <div className="spcCopyToSpaceResultDetails">

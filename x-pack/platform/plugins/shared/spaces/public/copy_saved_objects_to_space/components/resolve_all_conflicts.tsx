@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './resolve_all_conflicts.scss';
-
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
+import type { SerializedStyles } from '@emotion/react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -21,6 +20,7 @@ export interface ResolveAllConflictsProps {
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;
   onDestinationMapChange: (value?: Map<string, string>) => void;
+  resolveAllConflictsLinkStyle: SerializedStyles;
 }
 
 interface State {
@@ -54,7 +54,7 @@ export class ResolveAllConflicts extends Component<ResolveAllConflictsProps, Sta
 
   public render() {
     const button = (
-      <EuiLink onClick={this.onButtonClick} className={'spcCopyToSpace__resolveAllConflictsLink'}>
+      <EuiLink onClick={this.onButtonClick} css={this.props.resolveAllConflictsLinkStyle}>
         <FormattedMessage
           id="xpack.spaces.management.copyToSpace.resolveAllConflictsLink"
           defaultMessage="(resolve all)"
