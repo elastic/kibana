@@ -69,7 +69,7 @@ const fieldsConfig: FieldsConfig = {
       />
     ),
   },
-  source_port: {
+  source_port: {                                                                                  
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.sourcePortLabel', {
@@ -176,9 +176,24 @@ const fieldsConfig: FieldsConfig = {
   seed: {
     type: FIELD_TYPES.NUMBER,
     formatters: [fieldFormatters.toInt],
-    serializer: from.undefinedIfValue(''),
+    deserializer: (value: string) => {
+      if (value === '' || value == null) {
+        return undefined;
+      }
+      const num = Number(value);
+      if (isNaN(num) || !Number.isInteger(num)) {
+        return undefined;
+      }
+      return num;
+    },
+    serializer: (value: number | undefined) => {
+      if (value === undefined) {
+        return '';
+      }
+      return String(value);
+    },
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedLabel', {
-      defaultMessage: 'Seed (optional)',
+      defaultMessage: 'Seed (optional)', 
     }),
     helpText: (
       <FormattedMessage
@@ -190,11 +205,26 @@ const fieldsConfig: FieldsConfig = {
     validations: [
       {
         validator: (field) => {
-          if (field.value) {
-            return seedValidator.max(field) ?? seedValidator.min(field) ?? seedValidator.int(field);
+          if (!field.value && field.value !== 0) {
+            return;
           }
+          const value = Number(field.value);
+          if (isNaN(value) || !Number.isInteger(value)) {
+            return {
+              code: 'ERR_INVALID_NUMBER',
+              message: i18n.translate(
+                'xpack.ingestPipelines.pipelineEditor.communityId.invalidNumberError',
+                { defaultMessage: 'Must be a valid integer.' }
+              ),
+            };
+          }
+          return (
+            seedValidator.max(field) ?? 
+            seedValidator.min(field) ?? 
+            seedValidator.int(field)
+          );
         },
-      },
+      }
     ],
   },
 };
@@ -290,6 +320,13 @@ export const CommunityId: FunctionComponent = () => {
           euiFieldProps: {
             min: SEED_MIN_VALUE,
             max: SEED_MAX_VALUE,
+            step: 1,
+            strict: true,
+            onKeyDown: (e: { key: string; preventDefault: () => void; }) => {
+              if (!/[\d]/.test(e.key) && !['Backspace', 'Delete', 'Tab'].includes(e.key)) {
+                e.preventDefault();
+              }
+            }
           },
         }}
       />
