@@ -22,8 +22,7 @@ export const useAlertHistogramCount = ({
   const { responses: visualizationResponses } = useVisualizationResponse({ visualizationId });
 
   const visualizationAlerts = useMemo(() => {
-    const visualizationAlertsCount =
-      visualizationResponses != null ? visualizationResponses[0].hits.total : 0;
+    const visualizationAlertsCount = visualizationResponses?.[0]?.hits?.total ?? 0;
     return SHOWING_ALERTS(
       numeral(visualizationAlertsCount).format(defaultNumberFormat),
       visualizationAlertsCount,
