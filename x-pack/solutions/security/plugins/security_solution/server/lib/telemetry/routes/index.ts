@@ -32,6 +32,9 @@ export const getTriggerIndicesMetadataTaskRoute = (
           datastreamsThreshold: schema.maybe(schema.number()),
           indicesThreshold: schema.maybe(schema.number()),
           indicesSettingsThreshold: schema.maybe(schema.number()),
+          indicesQuerySize: schema.maybe(schema.number()),
+          ilmStatsQuerySize: schema.maybe(schema.number()),
+          ilmPolicyQuerySize: schema.maybe(schema.number()),
         }),
       },
     },
@@ -45,11 +48,17 @@ export const getTriggerIndicesMetadataTaskRoute = (
       taskConfig.indices_threshold = request.query.indicesThreshold || 100;
       taskConfig.datastreams_threshold = request.query.datastreamsThreshold || 100;
       taskConfig.indices_settings_threshold = request.query.indicesSettingsThreshold || 100;
+      taskConfig.index_query_size = request.query.indicesQuerySize || 1024;
+      taskConfig.ilm_stats_query_size = request.query.ilmStatsQuerySize || 1024;
+      taskConfig.ilm_policy_query_size = request.query.ilmPolicyQuerySize || 1024;
 
       const detail = {
         indicesThreshold: taskConfig.indices_threshold,
         dataStreamsThreshold: taskConfig.datastreams_threshold,
         indicesSettingsThreshold: taskConfig.indices_settings_threshold,
+        indicesQuerySize: taskConfig.index_query_size,
+        ilmStatsQuerySize: taskConfig.ilm_stats_query_size,
+        ilmPolicyQuerySize: taskConfig.ilm_policy_query_size,
       };
 
       logger.info(`Triggering indices metadata task ${detail}`);
