@@ -28,7 +28,12 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+       spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset(
+        'doc_table:legacy',
+        'defaultIndex',
+        'timepicker:timeDefaults'
+      );
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
