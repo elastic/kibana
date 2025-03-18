@@ -23,6 +23,7 @@ export type {
   ScoutTestOptions,
   ScoutPage,
   PageObjects,
+  ApiServicesFixture,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
