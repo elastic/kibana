@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-export * from './ingest';
-export * from './api';
-export * from './core';
-export * from './helpers';
-export * from './group';
-export * from './record_types';
-export * from './content';
+import { z } from '@kbn/zod';
+
+interface ContentPack {
+  content: string;
+}
+
+const contentPackSchema: z.Schema<ContentPack> = z.object({
+  content: z.string(),
+});
+
+export { contentPackSchema, type ContentPack };
