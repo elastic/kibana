@@ -54,9 +54,3 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
     return null;
   }
 };
-
-//     '& .homeSolutions__content': {
-//       paddingBlockStart: 0,
-//     } doesn't make any difference. especially given that we are using paddingSize=xl on template. visually see no difference either
-
-// className="homSolutions" https://github.com/MichaelMarcialis/kibana/commit/532f2d70e84af2aec4df06331643fbb6e0ba5033#diff-cb7678fe754c5fd50e7eea9ed64146d71ce78037be797f7eb04b4735d99ffdbdR21

@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiFlexItem,
-  useEuiMinBreakpoint,
   UseEuiTheme,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -35,7 +34,6 @@ interface Props {
 }
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
-  const euiBreakpointL = useEuiMinBreakpoint('l');
   const { share, trackUiMetric } = getServices();
 
   const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
@@ -122,7 +120,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             <EuiFlexItem
               css={({ euiTheme }: UseEuiTheme) =>
                 css({
-                  [euiBreakpointL]: {
+                  [`@media (min-width: ${euiTheme.breakpoint.l}px)`]: {
                     maxWidth: `calc(33.33% - ${euiTheme.size.l})`,
                   },
                 })

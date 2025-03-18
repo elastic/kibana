@@ -10,13 +10,7 @@
 import { snakeCase } from 'lodash';
 import React, { FC, MouseEvent } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiCard,
-  EuiFlexItem,
-  useEuiMinBreakpoint,
-  UseEuiTheme,
-  mathWithUnits,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexItem, UseEuiTheme, mathWithUnits } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/kibana-react-plugin/public';
 import { FeatureCatalogueSolution } from '../../..';
@@ -34,35 +28,8 @@ const getSolutionGraphicURL = (solutionId: string) =>
 export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
   const { trackUiMetric } = getServices();
 
-  const euiMinBreakpointM = useEuiMinBreakpoint('m');
-  const homeSolutionPanelstyles = ({ euiTheme }: UseEuiTheme) =>
-    css({
-      [euiMinBreakpointM]: {
-        maxInlineSize: `calc(33.33% - ${euiTheme.size.m} * 10)`,
-      },
-      '.homeSolutionPanel': {
-        img: {
-          backgroundColor: euiTheme.colors.primary,
-          maxBlockSize: mathWithUnits(euiTheme.size.m, (x) => x * 10),
-          objectFit: 'cover',
-        },
-
-        '&--enterpriseSearch img': {
-          backgroundColor: euiTheme.colors.warning,
-        },
-
-        '&--observability img': {
-          backgroundColor: euiTheme.colors.accent,
-        },
-
-        '&--securitySolution img': {
-          backgroundColor: euiTheme.colors.accentSecondary,
-        },
-      },
-    });
-
   return (
-    <EuiFlexItem css={homeSolutionPanelstyles} data-test-subj={`homeSolutionPanel_${solution.id}`}>
+    <EuiFlexItem css={styles} data-test-subj={`homeSolutionPanel_${solution.id}`}>
       <EuiCard
         className={`homeSolutionPanel homeSolutionPanel--${solution.id}`}
         description={solution.description}
@@ -85,3 +52,29 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
     </EuiFlexItem>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    [`@media (min-width: ${euiTheme.breakpoint.m}px)`]: {
+      maxInlineSize: `calc(33.33% - ${euiTheme.size.m} * 10)`,
+    },
+    '.homeSolutionPanel': {
+      img: {
+        backgroundColor: euiTheme.colors.primary,
+        maxBlockSize: mathWithUnits(euiTheme.size.m, (x) => x * 10),
+        objectFit: 'cover',
+      },
+
+      '&--enterpriseSearch img': {
+        backgroundColor: euiTheme.colors.warning,
+      },
+
+      '&--observability img': {
+        backgroundColor: euiTheme.colors.accent,
+      },
+
+      '&--securitySolution img': {
+        backgroundColor: euiTheme.colors.accentSecondary,
+      },
+    },
+  });

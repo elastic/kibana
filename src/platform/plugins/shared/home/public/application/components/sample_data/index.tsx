@@ -53,10 +53,26 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
       }
       footer={
         <footer>
-          <EuiButton fill css={rightMargin} onClick={onConfirm}>
+          <EuiButton
+            fill
+            css={({ euiTheme }: UseEuiTheme) =>
+              css({
+                marginRight: euiTheme.size.s,
+              })
+            }
+            onClick={onConfirm}
+          >
             <FormattedMessage id="home.tryButtonLabel" defaultMessage="Add integrations" />
           </EuiButton>
-          <EuiButtonEmpty css={rightMargin} onClick={onDecline} data-test-subj="skipWelcomeScreen">
+          <EuiButtonEmpty
+            css={({ euiTheme }: UseEuiTheme) =>
+              css({
+                marginRight: euiTheme.size.s,
+              })
+            }
+            onClick={onDecline}
+            data-test-subj="skipWelcomeScreen"
+          >
             <FormattedMessage id="home.exploreButtonLabel" defaultMessage="Explore on my own" />
           </EuiButtonEmpty>
         </footer>
@@ -64,8 +80,3 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
     />
   );
 }
-
-const rightMargin = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    marginRight: euiTheme.size.s,
-  });

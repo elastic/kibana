@@ -43,12 +43,11 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
   const { trackUiMetric, guidedOnboardingService } = getServices();
   const euiBreakpointM = useEuiMinBreakpoint('m');
   const euiBreakpointL = useEuiMinBreakpoint('l');
-  const cloudImageStyles = ({ euiTheme }: UseEuiTheme) =>
+  const styles = ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'block',
       marginBlock: `0 -${mathWithUnits([euiTheme.size.xl, euiTheme.size.xs], (x, y) => x + y)}`,
       marginInline: 'auto',
-      border: '1px solid red',
       [euiBreakpointM]: {
         marginBlockEnd: euiTheme.size.xl,
       },
@@ -154,7 +153,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 alt={i18n.translate('home.addData.illustration.alt.text', {
                   defaultMessage: 'Illustration of Elastic data integrations',
                 })}
-                css={cloudImageStyles}
+                css={styles}
                 src={
                   addBasePath('/plugins/kibanaReact/assets/') +
                   (isDarkMode

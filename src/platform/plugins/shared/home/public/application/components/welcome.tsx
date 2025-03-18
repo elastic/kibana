@@ -82,7 +82,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
       <div
         data-test-subj="homeWelcomeInterstitial"
         css={[
-          welcomeStyles,
+          styles,
           fullScreenGraphicsMixinStyles(
             Number(useEuiTheme().euiTheme.levels.navigation),
             useEuiTheme()
@@ -125,7 +125,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
     </EuiPortal>
   );
 };
-const welcomeStyles = ({ euiTheme }: UseEuiTheme) =>
+const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
     '.homeWelcome__header': {
       padding: euiTheme.size.xl,
@@ -137,7 +137,7 @@ const welcomeStyles = ({ euiTheme }: UseEuiTheme) =>
     },
     '.homeWelcome__content': {
       margin: 'auto',
-      maxWidth: mathWithUnits(euiTheme.size.xxxxl, (x) => x * 8), // 512px
+      maxWidth: mathWithUnits(euiTheme.size.xxxxl, (x) => x * 8),
       paddingLeft: euiTheme.size.xl,
       paddingRight: euiTheme.size.xl,
       zIndex: 10,
