@@ -20,6 +20,11 @@ import { PublicApiServiceSetup } from './services/public_api_service';
 export type IndexManagementLocatorParams = SerializableRecord &
   (
     | {
+        page: 'index_list';
+        filter?: string;
+        includeHiddenIndices?: boolean;
+      }
+    | {
         page: 'data_streams_details';
         dataStreamName?: string;
       }
@@ -38,6 +43,10 @@ export type IndexManagementLocatorParams = SerializableRecord &
     | {
         page: 'component_template';
         componentTemplate: string;
+      }
+    | {
+        page: 'component_template_list';
+        filter?: string;
       }
     | {
         page: 'edit_component_template';

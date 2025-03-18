@@ -25,7 +25,7 @@ import {
   wiredStreamDefinitionSchema,
   wiredStreamDefinitionSchemaBase,
 } from './base';
-import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
+import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
 import {
   UnwiredIngestStreamEffectiveLifecycle,
   WiredIngestStreamEffectiveLifecycle,
@@ -81,7 +81,7 @@ interface WiredStreamGetResponse extends StreamGetResponseBase {
 
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
   stream: UnwiredStreamDefinition;
-  elasticsearch_assets: ElasticsearchAsset[];
+  elasticsearch_assets?: ElasticsearchAssets;
   data_stream_exists: boolean;
   effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
@@ -134,7 +134,7 @@ const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.int
   streamGetResponseSchemaBase,
   z.object({
     stream: unwiredStreamDefinitionSchema,
-    elasticsearch_assets: z.array(elasticsearchAssetSchema),
+    elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
     data_stream_exists: z.boolean(),
     effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })

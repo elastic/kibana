@@ -13,7 +13,9 @@ import {
   getComponentTemplateCreateLink,
   getComponentTemplateDetailLink,
   getComponentTemplateEditLink,
+  getComponentTemplateListLink,
   getDataStreamDetailsLink,
+  getIndexListUri,
   getTemplateCloneLink,
   getTemplateDetailsLink,
   getTemplateEditLink,
@@ -40,6 +42,12 @@ export class IndexManagementLocatorDefinition
     });
 
     switch (params.page) {
+      case 'index_list': {
+        return {
+          ...location,
+          path: location.path + getIndexListUri(params.filter, params.includeHiddenIndices),
+        };
+      }
       case 'data_streams_details': {
         return {
           ...location,
@@ -68,6 +76,12 @@ export class IndexManagementLocatorDefinition
         return {
           ...location,
           path: location.path + getComponentTemplateDetailLink(params.componentTemplate),
+        };
+      }
+      case 'component_template_list': {
+        return {
+          ...location,
+          path: location.path + getComponentTemplateListLink(params.filter),
         };
       }
       case 'edit_component_template': {
