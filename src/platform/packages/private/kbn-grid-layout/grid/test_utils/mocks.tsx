@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ObservedSize } from 'use-resize-observer/polyfilled';
 import {
   ActivePanel,
-  ActiveRow,
+  ActiveRowEvent,
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
@@ -50,7 +50,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
     interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),
     activePanel$: new BehaviorSubject<ActivePanel | undefined>(undefined),
-    activeRow$: new BehaviorSubject<ActiveRow | undefined>(undefined),
+    activeRowEvent$: new BehaviorSubject<ActiveRowEvent | undefined>(undefined),
     gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
     ...overrides,
   };

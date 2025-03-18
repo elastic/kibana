@@ -60,7 +60,7 @@ export interface ActivePanel {
   };
 }
 
-export interface ActiveRow {
+export interface ActiveRowEvent {
   id: string;
   startingPosition: {
     top: number;
@@ -81,7 +81,7 @@ export interface GridLayoutStateManager {
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
-  activeRow$: BehaviorSubject<ActiveRow | undefined>;
+  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
   rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;

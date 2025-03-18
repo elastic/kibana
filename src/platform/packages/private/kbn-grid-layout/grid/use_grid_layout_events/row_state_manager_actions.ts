@@ -27,7 +27,7 @@ export const startAction = (
 
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
   startingMouse.current = getPointerPosition(e);
-  gridLayoutStateManager.activeRow$.next({
+  gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,
     translate: {
@@ -38,11 +38,11 @@ export const startAction = (
 };
 
 export const commitAction = ({
-  activeRow$,
+  activeRowEvent$,
   proposedGridLayout$,
   gridLayout$,
 }: GridLayoutStateManager) => {
-  activeRow$.next(undefined);
+  activeRowEvent$.next(undefined);
   const proposedGridLayoutValue = proposedGridLayout$.getValue();
   if (proposedGridLayoutValue && !deepEqual(proposedGridLayoutValue, gridLayout$.getValue())) {
     gridLayout$.next(cloneDeep(proposedGridLayoutValue));
@@ -55,8 +55,8 @@ export const moveAction = (
   startingMouse: MousePosition,
   currentMouse: MousePosition
 ) => {
-  const currentActiveRow = gridLayoutStateManager.activeRow$.getValue();
-  if (!currentActiveRow) return;
+  const currentActiveRowEvent = gridLayoutStateManager.activeRowEvent$.getValue();
+  if (!currentActiveRowEvent) return;
 
   const currentLayout =
     gridLayoutStateManager.proposedGridLayout$.getValue() ??
@@ -92,8 +92,8 @@ export const moveAction = (
     gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
   }
 
-  gridLayoutStateManager.activeRow$.next({
-    ...currentActiveRow,
+  gridLayoutStateManager.activeRowEvent$.next({
+    ...currentActiveRowEvent,
     translate: {
       top: currentMouse.clientY - startingMouse.clientY,
       left: currentMouse.clientX - startingMouse.clientX,

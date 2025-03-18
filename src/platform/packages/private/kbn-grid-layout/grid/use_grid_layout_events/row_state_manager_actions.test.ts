@@ -16,7 +16,7 @@ describe('row state manager actions', () => {
 
   describe('move action', () => {
     beforeAll(() => {
-      gridLayoutStateManager.activeRow$.next({
+      gridLayoutStateManager.activeRowEvent$.next({
         id: 'second',
         startingPosition: {
           top: 100,
@@ -62,7 +62,7 @@ describe('row state manager actions', () => {
         { clientX: 20, clientY: 150 },
         { clientX: 100, clientY: 10 }
       );
-      expect(gridLayoutStateManager.activeRow$.getValue()).toEqual({
+      expect(gridLayoutStateManager.activeRowEvent$.getValue()).toEqual({
         id: 'second',
         startingPosition: {
           top: 100,

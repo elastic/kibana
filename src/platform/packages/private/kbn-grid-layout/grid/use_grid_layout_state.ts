@@ -16,7 +16,7 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 
 import {
   ActivePanel,
-  ActiveRow,
+  ActiveRowEvent,
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
@@ -95,7 +95,7 @@ export const useGridLayoutState = ({
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-    const activeRow$ = new BehaviorSubject<ActiveRow | undefined>(undefined);
+    const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
     return {
       rowRefs,
@@ -104,7 +104,7 @@ export const useGridLayoutState = ({
       proposedGridLayout$,
       gridLayout$,
       activePanel$,
-      activeRow$,
+      activeRowEvent$,
       accessMode$,
       gridDimensions$,
       runtimeSettings$,

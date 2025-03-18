@@ -86,32 +86,32 @@ export const GridRowHeader = React.memo(
        * This subscription is responsible for handling the drag + drop styles for
        * re-ordering grid rows
        */
-      const dragRowStyleSubscription = gridLayoutStateManager.activeRow$
+      const dragRowStyleSubscription = gridLayoutStateManager.activeRowEvent$
         .pipe(
           pairwise(),
           map(([before, after]) => {
             if (!before && after) {
-              return { type: 'init', activeRow: after };
+              return { type: 'init', activeRowEvent: after };
             } else if (before && after) {
-              return { type: 'update', activeRow: after };
+              return { type: 'update', activeRowEvent: after };
             } else {
-              return { type: 'finish', activeRow: before };
+              return { type: 'finish', activeRowEvent: before };
             }
           })
         )
-        .subscribe(({ type, activeRow }) => {
+        .subscribe(({ type, activeRowEvent }) => {
           const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-          if (!headerRef || activeRow?.id !== rowId) return;
+          if (!headerRef || activeRowEvent?.id !== rowId) return;
 
           if (type === 'init') {
             setIsActive(true);
             const width = headerRef.getBoundingClientRect().width;
             headerRef.style.position = 'fixed';
             headerRef.style.width = `${width}px`;
-            headerRef.style.top = `${activeRow.startingPosition.top}px`;
-            headerRef.style.left = `${activeRow.startingPosition.left}px`;
+            headerRef.style.top = `${activeRowEvent.startingPosition.top}px`;
+            headerRef.style.left = `${activeRowEvent.startingPosition.left}px`;
           } else if (type === 'update') {
-            headerRef.style.transform = `translate(${activeRow.translate.left}px, ${activeRow.translate.top}px)`;
+            headerRef.style.transform = `translate(${activeRowEvent.translate.left}px, ${activeRowEvent.translate.top}px)`;
           } else {
             setIsActive(false);
             headerRef.style.position = 'relative';
