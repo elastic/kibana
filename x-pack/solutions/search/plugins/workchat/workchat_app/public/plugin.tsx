@@ -13,7 +13,8 @@ import type {
   WorkChatAppPluginStartDependencies,
 } from './types';
 import { registerApp } from './application';
-import { ChatService, ConversationService, type WorkChatServices } from './services';
+import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
+import { IntegrationService } from './services/integration/integration_service';
 
 export class WorkChatAppPlugin
   implements
@@ -54,10 +55,18 @@ export class WorkChatAppPlugin
     const chatService = new ChatService({
       http,
     });
+    const agentService = new AgentService({
+      http,
+    });
+    const integrationService = new IntegrationService({
+      http,
+    });
 
     this.services = {
       chatService,
+      agentService,
       conversationService,
+      integrationService,
     };
 
     return {};

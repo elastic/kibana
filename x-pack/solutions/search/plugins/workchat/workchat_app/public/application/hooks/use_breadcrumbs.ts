@@ -5,19 +5,34 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
+import { workchatAppId } from '../constants';
 import { useKibana } from './use_kibana';
 
-export const useBreadcrumb = (breadcrumb: ChromeBreadcrumb[]) => {
+export const useBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
   const {
-    services: { chrome },
+    services: { chrome, application },
   } = useKibana();
 
+  const appUrl = useMemo(() => {
+    return application.getUrlForApp(workchatAppId);
+  }, [application]);
+
+  const baseCrumbs: ChromeBreadcrumb[] = useMemo(() => {
+    return [
+      {
+        text: i18n.translate('workchatApp.breadcrumb.workchat', { defaultMessage: 'WorkChat' }),
+        href: appUrl,
+      },
+    ];
+  }, [appUrl]);
+
   useEffect(() => {
-    chrome.setBreadcrumbs(breadcrumb);
+    chrome.setBreadcrumbs([...baseCrumbs, ...breadcrumbs]);
     return () => {
       chrome.setBreadcrumbs([]);
     };
-  }, [chrome, breadcrumb]);
+  }, [chrome, baseCrumbs, breadcrumbs]);
 };

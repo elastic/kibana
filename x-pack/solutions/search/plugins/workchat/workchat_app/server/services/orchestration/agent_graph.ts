@@ -11,13 +11,15 @@ import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StructuredTool } from '@langchain/core/tools';
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { Agent } from '../../../common/agents';
 import { withSystemPrompt } from './prompts';
+
 export const createAgentGraph = async ({
-  agentId,
+  agent,
   chatModel,
   integrationTools,
 }: {
-  agentId: string;
+  agent: Agent;
   chatModel: InferenceChatModel;
   integrationTools: StructuredTool[];
 }) => {
@@ -37,12 +39,15 @@ export const createAgentGraph = async ({
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({
-    tags: ['workflow', `agent:${agentId}`],
+    tags: ['workflow', `agent:${agent.id}`],
   });
 
   const callModel = async (state: typeof StateAnnotation.State) => {
     const response = await model.invoke(
-      await withSystemPrompt({ messages: [...state.initialMessages, ...state.addedMessages] })
+      await withSystemPrompt({
+        agentPrompt: agent.configuration.systemPrompt,
+        messages: [...state.initialMessages, ...state.addedMessages],
+      })
     );
     return {
       addedMessages: [response],

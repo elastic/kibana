@@ -63,6 +63,20 @@ get:
       schema:
         type: string
       example: 'slo.name:latency* and slo.tags : "prod"'
+    - name: size
+      in: query
+      description: The page size to use for cursor-based pagination, must be greater or equal than 1
+      schema:
+        type: integer
+        default: 1
+      example: 1
+    - name: searchAfter
+      in: query
+      description: The cursor to use for fetching the results from, when using a cursor-base pagination.
+      schema:
+        type: array
+        items:
+          type: string
     - name: page
       in: query
       description: The page to use for pagination, must be greater or equal than 1

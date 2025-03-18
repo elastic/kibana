@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserNameAndId } from './shared';
 import type { ConversationEvent } from './conversation_events';
 
 export interface Conversation {
@@ -12,10 +13,7 @@ export interface Conversation {
   agentId: string;
   title: string;
   lastUpdated: string;
-  user: {
-    id: string;
-    name: string;
-  };
+  user: UserNameAndId;
   events: ConversationEvent[];
 }
 

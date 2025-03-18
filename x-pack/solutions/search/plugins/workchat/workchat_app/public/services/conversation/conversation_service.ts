@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type {
+  ListConversationRequest,
   ListConversationResponse,
   GetConversationResponse,
 } from '../../../common/http_api/conversation';
@@ -18,11 +19,11 @@ export class ConversationService {
     this.http = http;
   }
 
-  async list() {
+  async list(request: ListConversationRequest) {
     const response = await this.http.post<ListConversationResponse>(
       '/internal/workchat/conversations',
       {
-        body: JSON.stringify({}),
+        body: JSON.stringify(request),
       }
     );
     return response.conversations;

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ConversationEvent } from '../../../common/conversations';
+import type { ConversationEvent } from '../../../common/conversation_events';
 import { conversationEventsToMessages } from '../orchestration/utils';
 
 export const generateConversationTitle = async ({
