@@ -37,7 +37,7 @@ export const discoverPlaywrightConfigs: Command<void> = {
   run: ({ flagsReader, log }) => {
     const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
 
-    let pluginsMap = measurePerformance(log, 'Discovering playwright config files', () => {
+    let pluginsMap = measurePerformance(log, 'Discovering Playwright config files', () => {
       return getScoutPlaywrightConfigs(searchPaths, log);
     });
 
