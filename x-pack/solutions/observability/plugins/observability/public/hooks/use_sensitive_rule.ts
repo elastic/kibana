@@ -156,6 +156,7 @@ function calculateZScoresWithExponentialWeighting(
 
   // Convert num_new_alerts to "alerts per normalized time unit"
   const alertsPerUnit = executions.map((exe) => {
+    console.log('exe', exe);
     return {
       value: (exe.num_new_alerts / executionIntervalSeconds) * scalingFactor,
       numNewAlerts: exe.num_new_alerts,

@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiRange,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -241,45 +242,54 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
-          <EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiTitle size="s">
+              <h4>
+                {i18n.translate('xpack.observability.alertDetails.h2.thisIsTheDefaultLabel', {
+                  defaultMessage: 'Rule sensitivity',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.observability.alertDetails.h2.thisIsTheDefaultLabel', {
+                defaultMessage:
+                  'This chart and information reflect the behavior of the rule associated with this alert.',
+              })}
+            </EuiText>
             <ZScoreChart ruleSensitivityHistory={ruleSensitivityHistory} />
             <EuiFlexGroup direction="column">
-              <div>
-                <EuiText size="s" color="subdued">
-                  {i18n.translate('xpack.observability.alertDetails.ruleSensitivityTextLabel', {
-                    defaultMessage: 'Rule sensitivity',
-                  })}
-                </EuiText>
-                <EuiRange
-                  id={'sensitivityRange'}
-                  min={1}
-                  max={3}
-                  value={sensitivity}
-                  onChange={(e) => setSensitivity(e.currentTarget.value)}
-                  showLabels
-                  showRange
-                  showValue
-                />
-              </div>
+              <EuiText size="s" color="subdued">
+                {i18n.translate('xpack.observability.alertDetails.ruleSensitivityTextLabel', {
+                  defaultMessage: 'Rule sensitivity',
+                })}
+              </EuiText>
+              <EuiRange
+                id={'sensitivityRange'}
+                min={1}
+                max={3}
+                value={sensitivity}
+                onChange={(e) => setSensitivity(e.currentTarget.value)}
+                showLabels
+                showRange
+                showValue
+              />
 
-              <div>
-                <EuiText size="m" color="subdued">
-                  {i18n.translate('xpack.observability.alertDetails.ruleSensitivityTextLabel', {
-                    defaultMessage: 'Rule sensitivity lookback-executions',
-                  })}
-                </EuiText>
-                <EuiRange
-                  id={'executionLookBackWindow'}
-                  min={10}
-                  max={1000}
-                  value={executionLookBackWindow}
-                  onChange={(e) => setExecutionLookBackWindow(e.currentTarget.value)}
-                  showLabels
-                  showRange
-                  showValue
-                  step={10}
-                />
-              </div>
+              <EuiText size="m" color="subdued">
+                {i18n.translate('xpack.observability.alertDetails.ruleSensitivityTextLabel', {
+                  defaultMessage: 'Rule sensitivity lookback-executions',
+                })}
+              </EuiText>
+              <EuiRange
+                id={'executionLookBackWindow'}
+                min={10}
+                max={1000}
+                value={executionLookBackWindow}
+                onChange={(e) => setExecutionLookBackWindow(e.currentTarget.value)}
+                showLabels
+                showRange
+                showValue
+                step={10}
+              />
             </EuiFlexGroup>
           </EuiFlexGroup>
 
