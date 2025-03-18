@@ -298,7 +298,7 @@ export const lowercaseHashValues = (
  */
 export const getFileCodeSignature = (
   alertData: Flattened<Ecs>
-): Array<{ field: string; type: 'nested'; entries: EntriesArray }> => {
+): EntriesArray | undefined => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
@@ -329,7 +329,7 @@ export const getFileCodeSignature = (
  */
 export const getProcessCodeSignature = (
   alertData: Flattened<Ecs>
-): Array<{ field: string; type: 'nested'; entries: EntriesArray }> | EntriesArray => {
+): EntriesArray | undefined => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
   if (codeSignature) {
@@ -359,7 +359,7 @@ export const getProcessCodeSignature = (
  */
 export const getDllCodeSignature = (
   alertData: Flattened<Ecs>
-): Array<{ subjectName: string; trusted: string }> => {
+): EntriesArray | undefined => {
   const { dll } = alertData;
   const codeSignature = dll && dll.Ext && dll.Ext.code_signature;
   if (codeSignature) {
@@ -388,8 +388,9 @@ export const getDllCodeSignature = (
 export const getCodeSignatureValue = (
   codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined,
   field: string
-): Array<{ field: string; type: 'nested'; entries: EntriesArray }> => {
+): EntriesArray | undefined => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
+    const codeSignatureEntries: EntriesArray = [];
     return codeSignature.reduce((acc, signature) => {
       if (signature?.trusted === 'true') {
         acc.push({
@@ -412,7 +413,7 @@ export const getCodeSignatureValue = (
         });
       }
       return acc;
-    }, []);
+    }, codeSignatureEntries);
   } else {
     const signature: Flattened<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
@@ -488,12 +489,7 @@ export const getPrepopulatedEndpointException = ({
   const sha256Hash = file?.hash?.sha256 ?? '';
   const isLinux = host?.os?.name === 'Linux';
 
-  const commonFields: Array<{
-    field: string;
-    operator: 'excluded' | 'included';
-    type: 'match';
-    value: string;
-  }> = [
+  const commonFields: EntriesArray = [
     {
       field: isLinux ? 'file.path' : 'file.path.caseless',
       operator: 'included',
