@@ -90,4 +90,3 @@ describe('row management', () => {
     });
   });
 });
-s;
