@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IntegrationType } from '@kbn/wci-common';
 import type {
   ListIntegrationsResponse,
   GetIntegrationResponse,
@@ -15,7 +16,7 @@ import type {
 } from '../../common/http_api/integrations';
 import type { RouteDependencies } from './types';
 
-export const registerIntegrationsRoutes = ({ getServices, router }: RouteDependencies) => {
+export const registerIntegrationsRoutes = ({ getServices, router, logger }: RouteDependencies) => {
   // Get a single integration by ID
   router.get(
     {
@@ -66,27 +67,37 @@ export const registerIntegrationsRoutes = ({ getServices, router }: RouteDepende
       path: '/internal/workchat/integrations',
       validate: {
         body: schema.object({
-          type: schema.string(),
+          type: schema.oneOf(
+            // @ts-expect-error complains that IntegrationType may have less than 1 element...
+            Object.values(IntegrationType).map((val) => schema.literal(val))
+          ),
+          name: schema.string(),
           description: schema.string(),
           configuration: schema.recordOf(schema.string(), schema.any()),
         }),
       },
     },
     async (ctx, request, res) => {
-      const { integrationsService } = getServices();
-      const client = await integrationsService.getScopedClient({ request });
+      try {
+        const { integrationsService } = getServices();
+        const client = await integrationsService.getScopedClient({ request });
 
-      const { type, description, configuration } = request.body;
+        const { type, name, description, configuration } = request.body;
 
-      const integration = await client.create({
-        type,
-        description,
-        configuration,
-      });
+        const integration = await client.create({
+          type,
+          name,
+          description,
+          configuration,
+        });
 
-      return res.ok<CreateIntegrationResponse>({
-        body: integration,
-      });
+        return res.ok<CreateIntegrationResponse>({
+          body: integration,
+        });
+      } catch (e) {
+        logger.error(e);
+        throw e;
+      }
     }
   );
 
@@ -99,6 +110,7 @@ export const registerIntegrationsRoutes = ({ getServices, router }: RouteDepende
           integrationId: schema.string(),
         }),
         body: schema.object({
+          name: schema.maybe(schema.string()),
           description: schema.maybe(schema.string()),
           configuration: schema.recordOf(schema.string(), schema.any()),
         }),
@@ -109,9 +121,10 @@ export const registerIntegrationsRoutes = ({ getServices, router }: RouteDepende
       const client = await integrationsService.getScopedClient({ request });
 
       const { integrationId } = request.params;
-      const { description, configuration } = request.body;
+      const { name, description, configuration } = request.body;
 
       const integration = await client.update(integrationId, {
+        name,
         description,
         configuration,
       });

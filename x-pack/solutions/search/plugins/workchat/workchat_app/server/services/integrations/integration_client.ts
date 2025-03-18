@@ -19,7 +19,7 @@ interface IntegrationClientOptions {
 }
 
 export type IntegrationUpdatableFields = Partial<
-  Pick<Integration, 'description' | 'configuration'>
+  Pick<Integration, 'name' | 'description' | 'configuration'>
 >;
 
 export interface IntegrationClient {

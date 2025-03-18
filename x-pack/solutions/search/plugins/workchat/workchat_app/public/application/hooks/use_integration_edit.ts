@@ -66,11 +66,13 @@ export const useIntegrationEdit = ({
 
     (integrationId
       ? integrationService.update(integrationId, {
+          name: editState.name,
           description: editState.description,
           configuration: editState.configuration,
         })
       : integrationService.create({
           type: editState.type,
+          name: editState.name,
           description: editState.description,
           configuration: editState.configuration,
         })

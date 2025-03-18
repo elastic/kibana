@@ -18,6 +18,7 @@ export interface ListIntegrationsResponse {
 
 export interface CreateIntegrationPayload {
   type: IntegrationType;
+  name: string;
   description: string;
   configuration: IntegrationConfiguration;
 }
@@ -25,6 +26,7 @@ export interface CreateIntegrationPayload {
 export type CreateIntegrationResponse = Integration;
 
 export interface UpdateIntegrationPayload {
+  name?: string;
   description?: string;
   configuration?: IntegrationConfiguration;
 }

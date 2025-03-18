@@ -9,6 +9,7 @@ import { IntegrationConfiguration, IntegrationType } from '@kbn/wci-common';
 
 export interface Integration {
   id: string;
+  name: string;
   type: IntegrationType;
   description: string;
   configuration: IntegrationConfiguration;
@@ -19,7 +20,8 @@ export interface Integration {
 
 export interface IntegrationCreateRequest {
   id?: string;
-  type: string;
+  name: string;
+  type: IntegrationType;
   description: string;
   configuration: IntegrationConfiguration;
 }

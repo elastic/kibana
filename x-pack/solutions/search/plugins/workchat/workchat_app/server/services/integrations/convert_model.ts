@@ -6,7 +6,6 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import { IntegrationType } from '@kbn/wci-common';
 import type { Integration, IntegrationCreateRequest } from '../../../common/integrations';
 import type { IntegrationAttributes } from '../../saved_objects/integrations';
 import type { ClientUser } from './types';
@@ -16,7 +15,8 @@ export const savedObjectToModel = ({
 }: SavedObject<IntegrationAttributes>): Integration => {
   return {
     id: attributes.integration_id,
-    type: attributes.type as IntegrationType,
+    type: attributes.type,
+    name: attributes.name,
     description: attributes.description,
     configuration: attributes.configuration,
     createdAt: attributes.created_at,
@@ -31,6 +31,10 @@ export const updateToAttributes = ({
   updatedFields: Partial<Integration>;
 }): Partial<IntegrationAttributes> => {
   const result: Partial<IntegrationAttributes> = {};
+
+  if (updatedFields.name !== undefined) {
+    result.name = updatedFields.name;
+  }
 
   if (updatedFields.description !== undefined) {
     result.description = updatedFields.description;
@@ -62,7 +66,8 @@ export const createRequestToRaw = ({
 
   return {
     integration_id: id,
-    type: integration.type as IntegrationType,
+    type: integration.type,
+    name: integration.name,
     description: integration.description,
     configuration: integration.configuration,
     created_at: now,

@@ -156,14 +156,6 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
               title={<h3>Base configuration</h3>}
               description="Configure your integration"
             >
-              <EuiFormRow label="Description">
-                <EuiFieldText
-                  data-test-subj="workchatAppIntegrationEditViewFieldText"
-                  name="description"
-                  value={editState.description}
-                  onChange={(e) => setFieldValue('description', e.target.value)}
-                />
-              </EuiFormRow>
               <EuiFormRow label="Type">
                 <EuiSelect
                   data-test-subj="workchatAppIntegrationEditViewSelect"
@@ -171,6 +163,22 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                   value={editState.type}
                   onChange={(e) => setFieldValue('type', e.target.value)}
                   disabled={!!integrationId}
+                />
+              </EuiFormRow>
+              <EuiFormRow label="Name">
+                <EuiFieldText
+                  data-test-subj="workchatAppIntegrationEditViewFieldText"
+                  name="name"
+                  value={editState.name}
+                  onChange={(e) => setFieldValue('name', e.target.value)}
+                />
+              </EuiFormRow>
+              <EuiFormRow label="Description">
+                <EuiFieldText
+                  data-test-subj="workchatAppIntegrationEditViewFieldText"
+                  name="description"
+                  value={editState.description}
+                  onChange={(e) => setFieldValue('description', e.target.value)}
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>
