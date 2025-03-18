@@ -106,6 +106,15 @@ tags:
   - name: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
+  - description: |
+      Programmatically integrate with Logstash configuration management.
+      > warn
+      > Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs.
+    externalDocs:
+      description: Centralized pipeline management
+      url: https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html
+    name: logstash
+    x-displayName: Logstash configuration management
   - name: Message Signing Service
   - description: Machine learning
     name: ml
@@ -40928,6 +40937,169 @@ paths:
       summary: Get value list privileges
       tags:
         - Security Lists API
+  /api/logstash/pipeline/{id}:
+    delete:
+      description: |
+        Delete a centrally-managed Logstash pipeline.
+        If your Elasticsearch cluster is protected with basic authentication, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: delete-logstash-pipeline
+      parameters:
+        - description: An identifier for the pipeline.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call
+      summary: Delete a Logstash pipeline
+      tags:
+        - logstash
+      x-state: Technical Preview
+    get:
+      description: |
+        Get information for a centrally-managed Logstash pipeline.
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: get-logstash-pipeline
+      parameters:
+        - description: An identifier for the pipeline.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getLogstashPipelineResponseExample1:
+                  value: |-
+                    {
+                      "id": "hello-world",
+                      "description": "Just a simple pipeline",
+                      "username": "elastic",
+                      "pipeline": "input { stdin {} } output { stdout {} }",
+                      "settings": {
+                        "queue.type": "persistent"
+                      }
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get a Logstash pipeline
+      tags:
+        - logstash
+      x-state: Technical Preview
+    put:
+      description: |
+        Create a centrally-managed Logstash pipeline or update a pipeline.
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: put-logstash-pipeline
+      parameters:
+        - description: |
+            An identifier for the pipeline. Only alphanumeric characters, hyphens, and underscores are supported.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putLogstashPipelineRequestExample1:
+                value: |-
+                  {
+                    "pipeline": "input { stdin {} } output { stdout {} }",
+                    "settings": {
+                      "queue.type": "persisted"
+                    }
+                  }
+            schema:
+              type: object
+              properties:
+                description:
+                  description: A description of the pipeline.
+                  type: string
+                pipeline:
+                  description: A definition for the pipeline.
+                  type: string
+                settings:
+                  description: |
+                    Supported settings, represented as object keys, include the following:
+
+                    - `pipeline.workers`
+                    - `pipeline.batch.size`
+                    - `pipeline.batch.delay`
+                    - `pipeline.ecs_compatibility`
+                    - `pipeline.ordered`
+                    - `queue.type`
+                    - `queue.max_bytes`
+                    - `queue.checkpoint.writes`
+                  type: object
+              required:
+                - pipeline
+      responses:
+        '204':
+          description: Indicates a successful call
+      summary: Create or update a Logstash pipeline
+      tags:
+        - logstash
+      x-state: Technical Preview
+  /api/logstash/pipelines:
+    get:
+      description: |
+        Get a list of all centrally-managed Logstash pipelines.
+
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
+        > info
+        > Limit the number of pipelines to 10,000 or fewer. As the number of pipelines nears and surpasses 10,000, you may see performance issues on Kibana.
+
+        The `username` property appears in the response when security is enabled and depends on when the pipeline was created or last updated.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: get-logstash-pipelines
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getLogstashPipelinesResponseExample1:
+                  value: |-
+                    {
+                      "pipelines": [
+                        {
+                          "id": "hello-world",
+                          "description": "Just a simple pipeline",
+                          "last_modified": "2018-04-14T12:23:29.772Z",
+                          "username": "elastic" 
+                        },
+                        {
+                          "id": "sleepy-pipeline",
+                          "description": "",
+                          "last_modified": "2018-03-24T03:41:30.554Z"
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get all Logstash pipelines
+      tags:
+        - logstash
+      x-state: Technical Preview
   /api/ml/saved_objects/sync:
     get:
       description: |
