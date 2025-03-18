@@ -47,7 +47,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
       return callApmApi('GET /internal/apm/services/{serviceName}/metrics/serverless/charts', {
         params: {
           path: {
-            serviceName,
+            serviceName: encodeURIComponent(serviceName),
           },
           query: {
             kuery,

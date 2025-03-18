@@ -73,7 +73,7 @@ function ThroughputChart({
         return callApmApi('GET /internal/apm/services/{serviceName}/throughput', {
           params: {
             path: {
-              serviceName,
+              serviceName: encodeURIComponent(serviceName),
             },
             query: {
               environment,

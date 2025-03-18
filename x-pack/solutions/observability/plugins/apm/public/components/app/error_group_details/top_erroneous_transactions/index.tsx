@@ -50,7 +50,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
           {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
                 groupId,
               },
               query: {

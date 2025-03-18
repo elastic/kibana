@@ -64,7 +64,7 @@ export function TopErrors() {
           'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name',
           {
             params: {
-              path: { serviceName },
+              path: { serviceName: encodeURIComponent(serviceName) },
               query: {
                 environment,
                 kuery,
@@ -114,7 +114,7 @@ export function TopErrors() {
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
             params: {
-              path: { serviceName },
+              path: { serviceName: encodeURIComponent(serviceName) },
               query: {
                 environment,
                 kuery,

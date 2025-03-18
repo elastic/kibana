@@ -64,7 +64,7 @@ export function ServiceOverviewDependenciesTable({
 
       return callApmApi('GET /internal/apm/services/{serviceName}/dependencies', {
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             start,
             end,

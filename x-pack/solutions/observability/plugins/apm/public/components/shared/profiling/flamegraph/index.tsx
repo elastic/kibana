@@ -39,7 +39,7 @@ export function ProfilingFlamegraph({
       }
       return callApmApi('GET /internal/apm/services/{serviceName}/profiling/flamegraph', {
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             start,
             end,

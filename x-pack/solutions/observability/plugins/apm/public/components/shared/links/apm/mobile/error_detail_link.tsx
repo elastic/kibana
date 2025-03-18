@@ -28,7 +28,7 @@ function ErrorDetailLink({ serviceName, groupId, query, ...rest }: Props) {
     `/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}`,
     {
       path: {
-        serviceName,
+        serviceName: encodeURIComponent(serviceName),
         groupId,
       },
       query,

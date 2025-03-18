@@ -57,7 +57,7 @@ export function useErrorGroupListData({
             'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
             {
               params: {
-                path: { serviceName },
+                path: { serviceName: encodeURIComponent(serviceName) },
                 query: {
                   environment,
                   kuery,
@@ -90,7 +90,7 @@ export function useErrorGroupListData({
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
             params: {
-              path: { serviceName },
+              path: { serviceName: encodeURIComponent(serviceName) },
               query: {
                 environment,
                 kuery,

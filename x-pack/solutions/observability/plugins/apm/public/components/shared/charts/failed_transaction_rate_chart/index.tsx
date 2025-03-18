@@ -98,7 +98,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
           {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
               },
               query: {
                 environment,

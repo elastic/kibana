@@ -78,7 +78,7 @@ const mobileCrashMainStatisticsRoute = createApmServerRoute({
     const errorGroups = await getMobileCrashGroupMainStatistics({
       environment,
       kuery,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       sortField,
       sortDirection,
       apmEventClient,
@@ -121,7 +121,7 @@ const mobileCrashDetailedStatisticsRoute = createApmServerRoute({
     return getMobileCrashesGroupPeriods({
       environment,
       kuery,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       numBuckets,
       groupIds,

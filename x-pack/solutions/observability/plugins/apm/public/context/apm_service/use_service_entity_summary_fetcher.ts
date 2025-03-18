@@ -27,7 +27,10 @@ export function useServiceEntitySummaryFetcher({
     (callAPI) => {
       if (isEntityCentricExperienceEnabled && serviceName && environment) {
         return callAPI('GET /internal/apm/entities/services/{serviceName}/summary', {
-          params: { path: { serviceName }, query: { environment } },
+          params: {
+            path: { serviceName: encodeURIComponent(serviceName) },
+            query: { environment },
+          },
         });
       }
     },

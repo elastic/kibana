@@ -48,7 +48,7 @@ export function ProfilingHostsTopNFunctions({
       if (dataSource) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/hosts/functions', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               start,
               end,

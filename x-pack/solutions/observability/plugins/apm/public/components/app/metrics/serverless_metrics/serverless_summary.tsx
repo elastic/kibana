@@ -61,7 +61,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
       return callApmApi('GET /internal/apm/services/{serviceName}/metrics/serverless/summary', {
         params: {
           path: {
-            serviceName,
+            serviceName: encodeURIComponent(serviceName),
           },
           query: {
             kuery,

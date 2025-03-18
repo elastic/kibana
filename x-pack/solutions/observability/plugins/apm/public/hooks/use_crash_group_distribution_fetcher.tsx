@@ -34,7 +34,7 @@ export function useCrashGroupDistributionFetcher({
       if (start && end) {
         return callApmApi('GET /internal/apm/mobile-services/{serviceName}/crashes/distribution', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

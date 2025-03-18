@@ -37,7 +37,7 @@ export function ProfilingTopNFunctions({
       if (transactionType) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/functions', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               start,
               end,

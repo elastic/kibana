@@ -69,7 +69,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       apmApiClient.readUser({
         endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             ...commonQuery,
             kuery: `processor.event : "${processorEvent}"`,
@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       apmApiClient.readUser({
         endpoint: `GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics`,
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             ...commonQuery,
             kuery: `processor.event : "${processorEvent}"`,
@@ -112,7 +112,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       apmApiClient.readUser({
         endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             ...commonQuery,
             kuery: `processor.event : "${processorEvent}"`,

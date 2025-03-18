@@ -43,7 +43,7 @@ export function JvmMetricsOverview() {
       return callApmApi('GET /internal/apm/services/{serviceName}/metrics/nodes', {
         params: {
           path: {
-            serviceName,
+            serviceName: encodeURIComponent(serviceName),
           },
           query: {
             kuery,

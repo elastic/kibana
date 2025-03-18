@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: commonQuery,
       },
     });
@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       apmApiClient.readUser({
         endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: commonQuery,
         },
       }),

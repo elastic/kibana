@@ -45,7 +45,7 @@ const mobileMobileHttpRatesRoute = createApmServerRoute({
       environment,
       start,
       end,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       offset,
     });
@@ -85,7 +85,7 @@ const mobileErrorsDetailedStatisticsRoute = createApmServerRoute({
     return getMobileErrorGroupPeriods({
       environment,
       kuery,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       numBuckets,
       groupIds,
@@ -127,7 +127,7 @@ const mobileErrorTermsByFieldRoute = createApmServerRoute({
       environment,
       start,
       end,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       fieldName,
       size,
@@ -163,7 +163,7 @@ const mobileErrorsMainStatisticsRoute = createApmServerRoute({
     const errorGroups = await getMobileErrorGroupMainStatistics({
       environment,
       kuery,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       sortField,
       sortDirection,
       apmEventClient,

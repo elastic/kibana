@@ -89,7 +89,11 @@ function page({
 function RedirectNodesToMetrics() {
   const { query, path } = useApmParams('/services/{serviceName}/nodes');
   const search = qs.stringify(query);
-  return <Redirect to={{ pathname: `/services/${path.serviceName}/metrics`, search }} />;
+  return (
+    <Redirect
+      to={{ pathname: `/services/${encodeURIComponent(path.serviceName)}/metrics`, search }}
+    />
+  );
 }
 
 function RedirectNodeMetricsToMetricsDetails() {
@@ -98,7 +102,9 @@ function RedirectNodeMetricsToMetricsDetails() {
   return (
     <Redirect
       to={{
-        pathname: `/services/${path.serviceName}/metrics/${path.serviceNodeName}`,
+        pathname: `/services/${encodeURIComponent(path.serviceName)}/metrics/${
+          path.serviceNodeName
+        }`,
         search,
       }}
     />

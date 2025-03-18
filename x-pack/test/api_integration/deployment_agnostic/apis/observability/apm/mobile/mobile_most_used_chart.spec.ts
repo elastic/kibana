@@ -39,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .readUser({
         endpoint: 'GET /internal/apm/mobile-services/{serviceName}/most_used_charts',
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             environment,
             start: new Date(start).toISOString(),

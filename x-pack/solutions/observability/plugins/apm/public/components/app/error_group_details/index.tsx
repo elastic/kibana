@@ -98,7 +98,7 @@ export function ErrorGroupDetails() {
       title: groupId,
       href: apmRouter.link('/services/{serviceName}/errors/{groupId}', {
         path: {
-          serviceName,
+          serviceName: encodeURIComponent(serviceName),
           groupId,
         },
         query: {
@@ -131,7 +131,7 @@ export function ErrorGroupDetails() {
           return callApmApi('GET /internal/apm/services/{serviceName}/errors/{groupId}/samples', {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
                 groupId,
               },
               query: {

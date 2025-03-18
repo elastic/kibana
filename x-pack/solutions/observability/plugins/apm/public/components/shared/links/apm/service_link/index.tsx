@@ -77,7 +77,7 @@ export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps)
         <StyledLink
           data-test-subj={`serviceLink_${agentName}`}
           href={apmRouter.link(serviceLink, {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query,
           })}
         >

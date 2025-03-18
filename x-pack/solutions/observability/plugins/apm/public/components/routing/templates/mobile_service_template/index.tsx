@@ -83,7 +83,7 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
             {
               title: serviceName,
               href: router.link('/mobile-services/{serviceName}', {
-                path: { serviceName },
+                path: { serviceName: encodeURIComponent(serviceName) },
                 query,
               }),
             },
@@ -155,7 +155,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'overview',
       href: router.link('/mobile-services/{serviceName}/overview', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.mobileServiceDetails.overviewTabLabel', {
@@ -165,7 +165,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'transactions',
       href: router.link('/mobile-services/{serviceName}/transactions', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.mobileServiceDetails.transactionsTabLabel', {
@@ -175,7 +175,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'dependencies',
       href: router.link('/mobile-services/{serviceName}/dependencies', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
@@ -185,7 +185,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'errors-and-crashes',
       href: router.link('/mobile-services/{serviceName}/errors-and-crashes', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.mobileErrorsTabLabel', {
@@ -195,7 +195,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'service-map',
       href: router.link('/mobile-services/{serviceName}/service-map', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
@@ -205,7 +205,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'logs',
       href: router.link('/mobile-services/{serviceName}/logs', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
@@ -216,7 +216,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'alerts',
       href: router.link('/mobile-services/{serviceName}/alerts', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.mobileServiceDetails.alertsTabLabel', {
@@ -227,7 +227,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     {
       key: 'dashboards',
       href: router.link('/mobile-services/{serviceName}/dashboards', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       append: <TechnicalPreviewBadge icon="beaker" />,

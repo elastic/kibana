@@ -216,7 +216,7 @@ function getLatencyChartForService({
   return apmApiClient.readUser({
     endpoint: `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
     params: {
-      path: { serviceName },
+      path: { serviceName: encodeURIComponent(serviceName) },
       query: {
         start: start.toISOString(),
         end: end.toISOString(),

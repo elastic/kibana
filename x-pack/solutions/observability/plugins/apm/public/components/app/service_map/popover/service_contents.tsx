@@ -54,7 +54,7 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
       if (serviceName && start && end) {
         return callApmApi('GET /internal/apm/service-map/service/{serviceName}', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               start,
@@ -71,7 +71,7 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
   const isLoading = status === FETCH_STATUS.LOADING;
 
   const detailsUrl = apmRouter.link('/services/{serviceName}', {
-    path: { serviceName },
+    path: { serviceName: encodeURIComponent(serviceName) },
     query: {
       rangeFrom,
       rangeTo,
@@ -83,7 +83,7 @@ export function ServiceContents({ onFocusClick, elementData, environment, kuery 
   });
 
   const focusUrl = apmRouter.link('/services/{serviceName}/service-map', {
-    path: { serviceName },
+    path: { serviceName: encodeURIComponent(serviceName) },
     query: {
       rangeFrom,
       rangeTo,

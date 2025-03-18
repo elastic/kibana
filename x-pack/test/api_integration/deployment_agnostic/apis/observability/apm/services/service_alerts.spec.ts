@@ -38,7 +38,7 @@ export default function ServiceAlerts({ getService }: DeploymentAgnosticFtrProvi
     return apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),

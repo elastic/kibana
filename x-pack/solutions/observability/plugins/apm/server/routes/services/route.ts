@@ -219,7 +219,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     const { start, end, environment } = params.query;
 
     const serviceMetadataDetails = await getServiceMetadataDetails({
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       environment,
       apmEventClient,
       start,
@@ -264,7 +264,7 @@ const serviceMetadataIconsRoute = createApmServerRoute({
     });
 
     return getServiceMetadataIcons({
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       searchAggregatedTransactions,
       start,
@@ -294,13 +294,13 @@ const serviceAgentRoute = createApmServerRoute({
 
     const [apmServiceAgent, serviceEntitySummary] = await Promise.all([
       getServiceAgent({
-        serviceName,
+        serviceName: decodeURIComponent(serviceName),
         apmEventClient,
         start,
         end,
       }),
       getServiceEntitySummary({
-        serviceName,
+        serviceName: decodeURIComponent(serviceName),
         entityManagerClient,
         environment: ENVIRONMENT_ALL.value,
       }),
@@ -328,7 +328,7 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     const { start, end, documentType, rollupInterval } = params.query;
 
     return getServiceTransactionTypes({
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       start,
       end,
@@ -357,7 +357,7 @@ const serviceNodeMetadataRoute = createApmServerRoute({
     return getServiceNodeMetadata({
       kuery,
       apmEventClient,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       serviceNodeName,
       start,
       end,
@@ -412,7 +412,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
       environment,
       apmEventClient,
       searchAggregatedTransactions,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       annotationsClient,
       client: esClient.asCurrentUser,
       logger,
@@ -494,7 +494,7 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
           },
           service: {
             ...body.service,
-            name: path.serviceName,
+            name: decodeURIComponent(path.serviceName),
           },
           tags: uniq(['apm'].concat(body.tags ?? [])),
         })
@@ -542,7 +542,7 @@ const serviceThroughputRoute = createApmServerRoute({
       environment,
       kuery,
       filters,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       transactionType,
       transactionName,
@@ -630,7 +630,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       environment,
       kuery,
       latencyAggregationType,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       transactionType,
       searchAggregatedTransactions,
@@ -698,7 +698,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       environment,
       kuery,
       latencyAggregationType,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmEventClient,
       transactionType,
       searchAggregatedTransactions,
@@ -734,7 +734,7 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
 
     const serviceInstanceMetadataDetails = await getServiceInstanceMetadataDetails({
       apmEventClient,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       serviceNodeName,
       start,
       end,
@@ -789,7 +789,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
         apmEventClient,
         start,
         end,
-        serviceName,
+        serviceName: decodeURIComponent(serviceName),
         environment,
         numBuckets,
         offset,
@@ -828,7 +828,7 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
       apmEventClient,
       start,
       end,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       environment,
       kuery,
       randomSampler,
@@ -867,7 +867,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
 
     try {
       const allAnomalyTimeseries = await getAnomalyTimeseries({
-        serviceName,
+        serviceName: decodeURIComponent(serviceName),
         transactionType,
         start,
         end,
@@ -910,7 +910,7 @@ const serviceAlertsRoute = createApmServerRoute({
 
     const apmAlertsClient = await getApmAlertsClient(resources);
     const servicesAlerts = await getServicesAlerts({
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       apmAlertsClient,
       environment,
       start,

@@ -47,7 +47,7 @@ export function useMobileStatisticsFetcher({
       if (start && end) {
         return callApmApi('GET /internal/apm/mobile-services/{serviceName}/main_statistics', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,
@@ -79,7 +79,7 @@ export function useMobileStatisticsFetcher({
       if (totalItems && start && end) {
         return callApmApi('GET /internal/apm/mobile-services/{serviceName}/detailed_statistics', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

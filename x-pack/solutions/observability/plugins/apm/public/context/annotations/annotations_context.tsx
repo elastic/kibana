@@ -34,7 +34,7 @@ export function AnnotationsContextProvider({
         return callApmApi('GET /api/apm/services/{serviceName}/annotation/search 2023-10-31', {
           params: {
             path: {
-              serviceName,
+              serviceName: encodeURIComponent(serviceName),
             },
             query: {
               environment,

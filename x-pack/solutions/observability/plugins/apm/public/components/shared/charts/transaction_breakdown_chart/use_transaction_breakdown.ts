@@ -43,7 +43,7 @@ export function useTransactionBreakdown({
       if (serviceName && start && end && transactionType) {
         return callApmApi('GET /internal/apm/services/{serviceName}/transaction/charts/breakdown', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

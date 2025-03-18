@@ -33,7 +33,7 @@ export function useServiceAgentFetcher({
       if (serviceName) {
         return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: { start, end },
           },
         });

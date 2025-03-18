@@ -13,7 +13,7 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 
 export function ApmServiceWrapper() {
   const {
-    path: { serviceName },
+    path: { serviceName: serviceName },
     query,
   } = useApmParams('/services/{serviceName}');
 
@@ -29,7 +29,7 @@ export function ApmServiceWrapper() {
         title: serviceName,
         href: router.link('/services/{serviceName}', {
           query,
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
         }),
       },
     ],

@@ -61,7 +61,7 @@ export function ClassicServiceLogsStream() {
       if (start && end) {
         return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,
@@ -124,7 +124,7 @@ export function ServiceLogsOverview() {
         'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
         {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

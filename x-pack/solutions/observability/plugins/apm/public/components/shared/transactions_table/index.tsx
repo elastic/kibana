@@ -306,7 +306,7 @@ function useTableData({
         'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
         {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,
@@ -354,7 +354,7 @@ function useTableData({
           'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           {
             params: {
-              path: { serviceName },
+              path: { serviceName: encodeURIComponent(serviceName) },
               query: {
                 environment,
                 kuery,

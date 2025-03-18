@@ -132,7 +132,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
         params: {
           path: {
-            serviceName,
+            serviceName: encodeURIComponent(serviceName),
           },
           query: {
             start,
@@ -149,7 +149,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'overview',
       href: router.link('/services/{serviceName}/overview', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
@@ -159,7 +159,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'transactions',
       href: router.link('/services/{serviceName}/transactions', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
@@ -169,7 +169,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'dependencies',
       href: router.link('/services/{serviceName}/dependencies', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
@@ -180,7 +180,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'errors',
       href: router.link('/services/{serviceName}/errors', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
@@ -190,7 +190,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'metrics',
       href: router.link('/services/{serviceName}/metrics', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
@@ -206,7 +206,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'infrastructure',
       href: router.link('/services/{serviceName}/infrastructure', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       append: <BetaBadge icon="beta" />,
@@ -222,7 +222,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'service-map',
       href: router.link('/services/{serviceName}/service-map', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
@@ -232,7 +232,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'logs',
       href: router.link('/services/{serviceName}/logs', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
@@ -244,7 +244,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'alerts',
       href: router.link('/services/{serviceName}/alerts', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       append:
@@ -269,7 +269,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'profiling',
       href: router.link('/services/{serviceName}/profiling', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
@@ -284,7 +284,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     {
       key: 'dashboards',
       href: router.link('/services/{serviceName}/dashboards', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
       label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {

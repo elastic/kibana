@@ -41,7 +41,7 @@ export function useTransactionTraceSamplesFetcher({
         return callApmApi('GET /internal/apm/services/{serviceName}/transactions/traces/samples', {
           params: {
             path: {
-              serviceName,
+              serviceName: encodeURIComponent(serviceName),
             },
             query: {
               environment,

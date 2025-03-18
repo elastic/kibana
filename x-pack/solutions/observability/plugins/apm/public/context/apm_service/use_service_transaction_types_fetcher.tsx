@@ -29,7 +29,7 @@ export function useServiceTransactionTypesFetcher({
       if (serviceName && start && end && documentType && rollupInterval) {
         return callApmApi('GET /internal/apm/services/{serviceName}/transaction_types', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: { start, end, documentType, rollupInterval },
           },
         });

@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           environment: 'test',
           kuery: '',

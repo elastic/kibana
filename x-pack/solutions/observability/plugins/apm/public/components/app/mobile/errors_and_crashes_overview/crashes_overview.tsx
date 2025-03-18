@@ -147,7 +147,7 @@ export function MobileCrashesOverview() {
           'POST /internal/apm/mobile-services/{serviceName}/crashes/groups/detailed_statistics',
           {
             params: {
-              path: { serviceName },
+              path: { serviceName: encodeURIComponent(serviceName) },
               query: {
                 environment,
                 kuery: kueryWithMobileFilters,

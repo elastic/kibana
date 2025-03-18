@@ -39,7 +39,7 @@ const infrastructureRoute = createApmServerRoute({
 
     const infrastructureData = await getInfrastructureData({
       apmEventClient,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       environment,
       kuery,
       start,

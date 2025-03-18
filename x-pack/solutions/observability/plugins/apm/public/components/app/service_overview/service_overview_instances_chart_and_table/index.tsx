@@ -91,7 +91,7 @@ export function ServiceOverviewInstancesChartAndTable({
         {
           params: {
             path: {
-              serviceName,
+              serviceName: encodeURIComponent(serviceName),
             },
             query: {
               environment,
@@ -166,7 +166,7 @@ export function ServiceOverviewInstancesChartAndTable({
         {
           params: {
             path: {
-              serviceName,
+              serviceName: encodeURIComponent(serviceName),
             },
             query: {
               environment,

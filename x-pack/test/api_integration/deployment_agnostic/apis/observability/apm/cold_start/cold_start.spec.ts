@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',

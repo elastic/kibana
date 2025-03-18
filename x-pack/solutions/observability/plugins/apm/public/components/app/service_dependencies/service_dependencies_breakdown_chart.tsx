@@ -32,7 +32,7 @@ export function ServiceDependenciesBreakdownChart({ height }: { height: number }
       return callApmApi('GET /internal/apm/services/{serviceName}/dependencies/breakdown', {
         params: {
           path: {
-            serviceName,
+            serviceName: encodeURIComponent(serviceName),
           },
           query: {
             start,

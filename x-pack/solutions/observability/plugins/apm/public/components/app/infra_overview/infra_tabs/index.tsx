@@ -36,7 +36,7 @@ export function InfraTabs() {
       if (start && end) {
         return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

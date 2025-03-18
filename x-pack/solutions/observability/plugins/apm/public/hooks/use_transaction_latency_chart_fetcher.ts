@@ -57,7 +57,7 @@ export function useTransactionLatencyChartsFetcher({
       if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/transactions/charts/latency', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

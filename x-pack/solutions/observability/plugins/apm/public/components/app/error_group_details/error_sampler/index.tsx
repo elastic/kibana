@@ -50,7 +50,7 @@ export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurren
           {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
                 groupId,
                 errorId,
               },
