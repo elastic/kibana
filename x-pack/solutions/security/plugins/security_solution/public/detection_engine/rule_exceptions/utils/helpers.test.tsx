@@ -440,7 +440,8 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{
+      expect(codeSignatures).toEqual([
+        {
           field: 'file.Ext.code_signature',
           type: 'nested',
           entries: [
@@ -457,7 +458,8 @@ describe('Exception helpers', () => {
               value: 'true',
             },
           ],
-        }]);
+        },
+      ]);
     });
 
     test('it works when file.Ext.code_signature is nested type', () => {
@@ -473,7 +475,8 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{
+      expect(codeSignatures).toEqual([
+        {
           field: 'file.Ext.code_signature',
           type: 'nested',
           entries: [
@@ -508,7 +511,7 @@ describe('Exception helpers', () => {
               value: 'true',
             },
           ],
-        }
+        },
       ]);
     });
 
@@ -523,16 +526,16 @@ describe('Exception helpers', () => {
       expect(codeSignature).toEqual([
         {
           field: 'file.code_signature.subject_name',
-              operator: 'included',
-              type: 'match',
-              value: 'some_subject',
-            },
-            {
-              field: 'file.code_signature.trusted',
-              operator: 'included',
-              type: 'match',
-              value: 'true',
-            },
+          operator: 'included',
+          type: 'match',
+          value: 'some_subject',
+        },
+        {
+          field: 'file.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+        },
       ]);
     });
 
@@ -551,8 +554,7 @@ describe('Exception helpers', () => {
       const codeSignature = getFileCodeSignature({
         _id: '123',
         file: {
-            code_signature:
-              { subject_name: 'some_subject', trusted: 'false' },
+          code_signature: { subject_name: 'some_subject', trusted: 'false' },
         },
       });
 
@@ -609,7 +611,8 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{
+      expect(codeSignatures).toEqual([
+        {
           field: 'process.Ext.code_signature',
           type: 'nested',
           entries: [
@@ -626,7 +629,8 @@ describe('Exception helpers', () => {
               value: 'true',
             },
           ],
-        }]);
+        },
+      ]);
     });
 
     test('it works when process.Ext.code_signature is nested type', () => {
@@ -642,7 +646,8 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{
+      expect(codeSignatures).toEqual([
+        {
           field: 'process.Ext.code_signature',
           type: 'nested',
           entries: [
@@ -677,7 +682,7 @@ describe('Exception helpers', () => {
               value: 'true',
             },
           ],
-        }
+        },
       ]);
     });
 
@@ -692,16 +697,16 @@ describe('Exception helpers', () => {
       expect(codeSignature).toEqual([
         {
           field: 'process.code_signature.subject_name',
-              operator: 'included',
-              type: 'match',
-              value: 'some_subject',
-            },
-            {
-              field: 'process.code_signature.trusted',
-              operator: 'included',
-              type: 'match',
-              value: 'true',
-            },
+          operator: 'included',
+          type: 'match',
+          value: 'some_subject',
+        },
+        {
+          field: 'process.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+        },
       ]);
     });
 
@@ -720,8 +725,7 @@ describe('Exception helpers', () => {
       const codeSignature = getProcessCodeSignature({
         _id: '123',
         file: {
-            code_signature:
-              { subject_name: 'some_subject', trusted: 'false' },
+          code_signature: { subject_name: 'some_subject', trusted: 'false' },
         },
       });
 
@@ -778,7 +782,8 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{
+      expect(codeSignatures).toEqual([
+        {
           field: 'dll.Ext.code_signature',
           type: 'nested',
           entries: [
@@ -795,7 +800,8 @@ describe('Exception helpers', () => {
               value: 'true',
             },
           ],
-        }]);
+        },
+      ]);
     });
 
     test('it works when dll.Ext.code_signature is nested type', () => {
@@ -811,7 +817,8 @@ describe('Exception helpers', () => {
         },
       });
 
-      expect(codeSignatures).toEqual([{
+      expect(codeSignatures).toEqual([
+        {
           field: 'dll.Ext.code_signature',
           type: 'nested',
           entries: [
@@ -846,7 +853,7 @@ describe('Exception helpers', () => {
               value: 'true',
             },
           ],
-        }
+        },
       ]);
     });
 
@@ -861,16 +868,16 @@ describe('Exception helpers', () => {
       expect(codeSignature).toEqual([
         {
           field: 'dll.code_signature.subject_name',
-              operator: 'included',
-              type: 'match',
-              value: 'some_subject',
-            },
-            {
-              field: 'dll.code_signature.trusted',
-              operator: 'included',
-              type: 'match',
-              value: 'true',
-            },
+          operator: 'included',
+          type: 'match',
+          value: 'some_subject',
+        },
+        {
+          field: 'dll.code_signature.trusted',
+          operator: 'included',
+          type: 'match',
+          value: 'true',
+        },
       ]);
     });
 
@@ -889,8 +896,7 @@ describe('Exception helpers', () => {
       const codeSignature = getDllCodeSignature({
         _id: '123',
         file: {
-            code_signature:
-              { subject_name: 'some_subject', trusted: 'false' },
+          code_signature: { subject_name: 'some_subject', trusted: 'false' },
         },
       });
 
@@ -1000,9 +1006,7 @@ describe('Exception helpers', () => {
         _id: '123',
         file: {
           Ext: {
-            code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-            ],
+            code_signature: [{ subject_name: 'some_subject', trusted: 'false' }],
           },
           path: '',
           hash: {
@@ -1037,9 +1041,9 @@ describe('Exception helpers', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         host: {
-         os: {
-           name: 'Linux',
-         },
+          os: {
+            name: 'Linux',
+          },
         },
         file: {
           Ext: {
@@ -1161,9 +1165,7 @@ describe('Exception helpers', () => {
         _id: '123',
         process: {
           Ext: {
-            code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-            ],
+            code_signature: [{ subject_name: 'some_subject', trusted: 'false' }],
           },
           executable: 'some file path',
           hash: {
@@ -1214,9 +1216,7 @@ describe('Exception helpers', () => {
         },
         process: {
           Ext: {
-            code_signature: [
-              { subject_name: 'some_subject', trusted: 'true' },
-            ],
+            code_signature: [{ subject_name: 'some_subject', trusted: 'true' }],
           },
           executable: 'some file path',
           hash: {
