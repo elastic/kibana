@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EmptySchedule } from './empty_schedule';
 
-export const CLOSE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.settingsFlyout.closeButton',
-  {
-    defaultMessage: 'Close',
-  }
-);
+export const Schedule: React.FC = React.memo(() => {
+  return <EmptySchedule />;
+});
+Schedule.displayName = 'Schedule';
