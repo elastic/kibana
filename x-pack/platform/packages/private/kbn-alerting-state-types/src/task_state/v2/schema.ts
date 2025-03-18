@@ -11,5 +11,5 @@ import { versionSchema as versionSchemaV1 } from '../v1';
 export * from '../v1';
 
 export const versionSchema = versionSchemaV1.extends({
-  executionUuid: schema.maybe(schema.string()),
+  trackedExecutions: schema.maybe(schema.arrayOf(schema.string())),
 });

@@ -16,6 +16,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_START,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -112,6 +113,7 @@ export class AlertsClient<
     getById: (id: string) => (Alert & AlertData) | undefined;
   };
 
+  private trackedExecutions: Set<string>;
   private startedAtString: string | null = null;
   private runTimestampString: string | undefined;
   private rule: AlertRule;
@@ -161,6 +163,7 @@ export class AlertsClient<
         );
       },
     };
+    this.trackedExecutions = new Set([]);
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
@@ -171,23 +174,26 @@ export class AlertsClient<
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
-    if (opts.runTimestamp) {
-      this.runTimestampString = opts.runTimestamp.toISOString();
+
+    const { runTimestamp, trackedExecutions } = opts;
+
+    if (runTimestamp) {
+      this.runTimestampString = runTimestamp.toISOString();
     }
     await this.legacyAlertsClient.initializeExecution(opts);
 
-    const { previousExecutionUuid } = opts;
+    this.trackedExecutions = new Set(trackedExecutions ?? []);
 
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
-      const getTrackedAlertsByExecutionUuid = async (uuid: string) => {
+      const getTrackedAlertsByExecutionUuids = async (executionUuids: string[]) => {
         const result = await this.search({
           size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
           seq_no_primary_term: true,
           query: {
             bool: {
               must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
-              filter: [{ term: { [ALERT_RULE_EXECUTION_UUID]: uuid } }],
+              filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
             },
           },
         });
@@ -211,6 +217,7 @@ export class AlertsClient<
         const result = await this.search({
           size: uuidsToFetch.length,
           seq_no_primary_term: true,
+          sort: { [ALERT_START]: 'desc' },
           query: {
             bool: {
               filter: [
@@ -224,12 +231,12 @@ export class AlertsClient<
       };
 
       try {
-        const results = previousExecutionUuid
-          ? await getTrackedAlertsByExecutionUuid(previousExecutionUuid)
+        const results = trackedExecutions
+          ? await getTrackedAlertsByExecutionUuids(Array.from(this.trackedExecutions))
           : await getTrackedAlertsByAlertUuids();
 
         for (const hit of results.flat()) {
-          const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
+          const alertHit = hit._source as Alert & AlertData;
           const alertUuid = get(alertHit, ALERT_UUID);
 
           if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
@@ -241,6 +248,14 @@ export class AlertsClient<
           this.trackedAlerts.indices[alertUuid] = hit._index;
           this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
           this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
+
+          // only when the alerts are fetched by alert uuids
+          if (!trackedExecutions) {
+            const executionUuid = get(alertHit, ALERT_RULE_EXECUTION_UUID);
+            if (executionUuid) {
+              this.trackedExecutions.add(executionUuid);
+            }
+          }
         }
       } catch (err) {
         this.options.logger.error(
@@ -845,6 +860,10 @@ export class AlertsClient<
 
   public isUsingDataStreams(): boolean {
     return this._isUsingDataStreams;
+  }
+
+  public getTrackedExecutions() {
+    return this.trackedExecutions;
   }
 
   private throwIfHasClusterBlockException(response: BulkResponse) {

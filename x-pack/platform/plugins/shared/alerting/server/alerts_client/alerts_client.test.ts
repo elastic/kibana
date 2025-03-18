@@ -222,6 +222,14 @@ const fetchedAlert2 = {
   [TAGS]: ['rule-', '-tags'],
 };
 
+const fetchedAlert3 = {
+  ...fetchedAlert2,
+  [TIMESTAMP]: '2023-05-28T13:27:28.159Z',
+  [ALERT_START]: '2023-05-28T02:27:28.159Z',
+  [ALERT_RULE_EXECUTION_UUID]: '34lrfhw-645g-as67-sdf5-2534fvf8vfnjks',
+  [ALERT_UUID]: 'xyz',
+};
+
 const getNewIndexedAlertDoc = (overrides = {}) => ({
   [TIMESTAMP]: date,
   [EVENT_ACTION]: 'open',
@@ -464,6 +472,9 @@ describe('Alerts Client', () => {
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
             ignore_unavailable: true,
+            sort: {
+              'kibana.alert.start': 'desc',
+            },
             size: 3,
           });
 
@@ -479,18 +490,18 @@ describe('Alerts Client', () => {
 
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
-            previousExecutionUuid: '1234',
+            trackedExecutions: ['1234'],
           });
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
             ...defaultExecutionOpts,
-            previousExecutionUuid: '1234',
+            trackedExecutions: ['1234'],
           });
 
           expect(clusterClient.search).toHaveBeenCalledWith({
             query: {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-                filter: [{ term: { [ALERT_RULE_EXECUTION_UUID]: '1234' } }],
+                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['1234'] } }],
               },
             },
             seq_no_primary_term: true,
@@ -529,7 +540,7 @@ describe('Alerts Client', () => {
           const alertsClient = new AlertsClient(alertsClientParams);
           const executionOptionsWithUuid = {
             ...defaultExecutionOpts,
-            previousExecutionUuid: '1234',
+            trackedExecutions: ['1234'],
           };
 
           try {
@@ -549,6 +560,94 @@ describe('Alerts Client', () => {
           );
 
           spy.mockRestore();
+        });
+
+        test('should generate tracked executions from the alerts when fetched by alert uuids', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
+                },
+                {
+                  _id: 'xyz',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 43,
+                  _primary_term: 667,
+                  _source: fetchedAlert3,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+              '2': trackedAlert2Raw,
+              '3': trackedAlert3Raw,
+            },
+          });
+
+          expect(alertsClient.getTrackedExecutions()).toEqual(
+            new Set([
+              '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              '34lrfhw-645g-as67-sdf5-2534fvf8vfnjks',
+            ])
+          );
+        });
+
+        test('should generate tracked executions from the state when fetched by execution uuids', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            trackedExecutions: ['111', '222', '333'],
+          });
+
+          expect(alertsClient.getTrackedExecutions()).toEqual(new Set(['111', '222', '333']));
         });
       });
 
