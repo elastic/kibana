@@ -65,7 +65,6 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
-  connectorTypeRegistry.register(getOpenAIPkiConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getGeminiConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
