@@ -54,11 +54,7 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
-import {
-  FleetError,
-  PackagePolicyIneligibleForUpgradeError,
-  PackagePolicyValidationError,
-} from '../errors';
+import { FleetError, PackagePolicyValidationError } from '../errors';
 
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
@@ -3047,6 +3043,10 @@ describe('Package policy service', () => {
         references: [],
       };
 
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [{ ...mockPackagePolicy }],
+      });
+
       soClient.get.mockResolvedValueOnce({
         ...mockPackagePolicy,
       });
@@ -5479,65 +5479,6 @@ describe('Package policy service', () => {
     });
   });
 
-  describe('upgrade package policy info', () => {
-    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-    beforeEach(() => {
-      savedObjectsClient = savedObjectsClientMock.create();
-    });
-
-    function mockPackage(pkgName: string) {
-      const mockPackagePolicy = createPackagePolicyMock();
-
-      const attributes = {
-        ...mockPackagePolicy,
-        inputs: [],
-        package: {
-          ...mockPackagePolicy.package,
-          name: pkgName,
-        },
-      };
-
-      savedObjectsClient.get.mockResolvedValueOnce({
-        id: 'package-policy-id',
-        type: 'abcd',
-        references: [],
-        version: '1.3.2',
-        attributes,
-      });
-    }
-
-    it('should return success if package and policy versions match', async () => {
-      mockPackage('apache');
-
-      const response = await packagePolicyService.getUpgradePackagePolicyInfo(
-        savedObjectsClient,
-        'package-policy-id'
-      );
-
-      expect(response).toBeDefined();
-    });
-
-    it('should return error if package policy newer than package version', async () => {
-      mockPackage('aws');
-
-      await expect(
-        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
-      ).rejects.toEqual(
-        new PackagePolicyIneligibleForUpgradeError(
-          "Package policy c6d16e42-c32d-4dce-8a88-113cfe276ad1's package version 0.9.0 of package aws is newer than the installed package version. Please install the latest version of aws."
-        )
-      );
-    });
-
-    it('should return error if package not installed', async () => {
-      mockPackage('notinstalled');
-
-      await expect(
-        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
-      ).rejects.toEqual(new FleetError('Package notinstalled is not installed'));
-    });
-  });
-
   describe('fetchAllItemIds()', () => {
     let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
 
@@ -5761,131 +5702,6 @@ describe('Package policy service', () => {
         }
       );
     });
-  });
-});
-
-describe('getUpgradeDryRunDiff', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  beforeEach(() => {
-    savedObjectsClient = savedObjectsClientMock.create();
-  });
-  it('should return no errors if there is no conflict to upgrade', async () => {
-    const res = await packagePolicyService.getUpgradeDryRunDiff(
-      savedObjectsClient,
-      'package-policy-id',
-      {
-        id: '123',
-        name: 'test-123',
-        package: {
-          title: 'test',
-          name: 'test',
-          version: '1.0.1',
-        },
-        namespace: 'default',
-        inputs: [
-          {
-            id: 'toto',
-            enabled: true,
-            streams: [],
-            type: 'logs',
-          },
-        ],
-      } as any,
-      '1.0.2'
-    );
-
-    expect(res.hasErrors).toBeFalsy();
-  });
-
-  it('should no errors if there is a conflict to upgrade', async () => {
-    const res = await packagePolicyService.getUpgradeDryRunDiff(
-      savedObjectsClient,
-      'package-policy-id',
-      {
-        id: '123',
-        name: 'test-123',
-        package: {
-          title: 'test',
-          name: 'test-conflict',
-          version: '1.0.1',
-        },
-        namespace: 'default',
-        inputs: [
-          {
-            id: 'toto',
-            enabled: true,
-            streams: [],
-            type: 'logs',
-          },
-        ],
-      } as any,
-      '1.0.2'
-    );
-
-    expect(res.hasErrors).toBeTruthy();
-  });
-
-  it('should return no errors if upgrading 2 package policies', async () => {
-    savedObjectsClient.get.mockImplementation((type, id) =>
-      Promise.resolve({
-        id,
-        type: 'abcd',
-        references: [],
-        version: '0.9.0',
-        attributes: { ...createPackagePolicyMock(), name: id },
-      })
-    );
-    const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
-      'package-policy-id',
-      'package-policy-id-2',
-    ]);
-
-    expect(res).toEqual([
-      {
-        id: 'package-policy-id',
-        name: 'package-policy-id',
-        success: true,
-      },
-      {
-        id: 'package-policy-id-2',
-        name: 'package-policy-id-2',
-        success: true,
-      },
-    ]);
-  });
-
-  it('should omit spaceIds when upgrading package policies with spaceIds', async () => {
-    savedObjectsClient.get.mockImplementation((type, id) =>
-      Promise.resolve({
-        id,
-        type: 'abcd',
-        references: [],
-        version: '0.9.0',
-        attributes: { ...createPackagePolicyMock(), name: id, spaceIds: ['test'] },
-      })
-    );
-    const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
-      'package-policy-id-test-spaceId',
-    ]);
-
-    expect(res).toEqual([
-      {
-        id: 'package-policy-id-test-spaceId',
-        name: 'package-policy-id-test-spaceId',
-        success: true,
-      },
-    ]);
-
-    expect(savedObjectsClient.update).toBeCalledWith(
-      'ingest-package-policies',
-      'package-policy-id-test-spaceId',
-      expect.not.objectContaining({
-        spaceIds: expect.anything(),
-      }),
-      expect.anything()
-    );
   });
 });
 
