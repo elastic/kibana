@@ -28,6 +28,7 @@ interface GroupPanelProps<T> {
   onToggleGroup?: (isOpen: boolean, groupBucket: GroupingBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
+  shouldIgnoreFieldSize?: boolean;
 }
 
 const DefaultGroupPanelRenderer = ({
@@ -72,6 +73,7 @@ const GroupPanelComponent = <T,>({
   renderChildComponent,
   selectedGroup,
   nullGroupMessage,
+  shouldIgnoreFieldSize,
 }: GroupPanelProps<T>) => {
   const lastForceState = useRef(forceState);
   useEffect(() => {
@@ -98,8 +100,8 @@ const GroupPanelComponent = <T,>({
     () =>
       isNullGroup
         ? getNullGroupFilter(selectedGroup)
-        : createGroupFilter(selectedGroup, groupFieldValue.asArray),
-    [groupFieldValue.asArray, isNullGroup, selectedGroup]
+        : createGroupFilter(selectedGroup, groupFieldValue.asArray, shouldIgnoreFieldSize),
+    [groupFieldValue.asArray, isNullGroup, selectedGroup, shouldIgnoreFieldSize]
   );
 
   const onToggle = useCallback(
