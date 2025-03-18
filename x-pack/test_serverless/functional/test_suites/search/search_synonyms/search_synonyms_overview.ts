@@ -74,6 +74,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           method: 'GET',
         });
         expect(overwrittenSet.synonyms_set).to.eql([]);
+        await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectEmptyPromptToExist();
+
         await es.transport.request({
           path: '_synonyms/overwrite-test',
           method: 'DELETE',
