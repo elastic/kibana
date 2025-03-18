@@ -28,6 +28,7 @@ describe('<AlertSummaryPage />', () => {
 
   it('should render landing page if no packages are installed', () => {
     (useFetchIntegrations as jest.Mock).mockReturnValue({
+      availablePackage: [{ id: 'id' }],
       installedPackages: [],
       isLoading: false,
     });
