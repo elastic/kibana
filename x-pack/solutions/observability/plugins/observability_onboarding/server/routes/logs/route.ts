@@ -12,9 +12,7 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
-import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
-import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
@@ -108,63 +106,8 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
-const createFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'POST /internal/observability_onboarding/logs/flow',
-  security: {
-    authz: {
-      enabled: false,
-      reason: 'Authorization is checked by the Saved Object client and Elasticsearch client',
-    },
-  },
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        name: t.string,
-      }),
-      t.type({
-        type: t.literal('logFiles'),
-      }),
-      t.partial({
-        state: t.record(t.string, t.unknown),
-      }),
-    ]),
-  }),
-  async handler(resources): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
-    const {
-      context,
-      params: {
-        body: { name, type, state },
-      },
-      core,
-      request,
-    } = resources;
-    const coreStart = await core.start();
-    const {
-      elasticsearch: { client },
-    } = await context.core;
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(
-      client.asCurrentUser,
-      `standalone_agent_logs_onboarding_${name}`
-    );
-
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-
-    const { id } = await saveObservabilityOnboardingFlow({
-      savedObjectsClient,
-      observabilityOnboardingState: {
-        type,
-        state: state as ObservabilityOnboardingFlow['state'],
-        progress: {},
-      },
-    });
-
-    return { apiKeyEncoded, onboardingId: id };
-  },
-});
-
 export const logsOnboardingRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
-  ...createFlowRoute,
   ...createAPIKeyRoute,
 };
