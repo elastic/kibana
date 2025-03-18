@@ -18,7 +18,10 @@ import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
 import { showErrorToast } from '../..';
-import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
+import {
+  getVulnerabilitiesAggregationCount,
+  getVulnerabilitiesQuery,
+} from '../utils/findings_query_builders';
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
