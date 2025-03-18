@@ -149,7 +149,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-
   useEffect(() => {
     onPageReady({
       meta: { description: '[ttfmp_onboarding] The UI with onboarding categories is rendered' },
