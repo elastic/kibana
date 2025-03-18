@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase, RewriteRequestCase } from './lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import {
-  API_PRIVILEGES,
+import type { ILicenseState } from '../lib';
+import type { RewriteResponseCase, RewriteRequestCase } from './lib';
+import { verifyAccessAndContext } from './lib';
+import type { AlertingRequestHandlerContext } from '../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import type {
   RulesSettingsAlertDeletion,
   RulesSettingsAlertDeletionProperties,
 } from '../../common';
+import { API_PRIVILEGES } from '../../common';
 
 const bodySchema = schema.object({
   is_active_alerts_deletion_enabled: schema.boolean(),
