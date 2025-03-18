@@ -152,16 +152,21 @@ export const AssetInventoryDataTable = ({
   groupSelectorComponent,
 }: AssetInventoryDataTableProps) => {
   const {
+    pageIndex,
     pageSize,
     sort,
     query,
     queryError,
     getRowsFromPages,
+    onChangePage,
     onChangeItemsPerPage,
     onResetFilters,
     onSort,
     setUrlQuery,
   } = state;
+
+  console.log({ pageIndex });
+  console.log({ pageSize });
 
   // Table Flyout Controls -------------------------------------------------------------------
 
@@ -398,10 +403,12 @@ export const AssetInventoryDataTable = ({
             setExpandedDoc={onExpandDocClick}
             renderDocumentView={EmptyComponent}
             sort={sort}
+            pageIndexState={pageIndex}
             rowsPerPageState={pageSize}
             totalHits={totalHits}
             services={services}
             onUpdateRowsPerPage={onChangeItemsPerPage}
+            onUpdatePageIndex={onChangePage}
             rowHeightState={0}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             showTimeCol={false}

@@ -102,6 +102,7 @@ const GroupingComponent = <T,>({
   }, [unitCount, unit]);
 
   const groupCount = useMemo(() => data?.groupsCount?.value ?? 0, [data?.groupsCount?.value]);
+
   const groupCountText = useMemo(() => {
     const hasNullGroupInCurrentPage =
       data?.groupByFields?.buckets?.some(
@@ -200,6 +201,10 @@ const GroupingComponent = <T,>({
     () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
     [groupCount, itemsPerPage]
   );
+
+  console.log({ groupCount });
+  console.log({ pageCount });
+  console.log({ unitCount });
 
   return (
     <>

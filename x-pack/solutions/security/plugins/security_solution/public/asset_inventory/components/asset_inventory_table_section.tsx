@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import type { Filter } from '@kbn/es-query';
 import { AssetInventoryDataTable } from './asset_inventory_data_table';
 import { AssetInventoryGrouping } from './grouping/asset_inventory_grouping';
@@ -14,6 +14,7 @@ import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory
 
 // TODO Move to constants?
 const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
+const noop = () => {};
 
 interface SubGroupingProps {
   state: AssetInventoryDataTableResult;
@@ -51,29 +52,16 @@ const SubGrouping = ({
     groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
   });
 
-  /**
-   * This is used to reset the active page index when the selected group changes
-   * It is needed because the grouping number of pages can change according to the selected group
-   */
-  useEffect(() => {
-    state.onChangePage(0); // setActivePageIndex(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroup]);
-
   return (
     <AssetInventoryGrouping
       data={groupData}
       grouping={grouping}
       renderChildComponent={renderChildComponent}
-      // onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
       onChangeGroupsItemsPerPage={state.onChangeItemsPerPage}
-      // onChangeGroupsPage={onChangeGroupsPage}
       onChangeGroupsPage={state.onChangePage}
-      // activePageIndex={activePageIndex}
       activePageIndex={state.pageIndex}
-      isFetching={isFetching}
-      // pageSize={pageSize}
       pageSize={state.pageSize}
+      isFetching={isFetching}
       selectedGroup={selectedGroup}
       // TODO isGroupLoading is not used nor expected by AssetInventoryGrouping
       // isGroupLoading={isGroupLoading}
@@ -130,7 +118,7 @@ const renderChildComponent = ({
         .map(({ query }) => (query.match_phrase ? query : null))
         .filter(Boolean);
 
-      const newState = {
+      const newState: AssetInventoryDataTableResult = {
         ...state,
         query: {
           ...state.query,
@@ -139,6 +127,11 @@ const renderChildComponent = ({
             filter: [...state.query.bool.filter, ...combinedFilters],
           },
         },
+        // Pagination state must be local and not in sync with URL state
+        pageIndex: 0,
+        pageSize: 10,
+        onChangePage: noop,
+        onChangeItemsPerPage: noop,
       };
 
       return (

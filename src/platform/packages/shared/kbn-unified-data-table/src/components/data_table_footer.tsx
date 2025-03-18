@@ -69,12 +69,15 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
     (paginationMode === 'multiPage' && !isOnLastPage) ||
     (paginationMode === 'singlePage' && !hasScrolledToBottom && !isLoadingMore)
   ) {
+    console.log({ pageIndex, pageCount, rowCount, totalHits });
+    console.log('return null');
     return null;
   }
 
   // allow to fetch more records for UnifiedDataTable
   if (onFetchMoreRecords && typeof isLoadingMore === 'boolean') {
     if (rowCount <= MAX_LOADED_GRID_ROWS - sampleSize) {
+      console.log('Fetch more');
       return (
         <UnifiedDataTableFooterContainer hasButton={true} {...props}>
           <EuiToolTip
@@ -106,14 +109,17 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
       );
     }
 
+    console.log('Return');
     return <UnifiedDataTableFooterContainer hasButton={false} {...props} />;
   }
 
   if (rowCount < totalHits) {
+    console.log('Return rowCount < totalHits');
     // show only a message for embeddable
     return <UnifiedDataTableFooterContainer hasButton={false} {...props} />;
   }
 
+  console.log('Last return null');
   return null;
 };
 
