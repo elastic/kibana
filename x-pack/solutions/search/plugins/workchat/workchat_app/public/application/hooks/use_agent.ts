@@ -7,12 +7,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useWorkChatServices } from './use_workchat_service';
+import { queryKeys } from '../query_keys';
 
 export const useAgent = ({ agentId }: { agentId: string }) => {
   const { agentService } = useWorkChatServices();
 
   const { data: agent, isLoading } = useQuery({
-    queryKey: ['workchat.agents', { id: agentId }],
+    queryKey: queryKeys.agents.details(agentId),
     queryFn: async () => {
       return agentService.get(agentId);
     },

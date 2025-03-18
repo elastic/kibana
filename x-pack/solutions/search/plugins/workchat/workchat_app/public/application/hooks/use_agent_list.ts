@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
-import type { Agent } from '../../../common/agents';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '../query_keys';
 import { useWorkChatServices } from './use_workchat_service';
 
 export const useAgentList = () => {
   const { agentService } = useWorkChatServices();
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const [agents, setAgents] = useState<Agent[]>([]);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-
-    const nextAgents = await agentService.list();
-
-    setAgents(nextAgents);
-    setLoading(false);
-  }, [agentService]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  const {
+    data: agents,
+    isLoading,
+    refetch: refresh,
+  } = useQuery({
+    queryKey: queryKeys.agents.list,
+    queryFn: async () => {
+      return agentService.list();
+    },
+    initialData: () => [],
+  });
 
   return {
     agents,
