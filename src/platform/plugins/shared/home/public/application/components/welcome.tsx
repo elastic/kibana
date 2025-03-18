@@ -38,7 +38,6 @@ interface WelcomeProps {
   urlBasePath: string;
   onSkip: () => void;
 }
-
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */

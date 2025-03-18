@@ -21,11 +21,10 @@ const fullScreenGraphicsFadeIn = keyframes`
     opacity: 1;
   }
 `;
-// not sure if svg ever worked
+
 export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEuiTheme) => {
   const lightOrDarkTheme = (lightSvg: any, darkSvg: any) => {
-    const result = euiTheme.colorMode === COLOR_MODES_STANDARD.light ? lightSvg : darkSvg; // nothing changes
-    return result;
+    return euiTheme.colorMode === COLOR_MODES_STANDARD.light ? lightSvg : darkSvg;
   };
   return css({
     position: 'fixed',

@@ -8,9 +8,15 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, MouseEvent, useMemo } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import { css } from '@emotion/react';
-import { EuiCard, EuiFlexItem, useEuiTheme, useEuiMinBreakpoint } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexItem,
+  useEuiMinBreakpoint,
+  UseEuiTheme,
+  mathWithUnits,
+} from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/kibana-react-plugin/public';
 import { FeatureCatalogueSolution } from '../../..';
@@ -27,36 +33,33 @@ const getSolutionGraphicURL = (solutionId: string) =>
 
 export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
   const { trackUiMetric } = getServices();
-  const { euiTheme } = useEuiTheme();
+
   const euiMinBreakpointM = useEuiMinBreakpoint('m');
+  const homeSolutionPanelstyles = ({ euiTheme }: UseEuiTheme) =>
+    css({
+      [euiMinBreakpointM]: {
+        maxInlineSize: `calc(33.33% - ${euiTheme.size.m} * 10)`,
+      },
+      '.homeSolutionPanel': {
+        img: {
+          backgroundColor: euiTheme.colors.primary,
+          maxBlockSize: mathWithUnits(euiTheme.size.m, (x) => x * 10),
+          objectFit: 'cover',
+        },
 
-  const homeSolutionPanelstyles = useMemo(
-    () => css`
-      ${euiMinBreakpointM} {
-        max-inline-size: calc(33.33% - ${euiTheme.size.m} * 10);
-      }
-      .homeSolutionPanel {
-        img {
-          background-color: ${euiTheme.colors.primary};
-          max-block-size: $euiSize * 10;
-          object-fit: cover;
-        }
+        '&--enterpriseSearch img': {
+          backgroundColor: euiTheme.colors.warning,
+        },
 
-        &--enterpriseSearch img {
-          background-color: ${euiTheme.colors.warning};
-        }
+        '&--observability img': {
+          backgroundColor: euiTheme.colors.accent,
+        },
 
-        &--observability img {
-          background-color: ${euiTheme.colors.accent};
-        }
-
-        &--securitySolution img {
-          background-color: ${euiTheme.colors.accentSecondary};
-        }
-      }
-    `,
-    [euiTheme, euiMinBreakpointM]
-  );
+        '&--securitySolution img': {
+          backgroundColor: euiTheme.colors.accentSecondary,
+        },
+      },
+    });
 
   return (
     <EuiFlexItem css={homeSolutionPanelstyles} data-test-subj={`homeSolutionPanel_${solution.id}`}>
