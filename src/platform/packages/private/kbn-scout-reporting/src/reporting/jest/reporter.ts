@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  Config,
-  AggregatedResult,
-  ReporterOnStartOptions,
-  TestContext,
-} from '@jest/reporters';
+import type { Config, AggregatedResult, TestContext } from '@jest/reporters';
 import { BaseReporter } from '@jest/reporters';
 import { TestResult } from '@jest/types';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -23,7 +18,7 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutJestMetadata } from '@kbn/scout-info';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ScoutJestReporterOptions } from './options';
@@ -42,8 +37,8 @@ import {
  * Scout Jest reporter
  */
 export class ScoutJestReporter extends BaseReporter {
+  name: string;
   readonly scoutLog: ToolingLog;
-  readonly name: string;
   readonly runId: string;
   private report: ScoutEventsReport;
   private baseTestRunInfo: ScoutTestRunInfo;
@@ -96,23 +91,31 @@ export class ScoutJestReporter extends BaseReporter {
     return path.join(outputPath, `scout-jest-${this.runId}`);
   }
 
-  onRunStart(results: AggregatedResult, _options: ReporterOnStartOptions): void {
-    /**
-     * Test execution began
-     */
-    // Log event
-    this.report.logEvent({
-      ...datasources.environmentMetadata,
-      '@timestamp': new Date(results.startTime),
-      reporter: {
-        name: this.name,
-        type: 'jest',
+  /**
+   * Look for Scout metadata in Jest globals and update this reporter instance if necessary
+   *
+   * @param jestGlobals Jest globals
+   */
+  loadMetadataFromJestGlobals(jestGlobals: Config.ConfigGlobals): void {
+    if (!Object.hasOwn(jestGlobals, 'scout')) {
+      // No Scout metadata in Jest globals
+      return;
+    }
+
+    const metadata = jestGlobals.scout as ScoutJestMetadata;
+
+    if (metadata.reporter.name !== undefined) {
+      this.name = metadata.reporter.name;
+    }
+
+    this.baseTestRunInfo = {
+      ...this.baseTestRunInfo,
+      config: {
+        ...this.baseTestRunInfo.config,
+        file: this.getScoutFileInfoForPath(metadata.configFilePath),
+        category: metadata.testRunConfigCategory,
       },
-      test_run: this.baseTestRunInfo,
-      event: {
-        action: ScoutReportEventAction.RUN_BEGIN,
-      },
-    });
+    };
   }
 
   /**
@@ -189,10 +192,28 @@ export class ScoutJestReporter extends BaseReporter {
     });
   }
 
-  async onRunComplete(_testContexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
+  async onRunComplete(testContexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
     /**
      * Test execution ended
      */
+    // Load Scout metadata from Jest globals
+    const context = testContexts.values().next().value as TestContext;
+    this.loadMetadataFromJestGlobals(context.config.globals);
+
+    // Log "run start" event
+    this.report.logEvent({
+      ...datasources.environmentMetadata,
+      '@timestamp': new Date(results.startTime),
+      reporter: {
+        name: this.name,
+        type: 'jest',
+      },
+      test_run: this.baseTestRunInfo,
+      event: {
+        action: ScoutReportEventAction.RUN_BEGIN,
+      },
+    });
+
     // Turn test results into events in bulk
     results.testResults.forEach((suite) => {
       suite.testResults.forEach((testResult) => {
