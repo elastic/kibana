@@ -30,6 +30,10 @@ class TelemetryConfigurationDTO {
     datastreams_threshold: 1000,
     indices_settings_threshold: 10_000,
 
+    index_query_size: 1024,
+    ilm_stats_query_size: 1024,
+    ilm_policy_query_size: 1024,
+
     max_prefixes: 10, // @deprecated
     max_group_size: 100, // @deprecated
     min_group_size: 5, // @deprecated

@@ -255,9 +255,11 @@ export interface ITelemetryReceiver {
 
   getIndices(): Promise<IndexSettings[]>;
   getDataStreams(): Promise<DataStream[]>;
-  getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
-  getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
-  getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
+  getIndicesStats(indices: string[], chunkSize: number): AsyncGenerator<IndexStats, void, unknown>;
+  getIlmsStats(indices: string[], chunkSize: number): AsyncGenerator<IlmStats, void, unknown>;
+  getIlmsPolicies(ilms: string[], chunkSize: number): AsyncGenerator<IlmPolicy, void, unknown>;
+
+  getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -1395,12 +1397,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       });
   }
 
-  public async *getIndicesStats(indices: string[]) {
+  public async *getIndicesStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     this.logger.l('Fetching indices stats');
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
     this.logger.l('Splitted indices into groups', {
       groups: groupedIndices.length,
@@ -1460,10 +1463,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsStats(indices: string[]) {
+  public async *getIlmsStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
     this.logger.l('Splitted ilms into groups', {
       groups: groupedIndices.length,
@@ -1497,8 +1501,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsPolicies(ilms: string[]) {
+  public async *getIlmsPolicies(ilms: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     const phase = (obj: unknown): Nullable<IlmPhase> => {
       let value: Nullable<IlmPhase>;
@@ -1510,7 +1515,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return value;
     };
 
-    const groupedIlms = chunkStringsByMaxLength(ilms);
+    const groupedIlms = chunkStringsByMaxLength(ilms, safeChunkSize);
 
     this.logger.l('Splitted ilms into groups', {
       groups: groupedIlms.length,

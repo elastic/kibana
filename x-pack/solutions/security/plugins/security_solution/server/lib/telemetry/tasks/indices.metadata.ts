@@ -73,7 +73,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           items: [],
         };
 
-        for await (const stat of receiver.getIndicesStats(indices)) {
+        for await (const stat of receiver.getIndicesStats(indices, taskConfig.index_query_size)) {
           indicesStats.items.push(stat);
         }
         sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT, indicesStats);
@@ -97,7 +97,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           items: [],
         };
 
-        for await (const stat of receiver.getIlmsStats(indices)) {
+        for await (const stat of receiver.getIlmsStats(indices, taskConfig.ilm_stats_query_size)) {
           if (stat.policy_name !== undefined) {
             ilmNames.add(stat.policy_name);
             ilmsStats.items.push(stat);
@@ -115,7 +115,10 @@ export function createTelemetryIndicesMetadataTaskConfig() {
           items: [],
         };
 
-        for await (const policy of receiver.getIlmsPolicies(Array.from(ilmNames.values()))) {
+        for await (const policy of receiver.getIlmsPolicies(
+          Array.from(ilmNames.values()),
+          taskConfig.ilm_policy_query_size
+        )) {
           ilmPolicies.items.push(policy);
         }
         sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT, ilmPolicies);
