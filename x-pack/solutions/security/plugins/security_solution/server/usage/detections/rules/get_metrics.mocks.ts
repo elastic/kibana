@@ -549,6 +549,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -592,6 +601,12 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           cardinality: {
             value: 0,
@@ -969,6 +984,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -1026,6 +1050,15 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -1069,6 +1102,12 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           cardinality: {
             value: 0,
@@ -1534,6 +1573,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -1577,6 +1625,12 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           cardinality: {
             value: 0,
@@ -2072,6 +2126,12 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           cardinality: {
             value: 0,
