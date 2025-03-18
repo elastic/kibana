@@ -7,6 +7,7 @@
 
 export { test, spaceTest } from './src/playwright';
 export type {
+  ObltApiServicesFixture,
   ObltPageObjects,
   ObltTestFixtures,
   ObltWorkerFixtures,

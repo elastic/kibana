@@ -18,7 +18,8 @@ import {
 } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useSessionViewPanelContext } from '../context';
-
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 /**
  * Tab displayed in the SessionView preview panel, shows alerts related to the session.
  */
@@ -32,6 +33,9 @@ export const AlertsTab = memo(() => {
     isFetching: isFetchingAlerts,
     hasNextPage: hasNextPageAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
+
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   // this code mimics what is being done in the x-pack/plugins/session_view/public/components/session_view/index.tsx file
   const alerts = useMemo(() => {
@@ -53,14 +57,14 @@ export const AlertsTab = memo(() => {
         id: DocumentDetailsPreviewPanelKey,
         params: {
           id: evtId,
-          indexName,
+          indexName: alertsIndex,
           scopeId,
           banner: ALERT_PREVIEW_BANNER,
           isPreviewMode: true,
         },
       });
     },
-    [openPreviewPanel, indexName, scopeId]
+    [openPreviewPanel, scopeId, alertsIndex]
   );
 
   // this code mimics what is being done in the x-pack/plugins/session_view/public/components/session_view/index.tsx file
