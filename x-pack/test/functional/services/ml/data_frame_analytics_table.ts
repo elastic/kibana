@@ -93,19 +93,17 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
             .attr('value'),
         };
 
-        if (tableEnvironment === 'stackMgmtJobList') {
-          const $spaces = $tr
-            .findTestSubject('mlAnalyticsTableColumnSpaces')
-            .find('.euiTableCellContent')
-            .find('.euiAvatar--space');
-          const spaces = [];
-          for (const el of $spaces.toArray()) {
-            // extract the space id from data-test-subj and add to list
-            spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
-          }
-
-          rowObject.spaces = spaces;
+        const $spaces = $tr
+          .findTestSubject('mlTableColumnSpaces')
+          .find('.euiTableCellContent')
+          .find('.euiAvatar--space');
+        const spaces = [];
+        for (const el of $spaces.toArray()) {
+          // extract the space id from data-test-subj and add to list
+          spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
         }
+
+        rowObject.spaces = spaces;
 
         rows.push(rowObject);
       }
@@ -205,12 +203,15 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       await searchBarInput.type(filter);
       await this.assertAnalyticsSearchInputValue(filter);
 
-      const rows = await this.parseAnalyticsTable();
+      const rows = (await this.parseAnalyticsTable()) ?? [];
+      // @TODO: remove
+      console.log(`--@@filterWithSearchString rows`, rows);
       const filteredRows = rows.filter((row) => row.id === filter);
       expect(filteredRows).to.have.length(
         expectedRowCount,
         `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
       );
+      return rows;
     }
 
     public async assertAnalyticsJobDisplayedInTable(
@@ -218,20 +219,22 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       shouldBeDisplayed: boolean,
       refreshButtonTestSubj = 'mlDatePickerRefreshPageButton'
     ) {
-      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
-      await testSubjects.click(`~${refreshButtonTestSubj}`);
-      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
-      await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
-
-      if (shouldBeDisplayed) {
-        await this.filterWithSearchString(analyticsId, 1);
-      } else {
+      const shouldNotBeDisplayed = shouldBeDisplayed === false;
+      if (shouldNotBeDisplayed) {
         if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
           // no jobs at all, no other assertion needed
           return;
         }
         await this.filterWithSearchString(analyticsId, 0);
+        return;
       }
+
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.click(`~${refreshButtonTestSubj}`);
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
+
+      await this.filterWithSearchString(analyticsId, 1);
     }
 
     public async assertAnalyticsRowFields(analyticsId: string, expectedRow: object) {

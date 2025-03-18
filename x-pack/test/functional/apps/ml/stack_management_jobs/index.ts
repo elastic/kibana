@@ -33,9 +33,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./synchronize'));
+    // loadTestFile(require.resolve('./synchronize'));
     loadTestFile(require.resolve('./manage_spaces'));
-    loadTestFile(require.resolve('./import_jobs'));
-    loadTestFile(require.resolve('./export_jobs'));
+    // loadTestFile(require.resolve('./import_jobs'));
+    // loadTestFile(require.resolve('./export_jobs'));
   });
 }

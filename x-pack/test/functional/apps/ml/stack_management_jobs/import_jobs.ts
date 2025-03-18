@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('ensures jobs have been imported', async () => {
         if (testData.expected.jobType === 'anomaly-detector') {
-          await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
+          await ml.navigation.navigateToJobManagement();
           await ml.stackManagementJobs.refreshList();
           for (const id of testData.expected.jobIds) {
             await ml.stackManagementJobs.filterTableWithSearchString('anomaly-detector', id);

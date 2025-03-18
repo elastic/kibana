@@ -35,20 +35,27 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async navigateToStackManagementMlSection(sectionId: string, pageSubject: string) {
-      await PageObjects.common.navigateToApp('management');
+    async navigateToStackManagementMlSection(
+      sectionId: string,
+      pageSubject: string,
+      spaceId?: string
+    ) {
+      if (spaceId) {
+        await PageObjects.common.navigateToApp('management', { basePath: `/s/${spaceId}` });
+      } else {
+        await PageObjects.common.navigateToApp('management');
+      }
+
       const sections = await managementMenu.getSections();
-      expect(sections).to.have.length(3);
-      expect(sections[1]).to.eql({
-        sectionId: 'ml',
-        sectionLinks: [
-          'overview',
-          'anomaly_detection',
-          'analytics',
-          'trained_models',
-          'ad_settings',
-        ],
-      });
+      const mlSection = sections.find((section) => section.sectionId === 'ml');
+      expect(mlSection).to.not.be(undefined);
+      expect(mlSection?.sectionLinks).to.eql([
+        'overview',
+        'anomaly_detection',
+        'analytics',
+        'trained_models',
+        'ad_settings',
+      ]);
       await testSubjects.click(sectionId);
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(pageSubject);
@@ -227,12 +234,16 @@ export function MachineLearningNavigationProvider({
       );
     },
 
-    async navigateToDataFrameAnalytics() {
-      await this.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
+    async navigateToDataFrameAnalytics(spaceId?: string) {
+      await this.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList', spaceId);
     },
 
-    async navigateToTrainedModels() {
-      await this.navigateToStackManagementMlSection('trained_models', 'mlModelsTableContainer');
+    async navigateToTrainedModels(spaceId?: string) {
+      await this.navigateToStackManagementMlSection(
+        'trained_models',
+        'mlModelsTableContainer',
+        spaceId
+      );
     },
 
     async navigateToModelManagementNodeList() {
@@ -269,12 +280,12 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async navigateToJobManagement() {
-      await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
+    async navigateToJobManagement(spaceId?: string) {
+      await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list', spaceId);
     },
 
-    async navigateToSettings() {
-      await this.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
+    async navigateToSettings(spaceId?: string) {
+      await this.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings', spaceId);
     },
 
     async navigateToStackManagementInsuficientLicensePage() {
@@ -284,10 +295,6 @@ export function MachineLearningNavigationProvider({
         // verify that the overall page is present
         await testSubjects.existOrFail('mlPageInsufficientLicense');
       });
-    },
-
-    async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
-      await this.navigateToJobManagement();
     },
 
     async navigateToAnomalyExplorerViaSingleMetricViewer() {

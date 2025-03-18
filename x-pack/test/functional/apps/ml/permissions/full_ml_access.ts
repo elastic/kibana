@@ -495,7 +495,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should load the analytics jobs list page in stack management'
             );
-            await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
+            await ml.navigation.navigateToDataFrameAnalytics();
             await ml.testExecution.logTestStep('should display the DFA job in the list');
             await ml.stackManagementJobs.filterTableWithSearchString(
               'data-frame-analytics',

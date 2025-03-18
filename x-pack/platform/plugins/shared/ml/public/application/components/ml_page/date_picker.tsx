@@ -38,6 +38,10 @@ export const DatePicker = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <DatePickerWrapper isLoading={isLoading} width="full" dataTestSubj="mlRefreshJobListButton" />
+    <DatePickerWrapper
+      isLoading={isLoading}
+      width="full"
+      dataTestSubj="mlDatePickerRefreshPageButton"
+    />
   );
 };
