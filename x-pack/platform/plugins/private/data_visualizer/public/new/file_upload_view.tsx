@@ -174,12 +174,12 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
         <EuiFlexItem grow={true} />
 
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+          {/* <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
             <FormattedMessage
               id="xpack.dataVisualizer.file.uploadView.closeButton"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiButtonEmpty> */}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

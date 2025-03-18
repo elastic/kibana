@@ -67,7 +67,7 @@ export interface UploadStatus {
   modelDeployed: STATUS;
   dataViewCreated: STATUS;
   pipelinesDeleted: STATUS;
-  // fileImport: STATUS; // is this really the same as overallImportStatus? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  fileImport: STATUS;
   filesStatus: FileAnalysis[];
   fileClashes: FileClash[];
   formatMix: boolean;
@@ -112,7 +112,7 @@ export class FileUploadManager {
     modelDeployed: STATUS.NA,
     dataViewCreated: STATUS.NOT_STARTED,
     pipelinesDeleted: STATUS.NOT_STARTED,
-    // fileImport: STATUS.NOT_STARTED,
+    fileImport: STATUS.NOT_STARTED,
     filesStatus: [],
     fileClashes: [],
     formatMix: false,
@@ -459,9 +459,9 @@ export class FileUploadManager {
       return null;
     }
 
-    // this.setStatus({
-    //   fileImport: STATUS.STARTED,
-    // });
+    this.setStatus({
+      fileImport: STATUS.STARTED,
+    });
 
     // import data
     const files = this.getFiles();
@@ -488,9 +488,9 @@ export class FileUploadManager {
       return null;
     }
 
-    // this.setStatus({
-    //   fileImport: STATUS.COMPLETED,
-    // });
+    this.setStatus({
+      fileImport: STATUS.COMPLETED,
+    });
 
     if (this.removePipelinesAfterImport) {
       try {
