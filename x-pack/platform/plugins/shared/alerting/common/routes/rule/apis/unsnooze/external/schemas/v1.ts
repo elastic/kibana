@@ -8,11 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 export const unsnoozeParamsSchema = schema.object({
-  id: schema.string(),
-});
-
-const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
-
-export const unsnoozeBodySchema = schema.object({
-  schedule_ids: scheduleIdsSchema,
+  ruleId: schema.string({ meta: { description: 'The identifier for the rule.' } }),
+  scheduleId: schema.string({
+    meta: { description: 'The identifier for the snooze schedule.' },
+  }),
 });
