@@ -9,7 +9,7 @@
 
 import React, { FC, useState } from 'react';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { css } from '@emotion/react';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
 import { AVAILABLE_PALETTES, getPalette, NeutralPalette } from '../palettes';
@@ -25,7 +25,7 @@ export default {
   decorators: [(story: Function) => story()],
 };
 
-const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
+const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
   const [updatedModel, setUpdateModel] = useState<ColorMapping.Config>(
     DEFAULT_COLOR_MAPPING_CONFIG
   );
@@ -77,50 +77,53 @@ const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
     </EuiPage>
   );
 };
-export const Default = Template.bind({});
 
-Default.args = {
-  model: {
-    ...DEFAULT_COLOR_MAPPING_CONFIG,
+export const Default: StoryObj<typeof Template> = {
+  render: Template,
 
-    colorMode: {
-      type: 'categorical',
-    },
-    specialAssignments: [
-      {
-        rule: {
-          type: 'other',
-        },
-        color: {
-          type: 'loop',
-        },
-        touched: false,
+  args: {
+    model: {
+      ...DEFAULT_COLOR_MAPPING_CONFIG,
+      paletteId: 'eui_amsterdam',
+
+      colorMode: {
+        type: 'categorical',
       },
-    ],
-    assignments: [],
+      specialAssignments: [
+        {
+          rule: {
+            type: 'other',
+          },
+          color: {
+            type: 'loop',
+          },
+          touched: false,
+        },
+      ],
+      assignments: [],
+    },
+    isDarkMode: false,
+    data: {
+      type: 'categories',
+      categories: [
+        'US',
+        'Mexico',
+        'Brasil',
+        'Canada',
+        'Italy',
+        'Germany',
+        'France',
+        'Spain',
+        'UK',
+        'Portugal',
+        'Greece',
+        'Sweden',
+        'Finland',
+      ],
+    },
+    palettes: AVAILABLE_PALETTES,
+    specialTokens: new Map(),
+    // eslint-disable-next-line no-console
+    onModelUpdate: (model) => console.log(model),
   },
-  isDarkMode: false,
-  data: {
-    type: 'categories',
-    categories: [
-      'US',
-      'Mexico',
-      'Brasil',
-      'Canada',
-      'Italy',
-      'Germany',
-      'France',
-      'Spain',
-      'UK',
-      'Portugal',
-      'Greece',
-      'Sweden',
-      'Finland',
-    ],
-  },
-
-  palettes: AVAILABLE_PALETTES,
-  specialTokens: new Map(),
-  // eslint-disable-next-line no-console
-  onModelUpdate: (model) => console.log(model),
 };

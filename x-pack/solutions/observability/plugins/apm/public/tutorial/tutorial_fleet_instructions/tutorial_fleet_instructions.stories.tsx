@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import React from 'react';
 import type { HttpStart } from '@kbn/core/public';
 import TutorialFleetInstructions from '.';
@@ -38,10 +38,12 @@ export default {
   },
 };
 
-export const Instructions: Story<Args> = (args) => {
-  return <Wrapper {...args} />;
-};
+export const Instructions: StoryObj<Args> = {
+  render: (args) => {
+    return <Wrapper {...args} />;
+  },
 
-Instructions.args = {
-  hasFleetPoliciesWithApmIntegration: true,
+  args: {
+    hasFleetPoliciesWithApmIntegration: true,
+  },
 };
