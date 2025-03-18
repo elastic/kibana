@@ -12,6 +12,7 @@ import { getSpaceId } from './utils/get_space_id';
 import { createTransformGenerators } from '../../services/transform_generators';
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
 import { executeWithErrorHandler } from '../../errors';
+import { SavedObjectsClient } from '@kbn/core/server';
 import {
   CreateSLO,
   DefaultSummaryTransformManager,
@@ -38,6 +39,10 @@ export const createSLORoute = createSloServerRoute({
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = core.savedObjects.client;
+    const [coreStart] = await corePlugins.getStartServices();
+    const internalSoClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
     const basePath = corePlugins.http.basePath;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
@@ -66,6 +71,7 @@ export const createSLORoute = createSloServerRoute({
       esClient,
       scopedClusterClient,
       repository,
+      internalSoClient,
       transformManager,
       summaryTransformManager,
       logger,
