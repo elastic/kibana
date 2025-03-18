@@ -296,9 +296,7 @@ export const lowercaseHashValues = (
  * `file.Ext.code_signature` or 'file.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getFileCodeSignature = (
-  alertData: Flattened<Ecs>
-): EntriesArray | undefined => {
+export const getFileCodeSignature = (alertData: Flattened<Ecs>): EntriesArray | undefined => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
@@ -327,9 +325,7 @@ export const getFileCodeSignature = (
  * `process.Ext.code_signature` or 'process.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getProcessCodeSignature = (
-  alertData: Flattened<Ecs>
-): EntriesArray | undefined => {
+export const getProcessCodeSignature = (alertData: Flattened<Ecs>): EntriesArray | undefined => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
   if (codeSignature) {
@@ -357,9 +353,7 @@ export const getProcessCodeSignature = (
  * `dll.Ext.code_signature` or 'dll.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getDllCodeSignature = (
-  alertData: Flattened<Ecs>
-): EntriesArray | undefined => {
+export const getDllCodeSignature = (alertData: Flattened<Ecs>): EntriesArray | undefined => {
   const { dll } = alertData;
   const codeSignature = dll && dll.Ext && dll.Ext.code_signature;
   if (codeSignature) {
