@@ -44,11 +44,11 @@ export class StorybookMock extends AbstractStorybookMock<
 > {
   propArguments = {
     solution: {
-      control: 'text',
+      control: { control: 'text' },
       defaultValue: 'Observability',
     },
     logo: {
-      control: { type: 'radio' },
+      control: { control: 'radio' },
       options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
       defaultValue: undefined,
     },
@@ -56,11 +56,11 @@ export class StorybookMock extends AbstractStorybookMock<
 
   serviceArguments = {
     hasESData: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
     hasUserDataView: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
   };
