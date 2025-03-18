@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Integration, IntegrationConfiguration } from '@kbn/wci-common';
+import type { IntegrationConfiguration } from '@kbn/wci-common';
+import type { Integration } from '../integrations';
 
 export type IntegrationType = string;
 

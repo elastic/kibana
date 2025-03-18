@@ -44,7 +44,6 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const breadcrumb = useMemo(() => {
     return [
-      { text: 'WorkChat' },
       { text: integrationLabels.breadcrumb.integrationsPill },
       integrationId
         ? { text: integrationLabels.breadcrumb.editIntegrationPill }

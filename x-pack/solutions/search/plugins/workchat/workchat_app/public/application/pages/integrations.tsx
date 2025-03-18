@@ -11,7 +11,7 @@ import { useIntegrationList } from '../hooks/use_integration_list';
 import { IntegrationListView } from '../components/integrations/listing/integration_list_view';
 
 export const WorkChatIntegrationsPage: React.FC<{}> = () => {
-  useBreadcrumb([{ text: 'WorkChat' }, { text: 'Integrations' }]);
+  useBreadcrumb([{ text: 'Integrations' }]);
   const { integrations } = useIntegrationList();
   return <IntegrationListView integrations={integrations} />;
 };

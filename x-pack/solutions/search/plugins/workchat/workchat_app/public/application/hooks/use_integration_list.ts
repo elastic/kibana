@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
-import type { Integration } from '@kbn/wci-common';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '../query_keys';
 import { useWorkChatServices } from './use_workchat_service';
 
 export const useIntegrationList = () => {
   const { integrationService } = useWorkChatServices();
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const [integrations, setIntegrations] = useState<Integration[]>([]);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-
-    const nextIntegrations = await integrationService.list();
-
-    setIntegrations(nextIntegrations);
-    setLoading(false);
-  }, [integrationService]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  const {
+    data: integrations,
+    isLoading,
+    refetch: refresh,
+  } = useQuery({
+    queryKey: queryKeys.integrations.list,
+    queryFn: async () => {
+      return integrationService.list();
+    },
+    initialData: () => [],
+  });
 
   return {
     integrations,

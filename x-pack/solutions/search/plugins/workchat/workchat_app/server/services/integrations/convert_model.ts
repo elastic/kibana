@@ -7,9 +7,10 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import { IntegrationType } from '@kbn/wci-common';
-import type { Integration, IntegrationCreateRequest } from './types';
+import type { Integration, IntegrationCreateRequest } from '../../../common/integrations';
 import type { IntegrationAttributes } from '../../saved_objects/integrations';
 import type { ClientUser } from './types';
+
 export const savedObjectToModel = ({
   attributes,
 }: SavedObject<IntegrationAttributes>): Integration => {

@@ -7,8 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectsClientContract, Logger, SavedObject } from '@kbn/core/server';
-import type { Integration } from '@kbn/wci-common';
-import type { IntegrationCreateRequest } from './types';
+import type { Integration, IntegrationCreateRequest } from '../../../common/integrations';
 import { integrationTypeName, type IntegrationAttributes } from '../../saved_objects/integrations';
 import type { ClientUser } from './types';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
