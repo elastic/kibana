@@ -127,6 +127,7 @@ export const editStreamRoute = createServerRoute({
       ? {
           ...params.body,
           stream: {
+            description: params.body.stream.description,
             group: {
               ...params.body.stream.group,
               members: Array.from(new Set(params.body.stream.group.members)),

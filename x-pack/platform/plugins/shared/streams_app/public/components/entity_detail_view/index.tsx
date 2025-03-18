@@ -111,7 +111,7 @@ export function EntityDetailViewWithoutParams({
                   {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
               }
-              description={<StreamDescription definition={definition} />}
+              description={definition && <StreamDescription definition={definition} />}
             />
           }
         >

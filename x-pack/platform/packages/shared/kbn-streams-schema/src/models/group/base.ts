@@ -10,21 +10,21 @@ import { NonEmptyString } from '@kbn/zod-helpers';
 import { StreamDefinitionBase } from '../base';
 
 interface GroupBase {
-  description?: string;
   members: string[];
 }
 
 const groupBaseSchema: z.Schema<GroupBase> = z.object({
-  description: z.optional(z.string()),
   members: z.array(NonEmptyString),
 });
 
 interface GroupStreamDefinitionBase {
   group: GroupBase;
+  description: string;
 }
 
 const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.object({
   group: groupBaseSchema,
+  description: z.string(),
 });
 
 type GroupStreamDefinition = StreamDefinitionBase & GroupStreamDefinitionBase;

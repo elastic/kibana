@@ -41,6 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: 'irrelevant',
                   group: {
                     members: ['logs', 'logs.test2', 'logs'],
                   },
@@ -60,7 +61,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
-                  description: 'some description',
+                  description: 'An updated description',
                   group: {
                     members: ['logs', 'logs.test2', 'logs'],
                   },
@@ -80,6 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group-too' },
               body: {
                 stream: {
+                  description: 'irrelevant',
                   group: {
                     members: ['logs.test2'],
                   },
@@ -99,6 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: 'irrelevant',
                   group: {
                     members: ['logs', 'non-existent-stream'],
                   },
@@ -117,6 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: 'irrelevant',
                   group: {
                     members: ['logs', 'test-group'],
                   },
@@ -135,6 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: 'irrelevant',
                   group: {
                     members: ['logs', 'test-group-too'],
                   },
@@ -166,6 +171,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
         expect(response.body).to.eql({
           stream: {
+            description: 'An updated description',
             name: 'test-group',
             group: {
               members: ['logs', 'logs.test2'],
@@ -223,6 +229,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'metrics-test-test' },
               body: {
                 stream: {
+                  description: 'irrelevant',
                   group: {
                     members: ['logs'],
                   },
@@ -241,6 +248,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'logs.group' },
               body: {
                 stream: {
+                  description: 'irrelevant',
                   group: {
                     members: ['logs'],
                   },

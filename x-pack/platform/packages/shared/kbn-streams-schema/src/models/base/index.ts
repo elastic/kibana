@@ -7,5 +7,5 @@
 
 export interface StreamDefinitionBase {
   name: string;
-  description?: string;
+  description: string;
 }

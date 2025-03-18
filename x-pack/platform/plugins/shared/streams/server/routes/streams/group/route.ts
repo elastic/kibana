@@ -95,16 +95,14 @@ const upsertGroupRoute = createServerRoute({
       entityType: 'stream',
     });
 
-    const groupUpsertRequest = params.body;
-
     const dashboards = assets
       .filter((asset) => asset.assetType === 'dashboard')
       .map((asset) => asset.assetId);
 
-    const upsertRequest = {
+    const upsertRequest: GroupStreamUpsertRequest = {
       dashboards,
-      stream: groupUpsertRequest,
-    } as GroupStreamUpsertRequest;
+      stream: { description: '', group: params.body.group },
+    };
 
     return await streamsClient.upsertStream({
       request: upsertRequest,

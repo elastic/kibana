@@ -9,7 +9,7 @@ import { StreamUpsertRequest } from '@kbn/streams-schema';
 import { useCallback } from 'react';
 import { useKibana } from './use_kibana';
 
-export const useUpdateStreams = (name?: string) => {
+export const useUpdateStreams = (name: string) => {
   const { signal } = useAbortController();
   const {
     dependencies: {

@@ -16,6 +16,7 @@ import {
 
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
+  description: 'irrelevant',
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
@@ -61,6 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
         stream: {
+          description: 'irrelevant',
           ingest: {
             ...rootStreamDefinition.ingest,
             processing: [
@@ -88,6 +90,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
         stream: {
+          description: 'irrelevant',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
@@ -110,6 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
         stream: {
+          description: 'irrelevant',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {

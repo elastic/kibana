@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, WiredIngest, isGroupStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, StreamUpsertRequest } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import React from 'react';
 import { useUpdateStreams } from '../../hooks/use_update_streams';
 
@@ -17,13 +18,13 @@ const EMPTY_DESCRIPTION_LABEL = i18n.translate(
 );
 
 interface Props {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
 }
 
 export function StreamDescription({ definition }: Props) {
-  const updateStream = useUpdateStreams(definition?.stream.name);
+  const updateStream = useUpdateStreams(definition.stream.name);
 
-  if (!definition || isGroupStreamDefinition(definition.stream)) {
+  if (!definition) {
     return null;
   }
 
@@ -40,10 +41,10 @@ export function StreamDescription({ definition }: Props) {
             await updateStream({
               dashboards: definition.dashboards,
               stream: {
-                ingest: definition.stream.ingest as WiredIngest, // TODO: Fix types
+                ...omit(definition.stream, 'name'),
                 description: sanitized,
               },
-            });
+            } as StreamUpsertRequest);
           }}
         />
       </EuiFlexItem>

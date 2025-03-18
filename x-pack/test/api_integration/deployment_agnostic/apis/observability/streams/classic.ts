@@ -47,6 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
@@ -64,6 +65,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           body: {
             dashboards: [],
             stream: {
+              description: 'irrelevant',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [
@@ -107,6 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
+        description: 'irrelevant',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [
@@ -182,6 +185,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           body: {
             dashboards: [],
             stream: {
+              description: 'irrelevant',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
@@ -278,6 +282,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               dashboards: [],
               stream: {
+                description: 'irrelevant',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: [

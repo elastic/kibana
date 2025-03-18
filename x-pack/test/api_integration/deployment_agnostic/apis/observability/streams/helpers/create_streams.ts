@@ -15,6 +15,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs',
     stream: {
+      description: 'irrelevant',
       ingest: {
         lifecycle: { dsl: {} },
         processing: [],
@@ -69,6 +70,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.test',
     stream: {
+      description: 'irrelevant',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -86,6 +88,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.test2',
     stream: {
+      description: 'irrelevant',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [
@@ -111,6 +114,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.deeply.nested.streamname',
     stream: {
+      description: 'irrelevant',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
