@@ -43,7 +43,6 @@ export const INVESTIGATIONS_URL = '/app/security/investigations';
 export const TIMELINES_URL = '/app/security/timelines/default';
 export const TIMELINE_TEMPLATES_URL = '/app/security/timelines/template';
 export const CASES_URL = '/app/security/cases';
-export const ATTACK_DISCOVERY_URL = '/app/security/attack_discovery';
 
 export const hostsUrl = (tab: 'allHosts' | 'anomalies' | 'events' | 'uncommonProcesses'): string =>
   `/app/security/hosts/${tab}`;
