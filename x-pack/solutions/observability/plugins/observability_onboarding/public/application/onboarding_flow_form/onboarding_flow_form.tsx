@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { OnboardingFlowPackageList } from '../packages_list';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
@@ -112,6 +113,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
   const categorySelectorTitleId = useGeneratedHtmlId();
   const packageListTitleId = useGeneratedHtmlId();
+  const { onPageReady } = usePerformanceContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -146,6 +148,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
+
+
+  useEffect(() => {
+    onPageReady({
+      meta: { description: '[ttfmp_onboarding] The UI with onboarding categories is rendered' },
+    });
+  }, [onPageReady]);
 
   const customCards = useCustomCardsForCategory(
     createCollectionCardHandler,
