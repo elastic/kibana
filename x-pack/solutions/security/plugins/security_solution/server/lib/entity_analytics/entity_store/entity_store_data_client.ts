@@ -25,6 +25,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { getAllMissingPrivileges } from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
 import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -98,10 +99,8 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
-
 import { getEntityStoreSourceIndicesPrivileges } from './utils/get_entity_store_privileges';
 import type { ApiKeyManager } from './auth/api_key';
-import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -810,22 +809,22 @@ export class EntityStoreDataClient {
       this.options.dataViewsService
     );
 
-    const requiredIndicesPrivileges = getEntityStoreSourceIndicesPrivileges(indexPatterns);
-
-    const privileges = await checkAndFormatPrivileges({
-      request: this.options.request,
-      security: this.options.security,
-      privilegesToCheck: {
-        elasticsearch: {
-          cluster: [],
-          index: requiredIndicesPrivileges,
-        },
-      },
-    });
+    const privileges = await getEntityStoreSourceIndicesPrivileges(
+      this.options.request,
+      this.options.security,
+      indexPatterns
+    );
 
     if (!privileges.has_all_required) {
+      const missingPrivilegesMsg = getAllMissingPrivileges(privileges).elasticsearch.index.map(
+        ({ indexName, privileges: missingPrivileges }) =>
+          `Missing [${missingPrivileges.join(', ')}] privileges for index '${indexName}'.`
+      );
+
       throw new Error(
-        `The current user does not have the required indices privileges. The user must have 'read' and 'view_index_metadata' privileges to all security data view indices.`
+        `The current user does not have the required indices privileges.\n${missingPrivilegesMsg.join(
+          '\n'
+        )}`
       );
     }
 
