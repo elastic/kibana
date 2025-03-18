@@ -47,7 +47,7 @@ const useUserProfile = ({ username, enabled = true }: { username: string; enable
     select: (profile) => {
       return {
         username: profile?.[0]?.user.username ?? username ?? 'Unknown',
-        avatar: profile?.[0].data.avatar,
+        avatar: profile?.[0]?.data.avatar,
       };
     },
     enabled: !!(enabled && username?.length),
