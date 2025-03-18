@@ -19,7 +19,6 @@ import {
   EuiToken,
   EuiToolTip,
   htmlIdGenerator,
-  useEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedOptionalPublishingSubjects,
@@ -40,7 +39,6 @@ export const OptionsListControl = ({
 }: {
   controlPanelClassName: string;
 }) => {
-  const { euiTheme } = useEuiTheme();
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const { api, stateManager, displaySettings } = useOptionsListContext();
 

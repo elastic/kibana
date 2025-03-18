@@ -17,7 +17,6 @@ import {
   EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -27,8 +26,7 @@ import {
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
-export const OptionsListPopoverInvalidSelections = () => {
-  const { euiTheme } = useEuiTheme();
+export const OptionsListPopoverInvalidSelections = () => 
   const { api } = useOptionsListContext();
 
   const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
