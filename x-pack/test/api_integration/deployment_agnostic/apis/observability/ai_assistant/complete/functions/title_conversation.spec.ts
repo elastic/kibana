@@ -46,7 +46,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
       let titleRequestBody: ChatCompletionStreamParams;
 
-      const USER_MESSAGE = 'Why the sky is blue?';
       const TITLE = 'Question about color of the sky';
       let conversationId: string;
 
@@ -55,7 +54,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptConversation('The sky is blue because of Rayleigh scattering.');
 
         const res = await chatComplete({
-          userPrompt: USER_MESSAGE,
+          userPrompt: 'Why the sky is blue?',
           connectorId,
           persist: true,
           observabilityAIAssistantAPIClient,
