@@ -58,5 +58,6 @@
     "@kbn/datemath",
     "@kbn/xstate-utils",
     "@kbn/visualization-utils",
+    "@kbn/core-analytics-browser",
   ]
 }
