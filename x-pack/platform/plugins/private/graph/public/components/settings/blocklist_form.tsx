@@ -21,6 +21,7 @@ import {
 import { SettingsWorkspaceProps } from './settings';
 import { useListKeys } from './use_list_keys';
 import { IconRenderer } from '../icon_renderer';
+import { legacyIconStyles } from './legacy_icon.styles';
 
 export function BlocklistForm({
   blocklistedNodes,
@@ -56,7 +57,10 @@ export function BlocklistForm({
             {blocklistedNodes.map((node) => (
               <EuiListGroupItem
                 icon={
-                  <IconRenderer icon={node.icon} className="gphLegacyIcon gphLegacyIcon--list" />
+                  <IconRenderer
+                    icon={node.icon}
+                    css={[legacyIconStyles.base, legacyIconStyles.list]}
+                  />
                 }
                 key={getListKey(node)}
                 label={node.label}

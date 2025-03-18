@@ -28,6 +28,7 @@ import { urlTemplateIconChoices } from '../../helpers/style_choices';
 import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../helpers/url_template';
 import { isEqual } from '../helpers';
 import { IconRenderer } from '../icon_renderer';
+import { legacyIconStyles } from './legacy_icon.styles';
 
 export interface NewFormProps {
   onSubmit: (template: UrlTemplate) => void;
@@ -134,7 +135,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         props.initialTemplate.icon && (
           <IconRenderer
             icon={props.initialTemplate.icon}
-            className="gphLegacyIcon gphLegacyIcon--list"
+            css={[legacyIconStyles.base, legacyIconStyles.list]}
           />
         )
       }
@@ -291,9 +292,11 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                     setValue('icon', icon);
                   }
                 }}
-                className={classNames('gphLegacyIcon gphLegacyIcon--pickable', {
-                  'gphLegacyIcon--selected': icon === currentTemplate.icon,
-                })}
+                css={[
+                  legacyIconStyles.base,
+                  legacyIconStyles.pickable,
+                  icon === currentTemplate.icon && legacyIconStyles.selected,
+                ]}
               />
             ))}
           </div>
