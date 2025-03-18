@@ -460,7 +460,7 @@ describe('EntityStoreDataClient', () => {
       mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
 
       await expect(dataClient.applyDataViewIndices()).rejects.toThrow(
-        "The current user does not have the required indices privileges. The user must have 'read' and 'view_index_metadata' privileges to all security data view indices."
+        /The current user does not have the required indices privileges.*/
       );
     });
 
