@@ -1,20 +1,23 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
+import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { caseRetrieval } from './tools';
+import { retrieveCases } from './tools';
 
-import { Client } from 'elasticsearch-8.x';
+// Define enum field structure upfront
+interface Field {
+  field: string;
+  description: string;
+  path?: string; // Optional path for nested fields
+}
 
-const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
+// Define enum value structure
+interface FieldWithValues extends Field {
+  values: string[];
+}
 
-export function createMcpServer({
+export async function createMcpServer({
   configuration,
   elasticsearchClient,
   logger,
@@ -22,31 +25,32 @@ export function createMcpServer({
   configuration: Record<string, any>;
   elasticsearchClient: ElasticsearchClient;
   logger: Logger;
-}): McpServer {
+}): Promise<McpServer> {
   const server = new McpServer({
     name: 'wci-salesforce',
     version: '1.0.0',
   });
 
-  // const ES_URL = '';
-  // const API_KEY = '';
+  const { index } = configuration;
 
-  // const externalESClient = new Client({
-  //   node: ES_URL,
-  //   auth: {
-  //     apiKey: API_KEY,
-  //   },
-  // });
+  const enumFields: Field[] = [
+    { field: 'priority', description: 'Case priority level', path: 'metadata.priority' },
+    {
+      field: 'status',
+      description: 'Current status of the case',
+      path: 'metadata.status',
+    },
+  ];
+
+  const enumFieldValues = await getFieldValues(elasticsearchClient, logger, index, enumFields);
+
+  // Extract specific values for tool parameters
+  const priorityValues = enumFieldValues.find((f) => f.field === 'priority')?.values || [];
+  const statusValues = enumFieldValues.find((f) => f.field === 'status')?.values || [];
 
   server.tool(
-    'case_retrieval',
-    `Retrieves Salesforce support cases from Elasticsearch with filtering options.
-
-     Cases are typically looked up by case number (caseNumber parameter) rather than ID.
-     Only use the ID parameter when specifically instructed to lookup by ID.
-
-     This tool should be used when a user needs to find information about support cases
-     based on various criteria such as owner, priority, status, content, or date ranges.`,
+    'retrieve_cases',
+    `Retrieves Salesforce support cases from Elasticsearch with filtering options.`,
     {
       caseNumber: z
         .string()
@@ -55,17 +59,27 @@ export function createMcpServer({
       id: z
         .string()
         .optional()
-        .describe('Unique identifier of the support case (use only when specifically requested)'),
-      size: z
-        .number()
+        .describe(
+          'Salesforce internal ID of the support case (use only when specifically requested)'
+        ),
+      size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
+      owner: z.string().optional().describe('Email of the case owner/assignee to filter results'),
+      priority: z
+        .enum(priorityValues.length ? (priorityValues as [string, ...string[]]) : [''])
         .optional()
-        .describe('Maximum number of cases to return (default: 10, max: 100)'),
-      owner: z.string().optional().describe('Name of the case owner/assignee to filter results'),
-      priority: z.string().optional().describe('Case priority level (e.g., High, Medium, Low)'),
+        .describe(
+          `Case priority level${
+            priorityValues.length ? ` (one of: ${priorityValues.join(', ')})` : ''
+          }`
+        ),
       status: z
-        .string()
+        .enum(statusValues.length ? (statusValues as [string, ...string[]]) : [''])
         .optional()
-        .describe('Current status of the case (e.g., New, In Progress, Escalated, Closed)'),
+        .describe(
+          `Current status of the case${
+            statusValues.length ? ` (one of: ${statusValues.join(', ')})` : ''
+          }`
+        ),
       closed: z.boolean().optional().describe('Filter by case closure status (true/false)'),
       createdAfter: z
         .string()
@@ -79,10 +93,18 @@ export function createMcpServer({
         .string()
         .optional()
         .describe('Natural language query to search case content semantically'),
+      updatedAfter: z
+        .string()
+        .optional()
+        .describe('Return cases updated after this date (format: YYYY-MM-DD)'),
+      updatedBefore: z
+        .string()
+        .optional()
+        .describe('Return cases updated before this date (format: YYYY-MM-DD)'),
     },
     async ({
       id,
-      size,
+      size = 10,
       owner,
       priority,
       closed,
@@ -91,13 +113,10 @@ export function createMcpServer({
       createdBefore,
       semanticQuery,
       status,
+      updatedAfter,
+      updatedBefore,
     }) => {
-      const response = await caseRetrieval(
-        // externalESClient,
-        elasticsearchClient,
-        logger,
-        // 'salesforce-prod-recent-cases',
-        'support_cases',
+      const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
         id,
         size,
         owner,
@@ -107,60 +126,72 @@ export function createMcpServer({
         createdAfter,
         createdBefore,
         semanticQuery,
-        status
-      );
+        status,
+        updatedAfter,
+        updatedBefore,
+      });
 
-      logger.info(`Retrieved ${JSON.stringify(response)} support cases`);
+      logger.info(`Retrieved ${caseContent.length} support cases`);
 
       return {
-        content: response,
+        content: caseContent,
       };
     }
   );
 
-  server.tool('search', 'search on HR docs', { query: z.string() }, async ({ query }) => {
-    logger.info(`Searching for ${query}`);
+  return server;
+}
 
-    // use advanced technology to simulate long running tools for demo
-    await delay(4000);
+/**
+ * Retrieves possible values for enum fields from Elasticsearch
+ */
+async function getFieldValues(
+  elasticsearchClient: ElasticsearchClient,
+  logger: Logger,
+  index: string,
+  enumFields: Field[]
+): Promise<FieldWithValues[]> {
+  let fieldValues: FieldWithValues[] = enumFields.map((field) => ({
+    ...field,
+    values: [],
+  }));
 
-    const result = await elasticsearchClient.search({
-      index: 'semantic_text_docs_dense3',
-      query: {
-        semantic: {
-          field: 'infer_field',
-          query,
-        },
-      },
-      _source: {
-        includes: '',
-      },
-      highlight: {
-        fields: {
-          infer_field: {
-            type: 'semantic',
+  try {
+    const aggs = Object.fromEntries(
+      enumFields.map((field) => [
+        field.field,
+        {
+          terms: {
+            field: field.path || field.field,
+            size: 100,
           },
         },
-      },
+      ])
+    );
+
+    const aggResult = await elasticsearchClient.search({
+      index,
+      size: 0,
+      aggs,
     });
 
-    logger.info(`Found ${result.hits.hits.length} hits`);
+    fieldValues = fieldValues.map((fieldValue) => {
+      const buckets = (
+        aggResult.aggregations?.[fieldValue.field] as AggregationsStringTermsAggregate
+      )?.buckets;
 
-    const contentFragments = result.hits.hits.map((hit) => {
-      return {
-        type: 'text' as const,
-        text:
-          hit.highlight?.infer_field
-            .flat()
-            .map((highlight) => highlight)
-            .join('\n') || '',
-      };
+      if (buckets?.length) {
+        return {
+          ...fieldValue,
+          // @ts-ignore
+          values: buckets.map((bucket) => bucket.key as string),
+        };
+      }
+      return fieldValue;
     });
+  } catch (error) {
+    logger.error(`Failed to get aggregations for enum fields: ${error}`);
+  }
 
-    return {
-      content: contentFragments,
-    };
-  });
-
-  return server;
+  return fieldValues;
 }
