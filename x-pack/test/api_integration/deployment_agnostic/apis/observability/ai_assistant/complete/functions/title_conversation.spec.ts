@@ -47,17 +47,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let titleRequestBody: ChatCompletionStreamParams;
 
       const USER_MESSAGE = 'Why the sky is blue?';
+      const TITLE = 'Question about color of the sky';
+      let conversationId: string;
 
       before(async () => {
-        void llmProxy.interceptTitle('Question about color of the sky');
-        void llmProxy.interceptConversation(`The sky is blue because of Rayleigh scattering.`);
+        void llmProxy.interceptTitle(TITLE);
+        void llmProxy.interceptConversation('The sky is blue because of Rayleigh scattering.');
 
-        await chatComplete({
+        const res = await chatComplete({
           userPrompt: USER_MESSAGE,
           connectorId,
           persist: true,
           observabilityAIAssistantAPIClient,
         });
+        conversationId = res.conversation?.conversation.id || '';
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
@@ -82,6 +85,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('sends the correct function call to the LLM for the title', () => {
         expect(titleRequestBody.tools?.[0].function.name).to.be(TITLE_CONVERSATION_FUNCTION_NAME);
+      });
+
+      it('stores the generated title in the conversation', async () => {
+        const { status, body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId,
+            },
+          },
+        });
+        expect(status).to.be(200);
+        expect(body.conversation.title).to.be(TITLE);
       });
     });
   });
