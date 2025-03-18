@@ -98,7 +98,7 @@ const getSha256Hash = async (filePath) => {
   await $('git', ['config', '--global', 'user.email', process.env.KIBANA_MACHINE_EMAIL]);
 
   // create a new branch to update puppeteer
-  await $('git', ['checkout', '-b', branchName]);
+  await $('git', ['checkout', '-b', `${branchName}_temp`]);
 
   console.log('---Updating puppeteer package to version %s', process.env.PUPPETEER_VERSION);
 
@@ -271,24 +271,42 @@ const getSha256Hash = async (filePath) => {
 
   console.log('---Creating pull request \n');
 
-  await $('git', ['push', 'origin', branchName]);
+  // create clean branch based off of main
 
-  await $('gh', [
-    'pr',
-    'create',
-    '--title',
-    prTitle,
-    '--body',
-    `Closes ${process.env.GITHUB_PR_NUMBER} \n\n This PR updates puppeteer to version ${process.env.PUPPETEER_VERSION} and updates the chromium paths to the latest known good version for windows and mac where the chromium revision is ${chromiumRevision} and version is ${chromiumVersion}, for linux a custom build was triggered to build chromium binaries for both x64 and arm64. \n **NB** This PR should be tested before merging it in as puppeteer might have breaking changes we are not aware of`,
-    '--base',
-    'main',
-    '--head',
-    branchName,
-    '--label',
-    'release_note:skip',
-    '--label',
-    'Team:SharedUX',
-  ]);
+  await $('git', ['checkout', 'main']);
+
+  await $('git', ['checkout', '-b', branchName]);
+
+  await $('git', ['cherry-pick', `${branchName}_temp~1`, `${branchName}_temp~0`], {
+    printToScreen: true,
+  });
+
+  await $('git', ['push', 'origin', branchName], {
+    printToScreen: true,
+  });
+
+  await $(
+    'gh',
+    [
+      'pr',
+      'create',
+      '--title',
+      prTitle,
+      '--body',
+      `Closes #${process.env.GITHUB_PR_NUMBER} \n\n This PR updates puppeteer to version ${process.env.PUPPETEER_VERSION} and updates the chromium paths to the latest known good version for windows and mac where the chromium revision is ${chromiumRevision} and version is ${chromiumVersion}, for linux a custom build was triggered to build chromium binaries for both x64 and arm64. \n **NB** This PR should be tested before merging it in as puppeteer might have breaking changes we are not aware of`,
+      '--base',
+      'main',
+      '--head',
+      branchName,
+      '--label',
+      'release_note:skip',
+      '--label',
+      'Team:SharedUX',
+    ],
+    {
+      printToScreen: true,
+    }
+  );
 
   console.log('---Providing feedback to issue \n');
 
