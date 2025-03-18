@@ -9295,7 +9295,7 @@
     {
       "query": "from a_index | enrich _:policy",
       "error": [
-        "Unrecognized value [_] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [_] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
@@ -9325,7 +9325,7 @@
     {
       "query": "from a_index | enrich any:policy",
       "error": [
-        "Unrecognized value [any] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [any] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
@@ -9452,7 +9452,7 @@
     {
       "query": "from a_index | enrich _unknown:policy",
       "error": [
-        "Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
