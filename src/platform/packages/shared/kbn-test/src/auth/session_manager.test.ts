@@ -320,7 +320,15 @@ describe('SamlSessionManager', () => {
       expect(email).toBe(cloudEmail);
     });
 
-    test(`'getSupportedRoles' return the correct roles`, async () => {
+    test(`'getSupportedRoles' return empty array when roles by default`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+      });
+      const roles = samlSessionManager.getSupportedRoles();
+      expect(roles).toEqual([]);
+    });
+
+    test(`'getSupportedRoles' return the correct roles when roles were defined`, async () => {
       const samlSessionManager = new SamlSessionManager({
         ...samlSessionManagerOptions,
         supportedRoles,

@@ -213,6 +213,6 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   }
 
   getSupportedRoles() {
-    return this.supportedRoles!.roles;
+    return this.supportedRoles ? this.supportedRoles.roles : [];
   }
 }
