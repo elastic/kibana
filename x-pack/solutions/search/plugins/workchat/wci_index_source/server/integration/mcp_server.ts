@@ -124,18 +124,16 @@ export async function createMcpServer({
 
     try {
       const queryClause = query
-      ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
-      : {
-          match_all: {},
-        }
+        ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
+        : {
+            match_all: {},
+          };
 
       result = await elasticsearchClient.search<SearchResult>({
         index,
         query: {
           bool: {
-            must: [
-              queryClause
-            ],
+            must: [queryClause],
             ...(esFilters.length > 0 ? { filter: esFilters } : {}),
           },
         },
