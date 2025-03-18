@@ -1360,6 +1360,8 @@
       "@kbn/observability-onboarding-plugin/*": ["x-pack/solutions/observability/plugins/observability_onboarding/*"],
       "@kbn/observability-plugin": ["x-pack/solutions/observability/plugins/observability"],
       "@kbn/observability-plugin/*": ["x-pack/solutions/observability/plugins/observability/*"],
+      "@kbn/observability-schema": ["x-pack/solutions/observability/packages/kbn-observability-schema"],
+      "@kbn/observability-schema/*": ["x-pack/solutions/observability/packages/kbn-observability-schema/*"],
       "@kbn/observability-shared-plugin": ["x-pack/solutions/observability/plugins/observability_shared"],
       "@kbn/observability-shared-plugin/*": ["x-pack/solutions/observability/plugins/observability_shared/*"],
       "@kbn/observability-synthetics-test-data": ["x-pack/solutions/observability/packages/synthetics-test-data"],

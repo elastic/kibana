@@ -60,5 +60,6 @@
     "@kbn/datemath",
     "@kbn/grok-ui",
     "@kbn/xstate-utils",
+    "@kbn/core-analytics-browser",
   ]
 }
