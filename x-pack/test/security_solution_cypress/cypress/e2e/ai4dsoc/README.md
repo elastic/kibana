@@ -40,9 +40,6 @@ Please, before opening a PR with the new test, please make sure that the test fa
 Note that we use tags in order to select which tests we want to execute:
 
 - `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless. 
-- `@serverlessQA` includes a test in the Serverless test suite for the Kibana release process of serverless. You need to explicitly add this tag to any test you want you run in CI for the Kibana QA quality gate. These tests should be stable, otherwise they will be blocking the release pipeline. They should be also critical enough, so that when they fail, there's a high chance of an SDH or blocker issue to be reported.
-- `@skipInServerlessMKI` excludes a test from the execution on any MKI environment (even if it's tagged as `@serverless` or `@serverlessQA`). Could indicate many things, e.g. "the test is flaky in Serverless MKI", "the test has been temporarily excluded, see the comment above why". All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
-- `@skipInServerless` excludes a test from the Serverless test suite and Serverless QA environment for both, periodic pipeline and Kibana QA quality gate (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environment", "the test has been temporarily excluded, see the comment above why". All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
 
 ## Running the tests
 
