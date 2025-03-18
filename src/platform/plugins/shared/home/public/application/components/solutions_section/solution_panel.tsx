@@ -29,7 +29,7 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
   const { trackUiMetric } = getServices();
 
   return (
-    <EuiFlexItem css={styles} data-test-subj={`homeSolutionPanel_${solution.id}`}>
+    <EuiFlexItem css={styles} data-test-subj={`homeSolutionPanel homeSolutionPanel_${solution.id}`}>
       <EuiCard
         className={`homeSolutionPanel homeSolutionPanel--${solution.id}`}
         description={solution.description}
