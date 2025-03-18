@@ -30,7 +30,7 @@ export const AgentListView: React.FC<AgentListViewProps> = ({ agents }) => {
           icon: 'documentEdit',
           type: 'icon',
           onClick: ({ id }) => {
-            navigateToWorkchatUrl(`/agents/${id}`);
+            navigateToWorkchatUrl(`/agents/${id}/edit`);
           },
           'data-test-subj': 'agentListTable-edit-btn',
         },

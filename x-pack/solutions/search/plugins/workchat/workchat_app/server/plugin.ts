@@ -104,6 +104,7 @@ export class WorkChatAppPlugin
     const agentFactory = new AgentFactory({
       inference: pluginsDependencies.inference,
       logger: this.logger.get('services.agentFactory'),
+      agentService,
       integrationsService,
     });
 

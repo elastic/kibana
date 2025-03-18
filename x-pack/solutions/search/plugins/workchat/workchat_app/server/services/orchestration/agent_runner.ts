@@ -8,24 +8,25 @@
 import { from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { Agent } from '../../../common/agents';
 import { IntegrationsSession } from '../integrations/integrations_session';
 import { getLCTools } from '../integrations/utils';
 import { createAgentGraph } from './agent_graph';
 import { langchainToChatEvents, conversationEventsToMessages } from './utils';
-import type { Agent, AgentRunResult } from './types';
+import type { AgentRunner, AgentRunResult } from './types';
 
-export const createAgent = async ({
-  agentId,
+export const createAgentRunner = async ({
+  agent,
   chatModel,
   integrationsSession,
 }: {
-  agentId: string;
+  agent: Agent;
   chatModel: InferenceChatModel;
   integrationsSession: IntegrationsSession;
-}): Promise<Agent> => {
+}): Promise<AgentRunner> => {
   const integrationTools = await getLCTools(integrationsSession);
 
-  const agentGraph = await createAgentGraph({ agentId, chatModel, integrationTools });
+  const agentGraph = await createAgentGraph({ agent, chatModel, integrationTools });
 
   return {
     run: async ({ previousEvents }): Promise<AgentRunResult> => {
@@ -39,7 +40,7 @@ export const createAgent = async ({
           version: 'v2',
           runName,
           metadata: {
-            agentId,
+            agentId: agent.id,
           },
           recursionLimit: 5,
         }
