@@ -20,7 +20,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
 
   describe('getMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const createParams = {
+    const createRequestBody = {
       title: 'test-maintenance-window',
       schedule: {
         custom: {
@@ -49,7 +49,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
           const { body: createdMaintenanceWindow } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
             .set('kbn-xsrf', 'foo')
-            .send(createParams);
+            .send(createRequestBody);
 
           objectRemover.add(
             space.id,

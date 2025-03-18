@@ -20,7 +20,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
 
   describe('createMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const createParams = {
+    const createRequestBody = {
       title: 'test-maintenance-window',
       enabled: false,
       schedule: {
@@ -52,7 +52,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(createParams);
+            .send(createRequestBody);
 
           if (response.body.id) {
             objectRemover.add(space.id, response.body.id, 'maintenance_window', 'alerting');
@@ -103,7 +103,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
-          ...createParams,
+          ...createRequestBody,
           scope: {
             query: {
               kql: 'invalid_kql:',
@@ -119,7 +119,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
-          ...createParams,
+          ...createRequestBody,
           scope: {
             query: {
               kql: 'invalid_kql:',
@@ -134,7 +134,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
-          ...createParams,
+          ...createRequestBody,
           schedule: {
             custom: {
               duration: '1d',
