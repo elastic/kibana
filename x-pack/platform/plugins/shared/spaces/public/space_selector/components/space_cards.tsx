@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { Component } from 'react';
 
 import { SpaceCard } from './space_card';
