@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { DateFormatArgInput } from '../date_format';
@@ -16,8 +15,12 @@ const dateFormats = [
   { value: 'LLL', text: 'Longhand' },
 ];
 
-storiesOf('arguments/DateFormat', module)
-  .add('with no format', () => (
+export default {
+  title: 'arguments/DateFormat',
+};
+
+export const WithNoFormat = {
+  render: () => (
     <DateFormatArgInput
       dateFormats={dateFormats}
       onValueChange={action('onValueChange')}
@@ -25,8 +28,13 @@ storiesOf('arguments/DateFormat', module)
       argId="DateFormatExample1"
       renderError={action('renderError')}
     />
-  ))
-  .add('with preset format', () => (
+  ),
+
+  name: 'with no format',
+};
+
+export const WithPresetFormat = {
+  render: () => (
     <DateFormatArgInput
       dateFormats={dateFormats}
       onValueChange={action('onValueChange')}
@@ -34,8 +42,13 @@ storiesOf('arguments/DateFormat', module)
       argId="DateFormatExample2"
       renderError={action('renderError')}
     />
-  ))
-  .add('with custom format', () => (
+  ),
+
+  name: 'with preset format',
+};
+
+export const WithCustomFormat = {
+  render: () => (
     <DateFormatArgInput
       dateFormats={dateFormats}
       onValueChange={action('onValueChange')}
@@ -43,4 +56,7 @@ storiesOf('arguments/DateFormat', module)
       argId="DateFormatExample3"
       renderError={action('renderError')}
     />
-  ));
+  ),
+
+  name: 'with custom format',
+};
