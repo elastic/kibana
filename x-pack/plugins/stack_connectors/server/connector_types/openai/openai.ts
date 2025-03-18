@@ -180,14 +180,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             model:
               sanitizedBody.model ??
               ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-            stream: false, // Force non-streaming for PKI
           },
           {
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
           }
         );
-        this.logger.debug(`PKI OpenAI Non-Streaming Response (runApi): ${JSON.stringify(response)}`);
+        this.logger.debug(`PKI OpenAI Response (runApi): ${JSON.stringify(response)}`);
         return response as RunActionResponse;
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
@@ -230,21 +229,24 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }: StreamActionParams): Promise<RunActionResponse> {
     if (this.provider === OpenAiProviderType.PkiOpenAi) {
       const sanitizedBody = JSON.parse(body);
-      const response = await this.openAI.chat.completions.create(
-        {
-          ...sanitizedBody,
-          model:
-            sanitizedBody.model ??
-            ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-          stream: false, // Force non-streaming for PKI
-        },
-        {
-          signal,
-          timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-        }
-      );
-      this.logger.debug(`PKI OpenAI Non-Streaming Response (streamApi): ${JSON.stringify(response)}`);
-      return response as RunActionResponse;
+      if (stream) {
+        const response = await this.openAI.chat.completions.create(
+          {
+            ...sanitizedBody,
+            model:
+              sanitizedBody.model ??
+              ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+            stream: true,
+          },
+          {
+            signal,
+            timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+          }
+        );
+        this.logger.debug(`PKI OpenAI Streaming Response (streamApi): ${JSON.stringify(response)}`);
+        return response as RunActionResponse;
+      }
+      return this.runApi({ body, signal, timeout });
     } else {
       const executeBody = getRequestWithStreamOption(
         this.provider,
