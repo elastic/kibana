@@ -33,7 +33,6 @@ import {
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { SavedObjectToItemOptions } from './transform_utils';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 

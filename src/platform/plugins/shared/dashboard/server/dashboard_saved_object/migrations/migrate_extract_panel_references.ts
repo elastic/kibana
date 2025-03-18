@@ -60,7 +60,9 @@ export function createExtractPanelReferencesMigration(
       { embeddablePersistableStateService: deps.embeddable }
     );
 
-    const { attributes, error: attributesError } = itemAttrsToSavedObject(extractedAttributes);
+    const { attributes, error: attributesError } = itemAttrsToSavedObject({
+      attributes: extractedAttributes,
+    });
     if (attributesError) throw attributesError;
 
     return {

@@ -150,7 +150,7 @@ function panelsOut(panelsJSON: string): DashboardAttributes['panels'] {
 
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references: SavedObjectReference[],
+  references?: SavedObjectReference[],
   getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
@@ -166,16 +166,16 @@ export function dashboardAttributesOut(
     title,
     version,
   } = attributes;
-  // try to maintain a consistent (alphabetical) order of keys
 
   // Inject any tag names from references into the attributes
   const tags = new Set<string>();
-  const tagRefs = references.filter(({ type }) => type === 'tag');
-  if (getTagNamesFromReferences && tagRefs.length) {
+  const tagRefs = references?.filter(({ type }) => type === 'tag');
+  if (getTagNamesFromReferences && tagRefs && tagRefs.length) {
     const tagNames = getTagNamesFromReferences(tagRefs);
     tagNames.forEach((tagName) => tags.add(tagName));
   }
 
+  // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: controlGroupInputOut(controlGroupInput) }),
     ...(description && { description }),
@@ -187,7 +187,7 @@ export function dashboardAttributesOut(
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
-    tags: Array.from(tags),
+    ...(tags.size && { tags: Array.from(tags) }),
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
@@ -244,9 +244,7 @@ function kibanaSavedObjectMetaIn(
   return { searchSourceJSON: JSON.stringify(searchSource ?? {}) };
 }
 
-export const getResultV3ToV2 = async (
-  result: DashboardGetOut
-): Promise<DashboardCrudTypesV2['GetOut']> => {
+export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;
   const {
@@ -368,7 +366,7 @@ export function savedObjectToItem(
     attributes,
     error,
     namespaces,
-    references = [],
+    references,
     version,
     managed,
   } = savedObject;
