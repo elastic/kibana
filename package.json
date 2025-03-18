@@ -125,7 +125,7 @@
     "@elastic/ecs": "^8.11.5",
     "@elastic/elasticsearch": "9.0.0-alpha.4",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_12.tgz",
+    "@elastic/eui": "file:./elastic_eui_100.0.0_borealis.0_v_2_poc_16.tgz",
     "@elastic/eui-theme-borealis": "file:./elastic_eui_theme_borealis_0.0.11_v_2_poc_05.tgz",
     "@elastic/eui-theme-common": "file:./elastic_eui_theme_common_0.0.11_v_2_poc_03.tgz",
     "@elastic/filesaver": "1.1.2",

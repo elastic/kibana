@@ -380,6 +380,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           max-block-size: 75vh;
         `,
       }}
+      theme={chromeStyle === 'project' ? { search: 'default', popover: 'default' } : undefined}
       searchProps={{
         autoFocus: chromeStyle === 'project',
         value: searchValue,
