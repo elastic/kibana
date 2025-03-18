@@ -44,28 +44,26 @@ export const getNonEmptyValidator = (
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
     if (schema) {
-      schema
-        .filter((f: ConfigEntryView) => f.required)
-        .forEach((field: ConfigEntryView) => {
-          // validate if submitting or on field edit - value is not default to null
-          if (configData[field.key] !== null || isSubmitting) {
-            // validate secrets fields separately from regular
-            if (isSecrets ? field.sensitive : !field.sensitive) {
-              if (
-                !configData[field.key] ||
-                (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
-              ) {
-                field.validationErrors = [LABELS.getRequiredMessage(field.label)];
-                field.isValid = false;
-                hasErrors = true;
-              } else {
-                field.validationErrors = [];
-                field.isValid = true;
-              }
+      schema.map((field: ConfigEntryView) => {
+        // validate if submitting or on field edit - value is not default to null
+        if (field.required && (configData[field.key] !== null || isSubmitting)) {
+          // validate secrets fields separately from regular
+          if (isSecrets ? field.sensitive : !field.sensitive) {
+            if (
+              !configData[field.key] ||
+              (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
+            ) {
+              field.validationErrors = [LABELS.getRequiredMessage(field.label)];
+              field.isValid = false;
+              hasErrors = true;
+            } else {
+              field.validationErrors = [];
+              field.isValid = true;
             }
           }
-          newSchema.push(field);
-        });
+        }
+        newSchema.push(field);
+      });
 
       validationEventHandler(newSchema);
       if (hasErrors) {

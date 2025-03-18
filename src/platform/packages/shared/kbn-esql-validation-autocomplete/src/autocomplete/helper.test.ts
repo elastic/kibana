@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getOverlapRange } from './helper';
+import { buildPartialMatcher, getOverlapRange } from './helper';
 
 describe('getOverlapRange', () => {
   it('should return the overlap range', () => {
@@ -20,5 +20,20 @@ describe('getOverlapRange', () => {
       start: 26,
       end: 30,
     });
+  });
+});
+
+describe('buildPartialMatcher', () => {
+  it('should build a partial matcher', () => {
+    const str = 'is NoT nulL';
+    const matcher = buildPartialMatcher(str);
+
+    for (let i = 0; i < str.length; i++) {
+      expect(matcher.test(str.slice(0, i + 1))).toEqual(true);
+    }
+
+    expect(matcher.test('not')).toEqual(false);
+    expect(matcher.test('is null')).toEqual(false);
+    expect(matcher.test('is not nullz')).toEqual(false);
   });
 });
