@@ -52,33 +52,35 @@ export const useIntegrationEdit = ({
     fetchIntegration();
   }, [integrationId, integrationService]);
 
-  const submit = useCallback((updatedIntegration: IntegrationEditState) => {
-    debugger
-    setSubmitting(true);
+  const submit = useCallback(
+    (updatedIntegration: IntegrationEditState) => {
+      setSubmitting(true);
 
-    (integrationId
-      ? integrationService.update(integrationId, {
-          name: updatedIntegration.name,
-          description: updatedIntegration.description,
-          configuration: updatedIntegration.configuration,
-        })
-      : integrationService.create({
-          type: updatedIntegration.type,
-          name: updatedIntegration.name,
-          description: updatedIntegration.description,
-          configuration: updatedIntegration.configuration,
-        })
-    ).then(
-      (response) => {
-        setSubmitting(false);
-        onSaveSuccess(response);
-      },
-      (err) => {
-        setSubmitting(false);
-        onSaveError(err);
-      }
-    );
-  }, [integrationId, state, integrationService, onSaveSuccess, onSaveError]);
+      (integrationId
+        ? integrationService.update(integrationId, {
+            name: updatedIntegration.name,
+            description: updatedIntegration.description,
+            configuration: updatedIntegration.configuration,
+          })
+        : integrationService.create({
+            type: updatedIntegration.type,
+            name: updatedIntegration.name,
+            description: updatedIntegration.description,
+            configuration: updatedIntegration.configuration,
+          })
+      ).then(
+        (response) => {
+          setSubmitting(false);
+          onSaveSuccess(response);
+        },
+        (err) => {
+          setSubmitting(false);
+          onSaveError(err);
+        }
+      );
+    },
+    [integrationId, state, integrationService, onSaveSuccess, onSaveError]
+  );
 
   return {
     state,

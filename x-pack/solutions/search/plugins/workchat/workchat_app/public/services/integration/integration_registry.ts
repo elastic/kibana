@@ -41,4 +41,4 @@ export class IntegrationRegistry {
   getAll() {
     return [...this.integrationTypes.values()];
   }
-} 
+}

@@ -13,9 +13,8 @@ export interface WCISalesforcePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginSetupDependencies {
-    workchatApp: WorkChatAppPluginSetup;
+  workchatApp: WorkChatAppPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

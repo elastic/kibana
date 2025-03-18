@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IntegrationToolComponentProps } from '@kbn/wci-common';
 import React from 'react';
+import { IntegrationToolComponentProps } from '@kbn/wci-common';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { EuiTextColor } from '@elastic/eui';
@@ -20,7 +20,7 @@ const italic = css`
   font-style: italic;
 `;
 
-export const IndexSourceTool: React.FC<IntegrationToolComponentProps> = ({
+export const ExternalServerTool: React.FC<IntegrationToolComponentProps> = ({
   toolCall,
   complete,
 }) => {
@@ -39,8 +39,8 @@ export const IndexSourceTool: React.FC<IntegrationToolComponentProps> = ({
     return (
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.workchatApp.wci_index_source.chat.toolCall.calledToolLabel"
-          defaultMessage="called index source {tool} with arguments {args}"
+          id="xpack.workchatApp.wci_external_server.chat.toolCall.calledToolLabel"
+          defaultMessage="called external server {tool} with arguments {args}"
           values={{
             tool: toolNode,
             args: argsNode,
@@ -52,8 +52,8 @@ export const IndexSourceTool: React.FC<IntegrationToolComponentProps> = ({
     return (
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.workchatApp.wci_index_source.chat.toolCall.callingToolLabel"
-          defaultMessage="called index source {tool} with arguments {args}"
+          id="xpack.workchatApp.wci_external_server.chat.toolCall.callingToolLabel"
+          defaultMessage="called external server {tool} with arguments {args}"
           values={{
             tool: toolNode,
             args: argsNode,

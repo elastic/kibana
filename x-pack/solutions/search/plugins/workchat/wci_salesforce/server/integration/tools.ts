@@ -50,9 +50,9 @@ export async function retrieveCases(
 
     const searchRequest: SearchRequest = {
       index: indexName,
-      query: query,
+      query,
       sort: [{ [sortField]: { order: sortOrder } }],
-      size: size,
+      size,
     };
 
     logger.info(

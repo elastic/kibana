@@ -1,7 +1,62 @@
-import { SalesforceConfiguration } from "../../common/types";
-import React from "react";
-import { IntegrationToolComponentProps } from "@kbn/wci-common";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-export const SalesforceTool: React.FC<IntegrationToolComponentProps<SalesforceConfiguration>> = ({ configuration }) => {
-  return <div>Salesforce Tool</div>;
+import React from 'react';
+import { IntegrationToolComponentProps } from '@kbn/wci-common';
+import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { EuiTextColor } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+const bold = css`
+  font-weight: bold;
+`;
+
+const italic = css`
+  font-style: italic;
+`;
+
+export const SalesforceTool: React.FC<IntegrationToolComponentProps> = ({ toolCall, complete }) => {
+  const toolNode = (
+    <EuiTextColor className={bold} color="success">
+      {toolCall.toolName}
+    </EuiTextColor>
+  );
+  const argsNode = (
+    <EuiTextColor className={italic} color="accent">
+      {JSON.stringify(toolCall.args)}
+    </EuiTextColor>
+  );
+
+  if (complete) {
+    return (
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.workchatApp.wci_salesforce.chat.toolCall.calledToolLabel"
+          defaultMessage="called Salesforce {tool} with arguments {args}"
+          values={{
+            tool: toolNode,
+            args: argsNode,
+          }}
+        />
+      </EuiText>
+    );
+  } else {
+    return (
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.workchatApp.wci_salesforce.chat.toolCall.callingToolLabel"
+          defaultMessage="called Salesforce {tool} with arguments {args}"
+          values={{
+            tool: toolNode,
+            args: argsNode,
+          }}
+        />
+      </EuiText>
+    );
+  }
 };

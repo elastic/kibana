@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiFieldText,
-  EuiTextArea,
   EuiFlexGroup,
   EuiPanel,
   EuiFlexItem,
@@ -23,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
+import { FormProvider, useForm, Controller } from 'react-hook-form';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
@@ -30,8 +30,7 @@ import { IntegrationEditState, useIntegrationEdit } from '../../../hooks/use_int
 import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { integrationLabels } from '../i18n';
 import { integrationTypeToLabel } from '../utils';
-import { useWorkChatServices } from '../../../hooks/use_workchat_service';
-import { FormProvider, useForm, Controller } from 'react-hook-form';
+import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_configuration_form';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -91,10 +90,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     })),
   ];
 
-  const integrationRegistry = useWorkChatServices().integrationRegistry;
-
-  const integrationDefinition = state.type && integrationRegistry.get(state.type as IntegrationType);
-  const ConfigurationForm = integrationDefinition?.getConfigurationForm?.();
+  const ConfigurationForm = useIntegrationConfigurationForm(state.type);
 
   const onDeleteSuccess = useCallback(() => {
     notifications.toasts.addSuccess(integrationLabels.notifications.integrationDeletedToastText);
@@ -131,10 +127,14 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
   };
 
   const formMethods = useForm<IntegrationEditState>({
-    values: state
+    values: state,
   });
 
-  const { handleSubmit, formState: { isSubmitting }, control } = formMethods
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    control,
+  } = formMethods;
   return (
     <KibanaPageTemplate panelled>
       <KibanaPageTemplate.Header
@@ -147,116 +147,118 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
       <KibanaPageTemplate.Section grow={false} paddingSize="m">
         <EuiPanel hasShadow={false} hasBorder={true}>
-        <FormProvider {...formMethods}>
-          <EuiForm component="form" fullWidth onSubmit={handleSubmit((data) => submit(data))}>
-            <EuiDescribedFormGroup
-              ratio="third"
-              title={<h3>Base configuration</h3>}
-              description="Configure your integration"
-            >
-              <EuiFormRow label="Name">
-                <Controller
-                  rules={{ required: true }}
-                  name="name"
-                  control={control}
-                  render={({ field }) => (
-                    <EuiFieldText
-                      data-test-subj="workchatAppIntegrationEditViewFieldText"
-                      {...field}
-                    />
-                  )}
-                />
-              </EuiFormRow>
-              <EuiFormRow label="Description">
-                <Controller
-                  rules={{ required: true }}
-                  name="description"
-                  control={control}
-                  render={({ field }) => (
-                    <EuiFieldText
-                      data-test-subj="workchatAppIntegrationEditViewFieldText"
-                      {...field}
-                    />
-                  )}
-                />
-              </EuiFormRow>
-              <EuiFormRow label="Type">
-                <Controller
-                  name="type"
-                  control={control}
-                  render={({ field }) => (
-                    <EuiSelect
-                      data-test-subj="workchatAppIntegrationEditViewSelect"
-                      options={integrationTypes}
-                      {...field}
-                      disabled={!!integrationId}
-                    />
-                  )}
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
+          <FormProvider {...formMethods}>
+            <EuiForm component="form" fullWidth onSubmit={handleSubmit((data) => submit(data))}>
+              <EuiDescribedFormGroup
+                ratio="third"
+                title={<h3>Base configuration</h3>}
+                description="Configure your integration"
+              >
+                <EuiFormRow label="Name">
+                  <Controller
+                    rules={{ required: true }}
+                    name="name"
+                    control={control}
+                    render={({ field }) => (
+                      <EuiFieldText
+                        data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        {...field}
+                      />
+                    )}
+                  />
+                </EuiFormRow>
+                <EuiFormRow label="Description">
+                  <Controller
+                    rules={{ required: true }}
+                    name="description"
+                    control={control}
+                    render={({ field }) => (
+                      <EuiFieldText
+                        data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        {...field}
+                      />
+                    )}
+                  />
+                </EuiFormRow>
+                <EuiFormRow label="Type">
+                  <Controller
+                    name="type"
+                    control={control}
+                    render={({ field }) => (
+                      <EuiSelect
+                        data-test-subj="workchatAppIntegrationEditViewSelect"
+                        options={integrationTypes}
+                        {...field}
+                        disabled={!!integrationId}
+                      />
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiDescribedFormGroup>
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            {ConfigurationForm && <ConfigurationForm form={formMethods} />}
+              {ConfigurationForm && <ConfigurationForm form={formMethods} />}
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiButton
-                      data-test-subj="workchatAppIntegrationEditViewCancelButton"
-                      type="button"
-                      iconType="framePrevious"
-                      color="warning"
-                      onClick={handleCancel}
-                    >
-                      {integrationLabels.editView.cancelButtonLabel}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  {integrationId && (
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup>
                     <EuiFlexItem>
-                      <EuiButtonEmpty
-                        data-test-subj="workchatAppIntegrationEditViewDeleteButton"
-                        color="danger"
-                        onClick={showDeleteModal}
-                        isLoading={isDeleting}
+                      <EuiButton
+                        data-test-subj="workchatAppIntegrationEditViewCancelButton"
+                        type="button"
+                        iconType="framePrevious"
+                        color="warning"
+                        onClick={handleCancel}
                       >
-                        Delete
-                      </EuiButtonEmpty>
+                        {integrationLabels.editView.cancelButtonLabel}
+                      </EuiButton>
                     </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="workchatAppIntegrationEditViewSaveButton"
-                  type="submit"
-                  iconType="save"
-                  fill
-                  disabled={isSubmitting}
-                >
-                  {integrationLabels.editView.saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiForm>
+                    {integrationId && (
+                      <EuiFlexItem>
+                        <EuiButtonEmpty
+                          data-test-subj="workchatAppIntegrationEditViewDeleteButton"
+                          color="danger"
+                          onClick={showDeleteModal}
+                          isLoading={isDeleting}
+                        >
+                          Delete
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="workchatAppIntegrationEditViewSaveButton"
+                    type="submit"
+                    iconType="save"
+                    fill
+                    disabled={isSubmitting}
+                  >
+                    {integrationLabels.editView.saveButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiForm>
 
-          {isDeleteModalVisible && (
-            <EuiConfirmModal
-              title="Delete integration"
-              onCancel={closeDeleteModal}
-              onConfirm={handleDelete}
-              cancelButtonText="Cancel"
-              confirmButtonText="Delete"
-              buttonColor="danger"
-              defaultFocusedButton="confirm"
-            >
-              <p>Are you sure you want to delete this integration? This action cannot be undone.</p>
-            </EuiConfirmModal>
-          )}
+            {isDeleteModalVisible && (
+              <EuiConfirmModal
+                title="Delete integration"
+                onCancel={closeDeleteModal}
+                onConfirm={handleDelete}
+                cancelButtonText="Cancel"
+                confirmButtonText="Delete"
+                buttonColor="danger"
+                defaultFocusedButton="confirm"
+              >
+                <p>
+                  Are you sure you want to delete this integration? This action cannot be undone.
+                </p>
+              </EuiConfirmModal>
+            )}
           </FormProvider>
         </EuiPanel>
       </KibanaPageTemplate.Section>

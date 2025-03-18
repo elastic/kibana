@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IndexSourceTool } from './tool';
 import { IntegrationType } from '@kbn/wci-common';
-import { IndexSourceConfigurationForm } from './configuration';
 import { IntegrationComponentDescriptor } from '@kbn/wci-common/src/types';
+import { IndexSourceTool } from './tool';
+import { IndexSourceConfigurationForm } from './configuration';
 import { WCIIndexSourceConfiguration } from '../../common/types';
 
 export function indexSourceIntegrationComponents(): IntegrationComponentDescriptor<WCIIndexSourceConfiguration> {
