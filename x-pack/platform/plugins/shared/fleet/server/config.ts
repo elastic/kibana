@@ -29,9 +29,14 @@ const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasti
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.3';
 
-const specMinSchema = schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MIN_VERSION});
-const specMaxSchema = schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MAX_VERSION});
-
+const specMinSchema = schema.string({
+  coerceFromNumber: true,
+  defaultValue: REGISTRY_SPEC_MIN_VERSION,
+});
+const specMaxSchema = schema.string({
+  coerceFromNumber: true,
+  defaultValue: REGISTRY_SPEC_MAX_VERSION,
+});
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
