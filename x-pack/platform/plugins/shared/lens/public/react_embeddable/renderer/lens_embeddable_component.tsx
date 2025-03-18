@@ -12,7 +12,6 @@ import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
-import { getViewMode } from '../helper';
 import { addLog } from '../logger';
 
 export function LensEmbeddableComponent({
@@ -34,13 +33,13 @@ export function LensEmbeddableComponent({
     blockingErrors,
     // has the render completed?
     hasRendered,
-    // has view mode changed?
-    latestViewMode,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
     internalApi.validationMessages$,
     api.rendered$,
+    // listen to view change mode but do not use its actual value
+    // just call the Lens API to know whether it's in edit mode
     api.viewMode$
   );
   const canEdit = Boolean(
