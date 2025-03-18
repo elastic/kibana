@@ -13,7 +13,6 @@ import {
   ESQLAstMetricsCommand,
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLMessage,
   ESQLSource,
@@ -21,7 +20,7 @@ import {
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import { CommandModeDefinition, CommandOptionsDefinition } from '../definitions/types';
+import { CommandOptionsDefinition } from '../definitions/types';
 import { METADATA_FIELDS } from '../shared/constants';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
@@ -35,7 +34,6 @@ import {
   isFunctionItem,
   isOptionItem,
   isParametrized,
-  isSettingItem,
   isSourceItem,
   isTimeIntervalItem,
   isVariable,
@@ -250,8 +248,6 @@ function validateCommand(
                 currentCommandIndex,
               })
             );
-          } else if (isSettingItem(arg)) {
-            messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
           } else if (isOptionItem(arg)) {
             messages.push(
               ...validateOption(
@@ -289,55 +285,6 @@ function validateCommand(
 
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-/** @deprecated — "command settings" will be removed soon */
-function validateSetting(
-  setting: ESQLCommandMode,
-  settingDef: CommandModeDefinition | undefined,
-  command: ESQLCommand,
-  referenceMaps: ReferenceMaps
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (setting.incomplete || command.incomplete) {
-    return messages;
-  }
-  if (!settingDef) {
-    const commandDef = getCommandDefinition(command.name);
-    messages.push(
-      getMessageFromId({
-        messageId: 'unsupportedSetting',
-        values: {
-          setting: setting.name,
-          expected: commandDef.modes.map(({ name }) => name).join(', '),
-        },
-        locations: setting.location,
-      })
-    );
-    return messages;
-  }
-  if (
-    settingDef.values.every(({ name }) => name !== setting.name) ||
-    // enforce the check on the prefix if present
-    (settingDef.prefix && !setting.text.startsWith(settingDef.prefix))
-  ) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unsupportedSettingCommandValue',
-        values: {
-          command: command.name.toUpperCase(),
-          value: setting.text,
-          // for some reason all this enums are uppercase in ES
-          expected: settingDef.values
-            .map(({ name }) => `${settingDef.prefix || ''}${name}`)
-            .join(', ')
-            .toUpperCase(),
-        },
-        locations: setting.location,
-      })
-    );
-  }
   return messages;
 }
 

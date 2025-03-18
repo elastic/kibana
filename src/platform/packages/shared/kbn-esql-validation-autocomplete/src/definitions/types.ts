@@ -339,20 +339,16 @@ export interface CommandOptionsDefinition<CommandName extends string = string>
   ) => ESQLMessage[];
 }
 
-export interface CommandModeDefinition {
-  name: string;
-  description: string;
-  values: Array<{ name: string; description: string }>;
-  prefix?: string;
-}
-
 export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
   examples: string[];
+  /**
+   * This function is run when the command is being validated, but it does not
+   * prevent the default behavior. If you need a full override, we are currently
+   * doing those directly in the validateCommand function in the validation module.
+   */
   validate?: (command: ESQLCommand<CommandName>, references: ReferenceMaps) => ESQLMessage[];
   suggest: CommandSuggestFunction<CommandName>;
-  /** @deprecated this property will disappear in the future */
-  modes: CommandModeDefinition[];
   /** @deprecated this property will disappear in the future */
   options: CommandOptionsDefinition[];
 }
