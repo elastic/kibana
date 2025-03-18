@@ -1,13 +1,18 @@
 .upgStepProgress__step {
   display: flex;
   align-items: center;
-  margin-top: $euiSize;
+  margin-top: $euiSizeS;
   margin-bottom: $euiSizeS;
   line-height: $euiSize;
+
+  &:first-child {
+    margin-top: $euiSize;
+  }
 }
 
 .upgStepProgress__status {
   @include size($euiSize);
+  min-width: $euiSize;
   margin-right: $euiSizeM;
 }
 
@@ -33,6 +38,8 @@ $stepStatusToCallOutColor: (
 }
 
 .upgStepProgress__title {
+  line-height: $euiSizeL;
+
   &--currentStep {
     font-weight: $euiFontWeightBold;
   }

@@ -39,7 +39,7 @@ export const EsDeprecationLogs: FunctionComponent = () => {
   }, [breadcrumbs]);
 
   return (
-    <EuiPageBody restrictWidth={true} data-test-subj="esDeprecationLogs">
+    <EuiPageBody restrictWidth data-test-subj="esDeprecationLogs" css={{ width: '100%' }}>
       <EuiPageSection color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder
