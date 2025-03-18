@@ -24,10 +24,6 @@ interface Props {
 export function StreamDescription({ definition }: Props) {
   const updateStream = useUpdateStreams(definition.stream.name);
 
-  if (!definition) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem grow>
