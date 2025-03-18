@@ -47341,6 +47341,13 @@ paths:
         For indices with more fields than the cap, add the `index.query.default_field` index setting to inform Elasticsearch which fields to use by default when no field is specified for a query. Use the add default field API to add the `index.query.default_field` setting to an Elasticsearch index.
         To add the `index.query.default_field` index setting to the specified index, Kibana generates an array of all fields from the index mapping. The fields contain the types specified in `fieldTypes`. Kibana appends any other fields specified in `otherFields` to the array of default fields.
       operationId: get-upgrade-default
+      parameters:
+        - description: The name of the index.
+          in: path
+          name: index
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
