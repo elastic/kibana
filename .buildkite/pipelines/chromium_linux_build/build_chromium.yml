@@ -46,6 +46,9 @@ steps:
   - command: node .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.js
     label: provided feedback to issue created to update puppeteer
     depends_on: "build_chromium"
+    env:
+      KIBANA_MACHINE_USERNAME: kibanamachine
+      KIBANA_MACHINE_EMAIL: 42973632+kibanamachine@users.noreply.github.com
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2004
