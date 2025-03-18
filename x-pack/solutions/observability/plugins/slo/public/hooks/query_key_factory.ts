@@ -82,6 +82,7 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  managementAll: ['slo', 'management'] as const,
 };
 
 export type SloKeys = typeof sloKeys;
