@@ -121,6 +121,7 @@ export const transformEventLogTypeStatus = ({
     total: {
       failures: countTotals([
         eqlFailure,
+        esqlFailure,
         indicatorFailure,
         mlFailure,
         queryFailure,
@@ -129,6 +130,7 @@ export const transformEventLogTypeStatus = ({
       ]),
       partial_failures: countTotals([
         eqlPartialFailure,
+        esqlPartialFailure,
         indicatorPartialFailure,
         mlPartialFailure,
         queryPartialFailure,
@@ -137,6 +139,7 @@ export const transformEventLogTypeStatus = ({
       ]),
       succeeded: countTotals([
         eqlSuccess,
+        esqlSuccess,
         indicatorSuccess,
         mlSuccess,
         querySuccess,
