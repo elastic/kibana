@@ -57,7 +57,7 @@ describe('upMigration', () => {
       summaryActions: {
         action1: { date: '2023-07-31T12:00:00Z' },
       },
-      executionUuid: undefined,
+      trackedExecutions: undefined,
     };
 
     const result = upMigration(inputState);

@@ -6,7 +6,7 @@
  */
 
 import { type TypeOf } from '@kbn/config-schema';
-import { isJSONObject, isString } from '../lib';
+import { isJSONObject, isString, isStringArray } from '../lib';
 import { versionSchema } from './schema';
 
 import {
@@ -23,6 +23,6 @@ export const upMigration = (state: Record<string, unknown>): VersionSchema => {
     alertRecoveredInstances: migrateAlertInstancesV1(state.alertRecoveredInstances),
     previousStartedAt: isString(state.previousStartedAt) ? state.previousStartedAt : undefined,
     summaryActions: migrateThrottledActionsV1(state.summaryActions),
-    executionUuid: isString(state.executionUuid) ? state.executionUuid : undefined,
+    trackedExecutions: isStringArray(state.trackedExecutions) ? state.trackedExecutions : undefined,
   };
 };
