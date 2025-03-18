@@ -83,14 +83,12 @@ export const KIBANA_GROUP_TEAMS_MAPPINGS: Record<KibanaGroup, string[]> = {
 /**
  * Find what group a code owner belongs to
  *
- * @param owner Owner to find an group name
+ * @param owner Owner to find a group for
  * @returns The code owner group if a match for the given owner is found
  */
 export function findGroupByOwner(owner: string): KibanaGroup | undefined {
   for (const group of KIBANA_GROUPS) {
-    // FIXME what happens if a team appears in 2 different groups?
     const owners = KIBANA_GROUP_TEAMS_MAPPINGS[group];
-
     if (owners.includes(owner)) {
       return group;
     }
