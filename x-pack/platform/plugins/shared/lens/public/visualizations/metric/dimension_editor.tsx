@@ -136,11 +136,12 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
 
 function getDefaultPalette(): EuiColorPalettePickerPaletteFixedProps {
   return {
-    value: 'default_trend_palette',
-    title: i18n.translate('coloring.dynamicColoring.palette.trend.label', {
-      defaultMessage: 'Trend',
+    title: i18n.translate('coloring.dynamicColoring.palette.complementary.label', {
+      defaultMessage: 'Trend Vis',
     }),
-    palette: ['danger', 'backgroundBaseDisabled', 'success'],
+    value: 'default_trend_palette',
+    // the #24C292 value here is the vis green color missing token from EUI
+    palette: ['euiColorVis6', 'backgroundBaseDisabled', '#24C292'],
     append: undefined,
     type: 'fixed',
   };
@@ -157,22 +158,6 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
     palette: defaultPalette.palette
       .slice()
       .reverse() as EuiColorPalettePickerPaletteFixedProps['palette'],
-  };
-  const temperatureEUIPalette: EuiColorPalettePickerPaletteFixedProps = {
-    ...getDefaultPalette(),
-    title: i18n.translate('coloring.dynamicColoring.palette.temperature.label', {
-      defaultMessage: 'Temperature EUI',
-    }),
-    value: 'temperature_eui_trend_palette',
-    palette: ['primary', 'backgroundBaseDisabled', 'danger'],
-  };
-  const complementaryEUIPalette: EuiColorPalettePickerPaletteFixedProps = {
-    ...getDefaultPalette(),
-    title: i18n.translate('coloring.dynamicColoring.palette.complementary.label', {
-      defaultMessage: 'Complementary EUI',
-    }),
-    value: 'complementary_eui_trend_palette',
-    palette: ['primary', 'backgroundBaseDisabled', 'warning'],
   };
   // Add 2 temperature & complementary palettes using vis colors
   const temperaturePalette: EuiColorPalettePickerPaletteFixedProps = {
@@ -191,32 +176,7 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
     value: 'complementary_trend_palette',
     palette: ['euiColorVis2', 'backgroundBaseDisabled', 'euiColorVis8'],
   };
-  const defaultPaletteVis: EuiColorPalettePickerPaletteFixedProps = {
-    ...getDefaultPalette(),
-    title: i18n.translate('coloring.dynamicColoring.palette.complementary.label', {
-      defaultMessage: 'Trend Vis',
-    }),
-    value: 'trend_vis_trend_palette',
-    palette: ['euiColorVis6', 'backgroundBaseDisabled', 'euiColorVis0'],
-  };
-  const reversedPaletteVis: EuiColorPalettePickerPaletteFixedProps = {
-    ...getDefaultPalette(),
-    title: i18n.translate('coloring.dynamicColoring.palette.complementary.label', {
-      defaultMessage: 'Reversed Vis',
-    }),
-    value: 'reversed_vis_trend_palette',
-    palette: ['euiColorVis0', 'backgroundBaseDisabled', 'euiColorVis6'],
-  };
-  return [
-    defaultPalette,
-    reversedPalette,
-    defaultPaletteVis,
-    reversedPaletteVis,
-    temperatureEUIPalette,
-    complementaryEUIPalette,
-    temperaturePalette,
-    complementaryPalette,
-  ];
+  return [defaultPalette, reversedPalette, temperaturePalette, complementaryPalette];
 }
 
 export function getDefaultTrendConfig() {
