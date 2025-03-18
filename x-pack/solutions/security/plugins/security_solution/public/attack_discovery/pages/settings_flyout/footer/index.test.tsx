@@ -12,31 +12,14 @@ import { Footer } from '.';
 
 describe('Footer', () => {
   const closeModal = jest.fn();
-  const onReset = jest.fn();
-  const onSave = jest.fn();
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('calls onReset when the reset button is clicked', () => {
-    render(<Footer closeModal={closeModal} onReset={onReset} onSave={onSave} />);
-
-    fireEvent.click(screen.getByTestId('reset'));
-
-    expect(onReset).toHaveBeenCalled();
-  });
-
   it('calls closeModal when the cancel button is clicked', () => {
-    render(<Footer closeModal={closeModal} onReset={onReset} onSave={onSave} />);
+    render(<Footer closeModal={closeModal} />);
 
-    fireEvent.click(screen.getByTestId('cancel'));
+    fireEvent.click(screen.getByTestId('close'));
 
     expect(closeModal).toHaveBeenCalled();
-  });
-
-  it('calls onSave when the save button is clicked', () => {
-    render(<Footer closeModal={closeModal} onReset={onReset} onSave={onSave} />);
-    fireEvent.click(screen.getByTestId('save'));
-
-    expect(onSave).toHaveBeenCalled();
   });
 });
