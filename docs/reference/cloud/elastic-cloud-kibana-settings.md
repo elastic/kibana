@@ -5,46 +5,6 @@ mapped_pages:
 
 # Elastic Cloud Kibana settings [ec-manage-kibana-settings]
 
-Elasticsearch Service supports most of the standard Kibana and X-Pack settings. Through a YAML editor in the console, you can append Kibana properties to the `kibana.yml` file. Your changes to the configuration file are read on startup.
-
-::::{important}
-Be aware that some settings that could break your cluster if set incorrectly and that the syntax might change between major versions. Before upgrading, be sure to review the full list of the [latest Kibana settings and syntax](/reference/configuration-reference/general-settings.md).
-::::
-
-
-To change Kibana settings:
-
-1. Log in to the [Elasticsearch Service Console](https://cloud.elastic.co?page=docs&placement=docs-body).
-2. Find your deployment on the home page in the Elasticsearch Service card and select **Manage** to access it directly. Or, select **Hosted deployments** to go to the deployments page to view all of your deployments.
-
-    On the deployments page you can narrow your deployments by name, ID, or choose from several other filters. To customize your view, use a combination of filters, or change the format from a grid to a list.
-
-3. From your deployment menu, go to the **Edit** page.
-4. In the **Kibana** section, select **Edit user settings**. (For deployments with existing user settings, you may have to expand the **Edit kibana.yml** caret instead.)
-5. Update the user settings.
-6. Select **Save changes**.
-
-Saving your changes initiates a configuration plan change that restarts Kibana automatically for you.
-
-::::{note}
-If a setting is not supported by Elasticsearch Service, you will get an error message when you try to save.
-::::
-
-
-## Supported Kibana settings [ec-kibana-config]
-
-### Version 8.12.0+ [ec_version_8_12_0]
-
-`xpack.reporting.csv.maxConcurrentShardRequests`
-:   Sets the maximum number of concurrent shard requests that each sub-search request executes per node during Kibana CSV export. Defaults to `5`.
-
-
-### Version 8.11.0+ [ec_version_8_11_0]
-
-`xpack.action.queued.max`
-:   Specifies the maximum number of actions that can be queued. Defaults to `1000000`.
-
-
 ### Version 8.9.0+ [ec_version_8_9_0]
 
 `xpack.fleet.createArtifactsBulkBatchSize`

@@ -19,7 +19,8 @@ If a setting is applicable to {{ecloud}} Hosted environments, its name is follow
 :   Add sources for the [Content Security Policy `script-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src).
 
 `csp.disableUnsafeEval`
-:   [8.7.0] Set this to `false` to add the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression to the `script-src` directive. **Default: `true`**
+:   Deprecated in 8.7.0. Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`. This config option will have no effect in a future version.
+    Set this to `false` to add the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression to the `script-src` directive. **Default: `true`**
 
     When `csp.disableUnsafeEval` is set to `true`, Kibana will use a custom version of the Handlebars template library. Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation. If you experience any issues rendering Handlebars templates, please set this setting to `false` and [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana GitHub repository.
 
@@ -257,7 +258,7 @@ $$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2
 :   Controls whether to enable the newsfeed system for the {{kib}} UI notification center. Set to `false` to disable the newsfeed system. **Default: `true`**
 
 `node.roles`
-:   [preview] Indicates which roles to configure the {{kib}} process with, which will effectively run {{kib}} in different modes. Valid options are `background_tasks` and `ui`, or `*` to select all roles. **Default: `*`**
+:   Indicates which roles to configure the {{kib}} process with, which will effectively run {{kib}} in different modes. Valid options are `background_tasks` and `ui`, or `*` to select all roles. **Default: `*`**. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 `notifications.connectors.default.email`
 :   Choose the default email connector for user notifications. As of `8.6.0`, {{kib}} is shipping with a new notification mechanism that will send email notifications for various user actions, e.g. assigning a *Case* to a user. To enable notifications, an email connector must be [preconfigured](/reference/connectors-kibana/pre-configured-connectors.md) in the system via `kibana.yml`, and the notifications plugin must be configured to point to the ID of that connector.
@@ -293,10 +294,10 @@ $$$server-compression$$$ `server.compression.enabled`
 :   Set to `false` to disable HTTP compression for all responses. **Default: `true`**
 
 `server.cors.enabled`
-:   [preview] Set to `true` to allow cross-origin API calls. **Default:** `false`
+:   Set to `true` to allow cross-origin API calls. **Default:** `false`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 `server.cors.allowCredentials`
-:   [preview] Set to `true` to allow browser code to access response body whenever request performed with user credentials. **Default:** `false`
+:   Set to `true` to allow browser code to access response body whenever request performed with user credentials. **Default:** `false`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 `server.cors.allowOrigin`
 :   experimental::[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
@@ -317,10 +318,10 @@ $$$server-securityResponseHeaders-referrerPolicy$$$ `server.securityResponseHead
 :   Controls whether the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `no-referrer`, `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`, `unsafe-url`, or `null`. To disable, set to `null`. **Default:** `"strict-origin-when-cross-origin"`
 
 $$$server-securityResponseHeaders-permissionsPolicy$$$ `server.securityResponseHeaders.permissionsPolicy`
-:   [preview] Controls whether the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. To disable, set to `null`. **Default:** `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
+:   Controls whether the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. To disable, set to `null`. **Default:** `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 $$$server-securityResponseHeaders-permissionsPolicyReportOnly$$$ `server.securityResponseHeaders.permissionsPolicyReportOnly`
-:   [preview] Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format.
+:   Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 $$$server-securityResponseHeaders-disableEmbedding$$$`server.securityResponseHeaders.disableEmbedding`
 :   Controls whether the [`Content-Security-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) and [`X-Frame-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options) headers are configured to disable embedding {{kib}} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors: 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. **Default:** `false`
@@ -350,7 +351,7 @@ $$$server-port$$$ `server.port`
 :   {{kib}} is served by a back end server. This setting specifies the port to use. **Default: `5601`**
 
 $$$server-protocol$$$ `server.protocol`
-:   [preview] The http protocol to use, either `http1` or `http2`. Set to `http1` to opt out of `HTTP/2` support when TLS is enabled. Use of `http1` may impact browser loading performance especially for dashboards with many panels. **Default**: `http2` if TLS is enabled, otherwise `http1`.
+:   The HTTP protocol to use, either `http1` or `http2`. Set to `http1` to opt out of `HTTP/2` support when TLS is enabled. Use of `http1` may impact browser loading performance especially for dashboards with many panels. **Default**: `http2` if TLS is enabled, otherwise `http1`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
     ::::{note}
     By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via [`server.ssl.enabled`](#server-ssl-enabled) and [`server.ssl.supportedProtocols`](#server-ssl-supportedProtocols), if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.

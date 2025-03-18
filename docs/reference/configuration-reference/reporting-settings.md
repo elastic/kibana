@@ -231,6 +231,9 @@ Reporting parameters can be adjusted to overcome some of these limiting scenario
 
 ::::
 
+`xpack.reporting.csv.maxConcurrentShardRequests` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Sets the maximum number of concurrent shard requests that each sub-search request executes per node during Kibana CSV export. Defaults to `5`.
+% TBD: Is this setting applicable only to Elastic Cloud?
 
 $$$xpack-reporting-csv$$$ `xpack.reporting.csv.maxSizeBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   The maximum [byte size](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#byte-units) of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
