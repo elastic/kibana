@@ -17,6 +17,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const logger = getService('log');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'header']);
+  const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 
   describe('Custom threshold preview chart', () => {
     const observability = getService('observability');
@@ -48,6 +49,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
       await observability.alerts.rulesPage.clickOnCustomThresholdRule();
       await pageObjects.common.sleep(1000);
+      const renderedPreview = await find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
+      const renderingCount = Number(await renderedPreview[0].getAttribute('data-rendering-count'));
+      logger.info(`renderingCount: ${renderingCount}`);
       expect(await find.existsByCssSelector('[data-rendering-count="2"]')).toBe(true);
     });
 
