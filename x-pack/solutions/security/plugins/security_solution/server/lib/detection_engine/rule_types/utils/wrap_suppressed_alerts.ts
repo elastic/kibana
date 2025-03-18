@@ -36,18 +36,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage: BuildReasonMessage;
   sharedParams: SecuritySharedParams<MachineLearningRuleParams | EqlRuleParams | ThreatRuleParams>;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  const {
-    completeRule,
-    spaceId,
-    mergeStrategy,
-    inputIndex: indicesToQuery,
-    alertTimestampOverride,
-    ruleExecutionLogger,
-    publicBaseUrl,
-    intendedTimestamp,
-    primaryTimestamp,
-    secondaryTimestamp,
-  } = sharedParams;
+  const { completeRule, spaceId, primaryTimestamp, secondaryTimestamp } = sharedParams;
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
@@ -65,20 +54,11 @@ export const wrapSuppressedAlerts = ({
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
     const baseAlert: BaseFieldsLatest = transformHitToAlert({
-      spaceId,
-      completeRule,
+      sharedParams,
       doc: event,
-      mergeStrategy,
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
       alertUuid: id,
-      publicBaseUrl,
-      intendedTimestamp,
     });
 
     return {

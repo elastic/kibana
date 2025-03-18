@@ -9,11 +9,13 @@ import { EndpointOf } from '@kbn/server-route-repository';
 import { ObservabilityConfig } from '..';
 import { aiAssistantRouteRepository } from './assistant/route';
 import { rulesRouteRepository } from './rules/route';
+import { alertsSuggestedDashboardRepository } from './alerts/route';
 
 export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
   const repository = {
     ...aiAssistantRouteRepository,
     ...rulesRouteRepository,
+    ...alertsSuggestedDashboardRepository,
   };
   return repository;
 }

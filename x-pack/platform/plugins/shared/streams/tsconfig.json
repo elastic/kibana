@@ -40,6 +40,7 @@
     "@kbn/traced-es-client",
     "@kbn/es-query",
     "@kbn/core-elasticsearch-client-server-internal",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/core-analytics-server"
   ]
 }

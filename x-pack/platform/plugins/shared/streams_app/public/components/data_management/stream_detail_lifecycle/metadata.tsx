@@ -31,6 +31,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  formatNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
@@ -203,7 +204,7 @@ export function RetentionMetadata({
           ) : isLoadingStats || !stats ? (
             <EuiLoadingSpinner size="s" />
           ) : (
-            stats.totalDocs
+            formatNumber(stats.totalDocs, '0,0')
           )
         }
       />
