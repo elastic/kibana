@@ -46,7 +46,7 @@ import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import { DiscoverEBTManager } from '../plugin_imports/discover_ebt_manager';
 import { createUrlTrackerMock } from './url_tracker.mock';
 
 export function createDiscoverServicesMock(): DiscoverServices {
