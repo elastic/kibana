@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   describe('Kibana API Deprecations', function () {
+    this.onlyEsVersion('8');
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
@@ -157,7 +158,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
         index: '.kibana_usage_counters',
-        query: { bool: { should } },
+        body: {
+          query: { bool: { should } },
+        },
       });
 
       expect(hits.hits.length).to.equal(4);
@@ -183,7 +186,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
           index: '.kibana_usage_counters',
-          query: { bool: { should } },
+          body: {
+            query: { bool: { should } },
+          },
         });
 
         expect(hits.hits.length).to.equal(5);
@@ -202,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
     });
-    it('GET /api/upgrade_assistant/status does not return { readyForUpgrade: false } if there are only critical API deprecations', async () => {
+    it('Readiness status excludes critical deprecations based on Kibana API usage', async () => {
       /** Throw in another critical deprecation... */
       await supertest.get(`/api/routing_example/d/removed_route`).expect(200);
       // sleep a little until the usage counter is synced into ES
@@ -219,7 +224,12 @@ export default function ({ getService }: FtrProviderContext) {
         2000
       );
       const { body } = await supertest.get(`/api/upgrade_assistant/status`).expect(200);
-      expect(body.readyForUpgrade).to.be(true);
+
+      // There are critical deprecations for Kibana API usage, but we do not
+      // surface them in readiness status
+      expect(body.readyForUpgrade).to.be(false);
+      expect(body.details?.length > 0).to.be(true);
+      expect(/Kibana/gi.test(body.details)).to.be(false);
     });
   });
 }
