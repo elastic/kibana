@@ -767,7 +767,6 @@ export interface OperationMetadata {
   isStaticValue?: boolean;
   // Extra metadata to infer array support in an operation
   hasArraySupport?: boolean;
-  params?: unknown;
 }
 
 /**
@@ -1073,7 +1072,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   initialize: {
     (
       addNewLayer: () => string,
-      nonPersistedState: T,
+      nonPersistedState?: T,
       mainPalette?: SuggestionRequest['mainPalette'],
       datasourceState?: FormBasedPersistedState
     ): T;

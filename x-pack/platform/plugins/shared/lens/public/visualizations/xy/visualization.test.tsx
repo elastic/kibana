@@ -278,6 +278,7 @@ describe('xy_visualization', () => {
             ],
           } as XYPersistedState,
           undefined,
+          undefined,
           {},
           [
             {
@@ -319,6 +320,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
+          undefined,
           undefined,
           {},
           [
@@ -392,6 +394,7 @@ describe('xy_visualization', () => {
                 } as XYPersistedByReferenceAnnotationLayerConfig,
               ],
             } as XYPersistedState,
+            undefined,
             undefined,
             {
               [annotationGroupId1]: {
@@ -519,6 +522,7 @@ describe('xy_visualization', () => {
               layers: [...baseState.layers, ...persistedAnnotationLayers],
             } as XYPersistedState,
             undefined,
+            undefined,
             libraryAnnotationGroups,
             references
           ).layers
@@ -592,6 +596,7 @@ describe('xy_visualization', () => {
               ...baseState,
               layers: [...baseState.layers, ...persistedAnnotationLayers],
             } as XYPersistedState,
+            undefined,
             undefined,
             libraryAnnotationGroups,
             references
@@ -4116,12 +4121,23 @@ describe('xy_visualization', () => {
     };
 
     it('compares after injecting annotation groups', () => {
-      expect(xyVisualization.isEqual!(state1, references1, state2, references2, annotationGroups));
+      expect(
+        xyVisualization.isEqual!(
+          state1,
+          references1,
+          undefined,
+          state2,
+          references2,
+          undefined,
+          annotationGroups
+        )
+      );
 
       expect(
         xyVisualization.isEqual!(
           state1,
           references1,
+          undefined,
           state2,
           [
             {
@@ -4135,6 +4151,7 @@ describe('xy_visualization', () => {
               type: 'index-pattern',
             },
           ],
+          undefined,
           annotationGroups
         )
       ).toBeFalsy();
@@ -4152,6 +4169,7 @@ describe('xy_visualization', () => {
             },
             // no index pattern reference
           ],
+          undefined,
           state2,
           [
             {
@@ -4161,6 +4179,7 @@ describe('xy_visualization', () => {
             },
             // no index pattern reference
           ],
+          undefined,
           annotationGroups
         )
       ).not.toThrowError();

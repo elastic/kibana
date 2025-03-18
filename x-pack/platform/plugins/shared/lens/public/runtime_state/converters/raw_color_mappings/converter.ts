@@ -89,6 +89,11 @@ export function convertColorMappingRule(
   }
 }
 
+const getParentFormatId = (column: Partial<GenericIndexPatternColumn>) =>
+  'params' in column
+    ? (column.params as { parentFormat?: { id?: string } })?.parentFormat?.id
+    : undefined;
+
 /**
  * Attempts to convert the previously stringified raw values into their raw/serialized form
  *
@@ -100,8 +105,8 @@ export function convertToRawValue(
 ): SerializedValue | symbol {
   if (!column) return NO_VALUE;
 
-  const { dataType, params } = column;
-  const type = (params as { parentFormat?: { id?: string } })?.parentFormat?.id;
+  const { dataType } = column;
+  const type = getParentFormatId(column);
 
   // all array values are multi-term
   if (type === 'multi_terms' || Array.isArray(value)) {
