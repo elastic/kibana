@@ -46,7 +46,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark'; //
 import { CISBenchmarkIcon } from '@kbn/cloud-security-posture';
-import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
+import cisLogoIcon from '@kbn/cloud-security-posture/assets/cis_logo.svg';
 import { TakeAction } from '../../../components/take_action';
 import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';

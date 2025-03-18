@@ -7,11 +7,11 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import { DETECTION_ENGINE_ALERTS_KEY } from '@kbn/cloud-security-posture';
 import {
   DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
   GET_DETECTION_RULE_ALERTS_STATUS_PATH,
 } from '../../../common/constants';
-import { DETECTION_ENGINE_ALERTS_KEY } from '../constants';
 
 interface AlertStatus {
   acknowledged: number;
