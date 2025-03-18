@@ -238,7 +238,9 @@ WARNING: only add keys which are not mapped as keywords - casting to keywords co
 TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
 the fields from the runtime mappings if they are removed from the Data Table.
 */
-export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
+export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
+  [VULNERABILITY_FIELDS.VULNERABILITY_ID]: ['vulnerability.id'],
+};
 export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
   [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]: ['orchestrator.cluster.id'],
   [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]: ['cloud.account.id'],
