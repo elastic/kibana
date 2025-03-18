@@ -16,9 +16,12 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiAccordion,
+  UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { css } from '@emotion/react';
 import { UrlTemplate } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { urlTemplateIconChoices } from '../../helpers/style_choices';
@@ -58,6 +61,8 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         };
 
   const [currentTemplate, setCurrentTemplate] = useState(getInitialTemplate);
+
+  const euiThemeContext = useEuiTheme();
 
   const persistedTemplateState = isUpdateForm(props) && props.initialTemplate;
 
@@ -133,10 +138,11 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           />
         )
       }
-      className={classNames('gphUrlTemplateList__accordion', {
-        'gphUrlTemplateList__accordion--isOpen': open,
-      })}
-      buttonClassName="gphUrlTemplateList__accordionbutton"
+      css={[
+        styles.listAccordion(euiThemeContext),
+        open && styles.openListAccordion(euiThemeContext),
+      ]}
+      buttonProps={{ css: styles.button(euiThemeContext) }}
       onToggle={(isOpen) => {
         setOpen(isOpen);
       }}
@@ -336,3 +342,26 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
     </EuiAccordion>
   );
 }
+
+const styles = {
+  listAccordion: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderTop: euiTheme.border.thin,
+      borderBottom: euiTheme.border.thin,
+
+      '& + &': {
+        // If there is another after it, shift up 1px to overlap borders
+        marginTop: '-1px',
+      },
+    }),
+
+  openListAccordion: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.body,
+    }),
+
+  button: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
+    }),
+};
