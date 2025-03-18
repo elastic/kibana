@@ -20,6 +20,7 @@ The settings are grouped by feature or purpose, for example:
 - [Internationalization](/reference/configuration-reference/internationalization-settings.md)
 - [Logging](/reference/configuration-reference/logging-settings.md)
 - [Logs](/reference/configuration-reference/logs-settings.md)
+- [Maps](/reference/configuration-reference/map-settings.md)
 - [Metrics](/reference/configuration-reference/metrics-settings.md)
 - [Monitoring](/reference/configuration-reference/monitoring-settings.md)
 - [Reporting](/reference/configuration-reference/reporting-settings.md)
