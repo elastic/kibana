@@ -35,7 +35,8 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
   const dashboardsFormData = formData.dashboards;
-  const isLinkedDashboardsEnabled = featureFlags.getBooleanValue('rca.linkedDashboards', false);
+  const isLinkedDashboardsEnabled =
+    (featureFlags && featureFlags.getBooleanValue('rca.linkedDashboards', false)) || false;
 
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
 
