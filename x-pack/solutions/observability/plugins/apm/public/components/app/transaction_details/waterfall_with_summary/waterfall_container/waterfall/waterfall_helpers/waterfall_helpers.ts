@@ -341,8 +341,25 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
   });
 }
 
-const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
-  groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
+const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanOrTransaction[]) => {
+  const childrenGroups = groupBy(waterfallItems, (item) =>
+    item.parentId ? item.parentId : ROOT_ID
+  );
+
+  const childrenGroupedByParentId = Object.entries(childrenGroups).reduce(
+    (acc, [parentId, items]) => {
+      // we shouldn't include the parent item in the children list
+      const filteredItems = items.filter((item) => item.id !== parentId);
+      return {
+        ...acc,
+        [parentId]: filteredItems,
+      };
+    },
+    {}
+  );
+
+  return childrenGroupedByParentId;
+};
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
@@ -509,9 +526,7 @@ function getChildren({
   };
   rootId: string;
 }) {
-  // children cannot have the same id as the root
-  const children =
-    waterfall.childrenByParentId[waterfallItemId]?.filter((child) => child.id !== rootId) ?? [];
+  const children = waterfall.childrenByParentId[waterfallItemId] ?? [];
 
   return path.showCriticalPath
     ? children.filter((child) => path.criticalPathSegmentsById[child.id]?.length)
