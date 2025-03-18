@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { CriteriaConditions } from './components/criteria_conditions';
 import type { AnyArtifact } from './types';
@@ -29,12 +29,12 @@ import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {
-    margin-top: ${({ theme }) => theme.eui.euiSizeL};
+    margin-top: ${({ theme }) => theme.euiTheme.size.l};
   }
 `;
 
 const CustomSplitInnerPanel = styled(EuiSplitPanel.Inner)`
-  background-color: ${({ theme }) => theme.eui.euiColorLightestShade} !important;
+  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBasePrimary};
 `;
 
 export interface ArtifactEntryCardMinifiedProps extends CommonProps {
