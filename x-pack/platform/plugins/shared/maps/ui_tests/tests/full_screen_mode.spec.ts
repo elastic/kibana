@@ -33,16 +33,16 @@ test.describe(
       const baseMapBtn = page.getByRole('button', { name: 'Basemap' });
 
       await expect(fullScreenBtn).toBeVisible();
-      await expect(exitFullScreenBtn).not.toBeVisible();
+      await expect(exitFullScreenBtn).toBeHidden();
       await expect(visibleChrome).toBeVisible();
-      await expect(hiddenChrome).not.toBeVisible();
+      await expect(hiddenChrome).toBeHidden();
       await expect(baseMapBtn).toBeVisible();
 
       await fullScreenBtn.click();
 
-      await expect(fullScreenBtn).not.toBeVisible();
+      await expect(fullScreenBtn).toBeHidden();
       await expect(exitFullScreenBtn).toBeVisible();
-      await expect(visibleChrome).not.toBeVisible();
+      await expect(visibleChrome).toBeHidden();
       await expect(hiddenChrome).toBeVisible();
       await expect(baseMapBtn).toBeVisible();
 
