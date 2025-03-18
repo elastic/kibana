@@ -56,6 +56,7 @@ const typeNames = [
   ZodFirstPartyTypeKind.ZodDefault,
   ZodFirstPartyTypeKind.ZodLazy,
   ZodFirstPartyTypeKind.ZodNullable,
+  ZodFirstPartyTypeKind.ZodPipeline,
   ...primitiveTypes,
   ...dangerousTypes,
 ] as const;
@@ -235,6 +236,9 @@ function getHandlingSchemas(schema: z.Schema, key: string, value: object): z.Sch
 
     case ZodFirstPartyTypeKind.ZodNullable:
       return [def.innerType];
+
+    case ZodFirstPartyTypeKind.ZodPipeline:
+      return [def.in];
   }
 }
 
