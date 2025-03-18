@@ -110,6 +110,9 @@ tags:
       Programmatically integrate with Logstash configuration management.
       > warn
       > Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs.
+    externalDocs:
+      description: Centralized pipeline management
+      url: https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html
     name: logstash
     x-displayName: Logstash configuration management
   - name: Message Signing Service
@@ -40936,7 +40939,12 @@ paths:
         - Security Lists API
   /api/logstash/pipeline/{id}:
     delete:
-      description: Delete a centrally-managed Logstash pipeline.
+      description: |
+        Delete a centrally-managed Logstash pipeline.
+        If your Elasticsearch cluster is protected with basic authentication, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
       operationId: delete-logstash-pipeline
       parameters:
         - description: An identifier for the pipeline.
@@ -40953,7 +40961,12 @@ paths:
         - logstash
       x-state: Technical Preview
     get:
-      description: Get information for a centrally-managed Logstash pipeline.
+      description: |
+        Get information for a centrally-managed Logstash pipeline.
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
       operationId: get-logstash-pipeline
       parameters:
         - description: An identifier for the pipeline.
@@ -40986,7 +40999,12 @@ paths:
         - logstash
       x-state: Technical Preview
     put:
-      description: Create a centrally-managed Logstash pipeline or update a pipeline.
+      description: |
+        Create a centrally-managed Logstash pipeline or update a pipeline.
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
       operationId: put-logstash-pipeline
       parameters:
         - description: |
@@ -41043,10 +41061,15 @@ paths:
     get:
       description: |
         Get a list of all centrally-managed Logstash pipelines.
+
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
         > info
         > Limit the number of pipelines to 10,000 or fewer. As the number of pipelines nears and surpasses 10,000, you may see performance issues on Kibana.
 
         The `username` property appears in the response when security is enabled and depends on when the pipeline was created or last updated.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
       operationId: get-logstash-pipelines
       responses:
         '200':
