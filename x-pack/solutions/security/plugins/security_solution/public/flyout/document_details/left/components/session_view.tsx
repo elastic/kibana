@@ -60,7 +60,7 @@ export const SessionView: FC = memo(() => {
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
-  const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
+  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();
   const openAlertDetailsPreview = useCallback(
@@ -75,7 +75,7 @@ export const SessionView: FC = memo(() => {
           id: DocumentDetailsPreviewPanelKey,
           params: {
             id: evtId,
-            indexName: eventDetailsIndex,
+            indexName: alertsIndex,
             scopeId,
             banner: ALERT_PREVIEW_BANNER,
             isPreviewMode: true,
@@ -87,7 +87,7 @@ export const SessionView: FC = memo(() => {
         panel: 'preview',
       });
     },
-    [openPreviewPanel, eventDetailsIndex, scopeId, telemetry]
+    [openPreviewPanel, alertsIndex, scopeId, telemetry]
   );
 
   const openDetailsInPreview = useCallback(
