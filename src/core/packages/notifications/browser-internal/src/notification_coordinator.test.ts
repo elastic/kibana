@@ -12,7 +12,6 @@ import { Coordinator, notificationCoordinator } from './notification_coordinator
 
 describe('notification coordination', () => {
   describe('Coordinator', () => {
-<<<<<<< HEAD
     it('instantiates with default properties', async () => {
       const coordinator = new Coordinator();
 
@@ -23,34 +22,11 @@ describe('notification coordination', () => {
     });
 
     it("updates to the source observable propagate to the coordinated observable when it's optin condition is met", async () => {
-=======
-    let consoleSpy: jest.SpyInstance;
-
-    beforeAll(() => {
-      consoleSpy = jest.spyOn(console, 'log');
-    });
-
-    afterAll(() => {
-      consoleSpy.mockRestore();
-    });
-
-    it('instantiates with default properties', () => {
-      new Coordinator({ debug: true });
-
-      expect(consoleSpy).toHaveBeenCalledWith({ locked: false, controller: null });
-    });
-
-    it("updates to the source observable propagate to the coordinated observable when it's optin condition is met", (done) => {
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
       const coordinator = new Coordinator();
 
       const optInCondition = jest.fn(() => true);
 
-<<<<<<< HEAD
       const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
-=======
-      const items = new Rx.BehaviorSubject<number[]>([]);
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
 
       const coordinatedItems$ = coordinator.optInToCoordination(
         'test',
@@ -62,30 +38,18 @@ describe('notification coordination', () => {
 
       coordinatedItems$.subscribe(nextFn);
 
-<<<<<<< HEAD
       items.next([{ id: '1' }]);
-=======
-      items.next([1]);
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
 
       expect(nextFn).toHaveBeenLastCalledWith([{ id: '1' }]);
       expect(optInCondition).toHaveBeenCalled();
     });
 
-<<<<<<< HEAD
     it('updates to the source observable do not propagate to the coordinated observable if the optin condition is not met', async () => {
-=======
-    it('updates to the source observable do not propagate to the coordinated observable if the optin condition is not met', () => {
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
       const coordinator = new Coordinator();
 
       const optInCondition = jest.fn(() => false);
 
-<<<<<<< HEAD
       const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
-=======
-      const items = new Rx.BehaviorSubject<number[]>([]);
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
 
       const coordinatedItems$ = coordinator.optInToCoordination(
         'test',
@@ -95,7 +59,6 @@ describe('notification coordination', () => {
 
       const subscriptionHandler = jest.fn();
 
-<<<<<<< HEAD
       coordinatedItems$.subscribe(subscriptionHandler);
 
       items.next([{ id: '1' }]);
@@ -162,23 +125,6 @@ describe('notification coordination', () => {
       const optInCondition = jest.fn(() => true);
 
       const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
-=======
-      const sub = coordinatedItems$.subscribe(subscriptionHandler);
-
-      items.next([1]);
-
-      expect(subscriptionHandler).not.toHaveBeenCalled();
-
-      sub.unsubscribe();
-    });
-
-    it("automatically releases an acquired lock if the source observable has no values to be emitted anymore despite it's optin condition being met", () => {
-      const coordinator = new Coordinator({ debug: true });
-
-      const optInCondition = jest.fn(() => true);
-
-      const items = new Rx.BehaviorSubject<number[]>([]);
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
 
       const coordinatedItems$ = coordinator.optInToCoordination(
         'test',
@@ -188,7 +134,6 @@ describe('notification coordination', () => {
 
       const sub = coordinatedItems$.subscribe();
 
-<<<<<<< HEAD
       items.next([{ id: '1' }]);
 
       expect(await Rx.firstValueFrom(coordinator.lock$)).toEqual({
@@ -236,18 +181,6 @@ describe('notification coordination', () => {
         controller: null,
       });
     });
-=======
-      items.next([1]);
-
-      expect(consoleSpy).toHaveBeenCalledWith({ locked: true, controller: 'test' });
-
-      items.next([]);
-
-      expect(consoleSpy).toHaveBeenCalledWith({ locked: false, controller: null });
-
-      sub.unsubscribe();
-    });
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
   });
 
   describe('notificationCoordinator', () => {
@@ -261,13 +194,9 @@ describe('notification coordination', () => {
     it('returns a object with the expected properties', () => {
       const result = notificationCoordinator.call(new Coordinator(), 'test');
       expect(result).toEqual({
-<<<<<<< HEAD
         lock$: expect.any(Rx.Observable),
         releaseLock: expect.any(Function),
         acquireLock: expect.any(Function),
-=======
-        releaseLock: expect.any(Function),
->>>>>>> 4de35b559c01 (add tests and simplify notification coordinator)
         optInToCoordination: expect.any(Function),
       });
     });

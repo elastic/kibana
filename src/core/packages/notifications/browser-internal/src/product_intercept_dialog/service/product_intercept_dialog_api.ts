@@ -64,18 +64,12 @@ export class ProductInterceptDialogApi {
    * @description expected to be called when a user is determined to have acknowledged the intercept for which the id is provided
    */
   private ack(interceptId: string, ackType: 'dismissed' | 'completed'): void {
-    this.get$()
-      .pipe(Rx.map((intercepts) => intercepts.filter((intercept) => intercept.id !== interceptId)))
-      .pipe(Rx.take(1))
-      .subscribe({
-        next: (intercepts) => {
-          this.productIntercepts$.next(intercepts);
-        },
-        complete: () => {
-          this.eventReporter?.reportInterceptInteraction({
-            interactionType: ackType,
-          });
-        },
-      });
+    this.productIntercepts$.next(
+      this.productIntercepts$.getValue().filter((intercept) => intercept.id !== interceptId)
+    );
+
+    this.eventReporter?.reportInterceptInteraction({
+      interactionType: ackType,
+    });
   }
 }

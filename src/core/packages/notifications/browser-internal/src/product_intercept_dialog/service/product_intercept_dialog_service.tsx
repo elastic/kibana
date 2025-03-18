@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as Rx from 'rxjs';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -49,10 +50,20 @@ export class ProductInterceptDialogService {
 
     const coordinator = notificationCoordinator(ProductInterceptDialogService.name);
 
-    const productIntercepts$ = coordinator.optInToCoordination(get$(), ({ locked }) => {
-      // only emits product intercept updates when there is no coordination lock
-      return !locked;
-    });
+    const productIntercept$ = coordinator
+      // emit values only when coordinator has no lock
+      .optInToCoordination(get$(), ({ locked }) => !locked)
+      .pipe(
+        Rx.mergeMap((x) => x),
+        // since the backing store for product intercepts accepts all queued intercepts,
+        // we might receive a list of intercepts that should be attended to,
+        // hence we attempt to present them serially to the user, without interrupting other queued notification types
+        Rx.delayWhen(() =>
+          coordinator.lock$.pipe(
+            Rx.filter(({ controller }) => controller === ProductInterceptDialogService.name)
+          )
+        )
+      );
 
     const ackProductIntercept = (...args: Parameters<typeof ack>) => {
       ack(...args);
@@ -65,7 +76,7 @@ export class ProductInterceptDialogService {
       rendering.addContext(
         <ProductInterceptDisplayManager
           {...{
-            productIntercepts$,
+            productIntercept$,
             ackProductIntercept,
           }}
         />
