@@ -9,6 +9,7 @@
 3. Key Components
 4. How to Use
 5. Contributing
+6. Running tests on CI
 
 ### Overview
 
@@ -264,3 +265,20 @@ export const scoutTestFixtures = mergeTests(
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
 - **Add Unit Tests:** Include tests for new logic where applicable, ensuring it works as expected.
 - **Playwright documentation:** [Official best practices](https://playwright.dev/docs/best-practices)
+
+
+### Running tests on CI
+Scout is still in active development, which means frequent code changes may sometimes cause test failures. To maintain stability, we currently do not run Scout tests for every PR and encourage teams to limit the number of tests they add for now.
+
+If a test is difficult to stabilize within a reasonable timeframe, we reserve the right to disable it or even all tests for particular plugin.
+
+To manage Scout test execution, we use the `.buildkite/scout_ci_config.yml` file, where Kibana plugins with Scout tests are registered. If you're unsure about the stability of your tests, please add your plugin under the `disabled` section.
+
+You can check whether your plugin is already registered by running:
+```bash
+node scripts/scout discover-playwright-configs --validate
+```
+On CI we run Scout tests only for `enabled` plugins:
+
+For PRs, Scout tests run only if there are changes to registered plugins or Scout-related packages.
+On merge commits, Scout tests run in a non-blocking mode.
