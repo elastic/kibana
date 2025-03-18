@@ -3,8 +3,10 @@ description: Defines properties for connectors when type is `.gen-ai`.
 oneOf:
   - $ref: 'config_properties_genai_azure.yaml'
   - $ref: 'config_properties_genai_openai.yaml'
+  - $ref: 'config_properties_genai_pki.yaml'
 discriminator:
   propertyName: apiProvider
   mapping:
-    Azure OpenAI: 'config_properties_genai_azure.yaml'
-    OpenAI: 'config_properties_genai_openai.yaml'
+    'Azure OpenAI': 'config_properties_genai_azure.yaml'
+    'OpenAI': 'config_properties_genai_openai.yaml'
+    'PKI OpenAI': 'config_properties_genai_pki.yaml'

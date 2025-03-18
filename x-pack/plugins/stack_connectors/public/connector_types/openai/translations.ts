@@ -47,6 +47,24 @@ export const AZURE_AI = i18n.translate('xpack.stackConnectors.components.genAi.a
   defaultMessage: 'Azure OpenAI',
 });
 
+export const PKI_OPENAI = i18n.translate('xpack.stackConnectors.components.genAi.pkiOpenAi', {
+  defaultMessage: 'PKI OpenAI',
+});
+
+export const CERT_PATH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certPathLabel',
+  {
+    defaultMessage: 'Certificate Path',
+  }
+);
+
+export const KEY_PATH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.keyPathLabel',
+  {
+    defaultMessage: 'Private Key Path',
+  }
+);
+
 export const DOCUMENTATION = i18n.translate(
   'xpack.stackConnectors.components.genAi.documentation',
   {

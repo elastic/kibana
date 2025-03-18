@@ -10,15 +10,38 @@ import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
 // Connector schema
 export const ConfigSchema = schema.oneOf([
+  // Existing OpenAI schema
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
+    apiUrl: schema.string(),
+    defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  }),
+  // Existing Azure schema
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
+  // New PKI schema
   schema.object({
-    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.PkiOpenAi)]),
     apiUrl: schema.string(),
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
+    certPath: schema.string({
+      validate: (value) => {
+        if (!value.endsWith('.pem')) {
+          return 'Certificate path must end with .pem';
+        }
+      }
+    }),
+    keyPath: schema.string({
+      validate: (value) => {
+        if (!value.endsWith('.pem')) {
+          return 'Private key path must end with .pem';
+        }
+      }
+    }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
 ]);

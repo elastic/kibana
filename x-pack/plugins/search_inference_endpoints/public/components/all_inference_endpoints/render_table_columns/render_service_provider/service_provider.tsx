@@ -68,6 +68,10 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: openAIIcon,
     name: 'OpenAI',
   },
+  [ServiceProviderKeys.pkiopenai]: { // Added PKI OpenAI
+    icon: openAIIcon, // Reuse OpenAI icon; replace with a custom one if desired
+    name: 'PKI OpenAI',
+  },
 };
 
 export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerKey }) => {

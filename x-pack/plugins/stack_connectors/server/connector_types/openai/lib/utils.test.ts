@@ -140,6 +140,22 @@ describe('Utils', () => {
       });
     });
 
+    it('returns correct axios options when provider is pki openai', () => {
+      expect(getAxiosOptions(OpenAiProviderType.PkiOpenAi, 'api-abc', false, {
+        certPath: '/path/to/cert.pem',
+        keyPath: '/path/to/key.pem'
+      })).toEqual({
+        headers: { Authorization: `Bearer api-abc`, ['content-type']: 'application/json' },
+        httpsAgent: expect.any(Object)
+      });
+    });
+
+    it('throws error when provider is pki openai but missing cert/key paths', () => {
+      expect(() => getAxiosOptions(OpenAiProviderType.PkiOpenAi, 'api-abc', false)).toThrow(
+        'Certificate and key paths are required for PKI OpenAI provider'
+      );
+    });
+
     it('returns empty options when provider is unrecognized', () => {
       expect(getAxiosOptions('foo', 'api-abc', true)).toEqual({ headers: {} });
     });
