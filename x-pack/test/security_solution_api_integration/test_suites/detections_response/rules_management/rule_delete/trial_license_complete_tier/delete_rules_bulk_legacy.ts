@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   createLegacyRuleAction,
   getSimpleRule,
@@ -28,8 +29,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/214633
-  describe.skip('@ess delete_rules_bulk_legacy', () => {
+  describe('@ess delete_rules_bulk_legacy', () => {
     describe('deleting rules bulk using bulk_action endpoint', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -68,9 +68,9 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.results.deleted.length).to.eql(1);
+        expect(body.attributes.results.deleted.length).toEqual(1);
         // ensure that its actions equal what we expect
-        expect(body.attributes.results.deleted[0].actions).to.eql([
+        expect(body.attributes.results.deleted[0].actions).toEqual([
           {
             id: hookAction.id,
             action_type_id: hookAction.connector_type_id,
@@ -120,33 +120,31 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // ensure we only get two bodies back
-        expect(body.attributes.results.deleted.length).to.eql(2);
+        expect(body.attributes.results.deleted.length).toEqual(2);
+
+        const actions = body.attributes.results.deleted.map(
+          (rule: RuleResponse) => rule.actions[0]
+        );
 
         // ensure that its actions equal what we expect for both responses
-        expect(body.attributes.results.deleted[0].actions).to.eql([
-          {
-            id: hookAction1.id,
-            action_type_id: hookAction1.connector_type_id,
-            group: 'default',
-            params: {
-              message:
-                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
-            },
-            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+        expect(actions).toContainEqual({
+          id: hookAction1.id,
+          action_type_id: hookAction1.connector_type_id,
+          group: 'default',
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
-        ]);
-        expect(body.attributes.results.deleted[1].actions).to.eql([
-          {
-            id: hookAction2.id,
-            action_type_id: hookAction2.connector_type_id,
-            group: 'default',
-            params: {
-              message:
-                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
-            },
-            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+        });
+        expect(actions).toContainEqual({
+          id: hookAction2.id,
+          action_type_id: hookAction2.connector_type_id,
+          group: 'default',
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
-        ]);
+          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+        });
       });
 
       /**
@@ -168,8 +166,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // check for legacy sidecar action
         const sidecarActionsResults = await getLegacyActionSO(es);
-        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
-        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+        expect(sidecarActionsResults.hits.hits.length).toEqual(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toEqual(
           createRuleBody.id
         );
 
@@ -199,11 +197,11 @@ export default ({ getService }: FtrProviderContext): void => {
           .send();
 
         // Expect that we have exactly 0 legacy rules after the deletion
-        expect(bodyAfterDelete.total).to.eql(0);
+        expect(bodyAfterDelete.total).toEqual(0);
 
         // legacy sidecar action should be gone
         const sidecarActionsPostResults = await getLegacyActionSO(es);
-        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+        expect(sidecarActionsPostResults.hits.hits.length).toEqual(0);
       });
     });
   });
