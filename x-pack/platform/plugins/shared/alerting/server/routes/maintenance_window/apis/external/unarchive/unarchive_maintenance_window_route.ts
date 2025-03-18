@@ -9,35 +9,32 @@ import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { BASE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
+import { UNARCHIVE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type {
-  GetMaintenanceWindowRequestParamsV1,
-  GetMaintenanceWindowResponseV1,
-} from '../../../../../../common/routes/maintenance_window/external/apis/get';
-import { getParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/get';
+  UnarchiveMaintenanceWindowRequestParamsV1,
+  UnarchiveMaintenanceWindowResponseV1,
+} from '../../../../../../common/routes/maintenance_window/external/apis/unarchive';
+import { unarchiveMaintenanceWindowRequestParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/unarchive';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 
-export const getMaintenanceWindowRoute = (
+export const unarchiveMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
+      path: UNARCHIVE_MAINTENANCE_WINDOW_API_PATH,
       validate: {
         request: {
-          params: getParamsSchemaV1,
+          params: unarchiveMaintenanceWindowRequestParamsSchemaV1,
         },
         response: {
           200: {
             body: () => maintenanceWindowResponseSchemaV1,
             description: 'Indicates a successful call.',
-          },
-          400: {
-            description: 'Indicates an invalid schema or parameters.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
@@ -49,32 +46,32 @@ export const getMaintenanceWindowRoute = (
       },
       security: {
         authz: {
-          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
         },
       },
       options: {
         access: 'public',
-        summary: 'Gets a maintenance window by ID.',
+        summary: 'Unarchives a maintenance window by ID.',
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
+        const params: UnarchiveMaintenanceWindowRequestParamsV1 = req.params;
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
-        const params: GetMaintenanceWindowRequestParamsV1 = req.params;
-
-        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.get({
+        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.archive({
           id: params.id,
+          archive: false,
         });
 
-        const response: GetMaintenanceWindowResponseV1 =
-          transformMaintenanceWindowToResponseV1(maintenanceWindow);
+        const response: UnarchiveMaintenanceWindowResponseV1 = {
+          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+        };
 
-        return res.ok({
-          body: response,
-        });
+        return res.ok(response);
       })
     )
   );

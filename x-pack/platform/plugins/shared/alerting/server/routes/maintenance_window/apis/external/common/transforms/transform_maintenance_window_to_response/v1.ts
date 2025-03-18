@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MaintenanceWindowResponseV1 } from '../../../../../../../../common/routes/maintenance_window/external/response';
-import { MaintenanceWindow } from '../../../../../../../application/maintenance_window/types';
+import type { MaintenanceWindowResponseV1 } from '../../../../../../../../common/routes/maintenance_window/external/response';
+import type { MaintenanceWindow } from '../../../../../../../application/maintenance_window/types';
 
 /**
  *  This function converts from the internal Maintenance Window type used by the application client,

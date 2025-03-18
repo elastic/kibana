@@ -9,35 +9,32 @@ import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { BASE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
+import { ARCHIVE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type {
-  GetMaintenanceWindowRequestParamsV1,
-  GetMaintenanceWindowResponseV1,
-} from '../../../../../../common/routes/maintenance_window/external/apis/get';
-import { getParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/get';
+  ArchiveMaintenanceWindowRequestParamsV1,
+  ArchiveMaintenanceWindowResponseV1,
+} from '../../../../../../common/routes/maintenance_window/external/apis/archive';
+import { archiveMaintenanceWindowRequestParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/archive';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 
-export const getMaintenanceWindowRoute = (
+export const archiveMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
+      path: ARCHIVE_MAINTENANCE_WINDOW_API_PATH,
       validate: {
         request: {
-          params: getParamsSchemaV1,
+          params: archiveMaintenanceWindowRequestParamsSchemaV1,
         },
         response: {
           200: {
             body: () => maintenanceWindowResponseSchemaV1,
             description: 'Indicates a successful call.',
-          },
-          400: {
-            description: 'Indicates an invalid schema or parameters.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
@@ -49,32 +46,32 @@ export const getMaintenanceWindowRoute = (
       },
       security: {
         authz: {
-          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
         },
       },
       options: {
         access: 'public',
-        summary: 'Gets a maintenance window by ID.',
+        summary: 'Archives a maintenance window by ID.',
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
+        const params: ArchiveMaintenanceWindowRequestParamsV1 = req.params;
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
-        const params: GetMaintenanceWindowRequestParamsV1 = req.params;
-
-        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.get({
+        const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.archive({
           id: params.id,
+          archive: true,
         });
 
-        const response: GetMaintenanceWindowResponseV1 =
-          transformMaintenanceWindowToResponseV1(maintenanceWindow);
+        const response: ArchiveMaintenanceWindowResponseV1 = {
+          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+        };
 
-        return res.ok({
-          body: response,
-        });
+        return res.ok(response);
       })
     )
   );

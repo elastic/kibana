@@ -10,11 +10,9 @@ import { licenseStateMock } from '../../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
-import { createMaintenanceWindowRoute } from './create_maintenance_window_route';
+import { archiveMaintenanceWindowRoute } from './archive_maintenance_window_route';
 import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
-import type { CreateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/external/apis/create';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
@@ -29,39 +27,35 @@ const mockMaintenanceWindow = {
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   id: 'test-id',
-} as MaintenanceWindow;
+};
 
-const createParams = {
-  title: 'test-maintenance-window',
-  start: '2026-02-07T09:17:06.790Z',
-  enabled: false,
-  duration: 60 * 60 * 1000, // 1 hr
-  scope: { query: { kql: "_id: '1234'" } },
-} as CreateMaintenanceWindowRequestBody;
-
-describe('createMaintenanceWindowRoute', () => {
+describe('archiveMaintenanceWindowRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  test('should create the maintenance window', async () => {
+  test('should archive the maintenance window', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createMaintenanceWindowRoute(router, licenseState);
+    archiveMaintenanceWindowRoute(router, licenseState);
 
-    maintenanceWindowClient.create.mockResolvedValueOnce(mockMaintenanceWindow);
+    maintenanceWindowClient.archive.mockResolvedValueOnce(mockMaintenanceWindow);
     const [config, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      { body: createParams }
+      {
+        params: {
+          id: 'test-id',
+        },
+      }
     );
 
-    expect(config.path).toEqual('/api/alerting/maintenance_window');
+    expect(config.path).toEqual('/api/alerting/maintenance_window/{id}/_archive');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
-        "summary": "Create a maintenance window.",
+        "summary": "Archives a maintenance window by ID.",
       }
     `);
 
@@ -77,49 +71,40 @@ describe('createMaintenanceWindowRoute', () => {
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.create).toHaveBeenLastCalledWith({
-      data: {
-        title: 'test-maintenance-window',
-        enabled: false,
-        scopedQuery: {
-          filters: [],
-          kql: "_id: '1234'",
-        },
-
-        // TODO schedule schema
-        duration: 60 * 60 * 1000, // 1 hr
-        rRule: {
-          dtstart: '2026-02-07T09:17:06.790Z',
-          tzid: 'UTC',
-        },
-      },
+    expect(maintenanceWindowClient.archive).toHaveBeenLastCalledWith({
+      id: 'test-id',
+      archive: true,
     });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),
     });
   });
 
-  test('ensures the license allows for creating maintenance windows', async () => {
+  test('ensures the license allows for archiving maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createMaintenanceWindowRoute(router, licenseState);
+    archiveMaintenanceWindowRoute(router, licenseState);
 
-    maintenanceWindowClient.create.mockResolvedValueOnce(mockMaintenanceWindow);
+    maintenanceWindowClient.archive.mockResolvedValueOnce(mockMaintenanceWindow);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      { body: createParams }
+      {
+        params: {
+          id: 'test-id',
+        },
+      }
     );
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  test('ensures the license check prevents for creating maintenance windows', async () => {
+  test('ensures the license check prevents for archiving maintenance windows', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createMaintenanceWindowRoute(router, licenseState);
+    archiveMaintenanceWindowRoute(router, licenseState);
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
@@ -127,7 +112,11 @@ describe('createMaintenanceWindowRoute', () => {
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { maintenanceWindowClient },
-      { body: createParams }
+      {
+        params: {
+          id: 'test-id',
+        },
+      }
     );
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
@@ -136,7 +125,7 @@ describe('createMaintenanceWindowRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    createMaintenanceWindowRoute(router, licenseState);
+    archiveMaintenanceWindowRoute(router, licenseState);
 
     (licenseState.ensureLicenseForMaintenanceWindow as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');
