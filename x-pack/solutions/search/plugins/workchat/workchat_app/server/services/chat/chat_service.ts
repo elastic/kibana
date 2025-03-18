@@ -83,7 +83,7 @@ export class ChatService {
     const nextUserEvent = createUserMessage({ content: nextUserMessage });
 
     return forkJoin({
-      agent: defer(() => this.agentFactory.getAgent({ request, connectorId, agentId })),
+      agentRunner: defer(() => this.agentFactory.getAgentRunner({ request, connectorId, agentId })),
       conversationClient: defer(() => this.conversationService.getScopedClient({ request })),
       chatModel: defer(() =>
         this.inference.getChatModel({
@@ -93,7 +93,7 @@ export class ChatService {
         })
       ),
     }).pipe(
-      switchMap(({ conversationClient, chatModel, agent }) => {
+      switchMap(({ conversationClient, chatModel, agentRunner }) => {
         const conversation$ = getConversation$({
           agentId,
           conversationId,
@@ -109,7 +109,7 @@ export class ChatService {
 
         const agentEvents$ = conversationEvents$.pipe(
           switchMap((conversationEvents) => {
-            return defer(() => agent.run({ previousEvents: conversationEvents }));
+            return defer(() => agentRunner.run({ previousEvents: conversationEvents }));
           }),
           switchMap((agentRunResult) => {
             return agentRunResult.events$;

@@ -18,6 +18,7 @@ import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { useCurrentUser } from '../hooks/use_current_user';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useKibana } from '../hooks/use_kibana';
+import { useAgent } from '../hooks/use_agent';
 
 const newConversationId = 'new';
 
@@ -32,18 +33,21 @@ const pageSectionContentClassName = css`
 `;
 
 export const WorkchatChatPage: React.FC<{}> = () => {
-  useBreadcrumb([{ text: 'Kibana' }, { text: 'WorkChat' }]);
   const {
     services: { application },
   } = useKibana();
 
   const currentUser = useCurrentUser();
 
-  const { conversations, refresh: refreshConversations } = useConversationList();
-
-  const { conversationId: conversationIdFromParams } = useParams<{
+  const { agentId, conversationId: conversationIdFromParams } = useParams<{
+    agentId: string;
     conversationId: string | undefined;
   }>();
+
+  const { agent } = useAgent({ agentId });
+  const { conversations, refresh: refreshConversations } = useConversationList({ agentId });
+
+  useBreadcrumb([{ text: agent?.name ?? 'Agent' }, { text: 'Chat' }]);
 
   const conversationId = useMemo(() => {
     return conversationIdFromParams === newConversationId ? undefined : conversationIdFromParams;
@@ -52,11 +56,11 @@ export const WorkchatChatPage: React.FC<{}> = () => {
   const onConversationUpdate = useCallback(
     (changes: ConversationEventChanges) => {
       if (!conversationId) {
-        application.navigateToApp('workchat', { path: `/chat/${changes.id}` });
+        application.navigateToApp('workchat', { path: `/agents/${agentId}/chat/${changes.id}` });
       }
       refreshConversations();
     },
-    [application, conversationId, refreshConversations]
+    [agentId, application, conversationId, refreshConversations]
   );
 
   const [connectorId, setConnectorId] = useState<string>();
@@ -74,10 +78,12 @@ export const WorkchatChatPage: React.FC<{}> = () => {
           conversations={conversations}
           activeConversationId={conversationId}
           onConversationSelect={(newConvId) => {
-            application.navigateToApp('workchat', { path: `/chat/${newConvId}` });
+            application.navigateToApp('workchat', { path: `/agents/${agentId}/chat/${newConvId}` });
           }}
           onNewConversationSelect={() => {
-            application.navigateToApp('workchat', { path: `/chat/${newConversationId}` });
+            application.navigateToApp('workchat', {
+              path: `/agents/${agentId}/chat/${newConversationId}`,
+            });
           }}
         />
       </KibanaPageTemplate.Sidebar>
@@ -90,8 +96,9 @@ export const WorkchatChatPage: React.FC<{}> = () => {
           justifyContent="center"
           responsive={false}
         >
-          <ChatHeader connectorId={connectorId} onConnectorChange={setConnectorId} />
+          <ChatHeader connectorId={connectorId} agent={agent} onConnectorChange={setConnectorId} />
           <Chat
+            agentId={agentId}
             conversationId={conversationId}
             connectorId={connectorId}
             currentUser={currentUser}

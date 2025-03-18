@@ -6,13 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ConversationSummary } from '../../common/conversations';
 import type {
+  ListConversationRequest,
   ListConversationResponse,
   GetConversationResponse,
 } from '../../common/http_api/conversation';
 import type { RouteDependencies } from './types';
 
-export const registerConversationRoutes = ({ getServices, router }: RouteDependencies) => {
+export const registerConversationRoutes = ({ getServices, router, logger }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/workchat/conversations/{conversationId}',
@@ -40,29 +42,40 @@ export const registerConversationRoutes = ({ getServices, router }: RouteDepende
     {
       path: '/internal/workchat/conversations',
       validate: {
-        body: schema.object({}),
+        body: schema.object({
+          agentId: schema.maybe(schema.string()),
+        }),
       },
     },
     async (ctx, request, res) => {
-      const { conversationService } = getServices();
-      const client = await conversationService.getScopedClient({ request });
+      try {
+        const { conversationService } = getServices();
+        const client = await conversationService.getScopedClient({ request });
 
-      const conversations = await client.list();
+        const params: ListConversationRequest = request.body;
 
-      const summaries = conversations.map((conv) => {
-        return {
-          id: conv.id,
-          agentId: conv.agentId,
-          title: conv.title,
-          lastUpdated: conv.lastUpdated,
-        };
-      });
+        const conversations = await client.list({
+          agentId: params.agentId,
+        });
 
-      return res.ok<ListConversationResponse>({
-        body: {
-          conversations: summaries,
-        },
-      });
+        const summaries = conversations.map<ConversationSummary>((conv) => {
+          return {
+            id: conv.id,
+            agentId: conv.agentId,
+            title: conv.title,
+            lastUpdated: conv.lastUpdated,
+          };
+        });
+
+        return res.ok<ListConversationResponse>({
+          body: {
+            conversations: summaries,
+          },
+        });
+      } catch (e) {
+        logger.error(e);
+        throw e;
+      }
     }
   );
 };

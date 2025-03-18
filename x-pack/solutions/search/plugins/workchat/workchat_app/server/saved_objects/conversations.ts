@@ -10,7 +10,7 @@ import type { ConversationEvent } from '../../common/conversation_events';
 
 export const conversationTypeName = 'workchat_conversation' as const;
 
-export const conversationType: SavedObjectsType<ConversationAttributes> = {
+export const conversationSoType: SavedObjectsType<ConversationAttributes> = {
   // TODO: specific SO index for workchat
   name: conversationTypeName,
   hidden: true,

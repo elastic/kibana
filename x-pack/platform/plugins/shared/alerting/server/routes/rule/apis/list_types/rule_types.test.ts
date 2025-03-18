@@ -58,6 +58,7 @@ describe('ruleTypesRoute', () => {
         },
         category: 'test',
         producer: 'test',
+        solution: 'stack',
         enabledInLicense: true,
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
@@ -67,7 +68,7 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<
-      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers'>>
+      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers' | 'solution'>>
     > = [
       {
         id: '1',
@@ -176,6 +177,7 @@ describe('ruleTypesRoute', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
@@ -233,6 +235,7 @@ describe('ruleTypesRoute', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,

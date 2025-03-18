@@ -8,11 +8,11 @@
 import moment from 'moment';
 import datemath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import type { Conversation } from '../../../common/conversations';
+import type { ConversationSummary } from '../../../common/conversations';
 
 export interface ConversationGroup {
   dateLabel: string;
-  conversations: Conversation[];
+  conversations: ConversationSummary[];
 }
 
 type ConversationGroupWithDate = ConversationGroup & {
@@ -55,7 +55,9 @@ const getGroups = () => {
 /**
  * Sort and group conversation by time period to display them in the ConversationList component.
  */
-export const sortAndGroupConversations = (conversations: Conversation[]): ConversationGroup[] => {
+export const sortAndGroupConversations = (
+  conversations: ConversationSummary[]
+): ConversationGroup[] => {
   const now = new Date();
 
   const getEpochLimit = (range: string) => {

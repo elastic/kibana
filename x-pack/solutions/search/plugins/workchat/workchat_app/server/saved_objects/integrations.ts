@@ -10,7 +10,7 @@ import { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
 
 export const integrationTypeName = 'workchat_integration' as const;
 
-export const integrationType: SavedObjectsType<IntegrationAttributes> = {
+export const integrationSoType: SavedObjectsType<IntegrationAttributes> = {
   name: integrationTypeName,
   hidden: true,
   namespaceType: 'agnostic',

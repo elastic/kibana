@@ -10,8 +10,8 @@ import {
   IntegrationType,
   WorkchatIntegrationDefinition,
   WorkChatIntegration,
-  getClientForInternalServer,
 } from '@kbn/wci-common';
+import { getClientForInternalServer } from '@kbn/wci-server';
 import { createMcpServer } from './mcp_server';
 import { WCIIndexSourceConfiguration } from '../types';
 export const getIndexSourceIntegrationDefinition = ({

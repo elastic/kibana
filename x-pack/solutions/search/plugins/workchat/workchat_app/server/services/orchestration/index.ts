@@ -6,4 +6,4 @@
  */
 
 export { AgentFactory } from './agent_factory';
-export type { Agent } from './types';
+export type { AgentRunner } from './types';

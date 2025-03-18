@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.from': '2020-10-28T06:00:00.000Z',
         'kibana.alert.rule.immutable': false,
         'kibana.alert.rule.interval': '1h',
-        'kibana.alert.rule.indices': [],
+        'kibana.alert.rule.indices': ['ecs_compliant'],
         'kibana.alert.rule.max_signals': 100,
         'kibana.alert.rule.references': [],
         'kibana.alert.rule.risk_score_mapping': [],
@@ -367,6 +367,275 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]._source).not.toHaveProperty('agent.name');
         expect(previewAlerts[0]._source).not.toHaveProperty(['agent.type']);
         expect(previewAlerts[0]._source).not.toHaveProperty('agent.type');
+      });
+
+      describe('mv_expand command', () => {
+        it('should generate alert per expanded row', async () => {
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const documents = [
+            { agent: { name: 'test-1', type: 'auditbeat' } },
+            { agent: { name: ['part-0', 'part-1'], type: 'auditbeat' } },
+          ];
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | mv_expand agent.name`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocuments({
+            documents,
+            interval,
+            id,
+          });
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+          expect(previewAlerts.length).toBe(3);
+          expect(previewAlerts.map((_) => _._source?.['agent.name'])).toEqual(
+            expect.arrayContaining(['part-0', 'part-1', 'test-1'])
+          );
+        });
+
+        it('should generate alert per expanded row when expanded field renamed', async () => {
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const documents = [
+            { agent: { name: 'test-1', type: 'auditbeat' } },
+            { agent: { name: ['part-0', 'part-1'], type: 'auditbeat' } },
+          ];
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant metadata _id ${internalIdPipe(
+              id
+            )} | mv_expand agent.name | rename agent.name as new_field`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocuments({
+            documents,
+            interval,
+            id,
+          });
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+          expect(previewAlerts.length).toBe(3);
+        });
+
+        //  When expanded field dropped, ES|QL response rows will be identical.
+        //  In this case, identical duplicated alerts won't be created
+        it('should NOT generate alert per expanded row when expanded field dropped', async () => {
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const documents = [
+            { agent: { name: 'test-1', type: 'auditbeat' } },
+            { agent: { name: ['part-0', 'part-1'], type: 'auditbeat' } },
+          ];
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant metadata _id ${internalIdPipe(
+              id
+            )} | mv_expand agent.name | drop agent.name`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocuments({
+            documents,
+            interval,
+            id,
+          });
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+          expect(previewAlerts.length).toBe(2);
+        });
+
+        it('should generate alert per expanded row when mv_expand used multiple times', async () => {
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const documents = [
+            { agent: { name: 'test-1', type: 'auditbeat' } },
+            { agent: { name: 'test-1', type: 'auditbeat' }, 'host.name': ['host-0', 'host-1'] },
+            {
+              agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+              'host.name': ['host-2', 'host-3'],
+            },
+          ];
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant metadata _id ${internalIdPipe(
+              id
+            )} | mv_expand agent.name | mv_expand host.name`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocuments({
+            documents,
+            interval,
+            id,
+          });
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+          expect(previewAlerts.length).toBe(7);
+          expect(previewAlerts.map((_) => _._source?.['agent.name'])).toEqual(
+            expect.arrayContaining(['part-0', 'part-1', 'test-1'])
+          );
+          expect(previewAlerts.map((_) => _._source?.['host.name'])).toEqual(
+            expect.arrayContaining([undefined, 'host-0', 'host-1', 'host-2', 'host-3'])
+          );
+        });
+
+        it('should deduplicate alerts generated from expanded rows', async () => {
+          const id = uuidv4();
+          // document will fall into 2 rule execution windows
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | mv_expand agent.name`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts.length).toBe(2);
+        });
+
+        it('should deduplicate alerts generated form expanded rows when expanded field renamed', async () => {
+          const id = uuidv4();
+          // document will fall into 2 rule execution windows
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant metadata _id ${internalIdPipe(
+              id
+            )} | mv_expand agent.name | rename agent.name as new_field`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts.length).toBe(2);
+        });
+
+        it('should deduplicate alert when expanded field dropped', async () => {
+          const id = uuidv4();
+          // document will fall into 2 rule execution windows
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant metadata _id ${internalIdPipe(
+              id
+            )} | mv_expand agent.name | drop agent.name`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts.length).toBe(1);
+        });
       });
     });
 
@@ -1110,8 +1379,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // skipped on MKI since feature flags are not supported there
-    describe('@skipInServerlessMKI manual rule run', () => {
+    describe('manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
