@@ -20,4 +20,6 @@ export interface WCISalesforcePluginSetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginStartDependencies {}
 
-export type SalesforceConfiguration = IntegrationConfiguration;
+export interface WCISalesforceConfiguration extends IntegrationConfiguration {
+  index: string;
+}
