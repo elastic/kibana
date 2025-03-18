@@ -112,6 +112,36 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
       }}
     </CspVulnerabilityFindingRenderer>
   ),
+  'package.name': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.package.name)) {
+          return <>{finding.package.name.join(', ')}</>;
+        }
+        return <>{finding.package.name || '-'}</>;
+      }}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'package.version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.package.version)) {
+          return <>{finding.package.version.join(', ')}</>;
+        }
+        return <>{finding.package.version || '-'}</>;
+      }}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'package.fixed_version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.package.fixed_version)) {
+          return <>{finding.package.fixed_version.join(', ')}</>;
+        }
+        return <>{finding.package.fixed_version || '-'}</>;
+      }}
+    </CspVulnerabilityFindingRenderer>
+  ),
 });
 
 export const LatestVulnerabilitiesTable = ({
