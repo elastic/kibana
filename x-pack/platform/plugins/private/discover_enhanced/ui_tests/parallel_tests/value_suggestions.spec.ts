@@ -28,7 +28,6 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-       spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(
         'doc_table:legacy',
         'defaultIndex',
