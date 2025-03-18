@@ -24,8 +24,6 @@
     "consumer",
     "createdAt",
     "createdBy",
-    "dashboards",
-    "dashboards.id",
     "enabled",
     "executionStatus",
     "executionStatus.error",

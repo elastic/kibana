@@ -80,13 +80,6 @@
       "createdBy": {
         "type": "keyword"
       },
-      "dashboards": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          }
-        }
-      },
       "enabled": {
         "type": "boolean"
       },
