@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { enforceColorContrast } from '@kbn/coloring';
@@ -46,17 +47,20 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   if (deltaValue < 0) {
     return {
       icon: trendConfig.icon ? 'sortDown' : undefined,
+      iconLabel: i18n.translate('visualizations.metric.trend.decrease', { defaultMessage: 'down' }),
       color: trendConfig.palette[0],
     };
   }
   if (deltaValue > 0) {
     return {
       icon: trendConfig.icon ? 'sortUp' : undefined,
+      iconLabel: i18n.translate('visualizations.metric.trend.increase', { defaultMessage: 'up' }),
       color: trendConfig.palette[2],
     };
   }
   return {
     icon: trendConfig.icon ? 'minus' : undefined,
+    iconLabel: i18n.translate('visualizations.metric.trend.stable', { defaultMessage: 'stable' }),
     color: trendConfig.palette[1],
   };
 }
@@ -80,7 +84,8 @@ function getBadgeColor(color: string, euiTheme: EuiThemeComputed<{}>) {
   }
   return (
     euiTheme.colors[color as Exclude<keyof typeof euiTheme.colors, 'vis' | 'DARK' | 'LIGHT'>] ||
-    euiTheme.colors.vis[color as keyof typeof euiTheme.colors.vis]
+    euiTheme.colors.vis[color as keyof typeof euiTheme.colors.vis] ||
+    color
   );
 }
 
@@ -102,10 +107,22 @@ function SecondaryMetricValue({
 
   if (trendConfig && typeof rawValue === 'number') {
     const deltaValue = rawValue - trendConfig.baselineValue;
-    const { icon, color: trendColor } = getBadgeConfiguration(trendConfig, deltaValue);
+    const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
     const translatedColor = getBadgeColor(trendColor, euiTheme);
     return (
       <EuiBadge
+        aria-label={
+          // Make the information accessible also for screen readers
+          trendConfig.value
+            ? undefined
+            : i18n.translate('visualizations.metric.trend', {
+                defaultMessage: 'Value: {value} - trend {direction}',
+                values: {
+                  value: formattedValue,
+                  direction: iconLabel,
+                },
+              })
+        }
         iconType={icon}
         iconSide="left"
         color={translatedColor}
@@ -171,6 +188,15 @@ function SecondaryMetricValue({
   return formattedValue;
 }
 
+export interface SecondaryMetricProps {
+  columns: DatatableColumn[];
+  row: DatatableRow;
+  config: Pick<VisParams, 'metric' | 'dimensions'>;
+  trendConfig?: TrendConfig;
+  color?: string;
+  getMetricFormatter: (accessor: string, columns: DatatableColumn[]) => FieldFormatConvertFunction;
+}
+
 export function SecondaryMetric({
   columns,
   row,
@@ -178,14 +204,7 @@ export function SecondaryMetric({
   getMetricFormatter,
   trendConfig,
   color,
-}: {
-  columns: DatatableColumn[];
-  row: DatatableRow;
-  config: Pick<VisParams, 'metric' | 'dimensions'>;
-  trendConfig?: TrendConfig;
-  color?: string;
-  getMetricFormatter: (accessor: string, columns: DatatableColumn[]) => FieldFormatConvertFunction;
-}) {
+}: SecondaryMetricProps) {
   let secondaryMetricColumn: DatatableColumn | undefined;
   let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
   if (config.dimensions.secondaryMetric) {
@@ -194,6 +213,7 @@ export function SecondaryMetric({
   }
   const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
   const secondaryValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
+
   return (
     <span>
       {secondaryPrefix}
