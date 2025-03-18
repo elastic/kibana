@@ -7,10 +7,7 @@
 
 import { EuiThemeComputed } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
-import type {
-  VulnSeverity,
-  MisconfigurationEvaluationStatus,
-} from '@kbn/cloud-security-posture-common';
+import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
 import {
   VULNERABILITIES_SEVERITY,
   MISCONFIGURATION_STATUS,
@@ -32,10 +29,7 @@ export const SEVERITY_COLOR = {
 } as const;
 
 // TODO: Borealis migration - migrate to security severity palette when it's ready https://github.com/elastic/security-team/issues/11606
-export const getSeverityStatusColor = (
-  severity: VulnSeverity,
-  euiTheme: EuiThemeComputed
-): string => {
+export const getSeverityStatusColor = (severity: string, euiTheme: EuiThemeComputed): string => {
   // TODO: Borealis migration - remove old mapping in main after Serverless switched to Borealis
   if (euiTheme && isAmsterdam(euiTheme.themeName)) {
     switch (severity) {

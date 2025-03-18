@@ -205,6 +205,19 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
 };
 
 /*
+ * ECS schema unique field to describe the event
+ * https://www.elastic.co/guide/en/ecs/current/ecs-event.html
+ */
+export const EVENT_ID = 'event.id';
+
+export const VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS = [
+  VULNERABILITY_FIELDS.VULNERABILITY_ID,
+  'package.name',
+  'package.version',
+  'package.fixed_version',
+];
+
+/*
 The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
 The runtime mappings are used to prevent filtering out the data when any of these columns are sorted in the Data Table.
 TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
@@ -224,7 +237,9 @@ to prevent filtering out the data when grouping by the key field.
 TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
 the fields from the runtime mappings if they are removed from the Data Table.
 */
-export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
+export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
+  [VULNERABILITY_FIELDS.VULNERABILITY_ID]: ['vulnerability.id'],
+};
 export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
   [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]: ['orchestrator.cluster.id'],
   [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]: ['cloud.account.id'],

@@ -161,25 +161,6 @@ export const CloudSecurityDataTable = ({
     };
   }, [persistedSettings, columnHeaders]);
 
-  // This is a mapper that adds vulnerability.id field as an empty string - needed for the flyout to open
-  const rowsWithVulnerabilityId = useMemo(
-    () =>
-      rows.map((row: DataTableRecord) => ({
-        ...row,
-        raw: {
-          ...row.raw,
-          _source: {
-            ...row.raw._source,
-            vulnerability: {
-              ...(row.raw._source?.vulnerability || {}),
-              id: (row.raw._source?.vulnerability as any)?.id ?? '',
-            },
-          },
-        },
-      })),
-    [rows]
-  );
-
   const { dataView, dataViewIsRefetching } = useDataViewContext();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
@@ -289,14 +270,14 @@ export const CloudSecurityDataTable = ({
     if (!customCellRenderer) {
       return undefined;
     }
-    return customCellRenderer(rowsWithVulnerabilityId);
-  }, [customCellRenderer, rowsWithVulnerabilityId]);
+    return customCellRenderer(rows);
+  }, [customCellRenderer, rows]);
 
   const onResetColumns = () => {
     setColumns(defaultColumns.map((c) => c.id));
   };
 
-  if (!isLoading && !rowsWithVulnerabilityId.length) {
+  if (!isLoading && !rows.length) {
     return <EmptyState onResetFilters={onResetFilters} />;
   }
 
@@ -358,7 +339,7 @@ export const CloudSecurityDataTable = ({
           onResize={onResize}
           onSetColumns={onSetColumns}
           onSort={onSort}
-          rows={rowsWithVulnerabilityId}
+          rows={rows}
           sampleSizeState={MAX_FINDINGS_TO_LOAD}
           setExpandedDoc={setExpandedDoc}
           renderDocumentView={renderDocumentView}

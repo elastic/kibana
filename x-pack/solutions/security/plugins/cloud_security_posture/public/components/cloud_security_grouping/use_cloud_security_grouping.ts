@@ -19,6 +19,7 @@ import { useUrlQuery } from '../../common/hooks/use_url_query';
 
 import { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
+import { VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS } from '../../common/constants';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_MAX_GROUPING_LEVELS = 3;
@@ -61,12 +62,18 @@ export const useCloudSecurityGrouping = ({
     query: urlQuery.query,
   });
 
+  // check if at least of the groupBy fields might contain multiple value
+  const isGroupByFieldsContainMultipleValues = urlQuery.groupBy?.some((field) =>
+    VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS.includes(field)
+  );
+
   const grouping = useGrouping({
     componentProps: {
       unit,
       groupPanelRenderer,
       getGroupStats,
       groupsUnit,
+      shouldIgnoreFieldSize: isGroupByFieldsContainMultipleValues,
     },
     defaultGroupingOptions,
     fields: dataView.fields,
