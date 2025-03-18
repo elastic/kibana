@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
-
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
@@ -57,7 +55,7 @@ export async function createMcpServer({
 
   server.tool(
     'retrieve_cases',
-    `Retrieves Salesforce support cases from Elasticsearch with filtering options.`,
+    `Retrieves Salesforce support cases`,
     {
       caseNumber: z
         .string()
@@ -150,7 +148,7 @@ export async function createMcpServer({
 }
 
 /**
- * Retrieves possible values for enum fields from Elasticsearch
+ * Retrieves possible values for enum fields from Elasticsearch using _terms_enum API
  */
 async function getFieldValues(
   elasticsearchClient: ElasticsearchClient,
@@ -164,40 +162,24 @@ async function getFieldValues(
   }));
 
   try {
-    const aggs = Object.fromEntries(
-      enumFields.map((field) => [
-        field.field,
-        {
-          terms: {
-            field: field.path || field.field,
-            size: 100,
-          },
-        },
-      ])
-    );
+    for (let i = 0; i < enumFields.length; i++) {
+      const field = enumFields[i];
+      const fieldPath = field.path || field.field;
 
-    const aggResult = await elasticsearchClient.search({
-      index,
-      size: 0,
-      aggs,
-    });
+      const response = await elasticsearchClient.termsEnum({
+        index,
+        field: fieldPath,
+      });
 
-    fieldValues = fieldValues.map((fieldValue) => {
-      const buckets = (
-        aggResult.aggregations?.[fieldValue.field] as AggregationsStringTermsAggregate
-      )?.buckets;
-
-      if (buckets?.length) {
-        return {
-          ...fieldValue,
-          // @ts-ignore
-          values: buckets.map((bucket) => bucket.key as string),
+      if (response.terms && response.terms.length) {
+        fieldValues[i] = {
+          ...fieldValues[i],
+          values: response.terms,
         };
       }
-      return fieldValue;
-    });
+    }
   } catch (error) {
-    logger.error(`Failed to get aggregations for enum fields: ${error}`);
+    logger.error(`Failed to get terms enum for fields: ${error}`);
   }
 
   return fieldValues;
