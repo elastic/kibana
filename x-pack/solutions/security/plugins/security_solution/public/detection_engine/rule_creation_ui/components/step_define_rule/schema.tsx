@@ -68,13 +68,6 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: 'Data view',
       }
     ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector.helpText',
-      {
-        defaultMessage:
-          'Data views are displayed by name. To see their full definitions, visit Stack Management > Data Views.',
-      }
-    ),
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
