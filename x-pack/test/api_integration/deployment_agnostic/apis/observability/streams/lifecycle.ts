@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import rawExpect from 'expect';
 import expect from '@kbn/expect';
 import {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamUpsertRequest,
-  UnwiredStreamGetResponse,
   WiredStreamGetResponse,
   asIngestStreamGetResponse,
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
-import {
-  disableStreams,
-  enableStreams,
-  putStream,
-  getStream,
-  getIlmStats,
-} from './helpers/requests';
+import rawExpect from 'expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
+import {
+  disableStreams,
+  enableStreams,
+  getIlmStats,
+  getStream,
+  putStream,
+} from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
@@ -118,24 +117,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dsl: { data_retention: '999d' },
           from: 'logs',
         });
-      });
-
-      it('updates the description', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
-
-        const response = await putStream(apiClient, 'logs', {
-          dashboards: [],
-          stream: {
-            ingest: (rootDefinition as WiredStreamGetResponse).stream.ingest,
-            description: 'some description',
-          },
-        });
-        expect(response).to.have.property('acknowledged', true);
-
-        const updatedRootDefinition = await getStream(apiClient, 'logs');
-        expect((updatedRootDefinition as WiredStreamGetResponse).stream.description).to.eql(
-          'some description'
-        );
       });
 
       it('does not allow inherit lifecycle on root', async () => {
@@ -446,26 +427,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
-
-        await clean();
-      });
-
-      it('updates the description', async () => {
-        const indexName = 'unwired-stream-override-description';
-        const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
-
-        await putStream(apiClient, indexName, {
-          dashboards: [],
-          stream: {
-            ...unwiredPutBody.stream,
-            description: 'some description',
-          },
-        });
-
-        const streamDefinition = await getStream(apiClient, 'unwired-stream-override-description');
-        expect((streamDefinition as UnwiredStreamGetResponse).stream.description).eql(
-          'some description'
-        );
 
         await clean();
       });

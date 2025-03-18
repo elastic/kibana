@@ -53,6 +53,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .then((response) => expect(response.body.acknowledged).to.eql(true));
       });
 
+      it('successfully updates a GroupStream description', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'test-group' },
+              body: {
+                stream: {
+                  description: 'some description',
+                  group: {
+                    members: ['logs', 'logs.test2', 'logs'],
+                  },
+                },
+                dashboards: [],
+              },
+            },
+          })
+          .expect(200)
+          .then((response) => expect(response.body.acknowledged).to.eql(true));
+      });
+
       it('successfully creates a second GroupStream', async () => {
         await apiClient
           .fetch('PUT /api/streams/{name} 2023-10-31', {
