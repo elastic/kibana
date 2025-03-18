@@ -151,7 +151,7 @@ export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
             defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
             values={{
               indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-                reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+              reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
             }}
           />
         </>
