@@ -7,11 +7,9 @@
 
 import React from 'react';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
-import { useAgentList } from '../hooks/use_agent_list';
-import { AgentListView } from '../components/agents/listing/agent_list_view';
+import { WorkChatHomeView } from '../components/home/home_view';
 
-export const WorkChatAgentsPage: React.FC<{}> = () => {
-  useBreadcrumb([{ text: 'Agents' }]);
-  const { agents } = useAgentList();
-  return <AgentListView agents={agents} />;
+export const WorkChatHomePage: React.FC<{}> = () => {
+  useBreadcrumb([]);
+  return <WorkChatHomeView />;
 };

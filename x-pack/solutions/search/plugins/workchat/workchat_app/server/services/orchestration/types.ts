@@ -12,12 +12,12 @@ import type { ConversationEvent } from '../../../common/conversation_events';
 /**
  * Represents an instance of a configured agent, ready to run.
  */
-export interface Agent {
+export interface AgentRunner {
   run(options: AgentRunOptions): Promise<AgentRunResult>;
 }
 
 /**
- * Options to call {@link Agent.run}
+ * Options to call {@link AgentRunner.run}
  */
 export interface AgentRunOptions {
   previousEvents: ConversationEvent[];
@@ -29,7 +29,7 @@ export interface AgentRunOptions {
 export type AgentRunEvents = ChunkEvent | MessageEvent | ToolResultEvent;
 
 /**
- * Output of {@link Agent.run}
+ * Output of {@link AgentRunner.run}
  */
 export interface AgentRunResult {
   /**

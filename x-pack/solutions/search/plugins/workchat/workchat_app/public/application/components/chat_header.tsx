@@ -7,21 +7,27 @@
 
 import React from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
+import type { Agent } from '../../../common/agents';
 import { ChatHeaderConnectorSelector } from './chat_header_connector_selector';
 
 interface ChatHeaderProps {
+  agent?: Agent;
   connectorId: string | undefined;
   onConnectorChange: (connectorId: string) => void;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ connectorId, onConnectorChange }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({
+  agent,
+  connectorId,
+  onConnectorChange,
+}) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel hasBorder={true} hasShadow={false}>
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <EuiTitle>
-              <h2>WorkChat</h2>
+              <h2>{agent?.name}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

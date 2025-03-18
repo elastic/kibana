@@ -9,7 +9,7 @@ import { useCallback, useState, useEffect } from 'react';
 import type { ConversationSummary } from '../../../common/conversations';
 import { useWorkChatServices } from './use_workchat_service';
 
-export const useConversationList = () => {
+export const useConversationList = ({ agentId }: { agentId: string }) => {
   const { conversationService } = useWorkChatServices();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
@@ -17,11 +17,11 @@ export const useConversationList = () => {
   const refresh = useCallback(async () => {
     setLoading(true);
 
-    const nextConversations = await conversationService.list();
+    const nextConversations = await conversationService.list({ agentId });
 
     setConversations(nextConversations);
     setLoading(false);
-  }, [conversationService]);
+  }, [agentId, conversationService]);
 
   useEffect(() => {
     refresh();

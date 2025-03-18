@@ -7,6 +7,13 @@
 
 import type { Conversation, ConversationSummary } from '../conversations';
 
+export interface ListConversationRequest {
+  /**
+   * If specified, will only fetch conversations for this agent.
+   */
+  agentId?: string;
+}
+
 export interface ListConversationResponse {
   conversations: ConversationSummary[];
 }

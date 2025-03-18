@@ -16,6 +16,7 @@ import { ChatInputForm } from './chat_input_form';
 import { ChatConversation } from './chat_conversation';
 
 interface ChatProps {
+  agentId: string;
   conversationId: string | undefined;
   connectorId: string | undefined;
   currentUser: AuthenticatedUser | undefined;
@@ -36,6 +37,7 @@ const scrollContainerClassName = (scrollBarStyles: string) => css`
 `;
 
 export const Chat: React.FC<ChatProps> = ({
+  agentId,
   conversationId,
   currentUser,
   onConversationUpdate,
@@ -44,7 +46,7 @@ export const Chat: React.FC<ChatProps> = ({
   const { sendMessage, conversationEvents, chatStatus } = useConversation({
     conversationId,
     connectorId,
-    agentId: 'default',
+    agentId,
     onConversationUpdate,
   });
 

@@ -30,20 +30,19 @@ interface AgentEditViewProps {
 }
 
 export const AgentEditView: React.FC<AgentEditViewProps> = ({ agentId }) => {
-  const { navigateToWorkchatUrl } = useNavigation();
+  const { navigateToWorkchatUrl, createWorkchatUrl } = useNavigation();
   const {
     services: { notifications },
   } = useKibana();
 
   const breadcrumb = useMemo(() => {
     return [
-      { text: 'WorkChat' },
-      { text: agentLabels.breadcrumb.agentsPill },
+      { text: agentLabels.breadcrumb.agentsPill, href: createWorkchatUrl('/agents') },
       agentId
         ? { text: agentLabels.breadcrumb.editAgentPill }
         : { text: agentLabels.breadcrumb.createAgensPill },
     ];
-  }, [agentId]);
+  }, [agentId, createWorkchatUrl]);
 
   useBreadcrumb(breadcrumb);
 

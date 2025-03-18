@@ -58,17 +58,13 @@ export class IntegrationsService {
     });
   }
 
-  async createSession({
-    request,
-    integrationClient,
-  }: {
-    request: KibanaRequest;
-    integrationClient: IntegrationClient;
-  }): Promise<IntegrationsSession> {
+  async createSession({ request }: { request: KibanaRequest }): Promise<IntegrationsSession> {
     this.logger.debug('Creating integrations session');
 
+    const client = await this.getScopedClient({ request });
+
     // Fetch integrations from the saved objects
-    const availableIntegrations = await integrationClient.list();
+    const availableIntegrations = await client.list();
 
     const integrations = await Promise.all(
       availableIntegrations.map<Promise<IntegrationWithMeta>>(async (source) => {
