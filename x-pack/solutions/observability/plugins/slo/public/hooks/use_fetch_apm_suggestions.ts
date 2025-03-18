@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useKibana } from './use_kibana';
 
 export type Suggestion = string;
@@ -47,8 +48,7 @@ export function useFetchApmSuggestions({
             start: moment().subtract(2, 'days').toISOString(),
             end: moment().toISOString(),
             fieldValue: search,
-            ...(serviceName !== ALL_VALUE &&
-              fieldName !== 'service.name' && { serviceName }),
+            ...(serviceName !== ALL_VALUE && fieldName !== 'service.name' && { serviceName }),
           },
           signal,
         });
