@@ -99,7 +99,7 @@ export const DateOutputFormatField = () => {
           defaultMessage="The format to use when writing the date to {field}. Must be a valid java time pattern. Defaults to {outputFormat}."
           values={{
             field: <EuiCode>target_field</EuiCode>,
-            outputFormat: <EuiCode>yyyy-MM-ddTHH:mm:ss.SSSXXX</EuiCode>,
+            outputFormat: <EuiCode>yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSSXXX</EuiCode>,
           }}
         />
       }
