@@ -639,6 +639,40 @@ describe('nested unknowns', () => {
 
     expect(type.validate(value, void 0, void 0, {})).toStrictEqual(expected);
   });
+
+  test('should strip unknown keys inside schema.oneOf with stripUnknownKeys for both objects at highest level', () => {
+    const type = schema.oneOf([
+      schema.object({
+        a: schema.string(),
+      }),
+      schema.object({
+        b: schema.string(),
+      }),
+    ]);
+
+    const value1 = {
+      a: 'testA',
+      c: 'should be stripped',
+    };
+    const value2 = {
+      b: 'testB',
+      d: 'should be stripped',
+    };
+    const expected1 = {
+      a: 'testA',
+    };
+    const expected2 = {
+      b: 'testB',
+    };
+
+    expect(type.validate(value1, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
+      expected1
+    );
+
+    expect(type.validate(value2, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
+      expected2
+    );
+  });
 });
 
 test('handles optional properties', () => {

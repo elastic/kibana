@@ -255,7 +255,7 @@ describe('nested unknowns', () => {
     const value = {
       x: {
         a: '123',
-        b: '345',
+        b: 'should be stripped',
       },
     };
     const expected = new Map([['x', { a: '123' }]]);
@@ -277,7 +277,7 @@ describe('nested unknowns', () => {
     const value = {
       x: {
         a: '123',
-        b: '345',
+        b: 'should be stripped',
       },
     };
     const expected = new Map([['x', { a: '123' }]]);

@@ -248,7 +248,7 @@ describe('nested unknowns', () => {
         {
           x: {
             a: '123',
-            b: '345', // should be stripped
+            b: 'should be stripped',
           },
         },
         void 0,
@@ -276,7 +276,7 @@ describe('nested unknowns', () => {
         {
           x: {
             a: '123',
-            b: '345', // should be stripped
+            b: 'should be stripped',
           },
         },
         void 0,
