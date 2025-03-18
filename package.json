@@ -1030,6 +1030,7 @@
     "@kbn/wci-external-server": "link:x-pack/solutions/search/plugins/workchat/wci_external_server",
     "@kbn/wci-index-source": "link:x-pack/solutions/search/plugins/workchat/wci_index_source",
     "@kbn/wci-salesforce": "link:x-pack/solutions/search/plugins/workchat/wci_salesforce",
+    "@kbn/wci-server": "link:x-pack/solutions/search/packages/workchat/wci-server",
     "@kbn/workchat-app": "link:x-pack/solutions/search/plugins/workchat/workchat_app",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",

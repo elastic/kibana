@@ -17,15 +17,15 @@ export interface ListIntegrationsResponse {
 
 export interface CreateIntegrationPayload {
   type: IntegrationType;
-  name: string;
+  description: string;
   configuration: IntegrationConfiguration;
 }
 
 export type CreateIntegrationResponse = Integration;
 
 export interface UpdateIntegrationPayload {
-  name?: string;
-  configuration: IntegrationConfiguration;
+  description?: string;
+  configuration?: IntegrationConfiguration;
 }
 
 export type UpdateIntegrationResponse = Integration;

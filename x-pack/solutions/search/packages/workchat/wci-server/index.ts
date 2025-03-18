@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-export { IntegrationType } from './src/constants';
-export type {
-  IntegrationClient,
-  IntegrationContext,
-  WorkChatIntegration,
-  WorkchatIntegrationDefinition,
-  IntegrationConfiguration,
-} from './src/types';
+export { getClientForInternalServer, getClientForExternalServer } from './src/utils';
+export { SSEClientTransport, type SSEClientTransportOptions } from './src/mcp/sse_client';
