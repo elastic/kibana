@@ -10,7 +10,7 @@
 import { omit } from 'lodash';
 import { getSampleLayout } from '../test_utils/sample_layout';
 import { GridLayoutData } from '../types';
-import { movePanelsToRow } from './row_management';
+import { deleteRow, movePanelsToRow } from './row_management';
 
 describe('row management', () => {
   describe('move panels to row', () => {
@@ -70,4 +70,24 @@ describe('row management', () => {
       });
     });
   });
+
+  describe('delete row', () => {
+    it('delete existing row', () => {
+      const originalLayout = getSampleLayout();
+      const newLayout = deleteRow(originalLayout, 'first');
+
+      // modification happens by value and not by reference
+      expect(originalLayout.first).toBeDefined();
+      expect(newLayout.first).not.toBeDefined();
+    });
+
+    it('delete non-existant row', () => {
+      const originalLayout = getSampleLayout();
+      expect(() => {
+        const newLayout = deleteRow(originalLayout, 'fake');
+        expect(newLayout.fake).not.toBeDefined();
+      }).not.toThrow();
+    });
+  });
 });
+s;
