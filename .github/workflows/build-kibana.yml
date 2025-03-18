@@ -34,41 +34,39 @@ jobs:
       - name: Bootstrap Kibana
         run: yarn kbn bootstrap
 
-      - name: Clean Build Artifacts
-        run: |
-          echo "Cleaning Yarn cache and build artifacts..."
-          yarn cache clean
-          rm -rf target/ build/ node_modules/.cache/
-          echo "Clean complete."
-
       - name: Build Kibana
-        run: yarn build --release --skip-os-packages --clean
+        run: yarn build --release --skip-os-packages
 
       - name: Free Up Disk Space (Remove Unnecessary Builds)
         run: |
           echo "Removing unnecessary tarballs to free up space..."
-          rm -v target/kibana-8.15.6-linux-aarch64.tar.gz || true
-          rm -v target/kibana-8.15.6-darwin-x86_64.tar.gz || true
-          rm -v target/kibana-8.15.6-darwin-aarch64.tar.gz || true
-          rm -v target/kibana-8.15.6-windows-x86_64.zip || true
-          rm -v target/kibana-serverless-8.15.6-linux-x86_64.tar.gz || true
-          rm -v target/kibana-serverless-8.15.6-linux-aarch64.tar.gz || true
+          rm -v target/kibana-8.15.6-linux-aarch64.tar.gz
+          rm -v target/kibana-8.15.6-darwin-x86_64.tar.gz
+          rm -v target/kibana-8.15.6-darwin-aarch64.tar.gz
+          rm -v target/kibana-8.15.6-windows-x86_64.zip
+          rm -v target/kibana-serverless-8.15.6-linux-x86_64.tar.gz
+          rm -v target/kibana-serverless-8.15.6-linux-aarch64.tar.gz
           echo "Disk space freed. Only keeping linux-x86_64 tarball."
 
       - name: Free Up Additional Disk Space
         run: |
           echo "Deleting unnecessary Kibana build artifacts..."
-          rm -rf build/default/kibana-8.15.6-linux-aarch64 || true
-          rm -rf build/default/kibana-8.15.6-darwin-x86_64 || true
-          rm -rf build/default/kibana-8.15.6-darwin-aarch64 || true
-          rm -rf build/default/kibana-8.15.6-windows-x86_64 || true
-          rm -rf build/default/kibana-serverless-8.15.6-linux-x86_64 || true
-          rm -rf build/default/kibana-serverless-8.15.6-linux-aarch64 || true
+          rm -rf build/default/kibana-8.15.6-linux-aarch64
+          rm -rf build/default/kibana-8.15.6-darwin-x86_64
+          rm -rf build/default/kibana-8.15.6-darwin-aarch64
+          rm -rf build/default/kibana-8.15.6-windows-x86_64
+          rm -rf build/default/kibana-serverless-8.15.6-linux-x86_64
+          rm -rf build/default/kibana-serverless-8.15.6-linux-aarch64
+      
+          echo "Clearing Yarn and npm caches..."
+          yarn cache clean
+          npm cache clean --force
           
           echo "Removing unused Docker images and cache..."
           docker system prune -af
           
           echo "Disk space cleanup complete."
+
 
       - name: Ensure Required Files Exist
         run: |
@@ -111,9 +109,9 @@ jobs:
       - name: Log in to GitHub Container Registry (GHCR)
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker Image (No Cache)
+      - name: Build Docker Image
         run: |
-          docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/kibana:8.15.6 -f $DOCKERFILE_PATH build/kibana-docker/default/
+          docker build -no-cache -t ghcr.io/${{ github.repository_owner }}/kibana:8.15.6 -f $DOCKERFILE_PATH build/kibana-docker/default/
 
       - name: Push Docker Image to GHCR
         run: |
