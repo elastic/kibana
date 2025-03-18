@@ -42,9 +42,10 @@ spec:
           access_level: BUILD_AND_READ
       # Scheduled runs for the pipeline
       schedules:
-        Daily 12 pm UTC:
-          cronline: 0 12 * * *
-          message: Daily Chrome Forward Testing
-          branch: main
+         # Disabled until 2025-03-28 (Chrome will be released @ 2025-04-01)
+#        Daily 12 pm UTC:
+#          cronline: 0 12 * * *
+#          message: Daily Chrome Forward Testing
+#          branch: main
       tags:
         - kibana
