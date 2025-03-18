@@ -140,51 +140,11 @@ function createObservabilityAIAssistantApiClient({
     }
   }
 
-  async function installProductDoc() {
-    const internalReqHeader = samlAuth.getInternalRequestHeader();
-    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-    try {
-      const res = await supertestWithoutAuth
-        .post('/internal/product_doc_base/install')
-        .set(roleAuthc.apiKeyHeader)
-        .set(internalReqHeader)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
-
-      const connectorId = res.body.id as string;
-      return connectorId;
-    } catch (e) {
-      logger.error(`Failed to create action connector due to: ${e}`);
-      throw e;
-    }
-  }
-
-  async function uninstallProductDoc() {
-    const internalReqHeader = samlAuth.getInternalRequestHeader();
-    const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-    try {
-      const res = await supertestWithoutAuth
-        .post('/internal/product_doc_base/uninstall')
-        .set(roleAuthc.apiKeyHeader)
-        .set(internalReqHeader)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
-
-      const connectorId = res.body.id as string;
-      return connectorId;
-    } catch (e) {
-      logger.error(`Failed to create action connector due to: ${e}`);
-      throw e;
-    }
-  }
-
   return {
     makeApiRequest,
     deleteAllActionConnectors,
     deleteActionConnector,
     createProxyActionConnector,
-    installProductDoc,
-    uninstallProductDoc,
   };
 }
 
@@ -214,8 +174,6 @@ export function ObservabilityAIAssistantApiProvider(context: DeploymentAgnosticF
     deleteAllActionConnectors: observabilityAIAssistantApiClient.deleteAllActionConnectors,
     createProxyActionConnector: observabilityAIAssistantApiClient.createProxyActionConnector,
     deleteActionConnector: observabilityAIAssistantApiClient.deleteActionConnector,
-    installProductDoc: observabilityAIAssistantApiClient.installProductDoc,
-    uninstallProductDoc: observabilityAIAssistantApiClient.uninstallProductDoc,
   };
 }
 

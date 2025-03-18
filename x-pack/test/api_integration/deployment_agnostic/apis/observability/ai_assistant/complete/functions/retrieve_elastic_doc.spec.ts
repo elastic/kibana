@@ -12,6 +12,7 @@ import {
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { chatComplete } from './helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -20,6 +21,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
+    const supertest = getService('supertest');
     const USER_MESSAGE = 'What is Kibana Lens?';
 
     describe('POST /internal/observability_ai_assistant/chat/complete without product doc installed', function () {
@@ -80,7 +82,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
-        await observabilityAIAssistantAPIClient.installProductDoc();
+        await installProductDoc(supertest);
 
         void llmProxy.interceptWithFunctionRequest({
           name: 'retrieve_elastic_doc',
@@ -100,7 +102,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        await observabilityAIAssistantAPIClient.uninstallProductDoc();
+        await uninstallProductDoc(supertest);
         llmProxy.close();
         await observabilityAIAssistantAPIClient.deleteActionConnector({
           actionId: connectorId,
