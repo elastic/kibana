@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiSkeletonText,
@@ -26,6 +26,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -46,6 +47,17 @@ export const OtelKubernetesPanel: React.FC = () => {
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const theme = useEuiTheme();
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    if (data) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Request to create the onboarding flow succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [data, onPageReady]);
 
   if (error) {
     return (

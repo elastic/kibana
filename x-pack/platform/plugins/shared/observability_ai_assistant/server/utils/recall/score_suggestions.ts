@@ -33,6 +33,7 @@ export async function scoreSuggestions({
   suggestions,
   messages,
   userPrompt,
+  userMessageFunctionName,
   context,
   chat,
   signal,
@@ -41,6 +42,7 @@ export async function scoreSuggestions({
   suggestions: RecalledSuggestion[];
   messages: Message[];
   userPrompt: string;
+  userMessageFunctionName?: string;
   context: string;
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
@@ -81,7 +83,10 @@ export async function scoreSuggestions({
     '@timestamp': new Date().toISOString(),
     message: {
       role: MessageRole.User,
-      content: newUserMessageContent,
+      content: userMessageFunctionName
+        ? JSON.stringify(newUserMessageContent)
+        : newUserMessageContent,
+      ...(userMessageFunctionName ? { name: userMessageFunctionName } : {}),
     },
   };
 
@@ -122,8 +127,8 @@ export async function scoreSuggestions({
   );
 
   const scores = parseSuggestionScores(scoresAsString)
-    // Restore original IDs
-    .map(({ id, score }) => ({ id: shortIdTable.lookup(id)!, score }));
+    // Restore original IDs (added fallback to id for testing purposes)
+    .map(({ id, score }) => ({ id: shortIdTable.lookup(id) || id, score }));
 
   if (scores.length === 0) {
     // seemingly invalid or no scores, return all

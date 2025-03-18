@@ -36,7 +36,10 @@ export function supertestToObservable<T = any>(response: supertest.Test): Observ
   return new Observable<T>((subscriber) => {
     const parser = createParser({
       onEvent: (event) => {
-        subscriber.next(JSON.parse(event.data));
+        subscriber.next({
+          type: event.event ?? 'event',
+          ...JSON.parse(event.data),
+        });
       },
     });
 

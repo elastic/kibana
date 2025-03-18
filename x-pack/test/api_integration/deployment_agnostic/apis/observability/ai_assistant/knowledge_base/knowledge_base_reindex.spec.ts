@@ -17,7 +17,7 @@ import {
   deleteInferenceEndpoint,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
-} from './helpers';
+} from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');

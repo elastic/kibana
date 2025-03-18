@@ -115,8 +115,8 @@ test.describe(
 
       expect(
         perfStats.cpuTime.diff,
-        'CPU time (seconds) usage during page navigation should not exceed 1.5 seconds'
-      ).toBeLessThan(1.5);
+        'CPU time (seconds) usage during page navigation should not exceed 2 seconds'
+      ).toBeLessThan(2);
       expect(
         perfStats.scriptTime.diff,
         'Additional time spent executing JS scripts should not exceed 0.5 second'

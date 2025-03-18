@@ -26,3 +26,4 @@ export class FleetActionsClientError extends FleetError {}
 export class UninstallTokenError extends FleetError {}
 
 export class AgentRequestInvalidError extends FleetError {}
+export class OutputInvalidError extends FleetError {}

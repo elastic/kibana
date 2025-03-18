@@ -22,11 +22,14 @@ import {
   LlmProxy,
   ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
-import { clearConversations } from '../knowledge_base/helpers';
-import { systemMessageSorted } from './functions/helpers';
+import {
+  systemMessageSorted,
+  clearConversations,
+  decodeEvents,
+  getConversationCreatedEvent,
+} from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');

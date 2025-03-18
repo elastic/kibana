@@ -10,6 +10,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable } from '@langchain/core/runnables';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 
+import { DefendInsightsGenerationPrompts } from '../prompts/incompatible_antivirus';
 import { getOutputParser } from '../get_output_parser';
 
 interface GetChainWithFormatInstructions {
@@ -18,11 +19,16 @@ interface GetChainWithFormatInstructions {
   llmType: string;
 }
 
-export const getChainWithFormatInstructions = (
-  insightType: DefendInsightType,
-  llm: ActionsClientLlm
-): GetChainWithFormatInstructions => {
-  const outputParser = getOutputParser({ type: insightType });
+export const getChainWithFormatInstructions = ({
+  insightType,
+  llm,
+  prompts,
+}: {
+  insightType: DefendInsightType;
+  llm: ActionsClientLlm;
+  prompts: DefendInsightsGenerationPrompts;
+}): GetChainWithFormatInstructions => {
+  const outputParser = getOutputParser({ type: insightType, prompts });
   const formatInstructions = outputParser.getFormatInstructions();
 
   const prompt = ChatPromptTemplate.fromTemplate(

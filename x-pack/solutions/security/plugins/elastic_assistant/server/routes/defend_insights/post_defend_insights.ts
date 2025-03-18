@@ -72,6 +72,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
 
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        const savedObjectsClient = assistantContext.savedObjectsClient;
 
         try {
           const isEnabled = isDefendInsightsEnabled({
@@ -147,6 +148,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             latestReplacements,
             logger,
             onNewReplacements,
+            savedObjectsClient,
           })
             .then(({ anonymizedEvents, insights }) =>
               updateDefendInsights({

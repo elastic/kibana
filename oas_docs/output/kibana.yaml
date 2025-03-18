@@ -106,6 +106,15 @@ tags:
   - name: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
+  - description: |
+      Programmatically integrate with Logstash configuration management.
+      > warn
+      > Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs.
+    externalDocs:
+      description: Centralized pipeline management
+      url: https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html
+    name: logstash
+    x-displayName: Logstash configuration management
   - name: Message Signing Service
   - description: Machine learning
     name: ml
@@ -218,6 +227,9 @@ tags:
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
+  - description: Manage Kibana short URLs.
+    name: short url
+    x-displayName: Short URLs
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -247,6 +259,11 @@ tags:
   - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
     name: upgrade
     x-displayName: Upgrade assistant
+  - externalDocs:
+      description: Uptime monitoring
+      url: https://www.elastic.co/guide/en/observability/current/uptime-intro.html
+    name: uptime
+    x-displayName: Uptime
   - name: user session
     x-displayName: User session management
 paths:
@@ -16039,6 +16056,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -16187,6 +16206,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -16236,6 +16257,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -16328,6 +16351,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -16481,6 +16506,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -17206,6 +17233,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -18078,6 +18107,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -18768,6 +18799,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -19434,6 +19467,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -20316,6 +20351,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21004,6 +21041,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21056,6 +21095,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21073,6 +21114,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -21474,6 +21517,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21572,6 +21617,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21633,6 +21680,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -21750,6 +21799,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21843,6 +21894,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -21919,6 +21972,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -22329,6 +22384,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -22388,6 +22445,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -22439,6 +22498,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -22766,6 +22827,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23109,6 +23172,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23247,6 +23312,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23303,6 +23370,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23367,6 +23436,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23464,6 +23535,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23538,6 +23611,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23699,6 +23774,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23787,6 +23864,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23826,6 +23905,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -23895,6 +23976,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -23962,6 +24045,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24036,6 +24121,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24108,6 +24195,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24188,6 +24277,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24241,6 +24332,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24282,6 +24375,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24346,6 +24441,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24405,6 +24502,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24456,6 +24555,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24503,6 +24604,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24602,6 +24705,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24729,6 +24834,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24820,6 +24927,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -24871,6 +24980,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -24940,6 +25051,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -25034,6 +25147,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -25099,6 +25214,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -25239,6 +25356,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -25315,6 +25434,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -25723,6 +25844,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -25845,6 +25968,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -26025,6 +26150,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -26136,6 +26263,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -26617,6 +26746,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -26762,6 +26893,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27233,6 +27366,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27278,6 +27413,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27365,6 +27502,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27413,6 +27552,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27562,6 +27703,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27601,6 +27744,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27704,6 +27849,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -27742,6 +27889,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -27872,6 +28021,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28083,6 +28234,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28132,6 +28285,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28255,6 +28410,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28464,6 +28621,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28524,6 +28683,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28541,6 +28702,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28595,6 +28758,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28642,6 +28807,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28659,6 +28826,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28704,6 +28873,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -28756,6 +28927,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -28773,6 +28946,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -29551,6 +29726,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -31059,6 +31236,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -31109,6 +31288,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -31126,6 +31307,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -31897,6 +32080,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -33389,6 +33574,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -33440,6 +33627,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -33913,6 +34102,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -34759,6 +34950,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -34776,6 +34969,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -35226,6 +35421,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -35291,6 +35488,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -35720,6 +35919,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -36576,6 +36777,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -36593,6 +36796,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -36725,6 +36930,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -36799,6 +37006,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37606,6 +37815,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -37686,6 +37897,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37799,6 +38012,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -37848,6 +38063,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -37922,6 +38139,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -38037,6 +38256,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -38095,6 +38316,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -38175,6 +38398,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -38304,6 +38529,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -38374,6 +38601,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -38481,6 +38710,8 @@ paths:
                   attributes: {}
                   error:
                     type: string
+                  errorType:
+                    type: string
                   message:
                     type: string
                   statusCode:
@@ -38545,6 +38776,8 @@ paths:
                 properties:
                   attributes: {}
                   error:
+                    type: string
+                  errorType:
                     type: string
                   message:
                     type: string
@@ -40712,6 +40945,169 @@ paths:
       summary: Get value list privileges
       tags:
         - Security Lists API
+  /api/logstash/pipeline/{id}:
+    delete:
+      description: |
+        Delete a centrally-managed Logstash pipeline.
+        If your Elasticsearch cluster is protected with basic authentication, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: delete-logstash-pipeline
+      parameters:
+        - description: An identifier for the pipeline.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call
+      summary: Delete a Logstash pipeline
+      tags:
+        - logstash
+      x-state: Technical Preview
+    get:
+      description: |
+        Get information for a centrally-managed Logstash pipeline.
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: get-logstash-pipeline
+      parameters:
+        - description: An identifier for the pipeline.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getLogstashPipelineResponseExample1:
+                  value: |-
+                    {
+                      "id": "hello-world",
+                      "description": "Just a simple pipeline",
+                      "username": "elastic",
+                      "pipeline": "input { stdin {} } output { stdout {} }",
+                      "settings": {
+                        "queue.type": "persistent"
+                      }
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get a Logstash pipeline
+      tags:
+        - logstash
+      x-state: Technical Preview
+    put:
+      description: |
+        Create a centrally-managed Logstash pipeline or update a pipeline.
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: put-logstash-pipeline
+      parameters:
+        - description: |
+            An identifier for the pipeline. Only alphanumeric characters, hyphens, and underscores are supported.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putLogstashPipelineRequestExample1:
+                value: |-
+                  {
+                    "pipeline": "input { stdin {} } output { stdout {} }",
+                    "settings": {
+                      "queue.type": "persisted"
+                    }
+                  }
+            schema:
+              type: object
+              properties:
+                description:
+                  description: A description of the pipeline.
+                  type: string
+                pipeline:
+                  description: A definition for the pipeline.
+                  type: string
+                settings:
+                  description: |
+                    Supported settings, represented as object keys, include the following:
+
+                    - `pipeline.workers`
+                    - `pipeline.batch.size`
+                    - `pipeline.batch.delay`
+                    - `pipeline.ecs_compatibility`
+                    - `pipeline.ordered`
+                    - `queue.type`
+                    - `queue.max_bytes`
+                    - `queue.checkpoint.writes`
+                  type: object
+              required:
+                - pipeline
+      responses:
+        '204':
+          description: Indicates a successful call
+      summary: Create or update a Logstash pipeline
+      tags:
+        - logstash
+      x-state: Technical Preview
+  /api/logstash/pipelines:
+    get:
+      description: |
+        Get a list of all centrally-managed Logstash pipelines.
+
+        To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
+        > info
+        > Limit the number of pipelines to 10,000 or fewer. As the number of pipelines nears and surpasses 10,000, you may see performance issues on Kibana.
+
+        The `username` property appears in the response when security is enabled and depends on when the pipeline was created or last updated.
+      externalDocs:
+        description: Secure your connection
+        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+      operationId: get-logstash-pipelines
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getLogstashPipelinesResponseExample1:
+                  value: |-
+                    {
+                      "pipelines": [
+                        {
+                          "id": "hello-world",
+                          "description": "Just a simple pipeline",
+                          "last_modified": "2018-04-14T12:23:29.772Z",
+                          "username": "elastic" 
+                        },
+                        {
+                          "id": "sleepy-pipeline",
+                          "description": "",
+                          "last_modified": "2018-03-24T03:41:30.554Z"
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get all Logstash pipelines
+      tags:
+        - logstash
+      x-state: Technical Preview
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -43622,6 +44018,104 @@ paths:
       tags:
         - user session
       x-state: Technical Preview
+  /api/short_url:
+    post:
+      description: |
+        Kibana URLs may be long and cumbersome, short URLs are much easier to remember and share.
+        Short URLs are created by specifying the locator ID and locator parameters. When a short URL is resolved, the locator ID and locator parameters are used to redirect user to the right Kibana page.
+      operationId: post-url
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                humanReadableSlug:
+                  description: |
+                    When the `slug` parameter is omitted, the API will generate a random human-readable slug if `humanReadableSlug` is set to true.
+                  type: boolean
+                locatorId:
+                  description: The identifier for the locator.
+                  type: string
+                params:
+                  description: |
+                    An object which contains all necessary parameters for the given locator to resolve to a Kibana location.
+                    > warn
+                    > When you create a short URL, locator params are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.
+                  type: object
+                slug:
+                  description: |
+                    A custom short URL slug. The slug is the part of the short URL that identifies it. You can provide a custom slug which consists of latin alphabet letters, numbers, and `-._` characters. The slug must be at least 3 characters long, but no longer than 255 characters.
+                  type: string
+              required:
+                - locatorId
+                - params
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Short_URL_APIs_urlResponse'
+          description: Indicates a successful call.
+      summary: Create a short URL
+      tags:
+        - short url
+      x-state: Technical Preview
+  /api/short_url/_slug/{slug}:
+    get:
+      description: |
+        Resolve a Kibana short URL by its slug.
+      operationId: resolve-url
+      parameters:
+        - description: The slug of the short URL.
+          in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Short_URL_APIs_urlResponse'
+          description: Indicates a successful call.
+      summary: Resolve a short URL
+      tags:
+        - short url
+      x-state: Technical Preview
+  /api/short_url/{id}:
+    delete:
+      description: |
+        Delete a Kibana short URL.
+      operationId: delete-url
+      parameters:
+        - $ref: '#/components/parameters/Short_URL_APIs_idParam'
+      responses:
+        '200':
+          description: Indicates a successful call.
+      summary: Delete a short URL
+      tags:
+        - short url
+      x-state: Technical Preview
+    get:
+      description: |
+        Get a single Kibana short URL.
+      operationId: get-url
+      parameters:
+        - $ref: '#/components/parameters/Short_URL_APIs_idParam'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Short_URL_APIs_urlResponse'
+          description: Indicates a successful call.
+      summary: Get a short URL
+      tags:
+        - short url
+      x-state: Technical Preview
   /api/spaces/_copy_saved_objects:
     post:
       description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
@@ -46127,6 +46621,70 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
+  /api/streams/{name}/content/export:
+    post:
+      description: Exports the content associated to a stream.
+      operationId: post-streams-name-content-export
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Export stream content
+      tags:
+        - streams
+  /api/streams/{name}/content/import:
+    post:
+      description: Links content objects to a stream.
+      operationId: post-streams-name-content-import
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content: {}
+              required:
+                - content
+      responses: {}
+      summary: Import content into a stream
+      tags:
+        - streams
   /api/streams/{name}/dashboards:
     get:
       description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
@@ -48296,6 +48854,139 @@ paths:
       tags:
         - upgrade
       x-state: Technical Preview
+  /api/uptime/settings:
+    get:
+      description: |
+        You must have `read` privileges for the uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: get-uptime-settings
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getUptimeSettingsResponseExample1:
+                  value: |-
+                    {
+                      "heartbeatIndices": "heartbeat-8*",
+                      "certExpirationThreshold": 30,
+                      "certAgeThreshold": 730,
+                      "defaultConnectors": [
+                          "08990f40-09c5-11ee-97ae-912b222b13d4",
+                          "db25f830-2318-11ee-9391-6b0c030836d6"
+                      ],
+                      "defaultEmail": {
+                          "to": [],
+                          "cc": [],
+                          "bcc": []
+                      }
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Get uptime settings
+      tags:
+        - uptime
+    put:
+      description: |
+        Update uptime setting attributes like `heartbeatIndices`, `certExpirationThreshold`, `certAgeThreshold`, `defaultConnectors`, or `defaultEmail`. You must have `all` privileges for the uptime feature in the Observability section of the Kibana feature privileges. A partial update is supported, provided settings keys will be merged with existing settings.
+      operationId: put-uptime-settings
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putUptimeSettingsRequestExample1:
+                description: Run `PUT api/uptime/settings` to update multiple Uptime settings.
+                summary: Update multiple settings
+                value: |-
+                  {
+                      "heartbeatIndices": "heartbeat-8*",
+                      "certExpirationThreshold": 30,
+                      "certAgeThreshold": 730,
+                      "defaultConnectors": [
+                          "08990f40-09c5-11ee-97ae-912b222b13d4",
+                          "db25f830-2318-11ee-9391-6b0c030836d6"
+                      ],
+                      "defaultEmail": {
+                          "to": [],
+                          "cc": [],
+                          "bcc": []
+                      }
+                  }
+              putUptimeSettingsRequestExample2:
+                description: Run `PUT api/uptime/settings` to update a single Uptime setting.
+                summary: Update a setting
+                value: |-
+                  {
+                      "heartbeatIndices": "heartbeat-8*",
+                  }
+            schema:
+              type: object
+              properties:
+                certAgeThreshold:
+                  default: 730
+                  description: The number of days after a certificate is created to trigger an alert.
+                  type: number
+                certExpirationThreshold:
+                  default: 30
+                  description: The number of days before a certificate expires to trigger an alert.
+                  type: number
+                defaultConnectors:
+                  default: []
+                  description: A list of connector IDs to be used as default connectors for new alerts.
+                  type: array
+                defaultEmail:
+                  description: |
+                    The default email configuration for new alerts.
+                  type: object
+                  properties:
+                    bcc:
+                      default: []
+                      items:
+                        - type: string
+                      type: array
+                    cc:
+                      default: []
+                      items:
+                        - type: string
+                      type: array
+                    to:
+                      default: []
+                      items:
+                        - type: string
+                      type: array
+                heartbeatIndices:
+                  default: heartbeat-*
+                  description: |
+                    An index pattern string to be used within the Uptime app and alerts to query Heartbeat data. 
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putUptimeSettingsResponseExample1:
+                  description: A successful response from `PUT api/uptime/settings`.
+                  value: |-
+                    {
+                        "heartbeatIndices": "heartbeat-8*",
+                        "certExpirationThreshold": 30,
+                        "certAgeThreshold": 730,
+                        "defaultConnectors": [
+                            "08990f40-09c5-11ee-97ae-912b222b13d4",
+                            "db25f830-2318-11ee-9391-6b0c030836d6"
+                        ],
+                        "defaultEmail": {
+                            "to": [],
+                            "cc": [],
+                            "bcc": []
+                        }
+                    }
+              schema:
+                type: object
+          description: Indicates a successful call
+      summary: Update uptime settings
+      tags:
+        - uptime
   /s/{spaceId}/api/observability/slos:
     get:
       description: |
@@ -52758,6 +53449,13 @@ components:
       description: Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
       in: path
       name: type
+      required: true
+      schema:
+        type: string
+    Short_URL_APIs_idParam:
+      description: The identifier for the short URL.
+      in: path
+      name: id
       required: true
       schema:
         type: string
@@ -67261,6 +67959,34 @@ components:
         - default
         - template
       type: string
+    Short_URL_APIs_urlResponse:
+      type: object
+      properties:
+        accessCount:
+          type: integer
+        accessDate:
+          type: string
+        createDate:
+          type: string
+        id:
+          description: The identifier for the short URL.
+          type: string
+        locator:
+          type: object
+          properties:
+            id:
+              description: The identifier for the locator.
+              type: string
+            state:
+              description: The locator parameters.
+              type: object
+            version:
+              description: The version of Kibana when the short URL was created.
+              type: string
+        slug:
+          description: |
+            A random human-readable slug is automatically generated if the `humanReadableSlug` parameter is set to `true`. If it is set to `false`, a random short string is generated.
+          type: string
     SLOs_400_response:
       title: Bad request
       type: object

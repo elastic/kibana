@@ -284,15 +284,25 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       });
     },
 
-    async expectBreadcrumbNavigationWithIndexName(indexName: string) {
+    async expectIndexNametoBeInBreadcrumbs(indexName: string) {
       await testSubjects.existOrFail('euiBreadcrumb');
       expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(indexName);
     },
+    async expectBreadcrumbsToBeAvailable(breadcrumbsName: string) {
+      const breadcrumbs = await testSubjects.findAll('breadcrumb');
+      let isBreadcrumbShown: boolean = false;
+      for (const breadcrumb of breadcrumbs) {
+        if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
+          isBreadcrumbShown = true;
+        }
+      }
+      expect(isBreadcrumbShown).to.be(true);
+    },
 
-    async clickOnIndexManagementBreadcrumb() {
+    async clickOnBreadcrumb(breadcrumbsName: string) {
       const breadcrumbs = await testSubjects.findAll('breadcrumb');
       for (const breadcrumb of breadcrumbs) {
-        if ((await breadcrumb.getVisibleText()) === 'Index Management') {
+        if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
           await breadcrumb.click();
           return;
         }

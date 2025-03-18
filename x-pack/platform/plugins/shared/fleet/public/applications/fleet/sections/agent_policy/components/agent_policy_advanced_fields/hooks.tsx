@@ -69,6 +69,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT) ||
     policyHasFleetServer(agentPolicy as AgentPolicy) ||
     policyHasSyntheticsIntegration(agentPolicy as AgentPolicy);
+
   const allowedOutputTypes = useMemo(
     () => getAllowedOutputTypesForAgentPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]
@@ -146,13 +147,21 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     ];
   }, [outputsRequest, isPolicyPerOutputAllowed]);
 
+  const dataOutputValueOfSelected = agentPolicy.data_output_id || DEFAULT_SELECT_VALUE;
+
   return useMemo(
     () => ({
       dataOutputOptions,
       monitoringOutputOptions,
+      dataOutputValueOfSelected,
       isLoading: outputsRequest.isLoading,
     }),
-    [dataOutputOptions, monitoringOutputOptions, outputsRequest.isLoading]
+    [
+      dataOutputOptions,
+      dataOutputValueOfSelected,
+      monitoringOutputOptions,
+      outputsRequest.isLoading,
+    ]
   );
 }
 

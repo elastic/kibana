@@ -19,7 +19,8 @@ export default function searchSolutionNavigation({
   const spaces = getService('spaces');
   const browser = getService('browser');
 
-  describe('Search Classic Navigation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/203607
+  describe.skip('Search Classic Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -67,6 +68,11 @@ export default function searchSolutionNavigation({
 
       await searchClassicNavigation.expectNavItemExists('Home');
 
+      // > Index Management
+      await searchClassicNavigation.clickNavItem('Indices');
+      await searchClassicNavigation.expectNavItemActive('Indices');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Index Management');
       // > Connectors
       await searchClassicNavigation.clickNavItem('Connectors');
       await searchClassicNavigation.expectNavItemActive('Connectors');
@@ -125,7 +131,8 @@ export default function searchSolutionNavigation({
 
     it("should redirect to index management when clicking on 'Indices'", async () => {
       await searchClassicNavigation.clickNavItem('Indices');
-      await indexManagement.expectToBeOnIndicesManagement();
+      await indexManagement.expectToBeOnSearchIndexManagement();
+      await indexManagement.expectToBeOnIndexManagement();
     });
   });
 }

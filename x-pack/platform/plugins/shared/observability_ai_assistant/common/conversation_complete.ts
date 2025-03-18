@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ServerSentEventBase } from '@kbn/sse-utils';
 import { type Message } from './types';
 
 export enum StreamingChatResponseEventType {
@@ -18,27 +19,19 @@ export enum StreamingChatResponseEventType {
   BufferFlush = 'bufferFlush',
 }
 
-type StreamingChatResponseEventBase<
-  TEventType extends StreamingChatResponseEventType,
-  TData extends {}
-> = {
-  type: TEventType;
-} & TData;
-
-type BaseChatCompletionEvent<TType extends StreamingChatResponseEventType> =
-  StreamingChatResponseEventBase<
-    TType,
-    {
-      id: string;
-      message: {
-        content?: string;
-        function_call?: {
-          name?: string;
-          arguments?: string;
-        };
+type BaseChatCompletionEvent<TType extends StreamingChatResponseEventType> = ServerSentEventBase<
+  TType,
+  {
+    id: string;
+    message: {
+      content?: string;
+      function_call?: {
+        name?: string;
+        arguments?: string;
       };
-    }
-  >;
+    };
+  }
+>;
 
 export type ChatCompletionChunkEvent =
   BaseChatCompletionEvent<StreamingChatResponseEventType.ChatCompletionChunk>;
@@ -46,7 +39,7 @@ export type ChatCompletionChunkEvent =
 export type ChatCompletionMessageEvent =
   BaseChatCompletionEvent<StreamingChatResponseEventType.ChatCompletionMessage>;
 
-export type ConversationCreateEvent = StreamingChatResponseEventBase<
+export type ConversationCreateEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ConversationCreate,
   {
     conversation: {
@@ -57,7 +50,7 @@ export type ConversationCreateEvent = StreamingChatResponseEventBase<
   }
 >;
 
-export type ConversationUpdateEvent = StreamingChatResponseEventBase<
+export type ConversationUpdateEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ConversationUpdate,
   {
     conversation: {
@@ -68,12 +61,12 @@ export type ConversationUpdateEvent = StreamingChatResponseEventBase<
   }
 >;
 
-export type MessageAddEvent = StreamingChatResponseEventBase<
+export type MessageAddEvent = ServerSentEventBase<
   StreamingChatResponseEventType.MessageAdd,
   { message: Message; id: string }
 >;
 
-export type ChatCompletionErrorEvent = StreamingChatResponseEventBase<
+export type ChatCompletionErrorEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ChatCompletionError,
   {
     error: {
@@ -85,7 +78,7 @@ export type ChatCompletionErrorEvent = StreamingChatResponseEventBase<
   }
 >;
 
-export type BufferFlushEvent = StreamingChatResponseEventBase<
+export type BufferFlushEvent = ServerSentEventBase<
   StreamingChatResponseEventType.BufferFlush,
   {
     data?: string;

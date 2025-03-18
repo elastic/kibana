@@ -2,22 +2,25 @@
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/apm-settings-kb.html
   - https://github.com/elastic/cloud/blob/master/docs/cloud-enterprise/ce-apm-settings.asciidoc
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # APM settings in Kibana [apm-settings-kb]
 
 These settings allow the APM app to function, and specify the data that it surfaces. Unless you’ve customized your setup, you do not need to configure any settings to use the APM app. It is enabled by default.
 
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
+
 ## APM indices [apm-indices-settings-kb]
 
 The APM app uses data views to query APM indices. To change the default APM indices that the APM app queries, open the APM app and select **Settings** > **Indices**. Index settings in the APM app take precedence over those set in `kibana.yml`.
 
-Starting in version 8.2.0, APM indices are {{kib}} Spaces-aware; Changes to APM index settings will only apply to the currently enabled space.
-
-:::{image} ../../images/apm-settings.png
-:alt: APM app settings in Kibana
-:class: screenshot
-:::
+APM indices are {{kib}} space-aware; changes to APM index settings will only apply to the currently enabled space.
 
 ## General APM settings [general-apm-settings-kb]
 
