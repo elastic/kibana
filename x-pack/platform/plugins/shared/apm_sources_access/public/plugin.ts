@@ -23,7 +23,7 @@ export class ApmSourceAccessPlugin
   public setup() {}
 
   public start(core: CoreStart) {
-    return core.application.capabilities.apm.show ? registerServices(core) : null;
+    return registerServices(core);
   }
 
   public stop() {}
