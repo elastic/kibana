@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useAssistantSpaceId } from './use_space_id';
+import { useAssistantSpaceId, AssistantSpaceIdProvider } from './use_space_id';
 import { useAssistantLastConversation } from './use_last_conversation';
 
-export { useAssistantSpaceId, useAssistantLastConversation };
+export { useAssistantSpaceId, AssistantSpaceIdProvider, useAssistantLastConversation };
