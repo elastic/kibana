@@ -1,19 +1,16 @@
 ---
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/settings.html
+navigation_title: General settings
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
-# Configure {{kib}} [settings]
+# General settings in {{kib}}
 
-The {{kib}} server reads properties from the `kibana.yml` file on startup. The location of this file differs depending on how you installed {{kib}}. For example, if you installed {{kib}} from an archive distribution (`.tar.gz` or `.zip`), by default it is in `$KIBANA_HOME/config`. By default, with package distributions (Debian or RPM), it is in `/etc/kibana`.  The config directory can be changed via the `KBN_PATH_CONF` environment variable:
-
-```text
-KBN_PATH_CONF=/home/kibana/config ./bin/kibana
-```
-
-The default host and port settings configure {{kib}} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you’ll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
-
-Environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax. By default, configuration validation will fail if an environment variable used in the config file is not present when Kibana starts. This behavior can be changed by using a default value for the environment variable, using the `${MY_ENV_VAR:defaultValue}` syntax.
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 `console.ui.enabled`
 :   Toggling this causes the server to regenerate assets on the next startup, which may cause a delay before pages start being served. Set to `false` to disable Console. **Default: `true`**
@@ -25,7 +22,6 @@ Environment variables can be injected into configuration using `${MY_ENV_VAR}` s
 :   [8.7.0] Set this to `false` to add the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression to the `script-src` directive. **Default: `true`**
 
     When `csp.disableUnsafeEval` is set to `true`, Kibana will use a custom version of the Handlebars template library. Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation. If you experience any issues rendering Handlebars templates, please set this setting to `false` and [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana GitHub repository.
-
 
 `csp.worker_src`
 :   Add sources for the [Content Security Policy `worker-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src).
@@ -89,7 +85,7 @@ $$$elasticsearch-idleSocketTimeout$$$ `elasticsearch.idleSocketTimeout`
 :   The timeout for idle sockets kept open between {{kib}} and {{es}}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {{kib}} and {{es}} be sure to set this value lower than or equal to the proxy’s timeout. **Default: `60s`**
 
 `elasticsearch.customHeaders`
-:   | Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestHeadersWhitelist) configuration. **Default: `{}`**
+:   Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestHeadersWhitelist) configuration. **Default: `{}`**
 
 $$$elasticsearch-hosts$$$ `elasticsearch.hosts:`
 :   The URLs of the {{es}} instances to use for all your queries. All nodes listed here must be on the same cluster. **Default: `[ "http://localhost:9200" ]`**

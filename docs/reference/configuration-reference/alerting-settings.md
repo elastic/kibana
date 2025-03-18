@@ -2,6 +2,10 @@
 navigation_title: "Alerting and action settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # Alerting and action settings in {{kib}} [alert-action-settings-kb]
@@ -13,8 +17,9 @@ Alerting and actions are enabled by default in {{kib}}, but require you to confi
 2. [Set up TLS encryption between {{kib}} and {{es}}](docs-content://deploy-manage/security/set-up-basic-security-plus-https.md#encrypt-kibana-http).
 3. If you are using an **on-premises** Elastic Stack deployment, [specify a value for `xpack.encryptedSavedObjects.encryptionKey`](#general-alert-action-settings).
 
-You can configure the following settings in the `kibana.yml` file.
-
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 ## General settings [general-alert-action-settings]
 

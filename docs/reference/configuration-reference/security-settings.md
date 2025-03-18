@@ -2,6 +2,10 @@
 navigation_title: "Security settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # Security settings in {{kib}} [security-settings-kb]
@@ -10,14 +14,16 @@ mapped_pages:
 You do not need to configure any additional settings to use the {{security-features}} in {{kib}}. They are enabled by default.
 
 ::::{important}
-In high-availability deployments, make sure you use the same security settings for all instances of {{kib}}. Also consider storing sensitive security settings, such as encryption and decryption keys, securely in the Kibana Keystore, instead of keeping them in clear text in the kibana.yml file.
+In high-availability deployments, make sure you use the same security settings for all instances of {{kib}}. Also consider storing sensitive security settings, such as encryption and decryption keys, securely in the Kibana keystore, instead of keeping them in clear text in the `kibana.yml` file.
 ::::
 
-
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 ### Authentication security settings [authentication-security-settings]
 
-You configure authentication settings in the `xpack.security.authc` namespace in `kibana.yml`.
+You configure authentication settings in the `xpack.security.authc` namespace.
 
 For example:
 
@@ -156,8 +162,6 @@ xpack.security.authc.http.schemes[]
 
 ### Login user interface settings [login-ui-settings]
 
-You can configure the following settings in the `kibana.yml` file.
-
 xpack.security.loginAssistanceMessage ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
 
@@ -170,15 +174,11 @@ xpack.security.authc.selector.enabled ![logo cloud](https://doc-icons.s3.us-east
 
 ### Configure a default access agreement [authentication-access-agreement-settings]
 
-You can configure the following settings in the `kibana.yml` file.
-
 xpack.security.accessAgreement.message ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   This setting specifies the access agreement text in Markdown format that will be used as the default access agreement for all providers that do not specify a value for `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message`. For more information, refer to [Access agreement](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/access-agreement.md).
 
 
 ### Session and cookie security settings [security-session-and-cookie-settings]
-
-You can configure the following settings in the `kibana.yml` file.
 
 xpack.security.cookieName
 :   Sets the name of the cookie used for the session. The default value is `"sid"`.

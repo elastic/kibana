@@ -2,6 +2,10 @@
 navigation_title: "{{fleet}} settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # {{fleet}} settings in {{kib}} [fleet-settings-kb]
@@ -9,15 +13,14 @@ mapped_pages:
 
 ::::{note}
 In {{ecloud}}, {{fleet}} flags are already configured.
-
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 ::::
 
-
-You can configure `xpack.fleet` settings in your `kibana.yml`. By default, {{fleet}} is enabled. To use {{fleet}}, you also need to configure {{kib}} and {{es}} hosts.
+By default, {{fleet}} is enabled. To use {{fleet}}, you also need to configure {{kib}} and {{es}} hosts.
 
 Many {{fleet}} settings can also be configured directly through the {{fleet}} UI. See [Fleet UI settings](docs-content://reference/ingestion-tools/fleet/fleet-settings.md) for details.
 
-See the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) docs for more information about {{fleet}}.
+Go to the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) docs for more information about {{fleet}}.
 
 ## General {{fleet}} settings [general-fleet-settings-kb]
 
