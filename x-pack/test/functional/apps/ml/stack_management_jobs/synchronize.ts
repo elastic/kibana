@@ -112,7 +112,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.overviewPage.assertJobSyncRequiredWarningExists();
 
       // object counts in sync flyout are all 1, sync button is enabled
-      await ml.navigation.navigateToJobManagement();
       await ml.stackManagementJobs.openSyncFlyout();
       await ml.stackManagementJobs.assertSyncFlyoutObjectCounts(
         new Map([
