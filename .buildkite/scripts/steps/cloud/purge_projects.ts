@@ -9,37 +9,33 @@
 
 import { execSync } from 'child_process';
 import axios from 'axios';
-import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
   // BOOKMARK - List of Kibana project types
   const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|chat)$/;
   try {
+    // BOOKMARK - List of Kibana project types
     return (
-      // BOOKMARK - List of Kibana project types
-      (
-        await Promise.all([
-          // TODO ideally rename 'elasticsearch' to 'search'
-          projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
-          projectRequest.get('/api/v1/serverless/projects/security'),
-          projectRequest.get('/api/v1/serverless/projects/observability'),
-          // BOOKMARK - List of Kibana project types - TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
-        ])
-      )
-        .map((response) => response.data.items)
-        .flat()
-        .filter((project) => project.name.match(match))
-        .map((project) => {
-          const [, , prNumber, projectType] = project.name.match(match);
-          return {
-            id: project.id,
-            name: project.name,
-            prNumber,
-            type: projectType,
-          };
-        })
-    );
+      await Promise.all([
+        projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
+        projectRequest.get('/api/v1/serverless/projects/security'),
+        projectRequest.get('/api/v1/serverless/projects/observability'),
+        // TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
+      ])
+    )
+      .map((response) => response.data.items)
+      .flat()
+      .filter((project) => project.name.match(match))
+      .map((project) => {
+        const [, , prNumber, projectType] = project.name.match(match);
+        return {
+          id: project.id,
+          name: project.name,
+          prNumber,
+          type: projectType,
+        };
+      });
   } catch (e) {
     if (e.isAxiosError) {
       const message = JSON.stringify(e.response.data) || 'unable to fetch projects';
@@ -54,18 +50,14 @@ async function deleteProject({
   id,
   name,
 }: {
-  type: KibanaSolution;
+  // BOOKMARK - List of Kibana project types
+  type: 'elasticsearch' | 'security' | 'observability' | 'chat';
   id: number;
   name: string;
 }) {
   try {
-    // BOOKMARK - List of Kibana project types
     // TODO handle the new 'chat' project type, and ideally rename 'elasticsearch' to 'search'
-    await projectRequest.delete(
-      `/api/v1/serverless/projects/${
-        type === ('search' as KibanaSolution) ? 'elasticsearch' : type
-      }/${id}`
-    );
+    await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
 
     execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
       cwd: getKibanaDir(),
