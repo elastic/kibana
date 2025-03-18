@@ -163,3 +163,25 @@ export const DEFAULT_CHAT_TITLE = `You are a helpful assistant for Elastic Secur
 MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
+
+export const DEFEND_INSIGHTS = {
+  INCOMPATIBLE_ANTIVIRUS: {
+    DEFAULT:
+      'You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Only focus on detecting antivirus processes. Ignore processes that belong to Elastic Agent or Elastic Defend, that are not antivirus processes, or are typical processes built into the operating system. Accuracy is of the utmost importance, try to minimize false positives. Group the processes by the antivirus program, keeping track of the agent.id and _id associated to each of the individual events as endpointId and eventId respectively. If there are no events, ignore the group field. Escape backslashes to respect JSON validation. New lines must always be escaped with double backslashes, i.e. \\\\n to ensure valid JSON. Only return JSON output, as described above. Do not add any additional text to describe your output.',
+    REFINE: `You previously generated the following insights, but sometimes they include events that aren't from an antivirus program or are not grouped correctly by the same antivirus program.
+
+Review the insights below and remove any that are not from an antivirus program and combine duplicates into the same 'group'; leave any other insights unchanged:`,
+    CONTINUE: `Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
+1) it MUST conform to the schema above, because it will be checked against the JSON schema
+2) it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
+3) it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
+4) it MUST NOT restart from the beginning, because that would prevent partial results from being combined
+5) it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
+`,
+    GROUP: 'The program which is triggering the events',
+    EVENTS: 'The events that the insight is based on',
+    EVENTS_ID: 'The event ID',
+    EVENTS_ENDPOINT_ID: 'The endpoint ID',
+    EVENTS_VALUE: 'The process.executable value of the event',
+  },
+};
