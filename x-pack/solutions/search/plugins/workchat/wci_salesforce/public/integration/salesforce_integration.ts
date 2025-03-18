@@ -15,6 +15,6 @@ export function getSalesforceIntegrationComponents(): IntegrationComponentDescri
   return {
     getType: () => IntegrationType.salesforce,
     getTool: () => SalesforceTool,
-    getConfigurationForm: () => SalesforceConfigurationForm,
+    getConfigurationForm: () => SalesforceConfigurationForm
   };
 }

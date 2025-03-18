@@ -9,7 +9,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import { Client as McpClient } from '@modelcontextprotocol/sdk/client/index';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IntegrationType } from './constants';
-
+import type { UseFormReturn } from 'react-hook-form';
 /**
  * Represents the definition of a type of integration for WorkChat.
  *
@@ -77,4 +77,5 @@ export interface IntegrationToolComponentProps<T extends IntegrationConfiguratio
 
 export interface IntegrationConfigurationFormProps<T extends IntegrationConfiguration = IntegrationConfiguration> {
   configuration: T;
+  form: UseFormReturn<any>;
 }

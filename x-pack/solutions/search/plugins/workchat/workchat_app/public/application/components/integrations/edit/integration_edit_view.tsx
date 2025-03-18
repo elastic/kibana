@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiFieldText,
@@ -26,11 +26,12 @@ import { IntegrationType } from '@kbn/wci-common';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
-import { useIntegrationEdit } from '../../../hooks/use_integration_edit';
+import { IntegrationEditState, useIntegrationEdit } from '../../../hooks/use_integration_edit';
 import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { integrationLabels } from '../i18n';
 import { integrationTypeToLabel } from '../utils';
 import { useWorkChatServices } from '../../../hooks/use_workchat_service';
+import { FormProvider, useForm, Controller } from 'react-hook-form';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -77,22 +78,11 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     [notifications]
   );
 
-  const { editState, setFieldValue, submit, isSubmitting } = useIntegrationEdit({
+  const { editState, submit } = useIntegrationEdit({
     integrationId,
     onSaveSuccess,
     onSaveError,
   });
-
-  const onSubmit = useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      if (isSubmitting) {
-        return;
-      }
-      submit();
-    },
-    [submit, isSubmitting]
-  );
 
   const integrationTypes = [
     { value: '', text: 'Pick a type' },
@@ -104,19 +94,8 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const integrationRegistry = useWorkChatServices().integrationRegistry;
 
-  const ConfigurationForm = useMemo(() => {
-    const integrationType = editState.type;
-    if (!integrationType) {
-      return null;
-    }
-    const integrationDefinition = integrationRegistry.get(integrationType as IntegrationType);
-    return integrationDefinition.getConfigurationForm();
-  }, [editState.type, integrationRegistry]);
-
-
-  const updateConfiguration = (configuration: string) => {
-    setFieldValue('configuration', JSON.parse(configuration));
-  };
+  const integrationDefinition = editState.type && integrationRegistry.get(editState.type as IntegrationType);
+  const ConfigurationForm = integrationDefinition?.getConfigurationForm?.();
 
   const onDeleteSuccess = useCallback(() => {
     notifications.toasts.addSuccess(integrationLabels.notifications.integrationDeletedToastText);
@@ -152,6 +131,11 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     setIsDeleteModalVisible(false);
   };
 
+  const formMethods = useForm<IntegrationEditState>({
+    values: editState
+  });
+
+  const { handleSubmit, formState: { isSubmitting }, control } = formMethods
   return (
     <KibanaPageTemplate panelled>
       <KibanaPageTemplate.Header
@@ -164,49 +148,45 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
       <KibanaPageTemplate.Section grow={false} paddingSize="m">
         <EuiPanel hasShadow={false} hasBorder={true}>
-          <EuiForm component="form" fullWidth onSubmit={onSubmit}>
+        <FormProvider {...formMethods}>
+          <EuiForm component="form" fullWidth onSubmit={handleSubmit((data) => submit(data))}>
             <EuiDescribedFormGroup
               ratio="third"
               title={<h3>Base configuration</h3>}
               description="Configure your integration"
             >
               <EuiFormRow label="Description">
-                <EuiFieldText
-                  data-test-subj="workchatAppIntegrationEditViewFieldText"
+                <Controller
+                  rules={{ required: true }}
                   name="description"
-                  value={editState.description}
-                  onChange={(e) => setFieldValue('description', e.target.value)}
+                  control={control}
+                  render={({ field }) => (
+                    <EuiFieldText
+                      data-test-subj="workchatAppIntegrationEditViewFieldText"
+                      {...field}
+                    />
+                  )}
                 />
               </EuiFormRow>
               <EuiFormRow label="Type">
-                <EuiSelect
-                  data-test-subj="workchatAppIntegrationEditViewSelect"
-                  options={integrationTypes}
-                  value={editState.type}
-                  onChange={(e) => setFieldValue('type', e.target.value)}
-                  disabled={!!integrationId}
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field }) => (
+                    <EuiSelect
+                      data-test-subj="workchatAppIntegrationEditViewSelect"
+                      options={integrationTypes}
+                      {...field}
+                      disabled={!!integrationId}
+                    />
+                  )}
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>
 
             <EuiSpacer />
 
-            <EuiDescribedFormGroup
-              ratio="third"
-              title={<h3>Integration Configuration</h3>}
-              description="Configure the integration details"
-            >
-              <EuiFormRow label="Additional Configuration">
-                <EuiTextArea
-                  data-test-subj="workchatAppIntegrationEditViewAdditionalConfig"
-                  placeholder="JSON configuration"
-                  value={JSON.stringify(editState.configuration, null, 2)}
-                  onChange={(e) => updateConfiguration(e.target.value)}
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-
-            {ConfigurationForm && <ConfigurationForm configuration={editState} />}
+            {ConfigurationForm && <ConfigurationForm form={formMethods} />}
 
             <EuiSpacer />
 
@@ -265,6 +245,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
               <p>Are you sure you want to delete this integration? This action cannot be undone.</p>
             </EuiConfirmModal>
           )}
+          </FormProvider>
         </EuiPanel>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

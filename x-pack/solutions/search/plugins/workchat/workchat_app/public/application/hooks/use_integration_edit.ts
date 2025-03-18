@@ -6,11 +6,9 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import type { Integration } from '@kbn/wci-common';
 import { useWorkChatServices } from './use_workchat_service';
 
 export interface IntegrationEditState {
-  name: string;
   description: string;
   type: string;
   configuration: Record<string, any>;
@@ -18,7 +16,6 @@ export interface IntegrationEditState {
 
 const emptyState = (): IntegrationEditState => {
   return {
-    name: '',
     description: '',
     type: '',
     configuration: {},
@@ -44,7 +41,6 @@ export const useIntegrationEdit = ({
       if (integrationId) {
         const integration = await integrationService.get(integrationId);
         setEditState({
-          name: integration.name,
           description: integration.description,
           type: integration.type,
           configuration: integration.configuration || {},
@@ -54,42 +50,41 @@ export const useIntegrationEdit = ({
     fetchIntegration();
   }, [integrationId, integrationService]);
 
-  const setFieldValue = <T extends keyof IntegrationEditState>(
-    key: T,
-    value: IntegrationEditState[T]
-  ) => {
-    setEditState((previous) => ({ ...previous, [key]: value }));
-  };
+  const submit = useCallback(
+    (customIntegration?: Partial<IntegrationEditState>) => {
+      setSubmitting(true);
+      
+      const integrationData = customIntegration 
+        ? { ...editState, ...customIntegration }
+        : editState;
 
-  const submit = useCallback(() => {
-    setSubmitting(true);
-
-    (integrationId
-      ? integrationService.update(integrationId, {
-          description: editState.description,
-          configuration: editState.configuration,
-        })
-      : integrationService.create({
-          type: editState.type,
-          description: editState.description,
-          configuration: editState.configuration,
-        })
-    ).then(
-      (response) => {
-        setSubmitting(false);
-        onSaveSuccess(response);
-      },
-      (err) => {
-        setSubmitting(false);
-        onSaveError(err);
-      }
-    );
-  }, [integrationId, editState, integrationService, onSaveSuccess, onSaveError]);
+      (integrationId
+        ? integrationService.update(integrationId, {
+            description: integrationData.description,
+            configuration: integrationData.configuration,
+          })
+        : integrationService.create({
+            type: integrationData.type,
+            description: integrationData.description,
+            configuration: integrationData.configuration,
+          })
+      ).then(
+        (response) => {
+          setSubmitting(false);
+          onSaveSuccess(response);
+        },
+        (err) => {
+          setSubmitting(false);
+          onSaveError(err);
+        }
+      );
+    },
+    [integrationId, editState, integrationService, onSaveSuccess, onSaveError]
+  );
 
   return {
     editState,
     isSubmitting,
-    setFieldValue,
     submit,
   };
 };
