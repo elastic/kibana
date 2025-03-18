@@ -12,6 +12,7 @@ import type { attachmentApiV1, userActionApiV1 } from '../../../../common/types/
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 const params = {
   params: schema.object({
@@ -22,6 +23,7 @@ const params = {
 export const findUserActionsRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_CASE_FIND_USER_ACTIONS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params,
   routerOptions: {
     access: 'public',
