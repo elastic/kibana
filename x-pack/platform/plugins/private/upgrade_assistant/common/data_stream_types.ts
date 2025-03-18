@@ -6,6 +6,7 @@
  */
 
 export interface DataStreamsActionMetadata {
+  excludedActions?: Array<'readOnly' | 'reindex'>;
   totalBackingIndices: number;
   indicesRequiringUpgradeCount: number;
   indicesRequiringUpgrade: string[];
@@ -72,23 +73,27 @@ export interface DataStreamReindexStatusNotStarted {
 }
 
 export interface DataStreamReindexStatusInProgress {
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.inProgress;
   taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusCompleted {
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.completed;
   taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusFailed {
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.failed;
   errorMessage: string;
 }
 
 export interface DataStreamReindexStatusCancelled {
+  resolutionType: 'reindex' | 'readonly';
   status: DataStreamMigrationStatus.cancelled;
 }
 

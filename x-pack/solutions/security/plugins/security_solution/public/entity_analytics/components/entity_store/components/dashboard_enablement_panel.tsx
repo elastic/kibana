@@ -46,7 +46,7 @@ interface EnableEntityStorePanelProps {
 }
 
 export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }) => {
-  const riskEngineStatus = state.riskEngine.data?.risk_engine_status;
+  const riskEngineStatus = state.riskEngine.data;
   const entityStoreStatus = state.entityStore.data?.status;
   const engines = state.entityStore.data?.engines;
   const enabledEntityTypes = useStoreEntityTypes();
@@ -183,14 +183,19 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     );
   }
 
+  const combinedRiskEngineStatus =
+    riskEngineStatus?.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED
+      ? riskEngineStatus?.risk_engine_status
+      : riskEngineStatus?.legacy_risk_engine_status;
+
   if (
-    riskEngineStatus !== RiskEngineStatusEnum.NOT_INSTALLED &&
-    (entityStoreStatus === 'running' || entityStoreStatus === 'stopped')
+    combinedRiskEngineStatus !== RiskEngineStatusEnum.NOT_INSTALLED &&
+    entityStoreStatus !== 'not_installed'
   ) {
     return null;
   }
 
-  const [title, body] = getEnablementTexts(entityStoreStatus, riskEngineStatus);
+  const [title, body] = getEnablementTexts(entityStoreStatus, combinedRiskEngineStatus);
   return (
     <>
       <EuiEmptyPrompt
@@ -222,14 +227,8 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
         visible={modal.visible}
         toggle={(visible) => setModalState({ visible })}
         enableStore={enableEntityStore}
-        riskScore={{
-          canToggle: riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
-          checked: riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
-        }}
-        entityStore={{
-          canToggle: entityStoreStatus !== 'running',
-          checked: entityStoreStatus === 'not_installed',
-        }}
+        riskEngineStatus={combinedRiskEngineStatus}
+        entityStoreStatus={entityStoreStatus}
       />
     </>
   );

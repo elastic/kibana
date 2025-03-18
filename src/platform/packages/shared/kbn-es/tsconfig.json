@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.json"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/dev-utils",
+    "@kbn/dev-proc-runner",
+    "@kbn/ci-stats-reporter",
+    "@kbn/mock-idp-utils",
+    "@kbn/jest-serializers",
+    "@kbn/repo-info"
+  ]
+}

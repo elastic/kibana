@@ -56,6 +56,7 @@ export interface ReindexStatusResponse {
     aliases: string[];
     isReadonly: boolean;
     isFrozen: boolean;
+    isInDataStream: boolean;
   };
   warnings?: IndexWarning[];
   reindexOp?: ReindexOperation;
@@ -193,24 +194,35 @@ export interface DeprecationInfo {
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
-export interface ReindexAction {
-  type: 'reindex';
+
+export interface IndexMetadata {
+  isFrozenIndex: boolean;
+  isInDataStream: boolean;
+  isClosedIndex: boolean;
+}
+
+export interface IndexAction {
   /**
-   * Indicate what blockers have been detected for calling reindex
-   * against this index.
-   *
-   * @remark
-   * In future this could be an array of blockers.
+   * Includes relevant information about the index related to this action
    */
-  blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+  metadata: IndexMetadata;
+}
+
+export interface ReindexAction extends IndexAction {
+  type: 'reindex';
 
   /**
    * The transform IDs that are currently targeting this index
    */
   transformIds?: string[];
+
+  /**
+   * The actions that should be excluded from the reindex corrective action.
+   */
+  excludedActions?: string[];
 }
 
-export interface UnfreezeAction {
+export interface UnfreezeAction extends IndexAction {
   type: 'unfreeze';
 }
 
@@ -237,6 +249,15 @@ export interface HealthIndicatorAction {
   impacts: HealthReportImpact[];
 }
 
+export type CorrectiveAction =
+  | ReindexAction
+  | UnfreezeAction
+  | MlAction
+  | IndexSettingAction
+  | ClusterSettingAction
+  | DataStreamsAction
+  | HealthIndicatorAction;
+
 export interface EnrichedDeprecationInfo
   extends Omit<
     estypes.MigrationDeprecationsDeprecation,
@@ -251,14 +272,7 @@ export interface EnrichedDeprecationInfo
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
-  correctiveAction?:
-    | ReindexAction
-    | UnfreezeAction
-    | MlAction
-    | IndexSettingAction
-    | ClusterSettingAction
-    | DataStreamsAction
-    | HealthIndicatorAction;
+  correctiveAction?: CorrectiveAction;
   resolveDuringUpgrade: boolean;
 }
 
@@ -334,3 +348,5 @@ export interface FeatureSet {
   reindexCorrectiveActions: boolean;
   migrateDataStreams: boolean;
 }
+
+export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;

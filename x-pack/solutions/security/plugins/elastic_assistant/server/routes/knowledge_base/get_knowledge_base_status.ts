@@ -54,8 +54,6 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          const indexExists = true; // Installed at startup, always true
-          const pipelineExists = true; // Installed at startup, always true
           const setupAvailable = await kbDataClient.isSetupAvailable();
           const isInferenceEndpointExists = await kbDataClient.isInferenceEndpointExists();
           const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
@@ -66,13 +64,11 @@ export const getKnowledgeBaseStatusRoute = (router: ElasticAssistantPluginRouter
           return response.ok({
             body: {
               elser_exists: isInferenceEndpointExists,
-              index_exists: indexExists,
               is_setup_in_progress: kbDataClient.isSetupInProgress,
               is_setup_available: setupAvailable,
               security_labs_exists: securityLabsExists,
               // If user data exists, we should have at least one document in the Security Labs index
               user_data_exists: userDataExists || !!loadedSecurityLabsDocsCount,
-              pipeline_exists: pipelineExists,
               product_documentation_status: productDocumentationStatus,
             },
           });

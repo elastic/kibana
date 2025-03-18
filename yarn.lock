@@ -3946,19 +3946,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-common-types@link:packages/kbn-ambient-common-types":
+"@kbn/ambient-common-types@link:src/platform/packages/private/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ftr-types@link:packages/kbn-ambient-ftr-types":
+"@kbn/ambient-ftr-types@link:src/platform/packages/private/kbn-ambient-ftr-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-storybook-types@link:packages/kbn-ambient-storybook-types":
+"@kbn/ambient-storybook-types@link:src/platform/packages/shared/kbn-ambient-storybook-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ui-types@link:packages/kbn-ambient-ui-types":
+"@kbn/ambient-ui-types@link:src/platform/packages/shared/kbn-ambient-ui-types":
   version "0.0.0"
   uid ""
 
@@ -3998,11 +3998,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace-client@link:packages/kbn-apm-synthtrace-client":
+"@kbn/apm-synthtrace-client@link:src/platform/packages/shared/kbn-apm-synthtrace-client":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace@link:packages/kbn-apm-synthtrace":
+"@kbn/apm-synthtrace@link:src/platform/packages/shared/kbn-apm-synthtrace":
   version "0.0.0"
   uid ""
 
@@ -4030,7 +4030,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/axe-config@link:packages/kbn-axe-config":
+"@kbn/axe-config@link:src/platform/packages/shared/kbn-axe-config":
   version "0.0.0"
   uid ""
 
@@ -4038,11 +4038,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-register@link:packages/kbn-babel-register":
+"@kbn/babel-register@link:src/platform/packages/shared/kbn-babel-register":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-transform@link:packages/kbn-babel-transform":
+"@kbn/babel-transform@link:src/platform/packages/private/kbn-babel-transform":
   version "0.0.0"
   uid ""
 
@@ -4126,7 +4126,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-core@link:packages/kbn-ci-stats-core":
+"@kbn/ci-stats-core@link:src/platform/packages/private/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
 
@@ -4134,7 +4134,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-reporter@link:packages/kbn-ci-stats-reporter":
+"@kbn/ci-stats-reporter@link:src/platform/packages/private/kbn-ci-stats-reporter":
   version "0.0.0"
   uid ""
 
@@ -4206,7 +4206,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-owners@link:packages/kbn-code-owners":
+"@kbn/code-owners@link:src/platform/packages/private/kbn-code-owners":
   version "0.0.0"
   uid ""
 
@@ -5222,7 +5222,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cypress-config@link:packages/kbn-cypress-config":
+"@kbn/cypress-config@link:src/platform/packages/shared/kbn-cypress-config":
   version "0.0.0"
   uid ""
 
@@ -5362,15 +5362,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-errors@link:packages/kbn-dev-cli-errors":
+"@kbn/dev-cli-errors@link:src/platform/packages/shared/kbn-dev-cli-errors":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-runner@link:packages/kbn-dev-cli-runner":
+"@kbn/dev-cli-runner@link:src/platform/packages/shared/kbn-dev-cli-runner":
   version "0.0.0"
   uid ""
 
-"@kbn/dev-proc-runner@link:packages/kbn-dev-proc-runner":
+"@kbn/dev-proc-runner@link:src/platform/packages/shared/kbn-dev-proc-runner":
   version "0.0.0"
   uid ""
 
@@ -5378,7 +5378,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-utils@link:packages/kbn-dev-utils":
+"@kbn/dev-utils@link:src/platform/packages/shared/kbn-dev-utils":
   version "0.0.0"
   uid ""
 
@@ -5506,7 +5506,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-archiver@link:packages/kbn-es-archiver":
+"@kbn/es-archiver@link:src/platform/packages/shared/kbn-es-archiver":
   version "0.0.0"
   uid ""
 
@@ -5526,7 +5526,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:packages/kbn-es":
+"@kbn/es@link:src/platform/packages/shared/kbn-es":
   version "0.0.0"
   uid ""
 
@@ -5638,7 +5638,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expect@link:packages/kbn-expect":
+"@kbn/expect@link:src/platform/packages/shared/kbn-expect":
   version "0.0.0"
   uid ""
 
@@ -5798,15 +5798,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-services@link:packages/kbn-ftr-common-functional-services":
+"@kbn/ftr-common-functional-services@link:src/platform/packages/shared/kbn-ftr-common-functional-services":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-ui-services@link:packages/kbn-ftr-common-functional-ui-services":
+"@kbn/ftr-common-functional-ui-services@link:src/platform/packages/shared/kbn-ftr-common-functional-ui-services":
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-screenshot-filename@link:packages/kbn-ftr-screenshot-filename":
+"@kbn/ftr-screenshot-filename@link:src/platform/packages/private/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
 
@@ -5814,7 +5814,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/gen-ai-functional-testing@link:packages/kbn-gen-ai-functional-testing":
+"@kbn/gen-ai-functional-testing@link:src/platform/packages/private/kbn-gen-ai-functional-testing":
   version "0.0.0"
   uid ""
 
@@ -5834,7 +5834,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/get-repo-files@link:packages/kbn-get-repo-files":
+"@kbn/get-repo-files@link:src/platform/packages/private/kbn-get-repo-files":
   version "0.0.0"
   uid ""
 
@@ -5942,7 +5942,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/import-resolver@link:packages/kbn-import-resolver":
+"@kbn/import-resolver@link:src/platform/packages/private/kbn-import-resolver":
   version "0.0.0"
   uid ""
 
@@ -6054,11 +6054,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/jest-serializers@link:packages/kbn-jest-serializers":
+"@kbn/jest-serializers@link:src/platform/packages/private/kbn-jest-serializers":
   version "0.0.0"
   uid ""
 
-"@kbn/journeys@link:packages/kbn-journeys":
+"@kbn/journeys@link:src/platform/packages/private/kbn-journeys":
   version "0.0.0"
   uid ""
 
@@ -6450,7 +6450,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mock-idp-utils@link:packages/kbn-mock-idp-utils":
+"@kbn/mock-idp-utils@link:src/platform/packages/private/kbn-mock-idp-utils":
   version "0.0.0"
   uid ""
 
@@ -6482,7 +6482,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/node-libs-browser-webpack-plugin@link:packages/kbn-node-libs-browser-webpack-plugin":
+"@kbn/node-libs-browser-webpack-plugin@link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin":
   version "0.0.0"
   uid ""
 
@@ -6582,7 +6582,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
+"@kbn/openapi-bundler@link:src/platform/packages/shared/kbn-openapi-bundler":
   version "0.0.0"
   uid ""
 
@@ -6590,11 +6590,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-generator@link:packages/kbn-openapi-generator":
+"@kbn/openapi-generator@link:src/platform/packages/shared/kbn-openapi-generator":
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer-webpack-helpers@link:packages/kbn-optimizer-webpack-helpers":
+"@kbn/optimizer-webpack-helpers@link:src/platform/packages/private/kbn-optimizer-webpack-helpers":
   version "0.0.0"
   uid ""
 
@@ -6626,7 +6626,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/peggy@link:packages/kbn-peggy":
+"@kbn/peggy@link:src/platform/packages/private/kbn-peggy":
   version "0.0.0"
   uid ""
 
@@ -6770,7 +6770,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-path@link:packages/kbn-repo-path":
+"@kbn/repo-path@link:src/platform/packages/private/kbn-repo-path":
   version "0.0.0"
   uid ""
 
@@ -6962,15 +6962,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout-info@link:packages/kbn-scout-info":
+"@kbn/scout-info@link:src/platform/packages/private/kbn-scout-info":
   version "0.0.0"
   uid ""
 
-"@kbn/scout-reporting@link:packages/kbn-scout-reporting":
+"@kbn/scout-reporting@link:src/platform/packages/private/kbn-scout-reporting":
   version "0.0.0"
   uid ""
 
-"@kbn/scout@link:packages/kbn-scout":
+"@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""
 
@@ -7546,7 +7546,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/some-dev-log@link:packages/kbn-some-dev-log":
+"@kbn/some-dev-log@link:src/platform/packages/private/kbn-some-dev-log":
   version "0.0.0"
   uid ""
 
@@ -7610,11 +7610,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stdio-dev-helpers@link:packages/kbn-stdio-dev-helpers":
+"@kbn/stdio-dev-helpers@link:src/platform/packages/private/kbn-stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/storybook@link:packages/kbn-storybook":
+"@kbn/storybook@link:src/platform/packages/shared/kbn-storybook":
   version "0.0.0"
   uid ""
 
@@ -7678,11 +7678,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+"@kbn/telemetry-tools@link:src/platform/packages/private/kbn-telemetry-tools":
   version "0.0.0"
   uid ""
 
-"@kbn/test-eui-helpers@link:packages/kbn-test-eui-helpers":
+"@kbn/test-eui-helpers@link:src/platform/packages/private/kbn-test-eui-helpers":
   version "0.0.0"
   uid ""
 
@@ -7690,11 +7690,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-jest-helpers@link:packages/kbn-test-jest-helpers":
+"@kbn/test-jest-helpers@link:src/platform/packages/shared/kbn-test-jest-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
+"@kbn/test-subj-selector@link:src/platform/packages/shared/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
 
@@ -7714,7 +7714,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:packages/kbn-test":
+"@kbn/test@link:src/platform/packages/shared/kbn-test":
   version "0.0.0"
   uid ""
 
@@ -7750,7 +7750,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tooling-log@link:packages/kbn-tooling-log":
+"@kbn/tooling-log@link:src/platform/packages/shared/kbn-tooling-log":
   version "0.0.0"
   uid ""
 
@@ -12013,11 +12013,6 @@
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.2.tgz#b74129719fc8d11c01868010082d483b7545591a"
   integrity sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==
 
-"@types/lru-cache@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.0.tgz#57f228f2b80c046b4a1bd5cac031f81f207f4f03"
-  integrity sha512-RaE0B+14ToE4l6UqdarKPnXwVDuigfFv+5j9Dze/Nqr23yyuqdNvzcZi3xB+3Agvi5R4EOgAksfv3lXX4vBt9w==
-
 "@types/lz-string@^1.3.34":
   version "1.3.34"
   resolved "https://registry.yarnpkg.com/@types/lz-string/-/lz-string-1.3.34.tgz#69bfadde419314b4a374bf2c8e58659c035ed0a5"
@@ -12877,6 +12872,14 @@
     "@typescript-eslint/types" "5.62.0"
     "@typescript-eslint/visitor-keys" "5.62.0"
 
+"@typescript-eslint/scope-manager@^8.15.0":
+  version "8.25.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-8.25.0.tgz#ac3805077aade898e98ca824294c998545597df3"
+  integrity sha512-6PPeiKIGbgStEyt4NNXa2ru5pMzQ8OYKO1hX1z53HMomrmiSB+R5FmChgQAP1ro8jMtNawz+TRQo/cSXrauTpg==
+  dependencies:
+    "@typescript-eslint/types" "8.25.0"
+    "@typescript-eslint/visitor-keys" "8.25.0"
+
 "@typescript-eslint/type-utils@5.62.0":
   version "5.62.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/type-utils/-/type-utils-5.62.0.tgz#286f0389c41681376cdad96b309cedd17d70346a"
@@ -12892,6 +12895,11 @@
   resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.62.0.tgz#258607e60effa309f067608931c3df6fed41fd2f"
   integrity sha512-87NVngcbVXUahrRTqIK27gD2t5Cu1yuCXxbLcFtCzZGlfyVWWh8mLHkoxzjsB6DDNnvdL+fW8MiwPEJyGJQDgQ==
 
+"@typescript-eslint/types@8.25.0":
+  version "8.25.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-8.25.0.tgz#f91512c2f532b1d6a8826cadd0b0e5cd53cf97e0"
+  integrity sha512-+vUe0Zb4tkNgznQwicsvLUJgZIRs6ITeWSCclX1q85pR1iOiaj+4uZJIUp//Z27QWu5Cseiw3O3AR8hVpax7Aw==
+
 "@typescript-eslint/typescript-estree@5.62.0", "@typescript-eslint/typescript-estree@^5.59.5", "@typescript-eslint/typescript-estree@^5.62.0":
   version "5.62.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.62.0.tgz#7d17794b77fabcac615d6a48fb143330d962eb9b"
@@ -12905,7 +12913,7 @@
     semver "^7.3.7"
     tsutils "^3.21.0"
 
-"@typescript-eslint/utils@5.62.0", "@typescript-eslint/utils@^5.10.0", "@typescript-eslint/utils@^5.62.0", "@typescript-eslint/utils@^6.18.1":
+"@typescript-eslint/utils@5.62.0", "@typescript-eslint/utils@^5.10.0", "@typescript-eslint/utils@^6.18.1", "@typescript-eslint/utils@^8.15.0":
   version "5.62.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.62.0.tgz#141e809c71636e4a75daa39faed2fb5f4b10df86"
   integrity sha512-n8oxjeb5aIbPFEtmQxQYOLI0i9n5ySBEY/ZEHHZqKQSFnxio1rv6dthascc9dLuwrL0RC5mPCxB7vnAVGAYWAQ==
@@ -12926,6 +12934,14 @@
   dependencies:
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
+
+"@typescript-eslint/visitor-keys@8.25.0":
+  version "8.25.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-8.25.0.tgz#e8646324cd1793f96e02669cb717a05319403164"
+  integrity sha512-kCYXKAum9CecGVHGij7muybDfTS2sD3t0L4bJsEZLkyrXUImiCTq1M3LG2SRtOhiHFwMR9wAFplpT6XHYjTkwQ==
+  dependencies:
+    "@typescript-eslint/types" "8.25.0"
+    eslint-visitor-keys "^4.2.0"
 
 "@ungap/structured-clone@^1.2.0":
   version "1.2.0"
@@ -14167,10 +14183,10 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@^1.0.0, axios@^1.6.0, axios@^1.6.2, axios@^1.7.4, axios@^1.7.9:
-  version "1.7.9"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
-  integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
+axios@^1.0.0, axios@^1.6.0, axios@^1.6.2, axios@^1.7.4, axios@^1.8.2:
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.2.tgz#fabe06e241dfe83071d4edfbcaa7b1c3a40f7979"
+  integrity sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.0"
@@ -15413,10 +15429,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^133.0.2:
-  version "133.0.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-133.0.3.tgz#84c314954172cf07dff89485afbe5778c3082b25"
-  integrity sha512-wGZUtrSdyqnbweXEDIbn+ndu7memG4SEqG6/D+mSabKUEic0hveMYepAPAhlYtvyOc0X8JbsARYtEalVD3R/Vg==
+chromedriver@^134.0.0:
+  version "134.0.2"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-134.0.2.tgz#a9ccfbb4e1f3398c3289e755ddec657ed8158ccf"
+  integrity sha512-r1yIHP0Lo61CdFGjZXITSY2ZGYBS5B/qwOs8NMm0r31qnyS4MAuSmMiIiZKhu+ThxfcT8zPrGPGT6RmM0LWljQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -16687,10 +16703,10 @@ cytoscape-dagre@^2.5.0:
   dependencies:
     dagre "^0.8.5"
 
-cytoscape@^3.31.0:
-  version "3.31.0"
-  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.31.0.tgz#cffbbb8ca51db01cbf360e0cf59088db6d429837"
-  integrity sha512-zDGn1K/tfZwEnoGOcHc0H4XazqAAXAuDpcYw9mUnUjATjqljyCNGJv8uEvbvxGaGHaVshxMecyl6oc6uKzRfbw==
+cytoscape@^3.31.1:
+  version "3.31.1"
+  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.31.1.tgz#29b12cac715fbb2aacc50cdf5cf1467aadde9c00"
+  integrity sha512-Hx5Mtb1+hnmAKaZZ/7zL1Y5HTFYOjdDswZy/jD+1WINRU8KVi1B7+vlHdsTwY+VCFucTreoyu1RDzQJ9u0d2Hw==
 
 "d3-array@1 - 3", "d3-array@2 - 3", "d3-array@2.10.0 - 3", "d3-array@2.5.0 - 3", d3-array@3.2.2, d3-array@^3.2.2:
   version "3.2.2"
@@ -18622,12 +18638,13 @@ eslint-plugin-react@^7.32.2:
     semver "^6.3.0"
     string.prototype.matchall "^4.0.8"
 
-eslint-plugin-testing-library@^6.4.0:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-6.4.0.tgz#1ba8a7422e3e31cc315a73ff17c34908f56f9838"
-  integrity sha512-yeWF+YgCgvNyPNI9UKnG0FjeE2sk93N/3lsKqcmR8dSfeXJwFT5irnWo7NjLf152HkRzfoFjh3LsBUrhvFz4eA==
+eslint-plugin-testing-library@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-7.1.1.tgz#df834e821e53fa81c1eb1fad5a0d9ba4c510f9ea"
+  integrity sha512-nszC833aZPwB6tik1nMkbFqmtgIXTT0sfJEYs0zMBKMlkQ4to2079yUV96SvmLh00ovSBJI4pgcBC1TiIP8mXg==
   dependencies:
-    "@typescript-eslint/utils" "^5.62.0"
+    "@typescript-eslint/scope-manager" "^8.15.0"
+    "@typescript-eslint/utils" "^8.15.0"
 
 eslint-rule-composer@^0.3.0:
   version "0.3.0"
@@ -18696,6 +18713,11 @@ eslint-visitor-keys@^3.3.0, eslint-visitor-keys@^3.4.1, eslint-visitor-keys@^3.4
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz#0cd72fe8550e3c2eae156a96a4dddcd1c8ac5800"
   integrity sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==
+
+eslint-visitor-keys@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-4.2.0.tgz#687bacb2af884fcdda8a6e7d65c606f46a14cd45"
+  integrity sha512-UyLnSehNt62FFhSwjZlHmeokpRK59rcz29j+F1/aDgbkbRTk7wIc9XzdoasMUbRNKDM0qQt/+BJ4BrpFeABemw==
 
 eslint@^8.57.0:
   version "8.57.0"
@@ -23913,6 +23935,11 @@ lru-cache@^10.2.0:
   version "10.4.3"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.4.3.tgz#410fc8a17b70e598013df257c2446b7f3383f119"
   integrity sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==
+
+lru-cache@^11.0.2:
+  version "11.0.2"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.0.2.tgz#fbd8e7cf8211f5e7e5d91905c415a3f55755ca39"
+  integrity sha512-123qHRfJBmo2jXDbo/a5YOQrJoHF/GNQTLzQ5+IdK5pWpceK17yRc6ozlWd25FxvGKQbIUs91fDFkXmDHTKcyA==
 
 lru-cache@^4.1.5:
   version "4.1.5"
@@ -29277,10 +29304,10 @@ rxjs@^6.4.0, rxjs@^6.6.0, rxjs@^6.6.7:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^7.4.0, rxjs@^7.5.5, rxjs@^7.8.1:
-  version "7.8.1"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
-  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
+rxjs@^7.4.0, rxjs@^7.5.5, rxjs@^7.8.1, rxjs@^7.8.2:
+  version "7.8.2"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.2.tgz#955bc473ed8af11a002a2be52071bf475638607b"
+  integrity sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==
   dependencies:
     tslib "^2.1.0"
 
@@ -33855,10 +33882,10 @@ x-default-browser@^0.4.0:
   optionalDependencies:
     default-browser-id "^1.0.4"
 
-xml-crypto@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-6.0.0.tgz#9657ce63cbbaacc48b2c74a13d05cf0a9d339d47"
-  integrity sha512-L3RgnkaDrHaYcCnoENv4Idzt1ZRj5U1z1BDH98QdDTQfssScx8adgxhd9qwyYo+E3fXbQZjEQH7aiXHLVgxGvw==
+xml-crypto@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-6.0.1.tgz#81d224cf9f2cac9f15190bbb4ef93f53e1f8a8e8"
+  integrity sha512-v05aU7NS03z4jlZ0iZGRFeZsuKO1UfEbbYiaeRMiATBFs6Jq9+wqKquEMTn4UTrYZ9iGD8yz3KT4L9o2iF682w==
   dependencies:
     "@xmldom/is-dom-node" "^1.0.1"
     "@xmldom/xmldom" "^0.8.10"
