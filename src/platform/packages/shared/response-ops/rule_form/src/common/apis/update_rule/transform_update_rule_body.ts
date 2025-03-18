@@ -58,5 +58,4 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
   ...(alertDelay !== undefined ? { alert_delay: alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformUpdateRuleFlapping(flapping) } : {}),
   ...(dashboards ? { dashboards } : []),
-
 });
