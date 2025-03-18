@@ -39,6 +39,7 @@ export interface DiscoverGridFlyoutProps {
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
+  docViewerAccordionState: Record<string, boolean>;
 }
 
 /**
@@ -58,6 +59,7 @@ export function DiscoverGridFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  docViewerAccordionState,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -87,8 +89,8 @@ export function DiscoverGridFlyout({
           : registry,
     }));
 
-    return getDocViewer({ record: actualHit });
-  }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
+    return getDocViewer({ record: actualHit, docViewerAccordionState });
+  }, [getDocViewerAccessor, actualHit, docViewerAccordionState, flyoutCustomization]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -177,6 +177,10 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const [docViewerAccordionState, setDocViewerAccordionState] = useState<Record<string, boolean>>(
+    {}
+  );
+
   const {
     columns: currentColumns,
     onAddColumn,
@@ -306,11 +310,13 @@ function DiscoverDocumentsComponent({
         onAddColumn={onAddColumnWithTracking}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
+        docViewerAccordionState={docViewerAccordionState}
         query={query}
       />
     ),
     [
       dataView,
+      docViewerAccordionState,
       onAddColumnWithTracking,
       onAddFilter,
       onRemoveColumnWithTracking,
@@ -469,6 +475,7 @@ function DiscoverDocumentsComponent({
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
+            setDocViewerAccordionState={setDocViewerAccordionState}
           />
         </CellActionsProvider>
       </div>
