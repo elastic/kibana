@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { History } from 'history';
-import { createHashHistory } from 'history';
-import type { HistoryLocationState } from './build_services';
+import { createHashHistory, type History } from 'history';
+import type { HistoryLocationState } from '../build_services';
 
 export class HistoryService {
   private history?: History<HistoryLocationState>;
