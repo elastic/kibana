@@ -18,10 +18,15 @@ import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/servi
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
+import { StreamsTelemetryService } from '../public/telemetry/service';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
   const appParams = coreMock.createAppMountParameters();
   const core = coreMock.createStart();
+  const coreSetup = coreMock.createSetup();
+
+  const telemetryService = new StreamsTelemetryService();
+  telemetryService.setup(coreSetup.analytics);
 
   return {
     appParams,
@@ -43,6 +48,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
       PageTemplate: () => null,
+      telemetryClient: telemetryService.getClient(),
     },
     isServerless: false,
   };
