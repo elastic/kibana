@@ -749,7 +749,39 @@ describe('waterfall_helpers', () => {
           parentId: 'myTransactionId1',
         } as IWaterfallSpan,
       ];
-      expect(getOrphanItemsIds(traceItems).length).toBe(0);
+      expect(getOrphanItemsIds(traceItems, traceItems[0].id).length).toBe(0);
+    });
+
+    it('should return missing items count: 0 if first item is orphan', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        {
+          doc: {
+            processor: { event: 'transaction' },
+            trace: { id: 'myTrace' },
+            transaction: {
+              id: 'myTransactionId1',
+            },
+          } as WaterfallTransaction,
+          docType: 'transaction',
+          id: 'myTransactionId1',
+          parentId: 'myNotExistingTransactionId0',
+        } as IWaterfallTransaction,
+        {
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            parent: {
+              id: 'myTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(getOrphanItemsIds(traceItems, traceItems[0].id).length).toBe(0);
     });
 
     it('should return missing items count if there are orphan items', () => {
@@ -770,7 +802,7 @@ describe('waterfall_helpers', () => {
           parentId: 'myNotExistingTransactionId1',
         } as IWaterfallSpan,
       ];
-      expect(getOrphanItemsIds(traceItems).length).toBe(1);
+      expect(getOrphanItemsIds(traceItems, traceItems[0].id).length).toBe(1);
     });
   });
 
