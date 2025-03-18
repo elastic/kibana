@@ -29,13 +29,15 @@ describe('setDeprecationLogging', () => {
       const dataClient = elasticsearchServiceMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, true);
       expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
-        persistent: {
-          'logger.deprecation': 'WARN',
-          'cluster.deprecation_indexing.enabled': true,
-        },
-        transient: {
-          'logger.deprecation': 'WARN',
-          'cluster.deprecation_indexing.enabled': true,
+        body: {
+          persistent: {
+            'logger.deprecation': 'WARN',
+            'cluster.deprecation_indexing.enabled': true,
+          },
+          transient: {
+            'logger.deprecation': 'WARN',
+            'cluster.deprecation_indexing.enabled': true,
+          },
         },
       });
     });
@@ -46,13 +48,15 @@ describe('setDeprecationLogging', () => {
       const dataClient = elasticsearchServiceMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, false);
       expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
-        persistent: {
-          'logger.deprecation': 'ERROR',
-          'cluster.deprecation_indexing.enabled': false,
-        },
-        transient: {
-          'logger.deprecation': 'ERROR',
-          'cluster.deprecation_indexing.enabled': false,
+        body: {
+          persistent: {
+            'logger.deprecation': 'ERROR',
+            'cluster.deprecation_indexing.enabled': false,
+          },
+          transient: {
+            'logger.deprecation': 'ERROR',
+            'cluster.deprecation_indexing.enabled': false,
+          },
         },
       });
     });

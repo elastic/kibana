@@ -21,6 +21,7 @@ import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
 
 const data = dataPluginMock.createStartContract();
 const dataViews = { ...data.dataViews };
@@ -51,6 +52,7 @@ const servicesMock = {
 const idToUrlMap = {
   SNAPSHOT_RESTORE_LOCATOR: 'snapshotAndRestoreUrl',
   DISCOVER_APP_LOCATOR: 'discoverUrl',
+  [OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID]: 'logsExplorerUrl',
 };
 type IdKey = keyof typeof idToUrlMap;
 
@@ -75,6 +77,7 @@ shareMock.url.locators.get = (id: IdKey) => ({
 });
 
 export const getAppContextMock = (kibanaVersion: SemVer) => ({
+  dataSourceExclusions: {},
   featureSet: {
     mlSnapshots: true,
     migrateSystemIndices: true,
