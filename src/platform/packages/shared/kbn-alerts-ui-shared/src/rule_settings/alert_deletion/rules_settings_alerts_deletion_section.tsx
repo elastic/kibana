@@ -148,7 +148,7 @@ export const RulesSettingsAlertsDeletionSection = (props: Props) => {
               isLoading={isLoadingPreview}
               contentAriaLabel={i18n.ALERT_DELETION_AFFECTED_ALERTS_ARIA}
               width={'100%'}
-              height={48}
+              height={48} // TODO: use euiTheme vars. font-size + margin * 2?
               borderRadius="none"
             >
               <EuiPanel borderRadius="none" color="subdued">
