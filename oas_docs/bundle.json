@@ -45667,10 +45667,14 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "description": {
+                                "type": "string"
                               }
                             },
                             "required": [
-                              "dashboards"
+                              "dashboards",
+                              "description"
                             ],
                             "type": "object"
                           },
@@ -46406,10 +46410,14 @@
                                   "type": "string"
                                 },
                                 "type": "array"
+                              },
+                              "description": {
+                                "type": "string"
                               }
                             },
                             "required": [
-                              "dashboards"
+                              "dashboards",
+                              "description"
                             ],
                             "type": "object"
                           },
@@ -46894,10 +46902,14 @@
                               "type": "string"
                             },
                             "type": "array"
+                          },
+                          "description": {
+                            "type": "string"
                           }
                         },
                         "required": [
-                          "dashboards"
+                          "dashboards",
+                          "description"
                         ],
                         "type": "object"
                       },
@@ -46909,9 +46921,6 @@
                               "group": {
                                 "additionalProperties": false,
                                 "properties": {
-                                  "description": {
-                                    "type": "string"
-                                  },
                                   "members": {
                                     "items": {
                                       "minLength": 1,
@@ -47214,9 +47223,6 @@
                   "group": {
                     "additionalProperties": false,
                     "properties": {
-                      "description": {
-                        "type": "string"
-                      },
                       "members": {
                         "items": {
                           "minLength": 1,
