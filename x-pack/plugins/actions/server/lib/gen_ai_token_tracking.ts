@@ -154,7 +154,7 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
-  // this is a non-streamed OpenAI PKI response, which comes with the usage object
+  // this is a non-streamed OpenAI response, which comes with the usage object
   if (actionTypeId === '.gen-ai') {
     const data = result.data as unknown as {
       usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
