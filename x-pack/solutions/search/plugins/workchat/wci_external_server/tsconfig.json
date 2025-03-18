@@ -13,7 +13,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/wci-common",
+    "@kbn/wci-server",
+    "@kbn/workchat-app"
   ],
   "exclude": [
     "target/**/*"
