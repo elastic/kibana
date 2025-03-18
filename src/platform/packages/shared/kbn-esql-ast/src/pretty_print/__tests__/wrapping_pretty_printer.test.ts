@@ -667,7 +667,7 @@ FROM index
       test('binary expressions vertical flattening child function function argument wrapping', () => {
         const query = `
 FROM index
-| STATS super_function_name(11111111111111.111 + 11111111111111.111 * 11111111111111.111 + another_function_goes_here("this will get wrapped", "at this word", "and one more long string") - 111 + 111)),
+| STATS super_function_name(11111111111111.111 + 11111111111111.111 * 11111111111111.111 + another_function_goes_here("this will get wrapped", "at this word", "and one more long string") - 111 + 111),
 | LIMIT 10
 `;
         const text = reprint(query).text;
@@ -681,7 +681,8 @@ FROM index
           ANOTHER_FUNCTION_GOES_HERE("this will get wrapped", "at this word",
             "and one more long string") -
           111 +
-          111)`);
+          111)
+  | LIMIT 10`);
       });
 
       test('two binary expression lists of different precedence group', () => {
