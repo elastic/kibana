@@ -21,6 +21,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
   DataStreamMigrationStatus,
+  DataStreamsAction,
   EnrichedDeprecationInfo,
 } from '../../../../../../../common/types';
 
@@ -63,7 +64,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   deprecation,
 }) => {
   const { status, migrationWarnings, errorMessage, resolutionType, meta } = migrationState;
-  const { index } = deprecation;
+  const { index, correctiveAction } = deprecation;
   const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
 
   const switchFlyoutStep = useCallback(() => {
@@ -158,6 +159,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
 
         return (
           <DataStreamDetailsFlyoutStep
+            correctiveAction={correctiveAction as DataStreamsAction}
             closeFlyout={closeFlyout}
             initAction={(selectedResolutionType) => {
               initMigration(selectedResolutionType);
@@ -226,14 +228,13 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         );
       }
       case 'completed': {
-        if (!meta || !resolutionType) {
-          return (
-            <InitializingFlyoutStep
-              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
-            />
-          );
-        }
-        return <MigrationCompletedFlyoutStep meta={meta} resolutionType={resolutionType} />;
+        return (
+          <MigrationCompletedFlyoutStep
+            meta={meta}
+            resolutionType={resolutionType}
+            closeFlyout={closeFlyout}
+          />
+        );
       }
     }
   }, [
@@ -250,6 +251,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     onStopReadonly,
     resolutionType,
     initMigration,
+    correctiveAction,
   ]);
 
   return (

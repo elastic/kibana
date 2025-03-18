@@ -43,7 +43,10 @@ const https = require('https');
 const proxy = require('proxy');
 
 const PROGRAM = path.basename(__filename).replace(/.js$/, '');
-const CertDir = path.resolve(__dirname, '../../../../../../../packages/kbn-dev-utils/certs');
+const CertDir = path.resolve(
+  __dirname,
+  '../../../../../../../src/platform/packages/shared/kbn-dev-utils/certs'
+);
 
 const Auth = 'elastic:changeme';
 const AuthB64 = Buffer.from(Auth).toString('base64');

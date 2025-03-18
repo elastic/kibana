@@ -8,7 +8,6 @@
  */
 
 import type { TimeRange } from '@kbn/data-plugin/common';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
@@ -87,7 +86,7 @@ export const getLensProps = ({
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }): LensProps => ({
   id: 'unifiedHistogramLensComponent',
-  viewMode: ViewMode.VIEW,
+  viewMode: 'view',
   timeRange: getTimeRange(),
   attributes,
   noPadding: true,

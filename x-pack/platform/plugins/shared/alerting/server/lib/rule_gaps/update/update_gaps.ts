@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger, ISavedObjectsRepository } from '@kbn/core/server';
-import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { BackfillClient } from '../../../backfill_client/backfill_client';
+import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
+import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { findGaps } from '../find_gaps';
-import { Gap } from '../gap';
+import type { Gap } from '../gap';
 import { gapStatus } from '../../../../common/constants';
-import { BackfillSchedule } from '../../../application/backfill/result/types';
+import type { BackfillSchedule } from '../../../application/backfill/result/types';
 import { adHocRunStatus } from '../../../../common/constants';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { updateGapFromSchedule } from './update_gap_from_schedule';

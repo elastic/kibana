@@ -13,7 +13,7 @@ import {
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { v4 as uuidv4 } from 'uuid';
 import { asHttpRequestExecutionSource, asSavedObjectExecutionSource } from '../lib';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

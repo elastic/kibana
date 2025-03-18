@@ -86,7 +86,6 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               }}
               getComments={mockGetComments}
               http={mockHttp}
-              baseConversations={{}}
               navigateToApp={mockNavigateToApp}
               productDocBase={{
                 installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
@@ -94,6 +93,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               currentAppId={'securitySolutionUI'}
               userProfileService={jest.fn() as unknown as UserProfileService}
               chrome={chrome}
+              spaceId="default"
             >
               {children}
             </AssistantProvider>

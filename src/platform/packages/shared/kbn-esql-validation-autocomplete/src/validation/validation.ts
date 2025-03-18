@@ -710,6 +710,7 @@ function validateFunction({
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
 }
 
+/** @deprecated — "command settings" will be removed soon */
 function validateSetting(
   setting: ESQLCommandMode,
   settingDef: CommandModeDefinition | undefined,
@@ -1351,7 +1352,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
   getFieldsMetadata: [],
-  getVariablesByType: [],
+  getVariables: [],
   canSuggestVariables: [],
   getJoinIndices: [],
 };

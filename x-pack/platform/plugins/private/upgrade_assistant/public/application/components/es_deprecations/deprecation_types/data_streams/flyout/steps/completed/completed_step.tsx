@@ -7,7 +7,15 @@
 
 import React from 'react';
 
-import { EuiFlyoutBody, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiTitle,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   DataStreamMetadata,
@@ -15,13 +23,15 @@ import type {
 } from '../../../../../../../../../common/types';
 
 interface Props {
-  meta: DataStreamMetadata;
+  meta?: DataStreamMetadata | null;
   resolutionType?: DataStreamResolutionType;
+  closeFlyout: () => void;
 }
 
 export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
   meta,
   resolutionType,
+  closeFlyout,
 }: Props) => {
   return (
     <>
@@ -38,11 +48,23 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
-            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read only} other {migrated}}."
-            values={{ count: meta.indicesRequiringUpgradeCount, resolutionType }}
+            defaultMessage="Success! {count, plural, =0 {backing indices} =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read-only} other {migrated}}."
+            values={{ count: meta?.indicesRequiringUpgradeCount || 0, resolutionType }}
           />
         </p>
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.completedStep.closeButtonLabel"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </>
   );
 };

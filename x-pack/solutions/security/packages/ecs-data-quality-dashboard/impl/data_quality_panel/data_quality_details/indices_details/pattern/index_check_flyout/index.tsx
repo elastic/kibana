@@ -186,6 +186,8 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
     [handleTabClick, pattern, selectedTabId]
   );
 
+  const checkedAt = indexResult?.checkedAt;
+
   return (
     <div data-test-subj="indexCheckFlyout">
       <EuiFlyout
@@ -205,11 +207,11 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
               </h2>
             </EuiFlexGroup>
           </EuiTitle>
-          {indexResult != null && indexResult.checkedAt != null && (
+          {checkedAt && (
             <>
               <EuiSpacer size="xs" />
               <EuiText size="s" data-test-subj="latestCheckedAt">
-                {getFormattedCheckTime(indexResult.checkedAt)}
+                {getFormattedCheckTime(checkedAt)}
               </EuiText>
             </>
           )}
@@ -220,6 +222,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
           {selectedTabId === LATEST_CHECK_TAB_ID ? (
             <>
               <LatestResults
+                checkedAt={checkedAt}
                 indexName={indexName}
                 stats={stats}
                 ilmExplain={ilmExplain}

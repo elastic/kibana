@@ -320,6 +320,7 @@ export interface DocLinks {
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
     readonly dashboardImportExport: string;
+    readonly legacyOpenSslProvider: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;
@@ -376,6 +377,7 @@ export interface DocLinks {
     readonly manageDetectionRules: string;
     readonly createDetectionRules: string;
     readonly updatePrebuiltDetectionRules: string;
+    readonly prebuiltRuleCustomizationPromoBlog: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -388,6 +390,8 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
     readonly legacyRuleManagementBulkApiDeprecations: string;
+    readonly siemMigrations: string;
+    readonly llmPerformanceMatrix: string;
   };
   readonly query: {
     readonly eql: string;

@@ -11,17 +11,10 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { elasticLogo, elasticOutline } from '@kbn/expression-utils';
 import { getRepeatImageRenderer } from '../repeat_image_renderer';
 
-const Renderer = ({
-  elasticLogo,
-  elasticOutline,
-}: {
-  elasticLogo: string;
-  elasticOutline: string;
-}) => {
+const Renderer = () => {
   const config = {
     count: 42,
     image: elasticLogo,
@@ -39,10 +32,6 @@ const Renderer = ({
   );
 };
 
-storiesOf('enderers/repeatImage', module).add(
-  'default',
-  (_, props) => (
-    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
-  ),
-  { decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())] }
-);
+storiesOf('enderers/repeatImage', module).add('default', (_, props) => <Renderer />, {
+  decorators: [],
+});

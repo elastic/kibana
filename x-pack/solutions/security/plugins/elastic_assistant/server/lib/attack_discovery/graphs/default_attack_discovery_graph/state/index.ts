@@ -47,7 +47,7 @@ export const getDefaultGraphAnnotation = ({ end, filter, prompts, start }: Optio
     }),
     continuePrompt: Annotation<string, string>({
       reducer: (x: string, y?: string) => y ?? x,
-      default: () => '',
+      default: () => prompts.continue,
     }),
     end: Annotation<string | null | undefined>({
       reducer: (x?: string | null, y?: string | null) => y ?? x,

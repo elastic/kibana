@@ -27,6 +27,8 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   ObservabilityLogsExplorerLocators,
   ObservabilityLogsExplorerLocationState,
@@ -61,6 +63,8 @@ export interface ObservabilityLogsExplorerStartDeps {
   dataViewEditor?: DataViewEditorStart;
   lens?: LensPublicStart;
   share: SharePluginStart;
+  charts?: ChartsPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export type ObservabilityLogsExplorerHistory =

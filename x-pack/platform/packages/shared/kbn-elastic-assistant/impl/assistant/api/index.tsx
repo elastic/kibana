@@ -9,8 +9,9 @@ import { HttpSetup } from '@kbn/core/public';
 import {
   API_VERSIONS,
   ApiConfig,
-  MessageMetadata,
   Replacements,
+  ScreenContext,
+  MessageMetadata,
 } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
@@ -29,6 +30,7 @@ export interface FetchConnectorExecuteAction {
   signal?: AbortSignal | undefined;
   size?: number;
   traceOptions?: TraceOptions;
+  screenContext: ScreenContext;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -53,8 +55,8 @@ export const fetchConnectorExecuteAction = async ({
   signal,
   size,
   traceOptions,
+  screenContext,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  // TODO add streaming support for gemini with langchain on
   const isStream = assistantStreamingEnabled;
 
   const optionalRequestParams = getOptionalRequestParams({
@@ -73,6 +75,7 @@ export const fetchConnectorExecuteAction = async ({
       traceOptions?.langSmithProject === '' ? undefined : traceOptions?.langSmithProject,
     langSmithApiKey:
       traceOptions?.langSmithApiKey === '' ? undefined : traceOptions?.langSmithApiKey,
+    screenContext,
     ...optionalRequestParams,
   };
 

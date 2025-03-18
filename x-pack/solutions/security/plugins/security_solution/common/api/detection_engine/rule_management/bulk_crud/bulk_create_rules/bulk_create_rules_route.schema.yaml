@@ -10,7 +10,15 @@ paths:
       operationId: BulkCreateRules
       deprecated: true
       summary: Create multiple detection rules 
-      description: Create new detection rules in bulk.
+      description: |
+        Create new detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       tags:
         - Bulk API
       requestBody:
@@ -22,6 +30,37 @@ paths:
               type: array
               items:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleCreateProps'
+            examples:
+              example1:
+                value: 
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                    risk_score: 50
+                    description: Process started by MS Office program - possible payload
+                    interval: 5m
+                    name: MS Office child process
+                    severity: low
+                    tags:
+                      - child process
+                      - ms office
+                    type: query
+                    from: now-6m
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or process.parent.name:OUTLOOK.EXE or process.parent.name:POWERPNT.EXE or process.parent.name:VISIO.EXE or process.parent.name:WINWORD.EXE
+                    language: kuery
+                    filters:
+                      - query:
+                          match:
+                            event.action:
+                              query: "Process Create (rule: ProcessCreate)"
+                              type: phrase
+                    enabled: false
+                  - name: Second bulk rule
+                    description: Query with a rule_id for referencing an external id
+                    rule_id: query-rule-id-2
+                    risk_score: 2
+                    severity: low
+                    type: query
+                    from: now-6m
+                    query: "user.name: root or user.name: admin"
       responses:
         200:
           description: Indicates a successful call.
