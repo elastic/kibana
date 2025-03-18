@@ -86,6 +86,7 @@ const AssistantComponent: React.FC<Props> = ({
   const {
     assistantAvailability: { isAssistantEnabled },
     assistantTelemetry,
+    currentAppId,
     augmentMessageCodeBlocks,
     getComments,
     getLastConversation,
@@ -93,6 +94,7 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     currentUserAvatar,
     setLastConversation,
+    spaceId,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
@@ -142,8 +144,11 @@ const AssistantComponent: React.FC<Props> = ({
     setCurrentSystemPromptId,
   } = useCurrentConversation({
     allSystemPrompts,
+    currentAppId,
+    connectors,
     conversations,
     defaultConnector,
+    spaceId,
     refetchCurrentUserConversations,
     lastConversation: lastConversation ?? getLastConversation(lastConversation),
     mayUpdateConversations:

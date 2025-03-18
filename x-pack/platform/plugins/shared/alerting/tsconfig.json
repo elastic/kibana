@@ -80,6 +80,8 @@
     "@kbn/es-types",
     "@kbn/core-deprecations-common",
     "@kbn/core-deprecations-server",
+    "@kbn/response-ops-rule-params",
+    "@kbn/datemath"
   ],
   "exclude": [
     "target/**/*"

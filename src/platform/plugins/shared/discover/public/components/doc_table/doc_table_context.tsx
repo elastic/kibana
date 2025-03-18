@@ -10,7 +10,8 @@
 import React, { Fragment } from 'react';
 import './index.scss';
 import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
-import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
+import type { DocTableProps, DocTableRenderProps } from './doc_table_wrapper';
+import { DocTableWrapper } from './doc_table_wrapper';
 
 const DocTableWrapperMemoized = React.memo(DocTableWrapper);
 
