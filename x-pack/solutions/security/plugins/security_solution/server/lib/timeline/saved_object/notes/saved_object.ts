@@ -7,6 +7,7 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 import { v1 as uuidv1 } from 'uuid';
+import { nodeBuilder } from '@kbn/es-query';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -15,7 +16,7 @@ import { identity } from 'fp-ts/lib/function';
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { MAX_UNASSOCIATED_NOTES, UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
   BareNote,
@@ -122,7 +123,6 @@ export const createNote = async ({
 }): Promise<InternalNoteResponse> => {
   const {
     savedObjects: { client: savedObjectsClient },
-    uiSettings: { client: uiSettingsClient },
   } = await request.context.core;
   const userInfo = request.user;
 
@@ -132,16 +132,18 @@ export const createNote = async ({
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
-  if (references.length === 1 && references[0].id === '') {
-    const maxUnassociatedNotes = await uiSettingsClient.get<number>(MAX_UNASSOCIATED_NOTES);
+  if (references.length === 1 && references[0].id === '' && note.eventId) {
+    // Get all notes that are not associated with the timeline & are linked to given eventId
     const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
       type: noteSavedObjectType,
       hasReference: { type: timelineSavedObjectType, id: '' },
+      // Filter notes by eventId
+      filter: nodeBuilder.is(`${noteSavedObjectType}.attributes.eventId`, note.eventId),
     });
-    if (notesCount.total >= maxUnassociatedNotes) {
+    if (notesCount.total >= MAX_NOTES_PER_DOCUMENT) {
       return {
         code: 403,
-        message: `Cannot create more than ${maxUnassociatedNotes} notes without associating them to a timeline`,
+        message: `Cannot create more than ${MAX_NOTES_PER_DOCUMENT} notes per document without associating them to a timeline`,
         note: {
           ...note,
           noteId: uuidv1(),
