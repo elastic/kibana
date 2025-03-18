@@ -91,8 +91,8 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
-  ...rest,
   dashboards,
+  ...rest,
 });
 
 export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({

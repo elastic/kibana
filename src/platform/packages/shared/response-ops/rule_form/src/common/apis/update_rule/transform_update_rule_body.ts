@@ -26,6 +26,7 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
   actions = [],
   alertDelay,
   flapping,
+  dashboards,
   ...res
 }): any => ({
   ...res,
@@ -56,4 +57,6 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
   }),
   ...(alertDelay !== undefined ? { alert_delay: alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformUpdateRuleFlapping(flapping) } : {}),
+  ...(dashboards ? { dashboards } : []),
+
 });
