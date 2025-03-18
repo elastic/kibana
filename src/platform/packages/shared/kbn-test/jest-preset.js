@@ -52,7 +52,14 @@ module.exports = {
           ],
         ]
       : []),
-    require('@kbn/scout-reporting').scoutJestReporter(),
+    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED)
+      ? [
+          [
+            '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
+            { name: 'Jest tests (unit)' },
+          ],
+        ]
+      : []),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
