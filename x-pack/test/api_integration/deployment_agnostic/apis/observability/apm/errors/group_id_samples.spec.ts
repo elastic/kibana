@@ -202,7 +202,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         after(() => apmSynthtraceEsClient.clean());
 
         it('returns the errors in the correct order (sampled first, then unsampled)', () => {
-          const idsOfErrors = errorGroupSamplesResponse.errorSampleIds.map((id) => id);
+          const idsOfErrors = errorGroupSamplesResponse.errorSampleIds.map((id) =>
+            parseInt(id, 10)
+          );
 
           // this checks whether the order of indexing is different from the order that is returned
           // if it is not, scoring/sorting is broken

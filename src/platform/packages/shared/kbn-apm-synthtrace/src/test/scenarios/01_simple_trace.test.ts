@@ -91,9 +91,6 @@ describe('simple trace', () => {
   it('outputs transaction events', () => {
     const [transaction] = events;
 
-    expect(transaction['trace.id']).toHaveLength(32);
-    expect(transaction['transaction.id']).toHaveLength(16);
-
     expect(transaction).toEqual({
       '@timestamp': 1609459200000,
       'agent.name': 'java',
@@ -108,9 +105,9 @@ describe('simple trace', () => {
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
       'timestamp.us': 1609459200000000,
-      'trace.id': expect.stringContaining('241'),
+      'trace.id': expect.stringContaining('00000000000000000000000241'),
       'transaction.duration.us': 1000000,
-      'transaction.id': expect.stringContaining('240'),
+      'transaction.id': expect.stringContaining('0000000240'),
       'transaction.name': 'GET /api/product/list',
       'transaction.type': 'request',
       'transaction.sampled': true,
@@ -121,11 +118,6 @@ describe('simple trace', () => {
   it('outputs span events', () => {
     const [, span] = events;
 
-    expect(span['parent.id']).toHaveLength(16);
-    expect(span['span.id']).toHaveLength(16);
-    expect(span['trace.id']).toHaveLength(32);
-    expect(span['transaction.id']).toHaveLength(16);
-
     expect(span).toEqual(
       expect.objectContaining({
         '@timestamp': 1609459200050,
@@ -133,20 +125,20 @@ describe('simple trace', () => {
         'container.id': 'instance-1',
         'event.outcome': 'success',
         'host.name': 'instance-1',
-        'parent.id': expect.stringContaining('300'),
+        'parent.id': expect.stringContaining('0000000300'),
         'processor.event': 'span',
         'processor.name': 'transaction',
         'service.environment': 'production',
         'service.name': 'opbeans-java',
         'service.node.name': 'instance-1',
         'span.duration.us': 900000,
-        'span.id': expect.stringContaining('302'),
+        'span.id': expect.stringContaining('0000000302'),
         'span.name': 'GET apm-*/_search',
         'span.subtype': 'elasticsearch',
         'span.type': 'db',
         'timestamp.us': 1609459200050000,
-        'trace.id': expect.stringContaining('301'),
-        'transaction.id': expect.stringContaining('300'),
+        'trace.id': expect.stringContaining('00000000000000000000000301'),
+        'transaction.id': expect.stringContaining('0000000300'),
       })
     );
   });

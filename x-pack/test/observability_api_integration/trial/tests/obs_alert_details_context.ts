@@ -137,7 +137,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
           const logCategory = logCategories[0];
           expect(logCategory?.sampleMessage).to.match(
-            /Error message #[a-fA-F0-9]{16} from container my-container-a/
+            /Error message #\d{16} from container my-container-a/
           );
           expect(logCategory?.docCount).to.be.greaterThan(0);
           expect(logCategory?.errorCategory).to.be('Error message from container my-container-a');
@@ -196,7 +196,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
 
           const logCategory = logCategories[0];
           expect(logCategory?.sampleMessage).to.match(
-            /Error message #[a-fA-F0-9]{16} from container my-container-a/
+            /Error message #\d{16} from container my-container-a/
           );
           expect(logCategory?.docCount).to.be.greaterThan(0);
           expect(logCategory?.errorCategory).to.be('Error message from container my-container-a');
@@ -345,9 +345,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
           expect(logCategories).to.have.length(1);
 
           const logCategory = logCategories[0];
-          expect(logCategory?.sampleMessage).to.match(
-            /Error message #[a-fA-F0-9]{16} from service Backend/
-          );
+          expect(logCategory?.sampleMessage).to.match(/Error message #\d{16} from service Backend/);
           expect(logCategory?.docCount).to.be.greaterThan(0);
           expect(logCategory?.errorCategory).to.be('Error message from service Backend');
         });
@@ -374,9 +372,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
           expect(logCategories).to.have.length(1);
 
           const logCategory = logCategories[0];
-          expect(logCategory?.sampleMessage).to.match(
-            /Error message #[a-fA-F0-9]{16} from service Backend/
-          );
+          expect(logCategory?.sampleMessage).to.match(/Error message #\d{16} from service Backend/);
           expect(logCategory?.docCount).to.be.greaterThan(0);
           expect(logCategory?.errorCategory).to.be('Error message from service Backend');
         });
