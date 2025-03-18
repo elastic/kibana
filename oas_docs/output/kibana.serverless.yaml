@@ -41463,8 +41463,11 @@ paths:
                                 minLength: 1
                                 type: string
                               type: array
+                            description:
+                              type: string
                           required:
                             - dashboards
+                            - description
                         - type: object
                           properties:
                             stream:
@@ -41908,8 +41911,11 @@ paths:
                                 minLength: 1
                                 type: string
                               type: array
+                            description:
+                              type: string
                           required:
                             - dashboards
+                            - description
                         - type: object
                           properties:
                             stream:
@@ -42206,8 +42212,11 @@ paths:
                             minLength: 1
                             type: string
                           type: array
+                        description:
+                          type: string
                       required:
                         - dashboards
+                        - description
                     - type: object
                       properties:
                         stream:
@@ -42218,8 +42227,6 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
-                                description:
-                                  type: string
                                 members:
                                   items:
                                     minLength: 1
@@ -42411,8 +42418,6 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    description:
-                      type: string
                     members:
                       items:
                         minLength: 1
