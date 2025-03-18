@@ -551,6 +551,93 @@ describe('nested unknowns', () => {
         },
       });
     });
+
+    test('should strip unknown keys in object inside record inside map inside object when stripUnkownKeys is true', () => {
+      const type = schema.object({
+        rootMap: schema.mapOf(
+          schema.string(),
+          schema.recordOf(
+            schema.string(),
+            schema.object({
+              a: schema.string(),
+            })
+          )
+        ),
+      });
+
+      const value = {
+        rootMap: new Map([
+          [
+            'key1',
+            {
+              record1: { a: '123', b: 'should be stripped' },
+              record2: { a: '456', extra: 'remove this' },
+            },
+          ],
+        ]),
+        anotherKey: 'should also be stripped',
+      };
+
+      const expected = {
+        rootMap: new Map([
+          [
+            'key1',
+            {
+              record1: { a: '123' },
+              record2: { a: '456' },
+            },
+          ],
+        ]),
+      };
+
+      expect(type.validate(value, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
+        expected
+      );
+    });
+  });
+
+  test('should strip unknown keys in object inside record inside map inside object when unknowns is ignore', () => {
+    const type = schema.object(
+      {
+        rootMap: schema.mapOf(
+          schema.string(),
+          schema.recordOf(
+            schema.string(),
+            schema.object({
+              a: schema.string(),
+            })
+          )
+        ),
+      },
+      { unknowns: 'ignore' }
+    );
+
+    const value = {
+      rootMap: new Map([
+        [
+          'key1',
+          {
+            record1: { a: '123', b: 'should be stripped' },
+            record2: { a: '456', extra: 'remove this' },
+          },
+        ],
+      ]),
+      anotherKey: 'should also be stripped',
+    };
+
+    const expected = {
+      rootMap: new Map([
+        [
+          'key1',
+          {
+            record1: { a: '123' },
+            record2: { a: '456' },
+          },
+        ],
+      ]),
+    };
+
+    expect(type.validate(value, void 0, void 0, {})).toStrictEqual(expected);
   });
 });
 

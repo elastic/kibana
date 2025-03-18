@@ -289,6 +289,65 @@ describe('nested unknowns', () => {
       },
     });
   });
+
+  test('should strip unknown keys in object inside map inside record when stripUnkownKeys is true', () => {
+    const type = schema.recordOf(
+      schema.string(),
+      schema.mapOf(
+        schema.string(),
+        schema.object({
+          a: schema.string(),
+        })
+      )
+    );
+
+    const value = {
+      record1: new Map([
+        ['key1', { a: '123', b: 'should be stripped' }],
+        ['key2', { a: '456', extra: 'remove this' }],
+      ]),
+    };
+
+    const expected = {
+      record1: new Map([
+        ['key1', { a: '123' }],
+        ['key2', { a: '456' }],
+      ]),
+    };
+
+    expect(type.validate(value, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
+      expected
+    );
+  });
+
+  test('should strip unknown keys in object inside map inside record when unkowns is ignore', () => {
+    const type = schema.recordOf(
+      schema.string(),
+      schema.mapOf(
+        schema.string(),
+        schema.object({
+          a: schema.string(),
+        })
+      ),
+      { unknowns: 'ignore' }
+    );
+
+    const value = {
+      record1: new Map([
+        ['key1', { a: '123', b: 'should be stripped' }],
+        ['key2', { a: '456', extra: 'remove this' }],
+      ]),
+    };
+
+    const expected = {
+      record1: new Map([
+        ['key1', { a: '123' }],
+        ['key2', { a: '456' }],
+      ]),
+    };
+
+    expect(type.validate(value, void 0, void 0, {})).toStrictEqual(expected);
+  });
 });
 
 test('meta', () => {
