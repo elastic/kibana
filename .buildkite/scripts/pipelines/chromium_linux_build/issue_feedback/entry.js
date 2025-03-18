@@ -70,6 +70,47 @@ const getSha256Hash = async (filePath) => {
 (async () => {
   const buildRoot = process.cwd();
 
+  const prTitle = `[Reporting] Update puppeteer to version ${process.env.PUPPETEER_VERSION}`;
+
+  const prSearchResult = await $('gh', [
+    'pr',
+    'list',
+    '--search',
+    prTitle,
+    '--state',
+    'open',
+    '--author',
+    process.env.KIBANA_MACHINE_USERNAME,
+    '--limit',
+    '1',
+    '--json',
+    'title',
+    '-q',
+    '.[].title',
+  ]);
+
+  assert.notStrictEqual(prSearchResult, prTitle, 'PR already exists');
+
+  const branchName = `chore/puppeteer_${process.env.PUPPETEER_VERSION}_update`;
+
+  // configure git
+  await $('git', ['config', '--global', 'user.name', process.env.KIBANA_MACHINE_USERNAME]);
+  await $('git', ['config', '--global', 'user.email', process.env.KIBANA_MACHINE_EMAIL]);
+
+  // create a new branch to update puppeteer
+  await $('git', ['checkout', '-b', branchName]);
+
+  console.log('---Updating puppeteer package to version %s', process.env.PUPPETEER_VERSION);
+
+  await $('yarn', ['add', `puppeteer@${process.env.PUPPETEER_VERSION}`]);
+  await $('yarn', ['kbn', 'bootstrap']);
+  await $('git', ['add', 'package.json', 'yarn.lock']);
+  await $('git', [
+    'commit',
+    '-m',
+    `chore: update puppeteer to version ${process.env.PUPPETEER_VERSION}`,
+  ]);
+
   // switch working dir to the screenshotting server directory
   process.chdir('src/platform/packages/private/kbn-screenshotting-server/src');
 
@@ -224,18 +265,37 @@ const getSha256Hash = async (filePath) => {
     { printToScreen: true }
   );
 
-  console.log('---Generating paths.ts file diff \n');
+  await $('git', ['add', '../paths.ts']);
 
-  const pathDiff = await $('git', ['diff', '../paths.ts']);
+  await $('git', ['commit', '-m', 'chore: update chromium paths']);
 
-  assert.ok(pathDiff, 'Failed to generate diff');
+  console.log('---Creating pull request \n');
+
+  await $('git', ['push', 'origin', branchName]);
+
+  await $('gh', [
+    'pr',
+    'create',
+    '--title',
+    prTitle,
+    '--body',
+    `Closes ${process.env.GITHUB_PR_NUMBER} \n\n This PR updates puppeteer to version ${process.env.PUPPETEER_VERSION} and updates the chromium paths to the latest known good version for windows and mac where the chromium revision is ${chromiumRevision} and version is ${chromiumVersion}, for linux a custom build was triggered to build chromium binaries for both x64 and arm64. \n **NB** This PR should be tested before merging it in as puppeteer might have breaking changes we are not aware of`,
+    '--base',
+    'main',
+    '--head',
+    branchName,
+    '--label',
+    'release_note:skip',
+    '--label',
+    'Team:SharedUX',
+  ]);
 
   console.log('---Providing feedback to issue \n');
 
   await $('ts-node', [
     `${resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts')}`,
     '--message',
-    `Linux headless chromium build completed at: ${process.env.BUILDKITE_BUILD_URL} ✨💅🏾 \n\n #### How to update puppeteer \n - You'll want to run \`yarn add puppeteer@${process.env.PUPPETEER_VERSION}\` \n - Next we'll want to apply the following patch; \n\n\`\`\`diff\n${pathDiff}\n\`\`\` \n - After applying the patch, create a PR to update puppeteer`,
+    `Linux headless chromium build completed at: ${process.env.BUILDKITE_BUILD_URL} ✨💅🏾 \n\n See the PR linked to this issue`,
     '--context',
     'chromium-linux-build-diff',
     '--clear-previous',
