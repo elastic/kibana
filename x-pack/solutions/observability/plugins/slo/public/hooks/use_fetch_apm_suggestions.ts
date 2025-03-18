@@ -47,8 +47,7 @@ export function useFetchApmSuggestions({
             start: moment().subtract(2, 'days').toISOString(),
             end: moment().toISOString(),
             fieldValue: search,
-            ...(!!serviceName &&
-              serviceName !== '*' &&
+            ...(serviceName !== ALL_VALUE &&
               fieldName !== 'service.name' && { serviceName }),
           },
           signal,
