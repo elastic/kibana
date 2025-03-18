@@ -317,7 +317,7 @@ export async function getEnterpriseSearchAccountCleanups(
   if (esUser) {
     message += "- Remove the 'enterprise_search' user account\n";
     manualStepsToAdd.push(
-      "- Remove the 'enterprise_search' user account via `DELETE /_security/user/enterprise_search`"
+      "Remove the 'enterprise_search' user account via `DELETE /_security/user/enterprise_search`"
     );
   }
 
@@ -325,9 +325,9 @@ export async function getEnterpriseSearchAccountCleanups(
     message += "- Invalidate any 'elastic/enterprise-search-server' service account credentials\n";
     credentialTokenIds.forEach((tokenId) => {
       manualStepsToAdd.push(
-        "- Invalidate the 'elastic/enterprise-search-server' token '" +
+        "Invalidate the 'elastic/enterprise-search-server' token '" +
           tokenId +
-          "' via `DELETE /_security/service/elastic/enterprise-search-server/credential/token" +
+          "' via `DELETE /_security/service/elastic/enterprise-search-server/credential/token/" +
           tokenId +
           '`'
       );
@@ -338,12 +338,15 @@ export async function getEnterpriseSearchAccountCleanups(
     message += "- Invalidate any 'cloud-internal-enterprise_search-server' API keys\n";
     esCloudApiKeys.forEach((apiKey) => {
       manualStepsToAdd.push(
-        "- Invalidate the 'cloud-internal-enterprise_search-server' API key '" +
+        "Invalidate the 'cloud-internal-enterprise_search-server' API key '" +
           apiKey.id +
           "' via `DELETE /_security/api_key` passing the API key id in the body"
       );
     });
   }
+
+  message +=
+    "\n\nAlternatively, you can use the 'Quick resolve' button to remove these items automatically.";
 
   const deprecation: DeprecationsDetails = {
     level: 'warning',
@@ -359,6 +362,11 @@ export async function getEnterpriseSearchAccountCleanups(
     },
     correctiveActions: {
       manualSteps: manualStepsToAdd,
+      api: {
+        method: 'POST',
+        path: '/internal/enterprise_search/deprecations/clean_ent_search_accounts',
+        body: {},
+      },
     },
   };
 
