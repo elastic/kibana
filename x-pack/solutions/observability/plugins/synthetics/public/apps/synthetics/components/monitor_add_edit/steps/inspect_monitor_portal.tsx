@@ -8,7 +8,7 @@
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
 import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
-import { MonitorInspectWrapper } from '../../common/components/monitor_inspect';
+import { MonitorInspect } from '../../common/components/monitor_inspect';
 import { InspectMonitorPortalNode } from '../portals';
 
 export const InspectMonitorPortal = ({
@@ -20,7 +20,7 @@ export const InspectMonitorPortal = ({
 }) => {
   return (
     <InPortal node={InspectMonitorPortalNode}>
-      <MonitorInspectWrapper isValid={isValid} monitorFields={monitorFields} />
+      <MonitorInspect isValid={isValid} monitorFields={monitorFields} />
     </InPortal>
   );
 };

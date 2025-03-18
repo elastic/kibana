@@ -11,5 +11,10 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { FIELD_TYPE_MAP } from './constants';
 
 export const FieldType = ({ type }: { type: FieldDefinitionConfig['type'] }) => {
-  return <FieldNameWithIcon name={FIELD_TYPE_MAP[type].label} type={type} />;
+  return (
+    <FieldNameWithIcon
+      name={FIELD_TYPE_MAP[type].label}
+      type={type !== 'system' ? type : undefined}
+    />
+  );
 };

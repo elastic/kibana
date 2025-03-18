@@ -15,7 +15,7 @@ export const ResolvedAt: React.FC = () => {
   const { killerState } = useFindMyKillerState();
 
   const formatter = useDateFormat();
-  let endsAt: string | ReactElement = formatter(killerState?.timestamp ?? '');
+  let endsAt: string | ReactElement = formatter(killerState?.['@timestamp'] ?? '');
 
   if (!endsAt) {
     endsAt = 'N/A';
