@@ -92,6 +92,7 @@ export interface AgentSOAttributes {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   packages?: string[];
+  namespaces?: string[];
 }
 
 export interface FleetProxySOAttributes {
