@@ -24,7 +24,6 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useRefreshAnalyticsList } from '../../../../common';
-import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';
@@ -116,13 +115,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
 
   const refreshObs = useRefresh();
-
-  const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics] = usePermissionCheck([
-    'canCreateDataFrameAnalytics',
-    'canStartStopDataFrameAnalytics',
-  ]);
-
-  const disabled = !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
 
   const getAnalytics = useGetAnalytics(
     setAnalytics,
