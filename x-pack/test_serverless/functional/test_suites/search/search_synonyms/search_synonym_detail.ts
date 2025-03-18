@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchSynonyms.SynonymRuleFlyout.addFromSynonym('synonym2');
         await pageObjects.searchSynonyms.SynonymRuleFlyout.clickSaveButton();
 
-        browser.refresh();
+        await browser.refresh();
 
         const rules = await pageObjects.searchSynonyms.SynonymsSetDetailPage.getSynonymsRules();
         expect(rules).to.eql([
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Delete new rule
         await pageObjects.searchSynonyms.SynonymsSetDetailPage.deleteRule(0);
 
-        browser.refresh();
+        await browser.refresh();
         const updatedRules =
           await pageObjects.searchSynonyms.SynonymsSetDetailPage.getSynonymsRules();
         expect(updatedRules).to.eql([{ synonyms: 'a,b,c' }, { synonyms: 'd,e => f' }]);
@@ -92,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchSynonyms.SynonymRuleFlyout.addFromSynonym('synonym2');
         await pageObjects.searchSynonyms.SynonymRuleFlyout.addMapTo('synonym3');
         await pageObjects.searchSynonyms.SynonymRuleFlyout.clickSaveButton();
-        browser.refresh();
+        await browser.refresh();
 
         const rules = await pageObjects.searchSynonyms.SynonymsSetDetailPage.getSynonymsRules();
         expect(rules).to.eql([
@@ -102,7 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
         // delete the new rule
         await pageObjects.searchSynonyms.SynonymsSetDetailPage.deleteRule(0);
-        browser.refresh();
+        await browser.refresh();
         const updatedRules =
           await pageObjects.searchSynonyms.SynonymsSetDetailPage.getSynonymsRules();
         expect(updatedRules).to.eql([{ synonyms: 'a,b,c' }, { synonyms: 'd,e => f' }]);
@@ -115,7 +115,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchSynonyms.SynonymRuleFlyout.removeSynonym(0);
         await pageObjects.searchSynonyms.SynonymRuleFlyout.addFromSynonym('synonym3');
         await pageObjects.searchSynonyms.SynonymRuleFlyout.clickSaveButton();
-        browser.refresh();
+        await browser.refresh();
         const rules = await pageObjects.searchSynonyms.SynonymsSetDetailPage.getSynonymsRules();
         expect(rules).to.eql([{ synonyms: 'b,c,synonym3' }, { synonyms: 'd,e => f' }]);
       });
