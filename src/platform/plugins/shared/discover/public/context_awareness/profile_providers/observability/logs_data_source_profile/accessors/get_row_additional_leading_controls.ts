@@ -14,78 +14,49 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
-import type { DataSourceProfileProvider } from '../../../../profiles';
+import type { LogsDataSourceProfileProvider } from '../profile';
 
-const scrollToSection = (id: string) => {
-  const element = document.querySelector(
-    '[data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"]'
-  );
+export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
 
-  if (element) {
-    setTimeout(() => {
-      element.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 100); // We need this delay because after the element is rendered, it takes some time before it can be scrolledIntoView
-  }
-};
+    (prev, { context }) =>
+    (params) => {
+      const additionalControls = prev(params) || [];
+      const { updateESQLQuery, query, setExpandedDoc } = params;
 
-export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
-  (prev) => (params) => {
-    const additionalControls = prev(params) || [];
-    const { updateESQLQuery, query, setExpandedDoc, setDocViewerAccordionState } = params;
+      const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
+        ? queryContainsMetadataIgnored(query)
+        : true;
 
-    const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
-      ? queryContainsMetadataIgnored(query)
-      : true;
+      const addIgnoredMetadataToQuery = updateESQLQuery
+        ? () => {
+            updateESQLQuery((prevQuery) => {
+              const { root } = parse(prevQuery);
+              // Add _ignored field to metadata directive if not present
+              mutate.commands.from.metadata.upsert(root, IGNORED_FIELD);
 
-    const addIgnoredMetadataToQuery = updateESQLQuery
-      ? () => {
-          updateESQLQuery((prevQuery) => {
-            const { root } = parse(prevQuery);
-            // Add _ignored field to metadata directive if not present
-            mutate.commands.from.metadata.upsert(root, IGNORED_FIELD);
+              return BasicPrettyPrinter.print(root);
+            });
+          }
+        : undefined;
 
-            return BasicPrettyPrinter.print(root);
-          });
+      const onStackTraceClick = (props: RowControlRowProps) => {
+        if (!setExpandedDoc) {
+          return;
         }
-      : undefined;
 
-    const onStackTraceClick = (props: RowControlRowProps) => {
-      // Open the flyout
-      if (setExpandedDoc) {
+        context.initialLogOverviewAccordionSection$.next('stacktrace');
         setExpandedDoc(props.record);
-      }
+      };
 
-      // Toggle on the Accordion
-      if (setDocViewerAccordionState) {
-        setDocViewerAccordionState({ stacktrace: true });
-      }
-
-      // Scroll the section into view
-      const observer = new MutationObserver((mutations, obs) => {
-        const element = document.querySelector(
-          '[data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"]'
-        );
-        if (element) {
-          scrollToSection('unifiedDocViewLogsOverviewStacktraceAccordion');
-          obs.disconnect();
-        }
-      });
-
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
+      return [
+        ...additionalControls,
+        createDegradedDocsControl({
+          enabled: isDegradedDocsControlEnabled,
+          addIgnoredMetadataToQuery,
+        }),
+        createStacktraceControl({ onClick: onStackTraceClick }),
+      ];
     };
-
-    return [
-      ...additionalControls,
-      createDegradedDocsControl({
-        enabled: isDegradedDocsControlEnabled,
-        addIgnoredMetadataToQuery,
-      }),
-      createStacktraceControl({ onClick: onStackTraceClick }),
-    ];
-  };
 
 const queryContainsMetadataIgnored = (query: AggregateQuery) =>
   retrieveMetadataColumns(query.esql).includes('_ignored');

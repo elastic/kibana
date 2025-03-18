@@ -34,7 +34,13 @@ export function LogsOverviewStacktraceSection({
   });
 
   return (
-    <>
+    <div
+      ref={(el) => {
+        if (el && isExpanded) {
+          setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+        }
+      }}
+    >
       <EuiAccordion
         id={accordionId}
         buttonContent={
@@ -49,6 +55,6 @@ export function LogsOverviewStacktraceSection({
         <StacktraceContent hit={hit} dataView={dataView} />
       </EuiAccordion>
       <EuiHorizontalRule margin="xs" />
-    </>
+    </div>
   );
 }
