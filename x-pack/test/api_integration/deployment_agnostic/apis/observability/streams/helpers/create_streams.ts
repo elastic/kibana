@@ -33,7 +33,7 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
             'stream.name': {
-              type: 'keyword',
+              type: 'system',
             },
           },
           routing: [
@@ -130,7 +130,7 @@ const streams: StreamPutItem[] = [
 export async function createStreams(apiClient: StreamsSupertestRepositoryClient) {
   for (const { name, ...stream } of streams) {
     await apiClient
-      .fetch('PUT /api/streams/{name}', {
+      .fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           body: {
             ...stream,
