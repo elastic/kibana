@@ -42,7 +42,6 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       valuesWithTimestamp: {},
     },
     revision: rule.revision,
-    dashboards: rule.dashboards,
   };
 
   const alerts = new Map<string, AlertStatus>();
