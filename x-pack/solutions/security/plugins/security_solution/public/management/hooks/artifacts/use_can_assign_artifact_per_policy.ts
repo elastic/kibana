@@ -37,9 +37,18 @@ export const useCanAssignArtifactPerPolicy = (
   }, [item.tags, hasItemBeenUpdated]);
 
   return useMemo(() => {
-    return (
-      isPlatinumPlus ||
-      (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasItemBeenUpdated)))
-    );
+    if (isPlatinumPlus) {
+      return true;
+    }
+
+    if (mode !== 'edit') {
+      return false;
+    }
+
+    if (!isGlobal) {
+      return true;
+    }
+
+    return wasByPolicy && hasItemBeenUpdated;
   }, [mode, isGlobal, hasItemBeenUpdated, isPlatinumPlus, wasByPolicy]);
 };

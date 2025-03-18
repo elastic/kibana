@@ -48,15 +48,8 @@ export const useArtifactRestrictedPolicyAssignments = (
     }
 
     const policiesFoundById = keyBy(data.items, 'id');
-    const restrictedIds: string[] = [];
 
-    for (const policyId of policies) {
-      if (!policiesFoundById[policyId]) {
-        restrictedIds.push(policyId);
-      }
-    }
-
-    return restrictedIds;
+    return policies.filter((id) => !policiesFoundById[id]);
   }, [data?.items, isSpaceAwarenessEnabled, policies]);
 
   useEffect(() => {
