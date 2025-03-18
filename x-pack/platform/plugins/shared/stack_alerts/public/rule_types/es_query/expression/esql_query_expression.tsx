@@ -231,6 +231,12 @@ export const EsqlQueryExpression: React.FC<
         />
       </EuiFormRow>
       <EuiSpacer />
+      <TestQueryRow
+        fetch={onTestQuery}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
+        showTable
+      />
+      <EuiSpacer />
       <EuiFormRow
         id="timeField"
         fullWidth
@@ -325,12 +331,6 @@ export const EsqlQueryExpression: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <TestQueryRow
-        fetch={onTestQuery}
-        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
-        showTable
-      />
     </Fragment>
   );
 };
