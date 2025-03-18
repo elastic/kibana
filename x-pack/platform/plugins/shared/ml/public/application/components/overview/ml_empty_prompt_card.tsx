@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 
 export const MLEmptyPromptCard = ({
   title,
@@ -16,22 +16,16 @@ export const MLEmptyPromptCard = ({
   iconSrc,
   iconAlt,
   'data-test-subj': dataTestSubj,
-}: Omit<EuiEmptyPromptProps, 'title'> & { title: string; iconSrc: string; iconAlt: string }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiEmptyPrompt
-      css={{
-        '.euiEmptyPrompt__main': { height: '100%', minWidth: euiTheme.breakpoint.m, width: '100%' },
-      }}
-      layout="horizontal"
-      hasBorder={true}
-      hasShadow={false}
-      icon={<EuiImage size="fullWidth" src={iconSrc} alt={iconAlt} />}
-      title={<h3>{title}</h3>}
-      titleSize="s"
-      body={body}
-      actions={actions}
-      data-test-subj={dataTestSubj}
-    />
-  );
-};
+}: Omit<EuiEmptyPromptProps, 'title'> & { title: string; iconSrc: string; iconAlt: string }) => (
+  <EuiEmptyPrompt
+    layout="horizontal"
+    hasBorder={true}
+    hasShadow={false}
+    icon={<EuiImage size="fullWidth" src={iconSrc} alt={iconAlt} />}
+    title={<h3>{title}</h3>}
+    titleSize="s"
+    body={body}
+    actions={actions}
+    data-test-subj={dataTestSubj}
+  />
+);

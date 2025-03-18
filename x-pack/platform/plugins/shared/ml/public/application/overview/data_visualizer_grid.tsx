@@ -17,7 +17,7 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
   buttonType,
   isEsqlEnabled,
 }) => (
-  <EuiFlexGrid gutterSize="m" columns={3}>
+  <EuiFlexGrid gutterSize="m" columns={2}>
     {isEsqlEnabled ? (
       <MLOverviewCard
         layout="horizontal"

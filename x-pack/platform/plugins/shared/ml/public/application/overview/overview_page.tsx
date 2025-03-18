@@ -206,7 +206,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
                     defaultMessage: 'overview panel',
                   })}
                 >
-                  <NodesList compactView />
+                  <NodesList />
                 </CollapsiblePanel>
                 <EuiSpacer size="m" />
               </>

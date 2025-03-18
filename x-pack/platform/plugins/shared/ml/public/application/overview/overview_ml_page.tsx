@@ -6,8 +6,9 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import type { EuiCardProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -17,21 +18,30 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiImage,
+  EuiLink,
+  EuiPageBody,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
+import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { MlPageHeader } from '../components/page_header';
-import { PageTitle } from '../components/page_title';
 import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_overview';
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
 import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
+import { OverviewFooterItem } from './components/overview_ml_footer_item';
+import bannerImageLight from './components/welcome--light.png';
+import bannerImageDark from './components/welcome--dark.png';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -100,24 +110,96 @@ export const MLOverviewCard = ({
 };
 
 export const OverviewPage: FC = () => {
+  const [user, setUser] = useState<GetUserProfileResponse | undefined>();
   const {
-    services: { docLinks, uiSettings },
+    services: { docLinks, uiSettings, userProfile },
   } = useMlKibana();
+  const { colorMode } = useEuiTheme();
+  const isDarkTheme = colorMode === 'DARK';
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.guide;
+  const trainedModelsDocLink = docLinks.links.ml.trainedModels;
   const navigateToPath = useNavigateToPath();
+  const navigateToTrainedModels = useCreateAndNavigateToManagementMlLink(
+    '',
+    ML_PAGES.TRAINED_MODELS_MANAGE
+  );
+  const navigateToStackManagementMLOverview = useCreateAndNavigateToManagementMlLink(
+    '',
+    'overview'
+  );
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
+
+  useEffect(
+    function loadUserName() {
+      async function loadUser() {
+        const currentUser = await userProfile.getCurrent();
+        setUser(currentUser);
+      }
+      loadUser();
+    },
+    [userProfile]
+  );
 
   return (
     <>
       <MlPageHeader>
-        <PageTitle
-          title={i18n.translate('xpack.ml.overview.elasticMachineLearningLabel', {
-            defaultMessage: 'Elastic Machine Learning',
-          })}
-        />
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {Boolean(user) && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">
+                    <h4>
+                      {user
+                        ? i18n.translate(
+                            'xpack.ml.overview.welcomeBanner.header.greeting.customTitle',
+                            {
+                              defaultMessage: '👋 Hi {name}!',
+                              values: { name: user.user.username ?? '' },
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.ml.overview.welcomeBanner.header.greeting.defaultTitle',
+                            {
+                              defaultMessage: '👋 Hi',
+                            }
+                          )}
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.ml.overview.welcomeBanner.header.title"
+                      defaultMessage="Welcome to the Machine Learning Hub"
+                    />
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText color="subdued">
+                  {i18n.translate('xpack.ml.overview.welcomeBanner.header.titleDescription', {
+                    defaultMessage:
+                      'Analyze your data and generate models for its patterns of behavior.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiImage
+              alt={i18n.translate('xpack.ml.overview.welcomeBanner.header.imageAlt', {
+                defaultMessage: 'Welcome to the Machine Learning Hub',
+              })}
+              src={isDarkTheme ? bannerImageDark : bannerImageLight}
+              size="l"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </MlPageHeader>
-      <div>
+      <EuiPageBody restrictWidth={1200}>
         <UpgradeWarning />
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="m" direction="column">
@@ -133,18 +215,20 @@ export const OverviewPage: FC = () => {
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
-                <EuiFlexGroup gutterSize="m" responsive={true} wrap={true}>
-                  {isADEnabled ? (
-                    <EuiFlexItem>
-                      <AnomalyDetectionOverviewCard />
-                    </EuiFlexItem>
-                  ) : null}
-                  {isDFAEnabled ? (
-                    <EuiFlexItem>
-                      <DataFrameAnalyticsOverviewCard />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="m">
+                    {isADEnabled ? (
+                      <EuiFlexItem>
+                        <AnomalyDetectionOverviewCard />
+                      </EuiFlexItem>
+                    ) : null}
+                    {isDFAEnabled ? (
+                      <EuiFlexItem>
+                        <DataFrameAnalyticsOverviewCard />
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               </EuiFlexGroup>
 
               <EuiSpacer size="s" />
@@ -325,7 +409,65 @@ export const OverviewPage: FC = () => {
           </EuiFlexGroup>
         </EuiFlexGroup>
         <HelpMenu docLink={helpLink} />
-      </div>
+      </EuiPageBody>
+      <EuiHorizontalRule />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <OverviewFooterItem
+            title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
+              defaultMessage: 'Manage ML Assets',
+            })}
+            description={i18n.translate('xpack.ml.overview.manageMlAssetsDescription', {
+              defaultMessage: 'Overview of your ML jobs, memory usage, and notifications.',
+            })}
+            docLink={helpLink}
+            callToAction={
+              <EuiLink onClick={navigateToStackManagementMLOverview}>
+                {i18n.translate('xpack.ml.overview.goToManagmentLink', {
+                  defaultMessage: 'Go to Management',
+                })}
+              </EuiLink>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <OverviewFooterItem
+            title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
+              defaultMessage: 'Trained Models',
+            })}
+            description={i18n.translate('xpack.ml.overview.trainedModelsDescription', {
+              defaultMessage:
+                'Add or manage Trained Models. See deployment stats or add a new deployment.',
+            })}
+            docLink={trainedModelsDocLink}
+            callToAction={
+              <EuiLink onClick={navigateToTrainedModels}>
+                {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
+                  defaultMessage: 'Manage Trained Models',
+                })}
+              </EuiLink>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <OverviewFooterItem
+            title={i18n.translate('xpack.ml.overview.browseDocumentationTitle', {
+              defaultMessage: 'Browse documentation',
+            })}
+            description={i18n.translate('xpack.ml.overview.browseDocumentationDescription', {
+              defaultMessage: 'In-depth guides on Elastic Machine Learning.',
+            })}
+            docLink={helpLink}
+            callToAction={
+              <EuiLink href={helpLink} external target="_blank">
+                {i18n.translate('xpack.ml.overview.startReadingDocsLink', {
+                  defaultMessage: 'Start Reading',
+                })}
+              </EuiLink>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

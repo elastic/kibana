@@ -41,6 +41,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.memoryUsage.assertNodeExpandedDetailsPanelExists();
     });
 
+    it('allows sorting', async () => {
+      await ml.memoryUsage.sortColumn('tableHeaderCell_name_1');
+      await ml.memoryUsage.assertColumnIsSorted('tableHeaderCell_name_1', 'descending');
+    });
+
+    it('allows searching for a node', async () => {
+      await ml.memoryUsage.searchForNode('ftr');
+      await ml.memoryUsage.assertRowCount(1);
+    });
+
     it('expands node details and displays memory usage details', async () => {
       await ml.memoryUsage.expandRow();
       await ml.memoryUsage.assertNodeExpandedDetailsPanelsExist();
