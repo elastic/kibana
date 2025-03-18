@@ -24,7 +24,7 @@ export const DateTargetField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateTargetHelpText"
-          defaultMessage="Output field. If empty, the input field is updated in place. Defaults to {target}"
+          defaultMessage="The field that will hold the parsed date. Defaults to {target}."
           values={{ target: <EuiCode>@timestamp</EuiCode> }}
         />
       }
@@ -48,7 +48,7 @@ export const DateTimezoneField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateTimezoneHelpText"
-          defaultMessage="Timezone for the date. Defaults to {timezone}"
+          defaultMessage="The timezone to use when parsing the date. Supports template snippets. Defaults to {timezone}"
           values={{ timezone: <EuiCode>UTC</EuiCode> }}
         />
       }
@@ -72,7 +72,7 @@ export const DateLocaleField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateLocaleHelpText"
-          defaultMessage="Locale for the date. Useful when parsing month or day names. Defaults to {locale}."
+          defaultMessage="The locale to use when parsing the date, relevant when parsing month names or week days. Supports template snippets. Defaults to {locale}."
           values={{ locale: <EuiCode>ENGLISH</EuiCode> }}
         />
       }
@@ -96,7 +96,7 @@ export const DateOutputFormatField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateOutputFormatHelpText"
-          defaultMessage="Format to use when writing the date to {field}. Must be a valid Java time pattern. Defaults to {outputFormat}."
+          defaultMessage="The format to use when writing the date to {field}. Must be a valid java time pattern. Defaults to {outputFormat}."
           values={{
             field: <EuiCode>target_field</EuiCode>,
             outputFormat: <EuiCode>yyyy-MM-ddTHH:mm:ss.SSSXXX</EuiCode>,
