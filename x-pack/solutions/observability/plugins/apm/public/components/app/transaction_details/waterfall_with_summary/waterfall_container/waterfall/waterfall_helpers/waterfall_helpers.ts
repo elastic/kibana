@@ -9,6 +9,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
@@ -75,6 +76,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   legendValues: Record<WaterfallLegendType, string>;
   spanLinksCount: SpanLinksCount;
   isOrphan?: boolean;
+  missingDestination?: boolean;
 }
 
 export type IWaterfallError = Omit<
@@ -340,7 +342,7 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
 }
 
 const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
-  groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
+  groupBy(waterfallItems, (item) => item.parentId ?? ROOT_ID);
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
@@ -403,10 +405,19 @@ function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['erro
   }, {});
 }
 
-export function getOrphanItemsIds(waterfall: IWaterfallSpanOrTransaction[]) {
+export function getOrphanItemsIds(
+  waterfall: IWaterfallSpanOrTransaction[],
+  entryWaterfallTransactionId?: string
+) {
   const waterfallItemsIds = new Set(waterfall.map((item) => item.id));
   return waterfall
-    .filter((item) => item.parentId && !waterfallItemsIds.has(item.parentId))
+    .filter(
+      (item) =>
+        // the root transaction should never be orphan
+        entryWaterfallTransactionId !== item.id &&
+        item.parentId &&
+        !waterfallItemsIds.has(item.parentId)
+    )
     .map((item) => item.id);
 }
 
@@ -455,7 +466,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     waterfallItems
   );
 
-  const orphanItemsIds = getOrphanItemsIds(waterfallItems);
+  const orphanItemsIds = getOrphanItemsIds(waterfallItems, entryWaterfallTransaction?.id);
   const childrenByParentId = getChildrenGroupedByParentId(
     reparentOrphanItems(
       orphanItemsIds,
@@ -547,6 +558,18 @@ function buildTree({
           childrenToLoad: 0,
           hasInitializedChildren: false,
         };
+
+        // It is missing a destination when a child (currentNode) is a transaction
+        // and its parent (node) is a span without destination for Otel agents.
+
+        if (
+          currentNode.item.docType === 'transaction' &&
+          node.item.docType === 'span' &&
+          !node.item.doc.span?.destination?.service?.resource &&
+          isOpenTelemetryAgentName(node.item.doc.agent.name)
+        ) {
+          node.item.missingDestination = true;
+        }
 
         node.children.push(currentNode);
         queue.push(currentNode);

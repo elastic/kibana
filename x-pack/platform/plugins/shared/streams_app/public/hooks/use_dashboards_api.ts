@@ -25,7 +25,7 @@ export const useDashboardsApi = (name?: string) => {
         return;
       }
 
-      await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
+      await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
         signal,
         params: {
           path: {
@@ -47,7 +47,7 @@ export const useDashboardsApi = (name?: string) => {
       if (!name) {
         return;
       }
-      await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
+      await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
         signal,
         params: {
           path: {
