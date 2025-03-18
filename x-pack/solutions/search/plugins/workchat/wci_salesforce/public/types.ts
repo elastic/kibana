@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/public';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginSetup {}
 
@@ -12,7 +14,9 @@ export interface WCISalesforcePluginSetup {}
 export interface WCISalesforcePluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCISalesforcePluginSetupDependencies {}
+export interface WCISalesforcePluginSetupDependencies {
+    workchatApp: WorkChatAppPluginSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginStartDependencies {}

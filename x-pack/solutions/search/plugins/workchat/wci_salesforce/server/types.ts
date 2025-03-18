@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IntegrationConfiguration } from '@kbn/wci-common';
 import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -19,5 +18,3 @@ export interface WCISalesforcePluginSetupDependencies {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginStartDependencies {}
-
-export type SalesforceConfiguration = IntegrationConfiguration;

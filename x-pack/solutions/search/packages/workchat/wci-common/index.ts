@@ -12,4 +12,7 @@ export type {
   WorkChatIntegration,
   WorkchatIntegrationDefinition,
   IntegrationConfiguration,
+  IntegrationComponentDescriptor,
+  IntegrationToolComponentProps,
+  IntegrationConfigurationFormProps,
 } from './src/types';

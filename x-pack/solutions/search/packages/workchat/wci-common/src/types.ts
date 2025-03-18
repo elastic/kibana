@@ -64,3 +64,17 @@ export interface IntegrationClient {
   connect: () => Promise<McpClient>;
   disconnect: () => Promise<void>;
 }
+
+export interface IntegrationComponentDescriptor<T extends IntegrationConfiguration = IntegrationConfiguration> {
+  getConfigurationForm: () => React.ComponentType<IntegrationConfigurationFormProps<T>>;
+  getTool: () => React.ComponentType<IntegrationToolComponentProps<T>>;
+  getType: () => IntegrationType;
+}
+
+export interface IntegrationToolComponentProps<T extends IntegrationConfiguration = IntegrationConfiguration> {
+  configuration: T;
+}
+
+export interface IntegrationConfigurationFormProps<T extends IntegrationConfiguration = IntegrationConfiguration> {
+  configuration: T;
+}

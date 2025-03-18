@@ -30,6 +30,7 @@ import { useIntegrationEdit } from '../../../hooks/use_integration_edit';
 import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { integrationLabels } from '../i18n';
 import { integrationTypeToLabel } from '../utils';
+import { useWorkChatServices } from '../../../hooks/use_workchat_service';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -100,6 +101,18 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
       text: integrationTypeToLabel(type),
     })),
   ];
+
+  const integrationRegistry = useWorkChatServices().integrationRegistry;
+
+  const ConfigurationForm = useMemo(() => {
+    const integrationType = editState.type;
+    if (!integrationType) {
+      return null;
+    }
+    const integrationDefinition = integrationRegistry.get(integrationType as IntegrationType);
+    return integrationDefinition.getConfigurationForm();
+  }, [editState.type, integrationRegistry]);
+
 
   const updateConfiguration = (configuration: string) => {
     setFieldValue('configuration', JSON.parse(configuration));
@@ -192,6 +205,8 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>
+
+            {ConfigurationForm && <ConfigurationForm configuration={editState} />}
 
             <EuiSpacer />
 
