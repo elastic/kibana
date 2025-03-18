@@ -7422,15 +7422,7 @@ components:
     RiskScoreMapping:
       description: >
         Overrides generated alerts' risk_score with a value from the source
-        event:
-
-
-        - field (string, required): Source event field used to override the
-        default risk_score. This field must be an integer.
-
-        - operator (string, required): Must be equals.
-
-        - value(string, required): Must be an empty string ("").
+        event
       items:
         type: object
         properties:
@@ -9640,13 +9632,6 @@ components:
         for generating alerts.
       type: string
     ThreatSubtechnique:
-      description: >
-        Array containing more specific information on the attack technique.
-
-        > info
-
-        > Only threats described using the MITRE ATT&CKTM framework are
-        displayed in the UI (Rules → Detection rules (SIEM) → Rule name).
       type: object
       properties:
         id:
@@ -9693,6 +9678,13 @@ components:
           description: Technique reference
           type: string
         subtechnique:
+          description: >
+            Array containing more specific information on the attack technique.
+
+            > info
+
+            > Only threats described using the MITRE ATT&CKTM framework are
+            displayed in the UI (Rules → Detection rules (SIEM) → Rule name).
           items:
             $ref: '#/components/schemas/ThreatSubtechnique'
           type: array
