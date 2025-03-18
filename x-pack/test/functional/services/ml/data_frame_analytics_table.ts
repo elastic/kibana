@@ -204,8 +204,6 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       await this.assertAnalyticsSearchInputValue(filter);
 
       const rows = (await this.parseAnalyticsTable()) ?? [];
-      // @TODO: remove
-      console.log(`--@@filterWithSearchString rows`, rows);
       const filteredRows = rows.filter((row) => row.id === filter);
       expect(filteredRows).to.have.length(
         expectedRowCount,

@@ -197,8 +197,6 @@ export function MachineLearningStackManagementJobsProvider(
           );
 
           const isPressed = await button.getAttribute('aria-pressed');
-          // @TODO: remove
-          console.log(`--@@isPressed`, isPressed);
           expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
         },
         {
@@ -536,7 +534,6 @@ export function MachineLearningStackManagementJobsProvider(
       if (mlSavedObjectType === 'data-frame-analytics') {
         rows = await dataFrameAnalyticsTable.parseAnalyticsTable();
       }
-      console.log(`--@@rows`, rows);
 
       const ids = rows.map((row) => row.id);
 
@@ -556,16 +553,6 @@ export function MachineLearningStackManagementJobsProvider(
       }
 
       const row = rows[matchedRowIndex];
-      // @TODO: remove
-      console.log(`--@@row.spaces`, row.spaces);
-      // const col = await row.findByTestSubject('mlSpaceManagementTableColumnSpaces');
-      // const spacesEl = await (
-      //   await col.findByClassName('euiTableCellContent')
-      // ).findAllByClassName('euiAvatar--space');
-
-      // for (const el of spacesEl) {
-      //   spaces.push(((await el.getAttribute('data-test-subj')) ?? '').replace('space-avatar-', ''));
-      // }
 
       return row.spaces;
     },

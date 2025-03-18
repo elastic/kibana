@@ -32,24 +32,24 @@ export default function ({ getService }: FtrProviderContext) {
   // each test run performs all spaces operations and validations for AD and
   // DFA in parallel to save test execution time when switching spaces and pages
   const testDataList: TestData[] = [
-    // {
-    //   suiteTitle: `add one space`,
-    //   initialSpace: spaceIds.idSpaceDefault,
-    //   adJobId: `ad_job_1_${Date.now()}`,
-    //   dfaJobId: `dfa_job_1_${Date.now()}`,
-    //   spacesToAdd: [spaceIds.idSpace1],
-    //   removeInitialSpace: false,
-    //   assignToAllSpaces: false,
-    // },
-    // {
-    //   suiteTitle: `add one space and remove initial space`,
-    //   initialSpace: spaceIds.idSpaceDefault,
-    //   adJobId: `ad_job_2_${Date.now()}`,
-    //   dfaJobId: `dfa_job_2_${Date.now()}`,
-    //   spacesToAdd: [spaceIds.idSpace1],
-    //   removeInitialSpace: true,
-    //   assignToAllSpaces: false,
-    // },
+    {
+      suiteTitle: `add one space`,
+      initialSpace: spaceIds.idSpaceDefault,
+      adJobId: `ad_job_1_${Date.now()}`,
+      dfaJobId: `dfa_job_1_${Date.now()}`,
+      spacesToAdd: [spaceIds.idSpace1],
+      removeInitialSpace: false,
+      assignToAllSpaces: false,
+    },
+    {
+      suiteTitle: `add one space and remove initial space`,
+      initialSpace: spaceIds.idSpaceDefault,
+      adJobId: `ad_job_2_${Date.now()}`,
+      dfaJobId: `dfa_job_2_${Date.now()}`,
+      spacesToAdd: [spaceIds.idSpace1],
+      removeInitialSpace: true,
+      assignToAllSpaces: false,
+    },
     {
       suiteTitle: `assign to all spaces`,
       initialSpace: spaceIds.idSpace1,
@@ -67,8 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
     spaceId: string,
     shouldBeDisplayed: boolean
   ) {
-    // @TODO: remove
-    console.log(`--@@spaceId`, spaceId, shouldBeDisplayed);
     await ml.testExecution.logTestStep(
       `AD job ${adJobId} and DFA job ${dfaJobId} should${
         shouldBeDisplayed ? '' : ' not'
@@ -94,8 +92,6 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function selectSpaces(testData: TestData) {
-    // @TODO: remove
-    console.log(`--@@testData.assignToAllSpaces`, testData.assignToAllSpaces);
     if (testData.assignToAllSpaces) {
       await ml.stackManagementJobs.selectShareToAllSpaces();
     } else {
@@ -123,19 +119,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       for (const spaceId of Object.values(spaceIds)) {
         if (spaceId !== 'default') {
-          try {
-            await spacesService.create({
-              id: spaceId,
-              name: spaceId,
-              disabledFeatures: [],
-              initials: `${spaceId.slice(-1)}`,
-            });
-          } catch (error) {
-            // @TODO: remove
-            console.log(`--@@`, error);
-            // Space already exists
-            // and that's ok
-          }
+          await spacesService.create({
+            id: spaceId,
+            name: spaceId,
+            disabledFeatures: [],
+            initials: `${spaceId.slice(-1)}`,
+          });
         }
       }
     });
@@ -173,34 +162,34 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteDataFrameAnalyticsJobES(testData.dfaJobId);
         });
 
-        // it('should display original job only in assigned spaces', async () => {
-        //   for (const spaceId of Object.values(spaceIds)) {
-        //     await assertJobsDisplayedInSpace(
-        //       testData.adJobId,
-        //       testData.dfaJobId,
-        //       spaceId,
-        //       spaceId === testData.initialSpace
-        //     );
-        //   }
-        // });
+        it('should display original job only in assigned spaces', async () => {
+          for (const spaceId of Object.values(spaceIds)) {
+            await assertJobsDisplayedInSpace(
+              testData.adJobId,
+              testData.dfaJobId,
+              spaceId,
+              spaceId === testData.initialSpace
+            );
+          }
+        });
 
-        // it('should display the initial job space correctly in the AD and DFA jobs lists', async () => {
-        //   await ml.commonUI.changeToSpace(testData.initialSpace);
+        it('should display the initial job space correctly in the AD and DFA jobs lists', async () => {
+          await ml.commonUI.changeToSpace(testData.initialSpace);
 
-        //   // AD
-        //   await ml.navigation.navigateToJobManagement(testData.initialSpace);
-        //   await ml.jobTable.filterWithSearchString(testData.adJobId, 1);
-        //   await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, [
-        //     testData.initialSpace,
-        //   ]);
+          // AD
+          await ml.navigation.navigateToJobManagement(testData.initialSpace);
+          await ml.jobTable.filterWithSearchString(testData.adJobId, 1);
+          await ml.stackManagementJobs.assertADJobRowSpaces(testData.adJobId, [
+            testData.initialSpace,
+          ]);
 
-        //   // DFA
-        //   await ml.navigation.navigateToDataFrameAnalytics(testData.initialSpace);
-        //   await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.dfaJobId, 1);
-        //   await ml.stackManagementJobs.assertDFAJobRowSpaces(testData.dfaJobId, [
-        //     testData.initialSpace,
-        //   ]);
-        // });
+          // DFA
+          await ml.navigation.navigateToDataFrameAnalytics(testData.initialSpace);
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.dfaJobId, 1);
+          await ml.stackManagementJobs.assertDFAJobRowSpaces(testData.dfaJobId, [
+            testData.initialSpace,
+          ]);
+        });
 
         it('should edit job space assignment', async () => {
           // AD
