@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { AggregationsSingleMetricAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsSingleMetricAggregateBase } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
@@ -124,21 +124,19 @@ async function fetchDocumentsTimeRange({
           index: dataView.getIndexPattern(),
           size: 0,
           track_total_hits: false,
-          body: {
-            timeout: '20s',
-            query: dslQuery ?? { match_all: {} },
-            aggs: {
-              earliest_timestamp: {
-                min: {
-                  field: dataView.timeFieldName,
-                  format: 'strict_date_optional_time',
-                },
+          timeout: '20s',
+          query: dslQuery ?? { match_all: {} },
+          aggs: {
+            earliest_timestamp: {
+              min: {
+                field: dataView.timeFieldName,
+                format: 'strict_date_optional_time',
               },
-              latest_timestamp: {
-                max: {
-                  field: dataView.timeFieldName,
-                  format: 'strict_date_optional_time',
-                },
+            },
+            latest_timestamp: {
+              max: {
+                field: dataView.timeFieldName,
+                format: 'strict_date_optional_time',
               },
             },
           },

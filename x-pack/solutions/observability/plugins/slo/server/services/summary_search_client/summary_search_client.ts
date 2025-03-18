@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -160,7 +160,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         }),
       };
     } catch (err) {
-      this.logger.error(`Error while searching SLO summary documents. ${err}`);
+      this.logger.debug(`Error while searching SLO summary documents. ${err}`);
       return { total: 0, ...pagination, results: [] };
     }
   }

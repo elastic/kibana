@@ -96,6 +96,7 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
@@ -115,7 +116,6 @@ export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const INVESTIGATIONS_PATH = '/investigations' as const;
 export const MACHINE_LEARNING_PATH = '/ml' as const;
 export const ASSETS_PATH = '/assets' as const;
-export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -217,6 +217,9 @@ export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
+export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -246,12 +249,6 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
-export const DETECTION_ENGINE_RULES_BULK_DELETE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
-export const DETECTION_ENGINE_RULES_BULK_CREATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
-export const DETECTION_ENGINE_RULES_BULK_UPDATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
@@ -385,7 +382,7 @@ export const STARTED_TRANSFORM_STATES = new Set([
 ]);
 
 /**
- * How many rules to update at a time is set to 50 from errors coming from
+ * How many rules to update at a time is set to 20 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
  * seeing timeout issues.
  *
@@ -400,14 +397,14 @@ export const STARTED_TRANSFORM_STATES = new Set([
  * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
  * which in turn could create additional connections we want to avoid.
  *
- * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
- * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
- * reducing the 50 above to a lower number.
+ * See file import_rules_route.ts for another area where 20 was chosen, therefore I chose
+ * 20 here to mimic it as well. If you see this re-opened or what similar to it, consider
+ * reducing the 20 above to a lower number.
  *
  * See the original ticket here:
  * https://github.com/elastic/kibana/issues/94418
  */
-export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 

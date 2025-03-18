@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { basename } from 'node:path';
@@ -196,11 +196,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const searchResult = await es.search<AlertDoc>({
         index,
         size: count,
-        body: {
-          query: {
-            bool: {
-              must: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
-            },
+        query: {
+          bool: {
+            must: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
           },
         },
       });
@@ -256,8 +254,7 @@ function compareAlertDocs(
 
 // perform an adhoc update to an alert doc
 async function adHocUpdate(es: Client, index: string, id: string) {
-  const body = { doc: DocUpdate };
-  await es.update({ index, id, body, refresh: true });
+  await es.update({ index, id, doc: DocUpdate, refresh: true });
 }
 
 // we'll do the adhoc updates with this data

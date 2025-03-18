@@ -15,11 +15,8 @@ import type {
   SearchRequest,
   SearchResponse,
   AggregateName,
-} from '@elastic/elasticsearch/lib/api/types';
-import type {
-  SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, ElasticsearchClient } from '@kbn/core/server';
 
 interface WrapScopedClusterClientOpts {
@@ -93,28 +90,28 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
     TDocument = unknown,
     TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
-    params?: SearchRequest | SearchRequestWithBody,
+    params?: SearchRequest,
     options?: TransportRequestOptionsWithOutMeta
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
     TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
-    params?: SearchRequest | SearchRequestWithBody,
+    params?: SearchRequest,
     options?: TransportRequestOptionsWithMeta
   ): Promise<TransportResult<SearchResponse<TDocument, TAggregations>, unknown>>;
   async function search<
     TDocument = unknown,
     TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
-    params?: SearchRequest | SearchRequestWithBody,
+    params?: SearchRequest,
     options?: TransportRequestOptions
   ): Promise<SearchResponse<TDocument, TAggregations>>;
   async function search<
     TDocument = unknown,
     TAggregations = Record<AggregateName, AggregationsAggregate>
   >(
-    params?: SearchRequest | SearchRequestWithBody,
+    params?: SearchRequest,
     options?: TransportRequestOptions
   ): Promise<
     | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>

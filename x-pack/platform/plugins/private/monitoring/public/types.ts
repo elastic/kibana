@@ -17,6 +17,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ReactNode } from 'react';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
@@ -27,6 +28,7 @@ export interface MonitoringStartPluginDependencies {
   dashboard?: DashboardStart;
   fleet?: FleetStart;
   share: SharePluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 interface LegacyStartDependencies {

@@ -127,11 +127,11 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"validate\" | \"options\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -178,11 +178,11 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"validate\" | \"options\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -229,11 +229,11 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"validate\" | \"options\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -280,11 +280,11 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"validate\" | \"options\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -331,11 +331,11 @@
                   "RouteConfig",
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"validate\" | \"options\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Pick<",
                   "RouteConfigOptions",
                   "<",
                   "Method",
-                  ">, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+                  ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; access: ",
                   "RouteAccess",
                   "; security?: ",
                   "RouteSecurity",
@@ -845,7 +845,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string[]"
+              "(versions: string[], access: \"public\" | \"internal\") => string[]"
             ],
             "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
@@ -874,7 +874,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
@@ -890,7 +890,7 @@
             "label": "oldest",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
+              "(versions: string[], access: \"public\" | \"internal\") => string | undefined"
             ],
             "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
@@ -919,7 +919,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
@@ -935,7 +935,7 @@
             "label": "newest",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
+              "(versions: string[], access: \"public\" | \"internal\") => string | undefined"
             ],
             "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
@@ -964,7 +964,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
@@ -980,7 +980,7 @@
             "label": "none",
             "description": [],
             "signature": [
-              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
+              "(versions: string[], access: \"public\" | \"internal\") => string | undefined"
             ],
             "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
@@ -1009,7 +1009,7 @@
                 "label": "access",
                 "description": [],
                 "signature": [
-                  "\"internal\" | \"public\""
+                  "\"public\" | \"internal\""
                 ],
                 "path": "src/core/packages/http/router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,

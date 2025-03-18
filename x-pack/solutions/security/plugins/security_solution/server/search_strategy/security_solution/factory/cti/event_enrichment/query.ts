@@ -33,30 +33,28 @@ export const buildEventEnrichmentQuery = ({
     allow_no_indices: true,
     ignore_unavailable: true,
     index: defaultIndex,
-    body: {
-      _source: false,
-      fields: [
-        { field: '*', include_unmapped: true },
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-        {
-          field: 'code_signature.timestamp',
-          format: 'strict_date_optional_time',
-        },
-        {
-          field: 'dll.code_signature.timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      stored_fields: ['*'],
-      query: {
-        bool: {
-          should: buildIndicatorShouldClauses(eventFields),
-          filter,
-          minimum_should_match: 1,
-        },
+    _source: false,
+    fields: [
+      { field: '*', include_unmapped: true },
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+      {
+        field: 'code_signature.timestamp',
+        format: 'strict_date_optional_time',
+      },
+      {
+        field: 'dll.code_signature.timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    stored_fields: ['*'],
+    query: {
+      bool: {
+        should: buildIndicatorShouldClauses(eventFields),
+        filter,
+        minimum_should_match: 1,
       },
     },
   };

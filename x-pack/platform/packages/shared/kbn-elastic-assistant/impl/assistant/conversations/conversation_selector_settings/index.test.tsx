@@ -35,13 +35,6 @@ describe('ConversationSelectorSettings', () => {
     fireEvent.click(getByTestId(alertConvo.title));
     expect(onConversationSelectionChange).toHaveBeenCalledWith(alertConvo);
   });
-  it('Only custom option can be deleted', () => {
-    const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);
-    fireEvent.click(getByTestId('comboBoxToggleListButton'));
-    // there is only one delete conversation because there is only one custom convo
-    fireEvent.click(getByTestId('delete-conversation'));
-    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.title);
-  });
   it('Selects existing conversation from the search  input', () => {
     const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);
     fireEvent.change(getByTestId('comboBoxSearchInput'), { target: { value: alertConvo.title } });

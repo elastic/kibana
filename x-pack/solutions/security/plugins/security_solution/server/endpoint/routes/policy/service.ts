@@ -20,30 +20,28 @@ export const getESQueryPolicyResponseByAgentID = (
   index: string
 ): ISearchRequestParams => {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'agent.id': agentID,
-            },
+    query: {
+      bool: {
+        filter: {
+          term: {
+            'agent.id': agentID,
           },
-          must_not: {
-            term: {
-              'Endpoint.policy.applied.id': INITIAL_POLICY_ID,
-            },
+        },
+        must_not: {
+          term: {
+            'Endpoint.policy.applied.id': INITIAL_POLICY_ID,
           },
         },
       },
-      sort: [
-        {
-          'event.created': {
-            order: 'desc',
-          },
-        },
-      ],
-      size: 1,
     },
+    sort: [
+      {
+        'event.created': {
+          order: 'desc',
+        },
+      },
+    ],
+    size: 1,
     index,
   };
 };

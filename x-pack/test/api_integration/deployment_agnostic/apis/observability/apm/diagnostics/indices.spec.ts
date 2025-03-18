@@ -147,7 +147,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           await es.indices.putSettings({
             index: datastreamToUpdate.data_streams[0].indices[0].index_name,
             // @ts-expect-error: Allow null values in https://github.com/elastic/elasticsearch-specification/pull/2126
-            body: { index: { default_pipeline: null } },
+            settings: { index: { default_pipeline: null } },
           });
         });
 
@@ -176,7 +176,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
           await es.indices.putSettings({
             index: datastreamToUpdate.data_streams[0].indices[0].index_name,
-            body: { index: { default_pipeline: 'logs-default-pipeline' } },
+            settings: { index: { default_pipeline: 'logs-default-pipeline' } },
           });
         });
 

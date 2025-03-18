@@ -8,7 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsErrorHelpers,

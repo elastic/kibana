@@ -138,7 +138,38 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WORKFLOW_LOCALSTORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_LOCALSTORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"search_onboarding_workflow\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WorkflowId",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowId",
+        "description": [],
+        "signature": [
+          "\"default\" | \"vector\" | \"semantic\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

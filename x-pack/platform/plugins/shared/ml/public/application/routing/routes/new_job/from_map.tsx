@@ -44,16 +44,16 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           timefilter: { timefilter: timeFilter },
         },
       },
-      dashboard: dashboardService,
       uiSettings: kibanaConfig,
       mlServices: { mlApi },
+      share,
     },
   } = useMlKibana();
 
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
       resolver(
-        { dataViews, mlApi, timeFilter, kibanaConfig, dashboardService },
+        { dataViews, mlApi, timeFilter, kibanaConfig, share },
         dashboard,
         dataViewId,
         embeddable,

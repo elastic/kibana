@@ -37,54 +37,52 @@ export const buildUsersQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggs: {
-        user_count: {
-          cardinality: {
-            field: 'user.name',
+    aggs: {
+      user_count: {
+        cardinality: {
+          field: 'user.name',
+        },
+      },
+      users: {
+        terms: {
+          field: 'user.name',
+          size: querySize,
+          order: {
+            ...getQueryOrder(sort),
           },
         },
-        users: {
-          terms: {
-            field: 'user.name',
-            size: querySize,
-            order: {
-              ...getQueryOrder(sort),
+        aggs: {
+          id: {
+            terms: {
+              field: 'user.id',
             },
           },
-          aggs: {
-            id: {
-              terms: {
-                field: 'user.id',
-              },
+          groupId: {
+            terms: {
+              field: 'user.group.id',
             },
-            groupId: {
-              terms: {
-                field: 'user.group.id',
-              },
-            },
-            groupName: {
-              terms: {
-                field: 'user.group.name',
-              },
+          },
+          groupName: {
+            terms: {
+              field: 'user.group.name',
             },
           },
         },
       },
-      query: {
-        bool: {
-          filter,
-          must_not: [
-            {
-              term: {
-                'event.category': 'authentication',
-              },
-            },
-          ],
-        },
-      },
-      size: 0,
     },
+    query: {
+      bool: {
+        filter,
+        must_not: [
+          {
+            term: {
+              'event.category': 'authentication',
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
   };
 
   return dslQuery;

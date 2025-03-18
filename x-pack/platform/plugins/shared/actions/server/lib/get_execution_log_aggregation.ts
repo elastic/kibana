@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KueryNode } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+
 import Boom from '@hapi/boom';
 import { flatMap, get, isEmpty } from 'lodash';
-import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
+import type { IExecutionLog, IExecutionLogResult } from '../../common';
+import { EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;

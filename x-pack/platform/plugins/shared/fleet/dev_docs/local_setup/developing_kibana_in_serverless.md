@@ -68,7 +68,7 @@ xpack.fleet.fleetServerHosts:
     is_default: true
     host_urls: ['http://localhost:8220']
     # If you want to run a Fleet Server containers via Docker, use this URL:
-    # host_urls: ['https://host.docker.internal:8220']
+    # host_urls: ['http://host.docker.internal:8220']
 xpack.fleet.outputs:
   - id: es-default-output
     name: Default output
@@ -84,13 +84,13 @@ xpack.fleet.outputs:
 
 In serverless mode, Fleet Server runs in standalone mode. Unless you are [simultaneously developing Kibana and Fleet Server](./developing_kibana_and_fleet_server.mddeveloping_), it is easier to run Fleet Server as a Docker container.
 
-The Kibana's dev utils package defines a hard-coded [Fleet Server service token](ttps://github.com/elastic/kibana/blob/92b6fd64cd58fd62f69898c222e86409d5f15b60/packages/kbn-dev-utils/src/dev_service_account.ts#L21-L25) and fingerprint of the ca.crt certificate.
+The Kibana's dev utils package defines a hard-coded [Fleet Server service token](ttps://github.com/elastic/kibana/blob/92b6fd64cd58fd62f69898c222e86409d5f15b60/src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts#L21-L25) and fingerprint of the ca.crt certificate.
 
 Running a standalone Fleet Server:
 
 ```bash
 docker run -it --rm \
-  -e ELASTICSEARCH_HOSTS="http://host.docker.internal:9200" \
+  -e ELASTICSEARCH_HOSTS="https://host.docker.internal:9200" \
   -e ELASTICSEARCH_SERVICE_TOKEN="AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ" \
   -e ELASTICSEARCH_CA_TRUSTED_FINGERPRINT="F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84" \
   -p 8220:8220 \

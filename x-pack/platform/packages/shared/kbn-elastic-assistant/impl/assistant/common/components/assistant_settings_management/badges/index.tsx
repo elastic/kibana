@@ -15,9 +15,9 @@ export const BadgesColumn: React.FC<{
 }> = React.memo(({ items, prefix, color = 'hollow' }) =>
   items && items.length > 0 ? (
     <div>
-      {items.map((c, idx) => (
+      {items.map((title, idx) => (
         <EuiBadge key={`${prefix}-${idx}`} color={color}>
-          {c}
+          {title}
         </EuiBadge>
       ))}
     </div>

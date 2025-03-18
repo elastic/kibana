@@ -40,15 +40,13 @@ export const fetchTagUsageData = async ({
     index: kibanaIndices,
     ignore_unavailable: true,
     filter_path: 'aggregations',
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          must: [hasTagReferenceClause],
-        },
+    size: 0,
+    query: {
+      bool: {
+        must: [hasTagReferenceClause],
       },
-      aggs: tagDataAggregations,
     },
+    aggs: tagDataAggregations,
   });
 
   const byTypeUsages: Record<string, ByTypeTaggingUsageData> = {};

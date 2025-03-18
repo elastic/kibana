@@ -16,3 +16,21 @@ export interface TransactionDetailsByTraceIdLocatorParams extends SerializableRe
   rangeTo?: string;
   traceId: string;
 }
+
+export const DEPENDENCY_OVERVIEW_LOCATOR_ID = 'dependencyOverviewLocator';
+
+export interface DependencyOverviewParams extends SerializableRecord {
+  dependencyName: string;
+  environment?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+}
+
+export const TRANSACTION_DETAILS_BY_NAME_LOCATOR = 'TransactionDetailsByNameLocator';
+
+export interface TransactionDetailsByNameParams extends SerializableRecord {
+  serviceName: string;
+  transactionName: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
 import { ReportDocument } from '@kbn/reporting-common/types';

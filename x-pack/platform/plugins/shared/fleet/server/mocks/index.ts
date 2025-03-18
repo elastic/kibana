@@ -140,7 +140,9 @@ export const createAppContextStartContractMock = (
       : {}),
     unenrollInactiveAgentsTask: {} as any,
     deleteUnenrolledAgentsTask: {} as any,
+    updateAgentlessDeploymentsTask: {} as any,
     syncIntegrationsTask: {} as any,
+    automaticAgentUpgradeTask: {} as any,
   };
 };
 
@@ -192,12 +194,12 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     listIds: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
+    bulkUpgrade: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
     runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
-    getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
     fetchAllItems: jest.fn((..._) => {

@@ -202,6 +202,9 @@ export default async function ({ readConfigFile }) {
       elasticsearchIndices: {
         pathname: '/app/elasticsearch/indices',
       },
+      searchPlayground: {
+        pathname: '/app/search_playground',
+      },
     },
 
     suiteTags: {
@@ -230,6 +233,20 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        test_filebeat_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['filebeat*'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

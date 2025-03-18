@@ -75,11 +75,11 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         );
       return prepareTemplate({
         packageInstallContext: {
-          assetsMap,
           archiveIterator: createArchiveIteratorFromMap(assetsMap),
           packageInfo,
           paths,
         },
+        fieldAssetsMap: assetsMap,
         dataStream,
         experimentalDataStreamFeature,
       });
@@ -192,6 +192,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       await esClient.cluster.putComponentTemplate({
         name: componentTemplateName,
+        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
         body,
         _meta: {
           has_experimental_data_stream_indexing_features: hasExperimentalDataStreamIndexingFeatures,

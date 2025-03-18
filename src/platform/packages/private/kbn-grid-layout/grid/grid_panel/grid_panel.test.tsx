@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { GridPanel, type GridPanelProps } from './grid_panel';
-import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
+import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { GridLayoutContext, type GridLayoutContextType } from '../use_grid_layout_context';
 
 describe('GridPanel', () => {
@@ -20,12 +20,12 @@ describe('GridPanel', () => {
   }) => {
     const contextValue = {
       renderPanelContents: mockRenderPanelContents,
-      gridLayoutStateManager: gridLayoutStateManagerMock,
+      gridLayoutStateManager: getGridLayoutStateManagerMock(),
       ...(overrides?.contextOverrides ?? {}),
     } as GridLayoutContextType;
     const panelProps = {
       panelId: 'panel1',
-      rowIndex: 0,
+      rowId: 'first',
       ...(overrides?.propsOverrides ?? {}),
     };
     const { rerender, ...rtlRest } = render(

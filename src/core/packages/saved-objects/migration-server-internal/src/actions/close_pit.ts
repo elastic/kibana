@@ -28,9 +28,7 @@ export const closePit =
   ({ client, pitId }: ClosePitParams): TaskEither.TaskEither<RetryableEsClientError, {}> =>
   () => {
     return client
-      .closePointInTime({
-        body: { id: pitId },
-      })
+      .closePointInTime({ id: pitId })
       .then((response) => {
         if (!response.succeeded) {
           throw new Error(`Failed to close PointInTime with id: ${pitId}`);

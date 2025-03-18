@@ -75,7 +75,7 @@ export const createFetchIndicators =
       {
         params: {
           index: selectedPatterns,
-          body: searchRequestBody,
+          ...searchRequestBody,
         },
         factoryQueryType: FactoryQueryType.IndicatorGrid,
       },

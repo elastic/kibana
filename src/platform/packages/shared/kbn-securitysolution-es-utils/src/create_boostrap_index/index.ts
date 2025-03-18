@@ -20,11 +20,9 @@ export const createBootstrapIndex = async (
     await esClient.indices.create(
       {
         index: `${index}-000001`,
-        body: {
-          aliases: {
-            [index]: {
-              is_write_index: true,
-            },
+        aliases: {
+          [index]: {
+            is_write_index: true,
           },
         },
       },

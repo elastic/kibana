@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '@kbn/apm-data-access-plugin/server/utils';
@@ -55,19 +55,17 @@ export async function getIsUsingServiceDestinationMetrics({
       apm: {
         events: [getProcessorEventForServiceDestinationStatistics(true)],
       },
-      body: {
-        track_total_hits: 1,
-        size: 0,
-        terminate_after: 1,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...kqlQuery(kuery),
-              ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-              ...(query ? [query] : []),
-            ],
-          },
+      track_total_hits: 1,
+      size: 0,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...kqlQuery(kuery),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+            ...(query ? [query] : []),
+          ],
         },
       },
     });

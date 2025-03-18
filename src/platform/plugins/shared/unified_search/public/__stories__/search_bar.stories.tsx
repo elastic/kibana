@@ -10,7 +10,6 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { DataViewBase, Query } from '@kbn/es-query';
-import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -223,9 +222,17 @@ function wrapSearchBarInContext(
   );
 }
 
-storiesOf('SearchBar', module)
-  .add('default', () => wrapSearchBarInContext({ showQueryInput: true } as SearchBarProps))
-  .add('with dataviewPicker', () =>
+export default {
+  title: 'SearchBar',
+};
+
+export const Default = {
+  render: () => wrapSearchBarInContext({ showQueryInput: true } as SearchBarProps),
+  name: 'default',
+};
+
+export const WithDataviewPicker = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -236,9 +243,13 @@ storiesOf('SearchBar', module)
         },
         onChangeDataView: action('onChangeDataView'),
       },
-    })
-  )
-  .add('with dataviewPicker enhanced', () =>
+    }),
+
+  name: 'with dataviewPicker',
+};
+
+export const WithDataviewPickerEnhanced = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -251,29 +262,49 @@ storiesOf('SearchBar', module)
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
       },
-    })
-  )
-  .add('with filterBar off', () =>
+    }),
+
+  name: 'with dataviewPicker enhanced',
+};
+
+export const WithFilterBarOff = {
+  render: () =>
     wrapSearchBarInContext({
       showFilterBar: false,
-    })
-  )
-  .add('with query input off', () =>
+    }),
+
+  name: 'with filterBar off',
+};
+
+export const WithQueryInputOff = {
+  render: () =>
     wrapSearchBarInContext({
       showQueryInput: false,
-    })
-  )
-  .add('with date picker off', () =>
+    }),
+
+  name: 'with query input off',
+};
+
+export const WithDatePickerOff = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: false,
-    })
-  )
-  .add('with disabled "Save query" menu', () =>
+    }),
+
+  name: 'with date picker off',
+};
+
+export const WithDisabledSaveQueryMenu = {
+  render: () =>
     wrapSearchBarInContext({
       showSaveQuery: false,
-    })
-  )
-  .add('with hidden "Manage saved objects" link in "Load saved query" menu', () =>
+    }),
+
+  name: 'with disabled "Save query" menu',
+};
+
+export const WithHiddenManageSavedObjectsLinkInLoadSavedQueryMenu = {
+  render: () =>
     wrapSearchBarInContext(
       {},
       {
@@ -281,37 +312,57 @@ storiesOf('SearchBar', module)
           edit: false,
         },
       }
-    )
-  )
-  .add('with the default date picker auto refresh interval on', () =>
+    ),
+
+  name: 'with hidden "Manage saved objects" link in "Load saved query" menu',
+};
+
+export const WithTheDefaultDatePickerAutoRefreshIntervalOn = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       onRefreshChange: action('onRefreshChange'),
-    })
-  )
-  .add('with the default date picker auto refresh interval off', () =>
+    }),
+
+  name: 'with the default date picker auto refresh interval on',
+};
+
+export const WithTheDefaultDatePickerAutoRefreshIntervalOff = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       isAutoRefreshDisabled: true,
-    })
-  )
-  .add('with only the date picker on', () =>
+    }),
+
+  name: 'with the default date picker auto refresh interval off',
+};
+
+export const WithOnlyTheDatePickerOn = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       showFilterBar: false,
       showQueryInput: false,
-    })
-  )
-  .add('with additional filters used for suggestions', () =>
+    }),
+
+  name: 'with only the date picker on',
+};
+
+export const WithAdditionalFiltersUsedForSuggestions = {
+  render: () =>
     wrapSearchBarInContext({
       filtersForSuggestions: [
         buildExistsFilter({ type: 'keyword', name: 'geo.src' }, {
           id: undefined,
         } as unknown as DataViewBase),
       ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with only the filter bar on', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with additional filters used for suggestions',
+};
+
+export const WithOnlyTheFilterBarOn = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: false,
       showFilterBar: true,
@@ -339,26 +390,38 @@ storiesOf('SearchBar', module)
           },
         },
       ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with only the query bar on', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with only the filter bar on',
+};
+
+export const WithOnlyTheQueryBarOn = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: false,
       showFilterBar: false,
       showQueryInput: true,
       query: { query: 'Test: miaou', language: 'kuery' },
-    } as unknown as SearchBarProps)
-  )
-  .add('with query menu off', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with only the query bar on',
+};
+
+export const WithQueryMenuOff = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: false,
       showFilterBar: false,
       showQueryInput: true,
       showQueryMenu: false,
       query: { query: 'Test: miaou', language: 'kuery' },
-    } as unknown as SearchBarProps)
-  )
-  .add('with only the filter bar and the date picker on', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with query menu off',
+};
+
+export const WithOnlyTheFilterBarAndTheDatePickerOn = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       showFilterBar: true,
@@ -386,9 +449,13 @@ storiesOf('SearchBar', module)
           },
         },
       ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with loaded saved query without changes', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with only the filter bar and the date picker on',
+};
+
+export const WithLoadedSavedQueryWithoutChanges = {
+  render: () =>
     wrapSearchBarInContext({
       savedQuery: {
         id: '0173d0d0-b19a-11ec-8323-837d6b231b82',
@@ -447,9 +514,13 @@ storiesOf('SearchBar', module)
           },
         },
       ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with loaded saved query with changes', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with loaded saved query without changes',
+};
+
+export const WithLoadedSavedQueryWithChanges = {
+  render: () =>
     wrapSearchBarInContext({
       savedQuery: {
         id: '0173d0d0-b19a-11ec-8323-837d6b231b82',
@@ -485,9 +556,13 @@ storiesOf('SearchBar', module)
           ],
         },
       },
-    } as unknown as SearchBarProps)
-  )
-  .add('with prepended controls', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with loaded saved query with changes',
+};
+
+export const WithPrependedControls = {
+  render: () =>
     wrapSearchBarInContext({
       prependFilterBar: (
         <EuiComboBox
@@ -502,41 +577,61 @@ storiesOf('SearchBar', module)
         />
       ),
       showQueryInput: true,
-    })
-  )
-  .add('without switch query language', () =>
+    }),
+
+  name: 'with prepended controls',
+};
+
+export const WithoutSwitchQueryLanguage = {
+  render: () =>
     wrapSearchBarInContext({
       disableQueryLanguageSwitcher: true,
-    })
-  )
-  .add('show only query bar without submit', () =>
+    }),
+
+  name: 'without switch query language',
+};
+
+export const ShowOnlyQueryBarWithoutSubmit = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: false,
       showFilterBar: false,
       showAutoRefreshOnly: false,
       showQueryInput: true,
       showSubmitButton: false,
-    })
-  )
-  .add('show only datepicker without submit', () =>
+    }),
+
+  name: 'show only query bar without submit',
+};
+
+export const ShowOnlyDatepickerWithoutSubmit = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       showFilterBar: false,
       showAutoRefreshOnly: false,
       showQueryInput: false,
       showSubmitButton: false,
-    })
-  )
-  .add('show only query bar and timepicker without submit', () =>
+    }),
+
+  name: 'show only datepicker without submit',
+};
+
+export const ShowOnlyQueryBarAndTimepickerWithoutSubmit = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: true,
       showFilterBar: false,
       showAutoRefreshOnly: false,
       showQueryInput: true,
       showSubmitButton: false,
-    })
-  )
-  .add('with filter bar on but pinning option is hidden from menus', () =>
+    }),
+
+  name: 'show only query bar and timepicker without submit',
+};
+
+export const WithFilterBarOnButPinningOptionIsHiddenFromMenus = {
+  render: () =>
     wrapSearchBarInContext({
       showDatePicker: false,
       showFilterBar: true,
@@ -565,9 +660,13 @@ storiesOf('SearchBar', module)
           },
         },
       ],
-    } as unknown as SearchBarProps)
-  )
-  .add('with dataviewPicker with ES|QL', () =>
+    } as unknown as SearchBarProps),
+
+  name: 'with filter bar on but pinning option is hidden from menus',
+};
+
+export const WithDataviewPickerWithEsQl = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -579,11 +678,14 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
-    } as SearchBarProps)
-  )
-  .add('with dataviewPicker with ES|QL and ES|QL query', () =>
+    } as SearchBarProps),
+
+  name: 'with dataviewPicker with ES|QL',
+};
+
+export const WithDataviewPickerWithEsQlAndEsQlQuery = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -595,12 +697,15 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       query: { esql: 'from dataview | project field1, field2' },
-    } as unknown as SearchBarProps<Query>)
-  )
-  .add('with dataviewPicker with ES|QL and large ES|QL query', () =>
+    } as unknown as SearchBarProps<Query>),
+
+  name: 'with dataviewPicker with ES|QL and ES|QL query',
+};
+
+export const WithDataviewPickerWithEsQlAndLargeEsQlQuery = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -612,14 +717,17 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       query: {
         esql: 'from dataview | project field1, field2, field 3, field 4, field 5 | where field5 > 5 | stats var = avg(field3)',
       },
-    } as unknown as SearchBarProps<Query>)
-  )
-  .add('with dataviewPicker with ES|QL and errors in ES|QL query', () =>
+    } as unknown as SearchBarProps<Query>),
+
+  name: 'with dataviewPicker with ES|QL and large ES|QL query',
+};
+
+export const WithDataviewPickerWithEsQlAndErrorsInEsQlQuery = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -631,7 +739,6 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
         onAddField: action('onAddField'),
         onDataViewCreated: action('onDataViewCreated'),
-        textBasedLanguages: ['ESQL'],
       },
       textBasedLanguageModeErrors: [
         new Error(
@@ -639,9 +746,13 @@ storiesOf('SearchBar', module)
         ),
       ],
       query: { esql: 'from dataview | project field10' },
-    } as unknown as SearchBarProps<Query>)
-  )
-  .add('in disabled state', () =>
+    } as unknown as SearchBarProps<Query>),
+
+  name: 'with dataviewPicker with ES|QL and errors in ES|QL query',
+};
+
+export const InDisabledState = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -653,9 +764,13 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       isDisabled: true,
-    })
-  )
-  .add('no submit button', () =>
+    }),
+
+  name: 'in disabled state',
+};
+
+export const NoSubmitButton = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -667,9 +782,13 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       showSubmitButton: false,
-    })
-  )
-  .add('submit button always as icon', () =>
+    }),
+
+  name: 'no submit button',
+};
+
+export const SubmitButtonAlwaysAsIcon = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -681,9 +800,13 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       submitButtonStyle: 'iconOnly',
-    })
-  )
-  .add('submit button always as a full button', () =>
+    }),
+
+  name: 'submit button always as icon',
+};
+
+export const SubmitButtonAlwaysAsAFullButton = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -695,10 +818,13 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       submitButtonStyle: 'full',
-    })
-  )
+    }),
 
-  .add('with renderQueryInputAppend prop', () =>
+  name: 'submit button always as a full button',
+};
+
+export const WithRenderQueryInputAppendProp = {
+  render: () =>
     wrapSearchBarInContext({
       dataViewPickerComponentProps: {
         currentDataViewId: '1234',
@@ -711,9 +837,13 @@ storiesOf('SearchBar', module)
       },
       submitButtonStyle: 'full',
       renderQueryInputAppend: () => <EuiButton onClick={() => {}}>Append</EuiButton>,
-    })
-  )
-  .add('with additional query bar menu items', () =>
+    }),
+
+  name: 'with renderQueryInputAppend prop',
+};
+
+export const WithAdditionalQueryBarMenuItems = {
+  render: () =>
     wrapSearchBarInContext({
       showFilterBar: true,
       additionalQueryBarMenuItems: {
@@ -746,5 +876,7 @@ storiesOf('SearchBar', module)
           },
         ],
       },
-    })
-  );
+    }),
+
+  name: 'with additional query bar menu items',
+};

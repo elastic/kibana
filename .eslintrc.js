@@ -641,14 +641,14 @@ module.exports = {
       files: [
         '**/*.stories.tsx',
         '**/*.test.js',
+        'src/platform/test/*/config.ts',
+        'src/platform/test/*/config_open.ts',
+        'src/platform/test/*/*.config.ts',
+        'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
+        'src/platform/test/server_integration/**/*.ts',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
-        'test/*/config.ts',
-        'test/*/config_open.ts',
-        'test/*/*.config.ts',
-        'test/*/{tests,test_suites,apis,apps}/**/*',
-        'test/server_integration/**/*.ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
@@ -724,7 +724,7 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -788,7 +788,10 @@ module.exports = {
      * Harden specific rules
      */
     {
-      files: ['test/harden/*.js', 'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js'],
+      files: [
+        'src/platform/test/harden/*.js',
+        'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js',
+      ],
       rules: {
         'mocha/handle-done-callback': 'off',
       },
@@ -1089,6 +1092,7 @@ module.exports = {
         'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/file_upload/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1340,6 +1344,10 @@ module.exports = {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
+    {
+      files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
+      extends: ['plugin:testing-library/react'],
+    },
 
     /**
      * Lists overrides. These rules below are maintained and owned by
@@ -1420,8 +1428,8 @@ module.exports = {
     },
     {
       files: [
-        'test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'test/*api_integration*/**/*.{js,ts}',
+        'src/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'src/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
@@ -1441,13 +1449,13 @@ module.exports = {
     },
     {
       files: [
-        'packages/kbn-scout/src/playwright/**/*.ts',
+        'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'src/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
       ],
-      excludedFiles: ['packages/kbn-scout/src/playwright/**/*.test.ts'],
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
       plugins: ['playwright'],
       settings: {
@@ -1470,7 +1478,8 @@ module.exports = {
         'playwright/no-slowed-test': 'error',
         'playwright/no-standalone-expect': 'error',
         'playwright/no-unsafe-references': 'error',
-        'playwright/no-wait-for-selector': 'warn',
+        'playwright/no-useless-await': 'error',
+        'playwright/no-wait-for-selector': 'error',
         'playwright/max-nested-describe': ['error', { max: 1 }],
         'playwright/missing-playwright-await': 'error',
         'playwright/prefer-comparison-matcher': 'error',
@@ -1606,9 +1615,9 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}',
       ],
@@ -1628,6 +1637,24 @@ module.exports = {
     },
 
     /**
+     * ResponseOps overrides
+     */
+
+    {
+      files: [
+        'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+
+    /**
      * Lens overrides
      */
     {
@@ -1642,10 +1669,11 @@ module.exports = {
      */
     {
       files: [
-        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
-        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
           'error',
@@ -1905,11 +1933,11 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-        'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
-        'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
+        'src/platform/test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
+        'src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-security-hardening/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
@@ -1995,7 +2023,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-config-schema',
         'src/platform/plugins/shared/saved_objects_management/**',
         'src/platform/packages/shared/kbn-analytics/**',
-        'packages/kbn-telemetry-tools/**',
+        'src/platform/packages/private/kbn-telemetry-tools/**',
         'src/platform/plugins/private/kibana_usage_collection/**',
         'src/platform/plugins/shared/usage_collection/**',
         'src/platform/plugins/shared/telemetry/**',
@@ -2063,7 +2091,8 @@ module.exports = {
      */
     {
       files: [
-        'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'src/platform/packages/*/kbn-repo-*/**/*',
+        'packages/kbn-repo-*/**/*',
         'packages/kbn-validate-next-docs-cli/**/*',
         'packages/kbn-find-used-node-modules/**/*',
       ],
@@ -2082,10 +2111,12 @@ module.exports = {
         'x-pack/platform/plugins/shared/osquery/**',
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
+        // FIXME @dmlemeshko
+        `src/platform/test/api_integration/apis/guided_onboarding/get_guides.ts`,
+        `src/platform/test/api_integration/apis/guided_onboarding/put_state.ts`,
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
-        'test/**',
         'x-pack/test_serverless/**',
         'x-pack/test/**',
         'x-pack/test/plugin_functional/plugins/resolver_test/**',

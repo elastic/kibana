@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
@@ -71,6 +71,20 @@ describe('reassignAgent', () => {
       // does not call ES update
       expect(esClient.update).toBeCalledTimes(0);
     });
+
+    it('update namespaces with reassign', async () => {
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
+
+      await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
+
+      // calls ES update with correct values
+      expect(esClient.update).toBeCalledTimes(1);
+      const calledWith = esClient.update.mock.calls[0];
+      expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
+      expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty('namespaces', [
+        'space1',
+      ]);
+    });
   });
 
   describe('reassignAgents (plural)', () => {
@@ -104,6 +118,10 @@ describe('reassignAgent', () => {
       expect((calledWith as estypes.BulkRequest).operations?.length).toBe(2);
       // @ts-expect-error
       expect(calledWith.operations[0].update._id).toEqual(agentInRegularDoc._id);
+      expect((calledWith.operations?.[1] as any)?.doc).toHaveProperty('namespaces', [
+        'space1',
+        'default',
+      ]);
 
       // hosted policy is updated in action results with error
       const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;

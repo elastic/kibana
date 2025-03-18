@@ -145,15 +145,13 @@ export function backgroundTaskUtilizationRoute(
           const hasPrivilegesResponse = await clusterClient
             .asScoped(req)
             .asCurrentUser.security.hasPrivileges({
-              body: {
-                application: [
-                  {
-                    application: `kibana-${kibanaIndexName}`,
-                    resources: ['*'],
-                    privileges: [`api:${kibanaVersion}:taskManager`],
-                  },
-                ],
-              },
+              application: [
+                {
+                  application: `kibana-${kibanaIndexName}`,
+                  resources: ['*'],
+                  privileges: [`api:${kibanaVersion}:taskManager`],
+                },
+              ],
             });
 
           // Keep track of total access vs admin access

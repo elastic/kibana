@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import type { CriteriaField } from './results_service';
 import type { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
@@ -205,7 +205,7 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
     // it includes the records that occurred as anomalies historically
     const searchAllTime = !isModelPlotEnabled && !applyTimeRange;
 
-    const requestBody: estypes.SearchRequest['body'] = {
+    const requestBody: estypes.SearchRequest = {
       query: {
         bool: {
           filter: [
@@ -254,10 +254,8 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
 
     const body = await mlClient.anomalySearch(
       {
-        body: {
-          ...requestBody,
-          size: 0,
-        },
+        ...requestBody,
+        size: 0,
       },
       [jobId]
     );

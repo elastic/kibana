@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import React from 'react';
 import type { DocumentProfileProvider } from '../../../../profiles';
-import { ProfileProviderServices } from '../../../profile_provider_services';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): DocumentProfileProvider['profile']['getDocViewer'] =>

@@ -250,15 +250,13 @@ export default function (providerContext: FtrProviderContext) {
           apiResponse.item.api_key
         ).security.hasPrivileges(
           {
-            body: {
-              cluster: ['all', 'monitor', 'manage_api_key'],
-              index: [
-                {
-                  names: ['log-*', 'metrics-*', 'events-*', '*'],
-                  privileges: ['write', 'create_index'],
-                },
-              ],
-            },
+            cluster: ['all', 'monitor', 'manage_api_key'],
+            index: [
+              {
+                names: ['log-*', 'metrics-*', 'events-*', '*'],
+                privileges: ['write', 'create_index'],
+              },
+            ],
           },
           { meta: true }
         );

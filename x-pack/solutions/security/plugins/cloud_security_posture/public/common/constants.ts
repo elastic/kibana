@@ -23,7 +23,6 @@ import {
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
-export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';

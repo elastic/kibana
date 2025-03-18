@@ -12,17 +12,15 @@ export const searchEnrichments: SearchEnrichments = async ({ index, services, qu
   try {
     const response = await services.scopedClusterClient.asCurrentUser.search({
       index,
-      body: {
-        _source: '',
-        fields,
-        query: getQueryFilter({
-          query: '',
-          language: 'kuery',
-          filters: [query],
-          index,
-          exceptionFilter: undefined,
-        }),
-      },
+      _source: '',
+      fields,
+      query: getQueryFilter({
+        query: '',
+        language: 'kuery',
+        filters: [query],
+        index,
+        exceptionFilter: undefined,
+      }),
       track_total_hits: false,
     });
 

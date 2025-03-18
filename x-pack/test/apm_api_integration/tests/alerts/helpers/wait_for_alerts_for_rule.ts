@@ -6,10 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import {
@@ -22,11 +19,9 @@ const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.
 async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
   const response = (await es.search({
     index: APM_ALERTS_INDEX,
-    body: {
-      query: {
-        term: {
-          'kibana.alert.rule.uuid': ruleId,
-        },
+    query: {
+      term: {
+        'kibana.alert.rule.uuid': ruleId,
       },
     },
   })) as SearchResponse<ApmAlertFields, Record<string, AggregationsAggregate>>;

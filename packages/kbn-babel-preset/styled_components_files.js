@@ -20,8 +20,8 @@ module.exports = {
    * Used by `kbn-babel-preset` and `kbn-eslint-config`.
    */
   USES_STYLED_COMPONENTS: [
-    /packages[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
-    /packages[\/\\]kbn-ui-shared-deps-src[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-src[\/\\]/,
 
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]assistant_overlay[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]settings[\/\\]assistant_settings.tsx/,
@@ -31,7 +31,6 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]fleet_server_instructions[\/\\]steps[\/\\]create_service_token.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]generate_service_token.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]components[\/\\]search_bar.tsx/,
-    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]layouts[\/\\]error.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_advanced_fields[\/\\]advanced_monitoring.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_advanced_fields[\/\\]custom_fields[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agent_policy[\/\\]components[\/\\]agent_policy_create_inline.tsx/,
@@ -121,7 +120,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitor_add_edit[\/\\]fields[\/\\]key_value_field.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitors_page[\/\\]overview[\/\\]overview[\/\\]actions_popover.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitors_page[\/\\]overview[\/\\]overview[\/\\]grid_by_group[\/\\]grid_items_by_group.tsx/,
-    /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitors_page[\/\\]overview[\/\\]overview[\/\\]metric_item_icon.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]settings[\/\\]alerting_defaults[\/\\]connector_field.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]test_now_mode[\/\\]browser[\/\\]browser_test_results.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]test_now_mode[\/\\]simple[\/\\]ping_list[\/\\]columns[\/\\]ping_error.tsx/,

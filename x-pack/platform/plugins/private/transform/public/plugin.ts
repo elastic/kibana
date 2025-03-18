@@ -24,6 +24,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
@@ -44,6 +45,7 @@ export interface PluginsDependencies {
   fieldFormats: FieldFormatsStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class TransformUiPlugin {

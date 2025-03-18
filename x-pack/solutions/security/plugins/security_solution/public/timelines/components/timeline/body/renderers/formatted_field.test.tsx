@@ -226,7 +226,7 @@ describe('Events', () => {
     expect(wrapper.find('[data-test-subj="truncatable-message"]').exists()).toEqual(true);
   });
 
-  test('it does NOT render the truncatable message style when fieldName is NOT message', () => {
+  test('it does NOT render the truncatable message style when truncate is false', () => {
     const wrapper = mount(
       <TestProviders>
         <FormattedFieldValue
@@ -234,6 +234,7 @@ describe('Events', () => {
           contextId="test"
           fieldName="NOT-message"
           fieldType="text"
+          truncate={false}
           value={'a NON-message value'}
         />
       </TestProviders>

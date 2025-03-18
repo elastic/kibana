@@ -23,3 +23,13 @@ export type FieldPath = string[];
 export function fieldPathToProcessorString(fieldPath: FieldPath): string {
   return fieldPath.join('.');
 }
+
+/**
+ * Converts a string representing a processor's path into a field path array.
+ *
+ * @param processorString - The dotted string to convert
+ * @returns An array of path segments representing the field path
+ */
+export function processorStringToFieldPath(processorString: string): FieldPath {
+  return processorString.split('.');
+}
