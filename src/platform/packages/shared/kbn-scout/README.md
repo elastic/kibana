@@ -236,7 +236,7 @@ export function createCorePageObjects(page: ScoutPage): PageObjects {
 ```
 #### Adding API service
 
-1. **Create a New API serivce:** Add your service to the `src/playwright/fixtures/worker/apis` directory. For instance:
+1. **Create a New API service:** Add your service to the `src/playwright/fixtures/worker/apis` directory. For instance:
 
 ```ts
 export interface FleetApiService {
