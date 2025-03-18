@@ -21,6 +21,13 @@ export const EMPTY_PAGE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SCHEDULE_ATTACK_DISCOVERY_ALT = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.scheduleAttackDiscoveryAlt',
+  {
+    defaultMessage: 'Schedule Attack Discoveries',
+  }
+);
+
 export const LEARN_MORE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.schedule.learnMoreLink',
   {

@@ -34,7 +34,7 @@ export const EmptySchedule: React.FC = React.memo(() => {
         >
           <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
             <EuiFlexItem grow={false}>
-              <EuiImage size="128" src={ScheduleIconSVG} alt="Schedule Attack Discoveries" />
+              <EuiImage size="128" src={ScheduleIconSVG} alt={i18n.SCHEDULE_ATTACK_DISCOVERY_ALT} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>

@@ -96,8 +96,11 @@ describe('SettingsFlyout', () => {
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
-  it('should not render Settings and Schedule tabs', () => {
+  it('should not render Settings tab', () => {
     expect(screen.queryByRole('tab', { name: 'Settings' })).not.toBeInTheDocument();
+  });
+
+  it('should not render Schedule tab', () => {
     expect(screen.queryByRole('tab', { name: 'Schedule' })).not.toBeInTheDocument();
   });
 
@@ -148,21 +151,30 @@ describe('SettingsFlyout', () => {
       );
     });
 
-    it('should render Settings and Schedule tabs', () => {
+    it('should render Settings tab', () => {
       expect(screen.getByRole('tab', { name: 'Settings' })).toBeInTheDocument();
+    });
+
+    it('should render Schedule tab', () => {
       expect(screen.getByRole('tab', { name: 'Schedule' })).toBeInTheDocument();
     });
 
-    it('should render Settings and Schedule tabs 2', async () => {
-      expect(screen.getByRole('tab', { name: 'Settings' })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: 'Schedule' })).toBeInTheDocument();
-
+    it('should switch to Settings tab and show `AlertSelectionQuery`', async () => {
       const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
       act(() => {
         fireEvent.click(scheduleTabButton); // clicking invokes tab switching
       });
       await waitFor(() => {
         expect(screen.getByTestId('emptySchedule')).toBeInTheDocument();
+      });
+    });
+
+    it('should switch to Settings tab and show `AlertSelectionRange`', async () => {
+      const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
+      act(() => {
+        fireEvent.click(scheduleTabButton); // clicking invokes tab switching
+      });
+      await waitFor(() => {
         expect(screen.getByTestId('createSchedule')).toBeInTheDocument();
       });
     });

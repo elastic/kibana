@@ -68,16 +68,23 @@ describe('useTabsView', () => {
     } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
   });
 
-  it('should return the alert selection component when settings tab is selected', () => {
+  it('should return the alert selection component with `AlertSelectionQuery` when settings tab is selected', () => {
     const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
 
     expect(screen.getByTestId('customizeAlerts')).toBeInTheDocument();
+  });
+
+  it('should return the alert selection component with `AlertSelectionRange` when settings tab is selected', () => {
+    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+
+    render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
+
     expect(screen.getByTestId('alertSelection')).toBeInTheDocument();
   });
 
-  it('should return the empty schedule component when schedule tab is selected', async () => {
+  it('should return the empty schedule component with empty schedule page when schedule tab is selected', async () => {
     const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
@@ -89,16 +96,37 @@ describe('useTabsView', () => {
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
     await waitFor(() => {
       expect(screen.getByTestId('emptySchedule')).toBeInTheDocument();
+    });
+  });
+
+  it('should return the empty schedule component with create new schedule button when schedule tab is selected', async () => {
+    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+
+    render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
+
+    const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
+    act(() => {
+      fireEvent.click(scheduleTabButton); // clicking invokes tab switching
+    });
+    render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
+    await waitFor(() => {
       expect(screen.getByTestId('createSchedule')).toBeInTheDocument();
     });
   });
 
-  it('should return action buttons when settings tab is selected', () => {
+  it('should return reset action button when settings tab is selected', () => {
     const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
     expect(screen.getByTestId('reset')).toBeInTheDocument();
+  });
+
+  it('should return save action button when settings tab is selected', () => {
+    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+
+    render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
     expect(screen.getByTestId('save')).toBeInTheDocument();
   });
 

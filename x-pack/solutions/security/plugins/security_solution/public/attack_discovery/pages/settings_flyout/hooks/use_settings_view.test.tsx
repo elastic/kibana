@@ -68,21 +68,35 @@ describe('useSettingsView', () => {
     } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
   });
 
-  it('should return the alert selection component as settings view', () => {
+  it('should return the alert selection component with `AlertSelectionQuery` as settings view', () => {
     const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
 
     render(<TestProviders>{result.current.settingsView}</TestProviders>);
 
     expect(screen.getByTestId('customizeAlerts')).toBeInTheDocument();
+  });
+
+  it('should return the alert selection component with `AlertSelectionRange` as settings view', () => {
+    const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
+
+    render(<TestProviders>{result.current.settingsView}</TestProviders>);
+
     expect(screen.getByTestId('alertSelection')).toBeInTheDocument();
   });
 
-  it('should return action buttons', () => {
+  it('should return reset action button', () => {
     const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
     expect(screen.getByTestId('reset')).toBeInTheDocument();
+  });
+
+  it('should return save action button', () => {
+    const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
+
+    render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
     expect(screen.getByTestId('save')).toBeInTheDocument();
   });
 
