@@ -47,6 +47,8 @@ export const getGroupingQuery = ({
   statsAggregations,
   uniqueValue,
   timeRange,
+  shouldFlattenMultiValueField = false,
+  countDocumentsBy,
 }: GroupingQueryArgs): GroupingQuery => ({
   size: 0,
   runtime_mappings: {
@@ -55,16 +57,23 @@ export const getGroupingQuery = ({
       type: 'keyword',
       script: {
         source:
-          // when size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
+          // when size()==0, emits a uniqueValue as the value to represent this group
           "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
-          // Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
-          // the runtime field will only return the first value in an array.
-          // The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
-          // However, this gives us a group for each value instead of combining the values like we're aiming for.
-          // Instead of .value, we can retrieve all values with .join().
-          // Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
-          // We will format into a proper array in parseGroupingQuery .
-          " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+          /*
+           * condition to decide between joining values or flattening based on shouldFlattenMultiValueField and groupByField parameters
+           * if shouldFlattenMultiValueField is true, and the selectedGroup field is an array, then emit each value in the array
+           * this is usefull when we would like to group documents based on each uniqueValue
+           * Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
+           * the runtime field will only return the first value in an array.
+           * The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
+           * However, this gives us a group for each value instead of combining the values like we're aiming for.
+           * Instead of .value, we can retrieve all values with .join().
+           * Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
+           * We will format into a proper array in parseGroupingQuery
+           */
+          (shouldFlattenMultiValueField
+            ? " else { for (def id : doc[params['selectedGroup']]) { emit(id) }}"
+            : " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}"),
         params: {
           selectedGroup: groupByField,
           uniqueValue,
@@ -91,8 +100,9 @@ export const getGroupingQuery = ({
           : {}),
       },
     },
-
-    unitsCount: { value_count: { field: 'groupByField' } },
+    // if countDocumentsBy is provided, we will count the number of documents by this field
+    // otherwise we will count the number of documents by groupByField
+    unitsCount: { value_count: { field: countDocumentsBy ?? 'groupByField' } },
     groupsCount: { cardinality: { field: 'groupByField' } },
 
     ...(rootAggregations
