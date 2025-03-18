@@ -12,78 +12,73 @@ import { Coordinator, notificationCoordinator } from './notification_coordinator
 
 describe('notification coordination', () => {
   describe('Coordinator', () => {
-    let consoleSpy: jest.SpyInstance;
+    it('instantiates with default properties', async () => {
+      const coordinator = new Coordinator();
 
-    beforeAll(() => {
-      consoleSpy = jest.spyOn(console, 'log');
+      expect(await Rx.firstValueFrom(coordinator.lock$)).toStrictEqual({
+        locked: false,
+        controller: null,
+      });
     });
 
-    afterAll(() => {
-      consoleSpy.mockRestore();
-    });
-
-    it('instantiates with default properties', () => {
-      new Coordinator({ debug: true });
-
-      expect(consoleSpy).toHaveBeenCalledWith({ locked: false, controller: null });
-    });
-
-    it("updates to the source observable propagate to the coordinated observable when it's optin condition is met", (done) => {
+    it("updates to the source observable propagate to the coordinated observable when it's optin condition is met", async () => {
       const coordinator = new Coordinator();
 
       const optInCondition = jest.fn(() => true);
 
-      const items = new Rx.BehaviorSubject<number[]>([]);
+      const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 
       const coordinatedItems$ = coordinator.optInToCoordination('test', items, optInCondition);
 
-      items.next([1]);
+      items.next([{ id: '1' }]);
 
-      coordinatedItems$.subscribe((value) => {
-        expect(optInCondition).toHaveBeenCalled();
-        expect(value).toEqual([1]);
-        done();
-      });
+      expect(await Rx.firstValueFrom(coordinatedItems$)).toEqual([{ id: '1' }]);
+
+      expect(optInCondition).toHaveBeenCalled();
     });
 
-    it('updates to the source observable do not propagate to the coordinated observable if the optin condition is not met', () => {
+    it('updates to the source observable do not propagate to the coordinated observable if the optin condition is not met', async () => {
       const coordinator = new Coordinator();
 
       const optInCondition = jest.fn(() => false);
 
-      const items = new Rx.BehaviorSubject<number[]>([]);
+      const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 
       const coordinatedItems$ = coordinator.optInToCoordination('test', items, optInCondition);
 
       const subscriptionHandler = jest.fn();
 
-      const sub = coordinatedItems$.subscribe(subscriptionHandler);
+      coordinatedItems$.subscribe(subscriptionHandler);
 
-      items.next([1]);
+      items.next([{ id: '1' }]);
 
       expect(subscriptionHandler).not.toHaveBeenCalled();
-
-      sub.unsubscribe();
     });
 
-    it("automatically releases an acquired lock if the source observable has no values to be emitted anymore despite it's optin condition being met", () => {
-      const coordinator = new Coordinator({ debug: true });
+    it("automatically releases an acquired lock if the source observable has no values to be emitted anymore despite it's optin condition being met", async () => {
+      const coordinator = new Coordinator();
 
       const optInCondition = jest.fn(() => true);
 
-      const items = new Rx.BehaviorSubject<number[]>([]);
+      const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
 
       const coordinatedItems$ = coordinator.optInToCoordination('test', items, optInCondition);
 
       const sub = coordinatedItems$.subscribe();
 
-      items.next([1]);
+      items.next([{ id: '1' }]);
 
-      expect(consoleSpy).toHaveBeenCalledWith({ locked: true, controller: 'test' });
+      expect(await Rx.firstValueFrom(coordinator.lock$)).toEqual({
+        locked: true,
+        controller: 'test',
+      });
 
       items.next([]);
 
-      expect(consoleSpy).toHaveBeenCalledWith({ locked: false, controller: null });
+      expect(await Rx.firstValueFrom(coordinator.lock$)).toEqual({
+        locked: false,
+        controller: null,
+      });
 
       sub.unsubscribe();
     });
@@ -100,7 +95,9 @@ describe('notification coordination', () => {
     it('returns a object with the expected properties', () => {
       const result = notificationCoordinator.call(new Coordinator(), 'test');
       expect(result).toEqual({
+        lock$: expect.any(Rx.Observable),
         releaseLock: expect.any(Function),
+        acquireLock: expect.any(Function),
         optInToCoordination: expect.any(Function),
       });
     });

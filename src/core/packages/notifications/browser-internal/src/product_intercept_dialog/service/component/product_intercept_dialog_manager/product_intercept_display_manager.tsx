@@ -27,13 +27,13 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import type { EuiTourStepStatus } from '@elastic/eui/src/components/tour/tour_step_indicator';
-import type { ProductIntercept } from '@kbn/core-notifications-browser';
-
 import { ProductInterceptDialogApi } from '../../product_intercept_dialog_api';
+
+type ProductIntercept = Rx.ObservedValueOf<ReturnType<ProductInterceptDialogApi['get$']>>[number];
 
 interface ProductInterceptDialogManagerProps {
   ackProductIntercept: ProductInterceptDialogApi['ack'];
-  productIntercepts$: ReturnType<ProductInterceptDialogApi['get$']>;
+  productIntercept$: Rx.Observable<ProductIntercept>;
 }
 
 interface InterceptProgressIndicatorProps {
@@ -65,7 +65,7 @@ const InterceptProgressIndicator = React.memo(
 
 export function ProductInterceptDisplayManager({
   ackProductIntercept,
-  productIntercepts$,
+  productIntercept$,
 }: ProductInterceptDialogManagerProps) {
   const { euiTheme } = useEuiTheme();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -74,22 +74,14 @@ export function ProductInterceptDisplayManager({
   );
   const feedbackStore = useRef<Record<string, unknown>>({});
 
-  const processingProductIntercept = useRef(new Rx.BehaviorSubject(false));
-
   useEffect(() => {
-    const subscription = productIntercepts$
-      .pipe(
-        Rx.mergeMap((x) => x),
-        Rx.distinct(({ id }) => id)
-      )
-      .pipe(Rx.delayWhen(() => processingProductIntercept.current.pipe(Rx.filter((v) => !v))))
-      .subscribe((intercepts) => {
-        processingProductIntercept.current.next(true);
-        setCurrentProductIntercept(intercepts);
-      });
+    const subscription = productIntercept$.subscribe((intercept) => {
+      setCurrentStepIndex(0);
+      setCurrentProductIntercept(intercept);
+    });
 
     return () => subscription.unsubscribe();
-  }, [productIntercepts$]);
+  }, [productIntercept$]);
 
   const currentProductInterceptStep = useMemo(() => {
     return currentProductIntercept?.steps?.[currentStepIndex];
@@ -112,15 +104,9 @@ export function ProductInterceptDisplayManager({
   );
 
   const dismissProductIntercept = useCallback(() => {
-    currentProductIntercept?.onDismiss?.();
     ackProductIntercept(currentProductIntercept!.id, 'dismissed');
-    setCurrentStepIndex(0);
+    currentProductIntercept?.onDismiss?.();
     setCurrentProductIntercept(null);
-
-    requestIdleCallback(() => {
-      // signal readiness for new intercept when machine is idle
-      processingProductIntercept.current.next(false);
-    });
   }, [ackProductIntercept, currentProductIntercept]);
 
   const onInputChange = useCallback(
@@ -166,16 +152,17 @@ export function ProductInterceptDisplayManager({
                     <h2>{currentProductInterceptStep!.title}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
-                {currentStepIndex > 0 && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="cross"
-                      aria-label="Close dialog"
-                      onClick={dismissProductIntercept}
-                      color="text"
-                    />
-                  </EuiFlexItem>
-                )}
+                {currentStepIndex > 0 &&
+                  !(isLastStep = currentStepIndex === currentProductIntercept.steps.length - 1) && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        aria-label="Close dialog"
+                        onClick={dismissProductIntercept}
+                        color="text"
+                      />
+                    </EuiFlexItem>
+                  )}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -201,8 +188,7 @@ export function ProductInterceptDisplayManager({
                 currentStep={currentStepIndex}
               />
             </EuiFlexItem>
-            {(currentStepIndex === 0 ||
-              (isLastStep = currentStepIndex === currentProductIntercept.steps.length - 1)) && (
+            {(currentStepIndex === 0 || isLastStep) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs">
                   {currentStepIndex === 0 && (

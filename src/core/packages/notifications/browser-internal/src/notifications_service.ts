@@ -42,7 +42,7 @@ export class NotificationsService {
   private readonly productIntercepts: ProductInterceptService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
-  private readonly coordinator = notificationCoordinator.bind(new Coordinator({ debug: true }));
+  private readonly coordinator = notificationCoordinator.bind(new Coordinator());
 
   constructor() {
     this.toasts = new ToastsService();

@@ -19,14 +19,9 @@ export class Coordinator {
     controller: null,
   });
 
-  constructor({ debug }: { debug?: boolean } = {}) {
-    if (debug) {
-      // eslint-disable-next-line no-console -- debugging lock ownership with the console, ideally we'd want to use a logger
-      this.coordinationLock$.subscribe(console.log);
-    }
-  }
+  public lock$ = this.coordinationLock$.asObservable();
 
-  private acquireLock(owner: string) {
+  public acquireLock(owner: string) {
     const { locked, controller } = this.coordinationLock$.getValue();
 
     if (locked && controller !== owner) {
@@ -57,15 +52,22 @@ export class Coordinator {
    * @param $ - Observable to be controlled
    * @param cond - Condition under which updates from the provided observable should be emitted
    */
-  public optInToCoordination<T extends unknown[]>(
+  public optInToCoordination<T extends Array<{ id: string }>>(
     registrar: string,
     $: Rx.Observable<T>,
     cond: Parameters<typeof Rx.filter<ReturnType<Coordinator['coordinationLock$']['getValue']>>>[0]
   ) {
-    return $.pipe(
-      Rx.delayWhen(() => this.coordinationLock$.pipe(Rx.filter((...args) => cond(...args)))),
+    const on$ = this.coordinationLock$.pipe(Rx.filter((...args) => cond(...args)));
+    const off$ = this.coordinationLock$.pipe(Rx.filter((...args) => !cond(...args)));
+
+    return Rx.merge(
+      $.pipe(Rx.bufferToggle(off$, () => on$)),
+      $.pipe(Rx.windowToggle(on$, () => off$))
+    ).pipe(
+      Rx.mergeMap((x) => x),
       Rx.tap((value) => {
         const lock = this.coordinationLock$.getValue();
+
         if (value.length && !lock.locked) {
           this.acquireLock(registrar);
         } else if (!value.length && lock.controller === registrar) {
@@ -78,7 +80,7 @@ export class Coordinator {
 
 export function notificationCoordinator(this: Coordinator, registrar: string) {
   return {
-    optInToCoordination: <T extends unknown[]>(
+    optInToCoordination: <T extends Array<{ id: string }>>(
       ...args: Parameters<typeof this.optInToCoordination<T>> extends [infer Head, ...infer Tail]
         ? Tail
         : unknown
@@ -88,7 +90,9 @@ export function notificationCoordinator(this: Coordinator, registrar: string) {
         Parameters<typeof this.optInToCoordination<T>>,
         Rx.Observable<T>
       >(this, [registrar, ...args]),
+    acquireLock: this.acquireLock.bind(this, registrar),
     releaseLock: this.releaseLock.bind(this, registrar),
+    lock$: this.lock$,
   };
 }
 
