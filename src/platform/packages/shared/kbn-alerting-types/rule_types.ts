@@ -250,7 +250,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
   flapping?: Flapping | null;
-  dashboards?: Array<{ id: string }>;
+  dashboards?: Array<{ id: string }> | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
