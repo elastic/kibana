@@ -29,7 +29,10 @@ export { Assistant } from './impl/assistant';
 // The spaceId here will be used to fetch the assistant data from localstorage.
 // So make sure not to provide null, undefined, or any fallback spaceId.
 // Only render the `AssistantSpaceIdProvider` component when the spaceId is available.
-export { AssistantSpaceIdProvider } from './impl/assistant/use_space_id';
+export {
+  AssistantSpaceIdProvider,
+  useAssistantLastConversation,
+} from './impl/assistant/use_space_aware_context';
 
 // Step 3: Wherever you want to bring context into the assistant, use the any combination of the following
 // components and hooks:

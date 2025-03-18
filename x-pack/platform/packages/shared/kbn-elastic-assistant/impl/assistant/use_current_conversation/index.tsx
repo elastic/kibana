@@ -125,18 +125,14 @@ export const useCurrentConversation = ({
    * @param isStreamRefetch - Are we refetching because stream completed? If so retry several times to ensure the message has updated on the server
    */
   const refetchCurrentConversation = useCallback(
-    async ({
-      cId,
-      isStreamRefetch = false,
-      silent,
-    }: { cId?: string; isStreamRefetch?: boolean; silent?: boolean } = {}) => {
+    async ({ cId, isStreamRefetch = false }: { cId?: string; isStreamRefetch?: boolean } = {}) => {
       if (cId === '') {
         return;
       }
       const cConversationId = cId ?? currentConversation?.id;
 
       if (cConversationId) {
-        let updatedConversation = await getConversation(cConversationId, silent);
+        let updatedConversation = await getConversation(cConversationId);
         let retries = 0;
         const maxRetries = 5;
 
@@ -150,7 +146,7 @@ export const useCurrentConversation = ({
         ) {
           retries++;
           await sleep(2000);
-          updatedConversation = await getConversation(cConversationId, silent);
+          updatedConversation = await getConversation(cConversationId);
         }
 
         if (updatedConversation) {
@@ -232,7 +228,7 @@ export const useCurrentConversation = ({
       }
       // refetch will set the currentConversation
       try {
-        await refetchCurrentConversation({ cId, silent: true });
+        await refetchCurrentConversation({ cId });
         setLastConversation({
           id: cId,
         });

@@ -146,7 +146,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     chrome,
     productDocBase,
   } = useKibana().services;
-  const spaceId = useSpaceId();
 
   let inferenceEnabled = false;
   try {
