@@ -715,6 +715,7 @@
     "@kbn/observability-logs-explorer-plugin": "link:x-pack/solutions/observability/plugins/observability_logs_explorer",
     "@kbn/observability-onboarding-plugin": "link:x-pack/solutions/observability/plugins/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/solutions/observability/plugins/observability",
+    "@kbn/observability-schema": "link:x-pack/solutions/observability/packages/kbn-observability-schema",
     "@kbn/observability-shared-plugin": "link:x-pack/solutions/observability/plugins/observability_shared",
     "@kbn/observability-utils-browser": "link:x-pack/solutions/observability/packages/utils-browser",
     "@kbn/observability-utils-common": "link:x-pack/solutions/observability/packages/utils-common",
@@ -1881,7 +1882,7 @@
     "webpack-dev-server": "^5.0.4",
     "webpack-merge": "^6.0.1",
     "webpack-sources": "^3.2.3",
-    "xml-crypto": "^6.0.0",
+    "xml-crypto": "^6.0.1",
     "xmlbuilder": "15.1.1",
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2"
