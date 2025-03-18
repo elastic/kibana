@@ -23,23 +23,22 @@ interface Props {
 
 export function StreamDescription({ definition }: Props) {
   const updateStream = useUpdateStreams(definition.stream.name);
+  const isEmpty = definition.stream.description.length === 0;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem grow>
         <EuiInlineEditText
           inputAriaLabel="Edit Stream description"
-          defaultValue={definition.stream.description ?? EMPTY_DESCRIPTION_LABEL}
+          defaultValue={!isEmpty ? definition.stream.description : EMPTY_DESCRIPTION_LABEL}
           size="s"
           onSave={async (value) => {
             const sanitized = value.trim();
 
             await updateStream({
               dashboards: definition.dashboards,
-              stream: {
-                ...omit(definition.stream, 'name'),
-                description: sanitized,
-              },
+              description: sanitized,
+              stream: omit(definition.stream, ['name', 'description']),
             } as StreamUpsertRequest);
           }}
         />
