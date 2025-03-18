@@ -21,7 +21,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
-import type { EnrichEvents } from './enrichments/types';
+import type { EnrichEventsWrapper } from './enrichments/types';
 import { enrichEvents } from './enrichments';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
@@ -72,7 +72,7 @@ export const bulkCreateWithSuppression = async <
 
   let enrichmentsTimeStart = 0;
   let enrichmentsTimeFinish = 0;
-  const enrichAlertsWrapper: EnrichEvents = async (alerts, params) => {
+  const enrichAlertsWrapper: EnrichEventsWrapper = async (alerts, params) => {
     enrichmentsTimeStart = performance.now();
     try {
       const enrichedAlerts = await enrichEvents({

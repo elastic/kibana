@@ -14,7 +14,7 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { EnrichEvents } from '../utils/enrichments/types';
+import type { EnrichEventsWrapper } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 
@@ -60,7 +60,7 @@ export const bulkCreate = async <T extends BaseFieldsLatest>({
 
   let enrichmentsTimeStart = 0;
   let enrichmentsTimeFinish = 0;
-  const enrichAlertsWrapper: EnrichEvents = async (alerts, params) => {
+  const enrichAlertsWrapper: EnrichEventsWrapper = async (alerts, params) => {
     enrichmentsTimeStart = performance.now();
     try {
       const enrichedAlerts = await enrichEvents({

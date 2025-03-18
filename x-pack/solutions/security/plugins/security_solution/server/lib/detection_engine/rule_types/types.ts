@@ -43,7 +43,6 @@ import type { RefreshTypes } from '../types';
 
 import type { Status } from '../../../../common/api/detection_engine';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
-import type { GenericBulkCreateResponse } from './factories';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   BaseFieldsLatest,
@@ -54,7 +53,6 @@ import type {
   RuleAction,
   RuleResponse,
 } from '../../../../common/api/detection_engine/model/rule_schema';
-import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
@@ -162,7 +160,6 @@ export type CreateSecurityRuleTypeWrapper = (
   type: SecurityAlertType<TParams, TState>
 ) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
 
-// TODO: remove
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
@@ -337,12 +334,6 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
 export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
-
-export type BulkCreate = <T extends BaseFieldsLatest>(
-  docs: Array<WrappedFieldsLatest<T>>,
-  maxAlerts?: number,
-  enrichEvents?: EnrichEvents
-) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 

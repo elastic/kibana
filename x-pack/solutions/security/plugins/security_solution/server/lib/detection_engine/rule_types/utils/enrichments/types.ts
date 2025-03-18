@@ -41,7 +41,7 @@ export type ApplyEnrichmentsToEvents = <T extends BaseFieldsLatest>(params: {
   logger: IRuleExecutionLogForExecutors;
 }) => Array<EventsForEnrichment<T>>;
 
-interface BasedEnrichParamters<T extends BaseFieldsLatest> {
+interface BasedEnrichParameters<T extends BaseFieldsLatest> {
   services: SecurityRuleServices;
   logger: IRuleExecutionLogForExecutors;
   events: Array<EventsForEnrichment<T>>;
@@ -79,13 +79,13 @@ export type IsIndexExist = (params: {
 }) => Promise<boolean>;
 
 export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
-  params: BasedEnrichParamters<T> & {
+  params: BasedEnrichParameters<T> & {
     spaceId: string;
   }
 ) => Promise<EventsMapByEnrichments>;
 
 export type CreateCriticalityEnrichment = <T extends BaseFieldsLatest>(
-  params: BasedEnrichParamters<T> & {
+  params: BasedEnrichParameters<T> & {
     spaceId: string;
   }
 ) => Promise<EventsMapByEnrichments>;
@@ -93,7 +93,7 @@ export type CreateCriticalityEnrichment = <T extends BaseFieldsLatest>(
 export type CreateEnrichmentFunction = (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
 
 export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
-  params: BasedEnrichParamters<T> & {
+  params: BasedEnrichParameters<T> & {
     name: string;
     index: string[];
     mappingField: {
@@ -109,13 +109,13 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
   }
 ) => Promise<EventsMapByEnrichments>;
 
-export type EnrichEventsFunction = <T extends BaseFieldsLatest>(
-  params: BasedEnrichParamters<T> & {
+export type EnrichEvents = <T extends BaseFieldsLatest>(
+  params: BasedEnrichParameters<T> & {
     spaceId: string;
   }
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
-export type EnrichEvents = <T extends BaseFieldsLatest>(
+export type EnrichEventsWrapper = <T extends BaseFieldsLatest>(
   alerts: Array<EventsForEnrichment<T>>,
   params: { spaceId: string }
 ) => Promise<Array<EventsForEnrichment<T>>>;
