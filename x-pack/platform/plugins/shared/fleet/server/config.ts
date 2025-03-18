@@ -29,6 +29,10 @@ const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasti
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.3';
 
+const specMinSchema = schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MIN_VERSION});
+const specMaxSchema = schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MAX_VERSION});
+
+
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
@@ -229,13 +233,13 @@ export const config: PluginConfigDescriptor = {
             excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
             spec: schema.object(
               {
-                min: schema.string({ defaultValue: REGISTRY_SPEC_MIN_VERSION }),
-                max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
+                min: specMinSchema,
+                max: specMaxSchema,
               },
               {
                 defaultValue: {
-                  min: REGISTRY_SPEC_MIN_VERSION,
-                  max: REGISTRY_SPEC_MAX_VERSION,
+                  min: specMinSchema,
+                  max: specMaxSchema,
                 },
               }
             ),
@@ -258,8 +262,8 @@ export const config: PluginConfigDescriptor = {
               capabilities: [],
               excludePackages: [],
               spec: {
-                min: REGISTRY_SPEC_MIN_VERSION,
-                max: REGISTRY_SPEC_MAX_VERSION,
+                min: specMinSchema,
+                max: specMaxSchema,
               },
             },
           }
