@@ -29,10 +29,6 @@ const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasti
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.3';
 
-const specMinSchema = schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MIN_VERSION});
-const specMaxSchema = schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MAX_VERSION});
-
-
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
@@ -233,19 +229,19 @@ export const config: PluginConfigDescriptor = {
             excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
             spec: schema.object(
               {
-                min: specMinSchema,
-                max: specMaxSchema,
+                min: schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MIN_VERSION}),
+                max: schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MAX_VERSION}),
               },
               {
                 defaultValue: {
-                  min: specMinSchema,
-                  max: specMaxSchema,
+                  min: REGISTRY_SPEC_MIN_VERSION,
+                  max: REGISTRY_SPEC_MAX_VERSION,
                 },
               }
             ),
             capabilities: schema.arrayOf(
               schema.oneOf([
-                // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+                // See package-spec for the list of available capabilities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
                 schema.literal('apm'),
                 schema.literal('enterprise_search'),
                 schema.literal('observability'),
@@ -262,8 +258,8 @@ export const config: PluginConfigDescriptor = {
               capabilities: [],
               excludePackages: [],
               spec: {
-                min: specMinSchema,
-                max: specMaxSchema,
+                min: REGISTRY_SPEC_MIN_VERSION,
+                max: REGISTRY_SPEC_MAX_VERSION,
               },
             },
           }
