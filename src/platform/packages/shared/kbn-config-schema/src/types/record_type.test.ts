@@ -63,10 +63,10 @@ test('fails when not receiving expected key type', () => {
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(`
-"[key(\\"name\\")]: types that failed validation:
-- [0]: expected value to equal [nickName]
-- [1]: expected value to equal [lastName]"
-`);
+    "[key(\\"name\\")]: types that failed validation:
+    - [0]: expected value to equal [nickName]
+    - [1]: expected value to equal [lastName]"
+  `);
 });
 
 test('fails after parsing when not receiving expected key type', () => {
@@ -78,10 +78,10 @@ test('fails after parsing when not receiving expected key type', () => {
   const value = `{"name": "foo"}`;
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(`
-"[key(\\"name\\")]: types that failed validation:
-- [0]: expected value to equal [nickName]
-- [1]: expected value to equal [lastName]"
-`);
+    "[key(\\"name\\")]: types that failed validation:
+    - [0]: expected value to equal [nickName]
+    - [1]: expected value to equal [lastName]"
+  `);
 });
 
 test('includes namespace in failure when wrong top-level type', () => {
@@ -212,15 +212,15 @@ describe('#extendsDeep', () => {
 });
 
 describe('nested unknowns', () => {
-  // leaving this test as skipped because we don't allow strip unknowns in oneOf for
-  // now because joi doesn't allow it in joi.alternatives and we use that for oneOf
-  test.skip('should strip unknown oneOf keys', () => {
+  // we don't allow strip unknowns in oneOf for now because joi
+  // doesn't allow it in joi.alternatives and we use that for oneOf
+  test('cant strip unknown keys in oneOf so it should throw an error', () => {
     const type = schema.recordOf(
       schema.oneOf([schema.literal('a'), schema.literal('b')]),
       schema.string()
     );
 
-    expect(
+    expect(() =>
       type.validate(
         {
           a: 'abc',
@@ -230,9 +230,11 @@ describe('nested unknowns', () => {
         void 0,
         { stripUnknownKeys: true }
       )
-    ).toStrictEqual({
-      a: 'abc',
-    });
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[key(\\"x\\")]: types that failed validation:
+      - [0]: expected value to equal [a]
+      - [1]: expected value to equal [b]"
+    `);
   });
 
   test('should strip unknown nested keys if stripUnkownKeys is true in validate', () => {

@@ -225,23 +225,29 @@ describe('#extendsDeep', () => {
 });
 
 describe('nested unknowns', () => {
-  // leaving this test as skipped because we don't allow strip unknowns in oneOf for
-  // now because joi doesn't allow it in joi.alternatives and we use that for oneOf
-  test.skip('should strip unknown oneOf keys', () => {
+  // we don't allow strip unknowns in oneOf for now because joi
+  // doesn't allow it in joi.alternatives and we use that for oneOf
+  test('cant strip unknown keys in oneOf so it should throw an error', () => {
     const type = schema.mapOf(
       schema.oneOf([schema.literal('a'), schema.literal('b')]),
       schema.string()
     );
 
-    const value = {
-      a: '123',
-      x: '345',
-    };
-    const expected = new Map([['a', '123']]);
-
-    expect(type.validate(value, void 0, void 0, { stripUnknownKeys: true })).toStrictEqual(
-      expected
-    );
+    expect(() =>
+      type.validate(
+        {
+          a: 'abc',
+          x: 'def',
+        },
+        void 0,
+        void 0,
+        { stripUnknownKeys: true }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[key(\\"x\\")]: types that failed validation:
+      - [0]: expected value to equal [a]
+      - [1]: expected value to equal [b]"
+    `);
   });
 
   test('should strip unknown nested keys if stripUnkownKeys is true in validate', () => {
