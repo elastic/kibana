@@ -87,7 +87,7 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
     [usageTracker, formState, setFormState]
   );
   const onClose = useCallback(() => {
-    application.navigateToApp('management', { deepLinkId: 'index_management' });
+    application.navigateToApp('elasticsearchIndexManagement');
   }, [application]);
 
   return (
