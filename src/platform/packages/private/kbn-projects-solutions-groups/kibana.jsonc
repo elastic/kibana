@@ -2,5 +2,6 @@
   "type": "shared-common",
   "id": "@kbn/projects-solutions-groups",
   "owner": "@elastic/kibana-core",
-  "devOnly": true
+  "group": "platform",
+  "visibility": "private",
 }

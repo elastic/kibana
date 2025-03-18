@@ -6562,7 +6562,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/projects-solutions-groups@link:packages/kbn-projects-solutions-groups":
+"@kbn/projects-solutions-groups@link:src/platform/packages/private/kbn-projects-solutions-groups":
   version "0.0.0"
   uid ""
 

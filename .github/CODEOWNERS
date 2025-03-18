@@ -81,7 +81,6 @@ packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
-packages/kbn-projects-solutions-groups @elastic/kibana-core
 packages/kbn-relocate @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
@@ -340,6 +339,7 @@ src/platform/packages/private/kbn-node-libs-browser-webpack-plugin @elastic/kiba
 src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-peggy @elastic/kibana-operations
+src/platform/packages/private/kbn-projects-solutions-groups @elastic/kibana-core
 src/platform/packages/private/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
 src/platform/packages/private/kbn-repo-path @elastic/kibana-operations
