@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/calculate_object_diff';
-export * from './src/flatten_object';
-export * from './src/unflatten_object';
+export * from './components';

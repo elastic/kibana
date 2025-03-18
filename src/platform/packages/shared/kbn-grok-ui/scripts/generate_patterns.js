@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/calculate_object_diff';
-export * from './src/flatten_object';
-export * from './src/unflatten_object';
+require('../../../../../setup_node_env');
+require('./generate_patterns_cli');
