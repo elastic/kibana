@@ -242,28 +242,6 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             actions: [],
           },
         });
-        // ES query rule
-        esQueryRuleId[space.id] = await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: '.es-query',
-            schedule: { interval: '1h' },
-            throttle: null,
-            params: {
-              size: 100,
-              timeWindowSize: 5,
-              timeWindowUnit: 'm',
-              thresholdComparator: '>',
-              threshold: [0],
-              searchType: 'esqlQuery',
-              esqlQuery: {
-                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
-              },
-              timeField: 'date_epoch_millis',
-            },
-            actions: [],
-          },
-        });
         // MW with both toggles off
         await createMaintenanceWindow({ spaceId: space.id });
         // MW with 'Repeat' toggle on and 'Filter alerts' toggle on
@@ -300,6 +278,29 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         });
 
         rulesWithAAD.push(ruleWithAadId);
+
+        // ES query rule
+        esQueryRuleId[space.id] = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: '.es-query',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {
+              size: 100,
+              timeWindowSize: 5,
+              timeWindowUnit: 'm',
+              thresholdComparator: '>',
+              threshold: [0],
+              searchType: 'esqlQuery',
+              esqlQuery: {
+                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              },
+              timeField: 'date_epoch_millis',
+            },
+            actions: [],
+          },
+        });
       }
     }
 
