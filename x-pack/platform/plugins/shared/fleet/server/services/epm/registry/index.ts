@@ -292,7 +292,7 @@ function formatSpecVersion(version: string): string {
   if (version.indexOf('.') > 0) {
     return version;
   }
-  return version + ".0";
+  return version + '.0';
 }
 
 function setCapabilities(url: URL) {
