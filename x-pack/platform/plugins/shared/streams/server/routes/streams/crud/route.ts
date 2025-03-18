@@ -13,6 +13,9 @@ import {
   streamUpsertRequestSchema,
   isGroupStreamDefinitionBase,
   isUnwiredStreamDefinition,
+  StreamUpsertRequest,
+  GroupStreamUpsertRequest,
+  IngestStreamUpsertRequest,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
@@ -109,7 +112,11 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
-    const streamDefinition = { ...params.body.stream, name: params.path.name };
+    const streamDefinition: StreamDefinition = {
+      ...params.body.stream,
+      description: params.body.description,
+      name: params.path.name,
+    };
 
     if (!isUnwiredStreamDefinition(streamDefinition) && !(await streamsClient.isStreamsEnabled())) {
       throw badData('Streams are not enabled for Wired and Group streams.');
@@ -123,18 +130,21 @@ export const editStreamRoute = createServerRoute({
       throw badRequest('A group stream name can not start with [logs.]');
     }
 
-    const body = isGroupStreamDefinitionBase(params.body.stream)
-      ? {
+    const body: StreamUpsertRequest = isGroupStreamDefinitionBase(params.body.stream)
+      ? ({
           ...params.body,
+          description: params.body.description,
           stream: {
-            description: params.body.stream.description,
             group: {
-              ...params.body.stream.group,
               members: Array.from(new Set(params.body.stream.group.members)),
             },
           },
-        }
-      : params.body;
+        } as GroupStreamUpsertRequest)
+      : ({
+          ...params.body,
+          description: params.body.description,
+          stream: params.body.stream,
+        } as IngestStreamUpsertRequest);
 
     return await streamsClient.upsertStream({
       request: body,

@@ -64,8 +64,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             dashboards: [],
+            description: 'irrelevant',
             stream: {
-              description: 'irrelevant',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [
@@ -184,8 +184,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           path: { name: TEST_STREAM_NAME },
           body: {
             dashboards: [],
+            description: 'irrelevant',
             stream: {
-              description: 'irrelevant',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
@@ -281,8 +281,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             body: {
               dashboards: [],
+              description: 'irrelevant',
               stream: {
-                description: 'irrelevant',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: [

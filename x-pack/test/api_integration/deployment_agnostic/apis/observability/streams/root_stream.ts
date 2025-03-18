@@ -61,8 +61,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Should not allow processing changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        description: 'irrelevant',
         stream: {
-          description: 'irrelevant',
           ingest: {
             ...rootStreamDefinition.ingest,
             processing: [
@@ -89,8 +89,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Should not allow fields changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        description: 'irrelevant',
         stream: {
-          description: 'irrelevant',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
@@ -112,8 +112,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Should allow routing changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        description: 'irrelevant',
         stream: {
-          description: 'irrelevant',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {

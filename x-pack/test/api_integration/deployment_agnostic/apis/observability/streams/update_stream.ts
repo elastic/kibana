@@ -42,9 +42,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await putStream(apiClient, 'logs', {
           dashboards: [],
+          description: 'some description',
           stream: {
             ingest: (rootDefinition as WiredStreamGetResponse).stream.ingest,
-            description: 'some description',
           },
         });
         expect(response).to.have.property('acknowledged', true);
@@ -58,8 +58,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('UnwiredStream update', () => {
       const unwiredPutBody: IngestStreamUpsertRequest = {
+        description: 'irrelevant',
         stream: {
-          description: 'irrelevant',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],
@@ -106,13 +106,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, indexName, {
           dashboards: [],
+          description: 'some description',
           stream: {
             ...unwiredPutBody.stream,
-            description: 'some description',
           },
         });
 
-        const streamDefinition = await getStream(apiClient, 'unwired-stream-override-description');
+        const streamDefinition = await getStream(apiClient, indexName);
         expect((streamDefinition as UnwiredStreamGetResponse).stream.description).eql(
           'some description'
         );

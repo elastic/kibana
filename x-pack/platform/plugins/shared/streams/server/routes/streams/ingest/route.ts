@@ -8,7 +8,7 @@
 import { badData, badRequest } from '@hapi/boom';
 import {
   IngestGetResponse,
-  StreamUpsertRequest,
+  IngestStreamUpsertRequest,
   ingestUpsertRequestSchema,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -85,30 +85,34 @@ const upsertIngestRoute = createServerRoute({
       request,
     });
 
+    const name = params.path.name;
+    const existingStream = await streamsClient.getStream(name).catch(() => undefined);
+
     if (
-      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
+      isWiredStreamDefinition({
+        name,
+        description: existingStream?.description ?? '',
+        ...params.body,
+      }) &&
       !(await streamsClient.isStreamsEnabled())
     ) {
       throw badData('Streams are not enabled for Wired streams.');
     }
-
-    const name = params.path.name;
 
     const assets = await assetClient.getAssets({
       entityId: name,
       entityType: 'stream',
     });
 
-    const ingestUpsertRequest = params.body;
-
     const dashboards = assets
       .filter((asset) => asset.assetType === 'dashboard')
       .map((asset) => asset.assetId);
 
     const upsertRequest = {
+      stream: { ...params.body },
+      description: existingStream?.description ?? '',
       dashboards,
-      stream: ingestUpsertRequest,
-    } as StreamUpsertRequest;
+    } as IngestStreamUpsertRequest;
 
     return await streamsClient.upsertStream({
       request: upsertRequest,

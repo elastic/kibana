@@ -14,10 +14,12 @@ export interface StreamGetResponseBase {
 
 export interface StreamUpsertRequestBase {
   dashboards: string[];
+  description: string;
 }
 
 export const streamUpsertRequestSchemaBase: z.Schema<StreamUpsertRequestBase> = z.object({
   dashboards: z.array(NonEmptyString),
+  description: z.string(),
 });
 
 export const streamGetResponseSchemaBase: z.Schema<StreamGetResponseBase> = z.object({

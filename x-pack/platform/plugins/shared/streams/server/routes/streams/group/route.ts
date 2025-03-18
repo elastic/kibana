@@ -90,10 +90,13 @@ const upsertGroupRoute = createServerRoute({
       throw badRequest('A group stream name can not start with [logs.]');
     }
 
-    const assets = await assetClient.getAssets({
-      entityId: name,
-      entityType: 'stream',
-    });
+    const [existingStream, assets] = await Promise.all([
+      streamsClient.getStream(name).catch(() => undefined),
+      assetClient.getAssets({
+        entityId: name,
+        entityType: 'stream',
+      }),
+    ]);
 
     const dashboards = assets
       .filter((asset) => asset.assetType === 'dashboard')
@@ -101,7 +104,8 @@ const upsertGroupRoute = createServerRoute({
 
     const upsertRequest: GroupStreamUpsertRequest = {
       dashboards,
-      stream: { description: '', group: params.body.group },
+      description: existingStream?.description ?? '',
+      stream: { group: params.body.group },
     };
 
     return await streamsClient.upsertStream({

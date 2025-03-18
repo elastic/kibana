@@ -52,8 +52,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Place processing steps', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        description: 'irrelevant',
         stream: {
-          description: 'irrelevant',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [

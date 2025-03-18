@@ -359,8 +359,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should allow to update field type to incompatible type', async () => {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
+          description: 'irrelevant',
           stream: {
-            description: 'irrelevant',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -381,8 +381,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs.rollovertest',
           {
             ...body,
+            description: 'irrelevant',
             stream: {
-              description: 'irrelevant',
               ingest: {
                 ...body.stream.ingest,
                 wired: {
@@ -403,8 +403,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow to update field type to system', async () => {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
+          description: 'irrelevant',
           stream: {
-            description: 'irrelevant',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],

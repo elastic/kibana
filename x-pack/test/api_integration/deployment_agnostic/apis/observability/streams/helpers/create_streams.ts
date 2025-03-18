@@ -14,8 +14,8 @@ type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards'> & { name: string };
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
+    description: 'irrelevant',
     stream: {
-      description: 'irrelevant',
       ingest: {
         lifecycle: { dsl: {} },
         processing: [],
@@ -69,8 +69,8 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test',
+    description: 'irrelevant',
     stream: {
-      description: 'irrelevant',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -87,8 +87,8 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.test2',
+    description: 'irrelevant',
     stream: {
-      description: 'irrelevant',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [
@@ -113,8 +113,8 @@ const streams: StreamPutItem[] = [
   },
   {
     name: 'logs.deeply.nested.streamname',
+    description: 'irrelevant',
     stream: {
-      description: 'irrelevant',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],

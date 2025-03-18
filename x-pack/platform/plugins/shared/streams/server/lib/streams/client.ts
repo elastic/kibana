@@ -136,7 +136,8 @@ export class StreamsClient {
     await this.upsertStream({
       request: {
         dashboards: [],
-        stream: omit(rootStreamDefinition, 'name'),
+        description: rootStreamDefinition.description,
+        stream: omit(rootStreamDefinition, ['name', 'description']),
       },
       name: rootStreamDefinition.name,
     });
@@ -242,7 +243,7 @@ export class StreamsClient {
     name: string;
     request: StreamUpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: StreamDefinition = { ...request.stream, name };
+    const stream: StreamDefinition = { ...request.stream, description: request.description, name };
     const { dashboards } = request;
     const { result, parentDefinition } = await this.validateAndUpsertStream({
       definition: stream,
@@ -275,8 +276,8 @@ export class StreamsClient {
           name: parentId,
           request: {
             dashboards: [],
+            description: '',
             stream: {
-              description: '',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],

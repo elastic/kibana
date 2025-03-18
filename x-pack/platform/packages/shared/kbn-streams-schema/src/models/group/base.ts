@@ -19,18 +19,16 @@ const groupBaseSchema: z.Schema<GroupBase> = z.object({
 
 interface GroupStreamDefinitionBase {
   group: GroupBase;
-  description: string;
 }
 
 const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.object({
   group: groupBaseSchema,
-  description: z.string(),
 });
 
 type GroupStreamDefinition = StreamDefinitionBase & GroupStreamDefinitionBase;
 
 const groupStreamDefinitionSchema: z.Schema<GroupStreamDefinition> = z.intersection(
-  z.object({ name: NonEmptyString }),
+  z.object({ name: NonEmptyString, description: z.string() }),
   groupStreamDefinitionBaseSchema
 );
 

@@ -31,12 +31,10 @@ interface UnwiredIngest extends IngestBase {
 
 interface WiredStreamDefinitionBase {
   ingest: WiredIngest;
-  description: string;
 }
 
 interface UnwiredStreamDefinitionBase {
   ingest: UnwiredIngest;
-  description: string;
 }
 
 interface WiredStreamDefinition extends StreamDefinitionBase {
@@ -73,17 +71,16 @@ const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
 
 const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.object({
   ingest: unwiredIngestSchema,
-  description: z.string(),
 });
 
 const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.object({
   ingest: wiredIngestSchema,
-  description: z.string(),
 });
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
   z.object({
     name: NonEmptyString,
+    description: z.string(),
   }),
   wiredStreamDefinitionSchemaBase
 );
@@ -91,6 +88,7 @@ const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersect
 const unwiredStreamDefinitionSchema: z.Schema<UnwiredStreamDefinition> = z.intersection(
   z.object({
     name: NonEmptyString,
+    description: z.string(),
   }),
   unwiredStreamDefinitionSchemaBase
 );
@@ -100,10 +98,9 @@ const ingestStreamDefinitionSchema: z.Schema<IngestStreamDefinition> = z.union([
   unwiredStreamDefinitionSchema,
 ]);
 
-const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'name'>> = z.union([
-  wiredStreamDefinitionSchemaBase,
-  unwiredStreamDefinitionSchemaBase,
-]);
+const ingestStreamDefinitionSchemaBase: z.Schema<
+  Omit<IngestStreamDefinition, 'name' | 'description'>
+> = z.union([wiredStreamDefinitionSchemaBase, unwiredStreamDefinitionSchemaBase]);
 
 export {
   type WiredStreamDefinition,
