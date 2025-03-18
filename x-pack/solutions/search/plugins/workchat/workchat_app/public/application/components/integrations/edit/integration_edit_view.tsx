@@ -46,7 +46,6 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const breadcrumb = useMemo(() => {
     return [
-      { text: 'WorkChat' },
       { text: integrationLabels.breadcrumb.integrationsPill },
       integrationId
         ? { text: integrationLabels.breadcrumb.editIntegrationPill }
@@ -78,7 +77,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     [notifications]
   );
 
-  const { editState, submit } = useIntegrationEdit({
+  const { state, submit } = useIntegrationEdit({
     integrationId,
     onSaveSuccess,
     onSaveError,
@@ -94,7 +93,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const integrationRegistry = useWorkChatServices().integrationRegistry;
 
-  const integrationDefinition = editState.type && integrationRegistry.get(editState.type as IntegrationType);
+  const integrationDefinition = state.type && integrationRegistry.get(state.type as IntegrationType);
   const ConfigurationForm = integrationDefinition?.getConfigurationForm?.();
 
   const onDeleteSuccess = useCallback(() => {
@@ -132,7 +131,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
   };
 
   const formMethods = useForm<IntegrationEditState>({
-    values: editState
+    values: state
   });
 
   const { handleSubmit, formState: { isSubmitting }, control } = formMethods
@@ -155,6 +154,19 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
               title={<h3>Base configuration</h3>}
               description="Configure your integration"
             >
+              <EuiFormRow label="Name">
+                <Controller
+                  rules={{ required: true }}
+                  name="name"
+                  control={control}
+                  render={({ field }) => (
+                    <EuiFieldText
+                      data-test-subj="workchatAppIntegrationEditViewFieldText"
+                      {...field}
+                    />
+                  )}
+                />
+              </EuiFormRow>
               <EuiFormRow label="Description">
                 <Controller
                   rules={{ required: true }}

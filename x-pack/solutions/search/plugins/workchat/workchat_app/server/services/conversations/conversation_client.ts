@@ -23,12 +23,18 @@ interface ConversationClientOptions {
 
 export type ConversationUpdatableFields = Partial<Pick<Conversation, 'title' | 'events'>>;
 
+export interface ConversationListOptions {
+  agentId?: string;
+}
+
 export interface ConversationClient {
-  list(): Promise<Conversation[]>;
+  list(options?: ConversationListOptions): Promise<Conversation[]>;
   get(options: { conversationId: string }): Promise<Conversation>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversationId: string, fields: ConversationUpdatableFields): Promise<Conversation>;
 }
+
+const attributesPath = `${conversationTypeName}.attributes`;
 
 export class ConversationClientImpl implements ConversationClient {
   private readonly client: SavedObjectsClientContract;
@@ -42,10 +48,15 @@ export class ConversationClientImpl implements ConversationClient {
     this.logger = logger;
   }
 
-  async list(): Promise<Conversation[]> {
+  async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
+    let filter = `${attributesPath}.user_id: ${this.user.id}`;
+    if (options.agentId) {
+      filter += ` AND ${attributesPath}.agent_id: ${options.agentId}`;
+    }
+
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
-      filter: `${conversationTypeName}.attributes.user_id: ${this.user.id}`,
+      filter,
       perPage: 1000,
     });
 

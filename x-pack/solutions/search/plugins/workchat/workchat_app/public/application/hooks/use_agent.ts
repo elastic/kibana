@@ -6,20 +6,21 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { useWorkChatServices } from './use_workchat_service';
 import { queryKeys } from '../query_keys';
-import { useKibana } from './use_kibana';
 
-export const useCurrentUser = () => {
-  const {
-    services: { security },
-  } = useKibana();
+export const useAgent = ({ agentId }: { agentId: string }) => {
+  const { agentService } = useWorkChatServices();
 
-  const { data: user } = useQuery({
-    queryKey: queryKeys.users.current,
+  const { data: agent, isLoading } = useQuery({
+    queryKey: queryKeys.agents.details(agentId),
     queryFn: async () => {
-      return security.authc.getCurrentUser();
+      return agentService.get(agentId);
     },
   });
 
-  return user;
+  return {
+    agent,
+    isLoading,
+  };
 };

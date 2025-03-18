@@ -21,7 +21,15 @@ export const useNavigation = () => {
     [application]
   );
 
+  const createWorkchatUrl = useCallback(
+    (path: string) => {
+      return application.getUrlForApp(workchatAppId, { path });
+    },
+    [application]
+  );
+
   return {
+    createWorkchatUrl,
     navigateToWorkchatUrl,
   };
 };

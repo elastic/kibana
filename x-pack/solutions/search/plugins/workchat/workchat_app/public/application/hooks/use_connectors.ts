@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ListConnectorsResponse } from '../../../common/http_api/connectors';
+import { queryKeys } from '../query_keys';
 import { useKibana } from './use_kibana';
 
 export const useConnectors = () => {
@@ -15,7 +16,7 @@ export const useConnectors = () => {
   } = useKibana();
 
   const { data: connectors, isLoading } = useQuery({
-    queryKey: ['workchat.chat.connectors'],
+    queryKey: queryKeys.connectors.list,
     queryFn: async () => {
       const response = await http.get<ListConnectorsResponse>('/internal/workchat/connectors');
       return response.connectors;

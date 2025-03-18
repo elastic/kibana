@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { WorkChatHomePage } from './pages/home';
 import { WorkchatChatPage } from './pages/chat';
 import { WorkChatAgentsPage } from './pages/agents';
 import { WorkChatAgentEditOrCreatePage } from './pages/agent_edit_or_create';
@@ -15,14 +16,17 @@ import { WorkChatIntegrationEditOrCreatePage } from './pages/integration_edit_or
 export const WorkchatAppRoutes: React.FC<{}> = () => {
   return (
     <Routes>
-      <Route path="/chat/:conversationId">
+      <Route path="/agents/:agentId/chat/:conversationId">
+        <WorkchatChatPage />
+      </Route>
+      <Route path="/agents/:agentId/chat">
         <WorkchatChatPage />
       </Route>
 
-      <Route path="/agents/create">
+      <Route path="/agents/create" strict>
         <WorkChatAgentEditOrCreatePage />
       </Route>
-      <Route path="/agents/:agentId">
+      <Route path="/agents/:agentId/edit" strict>
         <WorkChatAgentEditOrCreatePage />
       </Route>
       <Route path="/agents" strict>
@@ -40,7 +44,7 @@ export const WorkchatAppRoutes: React.FC<{}> = () => {
       </Route>
 
       <Route path="/">
-        <WorkchatChatPage />
+        <WorkChatHomePage />
       </Route>
     </Routes>
   );

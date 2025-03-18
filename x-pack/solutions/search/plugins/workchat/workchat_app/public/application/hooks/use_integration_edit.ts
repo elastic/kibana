@@ -6,9 +6,11 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
+import { Integration } from '../../../common/integrations';
 import { useWorkChatServices } from './use_workchat_service';
 
 export interface IntegrationEditState {
+  name: string;
   description: string;
   type: string;
   configuration: Record<string, any>;
@@ -16,12 +18,12 @@ export interface IntegrationEditState {
 
 const emptyState = (): IntegrationEditState => {
   return {
+    name: '',
     description: '',
     type: '',
     configuration: {},
   };
 };
-
 export const useIntegrationEdit = ({
   integrationId,
   onSaveSuccess,
@@ -32,15 +34,15 @@ export const useIntegrationEdit = ({
   onSaveError: (err: Error) => void;
 }) => {
   const { integrationService } = useWorkChatServices();
-
-  const [editState, setEditState] = useState<IntegrationEditState>(emptyState());
+  const [state, setState] = useState<IntegrationEditState>(emptyState());
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchIntegration = async () => {
       if (integrationId) {
         const integration = await integrationService.get(integrationId);
-        setEditState({
+        setState({
+          name: integration.name,
           description: integration.description,
           type: integration.type,
           configuration: integration.configuration || {},
@@ -50,40 +52,36 @@ export const useIntegrationEdit = ({
     fetchIntegration();
   }, [integrationId, integrationService]);
 
-  const submit = useCallback(
-    (customIntegration?: Partial<IntegrationEditState>) => {
-      setSubmitting(true);
-      
-      const integrationData = customIntegration 
-        ? { ...editState, ...customIntegration }
-        : editState;
+  const submit = useCallback((updatedIntegration: IntegrationEditState) => {
+    debugger
+    setSubmitting(true);
 
-      (integrationId
-        ? integrationService.update(integrationId, {
-            description: integrationData.description,
-            configuration: integrationData.configuration,
-          })
-        : integrationService.create({
-            type: integrationData.type,
-            description: integrationData.description,
-            configuration: integrationData.configuration,
-          })
-      ).then(
-        (response) => {
-          setSubmitting(false);
-          onSaveSuccess(response);
-        },
-        (err) => {
-          setSubmitting(false);
-          onSaveError(err);
-        }
-      );
-    },
-    [integrationId, editState, integrationService, onSaveSuccess, onSaveError]
-  );
+    (integrationId
+      ? integrationService.update(integrationId, {
+          name: updatedIntegration.name,
+          description: updatedIntegration.description,
+          configuration: updatedIntegration.configuration,
+        })
+      : integrationService.create({
+          type: updatedIntegration.type,
+          name: updatedIntegration.name,
+          description: updatedIntegration.description,
+          configuration: updatedIntegration.configuration,
+        })
+    ).then(
+      (response) => {
+        setSubmitting(false);
+        onSaveSuccess(response);
+      },
+      (err) => {
+        setSubmitting(false);
+        onSaveError(err);
+      }
+    );
+  }, [integrationId, state, integrationService, onSaveSuccess, onSaveError]);
 
   return {
-    editState,
+    state,
     isSubmitting,
     submit,
   };

@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import type { WorkChatServices } from '../services';
@@ -39,9 +40,11 @@ export const mountApp = async ({
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
             <WorkChatServicesContext.Provider value={services}>
-              <Router history={history}>
-                <WorkchatAppRoutes />
-              </Router>
+              <RedirectAppLinks coreStart={core}>
+                <Router history={history}>
+                  <WorkchatAppRoutes />
+                </Router>
+              </RedirectAppLinks>
             </WorkChatServicesContext.Provider>
           </QueryClientProvider>
         </I18nProvider>
