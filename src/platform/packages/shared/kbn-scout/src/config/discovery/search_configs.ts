@@ -127,7 +127,7 @@ export const validateWithScoutCiConfig = (
         .map((plugin) => {
           return `- ${plugin}`;
         })
-        .join('\n')}`
+        .join('\n')}\nRead more: src/platform/packages/shared/kbn-scout/README.md`
     );
   }
 
