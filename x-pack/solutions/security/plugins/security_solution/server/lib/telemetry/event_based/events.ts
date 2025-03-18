@@ -13,6 +13,7 @@ import type {
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
 import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
+import { SiemMigrationsEventTypes } from './types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -828,9 +829,17 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
   completed: number;
   failed: number;
   total: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_migration_success',
+  eventType: SiemMigrationsEventTypes.MigrationSuccess,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -876,9 +885,17 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   duration: number;
   translationResult: string;
   prebuiltMatch: boolean;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_rule_translation_success',
+  eventType: SiemMigrationsEventTypes.TranslationSucess,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     translationResult: {
       type: 'keyword',
       _meta: {
@@ -919,9 +936,17 @@ export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
   preFilterRuleCount: number;
   postFilterRuleName: string;
   postFilterRuleCount: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_prebuilt_rules_match',
+  eventType: SiemMigrationsEventTypes.PrebuiltRulesMatch,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -971,9 +996,17 @@ export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
   preFilterIntegrationCount: number;
   postFilterIntegrationName: string;
   postFilterIntegrationCount: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_integration_match',
+  eventType: SiemMigrationsEventTypes.IntegrationsMatch,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -1024,9 +1057,17 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   completed: number;
   failed: number;
   total: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_migration_failure',
+  eventType: SiemMigrationsEventTypes.MigrationFailure,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     error: {
       type: 'keyword',
       _meta: {
@@ -1076,9 +1117,17 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   model: string;
   error: string;
   migrationId: string;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_rule_translation_failure',
+  eventType: SiemMigrationsEventTypes.TranslationFailure,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     error: {
       type: 'keyword',
       _meta: {
