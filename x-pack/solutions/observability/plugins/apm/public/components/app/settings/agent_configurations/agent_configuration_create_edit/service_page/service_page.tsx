@@ -88,7 +88,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const INCORRECT_SERVICE_NAME_TRANSLATED = i18n.translate(
     'xpack.apm.settings.agentConfiguration.service.otel.error',
     {
-      defaultMessage: 'Selected service uses an unsupported OpenTelemetry agent',
+      defaultMessage:
+        'Central configuration is not yet supported for this type of APM Agent / OTel SDK',
     }
   );
 
