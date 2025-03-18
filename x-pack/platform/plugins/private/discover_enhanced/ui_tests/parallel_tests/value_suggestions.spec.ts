@@ -6,7 +6,7 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import { assertionMessages, spaceTest, testData } from '../fixtures';
+import { spaceTest, testData, assertionMessages } from '../fixtures';
 
 spaceTest.describe(
   'Discover app - value suggestions: useTimeRange enabled',
