@@ -212,81 +212,81 @@ describe('#extendsDeep', () => {
 });
 
 describe('nested unknowns', () => {
-  describe(`stripUnknownKeys: true in validate`, () => {
-    // leaving this test as skipped because we don't allow strip unknowns in oneOf for
-    // now because joi doesn't allow it in joi.alternatives and we use that for oneOf
-    test.skip('should strip unknown oneOf keys', () => {
-      const type = schema.recordOf(
-        schema.oneOf([schema.literal('a'), schema.literal('b')]),
-        schema.string()
-      );
+  // leaving this test as skipped because we don't allow strip unknowns in oneOf for
+  // now because joi doesn't allow it in joi.alternatives and we use that for oneOf
+  test.skip('should strip unknown oneOf keys', () => {
+    const type = schema.recordOf(
+      schema.oneOf([schema.literal('a'), schema.literal('b')]),
+      schema.string()
+    );
 
-      expect(
-        type.validate(
-          {
-            a: 'abc',
-            x: 'def',
-          },
-          { stripUnknownKeys: true }
-        )
-      ).toStrictEqual({
-        a: 'abc',
-      });
-    });
-
-    test('should strip unknown nested keys if stripUnkownKeys is true in validate', () => {
-      const type = schema.recordOf(
-        schema.string(),
-        schema.object({
-          a: schema.string(),
-        })
-      );
-
-      expect(
-        type.validate(
-          {
-            x: {
-              a: '123',
-              b: '345', // should be stripped
-            },
-          },
-          void 0,
-          void 0,
-          { stripUnknownKeys: true }
-        )
-      ).toStrictEqual({
-        x: {
-          a: '123',
+    expect(
+      type.validate(
+        {
+          a: 'abc',
+          x: 'def',
         },
-      });
+        void 0,
+        void 0,
+        { stripUnknownKeys: true }
+      )
+    ).toStrictEqual({
+      a: 'abc',
     });
+  });
 
-    test('should strip unknown nested keys if unknowns is ignore in the schema', () => {
-      const type = schema.recordOf(
-        schema.string(),
-        schema.object({
-          a: schema.string(),
-        }),
-        { unknowns: 'ignore' }
-      );
+  test('should strip unknown nested keys if stripUnkownKeys is true in validate', () => {
+    const type = schema.recordOf(
+      schema.string(),
+      schema.object({
+        a: schema.string(),
+      })
+    );
 
-      expect(
-        type.validate(
-          {
-            x: {
-              a: '123',
-              b: '345', // should be stripped
-            },
+    expect(
+      type.validate(
+        {
+          x: {
+            a: '123',
+            b: '345', // should be stripped
           },
-          void 0,
-          void 0,
-          {}
-        )
-      ).toStrictEqual({
-        x: {
-          a: '123',
         },
-      });
+        void 0,
+        void 0,
+        { stripUnknownKeys: true }
+      )
+    ).toStrictEqual({
+      x: {
+        a: '123',
+      },
+    });
+  });
+
+  test('should strip unknown nested keys if unknowns is ignore in the schema', () => {
+    const type = schema.recordOf(
+      schema.string(),
+      schema.object({
+        a: schema.string(),
+      }),
+      { unknowns: 'ignore' }
+    );
+
+    expect(
+      type.validate(
+        {
+          x: {
+            a: '123',
+            b: '345', // should be stripped
+          },
+        },
+        void 0,
+        void 0,
+        {}
+      )
+    ).toStrictEqual({
+      x: {
+        a: '123',
+      },
     });
   });
 });
