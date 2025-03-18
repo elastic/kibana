@@ -297,7 +297,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
-            numAgents={nAgentsInTable}
           />
         </EuiPortal>
       ) : null}

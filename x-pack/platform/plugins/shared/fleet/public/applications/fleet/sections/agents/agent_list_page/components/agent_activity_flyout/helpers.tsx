@@ -71,19 +71,22 @@ export const getAction = (type?: string, actionId?: string) => {
   return actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
 };
 
-export const inProgressTitle = (action: ActionStatus) => (
+export const inProgressTitle = (action: ActionStatus, totalAgents: number) => (
   <FormattedMessage
     id="xpack.fleet.agentActivity.inProgressTitle"
-    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}"
+    defaultMessage="{inProgressText} {nbAgents} {agents}{policyText}{reassignText}{upgradeText}{failuresText}"
     values={{
       nbAgents:
         action.nbAgentsAck >= action.nbAgentsActioned
           ? action.nbAgentsAck
+          : action.is_automatic
+          ? Math.round((action.nbAgentsActioned / totalAgents) * 100) + '% of ' + totalAgents
           : action.nbAgentsAck === 0
           ? action.nbAgentsActioned
           : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
       agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
       inProgressText: getAction(action.type, action.actionId).inProgressText,
+      policyText: action.is_automatic ? ' in policy ' : '',
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',

@@ -53,7 +53,6 @@ export const FlyoutBody: React.FunctionComponent<{
   onClickShowMore: () => void;
   dateFilter: moment.Moment | null;
   onChangeDateFilter: (date: moment.Moment | null) => void;
-  numAgents: number;
 }> = ({
   isFirstLoading,
   currentActions,
@@ -64,7 +63,6 @@ export const FlyoutBody: React.FunctionComponent<{
   onClickShowMore,
   dateFilter,
   onChangeDateFilter,
-  numAgents,
 }) => {
   const scrollToTopRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -168,7 +166,6 @@ export const FlyoutBody: React.FunctionComponent<{
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
-                numAgents={numAgents}
               />
             ) : null}
             {todayActions.length > 0 ? (
@@ -183,7 +180,6 @@ export const FlyoutBody: React.FunctionComponent<{
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
-                numAgents={numAgents}
               />
             ) : null}
             {Object.keys(otherDays).map((day) => (
@@ -194,7 +190,6 @@ export const FlyoutBody: React.FunctionComponent<{
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
-                numAgents={numAgents}
               />
             ))}
           </EuiFlexGroup>

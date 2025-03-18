@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionStatus } from '../../../../../types';
-import { useStartServices } from '../../../../../hooks';
+import { useStartServices, useGetAutoUpgradeAgentsStatusQuery } from '../../../../../hooks';
 
 import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
 
@@ -33,14 +33,14 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
-  totalAgentsInPolicy: number;
-}> = ({
-  action,
-  abortUpgrade,
-  onClickViewAgents,
-  onClickManageAutoUpgradeAgents,
-  totalAgentsInPolicy,
-}) => {
+}> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
+  // get the total agents in policy from the policy id
+  const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(
+    action.policyId ?? ''
+  );
+  console.log('the agents info', autoUpgradeAgentsStatus);
+  const totalAgentsInPolicy = autoUpgradeAgentsStatus?.totalAgents ?? null;
+
   console.log('the action in activity item', action);
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
@@ -92,7 +92,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                     }}
                   />
                 ) : (
-                  inProgressTitle(action)
+                  inProgressTitle(action, totalAgentsInPolicy ?? 0)
                 )}
               </EuiText>
             </EuiFlexItem>
@@ -133,15 +133,6 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
             </EuiFlexItem>
 
             <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiText color="subdued">
-                  <p>
-                    {isAutomaticUpgrade ? 'Automatic' : 'NOT Automatic'} Upgraded{' '}
-                    {(action.nbAgentsAck / action.nbAgentsActioned) * 100}% of the{' '}
-                    {totalAgentsInPolicy}% of agents in the policy
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
               </EuiFlexItem>

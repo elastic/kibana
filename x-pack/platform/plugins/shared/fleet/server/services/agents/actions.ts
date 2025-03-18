@@ -88,7 +88,9 @@ export async function createAgentAction(
   });
 
   auditLoggingService.writeCustomAuditLog({
-    message: `User created Fleet action [id=${actionId}]`,
+    message: `${
+      newAgentAction.is_automatic ? 'Automatic Upgrade' : 'User'
+    } created Fleet action [id=${actionId}]`,
   });
 
   return {

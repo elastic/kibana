@@ -300,6 +300,19 @@ export const AgentUpgradeStatus: React.FC<{
       </EuiFlexGroup>
     );
   }
+  if (agent.upgrade_attempts) {
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="warning"
+            content={`Retrying Upgrade (${agent.upgrade_attempts.length}/7 attempts)`}
+            color="subdued"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   if (isAgentUpgradable && isAgentUpgradeAvailable(agent, latestAgentVersion)) {
     return (
