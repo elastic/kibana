@@ -249,6 +249,48 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
           value: 0,
         },
       },
+      'siem.esqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
+      },
       'siem.thresholdRule': {
         doc_count: 0,
         maxTotalIndexDuration: {
@@ -408,6 +450,15 @@ export const getEventLogAllRules = (): SearchResponse<never, EventLogTypeStatusA
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           categories: {
             buckets: [],
@@ -677,6 +728,48 @@ export const getEmptyEventLogAllRules = (): SearchResponse<never, EventLogTypeSt
         },
       },
       'siem.eqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
+      },
+      'siem.esqlRule': {
         doc_count: 0,
         maxTotalIndexDuration: {
           value: null,
@@ -1153,6 +1246,48 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
           value: 0,
         },
       },
+      'siem.esqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
+      },
       'siem.thresholdRule': {
         doc_count: 0,
         maxTotalIndexDuration: {
@@ -1308,6 +1443,15 @@ export const getEventLogElasticRules = (): SearchResponse<never, EventLogTypeSta
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           categories: {
             buckets: [],
@@ -1610,6 +1754,48 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
           value: null,
         },
       },
+      'siem.esqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
+      },
       'siem.thresholdRule': {
         doc_count: 0,
         maxTotalIndexDuration: {
@@ -1768,6 +1954,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -1817,6 +2012,15 @@ export const getEmptyEventLogElasticRules = (): SearchResponse<never, EventLogTy
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           categories: {
             buckets: [],
@@ -2045,6 +2249,48 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
           value: 0,
         },
       },
+      'siem.esqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: 0,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 0,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 0,
+        },
+      },
       'siem.thresholdRule': {
         doc_count: 0,
         maxTotalIndexDuration: {
@@ -2208,6 +2454,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -2274,6 +2529,15 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -2317,6 +2581,12 @@ export const getElasticLogCustomRules = (): SearchResponse<never, EventLogTypeSt
           },
         },
         'siem.eqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
+        'siem.esqlRule': {
           doc_count: 0,
           cardinality: {
             value: 0,
@@ -2494,6 +2764,48 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
           value: null,
         },
       },
+      'siem.esqlRule': {
+        doc_count: 0,
+        maxTotalIndexDuration: {
+          value: null,
+        },
+        avgGapDuration: {
+          value: null,
+        },
+        maxTotalSearchDuration: {
+          value: null,
+        },
+        gapCount: {
+          value: 0,
+        },
+        avgTotalIndexDuration: {
+          value: null,
+        },
+        minTotalIndexDuration: {
+          value: null,
+        },
+        minGapDuration: {
+          value: null,
+        },
+        avgTotalSearchDuration: {
+          value: null,
+        },
+        minTotalSearchDuration: {
+          value: null,
+        },
+        maxGapDuration: {
+          value: null,
+        },
+        minTotalEnrichmentDuration: {
+          value: null,
+        },
+        maxTotalEnrichmentDuration: {
+          value: null,
+        },
+        avgTotalEnrichmentDuration: {
+          value: null,
+        },
+      },
       'siem.thresholdRule': {
         doc_count: 0,
         maxTotalIndexDuration: {
@@ -2652,6 +2964,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -2709,6 +3030,15 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          categories: {
+            buckets: [],
+          },
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           categories: {
@@ -2757,6 +3087,12 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
             value: 0,
           },
         },
+        'siem.esqlRule': {
+          doc_count: 0,
+          cardinality: {
+            value: 0,
+          },
+        },
         'siem.thresholdRule': {
           doc_count: 0,
           cardinality: {
@@ -2787,6 +3123,34 @@ export const getEmptyElasticLogCustomRules = (): SearchResponse<never, EventLogT
  */
 export const getEventLogAllRulesResult = (): SingleEventLogStatusMetric => ({
   eql: {
+    failures: 0,
+    top_failures: [],
+    partial_failures: 0,
+    top_partial_failures: [],
+    succeeded: 0,
+    index_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    search_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    gap_count: 0,
+  },
+  esql: {
     failures: 0,
     top_failures: [],
     partial_failures: 0,
@@ -3037,6 +3401,34 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
     },
     gap_count: 0,
   },
+  esql: {
+    failures: 0,
+    top_failures: [],
+    partial_failures: 0,
+    top_partial_failures: [],
+    succeeded: 0,
+    index_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    search_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    gap_count: 0,
+  },
   threat_match: {
     failures: 0,
     top_failures: [],
@@ -3218,6 +3610,34 @@ export const getEventLogElasticRulesResult = (): SingleEventLogStatusMetric => (
  */
 export const getEventLogCustomRulesResult = (): SingleEventLogStatusMetric => ({
   eql: {
+    failures: 0,
+    top_failures: [],
+    partial_failures: 0,
+    top_partial_failures: [],
+    succeeded: 0,
+    index_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    search_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    gap_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    enrichment_duration: {
+      max: 0,
+      avg: 0,
+      min: 0,
+    },
+    gap_count: 0,
+  },
+  esql: {
     failures: 0,
     top_failures: [],
     partial_failures: 0,

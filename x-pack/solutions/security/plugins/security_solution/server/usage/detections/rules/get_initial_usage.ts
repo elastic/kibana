@@ -161,6 +161,7 @@ export const getInitialEventLogUsage = (): EventLogStatusMetric => ({
  */
 export const getInitialSingleEventLogUsage = (): SingleEventLogStatusMetric => ({
   eql: getInitialSingleEventMetric(),
+  esql: getInitialSingleEventMetric(),
   threat_match: getInitialSingleEventMetric(),
   machine_learning: getInitialSingleEventMetric(),
   query: getInitialSingleEventMetric(),
