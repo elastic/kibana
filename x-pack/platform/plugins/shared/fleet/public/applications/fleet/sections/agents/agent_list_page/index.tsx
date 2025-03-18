@@ -45,6 +45,7 @@ import {
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
+
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {

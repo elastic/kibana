@@ -22,7 +22,6 @@ export const ActivitySection: React.FunctionComponent<{
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
 }> = ({ title, actions, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
   // unify the actions with the same policyId into single entries
-  console.log('the actions here: ', actions);
   const unifiedActions: ActionStatus[] = actions.reduce(
     (acc: ActionStatus[], action: ActionStatus) => {
       // if the action is expired, we dont want to do any unification on it, it should stay by itself. Same for non-automatic actions
@@ -52,7 +51,6 @@ export const ActivitySection: React.FunctionComponent<{
     },
     []
   );
-  console.log('the unified actions here: ', unifiedActions);
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">

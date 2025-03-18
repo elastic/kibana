@@ -251,7 +251,6 @@ async function getActions(
       const source = hit._source!;
 
       if (!acc[source.action_id!]) {
-        console.log('the source', source);
         const isExpired =
           source.expiration && source.type !== 'UPGRADE'
             ? Date.parse(source.expiration) < Date.now()

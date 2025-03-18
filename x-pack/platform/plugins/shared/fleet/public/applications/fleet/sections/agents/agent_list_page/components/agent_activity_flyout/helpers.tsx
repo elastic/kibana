@@ -71,7 +71,7 @@ export const getAction = (type?: string, actionId?: string) => {
   return actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
 };
 
-export const inProgressTitle = (action: ActionStatus, totalAgents: number) => (
+export const inProgressTitle = (action: ActionStatus, totalAgents?: number) => (
   <FormattedMessage
     id="xpack.fleet.agentActivity.inProgressTitle"
     defaultMessage="{inProgressText} {nbAgents} {agents}{policyText}{reassignText}{upgradeText}{failuresText}"
@@ -79,7 +79,7 @@ export const inProgressTitle = (action: ActionStatus, totalAgents: number) => (
       nbAgents:
         action.nbAgentsAck >= action.nbAgentsActioned
           ? action.nbAgentsAck
-          : action.is_automatic
+          : action.is_automatic && totalAgents
           ? Math.round((action.nbAgentsActioned / totalAgents) * 100) + '% of ' + totalAgents
           : action.nbAgentsAck === 0
           ? action.nbAgentsActioned
