@@ -259,7 +259,7 @@ describe('recallAndScore', () => {
 
     expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
       recallRankingEventType,
-      expect.objectContaining({ prompt: 'test\n\ncontext' })
+      expect.objectContaining({ scoredDocuments: [{ elserScore: 0.8, llmScore: 7 }] })
     );
   });
 });
