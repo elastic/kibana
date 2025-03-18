@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
-import { STORYBOOK_TITLE } from './storybook_constants';
+import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const asyncAction =
   (name: string) =>
@@ -20,18 +20,25 @@ const asyncAction =
   };
 
 export default {
-  title: `${STORYBOOK_TITLE}/Tab`,
+  title: 'Unified Tabs/Tab',
   parameters: {
     backgrounds: {
       default: 'white',
       values: [{ name: 'white', value: '#fff' }],
     },
   },
+} as Meta;
+
+const tabsSizeConfig = {
+  isScrollable: false,
+  regularTabMaxWidth: MAX_TAB_WIDTH,
+  regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
-const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (
+const TabTemplate: StoryFn<TabProps> = (args) => (
   <Tab
     {...args}
+    tabsSizeConfig={tabsSizeConfig}
     onLabelEdited={asyncAction('onLabelEdited')}
     onSelect={asyncAction('onSelect')}
     onClose={asyncAction('onClose')}
