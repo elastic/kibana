@@ -3962,11 +3962,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-ftr-helpers-plugin@link:test/analytics/plugins/analytics_ftr_helpers":
+"@kbn/analytics-ftr-helpers-plugin@link:src/platform/test/analytics/plugins/analytics_ftr_helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-plugin-a-plugin@link:test/analytics/plugins/analytics_plugin_a":
+"@kbn/analytics-plugin-a-plugin@link:src/platform/test/analytics/plugins/analytics_plugin_a":
   version "0.0.0"
   uid ""
 
@@ -4010,7 +4010,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/app-link-test-plugin@link:test/plugin_functional/plugins/app_link_test":
+"@kbn/app-link-test-plugin@link:src/platform/test/plugin_functional/plugins/app_link_test":
   version "0.0.0"
   uid ""
 
@@ -4314,7 +4314,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-app-status-plugin@link:test/plugin_functional/plugins/core_app_status":
+"@kbn/core-app-status-plugin@link:src/platform/test/plugin_functional/plugins/core_app_status":
   version "0.0.0"
   uid ""
 
@@ -4582,7 +4582,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-history-block-plugin@link:test/plugin_functional/plugins/core_history_block":
+"@kbn/core-history-block-plugin@link:src/platform/test/plugin_functional/plugins/core_history_block":
   version "0.0.0"
   uid ""
 
@@ -4610,7 +4610,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-plugin@link:test/plugin_functional/plugins/core_http":
+"@kbn/core-http-plugin@link:src/platform/test/plugin_functional/plugins/core_http":
   version "0.0.0"
   uid ""
 
@@ -4818,55 +4818,55 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-a-plugin@link:test/plugin_functional/plugins/core_plugin_a":
+"@kbn/core-plugin-a-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_a":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-appleave-plugin@link:test/plugin_functional/plugins/core_plugin_appleave":
+"@kbn/core-plugin-appleave-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_appleave":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-b-plugin@link:test/plugin_functional/plugins/core_plugin_b":
+"@kbn/core-plugin-b-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_b":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-chromeless-plugin@link:test/plugin_functional/plugins/core_plugin_chromeless":
+"@kbn/core-plugin-chromeless-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_chromeless":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-deep-links-plugin@link:test/plugin_functional/plugins/core_plugin_deep_links":
+"@kbn/core-plugin-deep-links-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_deep_links":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-deprecations-plugin@link:test/plugin_functional/plugins/core_plugin_deprecations":
+"@kbn/core-plugin-deprecations-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_deprecations":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-dynamic-resolving-a@link:test/plugin_functional/plugins/core_dynamic_resolving_a":
+"@kbn/core-plugin-dynamic-resolving-a@link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-dynamic-resolving-b@link:test/plugin_functional/plugins/core_dynamic_resolving_b":
+"@kbn/core-plugin-dynamic-resolving-b@link:src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-execution-context-plugin@link:test/plugin_functional/plugins/core_plugin_execution_context":
+"@kbn/core-plugin-execution-context-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_execution_context":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-helpmenu-plugin@link:test/plugin_functional/plugins/core_plugin_helpmenu":
+"@kbn/core-plugin-helpmenu-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_helpmenu":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-initializer-context-plugin@link:test/node_roles_functional/plugins/core_plugin_initializer_context":
+"@kbn/core-plugin-initializer-context-plugin@link:src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-route-timeouts-plugin@link:test/plugin_functional/plugins/core_plugin_route_timeouts":
+"@kbn/core-plugin-route-timeouts-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts":
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-static-assets-plugin@link:test/plugin_functional/plugins/core_plugin_static_assets":
+"@kbn/core-plugin-static-assets-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_static_assets":
   version "0.0.0"
   uid ""
 
@@ -4918,7 +4918,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-provider-plugin@link:test/plugin_functional/plugins/core_provider_plugin":
+"@kbn/core-provider-plugin@link:src/platform/test/plugin_functional/plugins/core_provider_plugin":
   version "0.0.0"
   uid ""
 
@@ -5246,7 +5246,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-search-plugin@link:test/plugin_functional/plugins/data_search":
+"@kbn/data-search-plugin@link:src/platform/test/plugin_functional/plugins/data_search":
   version "0.0.0"
   uid ""
 
@@ -5446,7 +5446,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elasticsearch-client-plugin@link:test/plugin_functional/plugins/elasticsearch_client_plugin":
+"@kbn/elasticsearch-client-plugin@link:src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin":
   version "0.0.0"
   uid ""
 
@@ -5598,7 +5598,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eui-provider-dev-warning@link:test/plugin_functional/plugins/eui_provider_dev_warning":
+"@kbn/eui-provider-dev-warning@link:src/platform/test/plugin_functional/plugins/eui_provider_dev_warning":
   version "0.0.0"
   uid ""
 
@@ -5894,7 +5894,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/hardening-plugin@link:test/plugin_functional/plugins/hardening":
+"@kbn/hardening-plugin@link:src/platform/test/plugin_functional/plugins/hardening":
   version "0.0.0"
   uid ""
 
@@ -5966,7 +5966,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-patterns-test-plugin@link:test/plugin_functional/plugins/index_patterns":
+"@kbn/index-patterns-test-plugin@link:src/platform/test/plugin_functional/plugins/index_patterns":
   version "0.0.0"
   uid ""
 
@@ -6018,7 +6018,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/interactive-setup-test-endpoints-plugin@link:test/interactive_setup_api_integration/plugins/test_endpoints":
+"@kbn/interactive-setup-test-endpoints-plugin@link:src/platform/test/interactive_setup_api_integration/plugins/test_endpoints":
   version "0.0.0"
   uid ""
 
@@ -6070,23 +6070,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kbn-health-gateway-status-plugin@link:test/health_gateway/plugins/status":
+"@kbn/kbn-health-gateway-status-plugin@link:src/platform/test/health_gateway/plugins/status":
   version "0.0.0"
   uid ""
 
-"@kbn/kbn-sample-panel-action-plugin@link:test/plugin_functional/plugins/kbn_sample_panel_action":
+"@kbn/kbn-sample-panel-action-plugin@link:src/platform/test/plugin_functional/plugins/kbn_sample_panel_action":
   version "0.0.0"
   uid ""
 
-"@kbn/kbn-top-nav-plugin@link:test/plugin_functional/plugins/kbn_top_nav":
+"@kbn/kbn-top-nav-plugin@link:src/platform/test/plugin_functional/plugins/kbn_top_nav":
   version "0.0.0"
   uid ""
 
-"@kbn/kbn-tp-custom-visualizations-plugin@link:test/plugin_functional/plugins/kbn_tp_custom_visualizations":
+"@kbn/kbn-tp-custom-visualizations-plugin@link:src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations":
   version "0.0.0"
   uid ""
 
-"@kbn/kbn-tp-run-pipeline-plugin@link:test/interpreter_functional/plugins/kbn_tp_run_pipeline":
+"@kbn/kbn-tp-run-pipeline-plugin@link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline":
   version "0.0.0"
   uid ""
 
@@ -6282,7 +6282,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-test-plugin@link:test/plugin_functional/plugins/management_test_plugin":
+"@kbn/management-test-plugin@link:src/platform/test/plugin_functional/plugins/management_test_plugin":
   version "0.0.0"
   uid ""
 
@@ -6474,7 +6474,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/newsfeed-test-plugin@link:test/common/plugins/newsfeed":
+"@kbn/newsfeed-test-plugin@link:src/platform/test/common/plugins/newsfeed":
   version "0.0.0"
   uid ""
 
@@ -6574,7 +6574,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/open-telemetry-instrumented-plugin@link:test/common/plugins/otel_metrics":
+"@kbn/open-telemetry-instrumented-plugin@link:src/platform/test/common/plugins/otel_metrics":
   version "0.0.0"
   uid ""
 
@@ -6746,7 +6746,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rendering-plugin@link:test/plugin_functional/plugins/rendering_plugin":
+"@kbn/rendering-plugin@link:src/platform/test/plugin_functional/plugins/rendering_plugin":
   version "0.0.0"
   uid ""
 
@@ -6918,11 +6918,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-object-export-transforms-plugin@link:test/plugin_functional/plugins/saved_object_export_transforms":
+"@kbn/saved-object-export-transforms-plugin@link:src/platform/test/plugin_functional/plugins/saved_object_export_transforms":
   version "0.0.0"
   uid ""
 
-"@kbn/saved-object-import-warnings-plugin@link:test/plugin_functional/plugins/saved_object_import_warnings":
+"@kbn/saved-object-import-warnings-plugin@link:src/platform/test/plugin_functional/plugins/saved_object_import_warnings":
   version "0.0.0"
   uid ""
 
@@ -6934,11 +6934,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-hidden-from-http-apis-type-plugin@link:test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type":
+"@kbn/saved-objects-hidden-from-http-apis-type-plugin@link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type":
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-hidden-type-plugin@link:test/plugin_functional/plugins/saved_objects_hidden_type":
+"@kbn/saved-objects-hidden-type-plugin@link:src/platform/test/plugin_functional/plugins/saved_objects_hidden_type":
   version "0.0.0"
   uid ""
 
@@ -7322,7 +7322,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/session-notifications-plugin@link:test/plugin_functional/plugins/session_notifications":
+"@kbn/session-notifications-plugin@link:src/platform/test/plugin_functional/plugins/session_notifications":
   version "0.0.0"
   uid ""
 
@@ -7610,11 +7610,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/status-plugin-a-plugin@link:test/server_integration/plugins/status_plugin_a":
+"@kbn/status-plugin-a-plugin@link:src/platform/test/server_integration/plugins/status_plugin_a":
   version "0.0.0"
   uid ""
 
-"@kbn/status-plugin-b-plugin@link:test/server_integration/plugins/status_plugin_b":
+"@kbn/status-plugin-b-plugin@link:src/platform/test/server_integration/plugins/status_plugin_b":
   version "0.0.0"
   uid ""
 
@@ -7694,7 +7694,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-test-plugin@link:test/plugin_functional/plugins/telemetry":
+"@kbn/telemetry-test-plugin@link:src/platform/test/plugin_functional/plugins/telemetry":
   version "0.0.0"
   uid ""
 
@@ -7722,7 +7722,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-src@link:test":
+"@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
 
@@ -7842,7 +7842,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-settings-plugin@link:test/plugin_functional/plugins/ui_settings_plugin":
+"@kbn/ui-settings-plugin@link:src/platform/test/plugin_functional/plugins/ui_settings_plugin":
   version "0.0.0"
   uid ""
 
@@ -7918,7 +7918,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/usage-collection-test-plugin@link:test/plugin_functional/plugins/usage_collection":
+"@kbn/usage-collection-test-plugin@link:src/platform/test/plugin_functional/plugins/usage_collection":
   version "0.0.0"
   uid ""
 
@@ -13003,6 +13003,14 @@
     "@typescript-eslint/types" "5.62.0"
     "@typescript-eslint/visitor-keys" "5.62.0"
 
+"@typescript-eslint/scope-manager@^8.15.0":
+  version "8.25.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/scope-manager/-/scope-manager-8.25.0.tgz#ac3805077aade898e98ca824294c998545597df3"
+  integrity sha512-6PPeiKIGbgStEyt4NNXa2ru5pMzQ8OYKO1hX1z53HMomrmiSB+R5FmChgQAP1ro8jMtNawz+TRQo/cSXrauTpg==
+  dependencies:
+    "@typescript-eslint/types" "8.25.0"
+    "@typescript-eslint/visitor-keys" "8.25.0"
+
 "@typescript-eslint/type-utils@5.62.0":
   version "5.62.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/type-utils/-/type-utils-5.62.0.tgz#286f0389c41681376cdad96b309cedd17d70346a"
@@ -13018,6 +13026,11 @@
   resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-5.62.0.tgz#258607e60effa309f067608931c3df6fed41fd2f"
   integrity sha512-87NVngcbVXUahrRTqIK27gD2t5Cu1yuCXxbLcFtCzZGlfyVWWh8mLHkoxzjsB6DDNnvdL+fW8MiwPEJyGJQDgQ==
 
+"@typescript-eslint/types@8.25.0":
+  version "8.25.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/types/-/types-8.25.0.tgz#f91512c2f532b1d6a8826cadd0b0e5cd53cf97e0"
+  integrity sha512-+vUe0Zb4tkNgznQwicsvLUJgZIRs6ITeWSCclX1q85pR1iOiaj+4uZJIUp//Z27QWu5Cseiw3O3AR8hVpax7Aw==
+
 "@typescript-eslint/typescript-estree@5.62.0", "@typescript-eslint/typescript-estree@^5.59.5", "@typescript-eslint/typescript-estree@^5.62.0":
   version "5.62.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/typescript-estree/-/typescript-estree-5.62.0.tgz#7d17794b77fabcac615d6a48fb143330d962eb9b"
@@ -13031,7 +13044,7 @@
     semver "^7.3.7"
     tsutils "^3.21.0"
 
-"@typescript-eslint/utils@5.62.0", "@typescript-eslint/utils@^5.10.0", "@typescript-eslint/utils@^5.62.0", "@typescript-eslint/utils@^6.18.1":
+"@typescript-eslint/utils@5.62.0", "@typescript-eslint/utils@^5.10.0", "@typescript-eslint/utils@^6.18.1", "@typescript-eslint/utils@^8.15.0":
   version "5.62.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-5.62.0.tgz#141e809c71636e4a75daa39faed2fb5f4b10df86"
   integrity sha512-n8oxjeb5aIbPFEtmQxQYOLI0i9n5ySBEY/ZEHHZqKQSFnxio1rv6dthascc9dLuwrL0RC5mPCxB7vnAVGAYWAQ==
@@ -13052,6 +13065,14 @@
   dependencies:
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
+
+"@typescript-eslint/visitor-keys@8.25.0":
+  version "8.25.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/visitor-keys/-/visitor-keys-8.25.0.tgz#e8646324cd1793f96e02669cb717a05319403164"
+  integrity sha512-kCYXKAum9CecGVHGij7muybDfTS2sD3t0L4bJsEZLkyrXUImiCTq1M3LG2SRtOhiHFwMR9wAFplpT6XHYjTkwQ==
+  dependencies:
+    "@typescript-eslint/types" "8.25.0"
+    eslint-visitor-keys "^4.2.0"
 
 "@ungap/structured-clone@^1.2.0":
   version "1.2.0"
@@ -18744,12 +18765,13 @@ eslint-plugin-react@^7.32.2:
     semver "^6.3.0"
     string.prototype.matchall "^4.0.8"
 
-eslint-plugin-testing-library@^6.4.0:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-6.4.0.tgz#1ba8a7422e3e31cc315a73ff17c34908f56f9838"
-  integrity sha512-yeWF+YgCgvNyPNI9UKnG0FjeE2sk93N/3lsKqcmR8dSfeXJwFT5irnWo7NjLf152HkRzfoFjh3LsBUrhvFz4eA==
+eslint-plugin-testing-library@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-7.1.1.tgz#df834e821e53fa81c1eb1fad5a0d9ba4c510f9ea"
+  integrity sha512-nszC833aZPwB6tik1nMkbFqmtgIXTT0sfJEYs0zMBKMlkQ4to2079yUV96SvmLh00ovSBJI4pgcBC1TiIP8mXg==
   dependencies:
-    "@typescript-eslint/utils" "^5.62.0"
+    "@typescript-eslint/scope-manager" "^8.15.0"
+    "@typescript-eslint/utils" "^8.15.0"
 
 eslint-rule-composer@^0.3.0:
   version "0.3.0"
@@ -18818,6 +18840,11 @@ eslint-visitor-keys@^3.3.0, eslint-visitor-keys@^3.4.1, eslint-visitor-keys@^3.4
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz#0cd72fe8550e3c2eae156a96a4dddcd1c8ac5800"
   integrity sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==
+
+eslint-visitor-keys@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-4.2.0.tgz#687bacb2af884fcdda8a6e7d65c606f46a14cd45"
+  integrity sha512-UyLnSehNt62FFhSwjZlHmeokpRK59rcz29j+F1/aDgbkbRTk7wIc9XzdoasMUbRNKDM0qQt/+BJ4BrpFeABemw==
 
 eslint@^8.57.0:
   version "8.57.0"
