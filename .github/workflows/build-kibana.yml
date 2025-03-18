@@ -111,7 +111,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/kibana:8.15.6 -f $DOCKERFILE_PATH build/kibana-docker/default/
+          docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/kibana:8.15.6 -f $DOCKERFILE_PATH build/kibana-docker/default/
 
       - name: Push Docker Image to GHCR
         run: |
