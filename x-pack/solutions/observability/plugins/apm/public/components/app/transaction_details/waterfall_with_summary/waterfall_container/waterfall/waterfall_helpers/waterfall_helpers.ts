@@ -499,6 +499,7 @@ function getChildren({
   path,
   waterfall,
   waterfallItemId,
+  rootId,
 }: {
   waterfallItemId: string;
   waterfall: IWaterfall;
@@ -506,8 +507,12 @@ function getChildren({
     criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
     showCriticalPath: boolean;
   };
+  rootId: string;
 }) {
-  const children = waterfall.childrenByParentId[waterfallItemId] ?? [];
+  // children cannot have the same id as the root
+  const children =
+    waterfall.childrenByParentId[waterfallItemId]?.filter((child) => child.id !== rootId) ?? [];
+
   return path.showCriticalPath
     ? children.filter((child) => path.criticalPathSegmentsById[child.id]?.length)
     : children;
@@ -533,7 +538,12 @@ function buildTree({
   for (let queueIndex = 0; queueIndex < queue.length; queueIndex++) {
     const node = queue[queueIndex];
 
-    const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
+    const children = getChildren({
+      path,
+      waterfall,
+      waterfallItemId: node.item.id,
+      rootId: root.item.id,
+    });
 
     // Set childrenToLoad for all nodes enqueued.
     // this allows lazy loading of child nodes
