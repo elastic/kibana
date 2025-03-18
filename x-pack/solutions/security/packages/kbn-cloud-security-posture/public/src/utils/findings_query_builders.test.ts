@@ -10,7 +10,7 @@ import {
   AggregationBuckets,
   getVulnerabilitiesAggregationCount,
   VULNERABILITIES_RESULT_EVALUATION,
-} from './hooks_utils';
+} from './findings_query_builders';
 
 describe('getVulnerabilitiesAggregationCount', () => {
   it('should return default counts when nothing is provided', () => {
