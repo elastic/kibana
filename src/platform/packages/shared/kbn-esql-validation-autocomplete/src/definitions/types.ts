@@ -16,7 +16,7 @@ import type {
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy } from '../validation/types';
+import type { ESQLPolicy, ReferenceMaps } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -349,7 +349,7 @@ export interface CommandModeDefinition {
 export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
   examples: string[];
-  validate?: (option: ESQLCommand) => ESQLMessage[];
+  validate?: (command: ESQLCommand<CommandName>, references: ReferenceMaps) => ESQLMessage[];
   suggest: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   modes: CommandModeDefinition[];
