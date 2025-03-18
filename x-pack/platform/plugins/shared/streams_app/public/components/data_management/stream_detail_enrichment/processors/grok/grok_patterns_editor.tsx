@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   useFormContext,
   useFieldArray,
@@ -25,7 +25,6 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GrokEditor } from '@kbn/grok-ui';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
 import { GrokAiSuggestions } from './grok_ai_suggestions';
@@ -69,7 +68,6 @@ export const GrokPatternsEditor = () => {
         )}
       >
         <EuiPanel color="subdued" paddingSize="none">
-          <GrokEditorTest />
           <SortableList onDragItem={handlerPatternDrag}>
             {fieldsWithError.map((field, idx) => (
               <DraggablePatternInput
@@ -171,19 +169,5 @@ const DraggablePatternInput = ({
         </EuiFormRow>
       )}
     </EuiDraggable>
-  );
-};
-
-const GrokEditorTest = () => {
-  const [samples, setSamples] = useState('');
-  const [expression, setExpression] = useState('');
-
-  return (
-    <GrokEditor
-      samples={samples}
-      onChangeSamples={setSamples}
-      expression={expression}
-      onChangeExpression={setExpression}
-    />
   );
 };
