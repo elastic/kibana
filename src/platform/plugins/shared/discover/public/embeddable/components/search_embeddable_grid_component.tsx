@@ -31,7 +31,7 @@ import {
 } from '@kbn/discover-utils';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getSortForEmbeddable } from '../../utils';
+import { getSortForEmbeddable } from '../../utils/sorting';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
