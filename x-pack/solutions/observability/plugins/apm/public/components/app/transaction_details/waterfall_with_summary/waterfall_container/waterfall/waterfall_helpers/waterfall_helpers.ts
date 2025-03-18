@@ -464,13 +464,10 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
 
   const errorCountByParentId = getErrorCountByParentId(traceItems.errorDocs);
 
-  const rawWaterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
+  const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
     traceItems.traceDocs,
     traceItems.spanLinksCountById
   );
-
-  const uniqueWaterfallItems = new Map(rawWaterfallItems.map((item) => [item.id, item]));
-  const waterfallItems = Array.from(uniqueWaterfallItems.values());
 
   const entryWaterfallTransaction = getEntryWaterfallTransaction(
     entryTransaction.transaction.id,

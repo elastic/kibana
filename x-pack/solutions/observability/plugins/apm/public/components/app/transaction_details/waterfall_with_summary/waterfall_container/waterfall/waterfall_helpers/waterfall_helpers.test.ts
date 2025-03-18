@@ -170,33 +170,6 @@ describe('waterfall_helpers', () => {
       expect(waterfall.errorItems.length).toBe(1);
       expect(waterfall.getErrorCount('myTransactionId1')).toEqual(1);
     });
-    it('should return waterfall without duplicates', () => {
-      const newHits = [...hits, hits[0], hits[1], hits[2]];
-      const apiResp = {
-        traceItems: {
-          traceDocs: newHits,
-          errorDocs,
-          exceedsMax: false,
-          spanLinksCountById: {},
-          traceDocsTotal: newHits.length,
-          maxTraceItems: 5000,
-        },
-        entryTransaction: {
-          processor: { event: 'transaction' },
-          trace: { id: 'myTraceId' },
-          service: { name: 'opbeans-node' },
-          transaction: {
-            duration: { us: 49660 },
-            name: 'GET /api',
-            id: 'myTransactionId1',
-          },
-          timestamp: { us: 1549324795784006 },
-        } as Transaction,
-      };
-      const waterfall = getWaterfall(apiResp);
-
-      expect(waterfall.items.length).toBe(6);
-    });
 
     it('should return partial waterfall', () => {
       const apiResp = {
