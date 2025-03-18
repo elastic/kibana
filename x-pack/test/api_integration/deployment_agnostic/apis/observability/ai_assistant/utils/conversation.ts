@@ -30,12 +30,14 @@ export function decodeEvents(body: Readable | string) {
     .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
 }
 
-export function getMessageAddedEvents(body: StreamingChatResponseEvent[]) {
-  return body.filter((event): event is MessageAddEvent => event.type === 'messageAdd');
+export function getMessageAddedEvents(body: Readable | string) {
+  return decodeEvents(body).filter(
+    (event): event is MessageAddEvent => event.type === 'messageAdd'
+  );
 }
 
-export function getConversationCreateEvent(body: StreamingChatResponseEvent[]) {
-  return body.find(
+export function getConversationCreateEvent(body: Readable | string) {
+  return decodeEvents(body).find(
     (event): event is ConversationCreateEvent => event.type === 'conversationCreate'
   );
 }
@@ -120,10 +122,10 @@ export async function chatComplete({
   });
 
   expect(status).to.be(200);
-  const decodedBody = decodeEvents(body);
-  const messageAddedEvents = getMessageAddedEvents(decodedBody);
-  const conversation = getConversationCreateEvent(decodedBody);
-  return { messageAddedEvents, conversation, body: decodedBody, status };
+  const messageEvents = decodeEvents(body);
+  const messageAddedEvents = getMessageAddedEvents(body);
+  const conversation = getConversationCreateEvent(body);
+  return { messageAddedEvents, conversation, messageEvents, status };
 }
 
 // order of instructions can vary, so we sort to compare them
