@@ -20,12 +20,7 @@ interface Props {
 export class SpaceCards extends Component<Props, {}> {
   public render() {
     return (
-      <div
-        css={css`
-          max-width: 1200px;
-          margin: auto;
-        `}
-      >
+      <div>
         <EuiFlexGroup gutterSize="l" justifyContent="center" wrap responsive={false}>
           {this.props.spaces.map(this.renderSpace)}
         </EuiFlexGroup>

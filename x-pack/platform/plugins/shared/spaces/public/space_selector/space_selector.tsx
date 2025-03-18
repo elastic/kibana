@@ -109,6 +109,12 @@ export class SpaceSelector extends Component<Props, State> {
   public render() {
     const { spaces, searchTerm } = this.state;
 
+    const panelStyles = css`
+      text-align: center;
+      margin-inline: auto;
+      max-width: 700px;
+    `;
+
     let filteredSpaces = spaces;
     if (searchTerm) {
       filteredSpaces = spaces.filter(
@@ -185,14 +191,7 @@ export class SpaceSelector extends Component<Props, State> {
           {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
             <Fragment>
               <EuiSpacer />
-              <EuiPanel
-                css={css`
-                  text-align: center;
-                  margin-inline: auto;
-                  max-width: 700px;
-                `}
-                color="subdued"
-              >
+              <EuiPanel css={panelStyles} color="subdued">
                 <EuiTitle size="xs">
                   <h2>
                     {i18n.translate(
@@ -211,14 +210,7 @@ export class SpaceSelector extends Component<Props, State> {
           {!this.state.loading && this.state.error && (
             <Fragment>
               <EuiSpacer />
-              <EuiPanel
-                color="danger"
-                css={css`
-                  text-align: center;
-                  margin-inline: auto;
-                  max-width: 700px;
-                `}
-              >
+              <EuiPanel css={panelStyles} color="danger">
                 <EuiText size="s" color="danger">
                   <h2>
                     <FormattedMessage

@@ -72,7 +72,7 @@ export class SectionPanel extends Component<React.PropsWithChildren<Props>, {}> 
       return null;
     }
 
-    return <SectionPanelTitle iconType={this.props.iconType} title={this.props.title} />;
+    return <SectionPanelTitle iconType={this.props.iconType} title={this.props.title as string} />;
   };
 
   public getForm = () => {
