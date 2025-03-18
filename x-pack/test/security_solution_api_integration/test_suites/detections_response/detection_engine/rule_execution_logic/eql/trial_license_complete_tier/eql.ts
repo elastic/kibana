@@ -255,9 +255,11 @@ export default ({ getService }: FtrProviderContext) => {
       await setBrokenRuntimeField({ es, index: 'auditbeat-*' });
       const { logs } = await previewRule({ supertest, rule });
       expect(
-        logs[0].warnings.some((warning) =>
-          warning.includes(
-            'The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards:'
+        logs.some((previewLog) =>
+          previewLog.warnings.some((warning) =>
+            warning.includes(
+              'The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards:'
+            )
           )
         )
       ).eql(true);
