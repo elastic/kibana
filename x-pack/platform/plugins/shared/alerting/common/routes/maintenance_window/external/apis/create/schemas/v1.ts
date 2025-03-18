@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 
 import { scheduleRequestSchemaV1 } from '../../../../../schedule';
-import { maintenanceWindowCategoryIdTypesV1 } from '../../../../shared';
 
 export const createMaintenanceWindowRequestBodySchema = schema.object({
   title: schema.string({
@@ -31,14 +30,11 @@ export const createMaintenanceWindowRequestBodySchema = schema.object({
   }),
   scope: schema.maybe(
     schema.object({
-      query: schema.object({
-        solutionId: schema.oneOf([
-          schema.literal(maintenanceWindowCategoryIdTypesV1.OBSERVABILITY),
-          schema.literal(maintenanceWindowCategoryIdTypesV1.SECURITY_SOLUTION),
-          schema.literal(maintenanceWindowCategoryIdTypesV1.MANAGEMENT),
-        ]),
-        kql: schema.string({
-          meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+      alerting: schema.object({
+        query: schema.object({
+          kql: schema.string({
+            meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+          }),
         }),
       }),
     })

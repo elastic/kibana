@@ -17,14 +17,12 @@ export const transformCreateBody = (
   createBody: CreateMaintenanceWindowRequestBodyV1
 ): CreateMaintenanceWindowParams['data'] => {
   const { rRule, duration } = transformCustomScheduleToRRule(createBody.schedule.custom);
-  const kql = createBody.scope?.query.kql;
-  const solutionId = createBody.scope?.query.solutionId;
+  const kql = createBody.scope?.alerting.query.kql;
 
   return {
     title: createBody.title,
     enabled: createBody.enabled,
     ...(kql && { scopedQuery: { kql, filters: [] } }),
-    ...(solutionId && { categoryIds: [solutionId] }),
     duration,
     rRule,
   };

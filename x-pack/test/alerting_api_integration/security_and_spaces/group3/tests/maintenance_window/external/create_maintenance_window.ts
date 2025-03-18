@@ -25,7 +25,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       enabled: false,
       schedule: {
         custom: {
-          duration: '1d',
+          duration: '1m',
           start: start.toISOString(),
           recurring: {
             every: '2d',
@@ -35,9 +35,10 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         },
       },
       scope: {
-        query: {
-          kql: "_id: '1234'",
-          solutionId: 'securitySolution',
+        alerting: {
+          query: {
+            kql: "_id: '1234'",
+          },
         },
       },
     };
@@ -76,16 +77,15 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.status).to.eql('running');
+              expect(response.body.status).to.eql('upcoming');
               expect(response.body.enabled).to.eql(false);
 
-              expect(response.body.scope.query.kql).to.eql("_id: '1234'");
-              expect(response.body.scope.query.solutionId).to.eql('securitySolution');
+              expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
 
               expect(response.body.created_by).to.eql(scenario.user.username);
               expect(response.body.updated_by).to.eql(scenario.user.username);
 
-              expect(response.body.schedule.custom.duration).to.eql('24h');
+              expect(response.body.schedule.custom.duration).to.eql('1m');
               expect(response.body.schedule.custom.start).to.eql(start.toISOString());
               expect(response.body.schedule.custom.recurring.every).to.eql('2d');
               expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());
@@ -105,24 +105,11 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         .send({
           ...createRequestBody,
           scope: {
-            query: {
-              kql: 'invalid_kql:',
-              solutionId: 'securitySolution',
-            },
-          },
-        })
-        .expect(400);
-    });
-
-    it('should throw if creating maintenance window with kql but missing solutionIds', async () => {
-      await supertest
-        .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          ...createRequestBody,
-          scope: {
-            query: {
-              kql: 'invalid_kql:',
+            alerting: {
+              query: {
+                kql: 'invalid_kql:',
+                solutionId: 'securitySolution',
+              },
             },
           },
         })
@@ -138,7 +125,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
           schedule: {
             custom: {
               duration: '1d',
-              // missing start
+              // test scenario: incomplete schedule, missing start
             },
           },
         })

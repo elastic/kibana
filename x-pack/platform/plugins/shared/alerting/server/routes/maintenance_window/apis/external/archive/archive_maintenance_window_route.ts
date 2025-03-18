@@ -18,7 +18,7 @@ import type {
 } from '../../../../../../common/routes/maintenance_window/external/apis/archive';
 import { archiveMaintenanceWindowRequestParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/archive';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 
 export const archiveMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -68,7 +68,7 @@ export const archiveMaintenanceWindowRoute = (
         });
 
         const response: ArchiveMaintenanceWindowResponseV1 = {
-          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+          body: transformInternalMaintenanceWindowToExternalV1(maintenanceWindow),
         };
 
         return res.ok(response);

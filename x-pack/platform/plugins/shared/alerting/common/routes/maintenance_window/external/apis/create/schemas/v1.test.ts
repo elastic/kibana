@@ -24,9 +24,10 @@ const maintenanceWindow = {
     },
   },
   scope: {
-    query: {
-      kql: "_id: '1234'",
-      solutionId: 'securitySolution',
+    alerting: {
+      query: {
+        kql: "_id: '1234'",
+      },
     },
   },
 };
@@ -74,9 +75,10 @@ describe('createMaintenanceWindowRequestBodySchema', () => {
           },
         },
         "scope": Object {
-          "query": Object {
-            "kql": "_id: '1234'",
-            "solutionId": "securitySolution",
+          "alerting": Object {
+            "query": Object {
+              "kql": "_id: '1234'",
+            },
           },
         },
         "title": "test-maintenance-window",
@@ -95,7 +97,7 @@ describe('createMaintenanceWindowRequestBodySchema', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[scope.query.solutionId]: expected at least one defined value but got [undefined]"`
+      `"[scope.alerting.query.kql]: expected value of type [string] but got [undefined]"`
     );
   });
 
@@ -110,7 +112,7 @@ describe('createMaintenanceWindowRequestBodySchema', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[scope.query.kql]: expected value of type [string] but got [undefined]"`
+      `"[scope.alerting.query.kql]: expected value of type [string] but got [undefined]"`
     );
   });
 });

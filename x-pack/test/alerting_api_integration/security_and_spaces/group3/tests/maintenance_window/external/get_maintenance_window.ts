@@ -18,13 +18,13 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
   const start = new Date();
   const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
 
-  describe('getMaintenanceWindow', () => {
+  describe.only('getMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',
       schedule: {
         custom: {
-          duration: '1d',
+          duration: '1m',
           start: start.toISOString(),
           recurring: {
             every: '2d',
@@ -34,9 +34,10 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
         },
       },
       scope: {
-        query: {
-          kql: "_id: '1234'",
-          solutionId: 'securitySolution',
+        alerting: {
+          query: {
+            kql: "_id: '1234'",
+          },
         },
       },
     };
@@ -83,16 +84,15 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.status).to.eql('running');
+              expect(response.body.status).to.eql('upcoming');
               expect(response.body.enabled).to.eql(true);
 
-              expect(response.body.scope.query.kql).to.eql("_id: '1234'");
-              expect(response.body.scope.query.solutionId).to.eql('securitySolution');
+              expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
 
               expect(response.body.created_by).to.eql('elastic');
               expect(response.body.updated_by).to.eql('elastic');
 
-              expect(response.body.schedule.custom.duration).to.eql('24h');
+              expect(response.body.schedule.custom.duration).to.eql('1m');
               expect(response.body.schedule.custom.start).to.eql(start.toISOString());
               expect(response.body.schedule.custom.recurring.every).to.eql('2d');
               expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());

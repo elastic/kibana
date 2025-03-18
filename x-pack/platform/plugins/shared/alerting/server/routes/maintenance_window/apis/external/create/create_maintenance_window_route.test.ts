@@ -42,9 +42,10 @@ const createParams = {
     },
   },
   scope: {
-    query: {
-      kql: "_id: '1234'",
-      solutionId: 'observability',
+    alerting: {
+      query: {
+        kql: "_id: '1234'",
+      },
     },
   },
 } as CreateMaintenanceWindowRequestBody;
@@ -95,7 +96,6 @@ describe('createMaintenanceWindowRoute', () => {
           filters: [],
           kql: "_id: '1234'",
         },
-        categoryIds: ['observability'],
         duration: 864000000,
         rRule: {
           dtstart: '2021-03-07T00:00:00.000Z',

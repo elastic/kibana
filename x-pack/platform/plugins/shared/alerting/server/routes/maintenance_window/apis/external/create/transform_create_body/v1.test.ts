@@ -21,9 +21,10 @@ describe('transformCreateBody', () => {
           },
         },
         scope: {
-          query: {
-            kql: "_id: '1234'",
-            solutionId: 'observability',
+          alerting: {
+            query: {
+              kql: "_id: '1234'",
+            },
           },
         },
       })
@@ -34,7 +35,6 @@ describe('transformCreateBody', () => {
         filters: [],
         kql: "_id: '1234'",
       },
-      categoryIds: ['observability'],
       duration: 864000000,
       rRule: {
         dtstart: '2021-03-07T00:00:00.000Z',
@@ -50,7 +50,7 @@ describe('transformCreateBody', () => {
     });
   });
 
-  it('transform excludes scopedQuery and categoryIds if scope is missing', () => {
+  it('transform excludes scopedQuery if scope is missing', () => {
     expect(
       transformCreateBody({
         title: 'test-maintenance-window',

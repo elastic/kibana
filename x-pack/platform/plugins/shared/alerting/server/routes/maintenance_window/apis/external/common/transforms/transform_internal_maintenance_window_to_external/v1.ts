@@ -17,7 +17,6 @@ export const transformInternalMaintenanceWindowToExternal = (
   maintenanceWindow: MaintenanceWindow
 ): MaintenanceWindowResponseV1 => {
   const kql = maintenanceWindow.scopedQuery?.kql;
-  const solutionId = maintenanceWindow.categoryIds && maintenanceWindow.categoryIds[0];
 
   const custom = transformRRuleToCustomScheduleV1({
     duration: maintenanceWindow.duration,
@@ -34,6 +33,6 @@ export const transformInternalMaintenanceWindowToExternal = (
     created_at: maintenanceWindow.createdAt,
     updated_at: maintenanceWindow.updatedAt,
     status: maintenanceWindow.status,
-    ...(kql && solutionId && { scope: { query: { kql, solutionId } } }),
+    ...(kql && { scope: { alerting: { query: { kql } } } }),
   };
 };
