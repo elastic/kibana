@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import type { Preview } from '@storybook/react';
+import * as jest from 'jest-mock';
+import { decorators } from './decorators';
 
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.tsx'],
+// @ts-expect-error
+window.jest = jest;
+
+const preview: Preview = {
+  decorators,
+  initialGlobals: { euiTheme: 'v8.light' },
 };
+
+// eslint-disable-next-line import/no-default-export
+export default preview;
