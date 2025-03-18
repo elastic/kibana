@@ -120,8 +120,8 @@ export class SpaceSelector extends Component<Props, State> {
 
     return (
       <KibanaPageTemplate
-        css={({ euiTheme }) => css`
-          background: ${euiTheme.colors.backgroundTransparent};
+        css={css`
+          background-color: transparent;
         `}
         data-test-subj="kibanaSpaceSelector"
       >
