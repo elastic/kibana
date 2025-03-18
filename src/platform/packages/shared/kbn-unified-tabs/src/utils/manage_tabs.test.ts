@@ -120,7 +120,7 @@ describe('manage_tabs', () => {
     it('inserts a tab after another tab', () => {
       const newItem = { id: 'tab-5', label: 'Tab 5' };
       const prevState = { items, selectedItem: items[0] };
-      const nextState = insertTabAfter(prevState, newItem, items[2]);
+      const nextState = insertTabAfter(prevState, newItem, items[2], undefined);
 
       expect(nextState.items).not.toBe(items);
       expect(nextState.items).toEqual([items[0], items[1], items[2], newItem, items[3], items[4]]);
@@ -140,7 +140,7 @@ describe('manage_tabs', () => {
     it('inserts a tab after the last tab', () => {
       const newItem = { id: 'tab-5', label: 'Tab 5' };
       const prevState = { items, selectedItem: items[0] };
-      const nextState = insertTabAfter(prevState, newItem, items[items.length - 1]);
+      const nextState = insertTabAfter(prevState, newItem, items[items.length - 1], 100);
 
       expect(nextState.items).not.toBe(items);
       expect(nextState.items).toEqual([items[0], items[1], items[2], items[3], items[4], newItem]);
