@@ -65,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           query: { match_all: {} },
         });
         await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+        // await kibanaServer.uiSettings.unset('defaultIndex');
       });
 
       afterEach(async () => {
