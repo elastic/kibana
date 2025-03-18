@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { ExclusiveUnion } from '@elastic/eui';
+import type { ExclusiveUnion, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
+  withEuiTheme,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
 import type {
@@ -51,9 +52,10 @@ interface Props {
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
 }
-class SpacesMenuUI extends Component<Props> {
+class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
   public render() {
     const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
+    const { euiTheme } = this.props.theme;
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -95,7 +97,7 @@ class SpacesMenuUI extends Component<Props> {
             defaultMessage: 'Spaces',
           })}
           id={this.props.id}
-          css={({ euiTheme }) => css`
+          css={css`
             max-width: calc(${euiTheme.size.l} * 10);
           `}
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
@@ -215,10 +217,11 @@ class SpacesMenuUI extends Component<Props> {
   };
 
   private renderManageButton = () => {
+    const { euiTheme } = this.props.theme;
     return (
       <ManageSpacesButton
         key="manageSpacesButton"
-        css={({ euiTheme }) => css`
+        css={css`
           margin: ${euiTheme.size.m};
           width: calc(100% - ${euiTheme.size.m} * 2});
         `}
@@ -231,4 +234,4 @@ class SpacesMenuUI extends Component<Props> {
   };
 }
 
-export const SpacesMenu = injectI18n(SpacesMenuUI);
+export const SpacesMenu = withEuiTheme(injectI18n(SpacesMenuUI));
