@@ -103,7 +103,18 @@ describe('getFormattedGroupBy', () => {
 });
 
 describe('getGroupByObject', () => {
-  it('should return an object containing groups', () => {
+  it('should return empty object for undefined groupBy', () => {
+    expect(getFormattedGroupBy(undefined, new Set<string>())).toEqual({});
+  });
+
+  it('should return an object containing groups for one groupBy field', () => {
+    expect(getGroupByObject('host.name', new Set(['host-0', 'host-1']))).toEqual({
+      'host-0': { host: { name: 'host-0' } },
+      'host-1': { host: { name: 'host-1' } },
+    });
+  });
+
+  it('should return an object containing groups for multiple groupBy fields', () => {
     expect(
       getGroupByObject(
         ['host.name', 'container.id'],
