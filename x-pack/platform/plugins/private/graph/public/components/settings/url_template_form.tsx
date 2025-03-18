@@ -135,7 +135,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         props.initialTemplate.icon && (
           <IconRenderer
             icon={props.initialTemplate.icon}
-            css={[legacyIconStyles.base, legacyIconStyles.list]}
+            css={[legacyIconStyles.base(euiThemeContext), legacyIconStyles.list(euiThemeContext)]}
           />
         )
       }
@@ -293,8 +293,8 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                   }
                 }}
                 css={[
-                  legacyIconStyles.base,
-                  legacyIconStyles.pickable,
+                  legacyIconStyles.base(euiThemeContext),
+                  legacyIconStyles.pickable(euiThemeContext),
                   icon === currentTemplate.icon && legacyIconStyles.selected,
                 ]}
               />

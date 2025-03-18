@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiCallOut,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { SettingsWorkspaceProps } from './settings';
@@ -29,6 +30,7 @@ export function BlocklistForm({
   unblockAll,
 }: Pick<SettingsWorkspaceProps, 'blocklistedNodes' | 'unblockNode' | 'unblockAll'>) {
   const getListKey = useListKeys(blocklistedNodes || []);
+  const euiThemeContext = useEuiTheme();
   return (
     <>
       {blocklistedNodes && blocklistedNodes.length > 0 ? (
@@ -59,7 +61,10 @@ export function BlocklistForm({
                 icon={
                   <IconRenderer
                     icon={node.icon}
-                    css={[legacyIconStyles.base, legacyIconStyles.list]}
+                    css={[
+                      legacyIconStyles.base(euiThemeContext),
+                      legacyIconStyles.list(euiThemeContext),
+                    ]}
                   />
                 }
                 key={getListKey(node)}
