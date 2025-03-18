@@ -86,7 +86,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
     });
 
     if (isCustomRoleCreated) {
-      log.debug('Deleting custom role');
+      log.debug(`Deleting custom role with name ${samlAuth.customRoleName}`);
       await esClient.security.deleteRole({ name: samlAuth.customRoleName });
     }
   },
