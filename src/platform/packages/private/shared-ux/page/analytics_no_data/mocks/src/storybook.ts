@@ -38,18 +38,18 @@ export class StorybookMock extends AbstractStorybookMock<
   propArguments = {
     // requires hasESData to be toggled to true
     useCustomOnTryESQL: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
   };
   serviceArguments = {
     kibanaGuideDocLink: {
-      control: 'text',
+      control: { control: 'text' },
       defaultValue: 'Kibana guide',
     },
     customBranding: {
       hasCustomBranding$: {
-        control: 'boolean',
+        control: { control: 'boolean' },
         defaultValue: false,
       },
     },
@@ -70,10 +70,10 @@ export class StorybookMock extends AbstractStorybookMock<
     };
   }
 
-  getProps(params: Params) {
+  getProps(params?: Params) {
     return {
       onDataViewCreated: action('onDataViewCreated'),
-      onTryESQL: params.useCustomOnTryESQL ? action('onTryESQL-from-props') : undefined,
+      onTryESQL: params?.useCustomOnTryESQL ? action('onTryESQL-from-props') : undefined,
     };
   }
 }
