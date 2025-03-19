@@ -24,6 +24,7 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -99,6 +100,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.setup(core, plugins);
 
     const { home, usageCollection, management, cases } = plugins;
+    const { productFeatureKeys$ } = this.contract;
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
@@ -202,6 +204,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
+    productFeatureKeys$
+      .pipe(combineLatestWith(plugins.licensing.license$))
+      .subscribe(([productFeatureKeys, license]) => {
+        if (!productFeatureKeys || !license) {
+          return;
+        }
+
+        const isAssistantAvailable =
+          productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          license?.hasAtLeast('enterprise');
+        const assistantManagementApp = management?.sections.section.kibana.getApp(
+          'securityAiAssistantManagement'
+        );
+
+        if (!isAssistantAvailable) {
+          assistantManagementApp?.disable();
+        }
+      });
+
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
@@ -297,7 +318,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
-        cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
@@ -322,7 +342,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
-      cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
@@ -416,16 +435,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { capabilities } = core.application;
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
-    // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (
-      !hasAccessToSecuritySolution(capabilities) &&
-      !capabilities.securitySolutionCasesV2?.read_cases
-    ) {
-      this.appUpdater$.next(() => ({
-        status: AppStatus.inaccessible,
-        visibleIn: [],
-      }));
-      // no need to register the links updater when the plugin is inaccessible
+    // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
+    // This is necessary to hide security solution from the selectable solutions in the spaces UI
+    if (!hasAccessToSecuritySolution(capabilities)) {
+      this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      // no need to register the links updater when the plugin is inaccessible. return early
       return;
     }
 

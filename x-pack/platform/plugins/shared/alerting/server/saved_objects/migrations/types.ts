@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { LogMeta, SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { RawRule } from '../../types';
+import type {
+  LogMeta,
+  SavedObjectMigrationContext,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core/server';
+import type { RawRule } from '../../types';
 
 export interface AlertLogMeta extends LogMeta {
   migrations: { alertDocument: SavedObjectUnsanitizedDoc<RawRule> };

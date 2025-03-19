@@ -26,7 +26,6 @@ import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
-import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 
@@ -209,7 +208,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -230,7 +229,7 @@ export const buildFieldsDefinitionsWithMetadata = (
   const suggestions = [...fieldsSuggestions];
   if (options?.supportsControls) {
     const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
-    const variables = getVariablesByType?.(variableType) ?? [];
+    const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
 
     const controlSuggestions = fields.length
       ? getControlSuggestion(
@@ -411,32 +410,23 @@ export function getUnitDuration(unit: number = 1) {
  * definition property...
  */
 export function getCompatibleLiterals(
-  commandName: string,
   types: string[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.some(isNumericType)) {
-    if (commandName === 'limit') {
-      // suggest 10/100/1000 for limit
-      suggestions.push(
-        ...buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
-          advanceCursorAndOpenSuggestions: true,
-        })
-      );
-    }
-  }
   if (types.includes('time_literal')) {
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
     if (options?.supportsControls) {
-      const variables = getVariablesByType?.(ESQLVariableType.TIME_LITERAL) ?? [];
+      const variables =
+        getVariables?.()?.filter((variable) => variable.type === ESQLVariableType.TIME_LITERAL) ??
+        [];
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
@@ -520,13 +510,13 @@ export function getDateLiterals(options?: {
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   if (!supportsControls) {
     return [];
   }
   const variableType = type;
-  const variables = getVariablesByType?.(variableType) ?? [];
+  const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
   const controlSuggestion = getControlSuggestion(
     variableType,
     variables?.map((v) => `?${v.key}`)

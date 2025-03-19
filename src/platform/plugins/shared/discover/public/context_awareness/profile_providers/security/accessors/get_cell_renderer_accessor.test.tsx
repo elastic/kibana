@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public';
-import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { createCellRendererAccessor } from './get_cell_renderer_accessor';
 import { render } from '@testing-library/react';
 

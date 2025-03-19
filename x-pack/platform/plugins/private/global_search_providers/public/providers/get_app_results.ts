@@ -20,9 +20,6 @@ export interface AppLink {
   euiIconType?: string;
 }
 
-/** weighting factor for scoring keywords */
-export const keywordScoreWeighting = 0.8;
-
 export const getAppResults = (
   term: string,
   apps: PublicAppInfo[]
@@ -65,7 +62,7 @@ export const scoreApp = (term: string, appLink: AppLink): number => {
   ];
   const appScoreByKeywords = scoreAppByKeywords(term, keywords);
 
-  return Math.max(appScoreByTerms, appScoreByKeywords * keywordScoreWeighting);
+  return Math.max(appScoreByTerms, appScoreByKeywords);
 };
 
 const scoreAppByTerms = (term: string, title: string): number => {

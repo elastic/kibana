@@ -6,9 +6,14 @@
  */
 
 import { spaceTest as spaceBase } from '@kbn/scout';
-
+import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 import { extendPageObjects } from '../page_objects';
-import { ObltParallelTestFixtures, ObltParallelWorkerFixtures } from './types';
+
+import {
+  ObltApiServicesFixture,
+  ObltParallelTestFixtures,
+  ObltParallelWorkerFixtures,
+} from './types';
 
 /**
  * Should be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance.
@@ -27,4 +32,17 @@ export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallel
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
+  apiServices: [
+    async (
+      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices = apiServices as ObltApiServicesFixture;
+      // extend with Observability specific API services
+      // extendedApiServices.<service_name> = getServiceApiHelper(kbnClient);
+
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
 });

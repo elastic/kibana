@@ -12,17 +12,18 @@ export {
   expect,
   test,
   spaceTest,
+  lighthouseTest,
+  globalSetupHook,
   tags,
   createPlaywrightConfig,
   createLazyPageObject,
-  ingestTestDataHook,
-  ingestSynthtraceDataHook,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
   ScoutPage,
   PageObjects,
+  ApiServicesFixture,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
@@ -39,6 +40,6 @@ export type {
 } from './src/types';
 
 // re-export from Playwright
-export type { Locator } from 'playwright/test';
+export type { Locator, CDPSession } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';

@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { createBreakdownMetricsAggregator } from '../../lib/apm/aggregators/create_breakdown_metrics_aggregator';
 import { apm, ApmFields, timerange } from '@kbn/apm-synthtrace-client';
+import { ToolingLog } from '@kbn/tooling-log';
 
 describe('breakdown metrics', () => {
   let events: ApmFields[];
@@ -32,7 +33,11 @@ describe('breakdown metrics', () => {
 
     const start = new Date('2021-01-01T00:00:00.000Z');
 
-    const range = timerange(start, new Date(start.getTime() + INTERVALS * 30 * 1000));
+    const range = timerange(
+      start,
+      new Date(start.getTime() + INTERVALS * 30 * 1000),
+      {} as ToolingLog
+    );
 
     const listSpans = Array.from(
       range

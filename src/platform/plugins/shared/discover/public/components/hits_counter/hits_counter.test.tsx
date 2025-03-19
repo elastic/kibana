@@ -14,7 +14,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import {
+import type {
   DataDocuments$,
   DataTotalHits$,
 } from '../../application/main/state_management/discover_data_state_container';

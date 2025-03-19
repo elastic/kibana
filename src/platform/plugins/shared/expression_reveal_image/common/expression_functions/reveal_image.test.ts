@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticOutline, elasticLogo } from '@kbn/expression-utils';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { revealImageFunction, errors } from './reveal_image_function';
 import { Origin } from '../types';
@@ -15,14 +15,6 @@ import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('revealImageFunction', () => {
   const fn = functionWrapper(revealImageFunction);
-
-  let elasticLogo = '';
-  let elasticOutline = '';
-
-  beforeEach(async () => {
-    elasticLogo = (await getElasticLogo()).elasticLogo;
-    elasticOutline = (await getElasticOutline()).elasticOutline;
-  });
 
   it('returns a render as revealImage', async () => {
     const result = await fn(
