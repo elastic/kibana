@@ -20,7 +20,7 @@ jest.mock('./use_data_view', () => ({
   useDataView: jest.fn(),
 }));
 
-// FIXME: this does not work but we should fix it
+// FIXME:
 describe.skip('useFullDataView', () => {
   beforeEach(() => {
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
