@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { IntegrationConfigurationFormProps } from '@kbn/wci-common';
 import React from 'react';
+import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 
 export const SalesforceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
 }) => {
-  const { control } = form;
-
   return (
     <EuiDescribedFormGroup
       ratio="third"

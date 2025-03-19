@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SupportCase } from './types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { SupportCase } from './types';
 
 interface CaseRetrievalParams {
   id?: string[];

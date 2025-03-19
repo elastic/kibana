@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IntegrationConfigurationFormProps } from '@kbn/wci-common';
 import React from 'react';
+import { Controller } from 'react-hook-form';
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiTextArea,
 } from '@elastic/eui';
-import { Controller } from 'react-hook-form';
+import type { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 
 export const ExternalServerConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,

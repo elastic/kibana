@@ -13,6 +13,7 @@ import type {
   WCIIndexSourcePluginStartDependencies,
 } from './types';
 import { indexSourceIntegrationComponents } from './integration/index_source_integration';
+
 export class WCIIndexSourcePlugin
   implements
     Plugin<
@@ -28,8 +29,6 @@ export class WCIIndexSourcePlugin
     core: CoreSetup<WCIIndexSourcePluginStartDependencies, WCIIndexSourcePluginStart>,
     { workchatApp }: WCIIndexSourcePluginSetupDependencies
   ): WCIIndexSourcePluginSetup {
-    // @ts-ignore
-    // TODO: fix this
     workchatApp.integrations.register(indexSourceIntegrationComponents());
 
     return {};

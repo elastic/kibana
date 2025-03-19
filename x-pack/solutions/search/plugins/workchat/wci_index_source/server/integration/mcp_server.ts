@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
-
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import type { WCIIndexSourceConfiguration } from '../types';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { WCIIndexSourceConfiguration } from '../../common/types';
 
 type SearchResult = any; // TODO: fix this
 

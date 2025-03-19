@@ -2104,6 +2104,8 @@
       "@kbn/visualizations-plugin/*": ["src/platform/plugins/shared/visualizations/*"],
       "@kbn/watcher-plugin": ["x-pack/platform/plugins/private/watcher"],
       "@kbn/watcher-plugin/*": ["x-pack/platform/plugins/private/watcher/*"],
+      "@kbn/wci-browser": ["x-pack/solutions/search/packages/workchat/wci-browser"],
+      "@kbn/wci-browser/*": ["x-pack/solutions/search/packages/workchat/wci-browser/*"],
       "@kbn/wci-common": ["x-pack/solutions/search/packages/workchat/wci-common"],
       "@kbn/wci-common/*": ["x-pack/solutions/search/packages/workchat/wci-common/*"],
       "@kbn/wci-external-server": ["x-pack/solutions/search/plugins/workchat/wci_external_server"],

@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { IntegrationType } from './src/constants';
-export type { IntegrationConfiguration } from './src/types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/packages/workchat/wci-browser'],
+};

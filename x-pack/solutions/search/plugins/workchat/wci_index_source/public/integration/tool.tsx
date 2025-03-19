@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { IntegrationToolComponentProps } from '@kbn/wci-common';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IntegrationToolComponentProps } from '@kbn/wci-browser';
 
 const bold = css`
   font-weight: bold;

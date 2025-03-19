@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { IntegrationType } from './src/constants';
-export type { IntegrationConfiguration } from './src/types';
+export type {
+  IntegrationComponentDescriptor,
+  IntegrationToolComponentProps,
+  IntegrationConfigurationFormProps,
+} from './src/integration_ui_descriptor';

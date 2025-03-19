@@ -8,13 +8,13 @@
 import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIIndexSoucePluginSetup {}
+export interface WCIIndexSourcePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIIndexSoucePluginStart {}
+export interface WCIIndexSourcePluginStart {}
 
-export interface WCIIndexSoucePluginSetupDependencies {
+export interface WCIIndexSourcePluginSetupDependencies {
   workchatApp: WorkChatAppPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIIndexSoucePluginStartDependencies {}
+export interface WCIIndexSourcePluginStartDependencies {}

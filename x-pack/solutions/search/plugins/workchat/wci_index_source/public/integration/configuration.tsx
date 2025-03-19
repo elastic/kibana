@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { IntegrationConfigurationFormProps } from '@kbn/wci-common';
 import React from 'react';
-import { EuiTextArea } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
-import { EuiDescribedFormGroup } from '@elastic/eui';
-import { Controller } from 'react-hook-form';
-import { useFieldArray } from 'react-hook-form';
-import { EuiFieldText } from '@elastic/eui';
-import { EuiSelect } from '@elastic/eui';
-import { EuiSwitch } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
+import { useFieldArray, Controller } from 'react-hook-form';
+import {
+  EuiTextArea,
+  EuiFormRow,
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiSelect,
+  EuiSwitch,
+  EuiButton,
+  EuiButtonIcon,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCallOut,
+} from '@elastic/eui';
+import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 
 export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,

@@ -6,12 +6,13 @@
  */
 
 import { IntegrationType } from '@kbn/wci-common';
+import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 
 export class IntegrationRegistry {
   private allowRegistration = true;
-  private integrationTypes = new Map<IntegrationType, any>();
+  private integrationTypes = new Map<IntegrationType, IntegrationComponentDescriptor>();
 
-  register(definition: any) {
+  register(definition: IntegrationComponentDescriptor) {
     if (!this.allowRegistration) {
       throw new Error(`Tried to register integration but allowRegistration is false`);
     }

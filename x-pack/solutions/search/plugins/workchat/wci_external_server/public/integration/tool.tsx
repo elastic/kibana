@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { IntegrationToolComponentProps } from '@kbn/wci-common';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IntegrationToolComponentProps } from '@kbn/wci-browser';
 
 const bold = css`
   font-weight: bold;

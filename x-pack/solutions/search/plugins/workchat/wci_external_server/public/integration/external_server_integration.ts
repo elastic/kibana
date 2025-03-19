@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IntegrationComponentDescriptor, IntegrationType } from '@kbn/wci-common';
+import { IntegrationType } from '@kbn/wci-common';
+import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 import { ExternalServerTool } from './tool';
 import { ExternalServerConfigurationForm } from './configuration';
 

@@ -7,7 +7,7 @@
 
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
-import type { WorkChatIntegration } from '@kbn/wci-common';
+import type { WorkChatIntegration } from '@kbn/wci-server';
 
 export type IntegrationWithMeta = WorkChatIntegration & {
   id: string;
