@@ -6,8 +6,8 @@
  */
 
 import { mockDefendInsights } from '../../../../mock/mock_defend_insights';
-import { getContinuePrompt } from '../../../helpers/get_continue_prompt';
 import { getCombinedRefinePrompt } from '.';
+import { DEFEND_INSIGHTS } from '../../../../../../../prompt/prompts';
 
 describe('getCombinedRefinePrompt', () => {
   const mockPrompt = 'Initial prompt text';
@@ -19,6 +19,7 @@ describe('getCombinedRefinePrompt', () => {
       combinedRefinements: '',
       refinePrompt: mockRefinePrompt,
       unrefinedResults: mockDefendInsights,
+      continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
     });
 
     expect(result).toBe(`${mockPrompt}
@@ -39,6 +40,7 @@ ${JSON.stringify(mockDefendInsights, null, 2)}
       combinedRefinements: mockRefinements,
       refinePrompt: mockRefinePrompt,
       unrefinedResults: mockDefendInsights,
+      continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
     });
 
     const baseQuery = `${mockPrompt}
@@ -53,7 +55,7 @@ ${JSON.stringify(mockDefendInsights, null, 2)}
 
     expect(result).toBe(`${baseQuery}
 
-${getContinuePrompt()}
+${DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE}
 
 """
 ${mockRefinements}
@@ -68,6 +70,7 @@ ${mockRefinements}
       combinedRefinements: '',
       refinePrompt: mockRefinePrompt,
       unrefinedResults: null,
+      continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
     });
 
     expect(result).toBe(`${mockPrompt}

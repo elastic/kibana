@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash/fp';
 
 import { getEventsContextPrompt } from '../../generate/helpers/get_events_context_prompt';
-import { getContinuePrompt } from '../get_continue_prompt';
 
 /**
  * Returns the the initial query, or the initial query combined with a
@@ -16,24 +15,26 @@ import { getContinuePrompt } from '../get_continue_prompt';
  */
 export const getCombinedDefendInsightsPrompt = ({
   anonymizedEvents,
-  prompt,
+  defendInsightsPrompt,
   combinedMaybePartialResults,
+  continuePrompt,
 }: {
   anonymizedEvents: string[];
-  prompt: string;
+  defendInsightsPrompt: string;
   /** combined results that may contain incomplete JSON */
   combinedMaybePartialResults: string;
+  continuePrompt: string;
 }): string => {
   const eventsContextPrompt = getEventsContextPrompt({
     anonymizedEvents,
-    prompt,
+    defendInsightsPrompt,
   });
 
   return isEmpty(combinedMaybePartialResults)
     ? eventsContextPrompt // no partial results yet
     : `${eventsContextPrompt}
 
-${getContinuePrompt()}
+${continuePrompt}
 
 """
 ${combinedMaybePartialResults}
