@@ -7,12 +7,18 @@
 
 import type { ListConnectorsResponse } from '../../common/http_api/connectors';
 import type { RouteDependencies } from './types';
+import { apiCapabilities } from '../../common/features';
 import { getConnectorList } from '../utils';
 
 export const registerConnectorRoutes = ({ getServices, router, core }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/workchat/connectors',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: false,
     },
     async (ctx, request, res) => {

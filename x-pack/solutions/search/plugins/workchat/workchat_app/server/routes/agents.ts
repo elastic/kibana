@@ -12,12 +12,19 @@ import type {
   CreateAgentResponse,
   CreateAgentPayload,
 } from '../../common/http_api/agents';
+import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
 
 export const registerAgentRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  // API to get a single agent
   router.get(
     {
       path: '/internal/workchat/agents/{agentId}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: {
         params: schema.object({
           agentId: schema.string(),
@@ -38,9 +45,15 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
     }
   );
 
+  // API to create an agent
   router.post(
     {
       path: '/internal/workchat/agents',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -75,9 +88,15 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
     }
   );
 
+  // API to update an agent
   router.put(
     {
       path: '/internal/workchat/agents/{agentId}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
+        },
+      },
       validate: {
         params: schema.object({
           agentId: schema.string(),
@@ -116,9 +135,15 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
     }
   );
 
+  // API to list all accessible agents
   router.get(
     {
       path: '/internal/workchat/agents',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: false,
     },
     async (ctx, request, res) => {

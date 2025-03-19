@@ -14,6 +14,7 @@ import type {
   UpdateIntegrationResponse,
   DeleteIntegrationResponse,
 } from '../../common/http_api/integrations';
+import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
 
 export const registerIntegrationsRoutes = ({ getServices, router, logger }: RouteDependencies) => {
@@ -21,6 +22,11 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   router.get(
     {
       path: '/internal/workchat/integrations/{integrationId}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: {
         params: schema.object({
           integrationId: schema.string(),
@@ -45,6 +51,11 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   router.get(
     {
       path: '/internal/workchat/integrations',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: {},
     },
     async (ctx, request, res) => {
@@ -65,6 +76,11 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   router.post(
     {
       path: '/internal/workchat/integrations',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
+        },
+      },
       validate: {
         body: schema.object({
           type: schema.oneOf(
@@ -105,6 +121,11 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   router.put(
     {
       path: '/internal/workchat/integrations/{integrationId}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
+        },
+      },
       validate: {
         params: schema.object({
           integrationId: schema.string(),
@@ -139,6 +160,11 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   router.delete(
     {
       path: '/internal/workchat/integrations/{integrationId}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: {
         params: schema.object({
           integrationId: schema.string(),

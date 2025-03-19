@@ -12,12 +12,19 @@ import type {
   ListConversationResponse,
   GetConversationResponse,
 } from '../../common/http_api/conversation';
+import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
 
 export const registerConversationRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  // get conversation by id
   router.get(
     {
       path: '/internal/workchat/conversations/{conversationId}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: {
         params: schema.object({
           conversationId: schema.string(),
@@ -38,9 +45,15 @@ export const registerConversationRoutes = ({ getServices, router, logger }: Rout
     }
   );
 
+  // list all conversations for a given agent
   router.post(
     {
       path: '/internal/workchat/conversations',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: {
         body: schema.object({
           agentId: schema.maybe(schema.string()),

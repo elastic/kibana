@@ -8,6 +8,7 @@
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkchatIntegrationDefinition } from '@kbn/wci-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export interface WorkChatAppPluginSetup {
   integrations: {
@@ -17,8 +18,9 @@ export interface WorkChatAppPluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkChatAppPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkChatAppPluginSetupDependencies {}
+export interface WorkChatAppPluginSetupDependencies {
+  features: FeaturesPluginSetup;
+}
 
 export interface WorkChatAppPluginStartDependencies {
   inference: InferenceServerStart;

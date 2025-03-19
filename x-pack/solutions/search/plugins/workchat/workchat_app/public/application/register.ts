@@ -6,6 +6,7 @@
  */
 
 import { type CoreSetup, AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { WORKCHAT_APP_ID } from '../../common/features';
 import type { WorkChatAppPluginStartDependencies } from '../types';
 import { WorkChatServices } from '../services';
 
@@ -17,21 +18,14 @@ export const registerApp = ({
   getServices: () => WorkChatServices;
 }) => {
   core.application.register({
-    id: 'workchat',
-    appRoute: '/app/workchat',
+    id: WORKCHAT_APP_ID,
+    appRoute: `/app/${WORKCHAT_APP_ID}`,
     category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     euiIconType: 'logoElasticsearch',
     status: AppStatus.accessible,
     title: 'WorkChat',
     updater$: undefined,
-    deepLinks: [
-      {
-        id: 'agents',
-        title: 'WorkChat - agents',
-        visibleIn: ['sideNav', 'globalSearch'],
-        path: '/agents',
-      },
-    ],
+    deepLinks: [],
     visibleIn: ['sideNav', 'globalSearch'],
     async mount({ element, history }) {
       const [coreStart, startPluginDeps] = await core.getStartServices();

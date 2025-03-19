@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
 
 export const registerChatRoutes = ({ getServices, router, logger }: RouteDependencies) => {
@@ -20,6 +21,11 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
   router.post(
     {
       path: '/internal/workchat/chat',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.useWorkchat],
+        },
+      },
       validate: {
         body: schema.object({
           conversationId: schema.maybe(schema.string()),

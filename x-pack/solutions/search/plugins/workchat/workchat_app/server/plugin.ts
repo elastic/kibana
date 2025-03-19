@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import { registerTypes } from './saved_objects';
+import { registerFeatures } from './features';
 import type { InternalServices } from './services/types';
 import {
   IntegrationsService,
@@ -49,7 +50,7 @@ export class WorkChatAppPlugin
 
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies>,
-    pluginsDependencies: WorkChatAppPluginSetupDependencies
+    setupDeps: WorkChatAppPluginSetupDependencies
   ): WorkChatAppPluginSetup {
     const router = core.http.createRouter();
     registerRoutes({
@@ -65,6 +66,8 @@ export class WorkChatAppPlugin
     });
 
     registerTypes({ savedObjects: core.savedObjects });
+
+    registerFeatures({ features: setupDeps.features });
 
     return {
       integrations: {
