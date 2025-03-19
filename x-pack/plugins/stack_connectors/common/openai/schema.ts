@@ -23,7 +23,7 @@ export const ConfigSchema = schema.oneOf([
     apiUrl: schema.string(),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
-  // New PKI schema
+  // New PKI schema with verificationMode
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.PkiOpenAi)]),
     apiUrl: schema.string(),
@@ -42,6 +42,11 @@ export const ConfigSchema = schema.oneOf([
         }
       }
     }),
+    verificationMode: schema.oneOf([
+      schema.literal('full'),
+      schema.literal('certificate'),
+      schema.literal('none'),
+    ], { defaultValue: 'full' }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
 ]);

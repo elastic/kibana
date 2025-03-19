@@ -83,7 +83,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         const httpsAgent = new https.Agent({
           cert: fs.readFileSync(this.config.certPath),
           key: fs.readFileSync(this.config.keyPath),
-          rejectUnauthorized: false, // Allow self-signed certificates
+          rejectUnauthorized: this.config.verificationMode === 'none', // 'none' skips all validation
+          checkServerIdentity:
+            this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
+              ? () => undefined // Skip hostname check for 'certificate' and 'none'
+              : undefined, // Use default hostname verification for 'full'
         });
 
         this.openAI = new OpenAI({
@@ -191,7 +195,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(
-            `Certificate error: ${error.message}. Please check if your PKI certificates are valid.`
+            `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`
           );
         }
         throw error;

@@ -10,7 +10,7 @@
 import { AxiosResponse, ResponseType } from 'axios';
 import { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
-import { Config } from '../../../../common/openai/types'; // Import Config type
+import { Config } from '../../../../common/openai/types';
 import {
   sanitizeRequest as openAiSanitizeRequest,
   getRequestWithStreamOption as openAiGetRequestWithStreamOption,
@@ -104,7 +104,11 @@ export const getAxiosOptions = (
       const httpsAgent = new https.Agent({
         cert: fs.readFileSync(config.certPath),
         key: fs.readFileSync(config.keyPath),
-        rejectUnauthorized: false, // Allow self-signed certificates
+        rejectUnauthorized: config.verificationMode === 'none', // 'none' skips all validation
+        checkServerIdentity:
+          config.verificationMode === 'certificate' || config.verificationMode === 'none'
+            ? () => undefined // Skip hostname check for 'certificate' and 'none'
+            : undefined, // Use default hostname verification for 'full'
       });
       return {
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -117,8 +121,6 @@ export const getAxiosOptions = (
 };
 
 export const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) => {
-  // Streaming responses are compressed by the Hapi router by default
-  // Set content-type to something that's not recognized by Hapi to circumvent this
   response.data.headers = {
     'Content-Type': 'dont-compress-this',
   };

@@ -189,6 +189,23 @@ export const pkiOpenAiConfig: ConfigFieldSchema[] = [
     ),
   },
   {
+    id: 'verificationMode',
+    label: i18n.VERIFICATION_MODE_LABEL,
+    type: 'select',
+    defaultValue: 'full',
+    options: [
+      { value: 'full', label: i18n.VERIFICATION_MODE_FULL },
+      { value: 'certificate', label: i18n.VERIFICATION_MODE_CERTIFICATE },
+      { value: 'none', label: i18n.VERIFICATION_MODE_NONE },
+    ],
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate Only' verifies the certificate but not the hostname, and 'None' skips all verification."
+        id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
+      />
+    ),
+  },
+  {
     id: 'defaultModel',
     label: i18n.DEFAULT_MODEL_LABEL,
     helpText: (
@@ -201,7 +218,6 @@ export const pkiOpenAiConfig: ConfigFieldSchema[] = [
   },
 ];
 
-// Add PKI to provider options
 export const providerOptions = [
   {
     value: OpenAiProviderType.OpenAi,
