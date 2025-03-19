@@ -13,6 +13,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
 
   describe('cases list', () => {
+    this.tags('skipFIPS');
+
     before(async () => {
       await cases.api.deleteAllCases();
       await cases.navigation.navigateToApp();
