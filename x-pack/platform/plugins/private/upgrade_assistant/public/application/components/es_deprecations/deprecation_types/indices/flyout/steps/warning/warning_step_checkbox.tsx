@@ -144,14 +144,17 @@ export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
         />
       }
       description={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningDetail"
-          defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
-          values={{
-            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-            reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
-          }}
-        />
+        <>
+          <EuiSpacer />
+          <FormattedMessage
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningDetail"
+            defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
+            values={{
+              indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+              reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+            }}
+          />
+        </>
       }
     />
   );
