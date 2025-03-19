@@ -15,6 +15,7 @@ import type {
 import { registerApp } from './application';
 import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
 import { IntegrationService } from './services/integration/integration_service';
+import { IntegrationRegistry } from './services/integration/integration_registry';
 
 export class WorkChatAppPlugin
   implements
@@ -26,6 +27,7 @@ export class WorkChatAppPlugin
     >
 {
   private services?: WorkChatServices;
+  private readonly integrationRegistry = new IntegrationRegistry();
 
   constructor(context: PluginInitializerContext) {}
 
@@ -42,7 +44,13 @@ export class WorkChatAppPlugin
       },
     });
 
-    return {};
+    return {
+      integrations: {
+        register: (integrationComponents: any) => {
+          this.integrationRegistry.register(integrationComponents);
+        },
+      },
+    };
   }
 
   public start(
@@ -67,6 +75,7 @@ export class WorkChatAppPlugin
       agentService,
       conversationService,
       integrationService,
+      integrationRegistry: this.integrationRegistry,
     };
 
     return {};

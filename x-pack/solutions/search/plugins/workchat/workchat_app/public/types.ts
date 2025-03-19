@@ -7,8 +7,12 @@
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkChatAppPluginSetup {}
+// todo: add types for integrations
+export interface WorkChatAppPluginSetup {
+  integrations: {
+    register: (integration: any) => void;
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkChatAppPluginStart {}

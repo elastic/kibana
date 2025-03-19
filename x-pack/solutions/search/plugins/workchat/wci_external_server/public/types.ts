@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/public';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCIExternalServerPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCIExternalServerPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIExternalServerPluginSetupDependencies {}
+export interface WCIExternalServerPluginSetupDependencies {
+  workchatApp: WorkChatAppPluginSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCIExternalServerPluginStartDependencies {}

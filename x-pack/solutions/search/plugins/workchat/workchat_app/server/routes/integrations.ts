@@ -28,16 +28,26 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       },
     },
     async (ctx, request, res) => {
-      const { integrationsService } = getServices();
-      const client = await integrationsService.getScopedClient({ request });
+      try {
+        const { integrationsService } = getServices();
+        const client = await integrationsService.getScopedClient({ request });
 
-      const { integrationId } = request.params;
+        const { integrationId } = request.params;
 
-      const integration = await client.get({ integrationId });
+        const integration = await client.get({ integrationId });
 
-      return res.ok<GetIntegrationResponse>({
-        body: integration,
-      });
+        return res.ok<GetIntegrationResponse>({
+          body: integration,
+        });
+      } catch (e) {
+        logger.error(e);
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: 'Failed to get integration',
+          },
+        });
+      }
     }
   );
 
@@ -48,16 +58,26 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       validate: {},
     },
     async (ctx, request, res) => {
-      const { integrationsService } = getServices();
-      const client = await integrationsService.getScopedClient({ request });
+      try {
+        const { integrationsService } = getServices();
+        const client = await integrationsService.getScopedClient({ request });
 
-      const integrations = await client.list();
+        const integrations = await client.list();
 
-      return res.ok<ListIntegrationsResponse>({
-        body: {
-          integrations,
-        },
-      });
+        return res.ok<ListIntegrationsResponse>({
+          body: {
+            integrations,
+          },
+        });
+      } catch (e) {
+        logger.error(e);
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: 'Failed to list integrations',
+          },
+        });
+      }
     }
   );
 
@@ -96,7 +116,12 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
         });
       } catch (e) {
         logger.error(e);
-        throw e;
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: 'Failed to create integration',
+          },
+        });
       }
     }
   );
@@ -117,21 +142,31 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       },
     },
     async (ctx, request, res) => {
-      const { integrationsService } = getServices();
-      const client = await integrationsService.getScopedClient({ request });
+      try {
+        const { integrationsService } = getServices();
+        const client = await integrationsService.getScopedClient({ request });
 
-      const { integrationId } = request.params;
-      const { name, description, configuration } = request.body;
+        const { integrationId } = request.params;
+        const { name, description, configuration } = request.body;
 
-      const integration = await client.update(integrationId, {
-        name,
-        description,
-        configuration,
-      });
+        const integration = await client.update(integrationId, {
+          name,
+          description,
+          configuration,
+        });
 
-      return res.ok<UpdateIntegrationResponse>({
-        body: integration,
-      });
+        return res.ok<UpdateIntegrationResponse>({
+          body: integration,
+        });
+      } catch (e) {
+        logger.error(e);
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: 'Failed to update integration',
+          },
+        });
+      }
     }
   );
 
@@ -146,18 +181,28 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       },
     },
     async (ctx, request, res) => {
-      const { integrationsService } = getServices();
-      const client = await integrationsService.getScopedClient({ request });
+      try {
+        const { integrationsService } = getServices();
+        const client = await integrationsService.getScopedClient({ request });
 
-      const { integrationId } = request.params;
+        const { integrationId } = request.params;
 
-      await client.delete(integrationId);
+        await client.delete(integrationId);
 
-      return res.ok<DeleteIntegrationResponse>({
-        body: {
-          success: true,
-        },
-      });
+        return res.ok<DeleteIntegrationResponse>({
+          body: {
+            success: true,
+          },
+        });
+      } catch (e) {
+        logger.error(e);
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: 'Failed to delete integration',
+          },
+        });
+      }
     }
   );
 };

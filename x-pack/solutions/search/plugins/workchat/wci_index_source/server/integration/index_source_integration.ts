@@ -13,7 +13,7 @@ import {
 } from '@kbn/wci-common';
 import { getClientForInternalServer } from '@kbn/wci-server';
 import { createMcpServer } from './mcp_server';
-import { WCIIndexSourceConfiguration } from '../types';
+import { WCIIndexSourceConfiguration } from '../../common/types';
 export const getIndexSourceIntegrationDefinition = ({
   core,
   logger,

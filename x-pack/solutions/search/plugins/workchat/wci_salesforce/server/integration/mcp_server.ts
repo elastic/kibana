@@ -156,7 +156,7 @@ async function getFieldValues(
   index: string,
   enumFields: Field[]
 ): Promise<FieldWithValues[]> {
-  let fieldValues: FieldWithValues[] = enumFields.map((field) => ({
+  const fieldValues: FieldWithValues[] = enumFields.map((field) => ({
     ...field,
     values: [],
   }));

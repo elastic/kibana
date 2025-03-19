@@ -24,7 +24,6 @@ const emptyState = (): IntegrationEditState => {
     configuration: {},
   };
 };
-
 export const useIntegrationEdit = ({
   integrationId,
   onSaveSuccess,
@@ -35,15 +34,14 @@ export const useIntegrationEdit = ({
   onSaveError: (err: Error) => void;
 }) => {
   const { integrationService } = useWorkChatServices();
-
-  const [editState, setEditState] = useState<IntegrationEditState>(emptyState());
+  const [state, setState] = useState<IntegrationEditState>(emptyState());
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchIntegration = async () => {
       if (integrationId) {
         const integration = await integrationService.get(integrationId);
-        setEditState({
+        setState({
           name: integration.name,
           description: integration.description,
           type: integration.type,
@@ -54,44 +52,39 @@ export const useIntegrationEdit = ({
     fetchIntegration();
   }, [integrationId, integrationService]);
 
-  const setFieldValue = <T extends keyof IntegrationEditState>(
-    key: T,
-    value: IntegrationEditState[T]
-  ) => {
-    setEditState((previous) => ({ ...previous, [key]: value }));
-  };
+  const submit = useCallback(
+    (updatedIntegration: IntegrationEditState) => {
+      setSubmitting(true);
 
-  const submit = useCallback(() => {
-    setSubmitting(true);
-
-    (integrationId
-      ? integrationService.update(integrationId, {
-          name: editState.name,
-          description: editState.description,
-          configuration: editState.configuration,
-        })
-      : integrationService.create({
-          type: editState.type,
-          name: editState.name,
-          description: editState.description,
-          configuration: editState.configuration,
-        })
-    ).then(
-      (response) => {
-        setSubmitting(false);
-        onSaveSuccess(response);
-      },
-      (err) => {
-        setSubmitting(false);
-        onSaveError(err);
-      }
-    );
-  }, [integrationId, editState, integrationService, onSaveSuccess, onSaveError]);
+      (integrationId
+        ? integrationService.update(integrationId, {
+            name: updatedIntegration.name,
+            description: updatedIntegration.description,
+            configuration: updatedIntegration.configuration,
+          })
+        : integrationService.create({
+            type: updatedIntegration.type,
+            name: updatedIntegration.name,
+            description: updatedIntegration.description,
+            configuration: updatedIntegration.configuration,
+          })
+      ).then(
+        (response) => {
+          setSubmitting(false);
+          onSaveSuccess(response);
+        },
+        (err) => {
+          setSubmitting(false);
+          onSaveError(err);
+        }
+      );
+    },
+    [integrationId, state, integrationService, onSaveSuccess, onSaveError]
+  );
 
   return {
-    editState,
+    state,
     isSubmitting,
-    setFieldValue,
     submit,
   };
 };
