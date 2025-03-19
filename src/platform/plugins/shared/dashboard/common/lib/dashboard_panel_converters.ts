@@ -26,6 +26,7 @@ export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): Dashboa
     panelsMap![panel.panelIndex ?? String(idx)] = {
       type: panel.type,
       gridData: panel.gridData,
+      ...(panel.sectionIndex !== undefined && { sectionIndex: panel.sectionIndex }),
       panelRefName: panel.panelRefName,
       explicitInput: {
         id: panelIndex,
@@ -61,6 +62,7 @@ export const convertPanelMapToPanelsArray = (
       ...(title !== undefined && { title }),
       ...(savedObjectId !== undefined && { id: savedObjectId }),
       ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
+      ...(panelState.sectionIndex !== undefined && { sectionIndex: panelState.sectionIndex }),
     };
   });
 };

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
+import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { PresentationContainer } from '../presentation_container';
 

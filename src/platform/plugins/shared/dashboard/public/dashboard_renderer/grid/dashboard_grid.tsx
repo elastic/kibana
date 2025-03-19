@@ -87,7 +87,6 @@ export const DashboardGrid = ({
         panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
       }
     });
-
     return newLayout;
   }, [panels, sections]);
 
