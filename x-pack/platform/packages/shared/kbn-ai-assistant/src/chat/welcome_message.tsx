@@ -7,26 +7,22 @@
 
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/css';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isSupportedConnectorType } from '@kbn/inference-common';
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+
+import { AddConnector, ReadyToHelp, ReadyToHelpProps } from '@kbn/ai-assistant-cta';
+
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
-import { WelcomeMessageConnectors } from './welcome_message_connectors';
-import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
+import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 
 const fullHeightClassName = css`
   height: 100%;
-`;
-
-const centerMaxWidthClassName = css`
-  max-width: 600px;
-  text-align: center;
 `;
 
 export function WelcomeMessage({
@@ -38,9 +34,10 @@ export function WelcomeMessage({
   knowledgeBase: UseKnowledgeBaseResult;
   onSelectPrompt: (prompt: string) => void;
 }) {
-  const breakpoint = useCurrentEuiBreakpoint();
-
-  const { application, triggersActionsUi } = useKibana().services;
+  const { application, triggersActionsUi, observabilityAIAssistant } = useKibana().services;
+  const {
+    service: { getScopes },
+  } = observabilityAIAssistant;
 
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
 
@@ -60,10 +57,6 @@ export function WelcomeMessage({
     if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
     }
-
-    if (!knowledgeBase.status.value || knowledgeBase.status.value?.ready === false) {
-      knowledgeBase.install();
-    }
   };
 
   const ConnectorFlyout = useMemo(
@@ -71,32 +64,67 @@ export function WelcomeMessage({
     [triggersActionsUi]
   );
 
+  const CallToAction = () => {
+    if (!connectors.connectors?.length) {
+      return <AddConnector onAddConnector={handleConnectorClick} />;
+    }
+
+    if (
+      !knowledgeBase.status.value?.ready ||
+      knowledgeBase.isInstalling ||
+      knowledgeBase.installError ||
+      knowledgeBase.status.value?.errorMessage
+    ) {
+      return <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />;
+    }
+
+    const scopes = getScopes();
+
+    let type: ReadyToHelpProps['type'] = 'stack';
+
+    if (scopes.length === 1) {
+      if (scopes[0] === 'observability') {
+        type = 'oblt';
+      }
+      if (scopes[0] === 'search') {
+        type = 'search';
+      }
+    }
+    return <ReadyToHelp type={type} />;
+  };
+
+  const Footer = () => {
+    if (!connectors.connectors?.length || !knowledgeBase.status.value?.ready) {
+      return null;
+    }
+
+    return (
+      <EuiFlexItem grow={false}>
+        <StarterPrompts onSelectPrompt={onSelectPrompt} />
+        <EuiSpacer size="l" />
+        <Disclaimer />
+      </EuiFlexItem>
+    );
+  };
+
   return (
     <>
       <EuiFlexGroup
         alignItems="center"
         direction="column"
         gutterSize="none"
+        justifyContent="center"
         className={fullHeightClassName}
       >
-        <EuiFlexItem grow={false}>
-          <AssistantBeacon backgroundColor="emptyShade" size="xl" />
+        <EuiFlexItem
+          grow={true}
+          className={css`
+            justify-content: center;
+          `}
+        >
+          <CallToAction />
         </EuiFlexItem>
-        <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
-          <WelcomeMessageConnectors
-            connectors={connectors}
-            onSetupConnectorClick={handleConnectorClick}
-          />
-          {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
-            <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
-          ) : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <StarterPrompts onSelectPrompt={onSelectPrompt} />
-          <EuiSpacer size="l" />
-          <Disclaimer />
-        </EuiFlexItem>
+        <Footer />
       </EuiFlexGroup>
 
       {connectorFlyoutOpen ? (
