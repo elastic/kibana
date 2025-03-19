@@ -5,43 +5,24 @@
  * 2.0.
  */
 
-import { ApiServicesFixture, spaceTest as spaceBase } from '@kbn/scout';
-import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
-import { SamlAuth, ScoutLogger, ScoutTestConfig } from '@kbn/scout/src/playwright/fixtures/worker';
-import { extendPageObjects } from './test/page_objects';
+import { spaceTest as baseTest, mergeTests, ApiServicesFixture } from '@kbn/scout';
 import {
+  SecurityApiServicesFixture,
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,
-  SecurityBrowserAuthFixture,
-  SecurityApiServicesFixture,
 } from './types';
-import { extendBrowserAuth } from './test/authentication';
-import { getDetectionRuleApiService } from './worker/apis';
+import { getDetectionRuleApiService } from './worker';
+import { extendPageObjects, securityBrowserAuthFixture } from './test';
+
+const securityParallelFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
 
 /**
  * Should be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance.
  */
-export const spaceTest = spaceBase.extend<
+export const spaceTest = securityParallelFixtures.extend<
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures
 >({
-  browserAuth: async (
-    {
-      browserAuth,
-      config,
-      samlAuth,
-      log,
-    }: {
-      browserAuth: BrowserAuthFixture;
-      config: ScoutTestConfig;
-      samlAuth: SamlAuth;
-      log: ScoutLogger;
-    },
-    use: (auth: SecurityBrowserAuthFixture) => Promise<void>
-  ) => {
-    const extendedAuth = await extendBrowserAuth(browserAuth, config, samlAuth, log);
-    await use(extendedAuth);
-  },
   pageObjects: async (
     {
       pageObjects,

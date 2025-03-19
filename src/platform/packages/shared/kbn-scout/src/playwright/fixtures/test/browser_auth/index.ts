@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchRoleDescriptor, KibanaRole, PROJECT_DEFAULT_ROLES } from '../../../../common';
+import { KibanaRole, PROJECT_DEFAULT_ROLES } from '../../../../common';
 import { coreWorkerFixtures } from '../../worker';
 
 export type LoginFunction = (role: string) => Promise<void>;
@@ -68,7 +68,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       await setSessionCookie(cookie);
     };
 
-    const loginWithCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
+    const loginWithCustomRole = async (role: KibanaRole) => {
       await samlAuth.setCustomRole(role);
       isCustomRoleCreated = true;
       return loginAs(samlAuth.customRoleName);

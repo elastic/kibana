@@ -12,25 +12,17 @@ import {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
-import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
 import { SecurityPageObjects } from './test/page_objects';
 import { DetectionRuleApiService } from './worker/apis';
-
-export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
-  loginAsPlatformEngineer: () => Promise<void>;
-}
-export interface SecurityTestFixtures extends ScoutTestFixtures {
-  browserAuth: SecurityBrowserAuthFixture;
-  pageObjects: SecurityPageObjects;
-}
-
-/*
-export interface SecurityWorkerFixtures extends ScoutWorkerFixtures {
-  detectionRuleApi: DetectionRuleFixture;
-}*/
+import { SecurityBrowserAuthFixture } from './test';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;
+}
+
+export interface SecurityTestFixtures extends ScoutTestFixtures {
+  browserAuth: SecurityBrowserAuthFixture;
+  pageObjects: SecurityPageObjects;
 }
 
 export interface SecurityWorkerFixtures extends ScoutWorkerFixtures {
@@ -41,11 +33,6 @@ export interface SecurityParallelTestFixtures extends ScoutParallelTestFixtures 
   browserAuth: SecurityBrowserAuthFixture;
   pageObjects: SecurityPageObjects;
 }
-
-/*
-export interface SecurityParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
-  detectionRuleApi: DetectionRuleFixture;
-}*/
 
 export interface SecurityParallelApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;

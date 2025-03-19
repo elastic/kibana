@@ -5,41 +5,14 @@
  * 2.0.
  */
 
-import { test as base, ScoutTestConfig } from '@kbn/scout';
-import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
-import {
-  ApiServicesFixture,
-  SamlAuth,
-  ScoutLogger,
-} from '@kbn/scout/src/playwright/fixtures/worker';
-import { extendPageObjects } from './test/page_objects';
-import {
-  SecurityApiServicesFixture,
-  SecurityBrowserAuthFixture,
-  SecurityTestFixtures,
-  SecurityWorkerFixtures,
-} from './types';
-import { extendBrowserAuth } from './test/authentication';
-import { getDetectionRuleApiService } from './worker/apis';
+import { test as baseTest, mergeTests, ApiServicesFixture } from '@kbn/scout';
+import { SecurityApiServicesFixture, SecurityTestFixtures, SecurityWorkerFixtures } from './types';
+import { getDetectionRuleApiService } from './worker';
+import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
-export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
-  browserAuth: async (
-    {
-      browserAuth,
-      config,
-      samlAuth,
-      log,
-    }: {
-      browserAuth: BrowserAuthFixture;
-      config: ScoutTestConfig;
-      samlAuth: SamlAuth;
-      log: ScoutLogger;
-    },
-    use: (auth: SecurityBrowserAuthFixture) => Promise<void>
-  ) => {
-    const extendedAuth = await extendBrowserAuth(browserAuth, config, samlAuth, log);
-    await use(extendedAuth);
-  },
+const securityFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
+
+export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
