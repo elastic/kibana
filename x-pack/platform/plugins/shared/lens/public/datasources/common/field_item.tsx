@@ -27,7 +27,6 @@ import {
 import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { DatasourceDataPanelProps } from '../../types';
 import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
@@ -49,11 +48,9 @@ const LazyFieldItemButton = lazy(
 const WrappedFieldItemButton = <T extends FieldListItem = LensFieldListItem>(
   props: FieldItemButtonProps<T>
 ) => (
-  <KibanaErrorBoundary>
-    <Suspense fallback={<></>}>
-      <LazyFieldItemButton<T> {...props} />
-    </Suspense>
-  </KibanaErrorBoundary>
+  <Suspense fallback={<></>}>
+    <LazyFieldItemButton<T> {...props} />
+  </Suspense>
 );
 
 function isTextBasedColumnField(field: LensFieldListItem): field is DatatableColumn {
