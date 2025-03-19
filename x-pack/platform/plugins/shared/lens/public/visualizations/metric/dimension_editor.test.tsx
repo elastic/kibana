@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, getByTitle, queryByRole } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -19,8 +19,7 @@ import {
   DimensionEditorAdditionalSection,
   SupportingVisType,
 } from './dimension_editor';
-import { DatasourcePublicAPI } from '../..';
-import { createMockFramePublicAPI } from '../../mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
@@ -86,23 +85,27 @@ describe('dimension editor', () => {
   };
 
   const getNonNumericDatasource = () =>
-    ({
-      hasDefaultTimeField: jest.fn(() => true),
+    createMockDatasource('formBased', {
       getOperationForColumnId: jest.fn(() => ({
         hasReducedTimeRange: false,
-        dataType: 'keyword',
+        dataType: 'string',
+        hasTimeShift: false,
+        label: 'myMockedOperation',
+        isBucketed: false,
       })),
-    } as unknown as DatasourcePublicAPI);
+    }).publicAPIMock;
 
   const getNumericDatasourceWithArraySupport = () =>
-    ({
-      hasDefaultTimeField: jest.fn(() => true),
+    createMockDatasource('formBased', {
       getOperationForColumnId: jest.fn(() => ({
         hasReducedTimeRange: false,
         dataType: 'number',
         hasArraySupport: true,
+        hasTimeShift: false,
+        label: 'myMockedOperation',
+        isBucketed: false,
       })),
-    } as unknown as DatasourcePublicAPI);
+    }).publicAPIMock;
 
   beforeEach(() => {
     props = {
@@ -110,13 +113,16 @@ describe('dimension editor', () => {
       groupId: 'some-group',
       accessor: 'some-accessor',
       state: fullState,
-      datasource: {
+      datasource: createMockDatasource('formBased', {
         hasDefaultTimeField: jest.fn(() => true),
         getOperationForColumnId: jest.fn(() => ({
           hasReducedTimeRange: false,
           dataType: 'number',
+          hasTimeShift: false,
+          label: 'myMockedOperation',
+          isBucketed: false,
         })),
-      } as unknown as DatasourcePublicAPI,
+      }).publicAPIMock,
       removeLayer: jest.fn(),
       addLayer: jest.fn(),
       frame: createMockFramePublicAPI(),
@@ -258,20 +264,73 @@ describe('dimension editor', () => {
         />
       );
 
-      const customPrefixTextbox = screen.queryByRole('textbox');
+      const customPrefixGroup = screen.getByRole('group', { name: 'Prefix' });
+      const getCustomPrefixTextbox = () =>
+        customPrefixGroup.parentElement?.parentElement
+          ? queryByRole(customPrefixGroup.parentElement.parentElement, 'textbox')
+          : null;
       const typePrefix = async (prefix: string) => {
+        const customPrefixTextbox = getCustomPrefixTextbox();
         if (customPrefixTextbox === null) {
           throw new Error('custom prefix textbox not found');
         }
         await userEvent.clear(customPrefixTextbox);
         await userEvent.type(customPrefixTextbox, prefix);
       };
+
+      const getBaselineGroup = () => screen.getByRole('group', { name: 'Baseline' });
+      const getCustomBaselineTextbox = () => screen.queryByRole('textbox', { name: 'Baseline' });
+      const typeBaseline = async (baseline: number) => {
+        const customBaselineTextbox = getCustomBaselineTextbox();
+        if (customBaselineTextbox == null) {
+          throw new Error('custom baseline textbox not found');
+        }
+        await userEvent.clear(customBaselineTextbox);
+        await userEvent.type(customBaselineTextbox, baseline.toString());
+      };
+
+      const colorModeGroup = screen.getByRole('group', { name: /Color by value/i });
+      const clickOnColorMode = async (mode: 'none' | 'static' | 'dynamic') => {
+        const colorByValueOption = getByTitle(colorModeGroup, mode, { exact: false });
+        if (!colorByValueOption) {
+          throw new Error(`Supported color by value ${mode} not found`);
+        }
+        await userEvent.click(colorByValueOption);
+      };
+
+      const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
+
+      const typeColor = async (color: string) => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
+        await userEvent.type(staticColorPicker, color);
+      };
+
+      const clearColor = async () => {
+        if (!staticColorPicker) {
+          throw new Error('Static color picker not found');
+        }
+        await userEvent.clear(staticColorPicker);
+      };
+
       return {
-        settingNone: () => screen.getByTitle(/none/i),
-        settingAuto: () => screen.getByTitle(/auto/i),
-        settingCustom: () => screen.getByTitle(/custom/i),
-        customPrefixTextbox,
+        getSettingNone: () => getByTitle(customPrefixGroup, 'none', { exact: false }),
+        getSettingAuto: () => getByTitle(customPrefixGroup, 'auto', { exact: false }),
+        getSettingCustom: () => getByTitle(customPrefixGroup, 'custom', { exact: false }),
+        getCustomPrefixTextbox,
         typePrefix,
+        getCustomBaselineTextbox,
+        getBaselineGroup,
+        typeBaseline,
+        getColorByValueNone: () => getByTitle(colorModeGroup, 'none', { exact: false }),
+        getColorByValueStatic: () => getByTitle(colorModeGroup, 'static', { exact: false }),
+        getColorByValueDynamic: () => getByTitle(colorModeGroup, 'dynamic', { exact: false }),
+        clickOnColorMode,
+        staticColorPicker,
+        typeColor,
+        clearColor,
         ...rtlRender,
       };
     }
@@ -298,53 +357,53 @@ describe('dimension editor', () => {
         secondaryMetricAccessor: accessor,
       };
       it('correctly renders chosen auto prefix', () => {
-        const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
           renderSecondaryMetricEditor({
             state: localState,
           });
 
-        expect(settingAuto()).toHaveAttribute('aria-pressed', 'true');
-        expect(settingNone()).toHaveAttribute('aria-pressed', 'false');
-        expect(settingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(customPrefixTextbox).not.toBeInTheDocument();
+        expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'true');
+        expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
+        expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
+        expect(getCustomPrefixTextbox()).not.toBeInTheDocument();
       });
 
       it('correctly renders chosen none prefix', () => {
-        const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
           renderSecondaryMetricEditor({ state: { ...localState, secondaryPrefix: NONE_PREFIX } });
 
-        expect(settingNone()).toHaveAttribute('aria-pressed', 'true');
-        expect(settingAuto()).toHaveAttribute('aria-pressed', 'false');
-        expect(settingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(customPrefixTextbox).not.toBeInTheDocument();
+        expect(getSettingNone()).toHaveAttribute('aria-pressed', 'true');
+        expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
+        expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
+        expect(getCustomPrefixTextbox()).not.toBeInTheDocument();
       });
 
       it('correctly renders custom prefix', () => {
         const customPrefixState = { ...localState, secondaryPrefix: faker.lorem.word(3) };
-        const { settingAuto, settingCustom, settingNone, customPrefixTextbox } =
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
           renderSecondaryMetricEditor({ state: customPrefixState });
 
-        expect(settingAuto()).toHaveAttribute('aria-pressed', 'false');
-        expect(settingNone()).toHaveAttribute('aria-pressed', 'false');
-        expect(settingCustom()).toHaveAttribute('aria-pressed', 'true');
-        expect(customPrefixTextbox).toHaveValue(customPrefixState.secondaryPrefix);
+        expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
+        expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
+        expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'true');
+        expect(getCustomPrefixTextbox()).toHaveValue(customPrefixState.secondaryPrefix);
       });
 
       it('clicking on the buttons calls setState with a correct secondaryPrefix', async () => {
         const customPrefix = faker.lorem.word(3);
         const setState = jest.fn();
 
-        const { settingAuto, settingNone } = renderSecondaryMetricEditor({
+        const { getSettingAuto, getSettingNone } = renderSecondaryMetricEditor({
           setState,
           state: { ...localState, secondaryPrefix: customPrefix },
         });
 
-        await userEvent.click(settingNone());
+        await userEvent.click(getSettingNone());
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: NONE_PREFIX })
         );
 
-        await userEvent.click(settingAuto());
+        await userEvent.click(getSettingAuto());
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: AUTO_PREFIX })
         );
@@ -367,6 +426,120 @@ describe('dimension editor', () => {
             expect.objectContaining({ secondaryPrefix: newCustomPrefix })
           )
         );
+      });
+    });
+
+    describe('secondary trend', () => {
+      const localState = {
+        ...fullState,
+        secondaryMetricAccessor: accessor,
+      };
+      describe('coloring', () => {
+        it('should change the color mode to static', async () => {
+          const setState = jest.fn();
+          const { clickOnColorMode } = renderSecondaryMetricEditor({
+            setState,
+            state: { ...localState },
+          });
+
+          // click on the static color mode
+          await clickOnColorMode('static');
+
+          // check for setState to be called with mode correct
+          expect(setState).toHaveBeenCalledWith(
+            expect.objectContaining({ secondaryColorMode: 'static' })
+          );
+        });
+
+        it('should move from none to static and prefill the UI with the correct defaults', async () => {
+          const setState = jest.fn();
+          const { staticColorPicker, getColorByValueStatic } = renderSecondaryMetricEditor({
+            setState,
+            state: { ...localState, secondaryColorMode: 'static' },
+          });
+
+          // check for color picker
+          expect(staticColorPicker).toBeInTheDocument();
+          expect(getColorByValueStatic()).toHaveAttribute('aria-pressed', 'true');
+        });
+
+        it('should prevent the dynamic coloring if the value type is not numeric', async () => {
+          const setState = jest.fn();
+          const getOperationForColumnId = jest.fn((id: string) =>
+            id === accessor
+              ? {
+                  dataType: 'string',
+                }
+              : {
+                  hasReducedTimeRange: false,
+                  dataType: 'number',
+                }
+          );
+          const { getColorByValueDynamic } = renderSecondaryMetricEditor({
+            setState,
+            state: { ...localState },
+            datasource: { ...props.datasource, getOperationForColumnId },
+          });
+
+          // check dynamic button to be disabled
+          expect(getColorByValueDynamic()).toBeDisabled();
+        });
+
+        it('should move from none to dynamic and prefill the UI with the correct defaults', async () => {
+          const setState = jest.fn();
+          const { staticColorPicker, getBaselineGroup } = renderSecondaryMetricEditor({
+            setState,
+            state: { ...localState, secondaryColorMode: 'dynamic' },
+          });
+
+          // check for palette/baseline/etc... to be prefilled with the correct values
+          expect(staticColorPicker).not.toBeInTheDocument();
+          expect(getBaselineGroup()).toBeInTheDocument();
+        });
+
+        it('should disable the "Primary metric" baseline if the primary is not of number type', async () => {
+          const setState = jest.fn();
+          const getOperationForColumnId = jest.fn((id: string) =>
+            id !== accessor
+              ? {
+                  // primary metric
+                  dataType: 'string',
+                }
+              : {
+                  // secondary metric
+                  hasReducedTimeRange: false,
+                  dataType: 'number',
+                }
+          );
+          renderSecondaryMetricEditor({
+            setState,
+            state: { ...localState, secondaryColorMode: 'dynamic' },
+            datasource: { ...props.datasource, getOperationForColumnId },
+          });
+
+          const baseLineGroup = screen.getByRole('group', { name: 'Baseline' });
+
+          expect(baseLineGroup).toBeInTheDocument();
+          expect(getByTitle(baseLineGroup, 'Primary metric')).toBeDisabled();
+        });
+      });
+
+      it('should hide the baseline textbox if Primary Metric baseline is chosen', async () => {
+        const setState = jest.fn();
+        const { getCustomBaselineTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
+          setState,
+          state: {
+            ...localState,
+            secondaryColorMode: 'dynamic',
+            secondaryTrend: { baselineValue: 'primary' },
+          },
+        });
+
+        expect(getByTitle(getBaselineGroup(), 'Primary metric')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(getCustomBaselineTextbox()).not.toBeInTheDocument();
       });
     });
   });
