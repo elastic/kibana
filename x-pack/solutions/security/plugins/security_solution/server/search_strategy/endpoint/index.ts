@@ -7,7 +7,6 @@
 
 import { map, mergeMap, from } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
-import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type {
   EndpointStrategyParseResponseType,
   EndpointStrategyRequestType,
@@ -52,7 +51,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
               return {
                 ...response,
                 ...{
-                  rawResponse: shimHitsTotal(response.rawResponse, options),
+                  rawResponse: response.rawResponse,
                 },
               };
             }),

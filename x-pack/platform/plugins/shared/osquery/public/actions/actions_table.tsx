@@ -20,6 +20,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { getHitsTotal } from '@kbn/data-plugin/common';
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
@@ -259,7 +260,7 @@ const ActionsTableComponent = () => {
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: actionsData?.data?.total ?? 0,
+      totalItemCount: getHitsTotal(actionsData?.data?.total) ?? 0,
       pageSizeOptions: [20, 50, 100],
     }),
     [actionsData, pageIndex, pageSize]

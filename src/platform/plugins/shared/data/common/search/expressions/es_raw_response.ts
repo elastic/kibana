@@ -9,6 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
+import { getHitsTotal } from '../..';
 
 const name = 'es_raw_response';
 
@@ -87,10 +88,7 @@ export const esRawResponse: EsRawResponseExpressionTypeDefinition = {
           type: 'esdsl',
           source: '*',
           statistics: {
-            totalCount:
-              typeof context.body.hits.total === 'number'
-                ? context.body.hits.total
-                : context.body.hits.total?.value,
+            totalCount: getHitsTotal(context.body.hits.total),
           },
         },
         columns,

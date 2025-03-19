@@ -16,7 +16,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { EsRawResponse } from './es_raw_response';
 
-import { KibanaContext } from '..';
+import { getHitsTotal, KibanaContext } from '..';
 import { getEsQueryConfig } from '../../es_query';
 import { UiSettingsCommon } from '../..';
 
@@ -167,7 +167,7 @@ export const getEsdslFn = ({
             label: i18n.translate('data.search.es_search.hitsTotalLabel', {
               defaultMessage: 'Hits (total)',
             }),
-            value: `${rawResponse.hits.total}`,
+            value: `${getHitsTotal(rawResponse.hits.total)}`,
             description: i18n.translate('data.search.es_search.hitsTotalDescription', {
               defaultMessage: 'The number of documents that match the query.',
             }),

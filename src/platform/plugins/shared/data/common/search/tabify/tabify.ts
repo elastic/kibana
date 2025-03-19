@@ -9,6 +9,7 @@
 
 import { get } from 'lodash';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { getHitsTotal } from '../..';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
 import type { TabbedResponseWriterOptions } from './types';
@@ -176,7 +177,7 @@ export function tabifyAggResponse(
   // this can be lifted off once the full impact is assessed
   if (!topLevelBucket.doc_count) {
     if (!hasMultipleDocCountAtRootWithFilters) {
-      topLevelBucket.doc_count = esResponse.hits?.total;
+      topLevelBucket.doc_count = getHitsTotal(esResponse.hits?.total) ?? 0;
     }
   }
 
@@ -188,7 +189,7 @@ export function tabifyAggResponse(
       type: 'esaggs',
       source: aggConfigs.indexPattern.id,
       statistics: {
-        totalCount: esResponse.hits?.total,
+        totalCount: getHitsTotal(esResponse.hits?.total) ?? 0,
       },
     },
   };

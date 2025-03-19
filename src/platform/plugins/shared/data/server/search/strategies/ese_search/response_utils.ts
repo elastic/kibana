@@ -13,7 +13,7 @@ import { IncomingHttpHeaders } from 'http';
 import type { AsyncSearchResponse } from './types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { AsyncSearchStatusResponse } from './types';
-import { shimHitsTotal, getTotalLoaded, IAsyncSearchOptions } from '../../../../common';
+import { getTotalLoaded, type IAsyncSearchOptions } from '../../../../common';
 
 /**
  * Get the Kibana representation of an async search status response.
@@ -42,7 +42,7 @@ export function toAsyncKibanaSearchResponse(
 ): IKibanaSearchResponse {
   return {
     id: headers['x-elasticsearch-async-id'] as string,
-    rawResponse: response.response ? shimHitsTotal(response.response, options) : response,
+    rawResponse: response.response ?? response,
     isPartial: headers['x-elasticsearch-async-is-running'] === '?1',
     isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
     ...(headers.warning ? { warning: headers.warning } : {}),

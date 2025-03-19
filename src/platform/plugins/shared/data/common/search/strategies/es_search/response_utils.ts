@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ISearchOptions } from '@kbn/search-types';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
@@ -21,19 +20,6 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
   return { total, loaded };
 }
 
-/**
- * Temporary workaround until https://github.com/elastic/kibana/issues/26356 is addressed.
- * Since we are setting `track_total_hits` in the request, `hits.total` will be an object
- * containing the `value`.
- *
- * @internal
- */
-export function shimHitsTotal(
-  response: estypes.SearchResponse<unknown>,
-  { legacyHitsTotal = true }: ISearchOptions = {}
-) {
-  if (!legacyHitsTotal) return response;
-  const total = (response.hits?.total as any)?.value ?? response.hits?.total;
-  const hits = { ...response.hits, total };
-  return { ...response, hits };
+export function getHitsTotal(total: estypes.SearchHitsMetadata['total']): number | undefined {
+  return typeof total === 'number' ? total : total?.value;
 }

@@ -35,6 +35,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
+import { getHitsTotal } from '@kbn/data-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -210,7 +211,7 @@ export function initializeFetch({
               processRecord: (record) =>
                 discoverServices.profilesManager.resolveDocumentProfile({ record }),
             }),
-            hitCount: resp.hits.total as number,
+            hitCount: getHitsTotal(resp.hits.total),
             fetchContext,
           };
         } catch (error) {
