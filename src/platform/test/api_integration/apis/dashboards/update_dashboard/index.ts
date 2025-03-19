@@ -16,11 +16,17 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
+      await kibanaServer.importExport.load(
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/tags.json'
+      );
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
         'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+      );
+      await kibanaServer.importExport.unload(
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/tags.json'
       );
     });
     loadTestFile(require.resolve('./main'));

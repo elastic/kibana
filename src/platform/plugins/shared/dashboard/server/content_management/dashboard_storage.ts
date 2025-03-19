@@ -40,7 +40,7 @@ const searchArgsToSOFindOptions = (
   return {
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    // fields: options?.fields,
+    fields: options?.fields,
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
@@ -91,11 +91,26 @@ export class DashboardStorage {
     newTagNames: string[],
     allTags: Tag[]
   ) => {
-    const newTagsIds = newTagNames.flatMap(
+    const combinedTagNames = this.getUniqueTagNames(references, newTagNames, allTags);
+    const newTagIds = this.convertTagNamesToIds(combinedTagNames, allTags);
+    return this.savedObjectsTagging?.replaceTagReferences(references, newTagIds) ?? references;
+  };
+
+  private getUniqueTagNames(
+    references: SavedObjectReference[],
+    newTagNames: string[],
+    allTags: Tag[]
+  ): string[] {
+    const referenceTagNames = this.getTagNamesFromReferences(references, allTags);
+    return Array.from(new Set([...referenceTagNames, ...newTagNames]));
+  }
+
+  private convertTagNamesToIds(tagNames: string[], allTags: Tag[]): string[] {
+    // convertTagNameToId could return undefined, so flatMap is used to filter out undefined values
+    return tagNames.flatMap(
       (tagName) => this.savedObjectsTagging?.convertTagNameToId(tagName, allTags) ?? []
     );
-    return this.savedObjectsTagging?.replaceTagReferences(references, newTagsIds) ?? references;
-  };
+  }
 
   async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
