@@ -27,7 +27,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const API_DOCS = meta.apiDocsUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
-  const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`
+  const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`;
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
@@ -765,9 +765,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       putIndexTemplateV1: `${ELASTICSEARCH_APIS}operation/operation-indices-put-template`,
       putSnapshotLifecyclePolicy: `${ELASTICSEARCH_APIS}operation/operation-slm-put-lifecycle`,
       putWatch: `${ELASTICSEARCH_APIS}operation/operation-watcher-put-watch`,
-      restApis: isServerless
-        ? `${ELASTICSEARCH_SERVERLESS_APIS}`
-        : `${ELASTICSEARCH_APIS}`,
+      restApis: isServerless ? `${ELASTICSEARCH_SERVERLESS_APIS}` : `${ELASTICSEARCH_APIS}`,
       searchPreference: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-search#operation-search-preference`
         : `${ELASTICSEARCH_APIS}operation/operation-search#operation-search-preference`,
