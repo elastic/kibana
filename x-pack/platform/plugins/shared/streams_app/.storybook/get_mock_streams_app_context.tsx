@@ -18,6 +18,7 @@ import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/servi
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -45,6 +46,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         licensing: {} as unknown as LicensingPluginStart,
         indexManagement: {} as unknown as IndexManagementPluginStart,
         ingestPipelines: {} as unknown as IngestPipelinesPluginStart,
+        discoverShared: {} as unknown as DiscoverSharedPublicStart,
       },
     },
     services: {
