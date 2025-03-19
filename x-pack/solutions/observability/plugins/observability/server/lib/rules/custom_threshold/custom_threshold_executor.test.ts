@@ -182,7 +182,7 @@ const setup = () => {
     ...alertsServices,
     getSearchSourceClient: jest.fn().mockResolvedValue({
       ...searchSourceCommonMock,
-      create: jest.fn(() => Promise.resolve(mockedSearchSource)),
+      createLazy: jest.fn(() => Promise.resolve(mockedSearchSource)),
     }),
   };
 
