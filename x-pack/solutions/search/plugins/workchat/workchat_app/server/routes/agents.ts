@@ -14,8 +14,11 @@ import type {
 } from '../../common/http_api/agents';
 import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
+import { getHandlerWrapper } from './wrap_handler';
 
 export const registerAgentRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  const wrapHandler = getHandlerWrapper({ logger });
+
   // API to get a single agent
   router.get(
     {
@@ -31,7 +34,7 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
         }),
       },
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const { agentService } = getServices();
       const client = await agentService.getScopedClient({ request });
 
@@ -42,7 +45,7 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
       return res.ok<GetAgentResponse>({
         body: agent,
       });
-    }
+    })
   );
 
   // API to create an agent
@@ -64,28 +67,23 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
         }),
       },
     },
-    async (ctx, request, res) => {
-      try {
-        const payload: CreateAgentPayload = request.body;
+    wrapHandler(async (ctx, request, res) => {
+      const payload: CreateAgentPayload = request.body;
 
-        const { agentService } = getServices();
-        const client = await agentService.getScopedClient({ request });
+      const { agentService } = getServices();
+      const client = await agentService.getScopedClient({ request });
 
-        // TODO: validation
+      // TODO: validation
 
-        const agent = await client.create(payload);
+      const agent = await client.create(payload);
 
-        return res.ok<CreateAgentResponse>({
-          body: {
-            success: true,
-            agent,
-          },
-        });
-      } catch (e) {
-        logger.error(e);
-        throw e;
-      }
-    }
+      return res.ok<CreateAgentResponse>({
+        body: {
+          success: true,
+          agent,
+        },
+      });
+    })
   );
 
   // API to update an agent
@@ -110,29 +108,24 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
         }),
       },
     },
-    async (ctx, request, res) => {
-      try {
-        const { agentId } = request.params;
-        const payload: CreateAgentPayload = request.body;
+    wrapHandler(async (ctx, request, res) => {
+      const { agentId } = request.params;
+      const payload: CreateAgentPayload = request.body;
 
-        const { agentService } = getServices();
-        const client = await agentService.getScopedClient({ request });
+      const { agentService } = getServices();
+      const client = await agentService.getScopedClient({ request });
 
-        // TODO: validation
+      // TODO: validation
 
-        const agent = await client.update(agentId, payload);
+      const agent = await client.update(agentId, payload);
 
-        return res.ok<CreateAgentResponse>({
-          body: {
-            success: true,
-            agent,
-          },
-        });
-      } catch (e) {
-        logger.error(e);
-        throw e;
-      }
-    }
+      return res.ok<CreateAgentResponse>({
+        body: {
+          success: true,
+          agent,
+        },
+      });
+    })
   );
 
   // API to list all accessible agents
@@ -146,7 +139,7 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
       },
       validate: false,
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const { agentService } = getServices();
       const client = await agentService.getScopedClient({ request });
 
@@ -157,6 +150,6 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
           agents,
         },
       });
-    }
+    })
   );
 };

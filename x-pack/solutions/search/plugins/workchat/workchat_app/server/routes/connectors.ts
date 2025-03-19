@@ -9,8 +9,11 @@ import type { ListConnectorsResponse } from '../../common/http_api/connectors';
 import type { RouteDependencies } from './types';
 import { apiCapabilities } from '../../common/features';
 import { getConnectorList } from '../utils';
+import { getHandlerWrapper } from './wrap_handler';
 
-export const registerConnectorRoutes = ({ getServices, router, core }: RouteDependencies) => {
+export const registerConnectorRoutes = ({ logger, router, core }: RouteDependencies) => {
+  const wrapHandler = getHandlerWrapper({ logger });
+
   router.get(
     {
       path: '/internal/workchat/connectors',
@@ -21,7 +24,7 @@ export const registerConnectorRoutes = ({ getServices, router, core }: RouteDepe
       },
       validate: false,
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const [, startDeps] = await core.getStartServices();
       const { actions } = startDeps;
 
@@ -33,6 +36,6 @@ export const registerConnectorRoutes = ({ getServices, router, core }: RouteDepe
       return res.ok<ListConnectorsResponse>({
         body: { connectors },
       });
-    }
+    })
   );
 };

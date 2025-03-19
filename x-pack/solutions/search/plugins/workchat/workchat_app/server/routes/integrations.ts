@@ -16,8 +16,11 @@ import type {
 } from '../../common/http_api/integrations';
 import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
+import { getHandlerWrapper } from './wrap_handler';
 
 export const registerIntegrationsRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  const wrapHandler = getHandlerWrapper({ logger });
+
   // Get a single integration by ID
   router.get(
     {
@@ -33,7 +36,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
         }),
       },
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const { integrationsService } = getServices();
       const client = await integrationsService.getScopedClient({ request });
 
@@ -44,7 +47,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       return res.ok<GetIntegrationResponse>({
         body: integration,
       });
-    }
+    })
   );
 
   // List all integrations
@@ -58,7 +61,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       },
       validate: {},
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const { integrationsService } = getServices();
       const client = await integrationsService.getScopedClient({ request });
 
@@ -69,7 +72,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
           integrations,
         },
       });
-    }
+    })
   );
 
   // Create a new integration
@@ -93,28 +96,23 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
         }),
       },
     },
-    async (ctx, request, res) => {
-      try {
-        const { integrationsService } = getServices();
-        const client = await integrationsService.getScopedClient({ request });
+    wrapHandler(async (ctx, request, res) => {
+      const { integrationsService } = getServices();
+      const client = await integrationsService.getScopedClient({ request });
 
-        const { type, name, description, configuration } = request.body;
+      const { type, name, description, configuration } = request.body;
 
-        const integration = await client.create({
-          type,
-          name,
-          description,
-          configuration,
-        });
+      const integration = await client.create({
+        type,
+        name,
+        description,
+        configuration,
+      });
 
-        return res.ok<CreateIntegrationResponse>({
-          body: integration,
-        });
-      } catch (e) {
-        logger.error(e);
-        throw e;
-      }
-    }
+      return res.ok<CreateIntegrationResponse>({
+        body: integration,
+      });
+    })
   );
 
   // Update an existing integration
@@ -137,7 +135,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
         }),
       },
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const { integrationsService } = getServices();
       const client = await integrationsService.getScopedClient({ request });
 
@@ -153,7 +151,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       return res.ok<UpdateIntegrationResponse>({
         body: integration,
       });
-    }
+    })
   );
 
   // Delete an integration
@@ -171,7 +169,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
         }),
       },
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const { integrationsService } = getServices();
       const client = await integrationsService.getScopedClient({ request });
 
@@ -184,6 +182,6 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
           success: true,
         },
       });
-    }
+    })
   );
 };

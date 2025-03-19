@@ -11,8 +11,11 @@ import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
+import { getHandlerWrapper } from './wrap_handler';
 
 export const registerChatRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+  const wrapHandler = getHandlerWrapper({ logger });
+
   const stubLogger = {
     debug: () => undefined,
     error: () => undefined,
@@ -35,7 +38,7 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
         }),
       },
     },
-    async (ctx, request, res) => {
+    wrapHandler(async (ctx, request, res) => {
       const { chatService } = getServices();
 
       const { nextMessage, conversationId, agentId, connectorId } = request.body;
@@ -45,31 +48,26 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
         abortController.abort();
       });
 
-      try {
-        const events$ = chatService.converse({
-          request,
-          connectorId: connectorId ?? 'azure-gpt4', // TODO: auto-select on server-side when not present
-          agentId,
-          nextUserMessage: nextMessage,
-          conversationId,
-        });
+      const events$ = chatService.converse({
+        request,
+        connectorId: connectorId ?? 'azure-gpt4', // TODO: auto-select on server-side when not present
+        agentId,
+        nextUserMessage: nextMessage,
+        conversationId,
+      });
 
-        return res.ok({
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-          },
-          body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
-            signal: abortController.signal,
-            // already logging at the service level
-            logger: stubLogger,
-          }),
-        });
-      } catch (err) {
-        logger.error(err);
-        throw err;
-      }
-    }
+      return res.ok({
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        },
+        body: observableIntoEventSourceStream(events$ as unknown as Observable<ServerSentEvent>, {
+          signal: abortController.signal,
+          // already logging at the service level
+          logger: stubLogger,
+        }),
+      });
+    })
   );
 };
