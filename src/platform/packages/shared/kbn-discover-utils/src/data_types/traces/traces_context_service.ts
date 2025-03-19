@@ -9,6 +9,7 @@
 
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+import type { CoreStart } from '@kbn/core/public';
 import { containsIndexPattern } from '../../utils';
 
 export interface TracesContextService {
@@ -18,6 +19,7 @@ export interface TracesContextService {
 }
 
 export interface TracesContextServiceDeps {
+  core: CoreStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
 
@@ -29,9 +31,10 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFr
 );
 
 export const createTracesContextService = async ({
+  core,
   apmSourcesAccess,
 }: TracesContextServiceDeps): Promise<TracesContextService> => {
-  if (apmSourcesAccess) {
+  if (core.application.capabilities.apm?.show && apmSourcesAccess) {
     const indices = await apmSourcesAccess.getApmIndices();
 
     if (indices) {
