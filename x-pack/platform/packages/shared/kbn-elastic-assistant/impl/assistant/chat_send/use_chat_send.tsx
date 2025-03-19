@@ -16,9 +16,9 @@ import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, useAssistantContext, useAssistantLastConversation } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
-import { useAssistantSpaceId } from '../use_space_aware_context';
+import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
 
 export interface UseChatSendProps {
   currentConversation?: Conversation;
