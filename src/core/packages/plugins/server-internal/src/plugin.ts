@@ -132,7 +132,7 @@ export class PluginWrapper<
   public setup(
     setupContext: CoreSetup<TPluginsStart, TStart> | CorePreboot,
     plugins: TPluginsSetup
-  ): undefined | TSetup | Promise<TSetup> {
+  ): TSetup | Promise<TSetup> {
     if (!this.definition) {
       throw new Error('The plugin is not initialized. Call the init method first.');
     }
@@ -152,7 +152,7 @@ export class PluginWrapper<
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
       this.container?.getNamed(Contract, Setup as symbol) as TSetup,
-    ].find(Boolean);
+    ].find(Boolean)!;
   }
 
   /**
@@ -162,10 +162,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public start(
-    startContext: CoreStart,
-    plugins: TPluginsStart
-  ): undefined | TStart | Promise<TStart> {
+  public start(startContext: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart> {
     if (!this.definition) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
@@ -180,7 +177,7 @@ export class PluginWrapper<
     const contract = [
       this.instance?.start(startContext, plugins),
       this.container?.getNamed(Contract, Start as symbol) as TStart,
-    ].find(Boolean);
+    ].find(Boolean)!;
 
     if (isPromise(contract)) {
       return contract.then((resolvedContract) => {
