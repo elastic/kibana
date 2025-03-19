@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { AssetInventoryDataTable } from './asset_inventory_data_table';
 import { AssetInventoryGrouping } from './grouping/asset_inventory_grouping';
@@ -14,6 +14,7 @@ import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory
 
 // TODO Move to constants?
 const DEFAULT_GROUPING_TABLE_HEIGHT = 512; // px
+const noop = () => {};
 
 interface SubGroupingProps {
   state: AssetInventoryDataTableResult;
@@ -32,6 +33,14 @@ const SubGrouping = ({
   selectedGroup,
   groupSelectorComponent,
 }: SubGroupingProps) => {
+  const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
+  const [subgroupPageSize, setSubgroupPageSize] = useState(10);
+
+  const subgroupState =
+    groupingLevel === 0
+      ? state
+      : { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize };
+
   const {
     groupData,
     grouping,
@@ -43,7 +52,7 @@ const SubGrouping = ({
     // isGroupLoading,
     // setActivePageIndex,
   } = useAssetInventoryGrouping({
-    state,
+    state: subgroupState,
     groupPanelRenderer,
     getGroupStats: groupStatsRenderer,
     // groupingLevel,
@@ -56,7 +65,11 @@ const SubGrouping = ({
    * It is needed because the grouping number of pages can change according to the selected group
    */
   useEffect(() => {
-    state.onChangePage(0); // setActivePageIndex(0);
+    if (groupingLevel === 0) {
+      state.onChangePage(0);
+    } else {
+      setSubgroupPageIndex(0);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup]);
 
@@ -65,15 +78,13 @@ const SubGrouping = ({
       data={groupData}
       grouping={grouping}
       renderChildComponent={renderChildComponent}
-      // onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
-      onChangeGroupsItemsPerPage={state.onChangeItemsPerPage}
-      // onChangeGroupsPage={onChangeGroupsPage}
-      onChangeGroupsPage={state.onChangePage}
-      // activePageIndex={activePageIndex}
-      activePageIndex={state.pageIndex}
+      activePageIndex={groupingLevel === 0 ? state.pageIndex : subgroupPageIndex}
+      pageSize={groupingLevel === 0 ? state.pageSize : subgroupPageSize}
+      onChangeGroupsPage={groupingLevel === 0 ? state.onChangePage : setSubgroupPageIndex}
+      onChangeGroupsItemsPerPage={
+        groupingLevel === 0 ? state.onChangeItemsPerPage : setSubgroupPageSize
+      }
       isFetching={isFetching}
-      // pageSize={pageSize}
-      pageSize={state.pageSize}
       selectedGroup={selectedGroup}
       // TODO isGroupLoading is not used nor expected by AssetInventoryGrouping
       // isGroupLoading={isGroupLoading}
@@ -130,7 +141,7 @@ const renderChildComponent = ({
         .map(({ query }) => (query.match_phrase ? query : null))
         .filter(Boolean);
 
-      const newState = {
+      const newState: AssetInventoryDataTableResult = {
         ...state,
         query: {
           ...state.query,
@@ -139,6 +150,11 @@ const renderChildComponent = ({
             filter: [...state.query.bool.filter, ...combinedFilters],
           },
         },
+        // Pagination state must be local and not in sync with URL state
+        pageIndex: 0,
+        pageSize: 10,
+        onChangeItemsPerPage: noop,
+        onChangePage: noop,
       };
 
       return <AssetInventoryDataTable state={newState} height={DEFAULT_GROUPING_TABLE_HEIGHT} />;

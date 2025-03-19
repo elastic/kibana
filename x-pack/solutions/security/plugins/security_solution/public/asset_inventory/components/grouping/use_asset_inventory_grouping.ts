@@ -198,7 +198,7 @@ export const useAssetInventoryGrouping = ({
   groupFilters?: Filter[];
   selectedGroup?: string;
 }) => {
-  const { query, setUrlQuery, pageSize, pageIndex, onChangePage } = state;
+  const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView } = useDataViewContext();
 
   const grouping = useGrouping({
@@ -214,7 +214,6 @@ export const useAssetInventoryGrouping = ({
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
     onGroupChange: ({ groupByFields }) => {
-      onChangePage(0);
       setUrlQuery({
         groupBy: groupByFields,
       });
