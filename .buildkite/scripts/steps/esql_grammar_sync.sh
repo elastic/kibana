@@ -110,7 +110,7 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   # Build ANTLR stuff
-  cd ./src/platform/packages/shared/kbn-esql-ast/src
+  cd ./src/platform/packages/shared/kbn-esql-ast
   yarn build:antlr4:esql
 
   # Make a commit
@@ -118,7 +118,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add antlr/*
+  git add src/antlr/*
   git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."
