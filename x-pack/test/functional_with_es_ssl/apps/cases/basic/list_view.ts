@@ -12,7 +12,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
 
-  describe('cases list', () => {
+  describe('cases list', function () {
     this.tags('skipFIPS');
 
     before(async () => {
