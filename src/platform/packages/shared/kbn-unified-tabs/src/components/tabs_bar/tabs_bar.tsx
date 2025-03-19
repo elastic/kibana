@@ -44,8 +44,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onSelect,
   onClose,
 }) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
   const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
     useState<HTMLDivElement | null>(null);
   const [tabsContainerElement, setTabsContainerElement] = useState<HTMLDivElement | null>(null);
