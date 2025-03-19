@@ -82,6 +82,24 @@ export const useLayoutStyles = () => {
           transition: none;
         }
       }
+
+      // styling for what the grid row header looks like when being dragged
+      .kbnGridRowHeader--active {
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border: var(--dashboardActivePanelBorderStyle);
+        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+        padding-left: 8px;
+        // hide accordian arrow + panel count text when row is being dragged
+        & .kbnGridRowTitle--button svg,
+        & .kbnGridLayout--panelCount {
+          display: none;
+        }
+      }
+
+      // styles for the area where the row will be dropped
+      .kbnGridPanel--rowDragPreview {
+        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+      }
     `;
   }, [euiTheme]);
 
