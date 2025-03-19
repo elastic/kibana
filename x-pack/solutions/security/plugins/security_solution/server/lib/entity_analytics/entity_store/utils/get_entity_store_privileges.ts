@@ -12,6 +12,7 @@ import { RISK_SCORE_INDEX_PATTERN } from '../../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
 } from '../../../../../common/entity_analytics/entity_store/constants';
 import { checkAndFormatPrivileges } from '../../utils/check_and_format_privileges';
 import { entityEngineDescriptorTypeName } from '../saved_object';
@@ -22,13 +23,7 @@ export const getEntityStorePrivileges = (
   securitySolutionIndices: string[]
 ) => {
   // The entity store needs access to all security solution indices
-  const indicesPrivileges = securitySolutionIndices.reduce<Record<string, string[]>>(
-    (acc, index) => {
-      acc[index] = ['read', 'view_index_metadata'];
-      return acc;
-    },
-    {}
-  );
+  const indicesPrivileges = getEntityStoreSourceRequiredIndicesPrivileges(securitySolutionIndices);
 
   // The entity store has to create the following indices
   indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
@@ -48,4 +43,31 @@ export const getEntityStorePrivileges = (
       },
     },
   });
+};
+
+// Get the index privileges required for running the transform
+export const getEntityStoreSourceIndicesPrivileges = (
+  request: KibanaRequest,
+  security: SecurityPluginStart,
+  indexPatterns: string[]
+) => {
+  const requiredIndicesPrivileges = getEntityStoreSourceRequiredIndicesPrivileges(indexPatterns);
+
+  return checkAndFormatPrivileges({
+    request,
+    security,
+    privilegesToCheck: {
+      elasticsearch: {
+        cluster: [],
+        index: requiredIndicesPrivileges,
+      },
+    },
+  });
+};
+
+const getEntityStoreSourceRequiredIndicesPrivileges = (securitySolutionIndices: string[]) => {
+  return securitySolutionIndices.reduce<Record<string, string[]>>((acc, index) => {
+    acc[index] = ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES;
+    return acc;
+  }, {});
 };

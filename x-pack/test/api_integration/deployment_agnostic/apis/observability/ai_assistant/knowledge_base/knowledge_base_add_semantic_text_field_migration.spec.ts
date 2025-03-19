@@ -18,7 +18,7 @@ import {
   deleteInferenceEndpoint,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
-} from './helpers';
+} from '../utils/knowledge_base';
 
 interface InferenceChunk {
   text: string;
