@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -15,15 +15,11 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiSpacer,
-  EuiSelectableOption,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  getConnectorCompatibility,
-  getAllAvailableConnectorFeatures,
-} from '@kbn/actions-plugin/common';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { CreateConnectorFilter } from './create_connector_filter';
 import {
   ActionConnector,
@@ -50,16 +46,6 @@ export interface CreateConnectorFlyoutProps {
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
-const availableFeatures = getAllAvailableConnectorFeatures();
-
-const getCategoryOptions = (selectedCategories: Array<{ label: string; key: string }>) => {
-  return Object.values(availableFeatures).map(({ id, name }) => ({
-    label: name,
-    key: id,
-    checked: selectedCategories.some((opt) => opt.key === id) ? 'on' : undefined, // Mark as checked if selected
-  })) as EuiSelectableOption[];
-};
-
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
   featureId,
@@ -79,14 +65,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [selectedCategories, setSelectedCategories] = useState<
-    Array<{ label: string; key: string }>
-  >([]);
-
-  const categoryOptions: EuiSelectableOption[] = useMemo(
-    () => getCategoryOptions(selectedCategories),
-    [selectedCategories]
-  );
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -227,13 +205,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     setSearchValue(newValue);
   }, []);
 
-  const onSelectCategoryChange = (newOptions: EuiSelectableOption[]) => {
-    const selected = newOptions
-      .filter((opt) => opt.checked === 'on')
-      .map((opt) => ({ label: opt.label, key: opt.key ?? '' }));
-    setSelectedCategories(selected);
-  };
-
   useEffect(() => {
     isMounted.current = true;
 
@@ -257,10 +228,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         {!hasConnectorTypeSelected && (
           <>
             <CreateConnectorFilter
-              categoryOptions={categoryOptions}
-              selectedCategories={selectedCategories}
-              onSelectCategoryChange={onSelectCategoryChange}
-              featureId={featureId}
               searchValue={searchValue}
               onSearchValueChange={handleSearchValueChange}
             />
@@ -359,7 +326,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             setAllActionTypes={setAllActionTypes}
             actionTypeRegistry={actionTypeRegistry}
             searchValue={searchValue}
-            selectedCategories={selectedCategories}
           />
         )}
       </EuiFlyoutBody>

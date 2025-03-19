@@ -457,20 +457,6 @@ describe('CreateConnectorFlyout', () => {
 
       expect(screen.getByTestId('createConnectorsModalSearch')).toBeInTheDocument();
     });
-
-    it('displays compatibility filter', async () => {
-      appMockRenderer.render(
-        <CreateConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          onConnectorCreated={onConnectorCreated}
-          onTestConnector={onTestConnector}
-        />
-      );
-      await act(() => Promise.resolve());
-
-      expect(screen.getByTestId('compatibilityFilterBtn')).toBeInTheDocument();
-    });
   });
 
   describe('Submitting', () => {

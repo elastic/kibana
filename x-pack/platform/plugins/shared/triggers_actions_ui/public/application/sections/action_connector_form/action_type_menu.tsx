@@ -37,33 +37,18 @@ interface RegisteredActionType {
   isExperimental: boolean | undefined;
 }
 
-const filterActionTypes = (
-  actionTypes: RegisteredActionType[],
-  searchValue: string,
-  selectedCategories: Array<{ label: string; key?: string }>
-) => {
-  if (isEmpty(selectedCategories) && isEmpty(searchValue)) {
+const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
+  if (isEmpty(searchValue)) {
     return actionTypes;
   }
   return actionTypes.filter((actionType) => {
-    const matchesCategory = actionType.actionType?.supportedFeatureIds.some((featureID) =>
-      selectedCategories.some((category) => category.key?.toLowerCase() === featureID.toLowerCase())
-    );
     const searchTargets = [actionType.name, actionType.selectMessage, actionType.actionType?.name]
       .filter(Boolean)
       .map((text) => text.toLowerCase());
 
-    const matchesSearch = searchTargets.some(
+    return searchTargets.some(
       (searchTarget) => !isEmpty(searchValue) && searchTarget.includes(searchValue.toLowerCase())
     );
-    if (isEmpty(searchValue)) {
-      return matchesCategory;
-    }
-
-    if (isEmpty(selectedCategories)) {
-      return matchesSearch;
-    }
-    return matchesCategory && matchesSearch;
   });
 };
 
@@ -140,8 +125,8 @@ export const ActionTypeMenu = ({
     });
 
   const filteredConnectors = useMemo(
-    () => filterActionTypes(registeredActionTypes, searchValue, selectedCategories),
-    [registeredActionTypes, searchValue, selectedCategories]
+    () => filterActionTypes(registeredActionTypes, searchValue),
+    [registeredActionTypes, searchValue]
   );
 
   const cardNodes = filteredConnectors
