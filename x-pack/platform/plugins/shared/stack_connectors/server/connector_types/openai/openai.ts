@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
-import { IncomingMessage } from 'http';
-import {
+import type { IncomingMessage } from 'http';
+import type {
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
-import { Stream } from 'openai/streaming';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Stream } from 'openai/streaming';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -39,7 +40,7 @@ import {
   OpenAiProviderType,
   SUB_ACTION,
 } from '../../../common/openai/constants';
-import {
+import type {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
@@ -283,7 +284,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<PassThrough> {
-    const { signal, timeout, ...rest } = body;
+    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
 
     const res = (await this.streamApi(
       {
@@ -315,7 +316,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     tokenCountStream: Stream<ChatCompletionChunk>;
   }> {
     try {
-      const { signal, timeout, ...rest } = body;
+      const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
@@ -353,7 +354,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
-    const { signal, timeout, ...rest } = body;
+    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
     const res = await this.runApi(
       { body: JSON.stringify(rest), signal, timeout },
       connectorUsageCollector

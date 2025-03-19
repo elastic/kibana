@@ -29,6 +29,7 @@ import { MetricVisualizationState } from './types';
 import { SECONDARY_DEFAULT_STATIC_COLOR, metricStateDefaults } from './constants';
 import { getColorMode, isMetricNumericType } from './helpers';
 import { getDefaultTrendConfig } from './dimension_editor';
+import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
 function computePaletteParams(
@@ -106,7 +107,7 @@ export const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const isMetricNumeric = isMetricNumericType(datasource, state.metricAccessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn

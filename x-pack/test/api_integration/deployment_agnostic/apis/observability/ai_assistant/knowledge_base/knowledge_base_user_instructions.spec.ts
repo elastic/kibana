@@ -13,19 +13,18 @@ import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  clearConversations,
   clearKnowledgeBase,
   importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
-} from './helpers';
-import { getConversationCreatedEvent } from '../helpers';
+} from '../utils/knowledge_base';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
 
 const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 

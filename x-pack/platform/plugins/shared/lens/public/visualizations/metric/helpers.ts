@@ -7,26 +7,7 @@
 
 import type { EuiThemeComputed, EuiThemeShape } from '@elastic/eui';
 import { type euiDarkVars as EuiThemeVariables } from '@kbn/ui-theme';
-import { DatasourcePublicAPI } from '../../types';
 import { MetricVisualizationState, TrendEUIColors } from './types';
-
-/**
- * Infer the numeric type of a metric column purely on the configuration
- */
-export function isMetricNumericType(
-  datasource: DatasourcePublicAPI | undefined,
-  accessor: string | undefined
-) {
-  // No accessor means it's not a numeric type by default
-  if (!accessor || !datasource) {
-    return false;
-  }
-  const operation = datasource.getOperationForColumnId(accessor);
-  const isNumericTypeFromOperation = Boolean(
-    operation?.dataType === 'number' && !operation.hasArraySupport
-  );
-  return isNumericTypeFromOperation;
-}
 
 export function getColorMode(
   colorMode: MetricVisualizationState['secondaryColorMode'],

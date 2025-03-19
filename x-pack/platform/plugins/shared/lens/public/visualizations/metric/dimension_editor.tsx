@@ -32,7 +32,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
@@ -580,7 +580,7 @@ function SecondaryMetricEditor({
 
 function PrimaryMetricEditor(props: SubProps) {
   const { state, setState, frame, accessor, idPrefix, isInlineEditing } = props;
-  const isMetricNumeric = isMetricNumericType(props.datasource, accessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(props.datasource, accessor);
 
   const setColor = useCallback(
     (color: string) => {
@@ -789,7 +789,7 @@ export function DimensionEditorAdditionalSection({
 }: VisualizationDimensionEditorProps<MetricVisualizationState>) {
   const { euiTheme } = useEuiTheme();
 
-  const isMetricNumeric = isMetricNumericType(datasource, accessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
   if (accessor !== state.metricAccessor || !isMetricNumeric) {
     return null;
   }
