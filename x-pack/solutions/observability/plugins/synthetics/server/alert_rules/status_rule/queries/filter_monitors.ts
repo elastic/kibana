@@ -27,6 +27,14 @@ export async function queryFilterMonitors({
   if (!ruleParams.kqlQuery) {
     return;
   }
+
+  // This is just to check if the kqlQuery is valid, if it is not the fromKueryExpression will throw an error
+  try {
+    fromKueryExpression(ruleParams.kqlQuery);
+  } catch (error) {
+    return;
+  }
+
   const filters = toElasticsearchQuery(fromKueryExpression(ruleParams.kqlQuery));
   const { body: result } = await esClient.search(
     {
