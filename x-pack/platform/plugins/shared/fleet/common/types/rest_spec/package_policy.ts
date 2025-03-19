@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
+
+import type { BulkGetPackagePoliciesRequestSchema } from '../../../server/types';
+
 import type {
   PackagePolicy,
   NewPackagePolicy,
@@ -21,6 +25,9 @@ export interface GetPackagePoliciesRequest {
 }
 
 export type GetPackagePoliciesResponse = ListResult<PackagePolicy>;
+export type BulkGetPackagePoliciesRequestBody = TypeOf<
+  typeof BulkGetPackagePoliciesRequestSchema.body
+>;
 export type BulkGetPackagePoliciesResponse = BulkGetResult<PackagePolicy>;
 
 export interface GetOnePackagePolicyRequest {
