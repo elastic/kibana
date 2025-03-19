@@ -15,5 +15,9 @@
     "@kbn/config-schema",
     "@kbn/core-http-server",
     "@kbn/dependency-injection-example-service",
+    "@kbn/core-di-browser",
+    "@kbn/core-application-browser",
+    "@kbn/core-di",
+    "@kbn/core-http-browser",
   ]
 }
