@@ -16,7 +16,8 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ContextMenuWithRouterSupportProps
   extends CommonProps,
-    Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'> {
+    Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'>,
+    Pick<ContextMenuItemNavByRouterProps, 'isNavigationDisabled'> {
   items: ContextMenuItemNavByRouterProps[];
   /**
    * The max width for the popup menu. Default is `32ch`.
@@ -38,8 +39,12 @@ export interface ContextMenuWithRouterSupportProps
    */
   title?: string;
   loading?: boolean;
-  hoverInfo?: React.ReactNode;
-  isNavigationDisabled?: boolean;
+  /**
+   * Additional information to show on ALL menu items.
+   * The content provided here will be applied to all menu items, thus overriding the
+   * `hoverInfo` that may be defined on each one.
+   */
+  hoverInfo?: ContextMenuItemNavByRouterProps['hoverInfo'];
 }
 
 /**
@@ -90,7 +95,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
             key={uuidv4()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
-            hoverInfo={hoverInfo}
+            hoverInfo={hoverInfo || itemProps.hoverInfo}
             onClick={(ev) => {
               handleCloseMenu();
               if (itemProps.onClick) {
