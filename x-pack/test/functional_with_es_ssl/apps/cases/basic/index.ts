@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Cases basic license', function () {
+    this.tags('skipFIPS');
     loadTestFile(require.resolve('./list_view'));
   });
 };
