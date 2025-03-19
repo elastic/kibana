@@ -45,11 +45,32 @@
     {
       "groupName": "webpack",
       "matchDepNames": [
+        "autoprefixer",
+        "clean-webpack-plugin",
+        "css-loader",
+        "file-loader",
+        "loader-utils",
+        "mini-css-extract-plugin",
+        "postcss-loader",
+        "raw-loader",
+        "sass-loader",
+        "style-loader",
+        "url-loader",
+        "val-loader",
         "webpack",
-        "@types/webpack",
+        "webpack-bundle-analyzer",
         "webpack-cli",
         "webpack-dev-server",
-        "webpack-merge"
+        "webpack-merge",
+        "webpack-sources",
+        "webpack-visualizer-plugin2",
+        "@statoscope/webpack-plugin",
+        "@types/loader-utils",
+        "@types/webpack",
+        "@types/webpack-bundle-analyzer",
+        "@types/webpack-env",
+        "@types/webpack-merge",
+        "@types/webpack-sources"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -2137,50 +2158,6 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },
-    {
-      "groupName": "webpack",
-      "matchDepNames": [
-        "autoprefixer",
-        "clean-webpack-plugin",
-        "css-loader",
-        "file-loader",
-        "loader-utils",
-        "mini-css-extract-plugin",
-        "postcss-loader",
-        "raw-loader",
-        "sass-loader",
-        "style-loader",
-        "url-loader",
-        "val-loader",
-        "webpack",
-        "webpack-bundle-analyzer",
-        "webpack-cli",
-        "webpack-dev-server",
-        "webpack-merge",
-        "webpack-sources",
-        "webpack-visualizer-plugin2",
-        "@statoscope/webpack-plugin",
-        "@types/loader-utils",
-        "@types/webpack",
-        "@types/webpack-bundle-analyzer",
-        "@types/webpack-env",
-        "@types/webpack-merge",
-        "@types/webpack-sources"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": false
     },
     {
       "groupName": "yargs",
