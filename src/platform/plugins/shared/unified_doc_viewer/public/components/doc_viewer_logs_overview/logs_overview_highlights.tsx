@@ -12,6 +12,7 @@ import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { first } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
+import { StreamsFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -20,11 +21,14 @@ import { TraceIdHighlightField } from './sub_components/trace_id_highlight_field
 
 export function LogsOverviewHighlights({
   formattedDoc,
-  flattenedDoc,
+  doc,
+  renderStreamsField,
 }: {
   formattedDoc: LogDocumentOverview;
-  flattenedDoc: DataTableRecord['flattened'];
+  doc: DataTableRecord;
+  renderStreamsField?: StreamsFeature['renderStreamsField'];
 }) {
+  const flattenedDoc = doc.flattened;
   const {
     fieldsMetadata: { useFieldsMetadata },
   } = getUnifiedDocViewerServices();
@@ -190,6 +194,7 @@ export function LogsOverviewHighlights({
             {...getHighlightProps(fieldConstants.DATASTREAM_NAMESPACE_FIELD)}
           />
         )}
+        {renderStreamsField && renderStreamsField({ doc })}
         {shouldRenderHighlight(fieldConstants.AGENT_NAME_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewLogShipper"
