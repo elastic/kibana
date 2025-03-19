@@ -22,6 +22,7 @@ import {
 export default function createUnsnoozeRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const NOW = new Date().toISOString();
 
   describe('unsnooze', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -62,11 +63,38 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id);
+          const { body: snoozeSchedule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
+            .set('kbn-xsrf', 'foo')
+            .set('content-type', 'application/json')
+            .send({
+              schedule: {
+                custom: {
+                  duration: '240h',
+                  start: NOW,
+                  recurring: {
+                    occurrences: 1,
+                  },
+                },
+              },
+            })
+            .expect(200);
+
+          const response = await alertUtils.getUnsnoozeRequest(
+            createdAlert.id,
+            snoozeSchedule.schedule.id
+          );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -122,14 +150,45 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id);
+          const { body: snoozeSchedule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
+            .set('kbn-xsrf', 'foo')
+            .set('content-type', 'application/json')
+            .send({
+              schedule: {
+                custom: {
+                  duration: '240h',
+                  start: NOW,
+                  recurring: {
+                    occurrences: 1,
+                  },
+                },
+              },
+            })
+            .expect(200);
+
+          const response = await alertUtils.getUnsnoozeRequest(
+            createdAlert.id,
+            snoozeSchedule.schedule.id
+          );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-            case 'global_read at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'get',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -179,11 +238,42 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id);
+          const { body: snoozeSchedule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
+            .set('kbn-xsrf', 'foo')
+            .set('content-type', 'application/json')
+            .send({
+              schedule: {
+                custom: {
+                  duration: '240h',
+                  start: NOW,
+                  recurring: {
+                    occurrences: 1,
+                  },
+                },
+              },
+            })
+            .expect(200);
+
+          const response = await alertUtils.getUnsnoozeRequest(
+            createdAlert.id,
+            snoozeSchedule.schedule.id
+          );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'get',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -236,7 +326,27 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const response = await alertUtils.getUnsnoozeRequest(createdAlert.id);
+          const { body: snoozeSchedule } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`)
+            .set('kbn-xsrf', 'foo')
+            .set('content-type', 'application/json')
+            .send({
+              schedule: {
+                custom: {
+                  duration: '240h',
+                  start: NOW,
+                  recurring: {
+                    occurrences: 1,
+                  },
+                },
+              },
+            })
+            .expect(200);
+
+          const response = await alertUtils.getUnsnoozeRequest(
+            createdAlert.id,
+            snoozeSchedule.schedule.id
+          );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -244,13 +354,20 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('unsnooze', 'test.restricted-noop', 'alerts'),
+                message: getUnauthorizedErrorMessage('get', 'test.restricted-noop', 'alerts'),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('get', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
             case 'global_read at space1':
-            case 'space_1_all at space1':
-            case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
