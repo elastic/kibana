@@ -12,6 +12,8 @@
     "server/config.ts",
     "../../../../../typings/**/*",
     "ui_tests/**/*",
+    "api_tests/**/*",
+    "vitest.config.mts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -95,6 +97,7 @@
     "@kbn/react-hooks",
     "@kbn/scout",
     "@kbn/react-kibana-mount",
+    "@kbn/scout-api-tests",
   ],
   "exclude": [
     "target/**/*",

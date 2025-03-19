@@ -66,7 +66,8 @@
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
-    "test:type_check": "node scripts/type_check"
+    "test:type_check": "node scripts/type_check",
+    "typecheck:why": "tsc --noEmit --explainFiles > explainTypes.txt"
   },
   "repository": {
     "type": "git",
@@ -1533,6 +1534,7 @@
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
     "@kbn/sample-log-parser": "link:x-pack/platform/packages/shared/kbn-sample-parser",
     "@kbn/scout": "link:src/platform/packages/shared/kbn-scout",
+    "@kbn/scout-api-tests": "link:src/platform/packages/shared/kbn-scout-api-tests",
     "@kbn/scout-info": "link:src/platform/packages/private/kbn-scout-info",
     "@kbn/scout-oblt": "link:x-pack/solutions/observability/packages/kbn-scout-oblt",
     "@kbn/scout-reporting": "link:src/platform/packages/private/kbn-scout-reporting",
@@ -1734,6 +1736,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@typescript-eslint/typescript-estree": "^5.62.0",
+    "@vitest/ui": "3.0.8",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
     "@yarnpkg/lockfile": "^1.1.0",
     "aggregate-error": "^3.1.0",
@@ -1909,6 +1912,8 @@
     "typescript": "5.1.6",
     "val-loader": "^6.0.0",
     "vinyl-fs": "^4.0.0",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.8",
     "watchpack": "^1.6.0",
     "web-streams-polyfill": "^4.0.0",
     "webpack": "^5.95.0",
