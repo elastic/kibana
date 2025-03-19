@@ -21,7 +21,8 @@ import {
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import type { TabItem, TabsSizeConfig, GetTabMenuItems } from '../../types';
+import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../../types';
+import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 
 export interface TabProps {
   item: TabItem;
@@ -29,26 +30,28 @@ export interface TabProps {
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
+  services: TabsServices;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
 }
 
-export const Tab: React.FC<TabProps> = ({
-  item,
-  isSelected,
-  tabContentId,
-  tabsSizeConfig,
-  getTabMenuItems,
-  onLabelEdited,
-  onSelect,
-  onClose,
-}) => {
+export const Tab: React.FC<TabProps> = (props) => {
+  const {
+    item,
+    isSelected,
+    tabContentId,
+    tabsSizeConfig,
+    getTabMenuItems,
+    services,
+    onLabelEdited,
+    onSelect,
+    onClose,
+  } = props;
   const { euiTheme } = useEuiTheme();
-  const containerRef = useRef<HTMLDivElement>();
+  const tabRef = useRef<HTMLDivElement | null>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
 
-  const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
   });
@@ -78,7 +81,7 @@ export const Tab: React.FC<TabProps> = ({
 
   const onClickEvent = useCallback(
     async (event: MouseEvent<HTMLDivElement>) => {
-      if (event.currentTarget === containerRef.current) {
+      if (event.currentTarget === tabRef.current) {
         // if user presses on the space around the buttons, we should still trigger the onSelectEvent
         await onSelectEvent(event);
       }
@@ -86,19 +89,13 @@ export const Tab: React.FC<TabProps> = ({
     [onSelectEvent]
   );
 
-  return (
+  const mainTabContent = (
     <EuiFlexGroup
-      ref={containerRef}
-      {...getTabAttributes(item, tabContentId)}
-      role="tab"
-      aria-selected={isSelected}
       alignItems="center"
       direction="row"
       css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
-      data-test-subj={tabContainerDataTestSubj}
       responsive={false}
       gutterSize="none"
-      onClick={onClickEvent}
     >
       <div css={getTabContentCss()}>
         {isInlineEditActive ? (
@@ -149,6 +146,21 @@ export const Tab: React.FC<TabProps> = ({
       </div>
     </EuiFlexGroup>
   );
+
+  return (
+    <TabWithBackground
+      {...getTabAttributes(item, tabContentId)}
+      ref={tabRef}
+      role="tab"
+      aria-selected={isSelected}
+      data-test-subj={`unifiedTabs_tab_${item.id}`}
+      isSelected={isSelected}
+      services={services}
+      onClick={onClickEvent}
+    >
+      {mainTabContent}
+    </TabWithBackground>
+  );
 };
 
 function getTabContainerCss(
@@ -167,9 +179,7 @@ function getTabContainerCss(
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 
-    background-color: ${isSelected ? euiTheme.colors.emptyShade : euiTheme.colors.lightestShade};
     color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
-    transition: background-color ${euiTheme.animation.fast};
 
     .unifiedTabs__tabActions {
       position: absolute;
@@ -199,7 +209,6 @@ function getTabContainerCss(
           cursor: pointer;
 
           &:hover {
-            background-color: ${euiTheme.colors.lightShade};
             color: ${euiTheme.colors.text};
         }`}
   `;
