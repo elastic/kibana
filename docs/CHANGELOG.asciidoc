@@ -100,11 +100,11 @@ The 8.17.4 release includes the following fixes.
 === Fixes
 Dashboards and Visualizations::
 * Prevents unnecessary re-render when switching between View and Edit modes ({kibana-pull}213902[#213902]).
-* Fixed an issue with the handling of the `viewMode` check in *Lens* ({kibana-pull}213887[#213887]).
+* Fixes an issue with the handling of the `viewMode` check in *Lens* ({kibana-pull}213887[#213887]).
 * Adds `event-annotation-group` to saved object privileges for dashboards ({kibana-pull}212926[#212926]).
 Elastic Observability Solution::
 * Makes {kib} retrieval namespace-specific ({kibana-pull}213505[#213505]).
-* Fixed an error with the `retrieve-elastic-doc` function being unavailable ({kibana-pull}212676[#212676]).
+* Fixes an error with the `retrieve-elastic-doc` function being unavailable ({kibana-pull}212676[#212676]).
 Elastic Security solution::
 For the Elastic Security 8.17.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Management::
