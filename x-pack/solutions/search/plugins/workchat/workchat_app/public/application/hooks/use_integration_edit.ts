@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import type { Integration } from '@kbn/wci-common';
+import { Integration } from '../../../common/integrations';
 import { useWorkChatServices } from './use_workchat_service';
 
 export interface IntegrationEditState {
@@ -66,11 +66,13 @@ export const useIntegrationEdit = ({
 
     (integrationId
       ? integrationService.update(integrationId, {
+          name: editState.name,
           description: editState.description,
           configuration: editState.configuration,
         })
       : integrationService.create({
           type: editState.type,
+          name: editState.name,
           description: editState.description,
           configuration: editState.configuration,
         })

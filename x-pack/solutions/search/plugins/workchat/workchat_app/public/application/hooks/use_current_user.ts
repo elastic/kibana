@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-import type { AuthenticatedUser } from '@kbn/core/public';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '../query_keys';
 import { useKibana } from './use_kibana';
 
 export const useCurrentUser = () => {
@@ -14,17 +14,12 @@ export const useCurrentUser = () => {
     services: { security },
   } = useKibana();
 
-  const [user, setUser] = useState<AuthenticatedUser>();
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const loadedUser = await security.authc.getCurrentUser();
-      setUser(loadedUser);
-    };
-    loadUser().catch(() => {
-      setUser(undefined);
-    });
-  }, [security]);
+  const { data: user } = useQuery({
+    queryKey: queryKeys.users.current,
+    queryFn: async () => {
+      return security.authc.getCurrentUser();
+    },
+  });
 
   return user;
 };

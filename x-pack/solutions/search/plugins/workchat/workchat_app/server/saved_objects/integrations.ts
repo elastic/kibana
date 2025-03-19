@@ -19,6 +19,7 @@ export const integrationSoType: SavedObjectsType<IntegrationAttributes> = {
     properties: {
       integration_id: { type: 'keyword' },
       type: { type: 'keyword' },
+      name: { type: 'keyword' },
       description: { type: 'text' },
       configuration: { dynamic: false, type: 'object', properties: {} },
       created_at: { type: 'date' },
@@ -31,6 +32,7 @@ export const integrationSoType: SavedObjectsType<IntegrationAttributes> = {
 export interface IntegrationAttributes {
   integration_id: string;
   type: IntegrationType;
+  name: string;
   description: string;
   configuration: IntegrationConfiguration;
   created_at: string;

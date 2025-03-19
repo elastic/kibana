@@ -6,32 +6,17 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiButton, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useNavigation } from '../../hooks/use_navigation';
-import { HomeAgentTable } from './home_agent_table';
+import { HomeAgentSection } from './home_agent_section';
+import { HomeIntegrationSection } from './home_integration_section';
 
 export const WorkChatHomeView: React.FC<{}> = () => {
-  const { navigateToWorkchatUrl } = useNavigation();
   return (
     <KibanaPageTemplate panelled>
       <KibanaPageTemplate.Header pageTitle="WorkChat" />
 
-      <KibanaPageTemplate.Section>
-        <EuiTitle size="s">
-          <h4>Your agents</h4>
-        </EuiTitle>
-        <EuiSpacer />
-        <HomeAgentTable />
-        <EuiSpacer />
-        <EuiButton
-          onClick={() => {
-            navigateToWorkchatUrl('/agents');
-          }}
-        >
-          Go to agent management
-        </EuiButton>
-      </KibanaPageTemplate.Section>
+      <HomeAgentSection />
+      <HomeIntegrationSection />
     </KibanaPageTemplate>
   );
 };

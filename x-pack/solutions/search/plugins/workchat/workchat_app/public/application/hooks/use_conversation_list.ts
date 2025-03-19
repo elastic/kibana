@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
-import type { ConversationSummary } from '../../../common/conversations';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '../query_keys';
 import { useWorkChatServices } from './use_workchat_service';
 
 export const useConversationList = ({ agentId }: { agentId: string }) => {
   const { conversationService } = useWorkChatServices();
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-
-    const nextConversations = await conversationService.list({ agentId });
-
-    setConversations(nextConversations);
-    setLoading(false);
-  }, [agentId, conversationService]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  const {
+    data: conversations,
+    isLoading,
+    refetch: refresh,
+  } = useQuery({
+    queryKey: queryKeys.conversations.byAgent(agentId),
+    queryFn: async () => {
+      return conversationService.list({ agentId });
+    },
+    initialData: () => [],
+  });
 
   return {
     conversations,

@@ -8,9 +8,11 @@
 import React from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { type Integration, IntegrationType } from '@kbn/wci-common';
+import { IntegrationType } from '@kbn/wci-common';
+import type { Integration } from '../../../../../common/integrations';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { integrationTypeToLabel } from '../utils';
+
 interface IntegrationListViewProps {
   integrations: Integration[];
 }
@@ -18,6 +20,7 @@ interface IntegrationListViewProps {
 export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integrations }) => {
   const { navigateToWorkchatUrl } = useNavigation();
   const columns: Array<EuiBasicTableColumn<Integration>> = [
+    { field: 'name', name: 'Name' },
     {
       field: 'type',
       name: 'Type',

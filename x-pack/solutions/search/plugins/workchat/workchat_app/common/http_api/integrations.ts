@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Integration, IntegrationConfiguration } from '@kbn/wci-common';
+import type { IntegrationConfiguration } from '@kbn/wci-common';
+import type { Integration } from '../integrations';
 
 export type IntegrationType = string;
 
@@ -17,6 +18,7 @@ export interface ListIntegrationsResponse {
 
 export interface CreateIntegrationPayload {
   type: IntegrationType;
+  name: string;
   description: string;
   configuration: IntegrationConfiguration;
 }
@@ -24,6 +26,7 @@ export interface CreateIntegrationPayload {
 export type CreateIntegrationResponse = Integration;
 
 export interface UpdateIntegrationPayload {
+  name?: string;
   description?: string;
   configuration?: IntegrationConfiguration;
 }
