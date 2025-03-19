@@ -22,14 +22,15 @@ export const DragPreview = React.memo(({ rowId }: { rowId: string }) => {
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
-        gridLayoutStateManager.activePanel$,
+        gridLayoutStateManager.interactionEvent$,
         gridLayoutStateManager.proposedGridLayout$,
       ])
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
-        .subscribe(([activePanel, proposedGridLayout]) => {
-          if (!dragPreviewRef.current) return;
+        .subscribe(([interactionEvent, proposedGridLayout]) => {
+          if (!dragPreviewRef.current || !interactionEvent) return;
 
-          if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
+          const activePanel = proposedGridLayout?.[rowId].panels[interactionEvent?.id];
+          if (!activePanel) {
             dragPreviewRef.current.style.display = 'none';
           } else {
             const panel = proposedGridLayout[rowId].panels[activePanel.id];
