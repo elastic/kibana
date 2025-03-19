@@ -6,7 +6,6 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { UpdateAlertDeletionSettingsRequestBodyV1 } from '../../../../../common/routes/rules_settings/apis/update';
 import { updateAlertDeletionSettingsBodySchemaV1 } from '../../../../../common/routes/rules_settings/apis/update';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
