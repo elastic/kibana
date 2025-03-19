@@ -388,15 +388,17 @@ export function initializePanelsManager(
     } as StateComparators<Pick<DashboardState, 'panels' | 'sections'>>,
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {
+        console.log('CHILDREN', api, api.get);
         children$.next({
           ...children$.value,
           [api.uuid]: api,
         });
       },
       reset: (lastSavedState: DashboardState) => {
+        restoredRuntimeState = {};
         setPanels(lastSavedState.panels);
         setSections(lastSavedState.sections);
-        restoredRuntimeState = {};
+
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;
         for (const panelId of Object.keys(currentChildren)) {

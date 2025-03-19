@@ -96,10 +96,10 @@ export function initializeUnsavedChangesManager({
       if (controlGroupChanges) {
         reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
       }
-      Object.keys(reactEmbeddableChanges).forEach((embeddableId) => {
+      Object.keys(panelsManager.api.children$.getValue()).forEach((embeddableId) => {
         panelsManager.api.setRuntimeStateForChild(
           embeddableId,
-          reactEmbeddableChanges[embeddableId]
+          reactEmbeddableChanges[embeddableId] ?? {}
         );
       });
 
