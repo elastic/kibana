@@ -68,10 +68,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public setup(
-    setupContext: CoreSetup<TPluginsStart, TStart>,
-    plugins: TPluginsSetup
-  ): TSetup | undefined {
+  public setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup {
     this.definition = read(this.name);
     this.instance = this.createPluginInstance();
 
@@ -85,8 +82,8 @@ export class PluginWrapper<
 
     return [
       this.instance?.setup(setupContext, plugins),
-      this.container?.getNamed(Contract, Setup as symbol) as TSetup,
-    ].find(Boolean);
+      this.container?.getNamed<TSetup>(Contract, Setup as symbol),
+    ].find(Boolean)!;
   }
 
   /**
@@ -96,7 +93,7 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public start(startContext: CoreStart, plugins: TPluginsStart): TStart | undefined {
+  public start(startContext: CoreStart, plugins: TPluginsStart): TStart {
     if (this.definition === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
@@ -105,12 +102,10 @@ export class PluginWrapper<
     this.container?.load(toContainerModule(plugins, PluginStart));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.getNamed(Contract, Start as symbol) as TStart,
-    ].find(Boolean);
+      this.container?.getNamed<TStart>(Contract, Start as symbol),
+    ].find(Boolean)!;
 
-    if (contract) {
-      this.startDependencies$.next([startContext, plugins, contract]);
-    }
+    this.startDependencies$.next([startContext, plugins, contract]);
 
     return contract;
   }
