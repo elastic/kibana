@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { UpdateIndexOperation } from '../../../common/update_index';
+import { getRollupJobByIndexName } from '../rollup_job';
 
 export interface UpdateIndexParams {
   esClient: ElasticsearchClient;
@@ -26,18 +27,10 @@ export async function updateIndex({ esClient, index, operations }: UpdateIndexPa
 
     switch (operation) {
       case 'blockWrite': {
-        // hacky support for disabling rollup jobs before blocking write
-        const rollupCaps = await esClient.rollup.getRollupIndexCaps({ index });
-        const rollupIndices = Object.keys(rollupCaps);
-        let rollupJob;
-        if (rollupIndices.length > 0) {
-          // there should only be one job
-          rollupJob = rollupCaps[rollupIndices[0]].rollup_jobs[0].job_id;
-          const jobs = await esClient.rollup.getJobs({ id: rollupJob });
-          // there can only be one job. If its stopped then we don't need rollup handling
-          if (jobs.jobs[0].status.job_state !== 'stopped') {
-            await esClient.rollup.stopJob({ id: rollupJob });
-          }
+        // stop related rollup job if it exists
+        const rollupJob = await getRollupJobByIndexName(esClient, index);
+        if (rollupJob) {
+          await esClient.rollup.stopJob({ id: rollupJob });
         }
 
         res = await esClient.indices.addBlock({ index, block: 'write' });

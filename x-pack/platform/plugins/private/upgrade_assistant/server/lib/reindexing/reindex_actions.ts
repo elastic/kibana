@@ -22,6 +22,7 @@ import {
 } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
 import { FlatSettings } from './types';
+import { getRollupJobByIndexName } from '../rollup_job';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -125,18 +126,8 @@ export const reindexActionsFactory = (
   // ----- Public interface
   return {
     async createReindexOp(indexName: string, opts?: ReindexOptions) {
-      const rollupCaps = await esClient.rollup.getRollupIndexCaps({ index: indexName });
-      const rollupIndices = Object.keys(rollupCaps);
-      let rollupJob;
-      if (rollupIndices.length > 0) {
-        // there should only be one job
-        rollupJob = rollupCaps[rollupIndices[0]].rollup_jobs[0].job_id;
-        const jobs = await esClient.rollup.getJobs({ id: rollupJob });
-        // there can only be one job. If its stopped then we don't need rollup handling
-        if (jobs.jobs[0].status.job_state === 'stopped') {
-          rollupJob = undefined;
-        }
-      }
+      // gets rollup job if it exists and needs stopping, otherwise returns undefined
+      const rollupJob = await getRollupJobByIndexName(esClient, indexName);
 
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,

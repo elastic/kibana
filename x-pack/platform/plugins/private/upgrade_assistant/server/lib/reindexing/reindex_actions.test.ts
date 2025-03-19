@@ -22,6 +22,10 @@ import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
+jest.mock('../rollup_job', () => ({
+  getRollupJobByIndexName: jest.fn(),
+}));
+
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
   let clusterClient: ScopedClusterClientMock;
