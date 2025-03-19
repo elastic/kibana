@@ -10,9 +10,9 @@ import type { ElasticsearchClient, SavedObjectsClient, Logger } from '@kbn/core/
 import semverGte from 'semver/functions/gte';
 
 import type { PackageClient } from '../services';
-import { outputService } from '../services';
+import { appContextService, outputService } from '../services';
 
-import { PackageNotFoundError } from '../errors';
+import { PackageNotFoundError, FleetNotFoundError, FleetError } from '../errors';
 
 import type { SyncIntegrationsData } from './sync_integrations_task';
 
@@ -21,10 +21,10 @@ const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-cc
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
 
-const getSyncedIntegrationsCCRDoc = async (
+const getFollowerIndex = async (
   esClient: ElasticsearchClient,
   abortController: AbortController
-): Promise<SyncIntegrationsData | undefined> => {
+): Promise<string | undefined> => {
   const indices = await esClient.indices.get(
     {
       index: FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX,
@@ -33,7 +33,8 @@ const getSyncedIntegrationsCCRDoc = async (
   );
 
   const indexNames = Object.keys(indices);
-  if (indexNames.length > 1) {
+
+  if (indexNames?.length > 1) {
     throw new Error(
       `Not supported to sync multiple indices with prefix ${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`
     );
@@ -42,10 +43,18 @@ const getSyncedIntegrationsCCRDoc = async (
   if (indexNames.length === 0) {
     return undefined;
   }
+  return indexNames[0];
+};
+
+const getSyncedIntegrationsCCRDoc = async (
+  esClient: ElasticsearchClient,
+  abortController: AbortController
+): Promise<SyncIntegrationsData | undefined> => {
+  const index = await getFollowerIndex(esClient, abortController);
 
   const response = await esClient.search(
     {
-      index: indexNames[0],
+      index,
     },
     { signal: abortController.signal }
   );
@@ -166,5 +175,23 @@ export const syncIntegrationsOnRemote = async (
       throw new Error('Task was aborted');
     }
     await installPackageIfNotInstalled(pkg, packageClient, logger, abortController);
+  }
+};
+
+export const getFollowerIndexStats = async (esClient: ElasticsearchClient, outputId: string) => {
+  const logger = appContextService.getLogger();
+  const index = `${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`.replace('*', outputId);
+
+  try {
+    const res = await esClient.ccr.followStats({
+      index,
+    });
+
+    return res.indices;
+  } catch (err) {
+    logger.error('error', err.message);
+    if (err?.body?.error?.type === 'resource_not_found_exception')
+      throw new FleetNotFoundError(`Index ${index} not found`);
+    throw new FleetError(`Error: ${err.message}`);
   }
 };

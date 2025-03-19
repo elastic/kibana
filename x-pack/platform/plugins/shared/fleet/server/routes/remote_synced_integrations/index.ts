@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FleetAuthzRouter } from '../../services/security';
+
+import { API_VERSIONS } from '../../../common/constants';
+import { REMOTE_SYNCED_INTEGRATIONS_API_ROUTES } from '../../../common/constants';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
+import { genericErrorResponse } from '../schema/errors';
+import { ListResponseSchema } from '../schema/utils';
+import { getOneRemoteSyncedIntegrationsRequestSchema } from '../../types';
+import { getOneRemoteSyncedIntegrationsResponseSchema } from '../../types/models/synced_integrations';
+
+import { getRemoteSyncedIntegrationsInfoHandler } from './handler';
+
+export const registerRoutes = (router: FleetAuthzRouter) => {
+  router.versioned
+    .get({
+      path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+              ],
+            },
+          ],
+        },
+      },
+      summary: `Get CCR Remote synced integrations info`,
+      options: {
+        tags: ['oas-tag:CCR Remote synced integrations'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: getOneRemoteSyncedIntegrationsRequestSchema,
+          response: {
+            200: {
+              body: () => ListResponseSchema(getOneRemoteSyncedIntegrationsResponseSchema),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getRemoteSyncedIntegrationsInfoHandler
+    );
+};
