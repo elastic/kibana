@@ -11,7 +11,7 @@ export const WORKCHAT_APP_ID = 'workchat';
 
 export const uiCapabilities = {
   show: 'show',
-  showManagement: 'show_management',
+  showManagement: 'showManagement',
 };
 
 export const apiCapabilities = {
