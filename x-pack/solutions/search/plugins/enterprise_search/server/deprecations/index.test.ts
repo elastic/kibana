@@ -45,6 +45,7 @@ describe('Enterprise Search node deprecation', () => {
     expect(steps).toHaveLength(6);
     const stepsStr = steps.join(', ');
     expect(stepsStr).toMatch('Go to cloud.elastic.co');
+    expect(stepsStr).not.toMatch("Edit 'kibana.yml'");
     expect(stepsStr).toMatch('You should no longer see any Enterprise Search capacity');
   });
 
@@ -53,10 +54,11 @@ describe('Enterprise Search node deprecation', () => {
     const deprecations = getEnterpriseSearchNodeDeprecation(config, notCloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     const steps = deprecations[0].correctiveActions.manualSteps;
-    expect(steps).toHaveLength(5);
+    expect(steps).toHaveLength(6);
     const stepsStr = steps.join(', ');
     expect(stepsStr).toMatch("remove 'enterpriseSearch.host'");
     expect(stepsStr).toMatch("remove 'enterpriseSearch.customHeaders'");
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.appsDisabled'");
     expect(stepsStr).toMatch('Stop all your Enterprise Search nodes');
   });
 
@@ -65,10 +67,11 @@ describe('Enterprise Search node deprecation', () => {
     const deprecations = getEnterpriseSearchNodeDeprecation(config, notCloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     const steps = deprecations[0].correctiveActions.manualSteps;
-    expect(steps).toHaveLength(5);
+    expect(steps).toHaveLength(6);
     const stepsStr = steps.join(', ');
     expect(stepsStr).toMatch("remove 'enterpriseSearch.host'");
     expect(stepsStr).toMatch("remove 'enterpriseSearch.customHeaders'");
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.appsDisabled'");
     expect(stepsStr).toMatch('Stop all your Enterprise Search nodes');
   });
 
