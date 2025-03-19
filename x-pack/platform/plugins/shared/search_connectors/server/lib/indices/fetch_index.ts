@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/core/server';
 
 import {
-  Connector,
   CONNECTORS_JOBS_INDEX,
   ConnectorSyncJobDocument,
-  ElasticsearchIndexWithIngestion,
   fetchConnectorByIndexName,
+  FetchIndexResult,
   SyncStatus,
 } from '@kbn/search-connectors';
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
-import { mapIndexStats } from './utils/map_index_stats';
-
 const hasInProgressSyncs = async (
-  client: IScopedClusterClient,
+  client: ElasticsearchClient,
   connectorId: string
 ): Promise<{ inProgress: boolean; pending: boolean }> => {
   try {
-    const syncs = await client.asCurrentUser.search<ConnectorSyncJobDocument>({
+    const syncs = await client.search<ConnectorSyncJobDocument>({
       index: CONNECTORS_JOBS_INDEX,
       query: {
         bool: {
@@ -58,43 +55,31 @@ const hasInProgressSyncs = async (
 };
 
 export const fetchIndex = async (
-  client: IScopedClusterClient,
+  client: ElasticsearchClient,
   index: string,
   logger: Logger
-): Promise<ElasticsearchIndexWithIngestion> => {
-  const indexDataResult = await client.asCurrentUser.indices.get({ index });
-  const indexData = indexDataResult[index];
-  const { indices } = await client.asCurrentUser.indices.stats({ index });
+): Promise<FetchIndexResult | undefined> => {
+  const [indexDataResult, indexCountResult, connectorResult] = await Promise.allSettled([
+    client.indices.get({ index }),
+    client.count({ index }),
+    fetchConnectorByIndexName(client, index),
+  ]);
 
-  const { count } = await client.asCurrentUser.count({ index });
-
-  if (!indices || !indices[index] || !indexData) {
-    throw new Error('404');
+  if (indexDataResult.status === 'rejected') {
+    throw indexDataResult.reason;
   }
-  const indexStats = indices[index];
-  let connector: Connector | undefined;
-  try {
-    connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
-  } catch (error) {
-    logger.error(`Error fetching connector for index ${index}: ${error}`);
-  }
-  const hasInProgressSyncsResult = connector
-    ? await hasInProgressSyncs(client, connector.id)
-    : { inProgress: false, pending: false };
+  const indexData = indexDataResult.value;
+  if (!indexData || !indexData[index]) return undefined;
 
-  const indexResult = {
-    count,
-    ...mapIndexStats(indexData, indexStats, index),
-    has_in_progress_syncs: hasInProgressSyncsResult.inProgress,
-    has_pending_syncs: hasInProgressSyncsResult.pending,
-  };
+  const indexRes = indexData[index];
+  const count = indexCountResult.status === 'fulfilled' ? indexCountResult.value.count : 0;
+  const connector = connectorResult.status === 'fulfilled' ? connectorResult.value : undefined;
 
-  if (connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
-    return {
-      ...indexResult,
+  return {
+    index: {
+      ...indexRes,
+      count,
       connector,
-    };
-  }
-
-  return indexResult;
+    },
+  };
 };

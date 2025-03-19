@@ -72,8 +72,8 @@ export const createIndex = async (
     mappings: applyMappings ? defaultMappings : {},
     settings: {
       ...textAnalysisSettings(language ?? undefined),
-      auto_expand_replicas: '0-3',
-      number_of_shards: 2,
+      // auto_expand_replicas: '0-3',
+      // number_of_shards: 2,
     },
   });
 };

@@ -10,6 +10,7 @@
 import {
   HealthStatus,
   IndexName,
+  IndicesIndexState,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -64,3 +65,10 @@ export type ApiViewIndex = ElasticsearchIndex & ElasticsearchViewIndexExtension;
 export type ElasticsearchViewIndex = ConnectorViewIndex | ApiViewIndex;
 
 export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex;
+
+export interface FetchIndexResult {
+  index: IndicesIndexState & {
+    connector?: Connector;
+    count: number;
+  };
+}
