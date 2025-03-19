@@ -165,7 +165,7 @@ Legacy and unused configuration settings were deprecated for the Logs UI. For mo
 Dashboards & Visualizations::
 * ES|QL charts now allow the creation of controls in dashboards. You can control a part of the query such as a field, an interval or a value.
 * Improves Dashboard layout engine ({kibana-pull}205341[#205341]).
-* Adds the ability to rotate the X axis label in *Lens* heatmaps ({kibana-pull}202143[#202143]).
+* Adds the ability to rotate the X axis labels in *Lens* heatmaps ({kibana-pull}202143[#202143]).
 Data ingestion and Fleet::
 * Adds next steps and actions to the agentless integrations flyout ({kibana-pull}203824[#203824]).
 * Adds support for columns when exporting agents to CSV ({kibana-pull}203103[#203103]).
