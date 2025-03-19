@@ -883,19 +883,23 @@ interface GetOrCreateDefaultAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
   policyName?: string;
+  overrides?: Partial<Omit<CreateAgentPolicyRequest['body'], 'name'>>;
 }
 
 /**
  * Creates a default Fleet Agent policy (if it does not yet exist) for testing. If
- * policy already exists, then it will be reused.
+ * policy already exists, then it will be reused. It uses the policy name to find an
+ * existing match.
  * @param kbnClient
  * @param log
  * @param policyName
+ * @param overrides
  */
 export const getOrCreateDefaultAgentPolicy = async ({
   kbnClient,
   log,
   policyName = DEFAULT_AGENT_POLICY_NAME,
+  overrides = {},
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
     kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
@@ -919,6 +923,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
       description: `Policy created by security solution tooling: ${__filename}`,
       namespace: spaceId,
       monitoring_enabled: ['logs', 'metrics'],
+      ...overrides,
     },
   });
 
