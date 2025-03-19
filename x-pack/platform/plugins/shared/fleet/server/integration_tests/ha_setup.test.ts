@@ -180,7 +180,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
         kibanaVersionCheckEnabled: false,
         spec: {
           min: '1.0',
-        }
+        },
       },
     },
     packages: [
