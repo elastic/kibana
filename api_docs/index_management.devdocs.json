@@ -505,6 +505,52 @@
         },
         {
           "parentPluginId": "indexManagement",
+          "id": "def-public.IndexManagementPluginSetup.renderIndexManagementApp",
+          "type": "Function",
+          "tags": [],
+          "label": "renderIndexManagementApp",
+          "description": [],
+          "signature": [
+            "(params: ",
+            {
+              "pluginId": "@kbn/index-management-shared-types",
+              "scope": "common",
+              "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+              "section": "def-common.IndexManagementAppMountParams",
+              "text": "IndexManagementAppMountParams"
+            },
+            ") => Promise<() => void>"
+          ],
+          "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "indexManagement",
+              "id": "def-public.IndexManagementPluginSetup.renderIndexManagementApp.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "params",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/index-management-shared-types",
+                  "scope": "common",
+                  "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                  "section": "def-common.IndexManagementAppMountParams",
+                  "text": "IndexManagementAppMountParams"
+                }
+              ],
+              "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "indexManagement",
           "id": "def-public.IndexManagementPluginSetup.locator",
           "type": "Object",
           "tags": [],

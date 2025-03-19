@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -19,7 +19,7 @@ export default {
   alert,
 };
 
-const Template: ComponentStory<typeof Component> = (props: StatusBarProps) => (
+const Template: StoryFn<typeof Component> = (props: StatusBarProps) => (
   <I18nProvider>
     <KibanaContextProvider services={services}>
       <Component {...props} />

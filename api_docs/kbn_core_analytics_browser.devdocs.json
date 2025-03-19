@@ -871,6 +871,26 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
               },
               {
+                "plugin": "streams",
+                "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/client.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/service/create_chat_service.test.ts"
               },
@@ -885,6 +905,10 @@
               {
                 "plugin": "@kbn/langchain",
                 "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.test.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/utils/recall/recall_and_score.test.ts"
               },
               {
                 "plugin": "apm",
@@ -1089,6 +1113,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/storybook",
+                "path": "src/platform/packages/shared/kbn-storybook/src/lib/decorators.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/shared-ux-chrome-navigation",
@@ -1991,6 +2035,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/analytics/plugins/analytics_plugin_a/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/core",
