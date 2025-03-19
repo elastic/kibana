@@ -11,9 +11,9 @@ import { CUSTOM_QUERY_RULE } from '@kbn/scout-security/src/playwright/constants/
 const RIGHT = 'right';
 
 spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }, () => {
-  spaceTest.beforeEach(async ({ browserAuth, detectionRuleApi }) => {
-    await detectionRuleApi.deleteAll();
-    await detectionRuleApi.createCustomQueryRule(CUSTOM_QUERY_RULE);
+  spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
+    await apiServices.detectionRule.deleteAll();
+    await apiServices.detectionRule.createCustomQueryRule(CUSTOM_QUERY_RULE);
     await browserAuth.loginAsPlatformEngineer();
   });
 

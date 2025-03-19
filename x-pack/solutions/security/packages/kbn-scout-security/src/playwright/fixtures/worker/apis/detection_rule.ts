@@ -12,7 +12,7 @@ import { CUSTOM_QUERY_RULE, CustomQueryRule } from '../../../constants/detection
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_action';
 
-export interface DetectionRuleFixture {
+export interface DetectionRuleApiService {
   createCustomQueryRule: (body: CustomQueryRule) => Promise<void>;
   deleteAll: () => Promise<void>;
 }
@@ -28,7 +28,7 @@ export const createDetectionRuleFixture = async ({
 }) => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
-  const detectionRuleHelper: DetectionRuleFixture = {
+  const detectionRuleHelper: DetectionRuleApiService = {
     createCustomQueryRule: async (body = CUSTOM_QUERY_RULE) => {
       await measurePerformanceAsync(
         log,

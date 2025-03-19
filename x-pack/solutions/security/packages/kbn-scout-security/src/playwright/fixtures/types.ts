@@ -6,6 +6,7 @@
  */
 
 import {
+  ApiServicesFixture,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
   ScoutTestFixtures,
@@ -13,7 +14,7 @@ import {
 } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
 import { SecurityPageObjects } from './test/page_objects';
-import { DetectionRuleFixture } from './worker/apis/detection_rule';
+import { DetectionRuleApiService } from './worker/apis/detection_rule';
 
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
   loginAsPlatformEngineer: () => Promise<void>;
@@ -23,8 +24,17 @@ export interface SecurityTestFixtures extends ScoutTestFixtures {
   pageObjects: SecurityPageObjects;
 }
 
+/*
 export interface SecurityWorkerFixtures extends ScoutWorkerFixtures {
   detectionRuleApi: DetectionRuleFixture;
+}*/
+
+export interface SecurityApiServicesFixture extends ApiServicesFixture {
+  detectionRule: DetectionRuleApiService;
+}
+
+export interface SecurityWorkerFixtures extends ScoutWorkerFixtures {
+  apiServices: SecurityApiServicesFixture;
 }
 
 export interface SecurityParallelTestFixtures extends ScoutParallelTestFixtures {
@@ -32,6 +42,15 @@ export interface SecurityParallelTestFixtures extends ScoutParallelTestFixtures 
   pageObjects: SecurityPageObjects;
 }
 
+/*
 export interface SecurityParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
   detectionRuleApi: DetectionRuleFixture;
+}*/
+
+export interface SecurityParallelApiServicesFixture extends ApiServicesFixture {
+  detectionRule: DetectionRuleApiService;
+}
+
+export interface SecurityParallelWorkerFixtures extends ScoutParallelWorkerFixtures {
+  apiServices: SecurityApiServicesFixture;
 }

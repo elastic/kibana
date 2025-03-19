@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { spaceTest as spaceBase } from '@kbn/scout';
+import { KbnClient, ScoutLogger, spaceTest as spaceBase } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
+import { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/worker';
 import { extendPageObjects } from './test/page_objects';
 import {
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,
   SecurityBrowserAuthFixture,
+  SecurityApiServicesFixture,
 } from './types';
 import { extendBrowserAuth } from './test/authentication';
 import { createDetectionRuleFixture } from './worker/apis/detection_rule';
@@ -43,10 +45,22 @@ export const spaceTest = spaceBase.extend<
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
-  detectionRuleApi: [
-    async ({ kbnClient, log, scoutSpace }, use) => {
+  apiServices: [
+    async (
+      {
+        kbnClient,
+        log,
+        scoutSpace,
+      }: { kbnClient: KbnClient; log: ScoutLogger; scoutSpace: ScoutSpaceParallelFixture },
+      use: (services: SecurityApiServicesFixture) => Promise<void>
+    ) => {
       const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient, log, scoutSpace });
-      await use(detectionRuleHelper);
+
+      const apiServices: SecurityApiServicesFixture = {
+        detectionRule: detectionRuleHelper,
+      };
+
+      await use(apiServices);
     },
     { scope: 'worker' },
   ],
