@@ -14,6 +14,7 @@ import type { InitEntityStoreResponse } from '../../../../../common/api/entity_a
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
+import { InitEntityStoreRequestBody } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 
 export const enableEntityStoreRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -35,7 +36,7 @@ export const enableEntityStoreRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildInitRequestBodyValidation,
+            body: buildInitRequestBodyValidation(InitEntityStoreRequestBody),
           },
         },
       },

@@ -7,24 +7,26 @@
 
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type { RouteValidationResultFactory } from '@kbn/core-http-server';
+import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { InitEntityEngineRequestBody } from '../../../../../common/api/entity_analytics';
+import type { TypeOf, ZodType } from '@kbn/zod';
+import type { InitEntityEngineRequestBody } from '../../../../../common/api/entity_analytics';
 
-export const buildInitRequestBodyValidation = (
-  inputValue: unknown,
-  validationResultFactory: RouteValidationResultFactory
-) => {
-  const zodValidationResult = buildRouteValidationWithZod(InitEntityEngineRequestBody)(
-    inputValue,
-    validationResultFactory
-  );
-  if (zodValidationResult.error) return zodValidationResult;
-  const additionalValidationResult = validateInitializationRequestBody(zodValidationResult.value);
-  if (additionalValidationResult)
-    return validationResultFactory.badRequest(additionalValidationResult);
-  return zodValidationResult;
-};
+export const buildInitRequestBodyValidation =
+  <ZodSchema extends ZodType, Type = TypeOf<ZodSchema>>(
+    schema: ZodSchema
+  ): RouteValidationFunction<Type> =>
+  (inputValue: unknown, validationResultFactory: RouteValidationResultFactory) => {
+    const zodValidationResult = buildRouteValidationWithZod(schema)(
+      inputValue,
+      validationResultFactory
+    );
+    if (zodValidationResult.error) return zodValidationResult;
+    const additionalValidationResult = validateInitializationRequestBody(zodValidationResult.value);
+    if (additionalValidationResult)
+      return validationResultFactory.badRequest(additionalValidationResult);
+    return zodValidationResult;
+  };
 
 /**
  * Validations performed:
