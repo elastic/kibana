@@ -235,6 +235,12 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
             },
           },
           Object {
+            "set": Object {
+              "field": "spaceId",
+              "value": "some-space",
+            },
+          },
+          Object {
             "date_index_name": Object {
               "date_formats": Array [
                 "UNIX_MS",

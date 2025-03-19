@@ -38,6 +38,7 @@ interface Props {
   workingDirectory: string | null | undefined;
   args: string[] | null | undefined;
   session: string | null | undefined;
+  scopeId: string;
 }
 
 export const AuditdGenericFileLine = React.memo<Props>(
@@ -59,10 +60,12 @@ export const AuditdGenericFileLine = React.memo<Props>(
     session,
     text,
     fileIcon,
+    scopeId,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
         eventId={id}
+        scopeId={scopeId}
         contextId={contextId}
         hostName={hostName}
         userName={userName}
@@ -78,6 +81,7 @@ export const AuditdGenericFileLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           field="file.path"
@@ -92,6 +96,7 @@ export const AuditdGenericFileLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <ProcessDraggable
+          scopeId={scopeId}
           contextId={contextId}
           endgamePid={undefined}
           endgameProcessName={undefined}
@@ -101,7 +106,13 @@ export const AuditdGenericFileLine = React.memo<Props>(
           processExecutable={processExecutable}
         />
       </TokensFlexItem>
-      <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
+      <Args
+        scopeId={scopeId}
+        eventId={id}
+        args={args}
+        contextId={contextId}
+        processTitle={processTitle}
+      />
       {result != null && (
         <TokensFlexItem grow={false} component="span">
           {i18n.WITH_RESULT}
@@ -109,6 +120,7 @@ export const AuditdGenericFileLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           field="auditd.result"
@@ -152,6 +164,7 @@ export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
         <Details>
           <AuditdGenericFileLine
             id={id}
+            scopeId={timelineId}
             contextId={contextId}
             text={text}
             hostName={hostName}

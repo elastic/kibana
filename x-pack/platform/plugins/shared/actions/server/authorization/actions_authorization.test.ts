@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
 import {

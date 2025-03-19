@@ -9600,6 +9600,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.apmEnableServiceMapApiV2",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableServiceMapApiV2",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMapApiV2\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.apmEnableTableSearchBar",
         "type": "string",
         "tags": [],
@@ -20057,6 +20072,43 @@
             "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteHandlerResources.response",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "KibanaSuccessResponseFactory",
+              " & ",
+              "KibanaRedirectionResponseFactory",
+              " & ",
+              "KibanaNotModifiedResponseFactory",
+              " & ",
+              "KibanaErrorResponseFactory",
+              " & { file<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>(options: ",
+              "FileHttpResponseOptions",
+              "<T>): ",
+              "IKibanaResponse",
+              "<any>; custom<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>(options: ",
+              "CustomHttpResponseOptions",
+              "<T>): ",
+              "IKibanaResponse",
+              "<any>; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -20111,7 +20163,7 @@
         "label": "APIEndpoint",
         "description": [],
         "signature": [
-          "\"GET /internal/observability/assistant/alert_details_contextual_insights\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\""
+          "\"GET /internal/observability/assistant/alert_details_contextual_insights\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\" | \"GET /internal/observability/alerts/related_dashboards\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/routes/get_global_observability_server_route_repository.ts",
         "deprecated": false,
@@ -20144,7 +20196,33 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          "{ \"GET /internal/observability/alerts/related_dashboards\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/alerts/related_dashboards\", Zod.ZodObject<{ query: Zod.ZodObject<{ alertId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { alertId: string; }, { alertId: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { alertId: string; }; }, { query: { alertId: string; }; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", ",
+          "IKibanaResponse",
+          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -20276,7 +20354,33 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          "{ \"GET /internal/observability/alerts/related_dashboards\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/alerts/related_dashboards\", Zod.ZodObject<{ query: Zod.ZodObject<{ alertId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { alertId: string; }, { alertId: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { alertId: string; }; }, { query: { alertId: string; }; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", ",
+          "IKibanaResponse",
+          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -22465,6 +22569,132 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.solution",
+                "type": "string",
+                "tags": [],
+                "label": "solution",
+                "description": [],
+                "signature": [
+                  "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmEnableServiceMapApiV2",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmEnableServiceMapApiV2]",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.solution",
                 "type": "string",
                 "tags": [],
                 "label": "solution",
@@ -25748,6 +25978,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableServiceInventoryTableSearchBar\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmEnableServiceMapApiV2",
+        "type": "string",
+        "tags": [],
+        "label": "apmEnableServiceMapApiV2",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMapApiV2\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
