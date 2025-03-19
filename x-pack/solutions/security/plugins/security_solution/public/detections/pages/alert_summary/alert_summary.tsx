@@ -29,7 +29,7 @@ export const AlertSummaryPage = memo(() => {
     return (
       <EuiEmptyPrompt
         data-test-subj={LOADING_INTEGRATIONS_TEST_ID}
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+        icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
         title={<h2>{LOADING_INTEGRATIONS}</h2>}
       />
     );
