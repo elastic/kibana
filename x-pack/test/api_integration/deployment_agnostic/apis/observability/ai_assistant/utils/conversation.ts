@@ -11,7 +11,6 @@ import {
   ConversationUpdateEvent,
   Message,
   MessageAddEvent,
-  ConversationCreateEvent,
   MessageRole,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
@@ -33,12 +32,6 @@ export function decodeEvents(body: Readable | string) {
 export function getMessageAddedEvents(body: Readable | string) {
   return decodeEvents(body).filter(
     (event): event is MessageAddEvent => event.type === 'messageAdd'
-  );
-}
-
-export function getConversationCreateEvent(body: Readable | string) {
-  return decodeEvents(body).find(
-    (event): event is ConversationCreateEvent => event.type === 'conversationCreate'
   );
 }
 
@@ -124,8 +117,8 @@ export async function chatComplete({
   expect(status).to.be(200);
   const messageEvents = decodeEvents(body);
   const messageAddedEvents = getMessageAddedEvents(body);
-  const conversation = getConversationCreateEvent(body);
-  return { messageAddedEvents, conversation, messageEvents, status };
+  const conversationCreateEvent = getConversationCreatedEvent(body);
+  return { messageAddedEvents, conversationCreateEvent, messageEvents, status };
 }
 
 // order of instructions can vary, so we sort to compare them
