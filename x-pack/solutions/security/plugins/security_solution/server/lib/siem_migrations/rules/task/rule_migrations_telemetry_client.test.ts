@@ -107,15 +107,20 @@ describe('siemMigrationTelemetry', () => {
 
     siemMigrationTaskTelemetry.failure(new Error(error));
 
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('siem_migrations_migration_failure', {
-      completed: 2,
-      duration: 0,
-      error,
-      failed: 2,
-      migrationId: 'testmigration',
-      model: 'testModel',
-      total: 4,
-    });
+    expect(mockTelemetry.reportEvent).toHaveBeenNthCalledWith(
+      5,
+      'siem_migrations_migration_failure',
+      {
+        completed: 2,
+        duration: 0,
+        error,
+        failed: 2,
+        migrationId: 'testmigration',
+        model: 'testModel',
+        total: 4,
+        eventName: 'Migration failure',
+      }
+    );
   });
   it('start/end migration success', async () => {
     const siemMigrationTaskTelemetry = siemTelemetryClient.startSiemMigrationTask();
@@ -129,14 +134,19 @@ describe('siemMigrationTelemetry', () => {
 
     siemMigrationTaskTelemetry.success();
 
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('siem_migrations_migration_success', {
-      completed: 2,
-      duration: 0,
-      failed: 2,
-      migrationId: 'testmigration',
-      model: 'testModel',
-      total: 4,
-    });
+    expect(mockTelemetry.reportEvent).toHaveBeenNthCalledWith(
+      5,
+      'siem_migrations_migration_success',
+      {
+        completed: 2,
+        duration: 0,
+        failed: 2,
+        migrationId: 'testmigration',
+        model: 'testModel',
+        total: 4,
+        eventName: 'Migration success',
+      }
+    );
   });
   it('start/end rule translation with error', async () => {
     const error = 'test error message';
@@ -147,7 +157,7 @@ describe('siemMigrationTelemetry', () => {
 
     expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
       'siem_migrations_rule_translation_failure',
-      { error, migrationId: 'testmigration', model: 'testModel' }
+      { error, migrationId: 'testmigration', model: 'testModel', eventName: 'Translation failure' }
     );
   });
   it('start/end rule translation success with prebuilt', async () => {
@@ -164,6 +174,7 @@ describe('siemMigrationTelemetry', () => {
         duration: 0,
         prebuiltMatch: true,
         translationResult: 'full',
+        eventName: 'Translation success',
       }
     );
   });
@@ -181,6 +192,7 @@ describe('siemMigrationTelemetry', () => {
         prebuiltMatch: false,
         translationResult: 'partial',
         duration: 0,
+        eventName: 'Translation success',
       }
     );
   });
@@ -196,6 +208,7 @@ describe('siemMigrationTelemetry', () => {
       postFilterIntegrationName: 'testIntegration1',
       preFilterIntegrationCount: 2,
       preFilterIntegrationNames: ['testIntegration1', 'testIntegration2'],
+      eventName: 'Integrations match',
     });
   });
   it('reportIntegrationMatch without postFilter matches', async () => {
@@ -209,6 +222,7 @@ describe('siemMigrationTelemetry', () => {
       postFilterIntegrationName: '',
       preFilterIntegrationCount: 2,
       preFilterIntegrationNames: ['testIntegration1', 'testIntegration2'],
+      eventName: 'Integrations match',
     });
   });
   it('reportPrebuiltRulesMatch with a match', async () => {
@@ -223,6 +237,7 @@ describe('siemMigrationTelemetry', () => {
       postFilterRuleName: 'rule1id',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
+      eventName: 'Prebuilt rules match',
     });
   });
   it('reportPrebuiltRulesMatch without postFilter matches', async () => {
@@ -236,6 +251,7 @@ describe('siemMigrationTelemetry', () => {
       postFilterRuleName: '',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
+      eventName: 'Prebuilt rules match',
     });
   });
 });
