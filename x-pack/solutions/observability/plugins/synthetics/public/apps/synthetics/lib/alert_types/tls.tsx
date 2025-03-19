@@ -36,6 +36,8 @@ export const initTlsAlertType: AlertTypeInitializer = ({
       plugins={plugins}
       ruleParams={params.ruleParams}
       setRuleParams={params.setRuleParams}
+      // Passing the id to know if the user is creating or modifying the rule
+      id={params.id}
     />
   ),
   description,
