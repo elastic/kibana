@@ -12,6 +12,10 @@ synchronize_lexer_grammar () {
   cp "$source_file" "$destination_file"
   cp -r "$source_lib_dir" "$destination_lib_dir"
 
+  echo "Source files:"
+  ls -l "$source_lib_dir"
+
+  echo "Copied files:"
   ls -l "$destination_lib_dir"
 
   # Insert the license header
