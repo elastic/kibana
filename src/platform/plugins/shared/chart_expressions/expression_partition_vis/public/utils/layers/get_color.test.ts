@@ -146,7 +146,8 @@ describe('get color', () => {
         getAll: () => [mockPalette1],
       };
     };
-    it('should return the correct color based on the parent sortIndex', () => {
+
+    it('should return the correct color based on color map index', () => {
       const d: SimplifiedArrayNode = {
         depth: 1,
         sortIndex: 0,
@@ -178,6 +179,42 @@ describe('get color', () => {
         dataMock.fieldFormats,
         visData.columns[0],
         getColorIndexMap(ChartTypes.PIE)
+      );
+      expect(color).toEqual(colors[2]);
+    });
+
+    it('should return the correct color based on the parent sortIndex when no color map index found', () => {
+      const d: SimplifiedArrayNode = {
+        depth: 1,
+        sortIndex: 0,
+        parent: {
+          children: [
+            ['ES-Air', undefined],
+            ['Kibana Airlines', undefined],
+          ],
+          depth: 0,
+          sortIndex: 0,
+        },
+        children: [],
+      };
+
+      const color = getColor(
+        ChartTypes.PIE,
+        'ES-Air',
+        d,
+        0,
+        false,
+        {},
+        distinctSeries,
+        dataLength,
+        visParams,
+        getPaletteRegistry(),
+        { getColor: () => undefined },
+        false,
+        false,
+        dataMock.fieldFormats,
+        visData.columns[0],
+        new Map()
       );
       expect(color).toEqual(colors[0]);
     });

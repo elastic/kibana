@@ -230,9 +230,11 @@ describe('xy_visualization', () => {
                     "color": Object {
                       "type": "loop",
                     },
-                    "rule": Object {
-                      "type": "other",
-                    },
+                    "rules": Array [
+                      Object {
+                        "type": "other",
+                      },
+                    ],
                     "touched": false,
                   },
                 ],
