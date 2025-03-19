@@ -214,7 +214,7 @@ export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
                 schema.arrayOf(
                   schema
                     .object({
-                      id: schema.string(),
+                      id: schema.maybe(schema.string()),
                       data_stream: schema.object({
                         dataset: schema.string(),
                         type: schema.maybe(schema.string()),

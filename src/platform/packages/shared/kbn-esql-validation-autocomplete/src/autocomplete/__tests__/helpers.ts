@@ -321,6 +321,12 @@ export interface SuggestOptions {
   callbacks?: ESQLCallbacks;
 }
 
+export type AssertSuggestionsFn = (
+  query: string,
+  expected: Array<string | PartialSuggestionWithText>,
+  opts?: SuggestOptions
+) => Promise<void>;
+
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
     throw new Error('Caret must be a single character');
