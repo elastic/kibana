@@ -211,7 +211,7 @@ class AgentlessAgentService {
     return response;
   }
 
-  public async upgradeAgentlessDeployment(policyId: string, verify: boolean) {
+  public async upgradeAgentlessDeployment(policyId: string) {
     const logger = appContextService.getLogger();
     const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
