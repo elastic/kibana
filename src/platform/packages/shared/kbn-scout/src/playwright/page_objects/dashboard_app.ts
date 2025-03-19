@@ -110,7 +110,7 @@ export class DashboardApp {
       const count = await this.page.locator(options.selector).count();
       if (count === expectedCount) return;
       // Short polling interval
-      // eslint-disable-next-line playwright/no-wait-for-timeout
+
       await this.page.waitForTimeout(100);
     }
 
