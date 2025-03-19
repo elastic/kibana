@@ -18,7 +18,6 @@ import {
   getReferencesForControls,
   getReferencesForPanelId,
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { UnsavedPanelState } from '../dashboard_container/types';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
@@ -27,9 +26,9 @@ import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getSerializedState } from './get_serialized_state';
-import { openSaveModal } from './open_save_modal';
+import { openSaveModal } from './save_modal/open_save_modal';
 import { initializePanelsManager } from './panels_manager';
-import { initializeSearchSessionManager } from './search_session_manager';
+import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
@@ -40,6 +39,7 @@ import {
   DashboardCreationOptions,
   DashboardInternalApi,
   DashboardState,
+  UnsavedPanelState,
 } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';

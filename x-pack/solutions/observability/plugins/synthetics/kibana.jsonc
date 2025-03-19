@@ -41,7 +41,8 @@
       "uiActions",
       "unifiedSearch",
       "presentationUtil",
-      "charts"
+      "charts",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "cloud",

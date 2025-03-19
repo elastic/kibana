@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { createLogger } from '../../lib/utils/create_logger';
-import { getApmEsClient } from './get_apm_es_client';
-import { getLogsEsClient } from './get_logs_es_client';
-import { getInfraEsClient } from './get_infra_es_client';
+import { getClients } from './get_clients';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
-import { getSyntheticsEsClient } from './get_synthetics_es_client';
-import { getOtelSynthtraceEsClient } from './get_otel_es_client';
-import { getEntitiesEsClient } from './get_entities_es_client';
-import { getEntitiesKibanaClient } from './get_entites_kibana_client';
+import { getEsClientTlsSettings } from './ssl';
 
-export async function bootstrap(runOptions: RunOptions) {
+export async function bootstrap({
+  skipClientBootstrap,
+  ...runOptions
+}: RunOptions & { skipClientBootstrap?: boolean }) {
   const logger = createLogger(runOptions.logLevel);
-
-  let version = runOptions['assume-package-version'];
 
   const { kibanaUrl, esUrl } = await getServiceUrls({ ...runOptions, logger });
 
@@ -31,76 +28,37 @@ export async function bootstrap(runOptions: RunOptions) {
     logger,
   });
 
-  if (!version) {
-    version = await kibanaClient.fetchLatestApmPackageVersion();
-    await kibanaClient.installApmPackage(version);
-  } else if (version === 'latest') {
-    version = await kibanaClient.fetchLatestApmPackageVersion();
-  }
-
-  logger.info(`Using package version: ${version}`);
-
-  const apmEsClient = getApmEsClient({
-    target: esUrl,
-    logger,
-    concurrency: runOptions.concurrency,
-    version,
+  const client = new Client({
+    node: esUrl,
+    tls: getEsClientTlsSettings(esUrl),
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
-  const logsEsClient = getLogsEsClient({
-    target: esUrl,
+  const clients = await getClients({
     logger,
-    concurrency: runOptions.concurrency,
-  });
-
-  const infraEsClient = getInfraEsClient({
-    target: esUrl,
-    logger,
-    concurrency: runOptions.concurrency,
-  });
-
-  const entitiesEsClient = getEntitiesEsClient({
-    target: esUrl,
-    logger,
-    concurrency: runOptions.concurrency,
-  });
-
-  const entitiesKibanaClient = getEntitiesKibanaClient({
-    target: kibanaUrl,
-    logger,
-  });
-
-  const syntheticsEsClient = getSyntheticsEsClient({
-    target: esUrl,
-    logger,
-    concurrency: runOptions.concurrency,
-  });
-  const otelEsClient = getOtelSynthtraceEsClient({
-    target: esUrl,
-    logger,
-    concurrency: runOptions.concurrency,
+    packageVersion: runOptions['assume-package-version'],
+    options: {
+      client,
+      logger,
+      concurrency: runOptions.concurrency,
+      kibana: kibanaClient,
+    },
+    skipBootstrap: skipClientBootstrap,
   });
 
   if (runOptions.clean) {
-    await apmEsClient.clean();
-    await logsEsClient.clean();
-    await infraEsClient.clean();
-    await entitiesEsClient.clean();
-    await syntheticsEsClient.clean();
-    await otelEsClient.clean();
+    for (const synthtraceClient of Object.values(clients)) {
+      if ('clean' in synthtraceClient) {
+        await synthtraceClient.clean();
+      }
+    }
   }
 
   return {
+    clients,
     logger,
-    apmEsClient,
-    logsEsClient,
-    infraEsClient,
-    entitiesEsClient,
-    syntheticsEsClient,
-    otelEsClient,
-    version,
     kibanaUrl,
     esUrl,
-    entitiesKibanaClient,
   };
 }

@@ -283,6 +283,16 @@ const getEuiProps = (
         })
         .flat();
 
+  /**
+   * Check if the click event is a special click (e.g. right click, click with modifier key)
+   * We do not want to prevent the default behavior in these cases.
+   */
+  const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+    const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
+    const isLeftClickEvent = e.button === 0;
+    return isModifiedEvent || !isLeftClickEvent;
+  };
+
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
         href,
@@ -298,6 +308,10 @@ const getEuiProps = (
 
           if (customOnClick) {
             customOnClick(e);
+            return;
+          }
+
+          if (isSpecialClick(e)) {
             return;
           }
 
@@ -326,6 +340,10 @@ const getEuiProps = (
     // Do not navigate if it is a collapsible accordion, if there is a "link" defined it
     // will be used in the breadcrumb navigation.
     if (isAccordion && isCollapsible) return;
+
+    if (isSpecialClick(e)) {
+      return;
+    }
 
     if (href !== undefined) {
       e.preventDefault();
@@ -532,7 +550,9 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   }, [topLevelItems, serializeAccordionItems]);
 
   if (!isEuiCollapsibleNavItemProps(props)) {
-    throw new Error(`Invalid EuiCollapsibleNavItem props for node ${props.id}`);
+    throw new Error(
+      `Invalid EuiCollapsibleNavItem props for node ${(props as EuiCollapsibleNavSubItemProps).id}`
+    );
   }
 
   if (!isVisible) {

@@ -27,7 +27,6 @@ import type {
   DateHistogramIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { StartDependencies } from './plugin';
 
@@ -268,7 +267,7 @@ export const App = (props: {
             onTableRowClick={(_data) => {
               // call back event for on table row click event
             }}
-            viewMode={ViewMode.VIEW}
+            viewMode={'view'}
             extraActions={[
               {
                 id: 'testAction',
