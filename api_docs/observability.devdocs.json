@@ -20072,6 +20072,43 @@
             "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteHandlerResources.response",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "KibanaSuccessResponseFactory",
+              " & ",
+              "KibanaRedirectionResponseFactory",
+              " & ",
+              "KibanaNotModifiedResponseFactory",
+              " & ",
+              "KibanaErrorResponseFactory",
+              " & { file<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>(options: ",
+              "FileHttpResponseOptions",
+              "<T>): ",
+              "IKibanaResponse",
+              "<any>; custom<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>(options: ",
+              "CustomHttpResponseOptions",
+              "<T>): ",
+              "IKibanaResponse",
+              "<any>; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -20126,7 +20163,7 @@
         "label": "APIEndpoint",
         "description": [],
         "signature": [
-          "\"GET /internal/observability/assistant/alert_details_contextual_insights\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\""
+          "\"GET /internal/observability/assistant/alert_details_contextual_insights\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\" | \"GET /internal/observability/alerts/related_dashboards\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/routes/get_global_observability_server_route_repository.ts",
         "deprecated": false,
@@ -20159,7 +20196,33 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          "{ \"GET /internal/observability/alerts/related_dashboards\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/alerts/related_dashboards\", Zod.ZodObject<{ query: Zod.ZodObject<{ alertId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { alertId: string; }, { alertId: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { alertId: string; }; }, { query: { alertId: string; }; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", ",
+          "IKibanaResponse",
+          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -20291,7 +20354,33 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          "{ \"GET /internal/observability/alerts/related_dashboards\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/alerts/related_dashboards\", Zod.ZodObject<{ query: Zod.ZodObject<{ alertId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { alertId: string; }, { alertId: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { alertId: string; }; }, { query: { alertId: string; }; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", ",
+          "IKibanaResponse",
+          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
