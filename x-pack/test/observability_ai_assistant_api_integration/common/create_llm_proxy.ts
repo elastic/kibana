@@ -282,7 +282,7 @@ export class LlmProxy {
               requestBody,
               status: once((status: number) => {
                 response.writeHead(status, {
-                  'Elastic-Interceptor': name.replace(/[^a-zA-Z0-9 ]/g, ''), // Keeps only alphanumeric characters and spaces
+                  'Elastic-Interceptor': name.replace(/[^a-zA-Z0-9 ]/g, ' '), // Keeps only alphanumeric characters and spaces
                   'Content-Type': 'text/event-stream',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',
