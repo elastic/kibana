@@ -20,10 +20,12 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Agent } from '../../../../common/agents';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentList } from '../../hooks/use_agent_list';
+import { useCapabilities } from '../../hooks/use_capabilities';
 
 export const HomeAgentSection: React.FC<{}> = () => {
   const { createWorkchatUrl, navigateToWorkchatUrl } = useNavigation();
   const { agents } = useAgentList();
+  const { showManagement } = useCapabilities();
 
   const columns: Array<EuiBasicTableColumn<Agent>> = [
     {
@@ -44,17 +46,19 @@ export const HomeAgentSection: React.FC<{}> = () => {
       <EuiSpacer />
       <EuiBasicTable columns={columns} items={agents} />
       <EuiSpacer />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={() => {
-              navigateToWorkchatUrl('/agents');
-            }}
-          >
-            Go to agent management
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {showManagement && (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                navigateToWorkchatUrl('/agents');
+              }}
+            >
+              Go to agent management
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </KibanaPageTemplate.Section>
   );
 };
