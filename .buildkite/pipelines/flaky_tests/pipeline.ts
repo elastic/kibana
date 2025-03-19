@@ -139,6 +139,7 @@ for (const testSuite of testSuites) {
       command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
       env: {
         FTR_CONFIG: testSuite.ftrConfig,
+        USE_CHROME_BETA: 'true',
       },
       key: `ftr-suite-${suiteIndex++}`,
       label: `${testSuite.ftrConfig}`,
