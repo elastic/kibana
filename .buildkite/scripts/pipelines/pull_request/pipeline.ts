@@ -263,6 +263,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
       );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml'));
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml')
       );
