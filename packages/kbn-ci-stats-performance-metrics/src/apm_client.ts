@@ -54,6 +54,7 @@ export class ApmClient {
       auth,
       baseURL,
       timeout,
+      allowAbsoluteUrls: false,
     });
 
     this.logger = logger || console;

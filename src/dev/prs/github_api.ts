@@ -29,6 +29,7 @@ export class GithubApi {
   constructor(private accessToken?: string) {
     this.api = axios.create({
       baseURL: 'https://api.github.com/',
+      allowAbsoluteUrls: false,
       headers: {
         Accept: 'application/vnd.github.v3+json',
         'User-Agent': 'kibana/update_prs_cli',
