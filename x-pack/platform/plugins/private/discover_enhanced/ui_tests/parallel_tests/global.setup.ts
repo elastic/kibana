@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ingestTestDataHook } from '@kbn/scout';
-import { type FullConfig } from '@playwright/test';
+import { globalSetupHook } from '@kbn/scout';
 import { testData } from '../fixtures';
 
-async function globalSetup(config: FullConfig) {
+globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
   // add archives to load, if needed
   const archives = [
     testData.ES_ARCHIVES.LOGSTASH,
@@ -17,8 +16,8 @@ async function globalSetup(config: FullConfig) {
     testData.ES_ARCHIVES.ECOMMERCE,
   ];
 
-  return ingestTestDataHook(config, archives);
-}
-
-// eslint-disable-next-line import/no-default-export
-export default globalSetup;
+  log.debug('[setup] loading test data (only if indexes do not exist)...');
+  for (const archive of archives) {
+    await esArchiver.loadIfNeeded(archive);
+  }
+});

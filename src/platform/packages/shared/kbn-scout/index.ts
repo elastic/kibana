@@ -12,11 +12,10 @@ export {
   expect,
   test,
   spaceTest,
+  globalSetupHook,
   tags,
   createPlaywrightConfig,
   createLazyPageObject,
-  ingestTestDataHook,
-  ingestSynthtraceDataHook,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
@@ -36,6 +35,8 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  KibanaRole,
+  ElasticsearchRoleDescriptor,
 } from './src/types';
 
 // re-export from Playwright

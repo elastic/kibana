@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-oblt';
+lexer grammar Rrf;
 
-// eslint-disable-next-line import/no-default-export
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+DEV_RRF : {this.isDevVersion()}? 'rrf' -> pushMode(EXPRESSION_MODE);
