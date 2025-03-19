@@ -113,7 +113,7 @@ export class ScoutJestReporter extends BaseReporter {
       ...this.baseTestRunInfo,
       config: {
         ...this.baseTestRunInfo.config,
-        file: this.getScoutFileInfoForPath(path.relative(metadata.configFilePath, REPO_ROOT)),
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, metadata.configFilePath)),
         category: metadata.testRunConfigCategory,
       },
     };
