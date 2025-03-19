@@ -46,7 +46,7 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DiscoverAppLocator } from '../common';
 import type { DiscoverCustomizationContext } from './customizations';
-import { type DiscoverContainerProps } from './components/discover_container';
+import type { DiscoverContainerProps } from './components/discover_container';
 
 /**
  * @public
@@ -122,6 +122,11 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
+  /**
+   * @deprecated
+   * Embedding Discover in other applications is discouraged and will be removed in the future.
+   * Use the Discover context awareness framework instead to register a custom Discover profile.
+   */
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
 }
 

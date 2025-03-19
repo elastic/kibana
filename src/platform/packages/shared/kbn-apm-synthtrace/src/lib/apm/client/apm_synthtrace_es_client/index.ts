@@ -29,7 +29,7 @@ export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOpt
 }
 
 export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
-  private version: string;
+  public readonly version: string;
 
   constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
     super({
