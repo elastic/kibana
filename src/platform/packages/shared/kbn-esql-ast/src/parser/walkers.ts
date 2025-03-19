@@ -554,11 +554,11 @@ const visitMatchBooleanExpression = (
   if (dataTypeCtx) {
     expression = Builder.expression.inlineCast(
       {
-        castType: ctx.dataType().getText().toLowerCase() as InlineCastingType,
+        castType: dataTypeCtx.getText().toLowerCase() as InlineCastingType,
         value: expression,
       },
       {
-        location: getPosition(ctx.start, ctx.stop),
+        location: getPosition(ctx.start, dataTypeCtx.stop),
         incomplete: Boolean(ctx.exception),
       }
     );

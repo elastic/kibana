@@ -8,6 +8,7 @@
  */
 
 import { parse } from '..';
+import { ESQLColumn, ESQLCommand, ESQLFunction, ESQLInlineCast } from '../../types';
 
 describe('WHERE', () => {
   describe('correctly formatted', () => {
@@ -81,6 +82,17 @@ describe('WHERE', () => {
         });
       });
 
+      it('correctly reports match expression location', () => {
+        const text = `FROM index | WHERE abc /*a*/ :  /*a*/  123`;
+        const { root } = parse(text);
+        const expression = root.commands[1].args[0] as ESQLFunction;
+
+        expect(expression.name).toBe(':');
+        expect(text.slice(expression.location.min, expression.location.max + 1)).toBe(
+          'abc /*a*/ :  /*a*/  123'
+        );
+      });
+
       it('simple column with match expression and inline cast', () => {
         const text = `FROM index | WHERE abc :: INTEGER : 123`;
         const { root } = parse(text);
@@ -113,7 +125,25 @@ describe('WHERE', () => {
         });
       });
 
-      // TODO: verify that locations are correct
+      it('correctly reports match expression with inline cast location', () => {
+        const text = `FROM index | WHERE abc /*a*/ ::  /*a*/ INTEGER :  123`;
+        const { root } = parse(text);
+        const command = root.commands[1] as ESQLCommand;
+        const match = command.args[0] as ESQLFunction;
+        const cast = match.args[0] as ESQLInlineCast;
+        const column = cast.value as ESQLColumn;
+
+        expect(text.slice(command.location.min, command.location.max + 1)).toBe(
+          'WHERE abc /*a*/ ::  /*a*/ INTEGER :  123'
+        );
+        expect(text.slice(match.location.min, match.location.max + 1)).toBe(
+          'abc /*a*/ ::  /*a*/ INTEGER :  123'
+        );
+        expect(text.slice(cast.location.min, cast.location.max + 1)).toBe(
+          'abc /*a*/ ::  /*a*/ INTEGER'
+        );
+        expect(text.slice(column.location.min, column.location.max + 1)).toBe('abc');
+      });
     });
   });
 });
