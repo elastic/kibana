@@ -72,11 +72,9 @@ const getMetricLayerConfiguration = (
 ): {
   groups: VisualizationDimensionGroupConfig[];
 } => {
-  const currentData = props.frame.activeData?.[props.state.layerId];
-
+  const datasource = props.frame.datasourceLayers[props.state.layerId];
   const isPrimaryMetricNumeric = Boolean(
-    props.state.metricAccessor &&
-      isNumericFieldForDatatable(currentData, props.state.metricAccessor)
+    props.state.metricAccessor && getAccessorType(datasource, props.state.metricAccessor).isNumeric
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
@@ -99,7 +97,7 @@ const getMetricLayerConfiguration = (
 
   const isSecondaryMetricNumeric = Boolean(
     props.state.secondaryMetricAccessor &&
-      isNumericFieldForDatatable(currentData, props.state.secondaryMetricAccessor)
+      getAccessorType(datasource, props.state.secondaryMetricAccessor).isNumeric
   );
 
   const getSecondaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
