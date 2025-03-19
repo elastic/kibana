@@ -1081,8 +1081,14 @@
           "EsArchiverFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
@@ -1187,8 +1193,14 @@
           "UiSettingsFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { kbnUrl: ",
           {
             "pluginId": "@kbn/scout",
@@ -1449,8 +1461,14 @@
           },
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; } & { fleetApi: ",
-          "FleetApiFixture",
+          "; } & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { log: ",
           {
             "pluginId": "@kbn/scout",
@@ -1579,8 +1597,14 @@
           "UiSettingsFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { kbnUrl: ",
           {
             "pluginId": "@kbn/scout",
@@ -1606,6 +1630,34 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.ApiServicesFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiServicesFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/apis/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ApiServicesFixture.fleet",
+            "type": "Object",
+            "tags": [],
+            "label": "fleet",
+            "description": [],
+            "signature": [
+              "FleetApiService"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/apis/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/scout",
         "id": "def-common.CDPSession",
@@ -6562,17 +6614,6 @@
         "tags": [],
         "label": "ScoutParallelWorkerFixtures",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutParallelWorkerFixtures",
-            "text": "ScoutParallelWorkerFixtures"
-          },
-          " extends ",
-          "ApiParallelWorkerFixtures"
-        ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6680,6 +6721,26 @@
             "description": [],
             "signature": [
               "ScoutSpaceParallelFixture"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
             "deprecated": false,
@@ -7136,7 +7197,13 @@
             "text": "ScoutWorkerFixtures"
           },
           " extends ",
-          "ApiFixtures"
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
         "deprecated": false,
@@ -7259,6 +7326,26 @@
             "description": [],
             "signature": [
               "UiSettingsFixture"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
