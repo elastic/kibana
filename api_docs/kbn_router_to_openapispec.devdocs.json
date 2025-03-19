@@ -27,9 +27,9 @@
           "CoreVersionedRouter",
           "[]; }, opts: ",
           "GenerateOpenApiDocumentOptions",
-          ") => ",
+          ") => Promise<",
           "OpenAPIV3",
-          ".Document<{}>"
+          ".Document<{}>>"
         ],
         "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
         "deprecated": false,

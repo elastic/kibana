@@ -6,55 +6,52 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 
 import { removeExternalLinkText } from '../../common/test_utils';
 import { MarkdownRenderer } from './renderer';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('Markdown', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   describe('markdown links', () => {
     const markdownWithLink = 'A link to an external site [External Site](https://google.com)';
 
     test('it renders the expected link text', () => {
-      const result = appMockRender.render(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
+      renderWithTestingProviders(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(removeExternalLinkText(result.getByTestId('markdown-link').textContent)).toContain(
+      expect(removeExternalLinkText(screen.getByTestId('markdown-link').textContent)).toContain(
         'External Site'
       );
     });
 
     test('it renders the expected href', () => {
-      const result = appMockRender.render(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
+      renderWithTestingProviders(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(result.getByTestId('markdown-link')).toHaveProperty('href', 'https://google.com/');
+      expect(screen.getByTestId('markdown-link')).toHaveProperty('href', 'https://google.com/');
     });
 
     test('it does NOT render the href if links are disabled', () => {
-      const result = appMockRender.render(
+      renderWithTestingProviders(
         <MarkdownRenderer disableLinks={true}>{markdownWithLink}</MarkdownRenderer>
       );
 
-      expect(result.getByTestId('markdown-link')).not.toHaveProperty('href');
+      expect(screen.getByTestId('markdown-link')).not.toHaveProperty('href');
     });
 
     test('it opens links in a new tab via target="_blank"', () => {
-      const result = appMockRender.render(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
+      renderWithTestingProviders(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(result.getByTestId('markdown-link')).toHaveProperty('target', '_blank');
+      expect(screen.getByTestId('markdown-link')).toHaveProperty('target', '_blank');
     });
 
     test('it sets the link `rel` attribute to `noopener` to prevent the new page from accessing `window.opener`, `nofollow` to note the link is not endorsed by us, and noreferrer to prevent the browser from sending the current address', () => {
-      const result = appMockRender.render(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
+      renderWithTestingProviders(<MarkdownRenderer>{markdownWithLink}</MarkdownRenderer>);
 
-      expect(result.getByTestId('markdown-link')).toHaveProperty(
+      expect(screen.getByTestId('markdown-link')).toHaveProperty(
         'rel',
         'nofollow noopener noreferrer'
       );
