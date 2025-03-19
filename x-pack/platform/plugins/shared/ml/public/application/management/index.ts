@@ -117,6 +117,7 @@ export function registerManagementSections(
             unmountAppCallback();
           };
         },
+        hideFromSidebar: false,
       })
       .enable();
   });

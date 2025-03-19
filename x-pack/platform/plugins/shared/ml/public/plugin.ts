@@ -271,6 +271,18 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerHomeFeature(pluginsSetup.home);
             }
 
+            if (pluginsSetup.management && fullLicense && mlCapabilities.canGetMlInfo) {
+              registerManagementSections(
+                pluginsSetup.management,
+                core,
+                { telemetry: telemetryClient, ...deps },
+                this.isServerless,
+                this.enabledFeatures,
+                this.nlpSettings,
+                this.experimentalFeatures
+              );
+            }
+
             const {
               registerEmbeddables,
               registerMlUiActions,
@@ -284,18 +296,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               this.isServerless,
               isEsqlEnabled
             );
-
-            if (pluginsSetup.management && fullLicense && mlCapabilities.canGetMlInfo) {
-              registerManagementSections(
-                pluginsSetup.management,
-                core,
-                { telemetry: telemetryClient, ...deps },
-                this.isServerless,
-                this.enabledFeatures,
-                this.nlpSettings,
-                this.experimentalFeatures
-              );
-            }
 
             if (
               pluginsSetup.triggersActionsUi &&

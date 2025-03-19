@@ -95,7 +95,6 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
       { link: 'management:analytics' },
       { link: 'management:trained_models' },
       { link: 'management:supplied_configurations' },
-      { link: 'management:ad_settings' },
     ],
   },
   {
