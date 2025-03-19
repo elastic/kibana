@@ -1,15 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { CONTEXT, BASE64, URL } from '../constants';
-import { ExpressionRepeatImageFunction } from '../types';
+import { ExpressionValueRender, ExpressionFunctionDefinition } from '../../types';
+
+const BASE64 = '`base64`';
+const URL = 'URL';
+
+interface Arguments {
+  image: string | null;
+  size: number;
+  max: number | null;
+  emptyImage: string | null;
+}
+
+interface Return {
+  count: number;
+  image: string;
+  size: number;
+  max: number;
+  emptyImage: string | null;
+}
+
+type ExpressionRepeatImageFunction = () => ExpressionFunctionDefinition<
+  'repeatImage',
+  number,
+  Arguments,
+  Promise<ExpressionValueRender<Arguments>>
+>;
 
 export const strings = {
   help: i18n.translate('expressionRepeatImage.functions.repeatImageHelpText', {
@@ -24,7 +46,7 @@ export const strings = {
           'Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',
         values: {
           BASE64,
-          CONTEXT,
+          CONTEXT: '_context_',
           maxArg: '`max`',
           URL,
         },
@@ -60,7 +82,7 @@ const errors = {
     }),
 };
 
-export const repeatImageFunction: ExpressionRepeatImageFunction = () => {
+export const repeatImage: ExpressionRepeatImageFunction = () => {
   const { help, args: argHelp } = strings;
 
   return {

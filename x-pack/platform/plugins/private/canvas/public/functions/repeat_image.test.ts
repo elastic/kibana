@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { elasticLogo, elasticOutline } from '@kbn/expression-utils';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
-import { repeatImageFunction } from './repeat_image_function';
+import { repeatImage } from './repeat_image';
 
 describe('repeatImage', () => {
-  const fn = functionWrapper(repeatImageFunction);
+  const fn = functionWrapper(repeatImage);
 
   it('returns a render as repeatImage', async () => {
     const result = await fn(10, {}, {} as ExecutionContext);
