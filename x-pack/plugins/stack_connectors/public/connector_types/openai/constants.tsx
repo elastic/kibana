@@ -194,18 +194,9 @@ export const pkiOpenAiConfig: ConfigFieldSchema[] = [
     type: 'select',
     defaultValue: 'full',
     options: [
-      {
-        value: 'full',
-        label: i18n.VERIFICATION_MODE_FULL,
-      },
-      {
-        value: 'certificate',
-        label: i18n.VERIFICATION_MODE_CERTIFICATE,
-      },
-      {
-        value: 'none',
-        label: i18n.VERIFICATION_MODE_NONE,
-      },
+      { value: 'full', label: i18n.VERIFICATION_MODE_FULL },
+      { value: 'certificate', label: i18n.VERIFICATION_MODE_CERTIFICATE },
+      { value: 'none', label: i18n.VERIFICATION_MODE_NONE },
     ],
     helpText: (
       <FormattedMessage
@@ -227,7 +218,6 @@ export const pkiOpenAiConfig: ConfigFieldSchema[] = [
   },
 ];
 
-// Add PKI to provider options
 export const providerOptions = [
   {
     value: OpenAiProviderType.OpenAi,
