@@ -70,9 +70,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
         deprecate('ui', '9.0.0', {
           level: 'critical',
         }),
-        deprecate('appsDisabled', '9.0.0', {
-          level: 'critical',
-        }),
       ].forEach((deprecation) => deprecation(deprecationConfig, fromPath, addDeprecation, context));
     },
   ],

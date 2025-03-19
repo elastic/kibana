@@ -604,7 +604,7 @@ FROM index
     test('can vertically flatten adjacent binary expressions of the same precedence', () => {
       const query = `
 FROM index
-| STATS super_function_name(0.123123123123123 + 888811112.232323123123 + 123123123123.123123123 + 23232323.23232323123 - 123 + 999)),
+| STATS super_function_name(0.123123123123123 + 888811112.232323123123 + 123123123123.123123123 + 23232323.23232323123 - 123 + 999),
 | LIMIT 10
 `;
       const text = reprint(query).text;
@@ -618,7 +618,8 @@ FROM index
           123123123123.12312 +
           23232323.232323233 -
           123 +
-          999)`);
+          999)
+  | LIMIT 10`);
     });
   });
 
@@ -644,7 +645,7 @@ FROM index
       test('binary expressions of different precedence are not flattened', () => {
         const query = `
 FROM index
-| STATS fn(123456789 + 123456789 - 123456789 + 123456789 - 123456789 + 123456789 - 123456789)),
+| STATS fn(123456789 + 123456789 - 123456789 + 123456789 - 123456789 + 123456789 - 123456789),
 | LIMIT 10
 `;
         const text = reprint(query).text;
@@ -659,13 +660,14 @@ FROM index
           123456789 -
           123456789 +
           123456789 -
-          123456789)`);
+          123456789)
+  | LIMIT 10`);
       });
 
       test('binary expressions vertical flattening child function function argument wrapping', () => {
         const query = `
 FROM index
-| STATS super_function_name(11111111111111.111 + 11111111111111.111 * 11111111111111.111 + another_function_goes_here("this will get wrapped", "at this word", "and one more long string") - 111 + 111)),
+| STATS super_function_name(11111111111111.111 + 11111111111111.111 * 11111111111111.111 + another_function_goes_here("this will get wrapped", "at this word", "and one more long string") - 111 + 111),
 | LIMIT 10
 `;
         const text = reprint(query).text;
@@ -679,13 +681,14 @@ FROM index
           ANOTHER_FUNCTION_GOES_HERE("this will get wrapped", "at this word",
             "and one more long string") -
           111 +
-          111)`);
+          111)
+  | LIMIT 10`);
       });
 
       test('two binary expression lists of different precedence group', () => {
         const query = `
 FROM index
-| STATS fn(11111111111111.111 + 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 + 11111111111111.111 + 11111111111111.111)),
+| STATS fn(11111111111111.111 + 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 * 3333333333333.3333 + 11111111111111.111 + 11111111111111.111),
 | LIMIT 10
 `;
         const text = reprint(query).text;
@@ -700,7 +703,8 @@ FROM index
             3333333333333.3335 *
             3333333333333.3335 +
           11111111111111.111 +
-          11111111111111.111)`);
+          11111111111111.111)
+  | LIMIT 10`);
       });
 
       test('formats WHERE binary-expression', () => {
