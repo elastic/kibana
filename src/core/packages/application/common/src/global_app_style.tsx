@@ -88,14 +88,6 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
       --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
     }
   }
-
-  // Fixes fullscreen mode for saved searches on Dashboard. Otherwise, sibling grids can obscure the grid in fullscreen mode.
-  // "euiDataGrid__restrictBody" is set to body element when a grid is in fullscreen
-  // https://github.com/elastic/kibana/issues/134032
-
-  .euiDataGrid__restrictBody .embPanel .embPanel__content {
-    z-index: unset !important;
-  }
 `;
 
 export const bannerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
