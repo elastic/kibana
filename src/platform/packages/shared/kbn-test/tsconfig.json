@@ -40,6 +40,5 @@
     "@kbn/scout-reporting",
     "@kbn/scout-info",
     "@kbn/react-mute-legacy-root-warning",
-    "@kbn/projects-solutions-groups",
   ]
 }
