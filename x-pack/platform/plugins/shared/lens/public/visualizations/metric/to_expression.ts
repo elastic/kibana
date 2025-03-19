@@ -27,7 +27,7 @@ import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import { MetricVisualizationState } from './types';
 import { SECONDARY_DEFAULT_STATIC_COLOR, metricStateDefaults } from './constants';
-import { getColorMode, isMetricNumericType } from './helpers';
+import { getColorMode } from './helpers';
 import { getDefaultTrendConfig } from './dimension_editor';
 import { getAccessorType } from '../../shared_components';
 
@@ -149,7 +149,7 @@ export const toExpression = (
     : undefined;
 
   const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
-  const isNumericType = isMetricNumericType(datasource, state.secondaryMetricAccessor);
+  const { isNumeric: isNumericType } = getAccessorType(datasource, state.secondaryMetricAccessor);
 
   const secondaryDynamicColorMode = getColorMode(state.secondaryColorMode, isNumericType);
   const isSecondaryDynamicColorMode = secondaryDynamicColorMode === 'dynamic';

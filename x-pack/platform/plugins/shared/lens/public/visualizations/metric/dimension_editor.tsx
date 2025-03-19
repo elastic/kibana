@@ -39,7 +39,7 @@ import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualizatio
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { EuiColorPalettePickerPaletteFixedProps, MetricVisualizationState } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
-import { getColorFromEUI, getColorMode, isMetricNumericType } from './helpers';
+import { getColorFromEUI, getColorMode } from './helpers';
 import { nonNullable } from '../../utils';
 import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
 
@@ -195,8 +195,8 @@ function TrendEditor({
   state,
   datasource,
 }: Pick<SubProps, 'accessor' | 'idPrefix' | 'setState' | 'state' | 'datasource'>) {
-  const secondaryMetricCanTrend = isMetricNumericType(datasource, accessor);
-  const primaryMetricCanTrend = isMetricNumericType(datasource, state?.metricAccessor);
+  const { isNumeric: secondaryMetricCanTrend } = getAccessorType(datasource, accessor);
+  const { isNumeric: primaryMetricCanTrend } = getAccessorType(datasource, state?.metricAccessor);
   const { euiTheme } = useEuiTheme();
   const defaultPalette = getDefaultPalette();
 
@@ -414,7 +414,7 @@ function SecondaryMetricEditor({
 }: SubProps) {
   const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
   const defaultPrefix = columnName || '';
-  const isNumericType = isMetricNumericType(datasource, accessor);
+  const { isNumeric: isNumericType } = getAccessorType(datasource, accessor);
   const colorMode = getColorMode(state.secondaryColorMode, isNumericType);
 
   const setColor = useCallback(
