@@ -20,6 +20,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
       http: core.http,
       notifications: core.notifications,
       userProfile: core.userProfile,
+      analytics: core.analytics,
     });
   }
 

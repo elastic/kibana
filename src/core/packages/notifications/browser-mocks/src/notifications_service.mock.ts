@@ -26,7 +26,7 @@ const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<NotificationsStart> = {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
-    productIntercepts: productInterceptServiceMock.createStartContract(),
+    intercepts: productInterceptServiceMock.createStartContract(),
     showErrorDialog: jest.fn(),
   };
   return startContract;

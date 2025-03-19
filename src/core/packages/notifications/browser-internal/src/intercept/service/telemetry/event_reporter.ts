@@ -10,7 +10,7 @@
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { EventMetric, EventFieldType, eventTypes } from './event_definitions';
 
-export class ProductInterceptTelemetry {
+export class InterceptTelemetry {
   private reportEvent?: AnalyticsServiceStart['reportEvent'];
 
   public setup({ analytics }: { analytics: AnalyticsServiceSetup }) {

@@ -9,30 +9,30 @@
 
 import * as Rx from 'rxjs';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ProductIntercept } from '@kbn/core-notifications-browser';
+import type { Intercept } from '@kbn/core-notifications-browser';
 
-import { ProductInterceptTelemetry } from './telemetry';
+import { InterceptTelemetry } from './telemetry';
 
-interface ProductInterceptDialogApiStartDeps {
+interface InterceptDialogApiStartDeps {
   analytics: AnalyticsServiceStart;
 }
 
-interface ProductInterceptDialogApiSetupDeps {
+interface InterceptDialogApiSetupDeps {
   analytics: AnalyticsServiceSetup;
 }
 
-export class ProductInterceptDialogApi {
-  private readonly telemetry = new ProductInterceptTelemetry();
-  private productIntercepts$ = new Rx.BehaviorSubject<ProductIntercept[]>([]);
-  private eventReporter?: ReturnType<ProductInterceptTelemetry['start']>;
+export class InterceptDialogApi {
+  private readonly telemetry = new InterceptTelemetry();
+  private productIntercepts$ = new Rx.BehaviorSubject<Intercept[]>([]);
+  private eventReporter?: ReturnType<InterceptTelemetry['start']>;
 
-  setup({ analytics }: ProductInterceptDialogApiSetupDeps) {
+  setup({ analytics }: InterceptDialogApiSetupDeps) {
     this.telemetry.setup({ analytics });
 
     return {};
   }
 
-  start({ analytics }: ProductInterceptDialogApiStartDeps) {
+  start({ analytics }: InterceptDialogApiStartDeps) {
     this.eventReporter = this.telemetry.start({ analytics });
 
     return {
@@ -46,9 +46,7 @@ export class ProductInterceptDialogApi {
     return this.productIntercepts$.asObservable();
   }
 
-  private add(
-    productIntercept: Omit<ProductIntercept, 'id'> & Partial<Pick<ProductIntercept, 'id'>>
-  ): string {
+  private add(productIntercept: Omit<Intercept, 'id'> & Partial<Pick<Intercept, 'id'>>): string {
     const intercept = {
       ...productIntercept,
       id: productIntercept?.id ?? crypto.randomUUID(),

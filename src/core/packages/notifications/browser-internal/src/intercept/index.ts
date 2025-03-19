@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProductInterceptTelemetry } from './event_reporter';
+export { InterceptDialogService } from './service';
+export type { InterceptDialogApi } from './service';

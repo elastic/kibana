@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProductInterceptDialogService as ProductInterceptService } from './service';
-export type { ProductInterceptDialogApi } from './service';
+export { InterceptDialogService } from './intercept_dialog_service';
+export type { InterceptDialogApi } from './intercept_dialog_api';

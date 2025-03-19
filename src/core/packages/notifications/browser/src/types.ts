@@ -125,7 +125,7 @@ export interface NotificationCoordinatorPublicApi {
  */
 export type NotificationCoordinator = (registrar: string) => NotificationCoordinatorPublicApi;
 
-interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title'> {
+interface InterceptSteps extends Pick<EuiTourStepProps, 'title'> {
   id: string;
   /**
    * expects a react component that will be rendered in the dialog, and expects a callback to be called with the value
@@ -134,10 +134,10 @@ interface ProductInterceptSteps extends Pick<EuiTourStepProps, 'title'> {
   content: FC<{ onValue: (value: unknown) => void }>;
 }
 
-export interface ProductIntercept {
+export interface Intercept {
   id: string;
   title: string;
-  steps: ProductInterceptSteps[];
+  steps: InterceptSteps[];
   /**
    * Provides the response of the user interaction with the dialog for a particular step.
    */
@@ -149,8 +149,6 @@ export interface ProductIntercept {
   onDismiss?: () => void;
 }
 
-export interface IProductInterceptPublicApi {
-  add(
-    productIntercept: Omit<ProductIntercept, 'id'> & Partial<Pick<ProductIntercept, 'id'>>
-  ): string;
+export interface IInterceptPublicApi {
+  add(productIntercept: Omit<Intercept, 'id'> & Partial<Pick<Intercept, 'id'>>): string;
 }

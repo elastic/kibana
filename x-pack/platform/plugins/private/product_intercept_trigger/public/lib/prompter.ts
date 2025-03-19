@@ -6,19 +6,23 @@
  */
 
 import React from 'react';
-import { type CoreStart } from '@kbn/core/public';
+import { type CoreStart, CoreSetup } from '@kbn/core/public';
 import { EuiText } from '@elastic/eui';
 import { NPSScoreInput } from './components';
 import { TRIGGER_API_ENDPOINT } from '../../common/constants';
 
-type ProductInterceptPrompterArgs = Pick<CoreStart, 'http' | 'notifications' | 'userProfile'>;
+type ProductInterceptPrompterSetupDeps = Pick<CoreSetup, 'analytics'>;
+type ProductInterceptPrompterStartDeps = Pick<
+  CoreStart,
+  'http' | 'notifications' | 'userProfile' | 'analytics'
+>;
 
 export class ProductInterceptPrompter {
-  setup() {
+  setup({ analytics }: ProductInterceptPrompterSetupDeps) {
     // register the event types this prompter will be reporting
   }
 
-  start({ http, notifications, userProfile }: ProductInterceptPrompterArgs) {
+  start({ http, notifications, userProfile }: ProductInterceptPrompterStartDeps) {
     http
       .get<{ triggerIntervalInMs: number; runs: number }>(TRIGGER_API_ENDPOINT)
       .then((response) => {
@@ -31,7 +35,7 @@ export class ProductInterceptPrompter {
             let runCount = 0;
 
             setInterval(() => {
-              notifications.productIntercepts.add({
+              notifications.intercepts.add({
                 title: 'hello',
                 // ideally this will come from a predefined place, so it's configurable
                 steps: [
