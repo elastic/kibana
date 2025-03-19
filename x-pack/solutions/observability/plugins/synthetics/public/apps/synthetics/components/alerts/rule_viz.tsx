@@ -100,7 +100,7 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="syntheticsStatusRuleVizInspectButton"
+            data-test-subj="syntheticsRuleVizInspectButton"
             onClick={inspect}
             iconType="inspect"
             size="xs"
