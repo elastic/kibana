@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
-import isEmpty from 'lodash/isEmpty';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  type DataView,
+  type DataViewsServicePublic,
+  type DataViewSpec,
+} from '@kbn/data-views-plugin/public';
 import memoize from 'lodash/memoize';
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import { useKibana } from '../../common/lib/kibana';
 import { type DataViewManagerScopeName } from '../constants';
@@ -19,19 +21,20 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 /**
  * Creates a DataView from the provided DataViewSpec.
  *
- * This is a memoized function that will return the same DataView instance
+ * This is a memoized function that will return the same DataView instance across useFullDataView occurences in the project,
  * for the same dataViewSpec version or title.
  */
 const dataViewFromSpec: (
-  fieldFormats: FieldFormatsStartCommon,
-  dataViewSpec?: DataViewSpec
-) => DataView | undefined = memoize(
-  (fieldFormats: FieldFormatsStartCommon, dataViewSpec?: DataViewSpec) => {
-    if (isEmpty(dataViewSpec?.fields)) {
-      return undefined;
+  dataViewsService: DataViewsServicePublic,
+  dataViewSpec: DataViewSpec
+) => Promise<DataView | undefined> = memoize(
+  (dataViewsService: DataViewsServicePublic, dataViewSpec: DataViewSpec) => {
+    // NOTE: this should never happen for data views managed by the Data View Manager and is considered an error
+    if (!dataViewSpec.id) {
+      return Promise.resolve(undefined);
     }
 
-    return new DataView({ spec: dataViewSpec, fieldFormats });
+    return dataViewsService.get(dataViewSpec.id);
   },
   (...args) => {
     return args[1]?.version ?? args[1]?.title;
@@ -46,18 +49,24 @@ export const useFullDataView = (
   dataViewManagerScope: DataViewManagerScopeName
 ): DataView | undefined => {
   const {
-    services: { fieldFormats },
+    services: { dataViews },
   } = useKibana();
   const { dataView: dataViewSpec } = useDataView(dataViewManagerScope);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const dataView = useMemo(() => {
+  const [retrievedDataView, setRetrievedDataView] = useState<DataView | undefined>();
+
+  useEffect(() => {
+    (async () => {
+      setRetrievedDataView(await dataViewFromSpec(dataViews, dataViewSpec));
+    })();
+  }, [dataViews, dataViewSpec]);
+
+  return useMemo(() => {
     if (!newDataViewPickerEnabled) {
       return undefined;
     }
 
-    return dataViewFromSpec(fieldFormats, dataViewSpec);
-  }, [dataViewSpec, fieldFormats, newDataViewPickerEnabled]);
-
-  return dataView;
+    return retrievedDataView;
+  }, [newDataViewPickerEnabled, retrievedDataView]);
 };
