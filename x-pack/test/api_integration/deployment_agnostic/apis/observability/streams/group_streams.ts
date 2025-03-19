@@ -46,6 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -65,6 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -84,6 +86,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -102,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -120,6 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -208,6 +213,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -226,6 +232,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })

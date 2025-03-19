@@ -359,6 +359,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should allow to update field type to incompatible type', async () => {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               lifecycle: { inherit: {} },
@@ -401,6 +402,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow to update field type to system', async () => {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               lifecycle: { inherit: {} },

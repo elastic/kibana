@@ -63,6 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
@@ -180,6 +181,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         params: {
           path: { name: TEST_STREAM_NAME },
           body: {
+            queries: [],
             dashboards: [],
             stream: {
               ingest: {
@@ -276,6 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: DATA_STREAM_NAME,
             },
             body: {
+              queries: [],
               dashboards: [],
               stream: {
                 ingest: {
