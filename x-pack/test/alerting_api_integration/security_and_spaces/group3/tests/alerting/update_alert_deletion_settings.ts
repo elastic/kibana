@@ -158,10 +158,10 @@ export default function updateAlertDeletionSettingsTest({ getService }: FtrProvi
           .auth(Superuser.username, Superuser.password);
 
         expect(getResponse.statusCode).to.eql(200);
-        expect(postResponse.body.is_active_alerts_deletion_enabled).to.eql(false);
-        expect(postResponse.body.is_active_alerts_deletion_enabled).to.eql(false);
-        expect(postResponse.body.active_alerts_deletion_threshold).to.eql(90);
-        expect(postResponse.body.inactive_alerts_deletion_threshold).to.eql(90);
+        expect(getResponse.body.is_active_alerts_deletion_enabled).to.eql(false);
+        expect(getResponse.body.is_active_alerts_deletion_enabled).to.eql(false);
+        expect(getResponse.body.active_alerts_deletion_threshold).to.eql(90);
+        expect(getResponse.body.inactive_alerts_deletion_threshold).to.eql(90);
       });
     });
   });
