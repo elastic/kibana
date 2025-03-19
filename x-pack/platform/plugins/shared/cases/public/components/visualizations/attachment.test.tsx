@@ -10,17 +10,16 @@ import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../common';
 import type { PersistableStateAttachmentViewProps } from '../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { basicCase } from '../../containers/mock';
 import { getVisualizationAttachmentType } from './attachment';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('getVisualizationAttachmentType', () => {
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
-
-  let appMockRender: AppMockRenderer;
 
   const attachmentViewProps: PersistableStateAttachmentViewProps = {
     persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
@@ -34,8 +33,6 @@ describe('getVisualizationAttachmentType', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-    appMockRender.coreStart.lens.EmbeddableComponent = mockEmbeddableComponent;
   });
 
   it('create the attachment type correctly', () => {
@@ -89,8 +86,6 @@ describe('getVisualizationAttachmentType', () => {
     });
 
     it('renders the open visualization button correctly', () => {
-      appMockRender.coreStart.lens.canUseEditor = () => true;
-
       const lensType = getVisualizationAttachmentType();
       const actions = lensType
         .getAttachmentViewObject(attachmentViewProps)
@@ -98,20 +93,28 @@ describe('getVisualizationAttachmentType', () => {
 
       const openLensButton = actions[0];
 
+      const services = createStartServicesMock();
+      services.lens.EmbeddableComponent = mockEmbeddableComponent;
+      services.lens.canUseEditor = () => true;
       // @ts-expect-error: render exists on CustomAttachmentAction
-      appMockRender.render(openLensButton.render());
+      renderWithTestingProviders(openLensButton.render(), { wrapperProps: { services } });
 
       expect(screen.getByTestId('cases-open-in-visualization-btn')).toBeInTheDocument();
     });
 
     it('renders the children correctly', async () => {
       const lensType = getVisualizationAttachmentType();
+      // eslint-disable-next-line testing-library/no-node-access
       const Component = lensType.getAttachmentViewObject(attachmentViewProps).children!;
 
-      appMockRender.render(
+      const services = createStartServicesMock();
+      services.lens.EmbeddableComponent = mockEmbeddableComponent;
+
+      renderWithTestingProviders(
         <Suspense fallback={'Loading...'}>
           <Component {...attachmentViewProps} />
-        </Suspense>
+        </Suspense>,
+        { wrapperProps: { services } }
       );
 
       await waitFor(() => {
