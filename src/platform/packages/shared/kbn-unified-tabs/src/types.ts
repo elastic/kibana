@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart } from '@kbn/core/public';
+
 export interface TabItem {
   id: string;
   label: string;
@@ -18,6 +20,20 @@ export interface TabMenuItemWithClick {
   label: string;
   onClick: () => void;
 }
+
+export interface TabsSizeConfig {
+  isScrollable: boolean;
+  regularTabMaxWidth: number;
+  regularTabMinWidth: number;
+  // TODO: extend with possibly different sizes for pinned tabs
+}
+
 export type TabMenuItem = TabMenuItemWithClick | 'divider';
 
 export type GetTabMenuItems = (item: TabItem) => TabMenuItem[];
+
+export interface TabsServices {
+  core: {
+    chrome?: CoreStart['chrome'];
+  };
+}

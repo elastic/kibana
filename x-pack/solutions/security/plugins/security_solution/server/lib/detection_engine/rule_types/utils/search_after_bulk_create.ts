@@ -10,25 +10,26 @@ import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType
 import { createEnrichEventsFunction } from './enrichments';
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
 import { searchAfterAndBulkCreateFactory } from './search_after_bulk_create_factory';
+import { wrapHits } from '../factories';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async (
   params: SearchAfterAndBulkCreateParams
 ): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const { wrapHits, bulkCreate, services, buildReasonMessage, ruleExecutionLogger, tuple } = params;
+  const { sharedParams, services, buildReasonMessage } = params;
 
   const bulkCreateExecutor: SearchAfterAndBulkCreateFactoryParams['bulkCreateExecutor'] = async ({
     enrichedEvents,
     toReturn,
   }) => {
-    const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
+    const wrappedDocs = wrapHits(sharedParams, enrichedEvents, buildReasonMessage);
 
-    const bulkCreateResult = await bulkCreate(
+    const bulkCreateResult = await sharedParams.bulkCreate(
       wrappedDocs,
-      tuple.maxSignals - toReturn.createdSignalsCount,
+      sharedParams.tuple.maxSignals - toReturn.createdSignalsCount,
       createEnrichEventsFunction({
         services,
-        logger: ruleExecutionLogger,
+        logger: sharedParams.ruleExecutionLogger,
       })
     );
     addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });

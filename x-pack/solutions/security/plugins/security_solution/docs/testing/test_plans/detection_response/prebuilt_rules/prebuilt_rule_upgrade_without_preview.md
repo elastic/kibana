@@ -29,10 +29,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
-  - [Rule upgrade notifications on the Rule Management page](#rule-upgrade-notifications-on-the-rule-management-page)
-    - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
-    - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
-    - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
   - [Rule upgrade workflow: individual updates from Rule Updates table](#rule-upgrade-workflow-individual-updates-from-rule-updates-table)
     - [**Scenario: User can upgrade conflict-free prebuilt rules one by one**](#scenario-user-can-upgrade-conflict-free-prebuilt-rules-one-by-one)
     - [**Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**](#scenario-user-cannot-upgrade-prebuilt-rules-one-by-one-from-rules-update-table-if-they-have-conflicts)
@@ -143,50 +139,6 @@ User stories, misc:
 - In general, user can upgrade a prebuilt rule without preview regardless of the fact if the rule is customized or not. The ability to do so depends on the fact if this customization conflicts with the latest version or not, and if yes, is this conflict solvable or non-solvable.
 
 ## Scenarios
-
-### Rule upgrade notifications on the Rule Management page
-
-#### **Scenario: User is NOT notified when all installed prebuilt rules are up to date**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given all the latest prebuilt rules are installed in Kibana
-When user opens the Rule Management page
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
-```
-
-#### **Scenario: User is notified when some prebuilt rules can be upgraded**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And there are no more prebuilt rules available to install
-And for Z of the installed rules there are new versions available
-When user opens the Rule Management page
-Then user should NOT see a CTA to install prebuilt rules
-And user should NOT see a number of rules available to install
-And user should see a CTA to upgrade prebuilt rules
-And user should see the number of rules available to upgrade (Z)
-```
-
-#### **Scenario: User is notified when both rules to install and upgrade are available**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And there are Y more prebuilt rules available to install
-And for Z of the installed rules there are new versions available
-When user opens the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see the number of rules available to install (Y)
-And user should see a CTA to upgrade prebuilt rules
-And user should see the number of rules available to upgrade (Z)
-```
 
 ### Rule upgrade workflow: individual updates from Rule Updates table
 
@@ -734,18 +686,6 @@ Then the rule bound data should be preserved
 ```
 
 Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
-
-### Rule upgrade workflow: misc cases
-
-#### **Scenario: User doesn't see the Rule Updates tab until the package installation is completed**
-
-**Automation**: unit tests.
-
-```Gherkin
-Given prebuilt rules package is not installed
-When user opens the Rule Management page
-Then user should NOT see the Rule Updates tab until the package installation is completed and there are rules available for upgrade
-```
 
 ### Error handling
 

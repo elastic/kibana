@@ -48,6 +48,10 @@ function options(y: Argv) {
       description: 'Generate and index data continuously',
       boolean: true,
     })
+    .option('uniqueIds', {
+      description: 'Generate unique ids to avoid id collisions',
+      boolean: true,
+    })
     .option('liveBucketSize', {
       description: 'Bucket size in ms for live streaming',
       default: 1000,
@@ -67,15 +71,55 @@ function options(y: Argv) {
       number: true,
       default: 1,
     })
+    .option('debug', {
+      describe: 'Use a debug log level',
+      boolean: true,
+    })
+    .option('verbose', {
+      describe: 'Use a verbose log level',
+      boolean: true,
+    })
     .option('logLevel', {
       describe: 'Log level',
-      choices: ['trace', 'debug', 'info', 'error'],
+      choices: ['verbose', 'debug', 'info', 'error'],
       default: 'info',
     })
     .option('scenarioOpts', {
       describe: 'Options specific to the scenario',
-      coerce: (arg) => {
-        return arg as Record<string, any> | undefined;
+      type: 'string',
+      coerce: (arg: string): Record<string, unknown> => {
+        if (!arg) {
+          return {};
+        }
+
+        let scenarioOptions: Record<string, unknown> = {};
+
+        try {
+          scenarioOptions = JSON.parse(arg);
+        } catch (error) {
+          scenarioOptions = Object.fromEntries(
+            arg.split(',').map((kv) => {
+              const [key, value] = kv
+                .trim()
+                .split('=')
+                .map((part) => part.trim());
+              if (value === 'true') {
+                return [key, true];
+              }
+              if (value === 'false') {
+                return [key, false];
+              }
+
+              if (!isNaN(Number(value))) {
+                return [key, Number(value)];
+              }
+
+              return [key, value];
+            })
+          );
+        }
+
+        return scenarioOptions;
       },
     })
     .option('assume-package-version', {
@@ -95,20 +139,18 @@ function options(y: Argv) {
 async function run(argv: RunCliFlags) {
   const runOptions = parseRunCliFlags(argv);
 
-  const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
-  const to = new Date(toMs);
+  const to = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
 
   const defaultTimeRange = '1m';
 
-  const fromMs = argv.from
+  const from = argv.from
     ? datemath.parse(String(argv.from))!.valueOf()
-    : toMs - intervalToMs(defaultTimeRange);
-  const from = new Date(fromMs);
+    : to - intervalToMs(defaultTimeRange);
 
   const live = argv.live;
 
   if (live) {
-    await startLiveDataUpload({ runOptions, start: from });
+    await startLiveDataUpload({ runOptions, from, to });
   } else {
     await startHistoricalDataUpload({ runOptions, from, to });
   }

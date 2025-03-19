@@ -16,6 +16,7 @@
       "apm"
     ],
     "requiredPlugins": [
+      "apmSourcesAccess",
       "apmDataAccess",
       "data",
       "dashboard",
@@ -61,7 +62,8 @@
       "licenseManagement",
       "profilingDataAccess",
       "cases",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "share"
     ],
     "requiredBundles": [
       "fleet",

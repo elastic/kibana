@@ -7,7 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
@@ -15,7 +16,7 @@ import {
 } from './get_telemetry_from_kibana';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;

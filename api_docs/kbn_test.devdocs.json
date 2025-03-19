@@ -3995,7 +3995,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"image\" | \"host\" | \"tag\" | \"dataPath\" | \"kibanaUrl\" | \"resources\" | \"projectType\"> | undefined"
+              ", \"image\" | \"host\" | \"tag\" | \"dataPath\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
