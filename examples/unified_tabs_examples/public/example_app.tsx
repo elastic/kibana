@@ -123,6 +123,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
             <UnifiedTabs
               initialItems={initialItems}
               maxItemsCount={25}
+              services={services}
               onChanged={() => {}}
               createItem={getNewTabDefaultProps}
               getPreviewData={

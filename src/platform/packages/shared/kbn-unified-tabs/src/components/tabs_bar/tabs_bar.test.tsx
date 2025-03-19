@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TabsBar } from './tabs_bar';
 import { TabStatus } from '../../types';
+import { servicesMock } from '../../../__mocks__/services';
 
 const items = Array.from({ length: 5 }).map((_, i) => ({
   id: `tab-${i}`,
@@ -41,6 +42,7 @@ describe('TabsBar', () => {
         tabContentId={tabContentId}
         items={items}
         selectedItem={selectedItem}
+        services={servicesMock}
         onAdd={onAdd}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}

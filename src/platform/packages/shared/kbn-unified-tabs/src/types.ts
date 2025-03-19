@@ -8,6 +8,8 @@
  */
 
 import { AggregateQuery, Query } from '@kbn/es-query';
+import type { CoreStart } from '@kbn/core/public';
+
 export interface TabItem {
   id: string;
   label: string;
@@ -43,3 +45,9 @@ export interface TabPreviewData {
 export type TabMenuItem = TabMenuItemWithClick | 'divider';
 
 export type GetTabMenuItems = (item: TabItem) => TabMenuItem[];
+
+export interface TabsServices {
+  core: {
+    chrome?: CoreStart['chrome'];
+  };
+}

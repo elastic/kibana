@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 import { TabStatus } from '../../types';
+import { servicesMock } from '../../../__mocks__/services';
 
 const tabItem = {
   id: 'test-id',
@@ -47,6 +48,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
@@ -91,6 +93,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         getTabMenuItems={getTabMenuItems}
         onLabelEdited={jest.fn()}
         onSelect={jest.fn()}
@@ -121,6 +124,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
@@ -155,6 +159,7 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}

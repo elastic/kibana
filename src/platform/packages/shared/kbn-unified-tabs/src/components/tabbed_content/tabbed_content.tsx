@@ -21,12 +21,13 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import type { TabItem, TabPreviewData } from '../../types';
+import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   initialItems: TabItem[];
   initialSelectedItemId?: string;
   'data-test-subj'?: string;
+  services: TabsServices;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
@@ -42,6 +43,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   initialItems,
   initialSelectedItemId,
   maxItemsCount,
+  services,
   renderContent,
   createItem,
   onChanged,
@@ -129,6 +131,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}
+          services={services}
           onAdd={onAdd}
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
