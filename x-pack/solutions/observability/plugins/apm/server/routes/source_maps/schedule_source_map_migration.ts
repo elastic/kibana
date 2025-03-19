@@ -184,7 +184,7 @@ async function paginateArtifacts({
   }
 
   const migratedCount = (page - 1) * PER_PAGE + artifacts.length;
-  logger.info(`Migrating ${migratedCount} of ${total} source maps`);
+  logger.debug(`Migrating ${migratedCount} of ${total} source maps`);
 
   await bulkCreateApmSourceMaps({ artifacts, internalESClient });
 
@@ -199,7 +199,7 @@ async function paginateArtifacts({
       internalESClient,
     });
   } else {
-    logger.info(`Successfully migrated ${total} source maps`);
+    logger.debug(`Successfully migrated ${total} source maps`);
   }
 }
 
