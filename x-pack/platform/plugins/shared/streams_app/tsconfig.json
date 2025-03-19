@@ -60,5 +60,7 @@
     "@kbn/datemath",
     "@kbn/xstate-utils",
     "@kbn/core-analytics-browser",
+    "@kbn/index-management-shared-types",
+    "@kbn/ingest-pipelines-plugin",
   ]
 }
