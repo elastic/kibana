@@ -7,3 +7,10 @@
 
 export { getClientForInternalServer, getClientForExternalServer } from './src/utils';
 export { SSEClientTransport, type SSEClientTransportOptions } from './src/mcp/sse_client';
+export type {
+  IntegrationClient,
+  IntegrationContext,
+  WorkChatIntegration,
+  WorkchatIntegrationDefinition,
+  IntegrationConfiguration,
+} from './src/types';

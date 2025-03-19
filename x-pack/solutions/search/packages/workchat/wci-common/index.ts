@@ -6,13 +6,4 @@
  */
 
 export { IntegrationType } from './src/constants';
-export type {
-  IntegrationClient,
-  IntegrationContext,
-  WorkChatIntegration,
-  WorkchatIntegrationDefinition,
-  IntegrationConfiguration,
-  IntegrationComponentDescriptor,
-  IntegrationToolComponentProps,
-  IntegrationConfigurationFormProps,
-} from './src/types';
+export type { IntegrationConfiguration } from './src/types';

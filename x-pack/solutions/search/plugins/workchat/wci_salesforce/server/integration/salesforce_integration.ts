@@ -6,14 +6,14 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { IntegrationType } from '@kbn/wci-common';
 import {
-  IntegrationType,
-  WorkchatIntegrationDefinition,
-  WorkChatIntegration,
-} from '@kbn/wci-common';
-import { getClientForInternalServer } from '@kbn/wci-server';
+  getClientForInternalServer,
+  type WorkchatIntegrationDefinition,
+  type WorkChatIntegration,
+} from '@kbn/wci-server';
+import type { WCISalesforceConfiguration } from '../types';
 import { createMcpServer } from './mcp_server';
-import { WCISalesforceConfiguration } from '../types';
 
 export const getSalesforceIntegrationDefinition = ({
   core,

@@ -119,7 +119,6 @@ export async function createMcpServer({
     async ({
       id,
       size = 10,
-      owner,
       priority,
       closed,
       caseNumber,
@@ -133,7 +132,6 @@ export async function createMcpServer({
       const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
         id,
         size,
-        owner,
         priority,
         closed,
         caseNumber,
