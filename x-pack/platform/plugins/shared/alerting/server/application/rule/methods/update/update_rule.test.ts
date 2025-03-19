@@ -35,6 +35,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { RuleDomain } from '../../types';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { async } from 'fast-glob';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -4218,5 +4219,72 @@ describe('update()', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute actions]`);
     });
+  });
+
+  test('updates linked dashboards', async () => {
+    const dashboards = [
+      {
+        id: 'dashboard-1',
+      },
+      {
+        id: 'dashboard-2',
+      },
+    ];
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        dashboards,
+      },
+      references: [],
+    });
+
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [],
+        systemActions: [],
+        dashboards,
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        dashboards,
+      }),
+      {
+        id: '1',
+        overwrite: true,
+        references: [],
+        version: '123',
+      }
+    );
+
+    expect(result.dashboards).toEqual(dashboards);
   });
 });
