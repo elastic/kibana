@@ -17,7 +17,7 @@ export interface DetectionRuleApiService {
   deleteAll: () => Promise<void>;
 }
 
-export const createDetectionRuleFixture = async ({
+export const getDetectionRuleApiService = ({
   kbnClient,
   log,
   scoutSpace,
@@ -25,10 +25,10 @@ export const createDetectionRuleFixture = async ({
   kbnClient: KbnClient;
   log: ScoutLogger;
   scoutSpace?: ScoutSpaceParallelFixture;
-}) => {
+}): DetectionRuleApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
-  const detectionRuleHelper: DetectionRuleApiService = {
+  return {
     createCustomQueryRule: async (body = CUSTOM_QUERY_RULE) => {
       await measurePerformanceAsync(
         log,
@@ -56,6 +56,4 @@ export const createDetectionRuleFixture = async ({
       });
     },
   };
-
-  return detectionRuleHelper;
 };

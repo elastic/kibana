@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { KbnClient, ScoutLogger, spaceTest as spaceBase } from '@kbn/scout';
+import { ApiServicesFixture, spaceTest as spaceBase } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
-import { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/worker';
 import { extendPageObjects } from './test/page_objects';
 import {
   SecurityParallelTestFixtures,
@@ -16,7 +15,7 @@ import {
   SecurityApiServicesFixture,
 } from './types';
 import { extendBrowserAuth } from './test/authentication';
-import { createDetectionRuleFixture } from './worker/apis/detection_rule';
+import { getDetectionRuleApiService } from './worker/apis';
 
 /**
  * Should be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance.
@@ -48,19 +47,26 @@ export const spaceTest = spaceBase.extend<
   apiServices: [
     async (
       {
+        apiServices,
         kbnClient,
         log,
         scoutSpace,
-      }: { kbnClient: KbnClient; log: ScoutLogger; scoutSpace: ScoutSpaceParallelFixture },
-      use: (services: SecurityApiServicesFixture) => Promise<void>
+      }: {
+        apiServices: ApiServicesFixture;
+        kbnClient: SecurityParallelWorkerFixtures['kbnClient'];
+        log: SecurityParallelWorkerFixtures['log'];
+        scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
+      },
+      use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
-      const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient, log, scoutSpace });
+      const extendedApiServices = apiServices as SecurityApiServicesFixture;
+      extendedApiServices.detectionRule = getDetectionRuleApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+      });
 
-      const apiServices: SecurityApiServicesFixture = {
-        detectionRule: detectionRuleHelper,
-      };
-
-      await use(apiServices);
+      await use(extendedApiServices);
     },
     { scope: 'worker' },
   ],
