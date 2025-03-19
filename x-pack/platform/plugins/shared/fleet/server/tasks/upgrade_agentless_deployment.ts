@@ -217,12 +217,12 @@ export class UpgradeAgentlessDeploymentsTask {
     if (agent.status === 'online') {
       try {
         this.logger.info(
-          `${LOGGER_SUBJECT} Requesting to check and update agentless deployment for policy ${agentPolicy.id}`
+          `${LOGGER_SUBJECT} Requesting to check version and update agentless deployment for policy ${agentPolicy.id}`
         );
         await agentlessAgentService.upgradeAgentlessDeployment(agentPolicy.id);
 
         this.logger.info(
-          `${LOGGER_SUBJECT} Successfully sent the upgrade request for ${agentPolicy.id} is available`
+          `${LOGGER_SUBJECT} Successfully sent the upgrade deployment request for ${agentPolicy.id}`
         );
       } catch (e) {
         this.logger.error(

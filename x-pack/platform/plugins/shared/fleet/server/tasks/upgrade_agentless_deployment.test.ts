@@ -18,7 +18,7 @@ import type { AgentPolicy } from '../types';
 
 import { agentlessAgentService } from '../services/agents/agentless_agent';
 
-import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../services/agents';
+import { getAgentsByKuery } from '../services/agents';
 
 import {
   UPGRADE_AGENT_DEPLOYMENTS_TASK_VERSION,
@@ -170,7 +170,6 @@ describe('Upgrade Agentless Deployments', () => {
       },
     ];
     const mockedGetAgentsByKuery = getAgentsByKuery as jest.Mock;
-    const mockedGetLatestAvailableAgentVersion = getLatestAvailableAgentVersion as jest.Mock;
 
     beforeEach(() => {
       mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
@@ -183,8 +182,6 @@ describe('Upgrade Agentless Deployments', () => {
       mockedGetAgentsByKuery.mockResolvedValue({
         agents,
       });
-
-      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.0');
 
       jest
         .spyOn(agentlessAgentService, 'upgradeAgentlessDeployment')
@@ -202,27 +199,7 @@ describe('Upgrade Agentless Deployments', () => {
       expect(agentlessAgentService.upgradeAgentlessDeployment).toHaveBeenCalled();
     });
 
-    it('should not upgrade agentless deployments when the latest version is up to date', async () => {
-      mockedGetAgentsByKuery.mockResolvedValue({
-        agents: [
-          {
-            id: 'agent-1',
-            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-            status: 'online',
-            agent: {
-              version: '8.17.0',
-            },
-          },
-        ],
-      });
-      await runTask();
-
-      expect(mockAgentPolicyService.fetchAllAgentPolicies).toHaveBeenCalled();
-      expect(agentlessAgentService.upgradeAgentlessDeployment).not.toHaveBeenCalled();
-    });
-
     it('should not upgrade agentless deployments when agent status is updating', async () => {
-      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.1');
       mockedGetAgentsByKuery.mockResolvedValue({
         agents: [
           {
@@ -242,7 +219,6 @@ describe('Upgrade Agentless Deployments', () => {
     });
 
     it('should not upgrade agentless deployments when agent status is unhealthy', async () => {
-      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.1');
       mockedGetAgentsByKuery.mockResolvedValue({
         agents: [
           {
@@ -262,7 +238,6 @@ describe('Upgrade Agentless Deployments', () => {
     });
 
     it('should upgrade agentless deployments when agent status is online', async () => {
-      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.1');
       mockedGetAgentsByKuery.mockResolvedValue({
         agents: [
           {
@@ -282,7 +257,6 @@ describe('Upgrade Agentless Deployments', () => {
     });
 
     it('should not upgrade agentless deployments when agent status is unenroll', async () => {
-      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.1');
       mockedGetAgentsByKuery.mockResolvedValue({
         agents: [
           {
@@ -299,46 +273,6 @@ describe('Upgrade Agentless Deployments', () => {
 
       expect(mockAgentPolicyService.fetchAllAgentPolicies).toHaveBeenCalled();
       expect(agentlessAgentService.upgradeAgentlessDeployment).not.toHaveBeenCalled();
-    });
-
-    it('should upgrade agentless deployments when agent for target bg task release', async () => {
-      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.18.1');
-      mockedGetAgentsByKuery.mockResolvedValue({
-        agents: [
-          {
-            id: 'agent-1',
-            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-            status: 'online',
-            agent: {
-              version: '8.18.0',
-            },
-          },
-        ],
-      });
-      await runTask();
-
-      expect(mockAgentPolicyService.fetchAllAgentPolicies).toHaveBeenCalled();
-      expect(agentlessAgentService.upgradeAgentlessDeployment).toHaveBeenCalled();
-    });
-
-    it('should upgrade agentless deployments when agent version is up to date', async () => {
-      mockedGetLatestAvailableAgentVersion.mockResolvedValue('8.17.1');
-      mockedGetAgentsByKuery.mockResolvedValue({
-        agents: [
-          {
-            id: 'agent-1',
-            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-            status: 'online',
-            agent: {
-              version: '8.17.0',
-            },
-          },
-        ],
-      });
-      await runTask();
-
-      expect(mockAgentPolicyService.fetchAllAgentPolicies).toHaveBeenCalled();
-      expect(agentlessAgentService.upgradeAgentlessDeployment).toHaveBeenCalled();
     });
 
     it('should not call upgrade agentless api to upgrade when 0 agents', async () => {
@@ -363,7 +297,7 @@ describe('Upgrade Agentless Deployments', () => {
       expect(mockTask.abortController.signal.throwIfAborted).toHaveBeenCalled();
     });
 
-    it('should not called upgrade agentless api to upgrade when agent policy is not found', async () => {
+    it('should not call upgrade agentless api to upgrade when agent policy is not found', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: false } as any);
