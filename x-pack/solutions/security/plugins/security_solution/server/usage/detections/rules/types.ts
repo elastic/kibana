@@ -118,6 +118,7 @@ export interface SingleEventMetric {
  */
 export interface SingleEventLogStatusMetric {
   eql: SingleEventMetric;
+  new_terms: SingleEventMetric;
   esql: SingleEventMetric;
   threat_match: SingleEventMetric;
   machine_learning: SingleEventMetric;

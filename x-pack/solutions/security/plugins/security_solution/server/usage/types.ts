@@ -93,6 +93,7 @@ export interface SingleEVentLogTypeStatusAgg {
   'siem.queryRule': CountCardinality;
   'siem.savedQueryRule': CountCardinality;
   'siem.eqlRule': CountCardinality;
+  'siem.newTermsRule': CountCardinality;
   'siem.esqlRule': CountCardinality;
   'siem.thresholdRule': CountCardinality;
   'siem.mlRule': CountCardinality;
@@ -104,6 +105,7 @@ export interface SingleEVentLogTypeStatusAggWithCategories {
   'siem.queryRule': CountCardinalityWithCategories;
   'siem.savedQueryRule': CountCardinalityWithCategories;
   'siem.eqlRule': CountCardinalityWithCategories;
+  'siem.newTermsRule': CountCardinalityWithCategories;
   'siem.esqlRule': CountCardinalityWithCategories;
   'siem.thresholdRule': CountCardinalityWithCategories;
   'siem.mlRule': CountCardinalityWithCategories;
@@ -165,6 +167,7 @@ export interface EventLogTypeStatusAggs {
     'siem.queryRule': SingleExecutionMetricAgg;
     'siem.savedQueryRule': SingleExecutionMetricAgg;
     'siem.eqlRule': SingleExecutionMetricAgg;
+    'siem.newTermsRule': SingleExecutionMetricAgg;
     'siem.esqlRule': SingleExecutionMetricAgg;
     'siem.thresholdRule': SingleExecutionMetricAgg;
     'siem.mlRule': SingleExecutionMetricAgg;
