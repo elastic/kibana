@@ -23,7 +23,7 @@ describe('RiskScoreConfigurationSection', () => {
   const defaultProps = {
     includeClosedAlerts: false,
     setIncludeClosedAlerts: jest.fn(),
-    from: 'now-30m',
+    from: 'now-30d',
     to: 'now',
     onDateChange: jest.fn(),
   };
@@ -55,8 +55,8 @@ describe('RiskScoreConfigurationSection', () => {
 
   it('calls onDateChange on date change', () => {
     const wrapper = mount(<RiskScoreConfigurationSection {...defaultProps} />);
-    wrapper.find(EuiSuperDatePicker).props().onTimeChange({ start: 'now-30m', end: 'now' });
-    expect(defaultProps.onDateChange).toHaveBeenCalledWith({ start: 'now-30m', end: 'now' });
+    wrapper.find(EuiSuperDatePicker).props().onTimeChange({ start: 'now-30d', end: 'now' });
+    expect(defaultProps.onDateChange).toHaveBeenCalledWith({ start: 'now-30d', end: 'now' });
   });
 
   it('shows bottom bar when changes are made', async () => {
@@ -88,7 +88,7 @@ describe('RiskScoreConfigurationSection', () => {
     const callArgs = mockMutate.mock.calls[0][0];
     expect(callArgs).toEqual({
       includeClosedAlerts: true,
-      range: { start: 'now-30m', end: 'now' },
+      range: { start: 'now-30d', end: 'now' },
     });
   });
 
