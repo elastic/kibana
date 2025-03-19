@@ -47,20 +47,26 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   if (deltaValue < 0) {
     return {
       icon: trendConfig.icon ? 'sortDown' : undefined,
-      iconLabel: i18n.translate('visualizations.metric.trend.decrease', { defaultMessage: 'down' }),
+      iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
+        defaultMessage: 'down',
+      }),
       color: trendConfig.palette[0],
     };
   }
   if (deltaValue > 0) {
     return {
       icon: trendConfig.icon ? 'sortUp' : undefined,
-      iconLabel: i18n.translate('visualizations.metric.trend.increase', { defaultMessage: 'up' }),
+      iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
+        defaultMessage: 'up',
+      }),
       color: trendConfig.palette[2],
     };
   }
   return {
     icon: trendConfig.icon ? 'minus' : undefined,
-    iconLabel: i18n.translate('visualizations.metric.trend.stable', { defaultMessage: 'stable' }),
+    iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
+      defaultMessage: 'stable',
+    }),
     color: trendConfig.palette[1],
   };
 }
@@ -115,7 +121,7 @@ function SecondaryMetricValue({
           // Make the information accessible also for screen readers
           trendConfig.value
             ? undefined
-            : i18n.translate('visualizations.metric.trend', {
+            : i18n.translate('expressionMetricVis.secondaryMetric.trend', {
                 defaultMessage: 'Value: {value} - trend {direction}',
                 values: {
                   value: formattedValue,

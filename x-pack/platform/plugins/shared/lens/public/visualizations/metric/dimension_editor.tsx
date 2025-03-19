@@ -136,7 +136,7 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
 
 function getDefaultPalette(): EuiColorPalettePickerPaletteFixedProps {
   return {
-    title: i18n.translate('coloring.dynamicColoring.palette.complementary.label', {
+    title: i18n.translate('xpack.lens.secondaryMetric.trend.dynamicColoring.palette.trend.label', {
       defaultMessage: 'Trend Vis',
     }),
     value: 'default_trend_palette',
@@ -151,9 +151,12 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
   const defaultPalette = getDefaultPalette();
   const reversedPalette: EuiColorPalettePickerPaletteFixedProps = {
     ...getDefaultPalette(),
-    title: i18n.translate('coloring.dynamicColoring.palette.trendReversed.label', {
-      defaultMessage: 'Trend Reversed',
-    }),
+    title: i18n.translate(
+      'xpack.lens.secondaryMetric.trend.dynamicColoring.palette.trendReversed.label',
+      {
+        defaultMessage: 'Trend Reversed',
+      }
+    ),
     value: 'reversed_trend_palette',
     palette: defaultPalette.palette
       .slice()
@@ -162,17 +165,23 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
   // Add 2 temperature & complementary palettes using vis colors
   const temperaturePalette: EuiColorPalettePickerPaletteFixedProps = {
     ...getDefaultPalette(),
-    title: i18n.translate('coloring.dynamicColoring.palette.temperature.label', {
-      defaultMessage: 'Temperature',
-    }),
+    title: i18n.translate(
+      'xpack.lens.secondaryMetric.trend.dynamicColoring.palette.temperature.label',
+      {
+        defaultMessage: 'Temperature',
+      }
+    ),
     value: 'temperature_trend_palette',
     palette: ['euiColorVis2', 'backgroundBaseDisabled', 'euiColorVis6'],
   };
   const complementaryPalette: EuiColorPalettePickerPaletteFixedProps = {
     ...getDefaultPalette(),
-    title: i18n.translate('coloring.dynamicColoring.palette.complementary.label', {
-      defaultMessage: 'Complementary',
-    }),
+    title: i18n.translate(
+      'xpack.lens.secondaryMetric.trend.dynamicColoring.palette.complementary.label',
+      {
+        defaultMessage: 'Complementary',
+      }
+    ),
     value: 'complementary_trend_palette',
     palette: ['euiColorVis2', 'backgroundBaseDisabled', 'euiColorVis8'],
   };
@@ -224,9 +233,12 @@ function TrendEditor({
     <>
       <EuiFormRow
         display="columnCompressed"
-        label={i18n.translate('coloring.dynamicColoring.palettePicker.label', {
-          defaultMessage: 'Color palette',
-        })}
+        label={i18n.translate(
+          'xpack.lens.secondaryMetric.trend.staticColoring.palettePicker.label',
+          {
+            defaultMessage: 'Color palette',
+          }
+        )}
         fullWidth
       >
         <EuiColorPalettePicker
