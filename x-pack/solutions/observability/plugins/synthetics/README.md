@@ -46,13 +46,10 @@ Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.
 yarn test:jest x-pack/solutions/observability/plugins/synthetics
 ```
 
-### Functional tests
+### Functional tests server
 
 In one shell, from **~/kibana/x-pack**:
-`node scripts/functional_tests_server.js`
-
-In another shell, from **~kibana/x-pack**:
-`node ../scripts/functional_test_runner.js --grep="{TEST_NAME}" --config test/api_integration/apis/synthetics/config.ts`.
+`node scripts/functional_tests_server.js --config {PATH_TO_TEST_SUITE_CONFIG}`
 
 #### API tests
 
