@@ -32,16 +32,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
-  [ProductFeatureSecurityKey.investigationGuide]: {
-    privileges: {
-      all: {
-        ui: ['investigation-guide'],
-      },
-      read: {
-        ui: ['investigation-guide'],
-      },
-    },
-  },
+
   [ProductFeatureSecurityKey.alertsSummary]: {
     privileges: {
       all: {
@@ -51,6 +42,39 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       read: {
         ui: ['alerts_summary_read'],
         api: [`${APP_ID}-alert-summary`],
+      },
+    },
+  },
+  [ProductFeatureSecurityKey.detections]: {
+    privileges: {
+      all: {
+        ui: ['show', 'crud'],
+        api: [
+          APP_ID,
+          'lists-all',
+          'lists-read',
+          'lists-summary',
+          'rac',
+          'cloud-security-posture-all',
+          'cloud-security-posture-read',
+          'cloud-defend-all',
+          'cloud-defend-read',
+        ],
+      },
+      read: {
+        ui: ['show'],
+        api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],
+      },
+    },
+  },
+
+  [ProductFeatureSecurityKey.investigationGuide]: {
+    privileges: {
+      all: {
+        ui: ['investigation-guide'],
+      },
+      read: {
+        ui: ['investigation-guide'],
       },
     },
   },
