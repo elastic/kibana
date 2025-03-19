@@ -90,11 +90,11 @@ export class LlmProxy {
 
         const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
         const availableInterceptorNames = this.interceptors.map(({ name }) => name);
-        this.log.error(
+        this.log.warning(
           `Available interceptors: ${JSON.stringify(availableInterceptorNames, null, 2)}`
         );
 
-        this.log.error(
+        this.log.warning(
           `${errorMessage}. Messages: ${JSON.stringify(requestBody.messages, null, 2)}`
         );
         response.writeHead(500, {
