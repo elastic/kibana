@@ -173,7 +173,7 @@ export interface InfraFieldDef {
 
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<Params, Query, Body, Method>;
+} & Omit<RouteConfig<Params, Query, Body, Method>, 'security'>;
 
 export type InfraVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;

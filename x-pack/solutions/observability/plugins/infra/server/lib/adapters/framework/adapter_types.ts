@@ -208,4 +208,4 @@ export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = 
 
 export type InfraVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;
-} & VersionedRouteConfig<Method>;
+} & Omit<VersionedRouteConfig<Method>, 'security'>;
