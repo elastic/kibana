@@ -7,9 +7,13 @@
 
 import { IntegrationConfigurationFormProps } from '@kbn/wci-common';
 import React from 'react';
-import { EuiDescribedFormGroup } from '@elastic/eui';
-import { EuiTextArea } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTextArea,
+} from '@elastic/eui';
 import { Controller } from 'react-hook-form';
 
 export const ExternalServerConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
@@ -23,16 +27,31 @@ export const ExternalServerConfigurationForm: React.FC<IntegrationConfigurationF
       title={<h3>External Server Configuration</h3>}
       description="Configure the external server details"
     >
-      <EuiFormRow label="Configuration">
+      <EuiFormRow label="URL" helpText="The URL of the external server">
         <Controller
-          name="configuration"
+          name="configuration.url"
+          control={control}
+          render={({ field }) => (
+            <EuiFieldText
+              data-test-subj="workchatExternalServerUrl"
+              placeholder="https://example.com/api"
+              {...field}
+            />
+          )}
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
+      <EuiFormRow label="Description" helpText="Description of the external server">
+        <Controller
+          name="configuration.description"
           control={control}
           render={({ field }) => (
             <EuiTextArea
-              data-test-subj="workchatAppIntegrationEditViewAdditionalConfig"
-              placeholder="JSON configuration"
-              value={JSON.stringify(field.value, null, 2)}
-              onChange={(e) => field.onChange(JSON.parse(e.target.value))}
+              data-test-subj="workchatExternalServerDescription"
+              placeholder="Describe the external server"
+              {...field}
             />
           )}
         />

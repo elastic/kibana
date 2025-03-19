@@ -79,7 +79,7 @@ export const useIntegrationEdit = ({
         }
       );
     },
-    [integrationId, state, integrationService, onSaveSuccess, onSaveError]
+    [integrationId, integrationService, onSaveSuccess, onSaveError]
   );
 
   return {
