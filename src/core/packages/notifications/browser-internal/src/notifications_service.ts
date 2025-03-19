@@ -19,7 +19,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { showErrorDialog, ToastsService } from './toasts';
-import { ProductInterceptService } from './product_intercept_dialog';
+import { InterceptDialogService } from './intercept';
 import { Coordinator, notificationCoordinator } from './notification_coordinator';
 
 export interface SetupDeps {
@@ -39,20 +39,20 @@ export interface StartDeps {
 /** @public */
 export class NotificationsService {
   private readonly toasts: ToastsService;
-  private readonly productIntercepts: ProductInterceptService;
+  private readonly intercepts: InterceptDialogService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
   private readonly coordinator = notificationCoordinator.bind(new Coordinator());
 
   constructor() {
     this.toasts = new ToastsService();
-    this.productIntercepts = new ProductInterceptService();
+    this.intercepts = new InterceptDialogService();
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
     const notificationSetup = {
       toasts: this.toasts.setup({ uiSettings, analytics }),
-      productIntercepts: this.productIntercepts.setup({ analytics }),
+      intercepts: this.intercepts.setup({ analytics }),
     };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
@@ -79,7 +79,7 @@ export class NotificationsService {
         notificationCoordinator: this.coordinator,
         ...startDeps,
       }),
-      productIntercepts: this.productIntercepts.start({
+      intercepts: this.intercepts.start({
         overlays,
         notificationCoordinator: this.coordinator,
         targetDomElement: (() => {

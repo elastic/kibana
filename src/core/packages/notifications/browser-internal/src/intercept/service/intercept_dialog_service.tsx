@@ -17,16 +17,16 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
+import type { IInterceptPublicApi } from '@kbn/core-notifications-browser';
 import type { NotificationCoordinatorPublicImpl } from '../../notification_coordinator';
-import { ProductInterceptDialogApi } from './product_intercept_dialog_api';
-import { ProductInterceptDisplayManager } from './component/product_intercept_dialog_manager';
+import { InterceptDialogApi } from './intercept_dialog_api';
+import { InterceptDisplayManager } from './component/intercept_dialog_manager';
 
-interface ProductInterceptServiceSetupDeps {
+interface InterceptServiceSetupDeps {
   analytics: AnalyticsServiceSetup;
 }
 
-interface ProductInterceptServiceStartDeps {
+interface InterceptServiceStartDeps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   overlays: OverlayStart;
@@ -36,11 +36,11 @@ interface ProductInterceptServiceStartDeps {
   notificationCoordinator: NotificationCoordinatorPublicImpl;
 }
 
-export class ProductInterceptDialogService {
-  private readonly api = new ProductInterceptDialogApi();
+export class InterceptDialogService {
+  private readonly api = new InterceptDialogApi();
   private targetDomElement?: HTMLElement;
 
-  setup({ analytics }: ProductInterceptServiceSetupDeps) {
+  setup({ analytics }: InterceptServiceSetupDeps) {
     this.api.setup({ analytics });
 
     return {};
@@ -50,13 +50,13 @@ export class ProductInterceptDialogService {
     targetDomElement,
     notificationCoordinator,
     ...startDeps
-  }: ProductInterceptServiceStartDeps): IProductInterceptPublicApi {
+  }: InterceptServiceStartDeps): IInterceptPublicApi {
     const { ack, add, get$ } = this.api.start({ ...startDeps });
     this.targetDomElement = targetDomElement;
 
-    const coordinator = notificationCoordinator(ProductInterceptDialogService.name);
+    const coordinator = notificationCoordinator(InterceptDialogService.name);
 
-    const productIntercept$ = coordinator
+    const intercept$ = coordinator
       // emit values only when coordinator has no lock
       .optInToCoordination(get$(), ({ locked }) => !locked)
       .pipe(
@@ -66,12 +66,12 @@ export class ProductInterceptDialogService {
         // hence we attempt to present them serially to the user, without interrupting other queued notification types
         Rx.delayWhen(() =>
           coordinator.lock$.pipe(
-            Rx.filter(({ controller }) => controller === ProductInterceptDialogService.name)
+            Rx.filter(({ controller }) => controller === InterceptDialogService.name)
           )
         )
       );
 
-    const ackProductIntercept = (...args: Parameters<typeof ack>) => {
+    const ackIntercept = (...args: Parameters<typeof ack>) => {
       ack(...args);
       // we release the coordination lock on processing the user's acknowledgement of the product intercept,
       // so that any other pending notification can be shown
@@ -80,10 +80,10 @@ export class ProductInterceptDialogService {
 
     render(
       <KibanaRenderContextProvider {...startDeps}>
-        <ProductInterceptDisplayManager
+        <InterceptDisplayManager
           {...{
-            productIntercept$,
-            ackProductIntercept,
+            intercept$,
+            ackIntercept,
           }}
         />
       </KibanaRenderContextProvider>,

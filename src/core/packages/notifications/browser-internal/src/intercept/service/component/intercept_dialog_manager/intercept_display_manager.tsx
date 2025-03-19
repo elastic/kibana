@@ -27,13 +27,16 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import type { EuiTourStepStatus } from '@elastic/eui/src/components/tour/tour_step_indicator';
-import { ProductInterceptDialogApi } from '../../product_intercept_dialog_api';
+import { InterceptDialogApi } from '../../intercept_dialog_api';
 
-type ProductIntercept = Rx.ObservedValueOf<ReturnType<ProductInterceptDialogApi['get$']>>[number];
+type Intercept = Rx.ObservedValueOf<ReturnType<InterceptDialogApi['get$']>>[number];
 
-interface ProductInterceptDialogManagerProps {
-  ackProductIntercept: ProductInterceptDialogApi['ack'];
-  productIntercept$: Rx.Observable<ProductIntercept>;
+interface InterceptDialogManagerProps {
+  ackIntercept: InterceptDialogApi['ack'];
+  /**
+   * Observable that emits the intercept to be displayed
+   */
+  intercept$: Rx.Observable<Intercept>;
 }
 
 interface InterceptProgressIndicatorProps {
@@ -63,69 +66,64 @@ const InterceptProgressIndicator = React.memo(
   }
 );
 
-export function ProductInterceptDisplayManager({
-  ackProductIntercept,
-  productIntercept$,
-}: ProductInterceptDialogManagerProps) {
+export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptDialogManagerProps) {
   const { euiTheme } = useEuiTheme();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [currentProductIntercept, setCurrentProductIntercept] = useState<ProductIntercept | null>(
-    null
-  );
+  const [currentIntercept, setCurrentIntercept] = useState<Intercept | null>(null);
   const feedbackStore = useRef<Record<string, unknown>>({});
 
   useEffect(() => {
-    const subscription = productIntercept$.subscribe((intercept) => {
+    const subscription = intercept$.subscribe((intercept) => {
       setCurrentStepIndex(0);
-      setCurrentProductIntercept(intercept);
+      setCurrentIntercept(intercept);
     });
 
     return () => subscription.unsubscribe();
-  }, [productIntercept$]);
+  }, [intercept$]);
 
-  const currentProductInterceptStep = useMemo(() => {
-    return currentProductIntercept?.steps?.[currentStepIndex];
-  }, [currentProductIntercept, currentStepIndex]);
+  const currentInterceptStep = useMemo(() => {
+    return currentIntercept?.steps?.[currentStepIndex];
+  }, [currentIntercept, currentStepIndex]);
 
   const nextStep = useCallback(
     (isLastStep?: boolean) => {
       setCurrentStepIndex((prevStepIndex) => {
         if (isLastStep) {
-          currentProductIntercept?.onFinish?.({ response: feedbackStore.current });
+          currentIntercept?.onFinish?.({ response: feedbackStore.current });
           setCurrentStepIndex(0);
           // this will cause the component to unmount
-          ackProductIntercept(currentProductIntercept!.id, 'completed');
+          ackIntercept(currentIntercept!.id, 'completed');
         }
 
-        return Math.min(prevStepIndex + 1, currentProductIntercept!.steps.length);
+        return Math.min(prevStepIndex + 1, currentIntercept!.steps.length);
       });
     },
-    [ackProductIntercept, currentProductIntercept]
+    [ackIntercept, currentIntercept]
   );
 
   const dismissProductIntercept = useCallback(() => {
-    ackProductIntercept(currentProductIntercept!.id, 'dismissed');
-    currentProductIntercept?.onDismiss?.();
-    setCurrentProductIntercept(null);
-  }, [ackProductIntercept, currentProductIntercept]);
+    ackIntercept(currentIntercept!.id, 'dismissed');
+    currentIntercept?.onDismiss?.();
+    setCurrentIntercept(null);
+  }, [ackIntercept, currentIntercept]);
 
   const onInputChange = useCallback(
     (value: unknown) => {
-      feedbackStore.current[currentProductInterceptStep!.id] = value;
-      currentProductIntercept?.onProgress?.(currentProductInterceptStep!.id, value);
+      feedbackStore.current[currentInterceptStep!.id] = value;
+      currentIntercept?.onProgress?.(currentInterceptStep!.id, value);
       nextStep();
     },
-    [currentProductIntercept, currentProductInterceptStep, nextStep]
+    [currentIntercept, currentInterceptStep, nextStep]
   );
 
   let isLastStep = false;
 
-  return currentProductIntercept && currentProductInterceptStep ? (
+  return currentIntercept && currentInterceptStep ? (
     <EuiPortal>
       <EuiSplitPanel.Outer
         grow
         role="dialog"
-        data-test-subj={`interceptStep-${currentProductInterceptStep.id}`}
+        data-test-subj={`interceptStep-${currentInterceptStep.id}`}
         css={css`
           position: fixed;
           inline-size: 360px;
@@ -149,11 +147,11 @@ export function ProductInterceptDisplayManager({
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiTitle size="xxs">
-                    <h2>{currentProductInterceptStep!.title}</h2>
+                    <h2>{currentInterceptStep!.title}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 {currentStepIndex > 0 &&
-                  !(isLastStep = currentStepIndex === currentProductIntercept.steps.length - 1) && (
+                  !(isLastStep = currentStepIndex === currentIntercept.steps.length - 1) && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
                         iconType="cross"
@@ -167,7 +165,7 @@ export function ProductInterceptDisplayManager({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiForm fullWidth>
-                {React.createElement(currentProductInterceptStep!.content, {
+                {React.createElement(currentInterceptStep!.content, {
                   onValue: onInputChange,
                 })}
               </EuiForm>
@@ -184,7 +182,7 @@ export function ProductInterceptDisplayManager({
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <InterceptProgressIndicator
-                stepsTotal={currentProductIntercept.steps.length}
+                stepsTotal={currentIntercept.steps.length}
                 currentStep={currentStepIndex}
               />
             </EuiFlexItem>

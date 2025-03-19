@@ -7,6 +7,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { ProductInterceptPrompter } from './prompter';
 
 describe('ProductInterceptPrompter', () => {
@@ -19,13 +20,14 @@ describe('ProductInterceptPrompter', () => {
     const http = httpServiceMock.createStartContract();
     const userProfile = userProfileServiceMock.createStart();
     const notifications = notificationServiceMock.createStartContract();
+    const analytics = analyticsServiceMock.createAnalyticsServiceStart();
 
     let productInterceptAddSpy: jest.SpyInstance;
 
     beforeEach(() => {
       jest.useFakeTimers();
 
-      productInterceptAddSpy = jest.spyOn(notifications.productIntercepts, 'add');
+      productInterceptAddSpy = jest.spyOn(notifications.intercepts, 'add');
     });
 
     afterEach(() => {
@@ -42,6 +44,7 @@ describe('ProductInterceptPrompter', () => {
         http,
         notifications,
         userProfile,
+        analytics,
       });
 
       jest.runAllTimers();
@@ -61,6 +64,7 @@ describe('ProductInterceptPrompter', () => {
         http,
         notifications,
         userProfile,
+        analytics,
       });
 
       await jest.runOnlyPendingTimersAsync();

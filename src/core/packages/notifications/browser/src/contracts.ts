@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IToasts, IProductInterceptPublicApi } from './types';
+import type { IToasts, IInterceptPublicApi } from './types';
 
-export type { IProductInterceptPublicApi as IProductInterceptApi } from './types';
+export type { IInterceptPublicApi } from './types';
 
 /**
  * {@link IToasts}
@@ -34,5 +34,5 @@ export interface NotificationsStart {
   /** {@link ToastsStart} */
   toasts: ToastsStart;
   showErrorDialog: (options: { title: string; error: Error }) => void;
-  productIntercepts: IProductInterceptPublicApi;
+  intercepts: IInterceptPublicApi;
 }

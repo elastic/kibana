@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProductInterceptDisplayManager } from './product_intercept_display_manager';
+export { InterceptTelemetry } from './event_reporter';

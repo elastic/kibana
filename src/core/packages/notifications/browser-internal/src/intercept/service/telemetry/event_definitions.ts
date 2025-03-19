@@ -22,7 +22,7 @@ const fields: Record<EventFieldType, RootSchema<unknown>> = {
     [EventFieldType.INTERACTION_TYPE]: {
       type: 'keyword',
       _meta: {
-        description: 'The type of interaction that occurred with the product intercept',
+        description: 'The type of interaction that occurred with the intercept',
         optional: false,
       },
     },
