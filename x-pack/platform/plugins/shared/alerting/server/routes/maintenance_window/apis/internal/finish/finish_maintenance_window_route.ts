@@ -17,7 +17,7 @@ import type {
 } from '../../../../../../common/routes/maintenance_window/internal/apis/finish';
 import { finishParamsSchemaV1 } from '../../../../../../common/routes/maintenance_window/internal/apis/finish';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
-import { transformMaintenanceWindowToResponseV1 } from '../transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
 
 export const finishMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -51,7 +51,7 @@ export const finishMaintenanceWindowRoute = (
         });
 
         const response: FinishMaintenanceWindowResponseV1 = {
-          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+          body: transformInternalMaintenanceWindowToExternalV1(maintenanceWindow),
         };
 
         return res.ok(response);

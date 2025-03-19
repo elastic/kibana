@@ -15,7 +15,7 @@ import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type { CreateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/external/apis/create';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -33,10 +33,21 @@ const mockMaintenanceWindow = {
 
 const createParams = {
   title: 'test-maintenance-window',
-  start: '2026-02-07T09:17:06.790Z',
   enabled: false,
-  duration: 60 * 60 * 1000, // 1 hr
-  scope: { query: { kql: "_id: '1234'" } },
+  schedule: {
+    custom: {
+      duration: '10d',
+      start: '2021-03-07T00:00:00.000Z',
+      recurring: { every: '1d', end: '2022-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
+    },
+  },
+  scope: {
+    alerting: {
+      query: {
+        kql: "_id: '1234'",
+      },
+    },
+  },
 } as CreateMaintenanceWindowRequestBody;
 
 describe('createMaintenanceWindowRoute', () => {
@@ -85,17 +96,22 @@ describe('createMaintenanceWindowRoute', () => {
           filters: [],
           kql: "_id: '1234'",
         },
-
-        // TODO schedule schema
-        duration: 60 * 60 * 1000, // 1 hr
+        duration: 864000000,
         rRule: {
-          dtstart: '2026-02-07T09:17:06.790Z',
+          dtstart: '2021-03-07T00:00:00.000Z',
           tzid: 'UTC',
+          byweekday: ['MO', 'FR'],
+          freq: 3,
+          interval: 1,
+          until: '2022-05-17T05:05:00.000Z',
+          bymonth: undefined,
+          count: undefined,
+          bymonthday: undefined,
         },
       },
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),
+      body: transformInternalMaintenanceWindowToExternalV1(mockMaintenanceWindow),
     });
   });
 

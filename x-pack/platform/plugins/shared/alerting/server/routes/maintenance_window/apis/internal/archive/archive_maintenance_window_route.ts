@@ -22,7 +22,7 @@ import {
   archiveBodySchemaV1,
   archiveParamsSchemaV1,
 } from '../../../../../../common/routes/maintenance_window/internal/apis/archive';
-import { transformMaintenanceWindowToResponseV1 } from '../transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
 
 export const archiveMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -59,7 +59,7 @@ export const archiveMaintenanceWindowRoute = (
         });
 
         const response: ArchiveMaintenanceWindowResponseV1 = {
-          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+          body: transformInternalMaintenanceWindowToExternalV1(maintenanceWindow),
         };
 
         return res.ok(response);

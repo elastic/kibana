@@ -13,7 +13,7 @@ import { maintenanceWindowClientMock } from '../../../../../maintenance_window_c
 import { archiveMaintenanceWindowRoute } from './archive_maintenance_window_route';
 import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -76,7 +76,7 @@ describe('archiveMaintenanceWindowRoute', () => {
       archive: true,
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),
+      body: transformInternalMaintenanceWindowToExternalV1(mockMaintenanceWindow),
     });
   });
 

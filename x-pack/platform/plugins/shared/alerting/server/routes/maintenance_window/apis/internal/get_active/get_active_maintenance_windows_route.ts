@@ -14,7 +14,7 @@ import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type { GetActiveMaintenanceWindowsResponseV1 } from '../../../../../../common/routes/maintenance_window/internal/apis/get_active';
-import { transformMaintenanceWindowToResponseV1 } from '../transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
 
 export const getActiveMaintenanceWindowsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -51,7 +51,7 @@ export const getActiveMaintenanceWindowsRoute = (
 
         const response: GetActiveMaintenanceWindowsResponseV1 = {
           body: maintenanceWindows.map((maintenanceWindow) =>
-            transformMaintenanceWindowToResponseV1(maintenanceWindow)
+            transformInternalMaintenanceWindowToExternalV1(maintenanceWindow)
           ),
         };
 

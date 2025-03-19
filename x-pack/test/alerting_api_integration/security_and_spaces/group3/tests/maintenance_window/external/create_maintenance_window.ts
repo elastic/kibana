@@ -15,25 +15,34 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
+  const start = new Date();
+  const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
+
   describe('createMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const createParams = {
+    const createRequestBody = {
       title: 'test-maintenance-window',
-      start: '2026-02-07T09:17:06.790Z',
-      duration: 60 * 60 * 1000, // 1 hr
       enabled: false,
-      scope: { query: { kql: "_id: '1234'" } },
-      // TODO schedule schema
-      // every possible field should be passed
-      // recurring: {
-      //   end: '',
-      //   every: '',
-      //   onWeekDay: '',
-      //   onMonthDay: '',
-      //   onMonth: '',
-      //   ocurrences: 1234,
-      // },
+      schedule: {
+        custom: {
+          duration: '1m',
+          start: start.toISOString(),
+          recurring: {
+            every: '2d',
+            end: end.toISOString(),
+            onWeekDay: ['MO', 'FR'],
+          },
+        },
+      },
+      scope: {
+        alerting: {
+          query: {
+            kql: "_id: '1234'",
+          },
+        },
+      },
     };
+
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -44,7 +53,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(createParams);
+            .send(createRequestBody);
 
           if (response.body.id) {
             objectRemover.add(space.id, response.body.id, 'maintenance_window', 'alerting');
@@ -70,22 +79,17 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.body.title).to.eql('test-maintenance-window');
               expect(response.body.status).to.eql('upcoming');
               expect(response.body.enabled).to.eql(false);
-              expect(response.body.scope.query.kql).to.eql("_id: '1234'");
+
+              expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
 
               expect(response.body.created_by).to.eql(scenario.user.username);
               expect(response.body.updated_by).to.eql(scenario.user.username);
 
-              // TODO schedule schema
-              // We want to guarantee every field is returned as expected
-              expect(response.body.duration).to.eql(createParams.duration);
-              expect(response.body.start).to.eql(createParams.start);
-              // expect(response.body.expiration_date).to.eql('???');
-              // expect(response.body.recurring.end).to.eql();
-              // expect(response.body.recurring.every).to.eql();
-              // expect(response.body.recurring.onWeekDay).to.eql();
-              // expect(response.body.recurring.onMonthDay).to.eql();
-              // expect(response.body.recurring.onMonth).to.eql();
-              // expect(response.body.recurring.occurrences).to.eql();
+              expect(response.body.schedule.custom.duration).to.eql('1m');
+              expect(response.body.schedule.custom.start).to.eql(start.toISOString());
+              expect(response.body.schedule.custom.recurring.every).to.eql('2d');
+              expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());
+              expect(response.body.schedule.custom.recurring.onWeekDay).to.eql(['MO', 'FR']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -94,15 +98,33 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       });
     }
 
-    it('should throw if creating maintenance window with invalid scoped query', async () => {
+    it('should throw if creating maintenance window with invalid kql', async () => {
       await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
-          ...createParams,
+          ...createRequestBody,
           scope: {
-            query: {
-              kql: 'invalid_kql:',
+            alerting: {
+              query: {
+                kql: 'invalid_kql:',
+              },
+            },
+          },
+        })
+        .expect(400);
+    });
+
+    it('should throw if creating maintenance window with incomplete custom schedule', async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createRequestBody,
+          schedule: {
+            custom: {
+              duration: '1d',
+              // test scenario: incomplete schedule, missing start
             },
           },
         })

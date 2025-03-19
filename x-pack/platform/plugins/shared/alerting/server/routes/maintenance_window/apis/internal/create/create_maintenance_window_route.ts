@@ -18,7 +18,7 @@ import type {
   CreateMaintenanceWindowResponseV1,
 } from '../../../../../../common/routes/maintenance_window/internal/apis/create';
 import { transformCreateBodyV1 } from './transforms';
-import { transformMaintenanceWindowToResponseV1 } from '../transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../transforms';
 
 export const createMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -52,7 +52,7 @@ export const createMaintenanceWindowRoute = (
         });
 
         const response: CreateMaintenanceWindowResponseV1 = {
-          body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
+          body: transformInternalMaintenanceWindowToExternalV1(maintenanceWindow),
         };
 
         return res.ok(response);

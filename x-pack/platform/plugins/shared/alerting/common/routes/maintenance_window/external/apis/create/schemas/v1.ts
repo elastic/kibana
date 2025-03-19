@@ -7,23 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-// TODO schedule schema
-const scheduleSchema = schema.object({
-  duration: schema.number(),
-  start: schema.string(),
-  recurring: schema.maybe(
-    schema.object({
-      end: schema.maybe(schema.string()),
-      every: schema.maybe(schema.string()),
-      onWeekDay: schema.maybe(schema.arrayOf(schema.string())),
-      onMonthDay: schema.maybe(schema.arrayOf(schema.number())),
-      onMonth: schema.maybe(schema.arrayOf(schema.string())),
-      occurrences: schema.maybe(schema.number()),
-    })
-  ),
-});
+import { scheduleRequestSchemaV1 } from '../../../../../schedule';
 
-export const bodySchema = schema.object({
+export const createMaintenanceWindowRequestBodySchema = schema.object({
   title: schema.string({
     meta: {
       description:
@@ -39,18 +25,18 @@ export const bodySchema = schema.object({
       defaultValue: true,
     })
   ),
+  schedule: schema.object({
+    custom: scheduleRequestSchemaV1,
+  }),
   scope: schema.maybe(
     schema.object({
-      query: schema.object({
-        kql: schema.string({
-          meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+      alerting: schema.object({
+        query: schema.object({
+          kql: schema.string({
+            meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+          }),
         }),
       }),
     })
   ),
 });
-
-export const createMaintenanceWindowRequestBodySchema = schema.intersection([
-  bodySchema,
-  scheduleSchema,
-]);

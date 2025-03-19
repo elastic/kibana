@@ -17,10 +17,15 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
 
   describe('deleteMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
-    const createParams = {
+    const createRequestBody = {
       title: 'test-maintenance-window',
-      start: '2026-02-07T09:17:06.790Z',
-      duration: 60 * 60 * 1000,
+      enabled: false,
+      schedule: {
+        custom: {
+          duration: '1d',
+          start: new Date().toISOString(),
+        },
+      },
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -31,7 +36,7 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
           const { body: maintenanceWindowBody } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
             .set('kbn-xsrf', 'foo')
-            .send(createParams);
+            .send(createRequestBody);
 
           const response = await supertestWithoutAuth
             .delete(

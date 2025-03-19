@@ -7,24 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
+import { scheduleRequestSchemaV1 } from '../../../../schedule';
 
-// TODO schedule schema
-const scheduleSchema = schema.object({
-  duration: schema.number(),
-  start: schema.string(),
-  recurring: schema.maybe(
-    schema.object({
-      end: schema.maybe(schema.string()),
-      every: schema.maybe(schema.string()),
-      onWeekDay: schema.maybe(schema.arrayOf(schema.string())),
-      onMonthDay: schema.maybe(schema.arrayOf(schema.number())),
-      onMonth: schema.maybe(schema.arrayOf(schema.string())),
-      occurrences: schema.maybe(schema.number()),
-    })
-  ),
-});
-
-const maintenanceWindowResponseFieldsSchema = schema.object({
+export const maintenanceWindowResponseSchema = schema.object({
   id: schema.string({
     meta: {
       description: 'The identifier for the maintenance window.',
@@ -82,16 +67,17 @@ const maintenanceWindowResponseFieldsSchema = schema.object({
 
   scope: schema.maybe(
     schema.object({
-      query: schema.object({
-        kql: schema.string({
-          meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+      alerting: schema.object({
+        query: schema.object({
+          kql: schema.string({
+            meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+          }),
         }),
       }),
     })
   ),
-});
 
-export const maintenanceWindowResponseSchema = schema.intersection([
-  maintenanceWindowResponseFieldsSchema,
-  scheduleSchema,
-]);
+  schedule: schema.object({
+    custom: scheduleRequestSchemaV1,
+  }),
+});
