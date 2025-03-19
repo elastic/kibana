@@ -92,6 +92,13 @@ export const noPoliciesAvailableSuggestion: SuggestionRawDefinition = {
   },
 };
 
+export const modeDescription = i18n.translate(
+  'kbn-esql-validation-autocomplete.esql.definitions.ccqMode',
+  {
+    defaultMessage: 'Cross-cluster query mode',
+  }
+);
+
 export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES.map(
   ({ name, description }) => ({
     label: `_${name}`,
@@ -99,7 +106,7 @@ export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES.map(
     asSnippet: true,
     kind: 'Reference',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqModeDoc', {
-      defaultMessage: 'Cross-clusters query mode - ${description}',
+      defaultMessage: 'Cross-cluster query mode - ${description}',
       values: {
         description,
       },
