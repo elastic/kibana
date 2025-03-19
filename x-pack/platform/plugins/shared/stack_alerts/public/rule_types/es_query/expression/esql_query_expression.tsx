@@ -35,7 +35,11 @@ import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import { transformDatatableToEsqlTable, getEsqlQueryHits } from '../../../../common';
+import {
+  transformDatatableToEsqlTable,
+  getEsqlQueryHits,
+  ALERT_ID_SUGGESTED_MAX,
+} from '../../../../common';
 
 const ALL_DOCUMENTS = 'all';
 const alertingOptions = [
@@ -53,10 +57,21 @@ const alertingOptions = [
   },
 ];
 
-const warningMessage = i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowWarning', {
-  defaultMessage:
-    'Your alerts do not appear to be unique, which will delay recovery of your alerts.',
-});
+const getWarning = (duplicateAlertIds: Set<string>, longAlertIds: Set<string>) => {
+  if (duplicateAlertIds.size > 0) {
+    return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowWarning', {
+      defaultMessage:
+        'Your alerts do not appear to be unique, which will delay recovery of your alerts.',
+    });
+  } else if (longAlertIds.size > 0) {
+    return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowAlertIdWarning', {
+      defaultMessage: 'Your alert IDs are made up of at least {max} fields.',
+      values: {
+        max: ALERT_ID_SUGGESTED_MAX,
+      },
+    });
+  }
+};
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
@@ -140,11 +155,12 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const { results, duplicateAlertIds, rows, cols } = getEsqlQueryHits(
+      const { results, duplicateAlertIds, longAlertIds, rows, cols } = getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
         isGroupAgg
       );
+      const warning = getWarning(duplicateAlertIds, longAlertIds);
 
       setIsLoading(false);
       return {
@@ -156,9 +172,9 @@ export const EsqlQueryExpression: React.FC<
           cols,
           rows,
         },
-        ...(duplicateAlertIds.size > 0
+        ...(warning
           ? {
-              warning: warningMessage,
+              warning,
             }
           : {}),
       };

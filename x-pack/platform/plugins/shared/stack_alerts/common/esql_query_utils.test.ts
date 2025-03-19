@@ -10,7 +10,7 @@ import {
   toEsqlQueryHits,
   transformDatatableToEsqlTable,
   toGroupedEsqlQueryHits,
-  getAlertId,
+  getAlertIdFields,
 } from './esql_query_utils';
 
 describe('ESQL query utils', () => {
@@ -258,6 +258,139 @@ describe('ESQL query utils', () => {
       });
       expect(duplicateAlertIds.size).toBe(1);
     });
+    it('correctly converts ESQL table to grouped ES query hits with long alertIds', () => {
+      const value5 = [
+        '2023-07-12T13:32:04.174Z',
+        '1.8.0',
+        null,
+        'www.elastic.co',
+        'test',
+        'US',
+        'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+        'info',
+        'test message',
+        '/app-search',
+      ];
+      const value6 = [
+        '2025-07-12T13:32:04.174Z',
+        '1.2.0',
+        '400',
+        'artifacts.elastic.co',
+        'test',
+        'US',
+        'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+        'info',
+        'test message',
+        '/app-search',
+      ];
+      const { results, longAlertIds } = toGroupedEsqlQueryHits(
+        {
+          columns: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'ecs.version', type: 'keyword' },
+            { name: 'error.code', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'name', type: 'keyword' },
+            { name: 'geo.dest', type: 'keyword' },
+            { name: 'agent', type: 'keyword' },
+            { name: 'tags', type: 'keyword' },
+            { name: 'message', type: 'keyword' },
+            { name: 'request', type: 'keyword' },
+          ],
+          values: [value5, value6],
+        },
+        [
+          '@timestamp',
+          'ecs.version',
+          'error.code',
+          'host',
+          'name',
+          'geo.dest',
+          'agent',
+          'tags',
+          'message',
+          'request',
+        ]
+      );
+      expect(results).toEqual({
+        esResult: {
+          _shards: {
+            failed: 0,
+            successful: 0,
+            total: 0,
+          },
+          aggregations: {
+            groupAgg: {
+              buckets: [
+                {
+                  doc_count: 1,
+                  key: '2023-07-12T13:32:04.174Z,1.8.0,www.elastic.co,test,US,Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1,info,test message,/app-search',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: 'esql_query_document',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2023-07-12T13:32:04.174Z',
+                            agent:
+                              'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+                            'ecs.version': '1.8.0',
+                            'error.code': null,
+                            'geo.dest': 'US',
+                            host: 'www.elastic.co',
+                            message: 'test message',
+                            name: 'test',
+                            request: '/app-search',
+                            tags: 'info',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  doc_count: 1,
+                  key: '2025-07-12T13:32:04.174Z,1.2.0,400,artifacts.elastic.co,test,US,Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1,info,test message,/app-search',
+                  topHitsAgg: {
+                    hits: {
+                      hits: [
+                        {
+                          _id: 'esql_query_document',
+                          _index: '',
+                          _source: {
+                            '@timestamp': '2025-07-12T13:32:04.174Z',
+                            agent:
+                              'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+                            'ecs.version': '1.2.0',
+                            'error.code': '400',
+                            'geo.dest': 'US',
+                            host: 'artifacts.elastic.co',
+                            message: 'test message',
+                            name: 'test',
+                            request: '/app-search',
+
+                            tags: 'info',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          hits: {
+            hits: [],
+          },
+          timed_out: false,
+          took: 0,
+        },
+        isCountAgg: false,
+        isGroupAgg: true,
+      });
+      expect(longAlertIds.size).toBe(1);
+    });
     it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null alertIds', () => {
       const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
         {
@@ -467,10 +600,10 @@ describe('ESQL query utils', () => {
     });
   });
 
-  describe('getAlertId', () => {
+  describe('getAlertIdFields', () => {
     it('correctly gets the alertId from an ESQL query that uses only STATS', () => {
       expect(
-        getAlertId('FROM test-index | STATS count = COUNT(*)', [
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*)', [
           { name: 'host', type: 'keyword' },
           { name: 'error.code', type: 'keyword' },
           { name: 'count', type: 'number' },
@@ -480,7 +613,7 @@ describe('ESQL query utils', () => {
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY', () => {
       expect(
-        getAlertId('FROM test-index | STATS count = COUNT(*) BY error.code, host', [
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*) BY error.code, host', [
           { name: 'host', type: 'keyword' },
           { name: 'error.code', type: 'keyword' },
           { name: 'count', type: 'number' },
@@ -490,7 +623,7 @@ describe('ESQL query utils', () => {
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and RENAME', () => {
       expect(
-        getAlertId(
+        getAlertIdFields(
           'FROM test-index | STATS count = COUNT(*) BY error.code, host | RENAME error.code AS code, host AS h | RENAME code AS c',
           [
             { name: 'h', type: 'keyword' },
@@ -503,7 +636,7 @@ describe('ESQL query utils', () => {
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and drops fields', () => {
       expect(
-        getAlertId(
+        getAlertIdFields(
           'FROM test-index | STATS count = COUNT(*) BY error.code, host | KEEP host, count',
           [
             { name: 'host', type: 'keyword' },
@@ -515,7 +648,7 @@ describe('ESQL query utils', () => {
 
     it('correctly gets the alertId from an ESQL query that uses METADATA _id', () => {
       expect(
-        getAlertId('FROM test-index METADATA _id | KEEP host, _id', [
+        getAlertIdFields('FROM test-index METADATA _id | KEEP host, _id', [
           { name: 'host', type: 'keyword' },
           { name: '_id', type: 'keyword' },
         ])
@@ -524,13 +657,15 @@ describe('ESQL query utils', () => {
 
     it('correctly gets the alertId from an ESQL query that uses METADATA _id and drops then drops the _id field', () => {
       expect(
-        getAlertId('FROM test-index METADATA _id | KEEP host', [{ name: 'host', type: 'keyword' }])
+        getAlertIdFields('FROM test-index METADATA _id | KEEP host', [
+          { name: 'host', type: 'keyword' },
+        ])
       ).toEqual(['host']);
     });
 
     it('correctly gets the alertId from all columns', () => {
       expect(
-        getAlertId('FROM test-index', [
+        getAlertIdFields('FROM test-index', [
           { name: 'host', type: 'keyword' },
           { name: 'error.code', type: 'keyword' },
           { name: 'ecs.version', type: 'keyword' },

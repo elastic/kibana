@@ -13,6 +13,7 @@ export {
   transformDatatableToEsqlTable,
   getEsqlQueryHits,
   ALERT_ID_COLUMN,
+  ALERT_ID_SUGGESTED_MAX,
 } from './esql_query_utils';
 
 export {

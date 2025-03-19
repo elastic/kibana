@@ -27,7 +27,9 @@ interface EsqlResultColumn {
 
 interface EsqlQueryHits {
   results: ParseAggregationResultsOpts;
+  // Track duplicate and long alertIds, so we can add a warning in the ui
   duplicateAlertIds: Set<string>;
+  longAlertIds: Set<string>;
   rows: EsqlDocument[];
   cols: Array<{ id: string; actions: boolean }>;
 }
@@ -42,6 +44,7 @@ export interface EsqlTable {
 }
 
 export const ALERT_ID_COLUMN = 'Alert ID';
+export const ALERT_ID_SUGGESTED_MAX = 10;
 
 export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
   return columns.reduce<Record<string, string | null>>((acc, column, i) => {
@@ -57,8 +60,8 @@ export const getEsqlQueryHits = (
   isGroupAgg: boolean
 ): EsqlQueryHits => {
   if (isGroupAgg) {
-    const alertId = getAlertId(query, table.columns);
-    return toGroupedEsqlQueryHits(table, alertId);
+    const alertIdFields = getAlertIdFields(query, table.columns);
+    return toGroupedEsqlQueryHits(table, alertIdFields);
   }
   return toEsqlQueryHits(table);
 };
@@ -91,34 +94,40 @@ export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
       },
     },
     duplicateAlertIds: new Set<string>(),
+    longAlertIds: new Set<string>(),
     rows,
     cols: getColumnsForPreview(table.columns),
   };
 };
 
-export const toGroupedEsqlQueryHits = (table: EsqlTable, alertId: string[]): EsqlQueryHits => {
+export const toGroupedEsqlQueryHits = (
+  table: EsqlTable,
+  alertIdFields: string[]
+): EsqlQueryHits => {
   const duplicateAlertIds: Set<string> = new Set<string>();
+  const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
   const groupedHits = table.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(table.columns, row);
-    const id = alertId
-      .filter((a) => !isNil(document[a]))
-      .map((a) => document[a])
-      .join(',');
-
-    if (id) {
+    const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
+    if (mappedAlertId.length > 0) {
+      const alertId = mappedAlertId.join(',');
       const hit = {
         _id: ESQL_DOCUMENT_ID,
         _index: '',
         _source: document,
       };
-      if (acc[id]) {
-        duplicateAlertIds.add(id);
-        acc[id].push(hit);
+      if (acc[alertId]) {
+        duplicateAlertIds.add(alertId);
+        acc[alertId].push(hit);
       } else {
-        acc[id] = [hit];
+        acc[alertId] = [hit];
       }
-      rows.push({ [ALERT_ID_COLUMN]: id, ...document });
+      rows.push({ [ALERT_ID_COLUMN]: alertId, ...document });
+
+      if (mappedAlertId.length >= ALERT_ID_SUGGESTED_MAX) {
+        longAlertIds.add(alertId);
+      }
     }
     return acc;
   }, {});
@@ -152,6 +161,7 @@ export const toGroupedEsqlQueryHits = (table: EsqlTable, alertId: string[]): Esq
       },
     },
     duplicateAlertIds,
+    longAlertIds,
     rows,
     cols: getColumnsForPreview(table.columns),
   };
@@ -166,7 +176,7 @@ export const transformDatatableToEsqlTable = (datatable: Datatable): EsqlTable =
   return { columns, values };
 };
 
-export const getAlertId = (query: string, resultColumns: EsqlResultColumn[]): string[] => {
+export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[]): string[] => {
   const { root } = parse(query);
   const commands = root.commands;
   const columns = resultColumns.map((c) => c.name);
