@@ -214,11 +214,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('painless', () => {
         before(async () => {
-          await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+          await esArchiver.loadIfNeeded(
+            'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+          await esArchiver.unload(
+            'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+          );
         });
         it('should return 400 "search_phase_execution_exception" for Painless error in "es" strategy', async () => {
           const resp = await supertestAdminWithCookieCredentials
