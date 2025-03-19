@@ -25,7 +25,7 @@ import { EuiCallOut } from '@elastic/eui';
 export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
 }) => {
-  const { control, watch } = form;
+  const { control } = form;
   const filterFieldsArray = useFieldArray({
     control,
     name: 'configuration.fields.filterFields',
