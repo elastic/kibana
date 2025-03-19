@@ -71,7 +71,7 @@ export const setupPublicBaseUrlConfigWarning = ({
             }}
           />{' '}
           <a
-            href={`${docLinks.links.server.publicBaseUrl}`}
+            href={`${docLinks.links.settings}#server-publicBaseUrl`}
             target="_blank"
             rel="noopener noreferrer"
           >

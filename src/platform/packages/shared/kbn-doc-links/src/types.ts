@@ -282,7 +282,6 @@ export interface DocLinks {
   };
   readonly server: {
     readonly protocol: string;
-    readonly publicBaseUrl: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
