@@ -13,7 +13,7 @@ export interface RoleDescriptorsFixture {
 }
 
 /**
- * Fixture that provides the role descriptors for the serverless cluster.
+ * Fixture that provides the role descriptors for the serverless prebuilt roles.
  * Using worker scope to avoid reading the file for each test.
  */
 export const roleDesciptorsFixture = base.extend<
