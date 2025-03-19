@@ -35,7 +35,6 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { RuleDomain } from '../../types';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { async } from 'fast-glob';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
