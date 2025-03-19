@@ -209,10 +209,10 @@ export class State {
 
   async commitChanges(desiredState: State, startingState: State) {
     const executionPlan = new ExecutionPlan(this.dependencies);
-    executionPlan.plan(
+    await executionPlan.plan(
       await this.determineElasticsearchActions(this.changedStreams(), desiredState, startingState)
     );
-    executionPlan.execute();
+    await executionPlan.execute();
   }
 
   async attemptRollback(startingState: State) {
@@ -231,10 +231,10 @@ export class State {
     });
 
     const executionPlan = new ExecutionPlan(this.dependencies);
-    executionPlan.plan(
+    await executionPlan.plan(
       await this.determineElasticsearchActions(rollbackTargets, startingState, brokenState)
     );
-    executionPlan.execute();
+    await executionPlan.execute();
   }
 
   async determineElasticsearchActions(

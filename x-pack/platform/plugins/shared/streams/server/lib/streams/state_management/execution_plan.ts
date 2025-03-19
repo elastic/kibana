@@ -11,6 +11,7 @@ import { groupBy, orderBy } from 'lodash';
 import {
   ClusterPutComponentTemplateRequest,
   IndicesPutIndexTemplateRequest,
+  IngestProcessorContainer,
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IngestStreamLifecycle, StreamDefinition } from '@kbn/streams-schema';
@@ -31,6 +32,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../ingest_pipelines/manage_ingest_pipelines';
+import { mergeUnwiredStreamPipelineActions } from './merge_unwired_stream_pipeline_actions';
 
 interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -48,6 +50,15 @@ interface UpsertIngestPipelineAction {
   request: IngestPutPipelineRequest;
 }
 
+export interface AppendProcessorToIngestPipelineAction {
+  type: 'append_processor_to_ingest_pipeline';
+  pipeline: string;
+  template: string;
+  dataStream: string;
+  processor: IngestProcessorContainer;
+  referencePipeline: string;
+}
+
 interface UpsertDatastreamAction {
   type: 'upsert_datastream';
   request: {
@@ -55,7 +66,7 @@ interface UpsertDatastreamAction {
   };
 }
 
-interface UpsertWriteIndexOrRolloverAction {
+export interface UpsertWriteIndexOrRolloverAction {
   type: 'upsert_write_index_or_rollover';
   request: {
     name: string;
@@ -91,6 +102,14 @@ interface DeleteIngestPipelineAction {
   };
 }
 
+export interface DeleteProcessorFromIngestPipelineAction {
+  type: 'delete_processor_from_ingest_pipeline';
+  pipeline: string;
+  template: string;
+  dataStream: string;
+  referencePipeline: string;
+}
+
 interface DeleteDatastreamAction {
   type: 'delete_datastream';
   request: {
@@ -122,6 +141,7 @@ export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | UpsertIndexTemplateAction
   | UpsertIngestPipelineAction
+  | AppendProcessorToIngestPipelineAction
   | UpsertDatastreamAction
   | UpsertWriteIndexOrRolloverAction
   | UpdateLifecycleAction
@@ -130,12 +150,27 @@ export type ElasticsearchAction =
   | DeleteComponentTemplateAction
   | DeleteIndexTemplateAction
   | DeleteIngestPipelineAction
+  | DeleteProcessorFromIngestPipelineAction
   | DeleteDatastreamAction
   | SyncAssetListAction;
 
-type ActionsByType = {
-  [Type in ElasticsearchAction['type']]: ElasticsearchAction[] | undefined;
-};
+export interface ActionsByType {
+  upsert_component_template: UpsertComponentTemplateAction[];
+  upsert_index_template: UpsertIndexTemplateAction[];
+  update_lifecycle: UpdateLifecycleAction[];
+  upsert_datastream: UpsertDatastreamAction[];
+  upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
+  upsert_ingest_pipeline: UpsertIngestPipelineAction[];
+  upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
+  sync_asset_list: SyncAssetListAction[];
+  delete_datastream: DeleteDatastreamAction[];
+  delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
+  delete_index_template: DeleteIndexTemplateAction[];
+  delete_ingest_pipeline: DeleteIngestPipelineAction[];
+  delete_component_template: DeleteComponentTemplateAction[];
+  append_processor_to_ingest_pipeline: AppendProcessorToIngestPipelineAction[];
+  delete_processor_from_ingest_pipeline: DeleteProcessorFromIngestPipelineAction[];
+}
 
 interface ExecutionPlanDependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -147,16 +182,36 @@ interface ExecutionPlanDependencies {
 
 export class ExecutionPlan {
   private dependencies: ExecutionPlanDependencies;
-  private actionsByType: ActionsByType = {} as ActionsByType;
+  private actionsByType: ActionsByType;
 
   constructor(dependencies: ExecutionPlanDependencies) {
     this.dependencies = dependencies;
+
+    this.actionsByType = {
+      upsert_component_template: [],
+      upsert_index_template: [],
+      update_lifecycle: [],
+      upsert_datastream: [],
+      upsert_dot_streams_document: [],
+      upsert_ingest_pipeline: [],
+      upsert_write_index_or_rollover: [],
+      sync_asset_list: [],
+      delete_datastream: [],
+      delete_dot_streams_document: [],
+      delete_index_template: [],
+      delete_ingest_pipeline: [],
+      delete_component_template: [],
+      append_processor_to_ingest_pipeline: [],
+      delete_processor_from_ingest_pipeline: [],
+    };
   }
 
-  plan(elasticsearchActions: ElasticsearchAction[]) {
-    this.actionsByType = groupBy(elasticsearchActions, 'type') as ActionsByType;
-
-    // Merge append_to_ingest_pipeline and upsert_ingest_pipelines where needed, special case to support classic streams
+  async plan(elasticsearchActions: ElasticsearchAction[]) {
+    this.actionsByType = Object.assign(this.actionsByType, groupBy(elasticsearchActions, 'type'));
+    await mergeUnwiredStreamPipelineActions(
+      this.actionsByType,
+      this.dependencies.scopedClusterClient
+    );
   }
 
   async execute() {
@@ -174,75 +229,78 @@ export class ExecutionPlan {
       delete_index_template,
       delete_ingest_pipeline,
       delete_component_template,
+      append_processor_to_ingest_pipeline,
+      delete_processor_from_ingest_pipeline,
       ...rest
     } = this.actionsByType;
     assertEmptyObject(rest);
+
+    if (append_processor_to_ingest_pipeline.length !== 0) {
+      throw new Error('append_processor_to_ingest_pipeline actions have not been merged');
+    }
+    if (delete_processor_from_ingest_pipeline.length !== 0) {
+      throw new Error('delete_processor_from_ingest_pipeline actions have not been merged');
+    }
 
     // This graph is parallelizing as much as possible
     // It's important we don't make changes too early, otherwise things can break halfway through
     // such as leading to data loss if routing changes too early
 
     await Promise.all([
-      this.upsertComponentTemplates(upsert_component_template as UpsertComponentTemplateAction[]),
-      this.upsertIndexTemplates(upsert_index_template as UpsertIndexTemplateAction[]),
+      this.upsertComponentTemplates(upsert_component_template),
+      this.upsertIndexTemplates(upsert_index_template),
     ]);
     await Promise.all([
-      this.upsertWriteIndexOrRollover(
-        upsert_write_index_or_rollover as UpsertWriteIndexOrRolloverAction[]
-      ),
-      this.updateLifecycle(update_lifecycle as UpdateLifecycleAction[]),
-      this.upsertDatastreams(upsert_datastream as UpsertDatastreamAction[]),
+      this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
+      this.updateLifecycle(update_lifecycle),
+      this.upsertDatastreams(upsert_datastream),
     ]);
 
-    await this.upsertIngestPipelines(upsert_ingest_pipeline as UpsertIngestPipelineAction[]);
+    await this.upsertIngestPipelines(upsert_ingest_pipeline);
 
-    await this.deleteDatastreams(delete_datastream as DeleteDatastreamAction[]);
+    await this.deleteDatastreams(delete_datastream);
 
-    await this.deleteIndexTemplates(delete_index_template as DeleteIndexTemplateAction[]);
+    await this.deleteIndexTemplates(delete_index_template);
 
     await Promise.all([
-      this.deleteComponentTemplates(delete_component_template as DeleteComponentTemplateAction[]),
-      this.deleteIngestPipelines(delete_ingest_pipeline as DeleteIngestPipelineAction[]),
+      this.deleteComponentTemplates(delete_component_template),
+      this.deleteIngestPipelines(delete_ingest_pipeline),
     ]);
 
     await Promise.all([
-      this.syncAssetList(sync_asset_list as SyncAssetListAction[]),
-      this.upsertDotStreamsDocuments(
-        upsert_dot_streams_document as UpsertDotStreamsDocumentAction[]
-      ),
-      this.deleteDotStreamsDocuments(
-        delete_dot_streams_document as DeleteDotStreamsDocumentAction[]
-      ),
+      this.syncAssetList(sync_asset_list),
+      this.upsertDotStreamsDocuments(upsert_dot_streams_document),
+      this.deleteDotStreamsDocuments(delete_dot_streams_document),
     ]);
   }
 
-  private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[] | undefined) {
+  private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
     return Promise.all(
-      actions?.map((action: UpsertComponentTemplateAction) =>
+      actions.map((action: UpsertComponentTemplateAction) =>
         upsertComponent({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           component: action.request,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async upsertIndexTemplates(actions: UpsertIndexTemplateAction[] | undefined) {
+  private async upsertIndexTemplates(actions: UpsertIndexTemplateAction[]) {
     return Promise.all(
-      actions?.map((action: UpsertIndexTemplateAction) =>
+      actions.map((action: UpsertIndexTemplateAction) =>
         upsertTemplate({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           template: action.request,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async updateLifecycle(actions: UpdateLifecycleAction[] | undefined) {
+  private async updateLifecycle(actions: UpdateLifecycleAction[]) {
     return Promise.all(
-      actions?.map((action: UpdateLifecycleAction) =>
+      actions.map((action: UpdateLifecycleAction) =>
         updateDataStreamsLifecycle({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -250,25 +308,25 @@ export class ExecutionPlan {
           lifecycle: action.request.lifecycle,
           isServerless: this.dependencies.isServerless,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async upsertDatastreams(actions: UpsertDatastreamAction[] | undefined) {
+  private async upsertDatastreams(actions: UpsertDatastreamAction[]) {
     return Promise.all(
-      actions?.map((action: UpsertDatastreamAction) =>
+      actions.map((action: UpsertDatastreamAction) =>
         upsertDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async upsertDotStreamsDocuments(actions: UpsertDotStreamsDocumentAction[] | undefined) {
+  private async upsertDotStreamsDocuments(actions: UpsertDotStreamsDocumentAction[]) {
     return this.dependencies.storageClient.bulk({
-      operations: (actions ?? []).map((action) => ({
+      operations: actions.map((action) => ({
         index: {
           document: action.request,
           _id: action.request.name,
@@ -277,12 +335,11 @@ export class ExecutionPlan {
     });
   }
 
-  private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[] | undefined) {
-    const actionWithStreamsDepth =
-      actions?.map((action) => ({
-        ...action,
-        depth: action.stream.match(/\./g)?.length ?? 0,
-      })) ?? [];
+  private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
+    const actionWithStreamsDepth = actions.map((action) => ({
+      ...action,
+      depth: action.stream.match(/\./g)?.length ?? 0,
+    }));
     return Promise.all(
       orderBy(actionWithStreamsDepth, 'depth', 'desc').map((action: UpsertIngestPipelineAction) =>
         upsertIngestPipeline({
@@ -294,48 +351,46 @@ export class ExecutionPlan {
     );
   }
 
-  private async upsertWriteIndexOrRollover(
-    actions: UpsertWriteIndexOrRolloverAction[] | undefined
-  ) {
+  private async upsertWriteIndexOrRollover(actions: UpsertWriteIndexOrRolloverAction[]) {
     return Promise.all(
-      actions?.map((action: UpsertWriteIndexOrRolloverAction) =>
+      actions.map((action: UpsertWriteIndexOrRolloverAction) =>
         updateOrRolloverDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async syncAssetList(actions: SyncAssetListAction[] | undefined) {
+  private async syncAssetList(actions: SyncAssetListAction[]) {
     return Promise.all(
-      actions?.map((action: SyncAssetListAction) =>
+      actions.map((action: SyncAssetListAction) =>
         this.dependencies.assetClient.syncAssetList({
           entityId: action.request.name,
           entityType: 'stream',
           assetIds: action.request.assetIds,
           assetType: 'dashboard',
         })
-      ) ?? []
+      )
     );
   }
 
-  private async deleteDatastreams(actions: DeleteDatastreamAction[] | undefined) {
+  private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
     return Promise.all(
-      actions?.map((action: DeleteDatastreamAction) =>
+      actions.map((action: DeleteDatastreamAction) =>
         deleteDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async deleteDotStreamsDocuments(actions: DeleteDotStreamsDocumentAction[] | undefined) {
+  private async deleteDotStreamsDocuments(actions: DeleteDotStreamsDocumentAction[]) {
     return this.dependencies.storageClient.bulk({
-      operations: (actions ?? []).map((action) => ({
+      operations: actions.map((action) => ({
         delete: {
           _id: action.request.name,
         },
@@ -343,39 +398,39 @@ export class ExecutionPlan {
     });
   }
 
-  private async deleteIndexTemplates(actions: DeleteIndexTemplateAction[] | undefined) {
+  private async deleteIndexTemplates(actions: DeleteIndexTemplateAction[]) {
     return Promise.all(
-      actions?.map((action: DeleteIndexTemplateAction) =>
+      actions.map((action: DeleteIndexTemplateAction) =>
         deleteTemplate({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async deleteIngestPipelines(actions: DeleteIngestPipelineAction[] | undefined) {
+  private async deleteIngestPipelines(actions: DeleteIngestPipelineAction[]) {
     return Promise.all(
-      actions?.map((action: DeleteIngestPipelineAction) =>
+      actions.map((action: DeleteIngestPipelineAction) =>
         deleteIngestPipeline({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           id: action.request.name,
         })
-      ) ?? []
+      )
     );
   }
 
-  private async deleteComponentTemplates(actions: DeleteComponentTemplateAction[] | undefined) {
+  private async deleteComponentTemplates(actions: DeleteComponentTemplateAction[]) {
     return Promise.all(
-      actions?.map((action: DeleteComponentTemplateAction) =>
+      actions.map((action: DeleteComponentTemplateAction) =>
         deleteComponent({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
-      ) ?? []
+      )
     );
   }
 }
