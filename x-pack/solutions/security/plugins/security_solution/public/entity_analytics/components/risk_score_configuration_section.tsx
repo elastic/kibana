@@ -76,9 +76,10 @@ export const RiskScoreConfigurationSection = ({
 
   const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
     setFrom(newStart);
-    setTo(newEnd);
-    onDateChange({ start: newStart, end: newEnd });
-    checkForChanges(newStart, newEnd, includeClosedAlerts);
+    const adjustedEnd = newStart === newEnd ? 'now' : newEnd;
+    setTo(adjustedEnd);
+    onDateChange({ start: newStart, end: adjustedEnd });
+    checkForChanges(newStart, adjustedEnd, includeClosedAlerts);
   };
 
   const handleToggle = () => {
