@@ -48,6 +48,9 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--plugin-path=${path.resolve(__dirname, '../../../examples/developer_examples')}`,
       ],
     },
-    esTestCluster,
+    esTestCluster: {
+      ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+    },
   };
 }
