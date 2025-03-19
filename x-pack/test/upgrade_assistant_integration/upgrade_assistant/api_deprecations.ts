@@ -158,9 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
         index: '.kibana_usage_counters',
-        body: {
-          query: { bool: { should } },
-        },
+        query: { bool: { should } },
       });
 
       expect(hits.hits.length).to.equal(4);
@@ -186,9 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
           index: '.kibana_usage_counters',
-          body: {
-            query: { bool: { should } },
-          },
+          query: { bool: { should } },
         });
 
         expect(hits.hits.length).to.equal(5);
