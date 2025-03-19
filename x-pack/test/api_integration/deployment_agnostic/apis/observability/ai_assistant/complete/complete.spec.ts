@@ -253,11 +253,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void proxy.interceptTitle('Title for at new conversation');
         void proxy.interceptConversation('Hello again');
 
-        events = await getEvents({}).then((_events) => {
-          return _events.filter(
-            (event) => event.type !== StreamingChatResponseEventType.BufferFlush
-          );
-        });
+        const allEvents = await getEvents({});
+        events = allEvents.filter(
+          (event) => event.type !== StreamingChatResponseEventType.BufferFlush
+        );
       });
 
       it('has the correct events', async () => {
