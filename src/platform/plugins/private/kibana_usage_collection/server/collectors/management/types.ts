@@ -140,6 +140,7 @@ export interface UsageStats {
   dateFormat: string;
   'banners:placement': string;
   'banners:textColor': string;
+  'banners:linkColor': string;
   'banners:backgroundColor': string;
   'labs:canvas:enable_ui': boolean;
   'labs:canvas:byValueEmbeddable': boolean;

@@ -17,6 +17,7 @@ interface BannerProps {
 
 export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
   const { textContent, textColor, linkColor, backgroundColor } = bannerConfig;
+  const customLinkColor = linkColor || 'inherit';
   const bannerStyle = css({
     height: '100%',
     display: 'flex',
@@ -26,7 +27,7 @@ export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
     backgroundColor,
     color: textColor,
     '& a': {
-      color: linkColor,
+      color: customLinkColor,
     },
   });
 

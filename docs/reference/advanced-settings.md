@@ -212,6 +212,9 @@ $$$banners-textcontent$$$`banners:textContent`
 $$$banners-textcolor$$$`banners:textColor`
 :   The color for the banner text for this space. Defaults to the value of the `xpack.banners.textColor` configuration property.
 
+$$$banners-linkcolor$$$`banners:linkColor`
+:   The color for the banner link text for this space. Defaults to the value of the `xpack.banners.linkColor` configuration property.
+
 $$$banners-backgroundcolor$$$`banners:backgroundColor`
 :   The color of the banner background for this space. Defaults to the value of the `xpack.banners.backgroundColor` configuration property.
 

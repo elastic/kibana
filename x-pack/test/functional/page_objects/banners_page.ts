@@ -11,7 +11,9 @@ export class BannersPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
 
   isTopBannerVisible() {
-    return this.find.existsByCssSelector('.header__topBanner .kbnUserBanner__container');
+    return this.find.existsByCssSelector(
+      '.header__topBanner [data-test-subj="bannerInnerWrapper"]'
+    );
   }
 
   async getTopBannerText() {
@@ -19,7 +21,7 @@ export class BannersPageObject extends FtrService {
       return '';
     }
     const bannerContainer = await this.find.byCssSelector(
-      '.header__topBanner .kbnUserBanner__container'
+      '.header__topBanner [data-test-subj="bannerInnerWrapper"]'
     );
     return bannerContainer.getVisibleText();
   }
