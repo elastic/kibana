@@ -23,12 +23,8 @@ export const useIntegrationToolView = (toolName: string) => {
 
   useEffect(() => {
     const fetchIntegration = async () => {
-      try {
-        const integration = await integrationService.get(integrationId);
-        setIntegrationType(integration?.type as IntegrationType);
-      } catch (error) {
-        console.error('Error fetching tool view:', error);
-      }
+      const integration = await integrationService.get(integrationId);
+      setIntegrationType(integration?.type as IntegrationType);
     };
 
     fetchIntegration();
@@ -43,5 +39,5 @@ export const useIntegrationToolView = (toolName: string) => {
     const toolView = integrationDefinition?.getTool?.(name);
 
     return toolView;
-  }, [integrationType, name]);
+  }, [integrationType, integrationRegistry, name]);
 };

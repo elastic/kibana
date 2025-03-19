@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type {
+  IntegrationComponentDescriptor,
+  IntegrationToolComponentProps,
+  IntegrationConfigurationFormProps,
+} from './src/integration_ui_descriptor';

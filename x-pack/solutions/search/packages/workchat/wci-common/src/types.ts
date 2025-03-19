@@ -8,7 +8,6 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import { Client as McpClient } from '@modelcontextprotocol/sdk/client/index';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { UseFormReturn } from 'react-hook-form';
 import type { IntegrationType } from './constants';
 /**
  * Represents the definition of a type of integration for WorkChat.
@@ -63,21 +62,4 @@ export interface WorkChatIntegration {
 export interface IntegrationClient {
   connect: () => Promise<McpClient>;
   disconnect: () => Promise<void>;
-}
-
-export interface IntegrationComponentDescriptor {
-  getConfigurationForm: () => React.ComponentType<IntegrationConfigurationFormProps>;
-  getTool: () => React.ComponentType<IntegrationToolComponentProps>;
-  getType: () => IntegrationType;
-}
-
-export interface IntegrationToolComponentProps {
-  toolCall: any; // TODO: fix this
-  complete: boolean;
-}
-
-export interface IntegrationConfigurationFormProps {
-  // TODO: fix this 
-  // shouldn't need this and use the useFormContext vs passing down as prop
-  form: UseFormReturn<any>;
 }

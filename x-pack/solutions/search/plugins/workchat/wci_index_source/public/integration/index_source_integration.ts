@@ -6,7 +6,7 @@
  */
 
 import { IntegrationType } from '@kbn/wci-common';
-import { IntegrationComponentDescriptor } from '@kbn/wci-common/src/types';
+import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 import { IndexSourceTool } from './tool';
 import { IndexSourceConfigurationForm } from './configuration';
 
