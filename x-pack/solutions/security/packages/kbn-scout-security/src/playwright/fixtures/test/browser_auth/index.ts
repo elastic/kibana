@@ -15,7 +15,7 @@ import type {
   ScoutLogger,
   EsClient,
 } from '@kbn/scout';
-import { roleDesciptorsFixture, RoleDescriptorsFixture } from '../../worker';
+import { roleDescriptorsFixture, RoleDescriptorsFixture } from '../../worker';
 
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
   loginAsPlatformEngineer: () => Promise<void>;
@@ -23,7 +23,7 @@ export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
 
 export const securityBrowserAuthFixture = mergeTests(
   browserAuthFixture,
-  roleDesciptorsFixture
+  roleDescriptorsFixture
 ).extend<{
   browserAuth: SecurityBrowserAuthFixture;
 }>({

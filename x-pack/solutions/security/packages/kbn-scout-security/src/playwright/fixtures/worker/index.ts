@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { roleDesciptorsFixture } from './roles_descriptors';
+export { roleDescriptorsFixture } from './roles_descriptors';
 export type { RoleDescriptorsFixture } from './roles_descriptors';
 
 export { getDetectionRuleApiService } from './apis';
