@@ -16,11 +16,11 @@ interface DetermineDelayedAlertsOpts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId> | undefined>;
+  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId> | undefined>;
   alertDelay: number;
   startedAt?: string | null;
   ruleRunMetricsStore: RuleRunMetricsStore;
@@ -45,36 +45,40 @@ export function determineDelayedAlerts<
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
-    alert.incrementActiveCount();
-    // do not trigger an action notification if the number of consecutive
-    // active alerts is less than the rule alertDelay threshold
-    if (alert.getActiveCount() < alertDelay) {
-      // remove from new alerts and active alerts
-      delete newAlerts[id];
-      delete activeAlerts[id];
+    if (alert) {
+      alert.incrementActiveCount();
+      // do not trigger an action notification if the number of consecutive
+      // active alerts is less than the rule alertDelay threshold
+      if (alert.getActiveCount() < alertDelay) {
+        // remove from new alerts and active alerts
+        delete newAlerts[id];
+        delete activeAlerts[id];
 
-      delayedAlertsCount += 1;
-    } else {
-      // if the active count is equal to the alertDelay it is considered a new alert
-      if (alert.getActiveCount() === alertDelay) {
-        const currentTime = startedAt ?? new Date().toISOString();
-        const state = alert.getState();
-        // keep the state and update the start time and duration
-        alert.replaceState({ ...state, start: currentTime, duration: '0' });
-        newAlerts[id] = alert;
+        delayedAlertsCount += 1;
+      } else {
+        // if the active count is equal to the alertDelay it is considered a new alert
+        if (alert.getActiveCount() === alertDelay) {
+          const currentTime = startedAt ?? new Date().toISOString();
+          const state = alert.getState();
+          // keep the state and update the start time and duration
+          alert.replaceState({ ...state, start: currentTime, duration: '0' });
+          newAlerts[id] = alert;
+        }
       }
     }
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    // if alert has not reached the alertDelay threshold don't recover the alert
-    if (alert.getActiveCount() < alertDelay) {
-      // remove from recovered alerts
-      delete recoveredAlerts[id];
-      delete trackedRecoveredAlerts[id];
+    if (alert) {
+      // if alert has not reached the alertDelay threshold don't recover the alert
+      if (alert.getActiveCount() < alertDelay) {
+        // remove from recovered alerts
+        delete recoveredAlerts[id];
+        delete trackedRecoveredAlerts[id];
+      }
+      alert.resetActiveCount();
     }
-    alert.resetActiveCount();
   }
 
   ruleRunMetricsStore.setNumberOfDelayedAlerts(delayedAlertsCount);

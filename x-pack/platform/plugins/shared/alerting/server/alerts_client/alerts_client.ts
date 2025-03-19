@@ -434,7 +434,8 @@ export class AlertsClient<
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
-      if (activeAlerts[id]) {
+      const alert = activeAlerts[id];
+      if (alert) {
         if (
           Object.hasOwn(this.fetchedAlerts.data, id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
@@ -445,7 +446,7 @@ export class AlertsClient<
             LegacyContext,
             ActionGroupIds,
             RecoveryActionGroupId
-          >(this.fetchedAlerts.data[id], activeAlerts[id], this.ruleType.actionGroups);
+          >(this.fetchedAlerts.data[id], alert, this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -455,7 +456,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               alert: this.fetchedAlerts.data[id],
-              legacyAlert: activeAlerts[id],
+              legacyAlert: alert,
               rule: this.rule,
               isImproving,
               runTimestamp: this.runTimestampString,
@@ -467,7 +468,7 @@ export class AlertsClient<
         } else {
           // skip writing the alert document if the number of consecutive
           // active alerts is less than the rule alertDelay threshold
-          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+          if (alert.getActiveCount() < this.options.rule.alertDelay) {
             continue;
           }
           activeAlertsToIndex.push(
@@ -478,7 +479,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              legacyAlert: activeAlerts[id],
+              legacyAlert: alert,
               rule: this.rule,
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
@@ -500,8 +501,9 @@ export class AlertsClient<
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (Object.hasOwn(this.fetchedAlerts.data, id)) {
+        const alert = recoveredAlerts[id];
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
+          alert
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -510,7 +512,7 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: this.fetchedAlerts.data[id],
-                legacyAlert: recoveredAlerts[id],
+                legacyAlert: alert,
                 rule: this.rule,
                 runTimestamp: this.runTimestampString,
                 timestamp: currentTime,

@@ -64,11 +64,14 @@ export class LegacyAlertsClient<
   private reportedAlerts: Record<string, Alert<State, Context>> = {};
 
   private processedAlerts: {
-    new: Record<string, Alert<State, Context, ActionGroupIds>>;
-    active: Record<string, Alert<State, Context, ActionGroupIds>>;
-    trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-    recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-    trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    new: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+    active: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+    trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+    recovered: Record<string, Alert<State, Context, RecoveryActionGroupId> | undefined>;
+    trackedRecoveredAlerts: Record<
+      string,
+      Alert<State, Context, RecoveryActionGroupId> | undefined
+    >;
   };
 
   private alertFactory?: AlertFactory<
