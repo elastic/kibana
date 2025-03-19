@@ -39,17 +39,17 @@ export function initMVTRoutes({
     .get({
       path: `${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -125,17 +125,17 @@ export function initMVTRoutes({
     .get({
       path: `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

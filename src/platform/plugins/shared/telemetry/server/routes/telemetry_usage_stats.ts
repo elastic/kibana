@@ -93,6 +93,12 @@ export function registerTelemetryUsageStatsRoutes(
   router.versioned
     .post({
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       path: FetchSnapshotTelemetry,
       enableQueryVersion: true, // Allow specifying the version through querystring so that we can use it in Dev Console
     })
@@ -100,12 +106,6 @@ export function registerTelemetryUsageStatsRoutes(
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: v2Validations,
       },
       v2Handler

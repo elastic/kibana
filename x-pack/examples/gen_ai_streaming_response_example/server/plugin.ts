@@ -36,6 +36,13 @@ export class GenAiStreamingResponseExamplePlugin
       {
         path: `/internal/examples/get_gen_ai_connectors`,
         validate: {},
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'Authorization is handled by the actions plugin, which will check for the appropriate permissions',
+          },
+        },
       },
       async (_, request, response) => {
         const [, { actions }] = await getStartServices();
@@ -59,6 +66,13 @@ export class GenAiStreamingResponseExamplePlugin
             connector_id: schema.string(),
             prompt: schema.string(),
           }),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'Authorization is handled by the actions plugin, which will check for the appropriate permissions',
+          },
         },
       },
       async (_, request, response) => {

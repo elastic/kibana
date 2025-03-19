@@ -19,6 +19,12 @@ export function registerFeatureHitRoute(
   router.get(
     {
       path: '/api/feature_usage_test/hit',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           featureName: schema.string(),

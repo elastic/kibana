@@ -27,16 +27,19 @@ export const registerGetScriptedFieldRoute = (
   >
 ) => {
   router.versioned
-    .get({ path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}', access: 'public' })
+    .get({
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
+      access: 'public',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by saved objects client',
+        },
+      },
+    })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'Authorization provided by saved objects client',
-          },
-        },
         validate: {
           request: {
             params: schema.object(

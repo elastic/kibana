@@ -73,6 +73,7 @@ describe('Http server', () => {
       router.post(
         {
           path: '/',
+          security: { authz: { enabled: false, reason: '' } },
           validate: false,
           options: { body: { accepts: 'application/json' } },
         },

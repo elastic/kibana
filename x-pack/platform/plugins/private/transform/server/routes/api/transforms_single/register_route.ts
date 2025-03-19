@@ -26,17 +26,17 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .get({
       path: addInternalBasePath('transforms/{transformId}'),
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion<TransformIdParamSchema, undefined, undefined>(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             params: transformIdParamSchema,

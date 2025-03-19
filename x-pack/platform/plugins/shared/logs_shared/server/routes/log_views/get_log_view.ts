@@ -22,6 +22,12 @@ export const initGetLogViewRoute = ({
       access: 'internal',
       method: 'get',
       path: LOG_VIEW_URL,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the LogView client',
+        },
+      },
     })
     .addVersion(
       {

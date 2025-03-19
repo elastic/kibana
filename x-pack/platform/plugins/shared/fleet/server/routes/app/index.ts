@@ -210,6 +210,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route performs its own authorization checks.`,
+        },
+      },
     })
     .addVersion(
       {

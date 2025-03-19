@@ -69,6 +69,11 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): Versione
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
     },
+    security: {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+    },
   },
   isVersioned: true,
   handlers: [

@@ -192,6 +192,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             ...options,
             access,
           },
+          // @ts-expect-error
           security,
           validate: validationObject,
         },
@@ -204,6 +205,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         summary: options.summary,
         description: options.description,
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
+        // @ts-expect-error
         security,
       }).addVersion(
         {

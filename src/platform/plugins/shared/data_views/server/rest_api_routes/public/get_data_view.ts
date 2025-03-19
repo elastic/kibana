@@ -54,73 +54,79 @@ const getDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .get({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             enabled: false,
             reason: 'Authorization provided by saved objects client',
           },
         },
-        validate: {
-          request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object(
+                {
+                  id: schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                  }),
+                },
+                { unknowns: 'allow' }
+              ),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
               },
-              { unknowns: 'allow' }
-            ),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const id = req.params.id;
 
-          const dataView = await getDataView({
-            dataViewsService,
-            usageCollection,
-            counterName: `${req.route.method} ${path}`,
-            id,
-          });
+            const dataView = await getDataView({
+              dataViewsService,
+              usageCollection,
+              counterName: `${req.route.method} ${path}`,
+              id,
+            });
 
-          const responseBody: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: {
-              ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
-              namespaces: dataView.namespaces,
-            },
-          };
+            const responseBody: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: {
+                ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
+                namespaces: dataView.namespaces,
+              },
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: responseBody,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: responseBody,
+            });
+          })
+        )
+      );
   };
 
 export const registerGetDataViewRoute = getDataViewRouteFactory(

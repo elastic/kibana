@@ -34,17 +34,17 @@ export const defineRoute = (
     .post({
       path: AIOPS_API_ENDPOINT.LOG_RATE_ANALYSIS,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '2',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: aiopsLogRateAnalysisSchemaV2,
@@ -56,13 +56,6 @@ export const defineRoute = (
     .addVersion(
       {
         version: '3',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: aiopsLogRateAnalysisSchemaV3,

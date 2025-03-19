@@ -19,6 +19,9 @@ export function registerGetRandomNumberRoute(router: IRouter) {
   router.get(
     {
       path: RANDOM_NUMBER_ROUTE_PATH,
+      security: {
+        authz: { enabled: false, reason: 'This route is opted out of authorization because...' },
+      },
       validate: {},
     },
     async (context, request, response) => {

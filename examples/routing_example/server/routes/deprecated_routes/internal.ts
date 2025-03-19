@@ -14,6 +14,9 @@ export const registerInternalDeprecatedRoute = (router: IRouter) => {
   router.get(
     {
       path: DEPRECATED_ROUTES.INTERNAL_DEPRECATED_ROUTE,
+      security: {
+        authz: { enabled: false, reason: 'This route is opted out of authorization because...' },
+      },
       validate: false,
       options: {
         // Explicitly set access is to internal
@@ -40,6 +43,9 @@ export const registerInternalDeprecatedRoute = (router: IRouter) => {
     {
       path: DEPRECATED_ROUTES.INTERNAL_ONLY_ROUTE,
       validate: false,
+      security: {
+        authz: { enabled: false, reason: 'This route is opted out of authorization because...' },
+      },
       // If no access is specified then it defaults to internal
     },
     async (ctx, req, res) => {

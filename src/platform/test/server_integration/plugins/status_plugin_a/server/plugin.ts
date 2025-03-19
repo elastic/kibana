@@ -23,6 +23,12 @@ export class StatusPluginAPlugin implements Plugin {
     router.post(
       {
         path: '/internal/status_plugin_a/status/set',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             level: schema.oneOf([

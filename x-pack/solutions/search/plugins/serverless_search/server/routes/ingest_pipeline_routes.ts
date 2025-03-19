@@ -13,6 +13,12 @@ export const registerIngestPipelineRoutes = ({ logger, router }: RouteDependenci
     {
       path: '/internal/serverless_search/ingest_pipelines',
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;

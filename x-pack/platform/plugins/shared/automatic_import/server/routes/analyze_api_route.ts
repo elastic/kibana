@@ -33,19 +33,19 @@ export function registerApiAnalysisRoutes(router: IRouter<AutomaticImportRouteHa
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_ALL_ROLE,
+            INTEGRATIONS_ALL_ROLE,
+            ACTIONS_AND_CONNECTORS_ALL_ROLE,
+          ],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_ALL_ROLE,
-              INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
-            ],
-          },
-        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(AnalyzeApiRequestBody),

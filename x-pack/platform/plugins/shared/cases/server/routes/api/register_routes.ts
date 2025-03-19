@@ -85,6 +85,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
           query: params?.query ?? escapeHatch,
           body: params?.body ?? schema.nullable(escapeHatch),
         },
+        // @ts-ignore
         security,
       },
       async (context, request, response) => {

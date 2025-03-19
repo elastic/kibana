@@ -36,17 +36,17 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .get({
       path: '/internal/file_upload/has_import_permission',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             query: schema.object({
@@ -143,17 +143,17 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: initializeImportFileBodySchema,
@@ -196,17 +196,18 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
+
         validate: {
           request: {
             query: schema.object({
@@ -313,17 +314,17 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/index_exists',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             body: schema.object({ index: schema.string() }),
