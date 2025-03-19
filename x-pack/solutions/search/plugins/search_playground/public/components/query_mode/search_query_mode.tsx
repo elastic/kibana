@@ -70,7 +70,7 @@ export const SearchQueryMode: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={3} className="eui-yScroll" css={QueryViewSidebarContainer(euiTheme)}>
-          <QuerySidePanel />
+          <QuerySidePanel executeQuery={executeQuery} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </PlaygroundBodySection>

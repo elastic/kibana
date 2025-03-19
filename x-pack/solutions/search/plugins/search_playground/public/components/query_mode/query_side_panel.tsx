@@ -5,40 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiAccordion,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiPanel, EuiText } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useWatch } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { docLinks } from '../../../common/doc_links';
 import { createQuery } from '../../utils/create_query';
 import { SearchQuery } from './search_query';
+import { QueryFieldsPanel } from './query_fields_panel';
 
-const isQueryFieldSelected = (
-  queryFields: ChatForm[ChatFormFields.queryFields],
-  index: string,
-  field: string
-): boolean => {
-  return Boolean(queryFields[index]?.includes(field));
-};
+export interface QuerySidePanelProps {
+  executeQuery: () => void;
+}
 
-export const QuerySidePanel = () => {
+export const QuerySidePanel = ({ executeQuery }: QuerySidePanelProps) => {
   const usageTracker = useUsageTracker();
   const { fields } = useSourceIndicesFields();
   const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
@@ -54,32 +38,27 @@ export const QuerySidePanel = () => {
   } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
     name: ChatFormFields.elasticsearchQuery,
   });
-  const queryTableFields = useMemo(() => {
-    return [
-      ...group.semantic_fields,
-      ...group.elser_query_fields,
-      ...group.dense_vector_query_fields,
-      ...group.bm25_query_fields,
-    ].map((field) => ({
-      name: typeof field === 'string' ? field : field.field,
-      checked: isQueryFieldSelected(
-        queryFields,
-        index,
-        typeof field === 'string' ? field : field.field
-      ),
-    }));
-  }, [queryFields]);
 
-  const updateFields = (index: string, fieldName: string, checked: boolean) => {
-    const currentIndexFields = checked
-      ? [...queryFields[index], fieldName]
-      : queryFields[index].filter((field) => fieldName !== field);
-    const updatedQueryFields = { ...queryFields, [index]: currentIndexFields };
+  const handleSearch = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      executeQuery();
+    },
+    [executeQuery]
+  );
+  const updateFields = useCallback(
+    (index: string, fieldName: string, checked: boolean) => {
+      const currentIndexFields = checked
+        ? [...queryFields[index], fieldName]
+        : queryFields[index].filter((field) => fieldName !== field);
+      const updatedQueryFields = { ...queryFields, [index]: currentIndexFields };
 
-    queryFieldsOnChange(updatedQueryFields);
-    elasticsearchQueryChange(createQuery(updatedQueryFields, sourceFields, fields));
-    usageTracker?.count(AnalyticsEvents.queryFieldsUpdated, currentIndexFields.length);
-  };
+      queryFieldsOnChange(updatedQueryFields);
+      elasticsearchQueryChange(createQuery(updatedQueryFields, sourceFields, fields));
+      usageTracker?.count(AnalyticsEvents.queryFieldsUpdated, currentIndexFields.length);
+    },
+    [elasticsearchQueryChange, fields, queryFields, queryFieldsOnChange, sourceFields, usageTracker]
+  );
 
   return (
     <EuiPanel color="subdued" hasShadow={false}>
@@ -93,7 +72,9 @@ export const QuerySidePanel = () => {
           </h5>
         </EuiText>
         <EuiPanel grow={false} hasShadow={false} hasBorder>
-          <SearchQuery />
+          <EuiForm component="form" onSubmit={handleSearch}>
+            <SearchQuery />
+          </EuiForm>
         </EuiPanel>
         <EuiText>
           <h5>
@@ -103,96 +84,14 @@ export const QuerySidePanel = () => {
             />
           </h5>
         </EuiText>
-        {Object.entries(fields).map(([index, group], indexNum) => (
+        {Object.entries(fields).map(([index, group]) => (
           <EuiFlexItem grow={false} key={index}>
-            <EuiPanel grow={false} hasShadow={false} hasBorder>
-              <EuiAccordion
-                id={index}
-                buttonContent={
-                  <EuiText>
-                    <h5>{index}</h5>
-                  </EuiText>
-                }
-                initialIsOpen
-                data-test-subj={`fieldsAccordion-${indexNum}`}
-              >
-                <EuiSpacer size="s" />
-
-                <EuiBasicTable
-                  tableCaption={i18n.translate(
-                    'xpack.searchPlayground.viewQuery.flyout.table.caption',
-                    { defaultMessage: 'Query Model table' }
-                  )}
-                  items={queryTableFields}
-                  rowHeader="name"
-                  columns={[
-                    {
-                      field: 'name',
-                      name: i18n.translate(
-                        'xpack.searchPlayground.viewQuery.flyout.table.column.field.name',
-                        { defaultMessage: 'Field' }
-                      ),
-                      'data-test-subj': 'fieldName',
-                    },
-                    {
-                      field: 'checked',
-                      name: i18n.translate(
-                        'xpack.searchPlayground.viewQuery.flyout.table.column.enabled.name',
-                        { defaultMessage: 'Enabled' }
-                      ),
-                      align: 'right',
-                      render: (checked, field) => {
-                        return (
-                          <EuiSwitch
-                            showLabel={false}
-                            label={field.name}
-                            checked={checked}
-                            onChange={(e) => updateFields(index, field.name, e.target.checked)}
-                            compressed
-                            data-test-subj={`field-${field.name}-${checked}`}
-                          />
-                        );
-                      },
-                    },
-                  ]}
-                />
-
-                {group.skipped_fields > 0 && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiText
-                          size="s"
-                          color="subdued"
-                          data-test-subj={`skippedFields-${indexNum}`}
-                        >
-                          <EuiIcon type="eyeClosed" />
-                          {` `}
-                          <FormattedMessage
-                            id="xpack.searchPlayground.viewQuery.flyout.hiddenFields"
-                            defaultMessage="{skippedFields} fields are hidden."
-                            values={{ skippedFields: group.skipped_fields }}
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiLink
-                          href={docLinks.hiddenFields}
-                          target="_blank"
-                          data-test-subj="hidden-fields-documentation-link"
-                        >
-                          <FormattedMessage
-                            id="xpack.searchPlayground.viewQuery.flyout.learnMoreLink"
-                            defaultMessage="Learn more."
-                          />
-                        </EuiLink>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                )}
-              </EuiAccordion>
-            </EuiPanel>
+            <QueryFieldsPanel
+              index={index}
+              indexFields={group}
+              updateFields={updateFields}
+              queryFields={queryFields}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
