@@ -24,7 +24,6 @@ export interface SavedDashboardPanel {
   panelRefName?: string;
   gridData: GridData;
   panelIndex: string;
-  sectionIndex?: string;
   title?: string;
 
   /**

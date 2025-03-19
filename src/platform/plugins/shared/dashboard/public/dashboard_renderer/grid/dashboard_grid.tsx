@@ -73,7 +73,7 @@ export const DashboardGrid = ({
 
     Object.keys(panels).forEach((panelId) => {
       const gridData = panels[panelId].gridData;
-      const sectionId = panels[panelId].sectionIndex ?? firstRowId.current;
+      const sectionId = gridData.sectionId ?? firstRowId.current;
       newLayout[sectionId].panels[panelId] = {
         id: panelId,
         row: gridData.y,
@@ -113,13 +113,13 @@ export const DashboardGrid = ({
         Object.values(section.panels).forEach((panelLayout) => {
           updatedPanels[panelLayout.id] = {
             ...omit(currentPanels[panelLayout.id], 'sectionIndex'),
-            ...(sectionIndex === firstRowId.current ? {} : { sectionIndex }),
             gridData: {
               i: panelLayout.id,
               y: panelLayout.row,
               x: panelLayout.column,
               w: panelLayout.width,
               h: panelLayout.height,
+              ...(sectionIndex !== firstRowId.current && { sectionId: sectionIndex }),
             },
           };
         });

@@ -23,10 +23,10 @@ export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): Dashboa
   const panelsMap: DashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
     const panelIndex = panel.panelIndex ?? String(idx);
+    const { sectionId, ...gridData } = panel.gridData;
     panelsMap![panel.panelIndex ?? String(idx)] = {
       type: panel.type,
-      gridData: panel.gridData,
-      ...(panel.sectionIndex !== undefined && { sectionIndex: panel.sectionIndex }),
+      gridData: { ...gridData, ...(sectionId !== undefined && { sectionId }) },
       panelRefName: panel.panelRefName,
       explicitInput: {
         id: panelIndex,
@@ -47,6 +47,8 @@ export const convertPanelMapToPanelsArray = (
   return Object.entries(panels).map(([panelId, panelState]) => {
     const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
     const title = (panelState.explicitInput as { title?: string }).title;
+    const { sectionId, ...gridData } = panelState.gridData;
+
     return {
       /**
        * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
@@ -56,13 +58,12 @@ export const convertPanelMapToPanelsArray = (
       ...(!removeLegacyVersion ? { version: panelState.version } : {}),
 
       type: panelState.type,
-      gridData: panelState.gridData,
+      gridData: { ...gridData, ...(sectionId !== undefined && { sectionId }) },
       panelIndex: panelId,
       panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
       ...(title !== undefined && { title }),
       ...(savedObjectId !== undefined && { id: savedObjectId }),
       ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
-      ...(panelState.sectionIndex !== undefined && { sectionIndex: panelState.sectionIndex }),
     };
   });
 };

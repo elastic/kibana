@@ -41,6 +41,7 @@ export interface GridData {
   x: number;
   y: number;
   i: string;
+  sectionId?: string;
 }
 
 /**
@@ -52,7 +53,6 @@ export interface SavedDashboardPanel {
   type: string; // the embeddable type
   panelRefName?: string;
   gridData: GridData;
-  sectionIndex?: string;
   panelIndex: string;
   title?: string;
 

@@ -27,7 +27,6 @@ export interface DashboardPanelState<PanelState = object> {
   type: string;
   explicitInput: PanelState;
   readonly gridData: GridData;
-  sectionIndex?: string;
   panelRefName?: string;
 
   /**

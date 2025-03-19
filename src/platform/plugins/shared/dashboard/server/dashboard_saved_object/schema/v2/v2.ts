@@ -35,4 +35,5 @@ export const gridDataSchema = schema.object({
   w: schema.number(),
   h: schema.number(),
   i: schema.string(),
+  sectionId: schema.maybe(schema.string()),
 });

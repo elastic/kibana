@@ -113,8 +113,8 @@ export function initializePanelsManager(
         gridData: {
           ...newPanelPlacement,
           i: incomingPanelId,
+          // panels can currently only be added to the first section; so, no need to add sectionId
         },
-        // panels can currently only be added to the first section; so, no need to add sectionIndex
       };
     }
 
@@ -160,7 +160,6 @@ export function initializePanelsManager(
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
       gridData: panel.gridData,
-      sectionIndex: panel.sectionIndex,
       references: serialized.references,
     };
   }
@@ -276,8 +275,8 @@ export function initializePanelsManager(
           gridData: {
             ...newPanelPlacement,
             i: id,
+            sectionId: panelToClone.gridData.sectionId,
           },
-          ...(panelToClone.sectionIndex ? { sectionIndex: panelToClone.sectionIndex } : {}),
         };
 
         setPanels({

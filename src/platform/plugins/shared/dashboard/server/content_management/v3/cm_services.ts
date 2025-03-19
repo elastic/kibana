@@ -248,6 +248,11 @@ export const gridDataSchema = schema.object({
       meta: { description: 'The unique identifier of the panel' },
     })
   ),
+  sectionId: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the section' },
+    })
+  ),
 });
 
 export const panelSchema = schema.object({
@@ -288,11 +293,6 @@ export const panelSchema = schema.object({
   panelIndex: schema.maybe(
     schema.string({
       meta: { description: 'The unique ID of the panel.' },
-    })
-  ),
-  sectionIndex: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique ID of the section.' },
     })
   ),
   title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
