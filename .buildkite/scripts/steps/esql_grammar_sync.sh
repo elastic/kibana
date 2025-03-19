@@ -6,15 +6,16 @@ synchronize_lexer_grammar () {
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
   source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/lexer"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_lexer.g4"
-  destination_lib_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr/lexer"
+  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
+  destination_lib_dir="$destination_lib_parent_dir/lexer"
+
 
   # Copy the files
   cp "$source_file" "$destination_file"
   echo "Refreshing destination directory..."
   rm -rf "$destination_lib_dir"
-  mkdir -p "$destination_lib_dir"
   echo "Copying source files..."
-  cp -r "$source_lib_dir/" "$destination_lib_dir"
+  cp -r "$source_lib_dir" "$destination_lib_parent_dir"
 
   echo "Source files:"
   ls -l "$source_lib_dir"
