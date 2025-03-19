@@ -49,6 +49,8 @@ export {
   type RuntimeStateManager,
   createRuntimeStateManager,
   useRuntimeState,
+  selectCurrentTabRuntimeState,
+  useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
