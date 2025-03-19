@@ -28,6 +28,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
   useRuntimeState,
+  useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import type {
   CustomizationCallback,
@@ -124,7 +125,10 @@ export const DiscoverSessionView = forwardRef<DiscoverSessionViewRef, DiscoverSe
       stateContainer: initializeSessionState.value?.stateContainer,
     });
     const initializationState = useInternalStateSelector((state) => state.initializationState);
-    const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
+    const currentDataView = useCurrentTabRuntimeState(
+      runtimeStateManager,
+      (tab) => tab.currentDataView$
+    );
     const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
     const stopSyncing = useRef(() => {});
 
