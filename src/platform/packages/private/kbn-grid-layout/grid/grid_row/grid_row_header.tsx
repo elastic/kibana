@@ -214,6 +214,7 @@ export const GridRowHeader = React.memo(
                           defaultMessage: 'Move section',
                         })}
                         onMouseDown={startInteraction}
+                        onTouchStart={startInteraction}
                         data-test-subj={`kbnGridRowHeader-${rowId}--dragHandle`}
                       />
                     </EuiFlexItem>
@@ -258,6 +259,7 @@ const styles = {
       },
       '.kbnGridLayout--moveRowIcon': {
         cursor: 'move',
+        touchAction: 'none',
         '&:active, &:hover, &:focus': {
           transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
