@@ -91,6 +91,18 @@ export function initializeUnsavedChangesManager({
         hasUnsavedChanges$.next(hasUnsavedChanges);
       }
 
+      // keep runtime state for children in sync with react embeddable changes
+      const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
+      if (controlGroupChanges) {
+        reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
+      }
+      Object.keys(reactEmbeddableChanges).forEach((embeddableId) => {
+        panelsManager.api.setRuntimeStateForChild(
+          embeddableId,
+          reactEmbeddableChanges[embeddableId]
+        );
+      });
+
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
         // Current behaviour expects time range not to be backed up. Revisit this?
@@ -98,11 +110,6 @@ export function initializeUnsavedChangesManager({
           'timeRange',
           'refreshInterval',
         ]);
-        const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
-        if (controlGroupChanges) {
-          reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
-        }
-
         getDashboardBackupService().setState(
           savedObjectId$.value,
           dashboardStateToBackup,

@@ -20,7 +20,6 @@ export const DEBOUNCE_TIME = 100;
 export function childrenUnsavedChanges$(children$: PresentationContainer['children$']) {
   return children$.pipe(
     map((children) => Object.keys(children)),
-    distinctUntilChanged(deepEqual),
 
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
