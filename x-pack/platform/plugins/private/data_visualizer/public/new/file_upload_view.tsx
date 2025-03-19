@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
@@ -54,6 +46,12 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
     mappings,
     settings,
   } = useFileUpload(fileUploadManager);
+
+  const showImportControls =
+    uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
+    uploadStatus.analysisStatus !== STATUS.FAILED &&
+    uploadStatus.analysisStatus !== STATUS.STARTED &&
+    filesStatus.length > 0;
 
   return (
     <>
@@ -102,9 +100,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
           </>
         ) : null}
 
-        {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
-        uploadStatus.analysisStatus !== STATUS.FAILED &&
-        filesStatus.length > 0 ? (
+        {showImportControls ? (
           <>
             <AdvancedSection
               mappings={mappings.json}
@@ -146,22 +142,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
 
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {uploadStatus.overallImportStatus === STATUS.STARTED ? (
-            <EuiFlexGroup gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonEmpty onClick={onClose} disabled={true}>
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.uploadView.importingButton"
-                    defaultMessage="Importing"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-          {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
+          {showImportControls ? (
             <EuiButton disabled={canImport === false} onClick={onImportClick}>
               <FormattedMessage
                 id="xpack.dataVisualizer.file.uploadView.importButton"
@@ -172,15 +153,6 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={true} />
-
-        <EuiFlexItem grow={false}>
-          {/* <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.closeButton"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty> */}
-        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

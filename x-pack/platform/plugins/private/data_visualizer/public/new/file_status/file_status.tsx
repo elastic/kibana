@@ -30,6 +30,7 @@ import { FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
 import { UploadProgress } from './progress';
+import { AnalysisExplanation } from './analysis_explanation';
 
 enum TAB {
   SUMMARY,
@@ -37,6 +38,7 @@ enum TAB {
   CONTENT,
   MAPPINGS,
   PIPELINE,
+  EXPLANATION,
 }
 
 interface Props {
@@ -155,6 +157,19 @@ export const FileStatus: FC<Props> = ({
 
                     {lite === false ? (
                       <EuiTab
+                        isSelected={selectedTab === TAB.EXPLANATION}
+                        onClick={() => setSelectedTab(TAB.EXPLANATION)}
+                        data-test-subj="mlNodesOverviewPanelMemoryTab"
+                      >
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
+                          defaultMessage="Analysis explanation"
+                        />
+                      </EuiTab>
+                    ) : null}
+
+                    {lite === false ? (
+                      <EuiTab
                         isSelected={selectedTab === TAB.MAPPINGS}
                         onClick={() => setSelectedTab(TAB.MAPPINGS)}
                         data-test-subj="mlNodesOverviewPanelMemoryTab"
@@ -194,6 +209,10 @@ export const FileStatus: FC<Props> = ({
                       results={fileStatus.results!}
                       showTitle={false}
                     />
+                  ) : null}
+
+                  {selectedTab === TAB.EXPLANATION ? (
+                    <AnalysisExplanation results={fileStatus.results!} />
                   ) : null}
 
                   {selectedTab === TAB.MAPPINGS ? (

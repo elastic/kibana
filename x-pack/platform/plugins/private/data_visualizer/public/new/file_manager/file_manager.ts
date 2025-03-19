@@ -174,21 +174,19 @@ export class FileUploadManager {
           // mappingsOk = mappingsOk && existingIndexChecks.newFieldsPerFile.length < 5;
         }
 
-        if (formatsOk === false) {
-          this.setStatus({
-            fileClashes,
-          });
-        } else if (mappingsOk) {
+        if (mappingsOk && formatsOk) {
           this.updateMappings(mergedMappings);
           this.pipelines = this.getPipelines();
           this.addSemanticTextField();
-          this.setStatus({
-            fileClashes: [],
-          });
         }
 
         this.setStatus({
-          fileClashes: getMappingClashInfo(mappingClashes, existingIndexChecks, statuses),
+          fileClashes:
+            formatsOk === false
+              ? fileClashes
+              : mappingsOk === false
+              ? getMappingClashInfo(mappingClashes, existingIndexChecks, statuses)
+              : [],
           analysisStatus: mappingsOk && formatsOk ? STATUS.COMPLETED : STATUS.FAILED,
           pipelinesJsonValid: statuses.every((status) => status.pipelineJsonValid),
         });
