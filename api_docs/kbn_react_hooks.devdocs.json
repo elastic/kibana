@@ -149,6 +149,68 @@
       },
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useDebounceFn",
+        "type": "Function",
+        "tags": [
+          "throws",
+          "caveat"
+        ],
+        "label": "useDebounceFn",
+        "description": [
+          "\nCustom hook that returns a React safe debounced version of the provided function.\n"
+        ],
+        "signature": [
+          "(fn: T, options: ",
+          "DebounceOptions",
+          " | undefined) => { run: _.DebouncedFunc<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T> | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebounceFn.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "- The function to debounce."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebounceFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration options for debounce."
+            ],
+            "signature": [
+              "DebounceOptions",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "- An object containing the debounced function (`run`), and methods to cancel (`cancel`) or flush (`flush`) the debounce."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.useErrorTextStyle",
         "type": "Function",
         "tags": [],
@@ -163,6 +225,68 @@
         "trackAdoption": false,
         "children": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useThrottleFn",
+        "type": "Function",
+        "tags": [
+          "throws",
+          "caveat"
+        ],
+        "label": "useThrottleFn",
+        "description": [
+          "\nCustom hook that returns a React safe  throttled version of the provided function.\n"
+        ],
+        "signature": [
+          "(fn: T, options: ",
+          "ThrottleOptions",
+          " | undefined) => { run: _.DebouncedFuncLeading<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useThrottleFn.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "- The function to throttle."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useThrottleFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration options for throttle."
+            ],
+            "signature": [
+              "ThrottleOptions",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "- An object containing the throttled function (`run`), and methods to cancel (`cancel`) or flush (`flush`) the throttle."
+        ],
         "initialIsOpen": false
       }
     ],
