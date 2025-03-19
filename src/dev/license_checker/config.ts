@@ -71,6 +71,7 @@ export const LICENSE_ALLOWED = [
   'Python-2.0',
   '(Apache-2.0 AND MIT)',
   'BlueOak-1.0.0',
+  'WTFPL OR CC0-1.0',
 ];
 
 // The following list only applies to licenses that
