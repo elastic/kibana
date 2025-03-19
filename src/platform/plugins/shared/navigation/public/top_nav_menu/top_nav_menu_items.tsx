@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBreakpointSize, EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
+import {
+  EuiBreakpointSize,
+  EuiHeaderLinks,
+  useIsWithinBreakpoints,
+  type EuiHeaderLinksProps,
+} from '@elastic/eui';
 import React from 'react';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import type { EuiGutterSize } from '../types';
 
 const POPOVER_BREAKPOINTS: EuiBreakpointSize[] = ['xs', 's'];
 
@@ -19,7 +23,7 @@ interface TopNavMenuItemsProps {
   config: TopNavMenuData[] | undefined;
   className?: string;
   popoverBreakpoints?: EuiBreakpointSize[];
-  gutterSize?: EuiGutterSize;
+  gutterSize?: EuiHeaderLinksProps['gutterSize'];
 }
 
 export const TopNavMenuItems = ({

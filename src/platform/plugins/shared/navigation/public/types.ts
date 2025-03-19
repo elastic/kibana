@@ -57,5 +57,3 @@ export interface NavigationPublicStartDependencies {
 }
 
 export type SolutionType = 'es' | 'oblt' | 'security' | 'analytics';
-
-export type EuiGutterSize = 'xxs' | 'xs' | 's' | 'm' | 'l';

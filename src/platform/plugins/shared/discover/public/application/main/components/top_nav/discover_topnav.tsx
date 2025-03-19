@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import type { EuiGutterSize } from '@kbn/navigation-plugin/public/types';
+import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -166,7 +166,7 @@ export const DiscoverTopNav = ({
       badges: topNavBadges,
       config: topNavMenu,
       setMenuMountPoint: setHeaderActionMenu,
-      gutterSize: 'xxs' as EuiGutterSize,
+      gutterSize: 'xxs' as EuiHeaderLinksProps['gutterSize'],
     }),
     [setHeaderActionMenu, topNavBadges, topNavMenu]
   );

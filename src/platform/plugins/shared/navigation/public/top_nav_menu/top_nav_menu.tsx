@@ -15,11 +15,10 @@ import { MountPointPortal } from '@kbn/react-kibana-mount';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { EuiBreakpointSize } from '@elastic/eui';
+import type { EuiBreakpointSize, EuiHeaderLinksProps } from '@elastic/eui';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
 import { type TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
-import type { EuiGutterSize } from '../types';
 
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   StatefulSearchBarProps<QT>,
@@ -34,7 +33,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   unifiedSearch?: UnifiedSearchPublicPluginStart;
   className?: string;
   visible?: boolean;
-  gutterSize?: EuiGutterSize;
+  gutterSize?: EuiHeaderLinksProps['gutterSize'];
   /**
    * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
    *
