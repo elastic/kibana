@@ -60,5 +60,5 @@ export const transformCreateRuleBody: RewriteResponseCase<CreateRuleBody> = ({
   }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformCreateRuleFlapping(flapping) } : {}),
-  ...(dashboards ? { dashboards } : []),
+  ...(dashboards !== undefined ? { dashboards } : {}),
 });

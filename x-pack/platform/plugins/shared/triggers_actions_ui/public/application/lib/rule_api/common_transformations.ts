@@ -113,7 +113,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
-  dashboards,
+  ...(dashboards !== undefined ? { dashboards } : {}),
   ...rest,
 });
 

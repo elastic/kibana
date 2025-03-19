@@ -88,10 +88,10 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   activeSnoozes,
   ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
   ...(nextRun ? { nextRun } : {}),
+  ...(dashboards ? { dashboards } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
   ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
-  dashboards,
   ...rest,
 });
 
