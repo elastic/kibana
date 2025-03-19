@@ -21,34 +21,7 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import { type TabItem, type TabPreviewData, TabStatus } from '../../types';
-
-// TODO: replace with real data when ready
-const TAB_CONTENT_MOCK: TabPreviewData[] = [
-  {
-    query: {
-      esql: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
-    },
-    status: TabStatus.SUCCESS,
-  },
-  {
-    query: {
-      esql: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
-    },
-    status: TabStatus.RUNNING,
-  },
-  {
-    query: {
-      language: 'kql',
-      query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
-    },
-    status: TabStatus.ERROR,
-  },
-];
-
-/*
-getTabPreviewData: (item: TabItem) => (type with { query, status } structure)
-*/
+import type { TabItem, TabPreviewData } from '../../types';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   initialItems: TabItem[];
@@ -57,6 +30,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
+  getPreviewData: (item: TabItem) => TabPreviewData;
 }
 
 export interface TabbedContentState {
@@ -71,6 +45,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   renderContent,
   createItem,
   onChanged,
+  getPreviewData,
 }) => {
   const [tabContentId] = useState(() => htmlIdGenerator()());
   const [state, _setState] = useState<TabbedContentState>(() => {
@@ -158,9 +133,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onClose={onClose}
-          getPreviewData={() =>
-            TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)]
-          } // TODO: adjust getter function when real data ready
+          getPreviewData={getPreviewData}
         />
       </EuiFlexItem>
       {selectedItem ? (
