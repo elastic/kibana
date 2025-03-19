@@ -110,7 +110,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(requestData.messages[0].content).to.eql(SYSTEM_MESSAGE);
     });
 
-    it.only('returns a streaming response from the server', async () => {
+    it('returns a streaming response from the server', async () => {
       const NUM_RESPONSES = 5;
       const roleScopedSupertest = getService('roleScopedSupertest');
       const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
