@@ -370,10 +370,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         ${useEuiBreakpoint(['m', 'l', 'xl'])} {
           ${kibanaFullBodyHeightCss()}
         }
-
-        .dscPage .dscPageBody {
-          overflow: hidden;
-        }
       `}
     >
       <h1
@@ -401,8 +397,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
-      {/* class is used in different styles */}
-      <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
+      <EuiPageBody
+        aria-describedby="savedSearchTitle"
+        css={css`
+          overflow: hidden;
+        `}
+      >
         <div
           ref={setSidebarContainer}
           css={css`
