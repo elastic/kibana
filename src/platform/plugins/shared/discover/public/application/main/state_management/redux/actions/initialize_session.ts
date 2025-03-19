@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
-import type { MainHistoryLocationState } from '../../../../../../common';
 import type { MainRouteInitializationState } from '../../../types';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import {
@@ -37,7 +36,7 @@ export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
   mainRouteInitializationState: MainRouteInitializationState;
   discoverSessionId: string | undefined;
-  historyLocationState: MainHistoryLocationState | undefined;
+  dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
@@ -49,7 +48,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     stateContainer,
     mainRouteInitializationState,
     discoverSessionId,
-    historyLocationState,
+    dataViewSpec,
     defaultUrlState,
   }) =>
   async (
@@ -84,7 +83,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       .getValue()
       .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
     const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
+    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
     const canAccessWithoutPersistedDataView =
       isEsqlMode ||
       discoverSessionHasAdHocDataView ||
@@ -129,7 +128,7 @@ export const initializeSession: InternalStateThunkActionCreator<
         dataViewId: isDataViewSource(urlState?.dataSource)
           ? urlState?.dataSource.dataViewId
           : discoverSessionDataView?.id,
-        dataViewSpec: historyLocationState?.dataViewSpec,
+        dataViewSpec,
         savedSearch: persistedDiscoverSession,
         isEsqlMode,
         services,

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { useParams } from 'react-router-dom';
 import useLatest from 'react-use/lib/useLatest';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useUrl } from '../../hooks/use_url';
 import { useAlertResultsToast } from '../../hooks/use_alert_results_toast';
@@ -65,9 +65,10 @@ type SessionInitializationState =
       stateContainer: DiscoverStateContainer;
     };
 
-type InitializeSession = (
-  defaultUrlState?: DiscoverAppState
-) => Promise<SessionInitializationState>;
+type InitializeSession = (options?: {
+  dataViewSpec?: DataViewSpec | undefined;
+  defaultUrlState?: DiscoverAppState;
+}) => Promise<SessionInitializationState>;
 
 export const DiscoverSessionView = ({
   mainRouteInitializationState,
@@ -79,13 +80,10 @@ export const DiscoverSessionView = ({
 }: DiscoverSessionViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const { core, toastNotifications, history, getScopedHistory } = services;
+  const { core, history, getScopedHistory } = services;
   const { id: discoverSessionId } = useParams<{ id?: string }>();
-  const [historyLocationState] = useState(
-    () => getScopedHistory<MainHistoryLocationState>()?.location.state
-  );
   const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
-    async (defaultUrlState) => {
+    async ({ dataViewSpec, defaultUrlState } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         services,
         customizationContext,
@@ -98,7 +96,7 @@ export const DiscoverSessionView = ({
           stateContainer,
           mainRouteInitializationState,
           discoverSessionId,
-          historyLocationState,
+          dataViewSpec,
           defaultUrlState,
         })
       );
@@ -107,8 +105,13 @@ export const DiscoverSessionView = ({
     }
   );
   const initializeSessionWithDefaultLocationState = useLatest(() => {
-    const scopedHistory = getScopedHistory<{ defaultState?: DiscoverAppState }>();
-    initializeSession(scopedHistory?.location.state?.defaultState);
+    const historyLocationState = getScopedHistory<
+      MainHistoryLocationState & { defaultState?: DiscoverAppState }
+    >()?.location.state;
+    initializeSession({
+      dataViewSpec: historyLocationState?.dataViewSpec,
+      defaultUrlState: historyLocationState?.defaultState,
+    });
   });
   const customizationService = useDiscoverCustomizationService({
     customizationCallbacks,
@@ -129,10 +132,7 @@ export const DiscoverSessionView = ({
     },
   });
 
-  useAlertResultsToast({
-    isAlertResults: historyLocationState?.isAlertResults,
-    toastNotifications,
-  });
+  useAlertResultsToast();
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -165,8 +165,8 @@ export const DiscoverSessionView = ({
           await dispatch(internalStateActions.loadDataViewList());
           const dataView = dataViewUnknown as DataView;
           initializeSession({
-            dataSource: dataView.id
-              ? createDataViewDataSource({ dataViewId: dataView.id })
+            defaultUrlState: dataView.id
+              ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
               : undefined,
           });
         }}
