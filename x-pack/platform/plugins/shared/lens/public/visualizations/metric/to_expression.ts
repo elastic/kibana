@@ -165,7 +165,9 @@ export const toExpression = (
         : undefined,
     secondaryTrendVisuals: isSecondaryDynamicColorMode ? secondaryTrend.visuals : undefined,
     secondaryTrendBaseline: isSecondaryDynamicColorMode
-      ? secondaryTrend.baselineValue || 0
+      ? isMetricNumeric
+        ? secondaryTrend.baselineValue ?? 0
+        : 0
       : undefined,
     secondaryTrendPalette: isSecondaryDynamicColorMode ? secondaryTrend.palette.stops : undefined,
     max: state.maxAccessor,
