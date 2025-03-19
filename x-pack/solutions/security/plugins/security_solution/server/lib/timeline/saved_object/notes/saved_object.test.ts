@@ -7,14 +7,25 @@
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { KibanaRequest, RequestHandlerContext, SavedObject } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  RequestHandlerContext,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import { internalFrameworkRequest } from '../../../framework';
 import type { Note } from '../../../../../common/api/timeline';
 import { requestContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
 import { noteFieldsMigrator } from './field_migrator';
-import { pickSavedNote, persistNote, createNote, updateNote } from './saved_object';
+import {
+  pickSavedNote,
+  persistNote,
+  createNote,
+  updateNote,
+  countUnassignedNotesLinkedToDocument,
+} from './saved_object';
 
 jest.mock('uuid', () => ({
   v1: jest.fn().mockReturnValue('7ba7a520-03f4-11eb-9d9d-ffba20fabba8'),
@@ -314,5 +325,48 @@ describe('persistNote', () => {
     expect(result.note).toHaveProperty('noteId');
     expect(result.note).toHaveProperty('version', '');
     expect(result.note).toHaveProperty('timelineId', '');
+  });
+});
+
+describe('countUnassignedNotesLinkedToDocument', () => {
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSavedObjectsClient = {
+      find: jest.fn().mockReturnValue({ total: 0 }),
+    } as unknown as jest.Mocked<SavedObjectsClientContract>;
+  });
+
+  it('calls savedObjectsClient.find with correct parameters', async () => {
+    await countUnassignedNotesLinkedToDocument(mockSavedObjectsClient, 'test-document-id');
+
+    expect(mockSavedObjectsClient.find.mock.lastCall).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "siem-ui-timeline-note.attributes.eventId",
+              },
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "test-document-id",
+              },
+            ],
+            "function": "is",
+            "type": "function",
+          },
+          "hasReference": Object {
+            "id": "",
+            "type": "siem-ui-timeline",
+          },
+          "type": "siem-ui-timeline-note",
+        },
+      ]
+    `);
   });
 });

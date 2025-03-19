@@ -13,7 +13,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { SavedObjectsFindOptions } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
@@ -67,6 +67,22 @@ export const deleteNote = async ({
 
 export const getNote = async (request: FrameworkRequest, noteId: string): Promise<Note> => {
   return getSavedNote(request, noteId);
+};
+
+/*
+ * Count notes that are not associated with the timeline & are linked to given document
+ */
+export const countUnassignedNotesLinkedToDocument = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  documentId: string
+) => {
+  const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
+    type: noteSavedObjectType,
+    hasReference: { type: timelineSavedObjectType, id: '' },
+    filter: nodeBuilder.is(`${noteSavedObjectType}.attributes.eventId`, documentId),
+  });
+
+  return notesCount.total;
 };
 
 export const getNotesByTimelineId = async (
@@ -133,14 +149,9 @@ export const createNote = async ({
       data: noteWithCreator,
     });
   if (references.length === 1 && references[0].id === '' && note.eventId) {
-    // Get all notes that are not associated with the timeline & are linked to given eventId
-    const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
-      type: noteSavedObjectType,
-      hasReference: { type: timelineSavedObjectType, id: '' },
-      // Filter notes by eventId
-      filter: nodeBuilder.is(`${noteSavedObjectType}.attributes.eventId`, note.eventId),
-    });
-    if (notesCount.total >= MAX_NOTES_PER_DOCUMENT) {
+    const notesCount = await countUnassignedNotesLinkedToDocument(savedObjectsClient, note.eventId);
+
+    if (notesCount >= MAX_NOTES_PER_DOCUMENT) {
       return {
         code: 403,
         message: `Cannot create more than ${MAX_NOTES_PER_DOCUMENT} notes per document without associating them to a timeline`,
