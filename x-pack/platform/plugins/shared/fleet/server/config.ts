@@ -229,8 +229,14 @@ export const config: PluginConfigDescriptor = {
             excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
             spec: schema.object(
               {
-                min: schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MIN_VERSION}),
-                max: schema.string({coerceFromNumber: true, defaultValue: REGISTRY_SPEC_MAX_VERSION}),
+                min: schema.string({
+                  coerceFromNumber: true,
+                  defaultValue: REGISTRY_SPEC_MIN_VERSION,
+                }),
+                max: schema.string({
+                  coerceFromNumber: true,
+                  defaultValue: REGISTRY_SPEC_MAX_VERSION,
+                }),
               },
               {
                 defaultValue: {
