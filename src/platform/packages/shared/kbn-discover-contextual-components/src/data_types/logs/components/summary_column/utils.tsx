@@ -25,13 +25,9 @@ import {
   ORCHESTRATOR_NAMESPACE_FIELD,
   ORCHESTRATOR_RESOURCE_ID_FIELD,
   SERVICE_NAME_FIELD,
-  SPAN_DURATION_FIELD,
-  TRANSACTION_DURATION_FIELD,
   DataTableRecord,
   getFieldValue,
-  INDEX_FIELD,
   FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
-  TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
