@@ -92,6 +92,7 @@ export const buildESQLTheme = ({
           'join',
           'dev_change_point',
           'dev_insist',
+          'dev_rrf',
         ],
         euiThemeVars.euiColorAccentText,
         true // isBold
@@ -175,6 +176,8 @@ export const buildESQLTheme = ({
           'integer_literal',
           'decimal_literal',
           'named_or_positional_param',
+          'named_or_positional_double_params',
+          'double_params',
           'param',
           'timespan_literal',
         ],
