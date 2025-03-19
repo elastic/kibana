@@ -23,16 +23,24 @@ const stacktraceAccordionTitle = i18n.translate(
 export function LogsOverviewStacktraceSection({
   hit,
   dataView,
+  isExpanded,
 }: {
   hit: DataTableRecord;
   dataView: DataView;
+  isExpanded: boolean;
 }) {
   const accordionId = useGeneratedHtmlId({
     prefix: stacktraceAccordionTitle,
   });
 
   return (
-    <>
+    <div
+      ref={(el) => {
+        if (el && isExpanded) {
+          setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+        }
+      }}
+    >
       <EuiAccordion
         id={accordionId}
         buttonContent={
@@ -41,12 +49,12 @@ export function LogsOverviewStacktraceSection({
           </EuiTitle>
         }
         paddingSize="m"
-        initialIsOpen={false}
+        initialIsOpen={isExpanded}
         data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"
       >
         <StacktraceContent hit={hit} dataView={dataView} />
       </EuiAccordion>
       <EuiHorizontalRule margin="xs" />
-    </>
+    </div>
   );
 }

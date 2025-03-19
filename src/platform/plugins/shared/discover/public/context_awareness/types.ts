@@ -181,6 +181,11 @@ export interface RowControlsExtensionParams {
    * The current query
    */
   query?: DiscoverAppState['query'];
+  /**
+   * Todo: Define this parameter
+   * @param record
+   */
+  setExpandedDoc?: (record: DataTableRecord) => void;
 }
 
 /**

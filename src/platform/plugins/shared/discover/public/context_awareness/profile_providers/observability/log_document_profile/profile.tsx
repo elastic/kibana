@@ -8,20 +8,26 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { BehaviorSubject } from 'rxjs';
 import type { DocumentProfileProvider } from '../../../profiles';
 import { DocumentType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+import { isLogsDataSourceContext } from '../logs_data_source_profile/profile';
+
+export type LogDocumentProfileProvider = DocumentProfileProvider<{
+  initialLogOverviewAccordionSection$: BehaviorSubject<'stacktrace' | undefined>;
+}>;
 
 export const createObservabilityLogDocumentProfileProvider = (
   services: ProfileProviderServices
-): DocumentProfileProvider => ({
+): LogDocumentProfileProvider => ({
   profileId: 'observability-log-document-profile',
   profile: {
     getDocViewer: createGetDocViewer(services),
   },
-  resolve: ({ record, rootContext }) => {
+  resolve: ({ record, rootContext, dataSourceContext }) => {
     if (rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
       return { isMatch: false };
     }
@@ -36,6 +42,9 @@ export const createObservabilityLogDocumentProfileProvider = (
       isMatch: true,
       context: {
         type: DocumentType.Log,
+        initialLogOverviewAccordionSection$: isLogsDataSourceContext(dataSourceContext)
+          ? dataSourceContext.initialLogOverviewAccordionSection$
+          : new BehaviorSubject<'stacktrace' | undefined>(undefined),
       },
     };
   },
