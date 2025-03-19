@@ -10,7 +10,6 @@ import { useController } from 'react-hook-form';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFormContext } from 'react-hook-form';
 import { ProcessorFormState } from '../../types';
 
 export const DateFormatsField = () => {
@@ -24,14 +23,12 @@ export const DateFormatsField = () => {
     },
   });
 
-  const { register } = useFormContext();
-  const { ref, ...inputProps } = register('formats');
+  const { invalid, error } = fieldState;
+  const { ref, ...inputProps } = field;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     field.onChange([e.target.value]);
   };
-
-  const { invalid, error } = fieldState;
 
   return (
     <EuiFormRow
@@ -49,7 +46,7 @@ export const DateFormatsField = () => {
       isInvalid={invalid}
       error={error?.message}
     >
-      <EuiFieldText {...inputProps} inputRef={ref} onChange={handleChange} />
+      <EuiFieldText {...inputProps} inputRef={ref} isInvalid={invalid} onChange={handleChange} />
     </EuiFormRow>
   );
 };
