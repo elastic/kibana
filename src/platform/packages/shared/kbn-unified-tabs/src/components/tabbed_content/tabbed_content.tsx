@@ -21,23 +21,27 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import { type TabItem, type PreviewQuery, PreviewQueryLanguage, TabStatus } from '../../types';
+import { type TabItem, type TabPreviewData, TabStatus } from '../../types';
 
 // TODO: replace with real data when ready
-const TAB_CONTENT_MOCK: PreviewQuery[] = [
+const TAB_CONTENT_MOCK: TabPreviewData[] = [
   {
-    language: PreviewQueryLanguage.ESQL,
-    query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    query: {
+      esql: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    },
     status: TabStatus.SUCCESS,
   },
   {
-    language: PreviewQueryLanguage.ESQL,
-    query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    query: {
+      esql: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    },
     status: TabStatus.RUNNING,
   },
   {
-    language: PreviewQueryLanguage.KQL,
-    query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
+    query: {
+      language: 'kql',
+      query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
+    },
     status: TabStatus.ERROR,
   },
 ];
@@ -154,7 +158,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onClose={onClose}
-          getPreviewQuery={() =>
+          getPreviewData={() =>
             TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)]
           } // TODO: adjust getter function when real data ready
         />

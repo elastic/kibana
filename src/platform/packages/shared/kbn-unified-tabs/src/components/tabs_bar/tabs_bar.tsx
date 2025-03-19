@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem, PreviewQuery } from '../../types';
+import type { TabItem, TabPreviewData } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 
@@ -28,7 +28,7 @@ export type TabsBarProps = Pick<
   selectedItem: TabItem | null;
   maxItemsCount?: number;
   onAdd: () => Promise<void>;
-  getPreviewQuery: (item: TabItem) => PreviewQuery;
+  getPreviewData: (item: TabItem) => TabPreviewData;
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({
@@ -41,7 +41,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onLabelEdited,
   onSelect,
   onClose,
-  getPreviewQuery,
+  getPreviewData,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
@@ -108,7 +108,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                     onLabelEdited={onLabelEdited}
                     onSelect={onSelect}
                     onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                    previewQuery={getPreviewQuery(item)} // TODO consider performance improvements when real data ready
+                    tabPreviewData={getPreviewData(item)}
                   />
                 </EuiFlexItem>
               ))}

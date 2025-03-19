@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AggregateQuery, Query } from '@kbn/es-query';
 export interface TabItem {
   id: string;
   label: string;
@@ -33,15 +34,9 @@ export enum TabStatus {
   ERROR = 'danger',
 }
 
-export enum PreviewQueryLanguage {
-  ESQL = 'esql',
-  KQL = 'kql',
-}
-
 // TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
-export interface PreviewQuery {
-  language: PreviewQueryLanguage;
-  query: string;
+export interface TabPreviewData {
+  query: AggregateQuery | Query;
   status: TabStatus;
 }
 

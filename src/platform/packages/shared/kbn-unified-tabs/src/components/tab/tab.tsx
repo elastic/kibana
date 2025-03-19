@@ -21,7 +21,7 @@ import {
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import type { TabItem, TabsSizeConfig, GetTabMenuItems, PreviewQuery } from '../../types';
+import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabPreviewData } from '../../types';
 
 import { TabPreview } from '../tab_preview';
 
@@ -34,7 +34,7 @@ export interface TabProps {
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
-  previewQuery: PreviewQuery;
+  tabPreviewData: TabPreviewData;
 }
 
 export const Tab: React.FC<TabProps> = ({
@@ -46,7 +46,7 @@ export const Tab: React.FC<TabProps> = ({
   onLabelEdited,
   onSelect,
   onClose,
-  previewQuery,
+  tabPreviewData,
 }) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>();
@@ -105,7 +105,7 @@ export const Tab: React.FC<TabProps> = ({
       showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
-      previewQuery={previewQuery}
+      tabPreviewData={tabPreviewData}
       tabItem={item}
     >
       <EuiFlexGroup
@@ -135,7 +135,6 @@ export const Tab: React.FC<TabProps> = ({
                 css={getTabButtonCss(euiTheme)}
                 className="unifiedTabs__tabBtn"
                 data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-                title={item.label}
                 type="button"
                 onClick={onSelectEvent}
                 onDoubleClick={handleDoubleClick}

@@ -10,12 +10,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TabPreview } from './tab_preview';
-import type { PreviewQuery, TabItem } from '../../types';
-import { PreviewQueryLanguage, TabStatus } from '../../types';
+import type { TabPreviewData, TabItem } from '../../types';
+import { TabStatus } from '../../types';
 
-const previewQuery: PreviewQuery = {
-  language: PreviewQueryLanguage.ESQL,
-  query: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+const tabPreviewData: TabPreviewData = {
+  query: {
+    esql: 'SELECT * FROM table',
+  },
   status: TabStatus.SUCCESS,
 };
 
@@ -34,7 +35,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        previewQuery={previewQuery}
+        tabPreviewData={tabPreviewData}
         tabItem={tabItem}
         stopPreviewOnHover={false}
         previewDelay={0}
@@ -62,7 +63,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={true}
         setShowPreview={setShowPreview}
-        previewQuery={previewQuery}
+        tabPreviewData={tabPreviewData}
         tabItem={tabItem}
         stopPreviewOnHover={false}
       >
@@ -89,7 +90,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        previewQuery={previewQuery}
+        tabPreviewData={tabPreviewData}
         tabItem={tabItem}
         stopPreviewOnHover={true}
       >

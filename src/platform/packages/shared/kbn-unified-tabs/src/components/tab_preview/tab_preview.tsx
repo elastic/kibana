@@ -23,9 +23,10 @@ import {
   EuiText,
   type EuiThemeComputed,
 } from '@elastic/eui';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 
 import { PREVIEW_WIDTH } from '../../constants';
-import type { PreviewQuery, TabItem } from '../../types';
+import type { TabPreviewData, TabItem } from '../../types';
 import { TabStatus } from '../../types';
 
 interface TabPreviewProps {
@@ -33,17 +34,33 @@ interface TabPreviewProps {
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
   tabItem: TabItem;
-  previewQuery: PreviewQuery;
+  tabPreviewData: TabPreviewData;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
 }
+
+const getQueryLanguage = (tabPreviewData: TabPreviewData) => {
+  if (isOfAggregateQueryType(tabPreviewData.query)) {
+    return 'esql';
+  }
+
+  return tabPreviewData.query.language;
+};
+
+const getPreviewQuery = (tabPreviewData: TabPreviewData) => {
+  if (isOfAggregateQueryType(tabPreviewData.query)) {
+    return tabPreviewData.query.esql;
+  }
+
+  return typeof tabPreviewData.query.query === 'string' ? tabPreviewData.query.query : '';
+};
 
 export const TabPreview: React.FC<TabPreviewProps> = ({
   children,
   showPreview,
   setShowPreview,
   tabItem,
-  previewQuery,
+  tabPreviewData,
   stopPreviewOnHover,
   previewDelay = 500,
 }) => {
@@ -94,7 +111,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
     };
   }, [previewTimer]);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
     if (stopPreviewOnHover) return;
 
     const timer = setTimeout(() => {
@@ -102,16 +119,16 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
     }, previewDelay);
 
     setPreviewTimer(timer);
-  };
+  }, [previewDelay, setShowPreview, stopPreviewOnHover]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     if (previewTimer) {
       clearTimeout(previewTimer);
       setPreviewTimer(null);
     }
 
     setShowPreview(false);
-  };
+  }, [previewTimer, setShowPreview]);
 
   return (
     <div>
@@ -125,8 +142,12 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
           data-test-subj={`unifiedTabs_tabPreview_${tabItem.id}`}
         >
           <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
-            <EuiCodeBlock language={previewQuery.language} transparentBackground paddingSize="none">
-              {previewQuery.query}
+            <EuiCodeBlock
+              language={getQueryLanguage(tabPreviewData)}
+              transparentBackground
+              paddingSize="none"
+            >
+              {getPreviewQuery(tabPreviewData)}
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner
@@ -135,8 +156,8 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
             paddingSize="none"
             css={getSplitPanelCss(euiTheme)}
           >
-            {previewQuery.status === TabStatus.RUNNING ? (
-              <EuiFlexGroup alignItems="center" gutterSize="s">
+            {tabPreviewData.status === TabStatus.RUNNING ? (
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner />
                 </EuiFlexItem>
@@ -145,7 +166,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <EuiHealth color={previewQuery.status} textSize="m">
+              <EuiHealth color={tabPreviewData.status} textSize="m">
                 {tabItem.label}
               </EuiHealth>
             )}

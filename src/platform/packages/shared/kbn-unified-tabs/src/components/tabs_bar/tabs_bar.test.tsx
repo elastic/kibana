@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TabsBar } from './tabs_bar';
-import { PreviewQueryLanguage, TabStatus } from '../../types';
+import { TabStatus } from '../../types';
 
 const items = Array.from({ length: 5 }).map((_, i) => ({
   id: `tab-${i}`,
@@ -25,13 +25,14 @@ describe('TabsBar', () => {
     const onSelect = jest.fn();
     const onLabelEdited = jest.fn();
     const onClose = jest.fn();
-    const getPreviewQuery = jest.fn();
+    const getPreviewData = jest.fn();
 
     const selectedItem = items[0];
 
-    getPreviewQuery.mockReturnValue({
-      language: PreviewQueryLanguage.ESQL,
-      query: 'SELECT * FROM table',
+    getPreviewData.mockReturnValue({
+      query: {
+        esql: 'SELECT * FROM table',
+      },
       status: TabStatus.SUCCESS,
     });
 
@@ -44,7 +45,7 @@ describe('TabsBar', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        getPreviewQuery={getPreviewQuery}
+        getPreviewData={getPreviewData}
       />
     );
 
