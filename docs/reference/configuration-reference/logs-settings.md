@@ -2,6 +2,9 @@
 navigation_title: "Logs settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/logs-ui-settings-kb.html
+applies_to:
+  deployment:
+    self: all
 ---
 
 # Logs settings in {{kib}} [logs-ui-settings-kb]
@@ -18,7 +21,7 @@ The {{kib}} logs can be found per operating system under:
 
 ## General Logs settings [general-logs-ui-settings-kb]
 
-[8.18.0] `xpack.infra.sources.default.fields.message`
+`xpack.infra.sources.default.fields.message`
 :   Fields used to display messages in the Logs app. Defaults to `['message', '@message']`.
 
 `xpack.infra.alerting.inventory_threshold.group_by_page_size`

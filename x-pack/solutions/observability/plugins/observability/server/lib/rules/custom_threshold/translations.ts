@@ -95,8 +95,15 @@ export const CUSTOM_EQUATION_I18N = i18n.translate(
 
 // Action variable descriptions
 
-export const groupByKeysActionVariableDescription = i18n.translate(
-  'xpack.observability.customThreshold.rule.groupByKeysActionVariableDescription',
+export const groupActionVariableDescription = i18n.translate(
+  'xpack.observability.customThreshold.rule.groupActionVariableDescription',
+  {
+    defaultMessage: 'The array of objects containing groups that are reporting data',
+  }
+);
+
+export const groupingObjectActionVariableDescription = i18n.translate(
+  'xpack.observability.customThreshold.rule.groupingObjectActionVariableDescription',
   {
     defaultMessage: 'The object containing groups that are reporting data',
   }
