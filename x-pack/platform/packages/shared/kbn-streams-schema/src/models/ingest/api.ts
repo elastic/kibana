@@ -49,20 +49,24 @@ type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
 
 interface WiredIngestUpsertRequest {
   ingest: WiredIngest;
+  description: string;
 }
 
 interface UnwiredIngestUpsertRequest {
   ingest: UnwiredIngest;
+  description: string;
 }
 
 type IngestUpsertRequest = WiredIngestUpsertRequest | UnwiredIngestUpsertRequest;
 
 const wiredIngestUpsertRequestSchema: z.Schema<WiredIngestUpsertRequest> = z.object({
   ingest: wiredIngestSchema,
+  description: z.string(),
 });
 
 const unwiredIngestUpsertRequestSchema: z.Schema<UnwiredIngestUpsertRequest> = z.object({
   ingest: unwiredIngestSchema,
+  description: z.string(),
 });
 
 const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
@@ -91,7 +95,6 @@ type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse
 /**
  * Ingest stream upsert request
  */
-
 interface UnwiredStreamUpsertRequest extends StreamUpsertRequestBase {
   stream: UnwiredIngestUpsertRequest;
 }
@@ -151,6 +154,8 @@ export {
   ingestStreamGetResponseSchema,
   wiredStreamGetResponseSchema,
   unwiredStreamGetResponseSchema,
+  wiredStreamUpsertRequestSchema,
+  unwiredStreamUpsertRequestSchema,
   type IngestGetResponse,
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,

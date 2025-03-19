@@ -6,12 +6,19 @@
  */
 import { z } from '@kbn/zod';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
+import { streamUpsertRequestSchema } from './api';
 import { streamDefinitionSchema } from './core';
-import { groupStreamDefinitionBaseSchema, groupStreamDefinitionSchema } from './group';
+import {
+  groupStreamDefinitionBaseSchema,
+  groupStreamDefinitionSchema,
+  groupStreamUpsertRequestSchema,
+} from './group';
 import {
   ingestStreamDefinitionSchema,
   unwiredStreamDefinitionSchema,
+  unwiredStreamUpsertRequestSchema,
   wiredStreamDefinitionSchema,
+  wiredStreamUpsertRequestSchema,
 } from './ingest';
 
 export const isIngestStreamDefinition = createIsNarrowSchema(
@@ -42,6 +49,21 @@ export const isUnwiredStreamDefinition = createIsNarrowSchema(
 export const isGroupStreamDefinition = createIsNarrowSchema(
   streamDefinitionSchema,
   groupStreamDefinitionSchema
+);
+
+export const isGroupStreamUpsertRequest = createIsNarrowSchema(
+  streamUpsertRequestSchema,
+  groupStreamUpsertRequestSchema
+);
+
+export const isUnwiredStreamUpsertRequest = createIsNarrowSchema(
+  streamUpsertRequestSchema,
+  unwiredStreamUpsertRequestSchema
+);
+
+export const isWiredStreamUpsertRequest = createIsNarrowSchema(
+  streamUpsertRequestSchema,
+  wiredStreamUpsertRequestSchema
 );
 
 export const isGroupStreamDefinitionBase = createIsNarrowSchema(

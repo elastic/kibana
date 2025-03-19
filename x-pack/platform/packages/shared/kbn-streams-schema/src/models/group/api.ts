@@ -15,7 +15,7 @@ import {
   GroupBase,
   groupBaseSchema,
   GroupStreamDefinitionBase,
-  groupStreamDefinitionBaseSchema,
+  groupStreamDefinitionSchemaBase,
 } from './base';
 
 /**
@@ -28,7 +28,7 @@ interface GroupStreamGetResponse extends StreamGetResponseBase {
 const groupStreamGetResponseSchema: z.Schema<GroupStreamGetResponse> = z.intersection(
   streamGetResponseSchemaBase,
   z.object({
-    stream: groupStreamDefinitionBaseSchema,
+    stream: groupStreamDefinitionSchemaBase,
   })
 );
 
@@ -56,16 +56,16 @@ interface GroupStreamUpsertRequest extends StreamUpsertRequestBase {
 const groupStreamUpsertRequestSchema: z.Schema<GroupStreamUpsertRequest> = z.intersection(
   streamUpsertRequestSchemaBase,
   z.object({
-    stream: groupStreamDefinitionBaseSchema,
+    stream: groupStreamDefinitionSchemaBase,
   })
 );
 
 export {
-  type GroupStreamGetResponse,
-  type GroupObjectGetResponse,
-  type GroupStreamUpsertRequest,
-  type GroupObjectUpsertRequest,
+  groupObjectUpsertRequestSchema,
   groupStreamGetResponseSchema,
   groupStreamUpsertRequestSchema,
-  groupObjectUpsertRequestSchema,
+  type GroupObjectGetResponse,
+  type GroupObjectUpsertRequest,
+  type GroupStreamGetResponse,
+  type GroupStreamUpsertRequest,
 };
