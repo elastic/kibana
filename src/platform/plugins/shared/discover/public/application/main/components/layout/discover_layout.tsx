@@ -363,7 +363,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       data-fetch-counter={fetchCounter.current}
       direction="column"
       css={css`
-        flex-direction: column;
         overflow: hidden;
         padding: 0;
         background-color: ${pageBackgroundColor};
