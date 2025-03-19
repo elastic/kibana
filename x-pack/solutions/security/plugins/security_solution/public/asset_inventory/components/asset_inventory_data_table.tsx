@@ -144,11 +144,13 @@ const getEntity = (record: DataTableRecord) => {
 
 export interface AssetInventoryDataTableProps {
   state: AssetInventoryDataTableResult;
+  height?: number;
   groupSelectorComponent?: JSX.Element;
 }
 
 export const AssetInventoryDataTable = ({
   state,
+  height,
   groupSelectorComponent,
 }: AssetInventoryDataTableProps) => {
   const {
@@ -287,6 +289,8 @@ export const AssetInventoryDataTable = ({
     const isVirtualizationEnabled = pageSize >= 100;
 
     const getWrapperHeight = () => {
+      if (height) return height;
+
       // If virtualization is not needed the table will render unconstrained.
       if (!isVirtualizationEnabled) return 'auto';
 
@@ -298,7 +302,7 @@ export const AssetInventoryDataTable = ({
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize]);
+  }, [pageSize, height]);
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>

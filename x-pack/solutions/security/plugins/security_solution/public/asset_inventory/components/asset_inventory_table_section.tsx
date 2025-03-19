@@ -13,7 +13,7 @@ import { groupPanelRenderer, groupStatsRenderer } from './grouping/asset_invento
 import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory_data_table';
 
 // TODO Move to constants?
-const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
+const DEFAULT_GROUPING_TABLE_HEIGHT = 512; // px
 
 interface SubGroupingProps {
   state: AssetInventoryDataTableResult;
@@ -141,11 +141,7 @@ const renderChildComponent = ({
         },
       };
 
-      return (
-        <div css={{ height: `${DEFAULT_GROUPING_TABLE_HEIGHT}px` }}>
-          <AssetInventoryDataTable state={newState} />
-        </div>
-      );
+      return <AssetInventoryDataTable state={newState} height={DEFAULT_GROUPING_TABLE_HEIGHT} />;
     };
   }
   return (
