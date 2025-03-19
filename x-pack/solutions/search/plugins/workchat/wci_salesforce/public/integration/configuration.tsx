@@ -8,9 +8,6 @@
 import { IntegrationConfigurationFormProps } from '@kbn/wci-common';
 import React from 'react';
 import { EuiDescribedFormGroup } from '@elastic/eui';
-import { EuiTextArea } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
-import { Controller } from 'react-hook-form';
 
 export const SalesforceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
@@ -23,20 +20,7 @@ export const SalesforceConfigurationForm: React.FC<IntegrationConfigurationFormP
       title={<h3>Salesforce Configuration</h3>}
       description="Configure the salesforce details"
     >
-      <EuiFormRow label="Configuration">
-        <Controller
-          name="configuration"
-          control={control}
-          render={({ field }) => (
-            <EuiTextArea
-              data-test-subj="workchatAppIntegrationEditViewAdditionalConfig"
-              placeholder="JSON configuration"
-              value={JSON.stringify(field.value, null, 2)}
-              onChange={(e) => field.onChange(JSON.parse(e.target.value))}
-            />
-          )}
-        />
-      </EuiFormRow>
+      none
     </EuiDescribedFormGroup>
   );
 };

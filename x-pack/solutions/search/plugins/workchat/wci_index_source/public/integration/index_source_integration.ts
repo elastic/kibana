@@ -9,9 +9,8 @@ import { IntegrationType } from '@kbn/wci-common';
 import { IntegrationComponentDescriptor } from '@kbn/wci-common/src/types';
 import { IndexSourceTool } from './tool';
 import { IndexSourceConfigurationForm } from './configuration';
-import { WCIIndexSourceConfiguration } from '../../common/types';
 
-export function indexSourceIntegrationComponents(): IntegrationComponentDescriptor<WCIIndexSourceConfiguration> {
+export function indexSourceIntegrationComponents(): IntegrationComponentDescriptor {
   return {
     getType: () => IntegrationType.index_source,
     getTool: () => IndexSourceTool,
