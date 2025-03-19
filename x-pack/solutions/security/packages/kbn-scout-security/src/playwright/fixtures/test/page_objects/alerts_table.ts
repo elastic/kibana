@@ -33,7 +33,12 @@ export class AlertsTablePage {
       attempts++;
     }
     const buttons = await this.expandAlertBtn.all();
-    await buttons[0].click();
+
+    if (buttons.length > 0) {
+      await buttons[0].click();
+    } else {
+      throw new Error('No expand alert details buttons found');
+    }
   }
 
   async getCurrentUrl() {
@@ -42,6 +47,6 @@ export class AlertsTablePage {
   }
 
   async reload() {
-    this.page.reload();
+    return this.page.reload();
   }
 }

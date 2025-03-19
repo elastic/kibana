@@ -12,9 +12,8 @@ import {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
-import { SecurityPageObjects } from './test/page_objects';
-import { DetectionRuleApiService } from './worker/apis';
-import { SecurityBrowserAuthFixture } from './test';
+import { SecurityPageObjects, SecurityBrowserAuthFixture } from './test';
+import { DetectionRuleApiService } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;
