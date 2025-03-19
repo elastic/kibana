@@ -13,6 +13,8 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-peggy-loader
+dependsOn:
+  - '@kbn/peggy'
 tags:
   - common
   - shared-common
@@ -20,6 +22,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.js'
     - '!target/**/*'
 tasks:
   jest:

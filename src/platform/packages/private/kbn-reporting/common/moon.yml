@@ -13,6 +13,12 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-reporting/common
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/utility-types'
+  - '@kbn/screenshotting-plugin'
+  - '@kbn/i18n'
+  - '@kbn/task-manager-plugin'
 tags:
   - platform
   - shared-common

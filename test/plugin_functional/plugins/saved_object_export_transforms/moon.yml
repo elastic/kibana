@@ -13,6 +13,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: test/plugin_functional/plugins/saved_object_export_transforms
+dependsOn:
+  - '@kbn/core'
 tags:
   - common
   - plugin

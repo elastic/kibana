@@ -13,6 +13,9 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/local_storage
+dependsOn:
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/ml-is-defined'
 tags:
   - platform
   - shared-common

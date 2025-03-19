@@ -13,6 +13,8 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-timerange
+dependsOn:
+  - '@kbn/datemath'
 tags:
   - platform
   - shared-common

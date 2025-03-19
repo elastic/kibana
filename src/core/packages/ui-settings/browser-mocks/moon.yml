@@ -12,7 +12,9 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: packages/core/ui-settings/core-ui-settings-browser-mocks
+    sourceRoot: src/core/packages/ui-settings/browser-mocks
+dependsOn:
+  - '@kbn/core-ui-settings-browser'
 tags:
   - platform
   - shared-browser

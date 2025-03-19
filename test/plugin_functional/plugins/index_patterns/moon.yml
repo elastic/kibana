@@ -13,6 +13,10 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: test/plugin_functional/plugins/index_patterns
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/config-schema'
 tags:
   - common
   - plugin

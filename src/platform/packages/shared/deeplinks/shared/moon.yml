@@ -13,6 +13,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/deeplinks/shared
+dependsOn: []
 tags:
   - platform
   - shared-common

@@ -13,6 +13,13 @@ project:
   owner: '@elastic/obs-ux-logs-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/kbn-custom-integrations
+dependsOn:
+  - '@kbn/core-http-browser'
+  - '@kbn/i18n'
+  - '@kbn/core'
+  - '@kbn/fleet-plugin'
+  - '@kbn/io-ts-utils'
+  - '@kbn/xstate-utils'
 tags:
   - observability
   - shared-browser

@@ -12,7 +12,13 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/logging/core-logging-server-mocks
+    sourceRoot: src/core/packages/logging/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-logging-server'
+  - '@kbn/core-logging-server-internal'
 tags:
   - platform
   - shared-server

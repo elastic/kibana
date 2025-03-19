@@ -13,6 +13,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-ebt-tools
+dependsOn:
+  - '@kbn/logging-mocks'
+  - '@kbn/timerange'
 tags:
   - platform
   - shared-common

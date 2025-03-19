@@ -13,6 +13,11 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: test/plugin_functional/plugins/kbn_sample_panel_action
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/react-kibana-mount'
 tags:
   - common
   - plugin

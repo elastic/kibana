@@ -13,6 +13,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: test/analytics/plugins/analytics_ftr_helpers
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/std'
+  - '@kbn/config-schema'
 tags:
   - common
   - plugin

@@ -13,6 +13,14 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/guided_onboarding_example
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/guided-onboarding-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/guided-onboarding'
+  - '@kbn/shared-ux-router'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

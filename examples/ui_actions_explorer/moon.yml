@@ -13,6 +13,13 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/ui_actions_explorer
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/ui-actions-examples-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

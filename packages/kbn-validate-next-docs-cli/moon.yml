@@ -13,6 +13,11 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-validate-next-docs-cli
+dependsOn:
+  - '@kbn/dev-cli-errors'
+  - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/repo-info'
 tags:
   - common
   - shared-common

@@ -13,6 +13,8 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-resizable-layout
+dependsOn:
+  - '@kbn/shared-ux-utility'
 tags:
   - platform
   - shared-browser

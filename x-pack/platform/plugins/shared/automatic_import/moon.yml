@@ -1,5 +1,5 @@
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/integration-assistant-plugin'
+id: '@kbn/automatic-import-plugin'
 type: unknown
 owners:
   defaultOwner: '@elastic/security-scalability'
@@ -7,12 +7,42 @@ toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/integration-assistant-plugin'
-  description: Moon project for @kbn/integration-assistant-plugin
+  name: '@kbn/automatic-import-plugin'
+  description: Moon project for @kbn/automatic-import-plugin
   channel: ''
   owner: '@elastic/security-scalability'
   metadata:
-    sourceRoot: x-pack/platform/plugins/shared/integration_assistant
+    sourceRoot: x-pack/platform/plugins/shared/automatic_import
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/langchain'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/actions-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/i18n'
+  - '@kbn/core-http-browser'
+  - '@kbn/elastic-assistant'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/code-editor'
+  - '@kbn/monaco'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/shared-ux-router'
+  - '@kbn/zod-helpers'
+  - '@kbn/stack-connectors-plugin'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/logging-mocks'
+  - '@kbn/licensing-plugin'
+  - '@kbn/core-http-request-handler-context-server'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-http-server'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/utils'
+  - '@kbn/zod'
+  - '@kbn/tooling-log'
+  - '@kbn/ai-assistant-icon'
 tags:
   - platform
   - plugin

@@ -13,6 +13,11 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/test/security_api_integration/plugins/features_provider
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/features-plugin'
+  - '@kbn/alerting-plugin'
+  - '@kbn/config-schema'
 tags:
   - common
   - plugin

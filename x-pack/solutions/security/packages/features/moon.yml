@@ -13,6 +13,14 @@ project:
   owner: '@elastic/security-threat-hunting-explore'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/features
+dependsOn:
+  - '@kbn/features-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/i18n'
+  - '@kbn/core-application-common'
+  - '@kbn/cases-plugin'
+  - '@kbn/securitysolution-rules'
+  - '@kbn/securitysolution-list-constants'
 tags:
   - security
   - shared-common

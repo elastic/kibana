@@ -13,6 +13,11 @@ project:
   owner: '@elastic/kibana-esql'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-esql-validation-autocomplete
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/esql-ast'
+  - '@kbn/utility-types'
+  - '@kbn/esql-types'
 tags:
   - platform
   - shared-common

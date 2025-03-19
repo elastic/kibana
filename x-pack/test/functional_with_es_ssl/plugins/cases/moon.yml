@@ -13,6 +13,13 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/test/functional_with_es_ssl/plugins/cases
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/cases-plugin'
+  - '@kbn/lens-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-router'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

@@ -13,6 +13,11 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/plugins/private/no_data_page
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-plugins-browser'
+  - '@kbn/core-plugins-server'
+  - '@kbn/config-schema'
 tags:
   - platform
   - plugin

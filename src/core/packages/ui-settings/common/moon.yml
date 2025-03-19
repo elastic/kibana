@@ -13,6 +13,10 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/core/packages/ui-settings/common
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/analytics'
+  - '@kbn/core-http-server'
 tags:
   - platform
   - shared-common

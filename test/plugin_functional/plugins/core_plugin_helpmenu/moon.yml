@@ -13,6 +13,13 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: test/plugin_functional/plugins/core_plugin_helpmenu
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/core-i18n-browser'
+  - '@kbn/core-theme-browser'
+  - '@kbn/react-kibana-context-render'
+  - '@kbn/core-user-profile-browser'
 tags:
   - common
   - plugin

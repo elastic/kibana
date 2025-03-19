@@ -13,6 +13,7 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-src
+    preventUpdate: true
 tags:
   - platform
   - shared-common

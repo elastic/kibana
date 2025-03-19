@@ -13,6 +13,12 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/test/cases_api_integration/common/plugins/security_solution
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/files-plugin'
+  - '@kbn/features-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/security-plugin'
 tags:
   - common
   - plugin

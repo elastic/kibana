@@ -12,7 +12,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/analytics/core-analytics-server-mocks
+    sourceRoot: src/core/packages/analytics/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-analytics-server'
+  - '@kbn/core-analytics-server-internal'
 tags:
   - platform
   - shared-server

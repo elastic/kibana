@@ -14,6 +14,12 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/std'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/spaces-plugin'
 tags:
   - common
   - plugin

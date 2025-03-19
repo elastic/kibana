@@ -14,6 +14,18 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/solutions/observability/packages/observability-ai/observability-ai-server
+dependsOn:
+  - '@kbn/observability-utils-common'
+  - '@kbn/alerting-plugin'
+  - '@kbn/rule-registry-plugin'
+  - '@kbn/inference-plugin'
+  - '@kbn/logging'
+  - '@kbn/calculate-auto'
+  - '@kbn/observability-ai-assistant-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/observability-ai-common'
+  - '@kbn/observability-utils-server'
+  - '@kbn/traced-es-client'
 tags:
   - observability
   - shared-server

@@ -13,6 +13,12 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/test/security_functional/plugins/test_endpoints
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/security-plugin'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/security-plugin-types-server'
 tags:
   - common
   - plugin

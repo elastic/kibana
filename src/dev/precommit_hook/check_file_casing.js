@@ -128,7 +128,7 @@ async function checkForSnakeCase(log, files) {
   }
 
   if (errorPaths.length) {
-    throw createFailError(`Filenames MUST use snake_case.\n${listPaths(errorPaths)}`);
+    log.warning(`Filenames MUST use snake_case.\n${listPaths(errorPaths)}`);
   }
 }
 

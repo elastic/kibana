@@ -13,6 +13,10 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: test/plugin_functional/plugins/session_notifications
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/navigation-plugin'
+  - '@kbn/data-plugin'
 tags:
   - common
   - plugin

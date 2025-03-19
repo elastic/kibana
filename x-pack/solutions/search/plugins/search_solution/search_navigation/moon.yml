@@ -13,6 +13,14 @@ project:
   owner: '@elastic/search-kibana'
   metadata:
     sourceRoot: x-pack/solutions/search/plugins/search_solution/search_navigation
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/i18n'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/shared-ux-page-solution-nav'
+  - '@kbn/logging'
+  - '@kbn/serverless'
+  - '@kbn/core-plugins-browser'
 tags:
   - search
   - plugin

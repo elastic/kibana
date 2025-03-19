@@ -13,6 +13,14 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/plugins/shared/saved_objects
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/data-plugin'
+  - '@kbn/i18n'
+  - '@kbn/data-views-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/test-jest-helpers'
 tags:
   - platform
   - plugin

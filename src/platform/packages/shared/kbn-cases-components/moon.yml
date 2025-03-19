@@ -13,6 +13,9 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-cases-components
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
 tags:
   - platform
   - shared-common

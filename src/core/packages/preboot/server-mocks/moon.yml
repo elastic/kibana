@@ -12,7 +12,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/preboot/core-preboot-server-mocks
+    sourceRoot: src/core/packages/preboot/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-preboot-server-internal'
+  - '@kbn/core-preboot-server'
 tags:
   - platform
   - shared-server

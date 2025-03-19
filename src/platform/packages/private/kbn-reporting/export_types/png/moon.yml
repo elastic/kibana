@@ -13,6 +13,14 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-reporting/export_types/png
+dependsOn:
+  - '@kbn/reporting-common'
+  - '@kbn/licensing-plugin'
+  - '@kbn/screenshotting-plugin'
+  - '@kbn/reporting-server'
+  - '@kbn/reporting-export-types-png-common'
+  - '@kbn/core'
+  - '@kbn/reporting-mocks-server'
 tags:
   - platform
   - shared-server

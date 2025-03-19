@@ -22,7 +22,6 @@ tasks:
     script: echo 'stubbed:noop'
   typecheck:
     script: echo 'stubbed:noop'
-    outputs: []
   lint_with_types:
     script: echo 'stubbed:noop'
   jestCI:

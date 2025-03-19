@@ -13,6 +13,8 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: test/plugin_functional/plugins/eui_provider_dev_warning
+dependsOn:
+  - '@kbn/core'
 tags:
   - common
   - plugin

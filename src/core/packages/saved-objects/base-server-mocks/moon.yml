@@ -12,7 +12,10 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/saved-objects/core-saved-objects-base-server-mocks
+    sourceRoot: src/core/packages/saved-objects/base-server-mocks
+dependsOn:
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-saved-objects-base-server-internal'
 tags:
   - platform
   - shared-server

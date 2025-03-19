@@ -13,6 +13,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: test/health_gateway/plugins/status
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
 tags:
   - common
   - plugin

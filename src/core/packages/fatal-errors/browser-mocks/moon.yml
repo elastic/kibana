@@ -12,7 +12,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/fatal-errors/core-fatal-errors-browser-mocks
+    sourceRoot: src/core/packages/fatal-errors/browser-mocks
+dependsOn:
+  - '@kbn/core-fatal-errors-browser'
+  - '@kbn/core-fatal-errors-browser-internal'
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-browser

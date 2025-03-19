@@ -13,6 +13,14 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/plugins/shared/expression_reveal_image
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/i18n'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-error-boundary'
 tags:
   - platform
   - plugin

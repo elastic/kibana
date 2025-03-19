@@ -12,7 +12,12 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: packages/core/chrome/core-chrome-browser-mocks
+    sourceRoot: src/core/packages/chrome/browser-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/utility-types-jest'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/core-chrome-browser-internal'
 tags:
   - platform
   - shared-browser

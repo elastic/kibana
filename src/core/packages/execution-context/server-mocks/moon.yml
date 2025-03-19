@@ -12,7 +12,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/execution-context/core-execution-context-server-mocks
+    sourceRoot: src/core/packages/execution-context/server-mocks
+dependsOn:
+  - '@kbn/core-execution-context-common'
+  - '@kbn/core-execution-context-server'
+  - '@kbn/core-execution-context-server-internal'
 tags:
   - platform
   - shared-server

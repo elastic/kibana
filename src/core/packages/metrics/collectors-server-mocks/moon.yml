@@ -12,7 +12,10 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/metrics/core-metrics-collectors-server-mocks
+    sourceRoot: src/core/packages/metrics/collectors-server-mocks
+dependsOn:
+  - '@kbn/core-metrics-server'
+  - '@kbn/core-metrics-collectors-server-internal'
 tags:
   - platform
   - shared-server

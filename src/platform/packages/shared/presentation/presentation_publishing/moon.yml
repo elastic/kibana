@@ -13,6 +13,12 @@ project:
   owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/packages/shared/presentation/presentation_publishing
+dependsOn:
+  - '@kbn/es-query'
+  - '@kbn/data-views-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/core-execution-context-common'
+  - '@kbn/content-management-utils'
 tags:
   - platform
   - shared-browser

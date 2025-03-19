@@ -1,26 +1,30 @@
 $schema: https://moonrepo.dev/schemas/project.json
-id: '@kbn/serverless-project-switcher'
+id: '@kbn/data-grid-in-table-search'
 type: unknown
 owners:
-  defaultOwner: '@elastic/appex-sharedux'
+  defaultOwner: '@elastic/kibana-data-discovery'
 toolchain:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-project-switcher'
-  description: Moon project for @kbn/serverless-project-switcher
+  name: '@kbn/data-grid-in-table-search'
+  description: Moon project for @kbn/data-grid-in-table-search
   channel: ''
-  owner: '@elastic/appex-sharedux'
+  owner: '@elastic/kibana-data-discovery'
   metadata:
-    sourceRoot: src/platform/packages/private/serverless/project_switcher
+    sourceRoot: src/platform/packages/shared/kbn-data-grid-in-table-search
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/visualization-utils'
 tags:
   - platform
-  - shared-common
+  - shared-browser
   - prod
 fileGroups:
   src:
-    - '**/*.ts'
-    - '**/*.tsx'
+    - '*.ts'
+    - src/**/*
+    - __mocks__/**/*.ts
     - '!target/**/*'
 tasks:
   jest:

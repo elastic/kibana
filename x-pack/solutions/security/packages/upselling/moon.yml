@@ -13,6 +13,11 @@ project:
   owner: '@elastic/security-threat-hunting-explore'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/upselling
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/security-solution-navigation'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/ai-assistant-icon'
 tags:
   - security
   - shared-browser

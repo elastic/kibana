@@ -14,6 +14,8 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin
+dependsOn:
+  - '@kbn/core'
 tags:
   - common
   - plugin

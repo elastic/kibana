@@ -13,6 +13,10 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-babel-register
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/babel-transform'
+  - '@kbn/peggy'
 tags:
   - platform
   - shared-common

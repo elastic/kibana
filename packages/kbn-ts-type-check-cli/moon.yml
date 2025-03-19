@@ -13,6 +13,15 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-ts-type-check-cli
+    preventUpdate: true
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/repo-info'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/ts-projects'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/std'
+  - '@kbn/some-dev-log'
 tags:
   - common
   - shared-common
@@ -34,10 +43,3 @@ tasks:
       - $projectRoot/jest.config.js
     inputs:
       - '@group(src)'
-  generateAllTypecheckConfigs:
-    command: node
-    args: 'scripts/type_check.js --config-only'
-    inputs:
-      - '@group(src)'
-    options:
-      runFromWorkspaceRoot: true

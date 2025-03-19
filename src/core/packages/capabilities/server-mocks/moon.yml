@@ -12,7 +12,12 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/capabilities/core-capabilities-server-mocks
+    sourceRoot: src/core/packages/capabilities/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-capabilities-common'
+  - '@kbn/core-capabilities-server'
+  - '@kbn/core-capabilities-server-internal'
 tags:
   - platform
   - shared-server

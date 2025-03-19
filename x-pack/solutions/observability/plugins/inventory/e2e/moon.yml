@@ -13,6 +13,14 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/inventory/e2e
+dependsOn:
+  - '@kbn/test'
+  - '@kbn/apm-synthtrace'
+  - '@kbn/apm-synthtrace-client'
+  - '@kbn/dev-utils'
+  - '@kbn/cypress-config'
+  - '@kbn/ftr-common-functional-services'
+  - '@kbn/ftr-common-functional-ui-services'
 tags:
   - observability
   - test-helper

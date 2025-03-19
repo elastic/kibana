@@ -13,6 +13,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/serverless/types
+dependsOn: []
 tags:
   - platform
   - shared-common

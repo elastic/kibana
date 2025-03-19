@@ -13,6 +13,10 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/private/ml/time_buckets
+dependsOn:
+  - '@kbn/datemath'
+  - '@kbn/data-plugin'
+  - '@kbn/core-ui-settings-browser'
 tags:
   - platform
   - shared-common

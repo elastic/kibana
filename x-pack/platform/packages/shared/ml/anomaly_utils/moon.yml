@@ -13,6 +13,10 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/anomaly_utils
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/ml-is-populated-object'
+  - '@kbn/field-types'
 tags:
   - platform
   - shared-common

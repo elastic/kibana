@@ -13,6 +13,15 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: examples/discover_customization_examples
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/discover-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/controls-plugin'
+  - '@kbn/shared-ux-router'
+  - '@kbn/i18n-react'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/data-plugin'
 tags:
   - common
   - plugin

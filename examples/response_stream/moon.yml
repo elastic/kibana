@@ -13,6 +13,15 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: examples/response_stream
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/shared-ux-router'
+  - '@kbn/ml-response-stream'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

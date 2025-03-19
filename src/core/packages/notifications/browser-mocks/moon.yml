@@ -12,7 +12,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/notifications/core-notifications-browser-mocks
+    sourceRoot: src/core/packages/notifications/browser-mocks
+dependsOn:
+  - '@kbn/utility-types-jest'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/core-notifications-browser-internal'
 tags:
   - platform
   - shared-browser

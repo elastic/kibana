@@ -14,6 +14,8 @@ project:
   metadata:
     sourceRoot: >-
       x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared
+dependsOn:
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-common

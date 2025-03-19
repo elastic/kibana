@@ -174,6 +174,8 @@ export function regenerateMoonProjects() {
         (flags.filter as string | string[]) || undefined;
       const update = flags.update as boolean | undefined;
       const dryRun = flags['dry-run'] as boolean | undefined;
+      const clear = flags.clear as boolean | undefined;
+
       const implicitDependencies = !!flags.dependencies;
 
       const template = readFile(path.resolve(__dirname, './moon.template.yml'));
@@ -220,7 +222,13 @@ export function regenerateMoonProjects() {
         });
 
         const targetPath = path.resolve(pkg.normalizedRepoRelativeDir, 'moon.yml');
-        const result = createOrUpdateConfig(targetPath, projectConfig, { update, dryRun, log });
+
+        const result = createOrUpdateConfig(targetPath, projectConfig, {
+          update,
+          clear,
+          dryRun,
+          log,
+        });
         switch (result) {
           case 'create':
             projectsCreated.push(pkg.name);
@@ -244,7 +252,7 @@ export function regenerateMoonProjects() {
       `,
       flags: {
         string: ['filter'],
-        boolean: ['dry-run', 'update', 'dependencies'],
+        boolean: ['dry-run', 'update', 'dependencies', 'clear'],
         default: {},
         alias: {},
         help: `
@@ -262,16 +270,23 @@ function createOrUpdateConfig(
   targetPath: string,
   projectConfig: any,
   {
+    clear,
     update,
     dryRun,
     log,
-  }: { update: boolean | undefined; dryRun: boolean | undefined; log: ToolingLog }
+  }: {
+    clear?: boolean;
+    update?: boolean;
+    dryRun?: boolean;
+    log: ToolingLog;
+  }
 ): 'create' | 'update' | 'skip' {
   sortKeys(projectConfig);
   const name = projectConfig.id;
   const projectExists = fs.existsSync(targetPath);
   if (projectExists) {
-    if (update) {
+    const existingConfig = yaml.load(readFile(targetPath)) as any;
+    if (update && !existingConfig?.project?.metadata?.preventUpdate) {
       if (dryRun) {
         log.info(`Would update ${name} project configuration.`);
       } else {
@@ -279,6 +294,13 @@ function createOrUpdateConfig(
         log.info(`Updated ${name} project configuration.`);
       }
       return 'update';
+    } else if (clear && !existingConfig?.project?.metadata?.preventUpdate) {
+      if (dryRun) {
+        log.info(`Would clear ${name} project configuration.`);
+      } else {
+        log.info(`Deleting ${name} project configuration @ ${targetPath}`);
+        fs.unlinkSync(targetPath);
+      }
     } else {
       log.info(`moon.yml already exists at ${targetPath} - skipping update.`);
       return 'skip';

@@ -13,6 +13,10 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/packages/ai-infra/product-doc-artifact-builder
+dependsOn:
+  - '@kbn/tooling-log'
+  - '@kbn/repo-info'
+  - '@kbn/product-doc-common'
 tags:
   - common
   - shared-common

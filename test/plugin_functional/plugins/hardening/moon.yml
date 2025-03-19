@@ -13,6 +13,8 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: test/plugin_functional/plugins/hardening
+dependsOn:
+  - '@kbn/core'
 tags:
   - common
   - plugin
@@ -20,6 +22,9 @@ tags:
 fileGroups:
   src:
     - index.ts
+    - common/**/*.ts
+    - public/**/*.ts
+    - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
 tasks:

@@ -13,6 +13,7 @@ project:
   owner: '@elastic/ml-ui'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ml/chi2test
+dependsOn: []
 tags:
   - platform
   - shared-common

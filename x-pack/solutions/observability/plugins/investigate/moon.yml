@@ -13,6 +13,11 @@ project:
   owner: '@elastic/obs-ux-management-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/investigate
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/config-schema'
+  - '@kbn/es-query'
 tags:
   - observability
   - plugin

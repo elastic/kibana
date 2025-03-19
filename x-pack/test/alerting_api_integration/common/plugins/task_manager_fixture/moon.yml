@@ -13,6 +13,10 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/task-manager-plugin'
 tags:
   - common
   - plugin

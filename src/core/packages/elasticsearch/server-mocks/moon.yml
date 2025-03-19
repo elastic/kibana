@@ -12,7 +12,13 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/elasticsearch/core-elasticsearch-server-mocks
+    sourceRoot: src/core/packages/elasticsearch/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-status-common'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/core-elasticsearch-server-internal'
 tags:
   - platform
   - shared-server

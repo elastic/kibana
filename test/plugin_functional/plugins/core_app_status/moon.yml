@@ -13,6 +13,9 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: test/plugin_functional/plugins/core_app_status
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin

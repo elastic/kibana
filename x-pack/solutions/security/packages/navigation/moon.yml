@@ -13,6 +13,10 @@ project:
   owner: '@elastic/security-threat-hunting-explore'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/navigation
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core'
+  - '@kbn/deeplinks-security'
 tags:
   - security
   - shared-common

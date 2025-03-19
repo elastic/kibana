@@ -13,6 +13,8 @@ project:
   owner: '@elastic/security-threat-hunting-explore'
   metadata:
     sourceRoot: x-pack/solutions/security/packages/connectors
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - security
   - shared-browser

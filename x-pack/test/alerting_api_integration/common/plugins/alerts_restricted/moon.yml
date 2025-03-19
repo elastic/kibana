@@ -13,6 +13,13 @@ project:
   owner: '@elastic/response-ops'
   metadata:
     sourceRoot: x-pack/test/alerting_api_integration/common/plugins/alerts_restricted
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/alerting-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/actions-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/features-plugin'
 tags:
   - common
   - plugin

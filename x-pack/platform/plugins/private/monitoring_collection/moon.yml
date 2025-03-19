@@ -13,6 +13,13 @@ project:
   owner: '@elastic/stack-monitoring'
   metadata:
     sourceRoot: x-pack/platform/plugins/private/monitoring_collection
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/core-elasticsearch-client-server-mocks'
+  - '@kbn/utility-types'
+  - '@kbn/i18n'
 tags:
   - platform
   - plugin

@@ -13,6 +13,8 @@ project:
   owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: test/common/plugins/newsfeed
+dependsOn:
+  - '@kbn/core'
 tags:
   - common
   - plugin

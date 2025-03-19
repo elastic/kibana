@@ -12,7 +12,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/deprecations/core-deprecations-server-mocks
+    sourceRoot: src/core/packages/deprecations/server-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-deprecations-server'
+  - '@kbn/core-deprecations-server-internal'
 tags:
   - platform
   - shared-server

@@ -13,6 +13,12 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-guided-onboarding
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/core-application-browser'
+  - '@kbn/i18n-react'
+  - '@kbn/cloud'
+  - '@kbn/analytics'
 tags:
   - platform
   - shared-common

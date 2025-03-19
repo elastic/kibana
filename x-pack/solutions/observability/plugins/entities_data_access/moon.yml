@@ -13,6 +13,8 @@ project:
   owner: '@elastic/obs-entities'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/entities_data_access
+dependsOn:
+  - '@kbn/core'
 tags:
   - observability
   - plugin

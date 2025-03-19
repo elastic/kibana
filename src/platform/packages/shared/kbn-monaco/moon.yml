@@ -13,6 +13,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-monaco
+    preventUpdate: true
 tags:
   - platform
   - shared-common

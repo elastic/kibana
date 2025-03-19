@@ -13,6 +13,12 @@ project:
   owner: '@elastic/security-generative-ai'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-elastic-assistant-common
+dependsOn:
+  - '@kbn/zod-helpers'
+  - '@kbn/securitysolution-io-ts-utils'
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/zod'
 tags:
   - platform
   - shared-common

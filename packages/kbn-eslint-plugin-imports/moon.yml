@@ -13,6 +13,11 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: packages/kbn-eslint-plugin-imports
+dependsOn:
+  - '@kbn/import-resolver'
+  - '@kbn/repo-source-classifier'
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
 tags:
   - common
   - shared-common

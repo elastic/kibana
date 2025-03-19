@@ -13,6 +13,9 @@ project:
   owner: '@elastic/streams-program-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-streams-schema
+dependsOn:
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - platform
   - shared-common

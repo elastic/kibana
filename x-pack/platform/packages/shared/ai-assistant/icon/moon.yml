@@ -13,6 +13,7 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-assistant/icon
+dependsOn: []
 tags:
   - platform
   - shared-browser

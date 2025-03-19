@@ -13,6 +13,11 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-infra/inference-langchain
+dependsOn:
+  - '@kbn/inference-common'
+  - '@kbn/zod'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
 tags:
   - platform
   - shared-common

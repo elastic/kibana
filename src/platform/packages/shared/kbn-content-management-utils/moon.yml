@@ -13,6 +13,15 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-content-management-utils
+dependsOn:
+  - '@kbn/content-management-plugin'
+  - '@kbn/config-schema'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/config-schema'
+  - '@kbn/object-versioning'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
+  - '@kbn/core'
 tags:
   - platform
   - shared-server

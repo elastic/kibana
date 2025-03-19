@@ -13,6 +13,28 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/plugins/shared/share
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/core-custom-branding-browser'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/shared-ux-prompt-not-found'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/shared-ux-tabbed-modal'
+  - '@kbn/core-theme-browser'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/core-theme-browser-mocks'
+  - '@kbn/core-i18n-browser-mocks'
+  - '@kbn/core-notifications-browser-mocks'
+  - '@kbn/core-user-profile-browser'
 tags:
   - platform
   - plugin

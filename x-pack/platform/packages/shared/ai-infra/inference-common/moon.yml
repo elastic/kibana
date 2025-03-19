@@ -13,6 +13,7 @@ project:
   owner: '@elastic/appex-ai-infra'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-infra/inference-common
+dependsOn: []
 tags:
   - platform
   - shared-common

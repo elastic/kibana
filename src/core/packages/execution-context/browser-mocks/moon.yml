@@ -12,7 +12,11 @@ project:
   channel: ''
   owner: '@elastic/kibana-core'
   metadata:
-    sourceRoot: packages/core/execution-context/core-execution-context-browser-mocks
+    sourceRoot: src/core/packages/execution-context/browser-mocks
+dependsOn:
+  - '@kbn/utility-types'
+  - '@kbn/core-execution-context-browser'
+  - '@kbn/core-execution-context-browser-internal'
 tags:
   - platform
   - shared-browser

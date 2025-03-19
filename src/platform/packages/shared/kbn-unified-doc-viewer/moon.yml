@@ -13,6 +13,15 @@ project:
   owner: '@elastic/kibana-data-discovery'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-unified-doc-viewer
+dependsOn:
+  - '@kbn/discover-utils'
+  - '@kbn/data-views-plugin'
+  - '@kbn/es-query'
+  - '@kbn/data-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/i18n'
+  - '@kbn/react-field'
+  - '@kbn/field-utils'
 tags:
   - platform
   - shared-common

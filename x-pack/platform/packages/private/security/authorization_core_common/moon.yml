@@ -13,6 +13,8 @@ project:
   owner: '@elastic/kibana-security'
   metadata:
     sourceRoot: x-pack/platform/packages/private/security/authorization_core_common
+dependsOn:
+  - '@kbn/security-plugin-types-common'
 tags:
   - platform
   - shared-common

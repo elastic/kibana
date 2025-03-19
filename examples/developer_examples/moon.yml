@@ -13,6 +13,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: examples/developer_examples
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/react-kibana-context-render'
 tags:
   - common
   - plugin
