@@ -14,7 +14,7 @@ export const getTrackedExecutions = ({
   currentExecution: string;
   limit: number;
 }): string[] => {
-  const trackedExecutionsArray = Array.from(trackedExecutions);
+  const trackedExecutionsArray = Array.from(trackedExecutions ?? []);
   trackedExecutionsArray.push(currentExecution);
   if (trackedExecutionsArray.length > limit) {
     trackedExecutionsArray.shift();
