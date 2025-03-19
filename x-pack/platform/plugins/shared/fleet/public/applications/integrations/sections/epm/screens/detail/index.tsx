@@ -432,7 +432,7 @@ export function Detail() {
       }
 
       const navigateOptions: InstallPkgRouteOptions =
-        onboardingAppId && fixedOnboardingLink
+        onboardingAppId && onboardingLink && fixedOnboardingLink
           ? [
               defaultNavigateOptions[0],
               {
@@ -440,6 +440,7 @@ export function Detail() {
                 state: {
                   ...(defaultNavigateOptions[1]?.state ?? {}),
                   onCancelNavigateTo: [onboardingAppId, { path: fixedOnboardingLink }],
+                  onCancelUrl: onboardingLink,
                   onSaveNavigateTo: [onboardingAppId, { path: fixedOnboardingLink }],
                 },
               },
