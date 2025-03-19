@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await utils.getUsername()
         );
 
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should return an error if the id does not exist when trying to delete an id', async () => {
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           statusCode: 500,
           error: 'Internal Server Error',
           message: 'Bulk edit failed',
@@ -144,14 +144,14 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.success).to.be(true);
-        expect(body.rules_count).to.be(2);
+        expect(body.success).toBe(true);
+        expect(body.rules_count).toBe(2);
 
         const investigationFields = body.attributes.results.deleted
           .map((rule: RuleResponse) => rule.investigation_fields)
           .sort();
 
-        expect(investigationFields).to.eql([
+        expect(investigationFields).toEqual([
           { field_names: ['client.address', 'agent.name'] },
           undefined,
         ]);
