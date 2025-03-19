@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/private/product_intercept_trigger'],
+  roots: ['<rootDir>/x-pack/platform/plugins/private/product_intercept'],
 };

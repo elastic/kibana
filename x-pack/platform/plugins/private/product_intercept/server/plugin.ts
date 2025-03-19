@@ -21,42 +21,47 @@ import {
 } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ProductInterceptTriggerCore, type ProductInterceptTriggerCoreInitDeps } from './core';
+import type { ConfigSchema } from '../common/config';
 
-type ProductInterceptDialogPluginSetup = Pick<
+type ProductInterceptServerPluginSetup = Pick<
   ProductInterceptTriggerCoreInitDeps,
   'taskManager' | 'cloud'
 >;
 
-interface ProductInterceptDialogPluginStart {
+interface ProductInterceptServerPluginStart {
   taskManager: TaskManagerStartContract;
 }
 
 /**
  * @internal
  */
-export class ProductInterceptDialogPlugin
+export class ProductInterceptServerPlugin
   implements
-    Plugin<object, object, ProductInterceptDialogPluginSetup, ProductInterceptDialogPluginStart>
+    Plugin<object, object, ProductInterceptServerPluginSetup, ProductInterceptServerPluginStart>
 {
   private readonly logger: Logger;
+  private readonly config: ConfigSchema;
   private productInterceptDialogCore?: ProductInterceptTriggerCore;
 
   constructor(private initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
+    this.config = initContext.config.get<ConfigSchema>();
   }
 
-  public setup(core: CoreSetup, { taskManager, cloud }) {
-    this.productInterceptDialogCore = new ProductInterceptTriggerCore(this.initContext, {
-      core,
-      cloud,
-      logger: this.logger,
-      taskManager,
-    });
+  public setup(core: CoreSetup, { taskManager, cloud }: ProductInterceptServerPluginSetup) {
+    if (this.config.enabled) {
+      this.productInterceptDialogCore = new ProductInterceptTriggerCore(this.initContext, {
+        core,
+        cloud,
+        logger: this.logger,
+        taskManager,
+      });
+    }
 
     return {};
   }
 
-  public start(core: CoreStart, { taskManager }) {
+  public start(core: CoreStart, { taskManager }: ProductInterceptServerPluginStart) {
     void (async () => {
       await this.productInterceptDialogCore?.init({
         taskManager,

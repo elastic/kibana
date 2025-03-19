@@ -12,5 +12,5 @@ import { ProductInterceptPublicPlugin } from './plugin';
  * @internal
  */
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ProductInterceptPublicPlugin();
+  return new ProductInterceptPublicPlugin(initializerContext);
 }
