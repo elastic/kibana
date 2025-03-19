@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
@@ -30,7 +30,7 @@ export default {
   title: 'IndicatorsFieldSelector',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
@@ -41,7 +41,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const WithDefaultValue: Story<void> = () => {
+export const WithDefaultValue: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
@@ -53,6 +53,6 @@ export const WithDefaultValue: Story<void> = () => {
   );
 };
 
-export const NoData: Story<void> = () => {
+export const NoData: StoryFn = () => {
   return <IndicatorsFieldSelector indexPattern={{ fields: [] } as any} valueChange={() => {}} />;
 };
