@@ -7,13 +7,12 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 import { v1 as uuidv1 } from 'uuid';
-import { nodeBuilder } from '@kbn/es-query';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
@@ -30,6 +29,7 @@ import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
+import { countUnassignedNotesLinkedToDocument } from './count_unassigned_notes';
 
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -67,22 +67,6 @@ export const deleteNote = async ({
 
 export const getNote = async (request: FrameworkRequest, noteId: string): Promise<Note> => {
   return getSavedNote(request, noteId);
-};
-
-/*
- * Count notes that are not associated with the timeline & are linked to given document
- */
-export const countUnassignedNotesLinkedToDocument = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  documentId: string
-) => {
-  const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
-    type: noteSavedObjectType,
-    hasReference: { type: timelineSavedObjectType, id: '' },
-    filter: nodeBuilder.is(`${noteSavedObjectType}.attributes.eventId`, documentId),
-  });
-
-  return notesCount.total;
 };
 
 export const getNotesByTimelineId = async (
