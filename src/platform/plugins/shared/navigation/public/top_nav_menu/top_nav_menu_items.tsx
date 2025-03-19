@@ -11,6 +11,7 @@ import { EuiBreakpointSize, EuiHeaderLinks, useIsWithinBreakpoints } from '@elas
 import React from 'react';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
+import type { EuiGutterSize } from '../types';
 
 const POPOVER_BREAKPOINTS: EuiBreakpointSize[] = ['xs', 's'];
 
@@ -18,12 +19,14 @@ interface TopNavMenuItemsProps {
   config: TopNavMenuData[] | undefined;
   className?: string;
   popoverBreakpoints?: EuiBreakpointSize[];
+  gutterSize?: EuiGutterSize;
 }
 
 export const TopNavMenuItems = ({
   config,
   className,
   popoverBreakpoints = POPOVER_BREAKPOINTS,
+  gutterSize = 'xs',
 }: TopNavMenuItemsProps) => {
   const isMobileMenu = useIsWithinBreakpoints(popoverBreakpoints);
 
@@ -31,7 +34,7 @@ export const TopNavMenuItems = ({
   return (
     <EuiHeaderLinks
       data-test-subj="top-nav"
-      gutterSize="xs"
+      gutterSize={gutterSize}
       className={className}
       popoverBreakpoints={popoverBreakpoints}
     >

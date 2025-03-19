@@ -19,6 +19,7 @@ import type { EuiBreakpointSize } from '@elastic/eui';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
 import { type TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
+import type { EuiGutterSize } from '../types';
 
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   StatefulSearchBarProps<QT>,
@@ -33,6 +34,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   unifiedSearch?: UnifiedSearchPublicPluginStart;
   className?: string;
   visible?: boolean;
+  gutterSize?: EuiGutterSize;
   /**
    * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
    *
@@ -71,7 +73,7 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
 export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   props: TopNavMenuProps<QT>
 ): ReactElement | null {
-  const { config, badges, showSearchBar, ...searchBarProps } = props;
+  const { config, badges, showSearchBar, gutterSize, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.unifiedSearch)) {
     return null;
@@ -93,6 +95,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
           }
         `}
         popoverBreakpoints={props.popoverBreakpoints}
+        gutterSize={gutterSize}
       />
     );
   }
