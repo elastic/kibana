@@ -108,7 +108,6 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             alerting: {
               query: {
                 kql: 'invalid_kql:',
-                solutionId: 'securitySolution',
               },
             },
           },

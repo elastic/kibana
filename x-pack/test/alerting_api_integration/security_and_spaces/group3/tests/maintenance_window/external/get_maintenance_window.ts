@@ -18,7 +18,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
   const start = new Date();
   const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
 
-  describe.only('getMaintenanceWindow', () => {
+  describe('getMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',

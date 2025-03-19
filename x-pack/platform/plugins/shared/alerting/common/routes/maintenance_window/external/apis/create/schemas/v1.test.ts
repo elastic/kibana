@@ -85,34 +85,4 @@ describe('createMaintenanceWindowRequestBodySchema', () => {
       }
     `);
   });
-
-  it('throws an error where query has kql but no solutionIds', async () => {
-    expect(() =>
-      createMaintenanceWindowRequestBodySchema.validate({
-        ...maintenanceWindow,
-        scope: {
-          query: {
-            kql: "_id: '1234'",
-          },
-        },
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[scope.alerting.query.kql]: expected value of type [string] but got [undefined]"`
-    );
-  });
-
-  it('throws an error where query has solutionIds but no kql', async () => {
-    expect(() =>
-      createMaintenanceWindowRequestBodySchema.validate({
-        ...maintenanceWindow,
-        scope: {
-          query: {
-            solutionId: 'securitySolution',
-          },
-        },
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[scope.alerting.query.kql]: expected value of type [string] but got [undefined]"`
-    );
-  });
 });
