@@ -30,7 +30,7 @@ export interface BrowserAuthFixture {
   loginAsPrivilegedUser: () => Promise<void>;
   /**
    * Logs in as a user with a role.
-   * @param role - A role object that defines the Kibana and ES previleges. 
+   * @param role - A role object that defines the Kibana and ES previleges.
    * @returns A Promise that resolves once the cookie in browser is set.
    */
   loginAs: (role: string) => Promise<void>;
