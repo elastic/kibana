@@ -120,6 +120,7 @@
     "@kbn/core-capabilities-common",
     "@kbn/presentation-panel-plugin",
     "@kbn/esql-types",
+    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": ["target/**/*"]
 }
