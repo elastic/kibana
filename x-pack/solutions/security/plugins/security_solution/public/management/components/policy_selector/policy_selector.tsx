@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiSelectable,
   type EuiSelectableProps,
   type EuiSelectableOption,
   EuiCheckbox,
   htmlIdGenerator,
+  EuiPanel,
+  EuiPagination,
 } from '@elastic/eui';
 import type { GetPackagePoliciesRequest, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { EuiPaginationProps } from '@elastic/eui/src/components/pagination/pagination';
 import { APP_UI_ID } from '../../../../common';
 import { useAppUrl } from '../../../common/lib/kibana';
 import { LinkToApp } from '../../../common/components/endpoint';
@@ -65,7 +68,10 @@ export interface PolicySelectorProps {
    * Any query options supported by the fleet api. The defaults applied will filter for only
    * Endpoint integration policies sorted by name.
    */
-  queryOptions?: GetPackagePoliciesRequest['query'];
+  queryOptions?: Pick<
+    GetPackagePoliciesRequest['query'],
+    'perPage' | 'kuery' | 'sortField' | 'sortOrder' | 'withAgentCount'
+  >;
   /**
    * If `true`, then checkboxes will be used next to each item on the list as the selector component.
    * This is the likely choice when using this component in a Form (ex. Artifact create/update form)
@@ -99,7 +105,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       sortField = 'name',
       sortOrder = 'asc',
       withAgentCount = true,
-      ...otherQueryOptions
+      perPage = 20,
     } = {},
     selectedPolicyIds,
     useCheckbox = false,
@@ -111,6 +117,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const { getAppUrl } = useAppUrl();
     const { canReadPolicyManagement, canWriteIntegrationPolicies } =
       useUserPrivileges().endpointPrivileges;
+    const [page, setPage] = useState(1);
     const {
       data: policyListResponse,
       isFetching,
@@ -120,7 +127,9 @@ export const PolicySelector = memo<PolicySelectorProps>(
       kuery,
       sortOrder,
       sortField,
-      ...otherQueryOptions,
+      perPage,
+      withAgentCount,
+      page,
     });
 
     const selectableOptions: Array<EuiSelectableOption<OptionPolicyData>> = useMemo(() => {
@@ -204,8 +213,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       (list, search) => {
         return (
           <>
-            {search}
-            {list}
+            {search} {list}
           </>
         );
       },
@@ -218,18 +226,38 @@ export const PolicySelector = memo<PolicySelectorProps>(
       // FIXME:PT implement
     }, []);
 
+    const onPageClickHandler: Required<EuiPaginationProps>['onPageClick'] = useCallback(
+      (activePage) => {
+        setPage(activePage + 1);
+      },
+      []
+    );
+
     return (
       <PolicySelectorContainer data-test-subj={dataTestSubj}>
+        <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+          {'search bar here'}
+        </EuiPanel>
+
         <EuiSelectable<OptionPolicyData>
           options={selectableOptions}
           listProps={DEFAULT_LIST_PROPS}
           onChange={handleOnPolicySelectChange}
-          searchable={true}
-          searchProps={SEARCH_PROPS}
+          searchable={false}
+          // searchProps={SEARCH_PROPS}
           data-test-subj={getTestId('list')}
         >
           {listBuilderCallback}
         </EuiSelectable>
+
+        <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+          <EuiPagination
+            aria-label={'TODO: define label'}
+            pageCount={Math.ceil((policyListResponse?.total ?? 0) / perPage)}
+            activePage={(policyListResponse?.page ?? 1) - 1}
+            onPageClick={onPageClickHandler}
+          />
+        </EuiPanel>
       </PolicySelectorContainer>
     );
   }
