@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';

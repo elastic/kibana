@@ -6,16 +6,17 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import type { CodeBlockDetails, Conversation } from '@kbn/elastic-assistant';
 import { analyzeMarkdown } from '@kbn/elastic-assistant';
-import type { Conversation, CodeBlockDetails } from '@kbn/elastic-assistant';
 import React from 'react';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
 import { SendToTimelineButton } from './send_to_timeline';
-import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from '../detections/pages/detection_engine/translations';
-export const LOCAL_STORAGE_KEY = `securityAssistant`;
+import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from '../detection_engine/rule_creation_ui/components/ai_assistant/translations';
 import { UpdateQueryInFormButton } from './update_query_in_form';
+
+export const LOCAL_STORAGE_KEY = `securityAssistant`;
 
 export const getPromptContextFromDetectionRules = (rules: Rule[]): string => {
   const data = rules.map((rule) => `Rule Name:${rule.name}\nRule Description:${rule.description}`);

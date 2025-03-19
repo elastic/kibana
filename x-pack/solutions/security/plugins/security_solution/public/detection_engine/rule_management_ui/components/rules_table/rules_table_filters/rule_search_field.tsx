@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import { SEARCH_FIRST_RULE_ANCHOR } from '../rules_table/guided_onboarding/rules_management_tour';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 
 const SearchBarWrapper = styled(EuiFlexItem)`
   min-width: 200px;

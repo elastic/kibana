@@ -21,11 +21,7 @@ import { buildRelatedIntegrationsDescription } from '../../../../detections/comp
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import type {
-  AboutStepRiskScore,
-  AboutStepSeverity,
-  Duration,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepRiskScore, AboutStepSeverity, Duration } from '../../../common/types';
 import type { FieldValueTimeline } from '../../../rule_creation/components/pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
 import type { ListItems } from './types';

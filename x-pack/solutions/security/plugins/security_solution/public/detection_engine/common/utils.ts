@@ -6,22 +6,22 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DEFAULT_THREAT_MAPPING_VALUE } from '../../../../detection_engine/rule_creation/components/threat_match_mapping_edit';
+import { DEFAULT_THREAT_MAPPING_VALUE } from '../rule_creation/components/threat_match_mapping_edit';
 import {
+  ALERT_SUPPRESSION_DEFAULT_DURATION,
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
-  ALERT_SUPPRESSION_DEFAULT_DURATION,
-} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
-import { DEFAULT_KQL_QUERY_FIELD_VALUE } from '../../../../detection_engine/rule_creation_ui/components/query_bar_field';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import { DEFAULT_MAX_SIGNALS, DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+} from '../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
+import { DEFAULT_KQL_QUERY_FIELD_VALUE } from '../rule_creation_ui/components/query_bar_field';
+import { isThreatMatchRule } from '../../../common/detection_engine/utils';
+import { DEFAULT_TIMELINE_TITLE } from '../../timelines/components/timeline/translations';
+import { DEFAULT_MAX_SIGNALS, DEFAULT_THREAT_MATCH_QUERY } from '../../../common/constants';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../common/detection_engine/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
-import { DataSourceType, AlertSuppressionDurationType, RuleStep } from './types';
+import { AlertSuppressionDurationType, DataSourceType, RuleStep } from './types';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [

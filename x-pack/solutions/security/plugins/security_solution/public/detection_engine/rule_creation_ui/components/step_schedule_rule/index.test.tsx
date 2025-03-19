@@ -15,11 +15,11 @@ import {
   defaultSchedule,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import { useRuleForms } from '../../pages/form';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import type { FormHook } from '../../../../shared_imports';
-import type { ScheduleStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { ScheduleStepRule } from '../../../common/types';
 
 describe('StepScheduleRule', () => {
   const TestComp = ({

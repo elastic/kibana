@@ -49,14 +49,14 @@ import {
   StepRuleActions,
   StepRuleActionsReadOnly,
 } from '../../../rule_creation/components/step_rule_actions';
-import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as RuleI18n from '../../../common/translations';
 import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
+} from '../../../common/helpers';
+import type { DefineStepRule } from '../../../common/types';
+import { RuleStep } from '../../../common/types';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { formatRule } from './helpers';
@@ -69,7 +69,7 @@ import {
   ruleStepsOrder,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,

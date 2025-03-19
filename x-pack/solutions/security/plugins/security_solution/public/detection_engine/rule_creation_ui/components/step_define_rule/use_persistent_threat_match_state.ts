@@ -8,7 +8,7 @@
 import { useEffect, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../common/types';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useFormData } from '../../../../shared_imports';

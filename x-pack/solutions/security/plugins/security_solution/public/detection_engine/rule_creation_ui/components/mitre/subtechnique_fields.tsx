@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { Threats, ThreatSubtechnique } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as Rulei18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
@@ -63,6 +63,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       const mitreConfig = await lazyMitreConfiguration();
       setSubtechniquesOptions(mitreConfig.subtechniques);
     }
+
     getMitre();
   }, []);
 
