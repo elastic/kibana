@@ -8,11 +8,15 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, ProcessorDefinition } from '@kbn/streams-schema';
+// @ts-expect-error
+import { saveAs } from '@elastic/filesaver';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { ImportContentPackFlyout, processorLabel } from './content_pack_flyout';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamDetailDashboardsView({
   definition,
@@ -22,13 +26,21 @@ export function StreamDetailDashboardsView({
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
+  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
 
   const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
   const { addDashboards, removeDashboards } = useDashboardsApi(definition?.stream.name);
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {
-    return dashboardsFetch.value?.dashboards ?? [];
+    const processors = (definition?.stream.ingest.processing ?? []).map(
+      (processor: ProcessorDefinition, i: number) => {
+        const label = processorLabel(processor);
+        return { id: `processor-${i}`, label, tags: [] };
+      }
+    );
+
+    return [...processors, ...(dashboardsFetch.value?.dashboards ?? [])];
   }, [dashboardsFetch.value?.dashboards]);
 
   const filteredDashboards = useMemo(() => {
@@ -38,34 +50,97 @@ export function StreamDetailDashboardsView({
   }, [linkedDashboards, query]);
 
   const [selectedDashboards, setSelectedDashboards] = useState<SanitizedDashboardAsset[]>([]);
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="s">
           {selectedDashboards.length > 0 && (
-            <EuiButton
-              data-test-subj="streamsAppStreamDetailRemoveDashboardButton"
-              iconType="trash"
-              isLoading={isUnlinkLoading}
-              onClick={async () => {
-                try {
-                  setIsUnlinkLoading(true);
+            <>
+              <EuiButton
+                data-test-subj="streamsAppStreamDetailRemoveDashboardButton"
+                iconType="trash"
+                isLoading={isUnlinkLoading}
+                onClick={async () => {
+                  try {
+                    setIsUnlinkLoading(true);
 
-                  await removeDashboards(selectedDashboards);
-                  dashboardsFetch.refresh();
+                    await removeDashboards(selectedDashboards);
+                    dashboardsFetch.refresh();
 
-                  setSelectedDashboards([]);
-                } finally {
-                  setIsUnlinkLoading(false);
-                }
-              }}
-              color="danger"
-            >
-              {i18n.translate('xpack.streams.streamDetailDashboardView.removeSelectedButtonLabel', {
-                defaultMessage: 'Unlink selected',
-              })}
-            </EuiButton>
+                    setSelectedDashboards([]);
+                  } finally {
+                    setIsUnlinkLoading(false);
+                  }
+                }}
+                color="danger"
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailDashboardView.removeSelectedButtonLabel',
+                  {
+                    defaultMessage: 'Unlink selected',
+                  }
+                )}
+              </EuiButton>
+
+              <EuiButton
+                data-test-subj="streamsAppStreamDetailExportContentPackButton"
+                iconType="exportAction"
+                isDisabled={!definition}
+                isLoading={isUnlinkLoading}
+                onClick={async () => {
+                  if (!definition) {
+                    return;
+                  }
+
+                  const exportedAssets:
+                    | (
+                        | { type: 'dashboard'; id: string }
+                        | { type: 'processor'; processor: ProcessorDefinition }
+                      )[] = selectedDashboards.map((asset) => {
+                    if (asset.id.startsWith('processor-')) {
+                      const id = Number(asset.id.split('-')[1]);
+                      return {
+                        type: 'processor',
+                        processor: definition.stream.ingest.processing[id],
+                      };
+                    }
+
+                    return { type: 'dashboard', id: asset.id };
+                  });
+
+                  streamsRepositoryClient
+                    .fetch('POST /api/streams/{name}/content/export 2023-10-31', {
+                      params: {
+                        path: { name: definition.stream.name },
+                        body: { assets: exportedAssets },
+                      },
+                      signal: new AbortController().signal,
+                    })
+                    .then((response) => {
+                      saveAs(
+                        new Blob([JSON.stringify(response)], { type: 'application/json' }),
+                        'content.json'
+                      );
+                    });
+                }}
+                color="primary"
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailDashboardView.exportContentPackButtonLabel',
+                  {
+                    defaultMessage: 'Export as content pack',
+                  }
+                )}
+              </EuiButton>
+            </>
           )}
           <EuiSearchBar
             query={query}
@@ -86,6 +161,20 @@ export function StreamDetailDashboardsView({
             {i18n.translate('xpack.streams.streamDetailDashboardView.addADashboardButtonLabel', {
               defaultMessage: 'Add a dashboard',
             })}
+          </EuiButton>
+          <EuiButton
+            data-test-subj="streamsAppStreamDetailImportFromContentPack"
+            iconType="importAction"
+            onClick={() => {
+              setIsImportFlyoutOpen(true);
+            }}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailDashboardView.importFromContentPackButtonLabel',
+              {
+                defaultMessage: 'Import from content pack',
+              }
+            )}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -108,6 +197,18 @@ export function StreamDetailDashboardsView({
             }}
             onClose={() => {
               setIsAddDashboardFlyoutOpen(false);
+            }}
+          />
+        ) : null}
+        {definition && isImportFlyoutOpen ? (
+          <ImportContentPackFlyout
+            definition={definition}
+            onImport={() => {
+              dashboardsFetch.refresh();
+              setIsImportFlyoutOpen(false);
+            }}
+            onClose={() => {
+              setIsImportFlyoutOpen(false);
             }}
           />
         ) : null}
