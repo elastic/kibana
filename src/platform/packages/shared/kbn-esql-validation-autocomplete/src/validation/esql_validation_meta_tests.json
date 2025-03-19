@@ -168,70 +168,70 @@
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "row",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -339,7 +339,7 @@
     {
       "query": "row var = 1 in (",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [in] function expects at least 2 arguments, got 1."
       ],
       "warning": []
@@ -2271,28 +2271,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where', 'lookup'}"
+        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2663,7 +2663,7 @@
     {
       "query": "from a_index | dissect",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2718,7 +2718,7 @@
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option = ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
         "Invalid option for DISSECT: [option]"
       ],
       "warning": []
@@ -2757,7 +2757,7 @@
     {
       "query": "from a_index | grok",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -3558,21 +3558,21 @@
     {
       "query": "from a_index | where *+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where /+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where %+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -4499,7 +4499,7 @@
     {
       "query": "from a_index | eval ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -4542,7 +4542,7 @@
     {
       "query": "from a_index | eval a=b, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Unknown column [b]"
       ],
       "warning": []
@@ -4569,7 +4569,7 @@
     {
       "query": "from a_index | eval a=round(doubleField), ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -5710,21 +5710,21 @@
     {
       "query": "from a_index | eval *+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval /+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval %+ doubleField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -7050,7 +7050,7 @@
     {
       "query": "from a_index | eval not",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [not] function expects exactly one argument, got 0."
       ],
       "warning": []
@@ -7058,7 +7058,7 @@
     {
       "query": "from a_index | eval in",
       "error": [
-        "SyntaxError: mismatched input 'in' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input 'in' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -7073,8 +7073,7 @@
     {
       "query": "from a_index | eval textField in textField)",
       "error": [
-        "SyntaxError: missing '(' at 'textField'",
-        "Error: [in] function expects at least 2 arguments, got 1."
+        "Invalid query [from a_index | eval textField in textField)]"
       ],
       "warning": []
     },
@@ -9107,7 +9106,7 @@
     {
       "query": "from a_index | sort ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -9126,7 +9125,7 @@
     {
       "query": "from a_index | sort doubleField, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -9795,7 +9794,7 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'row', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'row', 'from', 'show'}"
       ],
       "warning": []
     },

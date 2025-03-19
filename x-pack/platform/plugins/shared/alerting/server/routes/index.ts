@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
-import { Observable } from 'rxjs';
-import { GetAlertIndicesAlias, ILicenseState } from '../lib';
-import { AlertingRequestHandlerContext } from '../types';
+import type { Observable } from 'rxjs';
+import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
+import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
@@ -37,8 +37,8 @@ import { unmuteAllRuleRoute } from './rule/apis/unmute_all';
 import { unmuteAlertRoute } from './rule/apis/unmute_alert/unmute_alert_route';
 import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_api_key_route';
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
-import { snoozeRuleRoute } from './rule/apis/snooze';
-import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
+import { snoozeRuleInternalRoute, snoozeRuleRoute } from './rule/apis/snooze';
+import { unsnoozeRuleRoute, unsnoozeRuleInternalRoute } from './rule/apis/unsnooze';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
@@ -121,8 +121,10 @@ export function defineRoutes(opts: RouteOptions) {
   bulkDeleteRulesRoute({ router, licenseState });
   bulkEnableRulesRoute({ router, licenseState });
   bulkDisableRulesRoute({ router, licenseState });
+  snoozeRuleInternalRoute(router, licenseState);
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
+  unsnoozeRuleInternalRoute(router, licenseState);
   cloneRuleRoute(router, licenseState);
   getRuleTagsRoute(router, licenseState);
   registerRulesValueSuggestionsRoute(router, licenseState, config$!);
