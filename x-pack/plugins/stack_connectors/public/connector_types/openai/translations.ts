@@ -65,6 +65,35 @@ export const KEY_PATH_LABEL = i18n.translate(
   }
 );
 
+// New translations for verificationMode
+export const VERIFICATION_MODE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeLabel',
+  {
+    defaultMessage: 'SSL Verification Mode',
+  }
+);
+
+export const VERIFICATION_MODE_FULL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeFullLabel',
+  {
+    defaultMessage: 'Full (Certificate and Hostname)',
+  }
+);
+
+export const VERIFICATION_MODE_CERTIFICATE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeCertificateLabel',
+  {
+    defaultMessage: 'Certificate Only',
+  }
+);
+
+export const VERIFICATION_MODE_NONE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeNoneLabel',
+  {
+    defaultMessage: 'None (Skip Verification)',
+  }
+);
+
 export const DOCUMENTATION = i18n.translate(
   'xpack.stackConnectors.components.genAi.documentation',
   {
@@ -85,6 +114,7 @@ export const BODY_REQUIRED = i18n.translate(
     defaultMessage: 'Body is required.',
   }
 );
+
 export const BODY_INVALID = i18n.translate(
   'xpack.stackConnectors.security.genAi.params.error.invalidBodyText',
   {
