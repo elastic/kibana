@@ -11,6 +11,7 @@ import path from 'path';
 import Fs from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
+import { ServerlessProjectType } from '@kbn/es';
 
 const MOCKED_SCOUT_SERVERS_ROOT = '/mock/repo/root/scout/servers';
 
@@ -34,6 +35,7 @@ const testServersConfig = {
     password: 'changeme',
   },
   serverless: true,
+  projectType: 'oblt' as ServerlessProjectType,
   isCloud: true,
   license: 'trial',
   cloudUsersFilePath: '/path/to/users',

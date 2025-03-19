@@ -41,6 +41,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
@@ -56,17 +57,10 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import {
-  isArtifactGlobal,
-  getPolicyIdsFromArtifact,
-  getArtifactTagsByPolicySelection,
-} from '../../../../../../common/endpoint/service/artifacts';
 
 import {
   ABOUT_EVENT_FILTERS,
@@ -79,7 +73,7 @@ import {
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
-import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
@@ -166,10 +160,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       const [newComment, setNewComment] = useState('');
       const [hasCommentError, setHasCommentError] = useState(false);
       const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
-      const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
-      const isPlatinumPlus = useLicense().isPlatinumPlus();
-      const isGlobal = useMemo(() => isArtifactGlobal(exception), [exception]);
-      const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(exception));
       const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
       const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
         hasWrongOperatorWithWildcard([exception])
@@ -205,12 +195,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         []
       );
 
-      const showAssignmentSection = useMemo(() => {
-        return (
-          isPlatinumPlus ||
-          (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
-        );
-      }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+      const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
 
       const isFormValid = useMemo(() => {
         // verify that it has legit entries
@@ -258,24 +243,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           hasWildcardWithWrongOperator,
         ]
       );
-
-      // set initial state of `wasByPolicy` that checks
-      // if the initial state of the exception was by policy or not
-      useEffect(() => {
-        if (!hasFormChanged && exception.tags) {
-          setWasByPolicy(!isArtifactGlobal({ tags: exception.tags }));
-        }
-      }, [exception.tags, hasFormChanged]);
-
-      // select policies if editing
-      useEffect(() => {
-        if (hasFormChanged) return;
-        const policyIds = exception.tags ? getPolicyIdsFromArtifact({ tags: exception.tags }) : [];
-
-        if (!policyIds.length) return;
-        const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
-        setSelectedPolicies(policiesData);
-      }, [hasFormChanged, exception, policies]);
 
       const eventFilterItem = useMemo<ArtifactFormComponentProps['item']>(() => {
         const ef: ArtifactFormComponentProps['item'] = exception;
@@ -689,44 +656,27 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo, filterTypeSubsection]
       );
 
-      // policy and handler
-      const handleOnPolicyChange = useCallback(
-        (change: EffectedPolicySelection) => {
-          const policySelectionTags = getArtifactTagsByPolicySelection(change);
-
-          // Preserve old selected policies when switching to global
-          if (!change.isGlobal) {
-            setSelectedPolicies(change.selected);
+      const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+        (updatedItem) => {
+          processChanged({ tags: updatedItem.tags ?? [] });
+          if (!hasFormChanged) {
+            setHasFormChanged(true);
           }
-
-          const tags = getTagsUpdatedBy('policySelection', policySelectionTags);
-          processChanged({ tags });
-          if (!hasFormChanged) setHasFormChanged(true);
         },
-        [getTagsUpdatedBy, processChanged, hasFormChanged]
+        [hasFormChanged, processChanged]
       );
 
       const policiesSection = useMemo(
         () => (
           <EffectedPolicySelect
-            selected={selectedPolicies}
+            item={exception}
             options={policies}
-            isGlobal={isGlobal}
             isLoading={policiesIsLoading}
-            isPlatinumPlus={isPlatinumPlus}
-            onChange={handleOnPolicyChange}
+            onChange={handleEffectedPolicyOnChange}
             data-test-subj={getTestId('effectedPolicies')}
           />
         ),
-        [
-          selectedPolicies,
-          policies,
-          isGlobal,
-          policiesIsLoading,
-          isPlatinumPlus,
-          handleOnPolicyChange,
-          getTestId,
-        ]
+        [exception, policies, policiesIsLoading, handleEffectedPolicyOnChange, getTestId]
       );
 
       useEffect(() => {
