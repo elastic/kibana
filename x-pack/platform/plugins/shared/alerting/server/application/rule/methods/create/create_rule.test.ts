@@ -346,9 +346,7 @@ describe('create()', () => {
   });
 
   test('creates an rule', async () => {
-    const data = getMockData({
-      dashboards: [{ id: 'dashboard-id' }],
-    });
+    const data = getMockData();
     const createdAttributes = {
       ...data,
       alertTypeId: '123',
@@ -374,7 +372,6 @@ describe('create()', () => {
           },
         },
       ],
-      dashboards: [{ id: 'dashboard-id' }],
     };
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -438,11 +435,6 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
-        "dashboards": Array [
-          Object {
-            "id": "dashboard-id",
-          },
-        ],
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -493,11 +485,6 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
-        "dashboards": Array [
-          Object {
-            "id": "dashboard-id",
-          },
-        ],
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
