@@ -38,6 +38,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
     timeRange,
     setTimeRange,
     absoluteTimeRange: { start, end },
+    refreshAbsoluteTimeRange,
   } = data.query.timefilter.timefilter.useTimefilter();
 
   const indexPatterns = useMemo(() => {
@@ -163,8 +164,12 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
               <StreamsAppSearchBar
                 onQuerySubmit={({ dateRange }, isUpdate) => {
                   if (!isUpdate) {
-                    histogramQueryFetch.refresh();
-                    docCountFetch.refresh();
+                    if (!refreshAbsoluteTimeRange()) {
+                      // if absolute time range didn't change, we need to manually refresh the histogram
+                      // otherwise it will be refreshed by the changed absolute time range
+                      histogramQueryFetch.refresh();
+                      docCountFetch.refresh();
+                    }
                     return;
                   }
 
@@ -174,6 +179,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
                 }}
                 onRefresh={() => {
                   histogramQueryFetch.refresh();
+                  docCountFetch.refresh();
                 }}
                 placeholder={i18n.translate(
                   'xpack.streams.entityDetailOverview.searchBarPlaceholder',
