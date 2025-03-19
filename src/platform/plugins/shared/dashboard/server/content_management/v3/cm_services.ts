@@ -310,7 +310,7 @@ export const panelSchema = schema.object({
 export const sectionSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
-    order: schema.number(),
+    order: schema.number({ min: 1 }), // order 0 is reserved for main dashboard content
     title: schema.string(),
     collapsed: schema.boolean(),
   })
