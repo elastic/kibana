@@ -10,7 +10,8 @@ synchronize_lexer_grammar () {
 
   # Copy the file
   cp "$source_file" "$destination_file"
-  cp -r "$source_lib_dir" "$destination_lib_dir"
+  rm -rf "$destination_lib_dir/*"
+  cp -r "$source_lib_dir/*" "$destination_lib_dir"
 
   echo "Source files:"
   ls -l "$source_lib_dir"
