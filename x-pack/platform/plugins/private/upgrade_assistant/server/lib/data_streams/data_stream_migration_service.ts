@@ -102,16 +102,14 @@ export const dataStreamMigrationServiceFactory = ({
 
       const names = [dataStreamName];
       const resp = await esClient.security.hasPrivileges({
-        body: {
-          cluster: ['manage', 'cancel_task'],
-          index: [
-            {
-              names,
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-          ],
-        },
+        cluster: ['manage', 'cancel_task'],
+        index: [
+          {
+            names,
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+        ],
       });
 
       return resp.has_all_requested;
@@ -399,10 +397,9 @@ export const dataStreamMigrationServiceFactory = ({
 
       for (const index of indices) {
         try {
-          const unfreeze = await esClient.indices.unfreeze({ index });
           const addBlock = await esClient.indices.addBlock({ index, block: 'write' });
 
-          if (!unfreeze.acknowledged || !addBlock.acknowledged) {
+          if (!addBlock.acknowledged) {
             throw error.readonlyTaskFailed(`Could not set index ${index} to readonly.`);
           }
         } catch (err) {

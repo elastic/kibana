@@ -30,8 +30,7 @@ export async function updateIndex({ esClient, index, operations }: UpdateIndexPa
         break;
       }
       case 'unfreeze': {
-        res = await esClient.indices.unfreeze({ index });
-        break;
+        throw new Error('Unfreeze is not supported after 8.x');
       }
     }
     if (!res.acknowledged) {
