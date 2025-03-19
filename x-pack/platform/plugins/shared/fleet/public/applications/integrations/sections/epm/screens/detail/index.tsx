@@ -421,17 +421,26 @@ export function Detail() {
       /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
        ** to redirect back to the onboarding page after adding an integration
        */
+
+      // if link already contains the application, remove it
+      let fixedOnboardingLink = onboardingLink;
+      if (onboardingAppId) {
+        const appBaseUrl = services.application.getUrlForApp(onboardingAppId);
+        if (onboardingLink?.startsWith(appBaseUrl)) {
+          fixedOnboardingLink = onboardingLink.slice(appBaseUrl.length);
+        }
+      }
+
       const navigateOptions: InstallPkgRouteOptions =
-        onboardingAppId && onboardingLink
+        onboardingAppId && fixedOnboardingLink
           ? [
               defaultNavigateOptions[0],
               {
                 ...defaultNavigateOptions[1],
                 state: {
                   ...(defaultNavigateOptions[1]?.state ?? {}),
-                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
-                  onCancelUrl: onboardingLink,
-                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                  onCancelNavigateTo: [onboardingAppId, { path: fixedOnboardingLink }],
+                  onSaveNavigateTo: [onboardingAppId, { path: fixedOnboardingLink }],
                 },
               },
             ]
