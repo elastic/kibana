@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -13,8 +13,6 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiBadge,
-  EuiI18nNumber,
-  EuiNotificationBadge,
   EuiText,
 } from '@elastic/eui';
 import {
@@ -27,9 +25,8 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { asTrees, type StreamTree } from '../streams_list';
-import { ColumnChart } from './column_chart';
+import { DocCountColumn } from './doc_count_column';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamsTreeTable({
@@ -40,14 +37,16 @@ export function StreamsTreeTable({
   streams: StreamDefinition[] | undefined;
 }) {
   const router = useStreamsAppRouter();
+  const {
+    dependencies: {
+      start: { data },
+    },
+  } = useKibana();
+  const {
+    absoluteTimeRange: { start, end },
+  } = data.query.timefilter.timefilter.useTimefilter();
 
-  // const [query, setQuery] = useState('');
-  const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>({});
-
-  const items = React.useMemo(
-    () => flattenTrees(asTrees(streams ?? []), collapsed),
-    [streams, collapsed]
-  );
+  const items = React.useMemo(() => flattenTrees(asTrees(streams ?? [])), [streams]);
 
   return (
     <EuiInMemoryTable
@@ -55,31 +54,22 @@ export function StreamsTreeTable({
       columns={[
         {
           field: 'name',
-          name: 'Name',
-          width: '40%',
+          name: i18n.translate('xpack.streams.streamsTreeTableNameColumnName', {
+            defaultMessage: 'Name',
+          }),
+          width: '50%',
           render: (name: StreamTreeWithLevel['name'], item) => (
             <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
               className={css`
                 margin-left: ${item.level * parseInt(euiThemeVars.euiSizeXL, 10)}px;
               `}
-              alignItems="center"
-              gutterSize="s"
             >
               <EuiFlexItem grow={false}>
                 {item.children.length > 0 ? (
-                  // TODO: We can either have pagination or expand/collapse, not both
-                  // <button
-                  //   type="button"
-                  //   onClick={() => {
-                  //     setCollapsed({ ...collapsed, [item.name]: !collapsed?.[item.name] });
-                  //   }}
-                  // >
-                  // </button>
-                  <EuiIcon
-                    type={collapsed[item.name] ? 'arrowRight' : 'arrowDown'}
-                    color="primary"
-                    size="s"
-                  />
+                  <EuiIcon type="arrowDown" color="primary" size="s" />
                 ) : (
                   <EuiIcon type="empty" color="primary" size="s" />
                 )}
@@ -94,56 +84,46 @@ export function StreamsTreeTable({
               </EuiFlexItem>
               {item.type === 'classic' ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">Classic</EuiBadge>
-                </EuiFlexItem>
-              ) : collapsed[item.name] && item.children.length ? (
-                <EuiFlexItem grow={false}>
-                  <EuiNotificationBadge color="subdued">
-                    {item.children.length}
-                  </EuiNotificationBadge>
+                  <EuiBadge color="hollow">
+                    {i18n.translate('xpack.streams.streamsTreeTableClassicBadge', {
+                      defaultMessage: 'Classic',
+                    })}
+                  </EuiBadge>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
           ),
         },
-        // {
-        //   field: 'type',
-        //   name: 'Type',
-        //   render: (type: StreamTreeWithLevel['type']) =>
-        //     type === 'root' ? (
-        //       <EuiBadge color="hollow">Root</EuiBadge>
-        //     ) : type === 'classic' ? (
-        //       <EuiBadge color="hollow">Classic</EuiBadge>
-        //     ) : null,
-        // },
         {
-          field: 'size',
-          name: 'Documents',
-          width: '20%',
-          render: (_, item) => {
-            return (
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                <EuiFlexItem grow={false}>
-                  <EuiI18nNumber value={Math.ceil(Math.random() * 100000)} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <ColumnChart />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
+          field: 'documents',
+          name: i18n.translate('xpack.streams.streamsTreeTableDocumentsColumnName', {
+            defaultMessage: 'Documents',
+          }),
+          nameTooltip: {
+            content: `Number of documents from ${start} to ${end}`,
           },
+          width: '25%',
+          render: (_, item) => (
+            <DocCountColumn indexPattern={item.name} start={start} end={end} numDataPoints={20} />
+          ),
         },
         {
           field: 'retention',
-          name: 'Retention',
-          width: '20%',
+          name: i18n.translate('xpack.streams.streamsTreeTableRetentionColumnName', {
+            defaultMessage: 'Retention',
+          }),
+          width: '25%',
           render: (_, item) =>
             isWiredStreamDefinition(item.stream) || isUnwiredStreamDefinition(item.stream) ? (
               isInheritLifecycle(item.stream.ingest.lifecycle) ? (
-                <EuiText color="subdued">Inherited</EuiText>
+                <EuiText color="subdued">
+                  {i18n.translate('xpack.streams.streamsTreeTableRetentionColumnInheritedBadge', {
+                    defaultMessage: 'Inherited',
+                  })}
+                </EuiText>
               ) : isDslLifecycle(item.stream.ingest.lifecycle) ? (
                 item.stream.ingest.lifecycle.dsl.data_retention || (
-                  <EuiIcon type="infinity" size="s" />
+                  <EuiIcon type="infinity" size="m" />
                 )
               ) : (
                 item.stream.ingest.lifecycle.ilm.policy
@@ -151,10 +131,17 @@ export function StreamsTreeTable({
             ) : null,
         },
       ]}
+      itemId="name"
       items={items}
       pagination={{
         initialPageSize: 30,
         pageSizeOptions: [3, 30],
+      }}
+      searchFormat="text"
+      search={{
+        box: {
+          incremental: true,
+        },
       }}
     />
   );
@@ -164,11 +151,11 @@ interface StreamTreeWithLevel extends StreamTree {
   level: number;
 }
 
-function flattenTrees(trees: StreamTree[], collapsed: Record<string, boolean>, level = 0) {
+function flattenTrees(trees: StreamTree[], level = 0) {
   return trees.reduce<StreamTreeWithLevel[]>((acc: StreamTreeWithLevel[], tree: StreamTree) => {
     acc.push({ ...tree, level });
-    if (!collapsed[tree.name]) {
-      acc.push(...flattenTrees(tree.children, collapsed, level + 1));
+    if (tree.children.length) {
+      acc.push(...flattenTrees(tree.children, level + 1));
     }
     return acc;
   }, []);
