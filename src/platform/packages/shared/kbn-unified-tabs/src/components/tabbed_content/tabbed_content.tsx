@@ -124,16 +124,17 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const getTabMenuItems = useMemo(() => {
     return getTabMenuItemsFn({
       tabsState: state,
+      maxItemsCount,
       onDuplicate: (item) => {
         const newItem = createItem();
         newItem.label = `${item.label} (copy)`;
-        changeState((prevState) => insertTabAfter(prevState, newItem, item));
+        changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
       },
       onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
       onCloseTabsToTheRight: (item) =>
         changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [changeState, createItem, state]);
+  }, [changeState, createItem, state, maxItemsCount]);
 
   return (
     <EuiFlexGroup
