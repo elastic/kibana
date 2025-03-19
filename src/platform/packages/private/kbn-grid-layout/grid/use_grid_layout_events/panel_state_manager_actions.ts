@@ -14,7 +14,7 @@ import { GridLayoutStateManager, GridPanelData } from '../types';
 import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './pointer_event_utils';
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import { isGridDataEqual } from '../utils/equality_checks';
-import { UserInteractionEvent } from './types';
+import { PointerPosition, UserInteractionEvent } from './types';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -56,7 +56,7 @@ export const commitAction = ({
 
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
-  pointerPixel: { clientX: number; clientY: number },
+  pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
 ) => {
   const {
@@ -164,7 +164,6 @@ export const moveAction = (
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
-    // remove the panel from the row it's currently in.
     const nextLayout = cloneDeep(currentLayout);
     Object.entries(nextLayout).forEach(([rowId, row]) => {
       const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
