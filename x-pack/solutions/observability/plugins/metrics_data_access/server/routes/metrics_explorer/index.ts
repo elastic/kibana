@@ -30,12 +30,6 @@ export const initMetricExplorerRoute = (framework: KibanaFramework) => {
       validate: {
         body: validateBody,
       },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the es client',
-        },
-      },
     },
     async (requestContext, request, response) => {
       const options = request.body;

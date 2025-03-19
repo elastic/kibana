@@ -20,12 +20,6 @@ export const initOverviewRoute = (libs: InfraBackendLibs) => {
       validate: {
         body: createRouteValidationFunction(TopNodesRequestRT),
       },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the SO client',
-        },
-      },
     },
     async (requestContext, request, response) => {
       const options = request.body;
