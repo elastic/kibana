@@ -250,7 +250,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        void proxy.interceptTitle('Title for at new conversation');
+        void proxy.interceptTitle('Title for a new conversation');
         void proxy.interceptConversation('Hello again');
 
         const allEvents = await getEvents({});
@@ -298,7 +298,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(omit(events[4], 'conversation.id', 'conversation.last_updated')).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
-            title: 'Title for at new conversation',
+            title: 'Title for a new conversation',
           },
         });
       });
