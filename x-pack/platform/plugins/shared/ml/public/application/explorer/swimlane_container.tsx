@@ -54,7 +54,6 @@ import type { SwimlaneType } from './explorer_constants';
 import { SWIMLANE_TYPE } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
 
@@ -418,7 +417,18 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   if (noSwimLaneData) {
     onRenderComplete?.();
   }
-
+  const swimlaneStyles = css({
+    '.echLegendListContainer': {
+      height: '34px !important',
+    },
+    '.echLegendList': {
+      display: 'flex !important',
+      justifyContent: 'space-between !important',
+      flexWrap: 'nowrap',
+      position: 'absolute',
+      right: 0,
+    },
+  });
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -452,7 +462,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   hidden={noSwimLaneData}
                 >
                   {showSwimlane && !isLoading && (
-                    <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
+                    <Chart css={swimlaneStyles} ref={chartRef}>
                       <Tooltip {...tooltipOptions} />
                       <Settings
                         theme={themeOverrides}
