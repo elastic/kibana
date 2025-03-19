@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           persist: true,
           observabilityAIAssistantAPIClient,
         });
-        conversationId = res.conversation?.conversation.id || '';
+        conversationId = res.conversationCreateEvent?.conversation.id || '';
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
