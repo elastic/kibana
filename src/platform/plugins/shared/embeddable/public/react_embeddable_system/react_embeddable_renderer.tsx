@@ -10,15 +10,15 @@
 import { apiIsPresentationContainer, HasSerializedChildState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
-  ComparatorDefinition,
-  HasSnapshottableState,
-  SerializedPanelState,
-  StateComparators,
+  type ComparatorDefinition,
+  type HasSnapshottableState,
+  type SerializedPanelState,
+  type StateComparators,
+  initializeHasUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import { initializeHasUnsavedChanges } from './initialize_has_unsaved_changes';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import {
@@ -144,7 +144,6 @@ export const ReactEmbeddableRenderer = <
 
             const unsavedChanges = initializeHasUnsavedChanges<SerializedState, RuntimeState>(
               uuid,
-              type,
               comparators,
               apiRegistration,
               parentApi,

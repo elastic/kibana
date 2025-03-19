@@ -157,3 +157,4 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+export { initializeHasUnsavedChanges } from './has_unsaved_changes/initialize_has_unsaved_changes';

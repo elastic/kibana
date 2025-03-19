@@ -12,10 +12,7 @@ import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import {
-  apiHasSaveNotification,
-  combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   PublishesDataViews,
   apiPublishesDataViews,
@@ -30,7 +27,6 @@ import type {
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlLabelPosition,
-  ControlPanelsState,
   ParentIgnoreSettings,
 } from '../../common';
 import {
@@ -67,13 +63,7 @@ export const getControlGroupEmbeddableFactory = () => {
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const defaultDataViewId = await dataViewsService.getDefaultId();
-      const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
-        lastSavedRuntimeState.initialChildControlState
-      );
-      const controlsManager = initControlsManager(
-        initialRuntimeState.initialChildControlState,
-        lastSavedControlsState$
-      );
+      const controlsManager = initControlsManager(initialRuntimeState.initialChildControlState);
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
@@ -91,6 +81,20 @@ export const getControlGroupEmbeddableFactory = () => {
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
       const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
+
+      const serializeState = () => {
+        const { controls, references } = controlsManager.serializeControls();
+        return {
+          rawState: {
+            chainingSystem: chainingSystem$.getValue(),
+            labelPosition: labelPosition$.getValue(),
+            autoApplySelections: autoApplySelections$.getValue(),
+            ignoreParentSettings: ignoreParentSettings$.getValue(),
+            controls,
+          },
+          references,
+        };
+      };
 
       const unsavedChanges = initializeControlGroupUnsavedChanges(
         selectionsManager.applySelections,
@@ -116,9 +120,9 @@ export const getControlGroupEmbeddableFactory = () => {
             (next: ControlLabelPosition) => labelPosition$.next(next),
           ],
         },
-        controlsManager.snapshotControlsRuntimeState,
         controlsManager.resetControlsUnsavedChanges,
-        parentApi
+        parentApi,
+        serializeState
       );
 
       const api = setApi({
@@ -173,33 +177,20 @@ export const getControlGroupEmbeddableFactory = () => {
             onSave: ({ type: controlType, state: initialState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: settings?.controlStateTransform
-                  ? settings.controlStateTransform(initialState, controlType)
-                  : initialState,
+                serializedState: {
+                  rawState: settings?.controlStateTransform
+                    ? settings.controlStateTransform(initialState, controlType)
+                    : initialState,
+                },
               });
               settings?.onSave?.();
             },
             controlGroupApi: api,
           });
         },
-        serializeState: () => {
-          const { controls, references } = controlsManager.serializeControls();
-          return {
-            rawState: {
-              chainingSystem: chainingSystem$.getValue(),
-              labelPosition: labelPosition$.getValue(),
-              autoApplySelections: autoApplySelections$.getValue(),
-              ignoreParentSettings: ignoreParentSettings$.getValue(),
-              controls,
-            },
-            references,
-          };
-        },
+        serializeState,
         dataViews$,
         labelPosition: labelPosition$,
-        saveNotification$: apiHasSaveNotification(parentApi)
-          ? parentApi.saveNotification$
-          : undefined,
         reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
 
         /** Public getters */
@@ -208,9 +199,6 @@ export const getControlGroupEmbeddableFactory = () => {
             defaultMessage: 'Controls',
           }),
         getEditorConfig: () => initialRuntimeState.editorConfig,
-        getLastSavedControlState: (controlUuid: string) => {
-          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
-        },
 
         /** Public setters */
         setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
@@ -232,20 +220,6 @@ export const getControlGroupEmbeddableFactory = () => {
       >(api, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
         esqlVariables$.next(newESQLVariables);
       });
-
-      const saveNotificationSubscription = apiHasSaveNotification(parentApi)
-        ? parentApi.saveNotification$.subscribe(() => {
-            lastSavedControlsState$.next(controlsManager.snapshotControlsRuntimeState());
-
-            if (
-              typeof autoApplySelections$.value === 'boolean' &&
-              !autoApplySelections$.value &&
-              selectionsManager.hasUnappliedSelections$.value
-            ) {
-              selectionsManager.applySelections();
-            }
-          })
-        : undefined;
 
       return {
         api,
@@ -275,10 +249,10 @@ export const getControlGroupEmbeddableFactory = () => {
             fetchAllowExpensiveQueries(); // no need to await - don't want to block anything waiting for this
 
             return () => {
+              unsavedChanges.cleanup();
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();
               childrenESQLVariablesSubscription.unsubscribe();
-              saveNotificationSubscription?.unsubscribe();
             };
           }, []);
 

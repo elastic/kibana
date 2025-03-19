@@ -11,7 +11,7 @@ import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesUnsavedChanges {
   hasUnsavedChanges$: PublishingSubject<boolean>;
-  resetUnsavedChanges: () => void;
+  resetUnsavedChanges: (() => void) | (() => Promise<void>);
 }
 
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {

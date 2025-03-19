@@ -345,12 +345,12 @@ export function initializePanelsManager(
 
         const panels = Object.keys(panels$.value).reduce((acc, id) => {
           const childApi = children$.value[id];
-          const serializeResult = apiHasSerializableState(childApi)
+          const { rawState, references: currentReferences } = apiHasSerializableState(childApi)
             ? childApi.serializeState()
-            : { rawState: {} };
-          acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
+            : { rawState: {}, references: [] };
+          acc[id] = { ...panels$.value[id], explicitInput: rawState };
 
-          references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));
+          references.push(...prefixReferencesFromPanel(id, currentReferences ?? []));
 
           return acc;
         }, {} as DashboardPanelMap);

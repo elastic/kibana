@@ -39,6 +39,7 @@ import {
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
+  PublishesUnsavedChanges,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
@@ -185,9 +186,9 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
+  PublishesUnsavedChanges &
   TrackContentfulRender &
   TracksOverlays & {
-    asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
@@ -200,7 +201,6 @@ export type DashboardApi = CanExpandPanels &
     };
     getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;
-    hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;

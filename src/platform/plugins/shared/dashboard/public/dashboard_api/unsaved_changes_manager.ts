@@ -28,12 +28,12 @@ import {
   skipWhile,
   switchMap,
 } from 'rxjs';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 
 export function initializeUnsavedChangesManager({
   creationOptions,
@@ -86,21 +86,19 @@ export function initializeUnsavedChangesManager({
       return changedPanelStates;
     })
   );
+
   const controlGroupChangesSource$ = controlGroupApi$.pipe(
     skipWhile((api) => !api),
-    switchMap((api) => api!.unsavedChanges$),
-    map((changes) => {
-      if (Object.keys(changes).length > 0) {
-        return controlGroupApi$.value?.serializeState();
-      }
-      return undefined;
-    })
+    switchMap((api) => api!.hasUnsavedChanges$)
   );
 
-  const unsavedChangesSubscription = combineLatest([dashboardChangesSource$, panelsChangesSource$])
+  const unsavedChangesSubscription = combineLatest([
+    dashboardChangesSource$,
+    panelsChangesSource$,
+    controlGroupChangesSource$,
+  ])
     .pipe(debounceTime(0))
-    .subscribe(([dashboardChanges, unsavedPanelState]) => {
-      const controlGroupChanges = undefined;
+    .subscribe(([dashboardChanges, unsavedPanelState, hasControlGroupChanges]) => {
       /**
        * viewMode needs to be stored in session state because its used to exclude 'view' dashboards on the listing page
        * However, viewMode differences should not trigger unsaved changes notification otherwise, opening a dashboard in
@@ -110,7 +108,7 @@ export function initializeUnsavedChangesManager({
       const hasDashboardChanges =
         Object.keys(omit(dashboardChanges ?? {}, ['viewMode', 'references'])).length > 0;
       const hasUnsavedChanges =
-        hasDashboardChanges || unsavedPanelState !== undefined || controlGroupChanges !== undefined;
+        hasDashboardChanges || unsavedPanelState !== undefined || hasControlGroupChanges;
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
       }
@@ -124,10 +122,11 @@ export function initializeUnsavedChangesManager({
           'refreshInterval',
         ]);
         // apply control group changes.
-        // if (controlGroupChanges) {
-        //   allReferences.concat(controlGroupChanges.references ?? []);
-        //   dashboardStateToBackup.controlGroupInput = controlGroupChanges.rawState;
-        // }
+        if (hasControlGroupChanges) {
+          const serializedControlGroupState = controlGroupApi$.value?.serializeState();
+          allReferences.concat(serializedControlGroupState?.references ?? []);
+          dashboardStateToBackup.controlGroupInput = serializedControlGroupState?.rawState;
+        }
 
         // apply panels changes
         if (unsavedPanelState) {
@@ -142,8 +141,7 @@ export function initializeUnsavedChangesManager({
           }
         }
         dashboardStateToBackup.references = allReferences;
-
-        // getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
+        getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
       }
     });
 
@@ -151,15 +149,8 @@ export function initializeUnsavedChangesManager({
     saveNotification$,
     getLastSavedStateForChild: (uuid: string) => {
       if (!lastSavedState$.value?.panels[uuid]) return;
-      const rawState = omit(
-        lastSavedState$.value?.panels[uuid]?.explicitInput,
-        'id' // omit Dashboard injected id copy.
-      );
+      const rawState = lastSavedState$.value?.panels[uuid]?.explicitInput;
 
-      // Dashboard injects enhancements key even when no enhancements are present.
-      if (Object.keys(rawState.enhancements ?? {}).length === 0) {
-        delete rawState.enhancements;
-      }
       return {
         rawState,
         references: getPanelReferences(uuid),
@@ -169,12 +160,12 @@ export function initializeUnsavedChangesManager({
 
   return {
     api: {
-      asyncResetToLastSavedState: async () => {
+      resetUnsavedChanges: async () => {
         if (!lastSavedState$.value) return;
         panelsManager.internalApi.reset(lastSavedState$.value);
         settingsManager.internalApi.reset(lastSavedState$.value);
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
-        await controlGroupApi$.value?.asyncResetUnsavedChanges();
+        await controlGroupApi$.value?.resetUnsavedChanges();
       },
       ...lastSavedChildStateApi,
       hasUnsavedChanges$,

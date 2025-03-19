@@ -32,7 +32,6 @@ import type {
   PublishingSubject,
   SerializedTitles,
   ViewMode,
-  HasSerializedStateComparator,
 } from '@kbn/presentation-publishing';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import type {
@@ -378,7 +377,6 @@ export interface LensInspectorAdapters {
 
 export type LensApi = Simplify<
   DefaultEmbeddableApi<LensSerializedState, LensRuntimeState> &
-    HasSerializedStateComparator<LensSerializedState> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI

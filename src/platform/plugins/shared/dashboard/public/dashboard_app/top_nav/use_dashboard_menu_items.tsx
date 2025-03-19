@@ -103,7 +103,7 @@ export const useDashboardMenuItems = ({
       }
       confirmDiscardUnsavedChanges(async () => {
         setIsResetting(true);
-        await dashboardApi.asyncResetToLastSavedState();
+        await dashboardApi.resetUnsavedChanges();
         if (isMounted()) {
           setIsResetting(false);
           switchModes?.();

@@ -25,10 +25,10 @@ export function initializeOptionsListSelections(
   const selectedOptionsComparatorFunction = (
     a: OptionsListSelection[] | undefined,
     b: OptionsListSelection[] | undefined
-  ) => deepEqual(a ?? [], b ?? []);
-  function setSelectedOptions(next: OptionsListSelection[] | undefined) {
-    if (!selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
-      selectedOptions$.next(next);
+  ) => deepEqual(a, b);
+  function setSelectedOptions(nextSelectedOptions: OptionsListSelection[] | undefined) {
+    if (!selectedOptionsComparatorFunction(selectedOptions$.value, nextSelectedOptions)) {
+      selectedOptions$.next(nextSelectedOptions);
       onSelectionChange();
     }
   }

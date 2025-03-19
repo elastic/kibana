@@ -19,7 +19,7 @@ import {
   skip,
   Subject,
 } from 'rxjs';
-
+import deepEqual from 'fast-deep-equal';
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
@@ -270,6 +270,18 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           ...dataControl.api,
           dataLoading$,
           getTypeDisplayName: OptionsListStrings.control.getDisplayName,
+          isSerializedStateEqual: (a, b) => {
+            const defaults = {
+              sort: OPTIONS_LIST_DEFAULT_SORT,
+              searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+              selectedOptions: [],
+            };
+            const isEqual = deepEqual({ ...defaults, ...a }, { ...defaults, ...b });
+            if (!isEqual) {
+              debugger;
+            }
+            return isEqual;
+          },
           serializeState: () => {
             const { rawState: dataControlState, references } = dataControl.serialize();
             return {

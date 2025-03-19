@@ -254,7 +254,11 @@ export function getDashboardApi({
       ...panelsManager.internalApi,
       ...unifiedSearchManager.internalApi,
       getLastSavedStateForControlGroup: () => {
-        return { references: [], rawState: defaultControlGroupState };
+        const lastSavedState = unsavedChangesManager.internalApi.getLastSavedState();
+        return {
+          rawState: lastSavedState?.controlGroupInput ?? defaultControlGroupState,
+          references: getReferencesForControls(lastSavedState?.references ?? []),
+        };
       },
       getSerializedStateForControlGroup: () => {
         return {

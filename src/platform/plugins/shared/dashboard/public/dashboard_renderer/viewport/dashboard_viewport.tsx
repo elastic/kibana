@@ -19,7 +19,7 @@ import {
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROL_GROUP_TYPE, CONTROL_GROUP_STATIC_ID } from '@kbn/controls-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -115,17 +115,16 @@ export const DashboardViewport = ({
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}
-            maybeId={'control_group'}
+            maybeId={CONTROL_GROUP_STATIC_ID}
             getParentApi={() => {
               return {
                 ...dashboardApi,
                 reload$: dashboardInternalApi.controlGroupReload$,
                 getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
+                getLastSavedStateForChild: dashboardInternalApi.getLastSavedStateForControlGroup,
               };
             }}
             onApiAvailable={(api) => {
-              console.log('control group api available');
               dashboardInternalApi.setControlGroupApi(api);
             }}
           />

@@ -11,6 +11,9 @@ import {
   apiHasLastSavedChildState,
   type HasLastSavedChildState,
 } from '@kbn/presentation-containers';
+import { MaybePromise } from '@kbn/utility-types';
+import deepEqual from 'fast-deep-equal';
+import { BehaviorSubject, combineLatestWith, debounceTime, Subscription } from 'rxjs';
 import {
   apiHasSerializableState,
   apiHasSerializedStateComparator,
@@ -19,10 +22,7 @@ import {
   PublishesUnsavedChanges,
   SerializedPanelState,
   StateComparators,
-} from '@kbn/presentation-publishing';
-import { MaybePromise } from '@kbn/utility-types';
-import deepEqual from 'fast-deep-equal';
-import { BehaviorSubject, combineLatestWith, debounceTime, Subscription } from 'rxjs';
+} from '..';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
@@ -40,7 +40,11 @@ const serializedStateComparator = <SerializedState extends object = object>(
   const comparatorFunction = apiHasSerializedStateComparator<SerializedState>(api)
     ? api.isSerializedStateEqual
     : deepEqual;
-  return comparatorFunction(stateA, stateB);
+  const isEqual = comparatorFunction(stateA, stateB);
+
+  console.log('has changes', !isEqual);
+  return isEqual;
+  // console.log('CHECKING', stateA, stateB, 'for panel', (api as any).uuid, isEqual);
 };
 
 export const initializeHasUnsavedChanges = <
@@ -48,7 +52,6 @@ export const initializeHasUnsavedChanges = <
   RuntimeState extends object = SerializedState
 >(
   uuid: string,
-  type: string,
   comparators: StateComparators<RuntimeState>,
   api: unknown,
   parentApi: unknown,
