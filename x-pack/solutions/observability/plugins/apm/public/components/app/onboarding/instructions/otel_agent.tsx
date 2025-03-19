@@ -193,7 +193,7 @@ export function OpenTelemetryInstructions({
     {
       setting: 'OTEL_RESOURCE_ATTRIBUTES',
       value:
-        'service.name=<app-name>,service.version=<app-version>,deployment.environment=production',
+        'service.name=<app-name>,service.version=<app-version>,deployment.environment.name=production',
     },
   ];
 
