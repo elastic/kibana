@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -19,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useWatch } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
@@ -53,6 +54,21 @@ export const QuerySidePanel = () => {
   } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
     name: ChatFormFields.elasticsearchQuery,
   });
+  const queryTableFields = useMemo(() => {
+    return [
+      ...group.semantic_fields,
+      ...group.elser_query_fields,
+      ...group.dense_vector_query_fields,
+      ...group.bm25_query_fields,
+    ].map((field) => ({
+      name: typeof field === 'string' ? field : field.field,
+      checked: isQueryFieldSelected(
+        queryFields,
+        index,
+        typeof field === 'string' ? field : field.field
+      ),
+    }));
+  }, [queryFields]);
 
   const updateFields = (index: string, fieldName: string, checked: boolean) => {
     const currentIndexFields = checked
@@ -103,30 +119,27 @@ export const QuerySidePanel = () => {
                 <EuiSpacer size="s" />
 
                 <EuiBasicTable
-                  tableCaption="Query Model table"
-                  items={[
-                    ...group.semantic_fields,
-                    ...group.elser_query_fields,
-                    ...group.dense_vector_query_fields,
-                    ...group.bm25_query_fields,
-                  ].map((field) => ({
-                    name: typeof field === 'string' ? field : field.field,
-                    checked: isQueryFieldSelected(
-                      queryFields,
-                      index,
-                      typeof field === 'string' ? field : field.field
-                    ),
-                  }))}
+                  tableCaption={i18n.translate(
+                    'xpack.searchPlayground.viewQuery.flyout.table.caption',
+                    { defaultMessage: 'Query Model table' }
+                  )}
+                  items={queryTableFields}
                   rowHeader="name"
                   columns={[
                     {
                       field: 'name',
-                      name: 'Field',
+                      name: i18n.translate(
+                        'xpack.searchPlayground.viewQuery.flyout.table.column.field.name',
+                        { defaultMessage: 'Field' }
+                      ),
                       'data-test-subj': 'fieldName',
                     },
                     {
                       field: 'checked',
-                      name: 'Enabled',
+                      name: i18n.translate(
+                        'xpack.searchPlayground.viewQuery.flyout.table.column.enabled.name',
+                        { defaultMessage: 'Enabled' }
+                      ),
                       align: 'right',
                       render: (checked, field) => {
                         return (

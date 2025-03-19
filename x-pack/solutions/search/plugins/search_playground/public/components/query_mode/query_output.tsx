@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { getErrorMessage } from '../../../common/errors';
 import { FullHeight, QueryViewTitlePanel } from './styles';
 import { QueryTestResponse } from '../../types';
 
@@ -37,17 +39,7 @@ export const ElasticsearchQueryOutput = ({
   const { euiTheme } = useEuiTheme();
   const respJSON = useMemo(() => {
     if (isError) {
-      if (queryError instanceof Error) {
-        return queryError.toString();
-      } else if (
-        typeof queryError === 'object' &&
-        queryError !== null &&
-        'toString' in queryError
-      ) {
-        return (queryError as { toString: () => string }).toString();
-      } else {
-        return String(queryError);
-      }
+      return getErrorMessage(queryError);
     }
     return queryResponse ? JSON.stringify(queryResponse.searchResponse, null, 2) : undefined;
   }, [isError, queryError, queryResponse]);
