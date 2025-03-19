@@ -17,12 +17,9 @@ import type {
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
-import type {
-  RuleStepProps,
-  ActionsStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { Form, UseField } from '../../../../shared_imports';
+import type { ActionsStepRule, RuleStepProps } from '../../../common/types';
 import type { FormHook } from '../../../../shared_imports';
+import { Form, UseField } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';

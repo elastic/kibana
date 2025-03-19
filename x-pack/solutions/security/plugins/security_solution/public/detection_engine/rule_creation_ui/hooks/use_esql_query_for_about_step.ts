@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { RuleStep } from '../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../common/types';
+import { RuleStep } from '../../common/types';
 import { isEsqlRule } from '../../../../common/detection_engine/utils';
-
-import type { DefineStepRule } from '../../../detections/pages/detection_engine/rules/types';
 
 interface UseEsqlQueryForAboutStepArgs {
   defineStepData: DefineStepRule;

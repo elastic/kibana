@@ -31,7 +31,7 @@ import { bulkAddRuleActions as i18n } from '../translations';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
+import { getAllActionMessageParams } from '../../../../../common/helpers';
 
 import { RuleActionsField } from '../../../../../rule_creation/components/rule_actions_field';
 import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';

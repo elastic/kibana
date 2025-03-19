@@ -28,7 +28,7 @@ import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { PreviewRenderCellValue } from './preview_table_cell_renderer';
 import { getPreviewTableControlColumn } from './preview_table_control_columns';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import type { TimeframePreviewOptions } from '../../../common/types';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getRulePreviewLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/rule_preview';

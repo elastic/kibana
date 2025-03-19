@@ -29,11 +29,8 @@ import type { SetRuleQuery } from '../../../../detections/containers/detection_e
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
-import type {
-  DefineStepRule,
-  RuleStepProps,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule, RuleStepProps } from '../../../common/types';
+import { DataSourceType } from '../../../common/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarFieldProps } from '../query_bar_field';
 import { QueryBarField } from '../query_bar_field';
@@ -102,6 +99,7 @@ const CommonUseField = getUseField({ component: Field });
 const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
+
 export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   defaultSavedQuery?: SavedQuery;

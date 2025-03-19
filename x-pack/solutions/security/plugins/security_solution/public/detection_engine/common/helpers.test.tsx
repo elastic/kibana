@@ -8,33 +8,33 @@
 import moment from 'moment';
 import type { GetStepsData } from './helpers';
 import {
-  getDefineStepsData,
-  getScheduleStepsData,
-  getStepsData,
-  getAboutStepsData,
-  getActionsStepsData,
-  getModifiedAboutDetailsData,
-  getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
   fillEmptySeverityMappings,
+  getAboutStepsData,
+  getActionsStepsData,
+  getDefineStepsData,
+  getModifiedAboutDetailsData,
+  getPrePackagedTimelineInstallationStatus,
+  getScheduleStepsData,
+  getStepsData,
 } from './helpers';
 import {
-  mockRuleWithEverything,
   mockRule,
-} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
+  mockRuleWithEverything,
+} from '../rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import type { RuleAction } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleAction } from '../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../common/api/detection_engine/model/rule_schema';
 
-import type { Rule } from '../../../../detection_engine/rule_management/logic';
+import type { Rule } from '../rule_management/logic';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
+  ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
-  ActionsStepRule,
 } from './types';
-import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { getThreatMock } from '../../../common/detection_engine/schemas/types/threat.mock';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
@@ -42,8 +42,8 @@ import {
   ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
-} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
+} from '../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;

@@ -7,18 +7,18 @@
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import {
-  RuleDetailTabs,
   RULE_DETAILS_TAB_NAME,
-} from '../../../../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
+  RuleDetailTabs,
+} from '../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import {
   getRuleDetailsTabUrl,
   getRuleDetailsUrl,
-} from '../../../../common/components/link_to/redirect_to_detection_engine';
+} from '../../common/components/link_to/redirect_to_detection_engine';
 import * as i18nRules from './translations';
-import { SecurityPageName } from '../../../../app/types';
-import { RULES_PATH } from '../../../../../common/constants';
-import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
-import { DELETED_RULE } from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
+import { SecurityPageName } from '../../app/types';
+import { RULES_PATH } from '../../../common/constants';
+import type { GetTrailingBreadcrumbs } from '../../common/components/navigation/breadcrumbs/types';
+import { DELETED_RULE } from '../rule_details_ui/pages/rule_details/translations';
 
 const getRuleDetailsTabName = (tabName: string): string => {
   return RULE_DETAILS_TAB_NAME[tabName] ?? RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts];

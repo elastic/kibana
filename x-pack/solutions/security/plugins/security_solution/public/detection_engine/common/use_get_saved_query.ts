@@ -10,10 +10,10 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
+import { useSavedQueryServices } from '../../common/utils/saved_query_services';
 import type { DefineStepRule } from './types';
 
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
 import { SAVED_QUERY_LOAD_ERROR_TOAST } from './translations';
 

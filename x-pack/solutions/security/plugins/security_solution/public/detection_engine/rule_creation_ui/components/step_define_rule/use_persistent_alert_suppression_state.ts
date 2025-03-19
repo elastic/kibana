@@ -19,10 +19,7 @@ import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
-import {
-  AlertSuppressionDurationType,
-  type DefineStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType, type DefineStepRule } from '../../../common/types';
 
 interface UsePersistentAlertSuppressionStateParams {
   form: FormHook<DefineStepRule>;
