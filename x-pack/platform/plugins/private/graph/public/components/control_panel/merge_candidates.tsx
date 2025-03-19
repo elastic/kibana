@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiToolTip,
-  UseEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ControlType, TermIntersect, Workspace } from '../../types';

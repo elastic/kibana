@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import { UrlTemplate } from '../../types';

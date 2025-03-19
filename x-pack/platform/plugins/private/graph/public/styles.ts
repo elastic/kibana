@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const gphFieldBadgeSizeStyles = ({ euiTheme }: UseEuiTheme) =>
@@ -23,10 +23,6 @@ export const gphSidebarHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
     padding: euiTheme.size.xs,
     borderRadius: euiTheme.border.radius.medium,
     marginBottom: euiTheme.size.xs,
-
-    '.kuiIcon': {
-      paddingRight: euiTheme.size.xs,
-    },
   });
 
 export const gphSidebarPanelStyles = ({ euiTheme }: UseEuiTheme) =>

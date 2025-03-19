@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { UseEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SearchBar } from '../search_bar';
 import {
