@@ -12,6 +12,7 @@ import type {
   WCIExternalServerPluginSetupDependencies,
   WCIExternalServerPluginStartDependencies,
 } from './types';
+import { getExternalServerIntegrationComponents } from './integration/external_server_integration';
 
 export class WCIExternalServerPlugin
   implements
@@ -25,8 +26,11 @@ export class WCIExternalServerPlugin
   constructor(context: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<WCIExternalServerPluginStartDependencies, WCIExternalServerPluginStart>
+    core: CoreSetup<WCIExternalServerPluginStartDependencies, WCIExternalServerPluginStart>,
+    { workchatApp }: WCIExternalServerPluginSetupDependencies
   ): WCIExternalServerPluginSetup {
+    workchatApp.integrations.register(getExternalServerIntegrationComponents());
+
     return {};
   }
 

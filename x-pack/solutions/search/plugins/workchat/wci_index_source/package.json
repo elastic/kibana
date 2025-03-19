@@ -1,6 +1,7 @@
 {
-  "name": "@kbn/workchat-integration-index-source",
+  "name": "@kbn/wci-index-source",
   "version": "1.0.0",
+  "license": "Elastic License 2.0",
   "scripts": {
     "test": "jest --config ./jest.config.js",
     "test:watch": "jest --config ./jest.config.js --watch"

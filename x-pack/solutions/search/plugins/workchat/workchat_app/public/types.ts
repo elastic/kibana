@@ -6,9 +6,13 @@
  */
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { IntegrationComponentDescriptor } from '@kbn/wci-common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkChatAppPluginSetup {}
+export interface WorkChatAppPluginSetup {
+  integrations: {
+    register: (integration: IntegrationComponentDescriptor) => void;
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkChatAppPluginStart {}

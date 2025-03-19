@@ -6,13 +6,13 @@
  */
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { WorkchatIntegrationDefinition } from '@kbn/wci-common';
+import type { IntegrationComponentDescriptor } from '@kbn/wci-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export interface WorkChatAppPluginSetup {
   integrations: {
-    register: (integration: WorkchatIntegrationDefinition) => void;
+    register: (integration: IntegrationComponentDescriptor) => void;
   };
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -12,6 +12,7 @@ import type {
   WCISalesforcePluginSetupDependencies,
   WCISalesforcePluginStartDependencies,
 } from './types';
+import { getSalesforceIntegrationComponents } from './integration/salesforce_integration';
 
 export class WCISalesforcePlugin
   implements
@@ -25,8 +26,10 @@ export class WCISalesforcePlugin
   constructor(context: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<WCISalesforcePluginStartDependencies, WCISalesforcePluginStart>
+    core: CoreSetup<WCISalesforcePluginStartDependencies, WCISalesforcePluginStart>,
+    { workchatApp }: WCISalesforcePluginSetupDependencies
   ): WCISalesforcePluginSetup {
+    workchatApp.integrations.register(getSalesforceIntegrationComponents());
     return {};
   }
 

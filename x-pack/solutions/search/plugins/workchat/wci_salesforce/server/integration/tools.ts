@@ -11,16 +11,16 @@ import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/a
 import { SupportCase } from './types';
 
 interface CaseRetrievalParams {
-  id?: string;
+  id?: string[];
   size?: number;
-  owner?: string;
-  priority?: string;
+  ownerEmail?: string[];
+  priority?: string[];
   closed?: boolean;
-  caseNumber?: string;
+  caseNumber?: string[];
   createdAfter?: string;
   createdBefore?: string;
   semanticQuery?: string;
-  status?: string;
+  status?: string[];
   updatedAfter?: string;
   updatedBefore?: string;
 }
@@ -50,9 +50,9 @@ export async function retrieveCases(
 
     const searchRequest: SearchRequest = {
       index: indexName,
-      query: query,
+      query,
       sort: [{ [sortField]: { order: sortOrder } }],
-      size: size,
+      size,
     };
 
     logger.info(
@@ -69,6 +69,8 @@ export async function retrieveCases(
       { field: 'metadata.case_number', type: 'keyword' },
       { field: 'metadata.priority', type: 'keyword' },
       { field: 'metadata.status', type: 'keyword' },
+      { field: 'owner.email', type: 'keyword' },
+      { field: 'owner.name', type: 'keyword' },
     ];
 
     const contentFragments = response.hits.hits.map((hit) => {
@@ -118,20 +120,18 @@ export async function retrieveCases(
 }
 
 function buildQuery(params: CaseRetrievalParams): any {
-  const mustClauses: any[] = [];
+  const mustClauses: any[] = [{ term: { object_type: 'support_case' } }];
 
-  mustClauses.push({
-    term: {
-      object_type: 'support_case',
-    },
-  });
-
-  if (params.id) mustClauses.push({ term: { id: params.id } });
-  if (params.owner) mustClauses.push({ match: { 'owner.emailaddress': params.owner } });
-  if (params.priority) mustClauses.push({ match: { 'metadata.priority': params.priority } });
-  if (params.status) mustClauses.push({ match: { 'metadata.status': params.status } });
+  if (params.id && params.id.length > 0) mustClauses.push({ terms: { id: params.id } });
+  if (params.caseNumber && params.caseNumber.length > 0)
+    mustClauses.push({ terms: { 'metadata.case_number': params.caseNumber } });
+  if (params.ownerEmail && params.ownerEmail.length > 0)
+    mustClauses.push({ terms: { 'owner.emailaddress': params.ownerEmail } });
+  if (params.priority && params.priority.length > 0)
+    mustClauses.push({ terms: { 'metadata.priority': params.priority } });
+  if (params.status && params.status.length > 0)
+    mustClauses.push({ terms: { 'metadata.status': params.status } });
   if (params.closed !== undefined) mustClauses.push({ term: { 'metadata.closed': params.closed } });
-  if (params.caseNumber) mustClauses.push({ term: { 'metadata.case_number': params.caseNumber } });
 
   if (params.createdAfter || params.createdBefore) {
     const range: any = { range: { created_at: {} } };
@@ -149,17 +149,9 @@ function buildQuery(params: CaseRetrievalParams): any {
 
   if (params.semanticQuery) {
     mustClauses.push({
-      semantic: {
-        field: 'content_semantic',
-        query: params.semanticQuery,
-        boost: 2.0,
-      },
+      semantic: { field: 'content_semantic', query: params.semanticQuery, boost: 2.0 },
     });
   }
 
-  return {
-    bool: {
-      must: mustClauses,
-    },
-  };
+  return { bool: { must: mustClauses } };
 }
