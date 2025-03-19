@@ -30,20 +30,20 @@ export function StreamsPromotion({ dataStreamName }: { dataStreamName: string })
       <EuiSpacer />
       <EuiCallOut
         size="s"
-        title={i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
+        title={i18n.translate('xpack.idxMgmt.streamsPromotion.title', {
           defaultMessage: 'Explore the New Streams UI in Technical Preview',
         })}
         color="primary"
       >
         <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
           <EuiText size="s">
-            {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverviewDescription', {
+            {i18n.translate('xpack.idxMgmt.streamsPromotion.description', {
               defaultMessage:
                 'A better way to manage your data streams is here! The new Streams UI provides a streamlined experience with improved insights and management tools.',
             })}
           </EuiText>
           <EuiButton onClick={() => streamsLocator.navigate({ name: dataStreamName })}>
-            {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverviewButton', {
+            {i18n.translate('xpack.idxMgmt.streamsPromotion.button', {
               defaultMessage: 'Go to Streams',
             })}
           </EuiButton>
