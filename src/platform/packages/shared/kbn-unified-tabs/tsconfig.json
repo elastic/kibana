@@ -9,5 +9,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/core-chrome-browser",
+    "@kbn/core",
   ]
 }
