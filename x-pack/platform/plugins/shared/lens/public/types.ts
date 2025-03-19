@@ -476,7 +476,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     state: T,
     deps: {
       frame: FramePublicAPI;
-      setState: StateSetter<T>;
+      setState?: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
@@ -528,6 +528,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
 
 export interface DatasourceFixAction<T> {
   label: string;
+  isCompatible?: (frame: FramePublicAPI) => boolean;
   newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
