@@ -140,6 +140,17 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     };
   }, [isScopedQueryEnabled, query, filters]);
 
+  const validRuleTypes = useMemo(() => {
+    if (!ruleTypes) {
+      return [];
+    }
+    return ruleTypes.filter((ruleType) => VALID_CATEGORIES.includes(ruleType.category));
+  }, [ruleTypes]);
+
+  const availableSolutions = useMemo(() => {
+    return [...new Set(validRuleTypes.map((ruleType) => ruleType.category))];
+  }, [validRuleTypes]);
+
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0) {
@@ -162,7 +173,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           formData.recurringSchedule
         ),
         categoryIds: formData.solutionId ? [formData.solutionId] : null,
-        scopedQuery: scopedQueryPayload,
+        scopedQuery: availableSolutions.length !== 0 ? scopedQueryPayload : null,
       };
 
       if (isEditMode) {
@@ -175,15 +186,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       }
     },
     [
-      isEditMode,
+      scopedQueryErrors.length,
       isScopedQueryEnabled,
-      scopedQueryErrors,
-      maintenanceWindowId,
-      updateMaintenanceWindow,
-      createMaintenanceWindow,
-      onSuccess,
-      defaultTimezone,
       scopedQueryPayload,
+      defaultTimezone,
+      availableSolutions.length,
+      isEditMode,
+      updateMaintenanceWindow,
+      maintenanceWindowId,
+      onSuccess,
+      createMaintenanceWindow,
     ]
   );
 
@@ -206,17 +218,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const showModal = useCallback(() => setIsModalVisible(true), []);
 
   const { setFieldValue } = form;
-
-  const validRuleTypes = useMemo(() => {
-    if (!ruleTypes) {
-      return [];
-    }
-    return ruleTypes.filter((ruleType) => VALID_CATEGORIES.includes(ruleType.category));
-  }, [ruleTypes]);
-
-  const availableSolutions = useMemo(() => {
-    return [...new Set(validRuleTypes.map((ruleType) => ruleType.category))];
-  }, [validRuleTypes]);
 
   const ruleTypeIds = useMemo(() => {
     if (!Array.isArray(validRuleTypes) || !mounted) {
@@ -294,6 +295,18 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
+      {availableSolutions.length === 0 && isScopedQueryEnabled && isEditMode && (
+        <>
+          <EuiCallOut
+            data-test-subj="maintenanceWindowNoAvailableSolutionsWarning"
+            title={i18n.NO_AVAILABLE_SOLUTIONS_WARNING_TITLE}
+            color="warning"
+          >
+            <p>{i18n.NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE}</p>
+          </EuiCallOut>
+          <EuiSpacer size="xl" />
+        </>
+      )}
       <EuiFlexGroup direction="column" responsive={false}>
         <EuiFlexItem>
           <UseField

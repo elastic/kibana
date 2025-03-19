@@ -678,7 +678,7 @@ export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
   {
     defaultMessage:
-      'The maintenance window will affect rules in all solutions unless you add a filter.',
+      'When you save the changes, the maintenance window will affect rules in all solutions.',
   }
 );
 
@@ -772,4 +772,17 @@ export const REFRESH = i18n.translate('xpack.alerting.maintenanceWindows.refresh
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alerting.maintenanceWindows.searchPlaceholder',
   { defaultMessage: 'Search' }
+);
+
+export const NO_AVAILABLE_SOLUTIONS_WARNING_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.title',
+  { defaultMessage: 'Limited permissions detected.' }
+);
+
+export const NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.subtitle',
+  {
+    defaultMessage:
+      "You don't have access to all solution types required for alert filtering. If you save, your alert filter settings may be reset.",
+  }
 );
