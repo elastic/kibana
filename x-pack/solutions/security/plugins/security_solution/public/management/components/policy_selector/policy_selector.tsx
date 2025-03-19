@@ -14,6 +14,7 @@ import {
   htmlIdGenerator,
   EuiPanel,
   EuiPagination,
+  EuiProgress,
 } from '@elastic/eui';
 import type { GetPackagePoliciesRequest, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -21,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { EuiPaginationProps } from '@elastic/eui/src/components/pagination/pagination';
+import { i18n } from '@kbn/i18n';
 import { APP_UI_ID } from '../../../../common';
 import { useAppUrl } from '../../../common/lib/kibana';
 import { LinkToApp } from '../../../common/components/endpoint';
@@ -37,6 +39,10 @@ const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = Object.freeze({
 const SEARCH_PROPS = Object.freeze({ className: 'searchbar' });
 
 const PolicySelectorContainer = styled.div`
+  .selectable-container {
+    position: relative;
+  }
+
   .searchbar {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -92,6 +98,8 @@ export interface PolicySelectorProps {
     policy: PackagePolicy
   ) => Pick<EuiSelectableOption, 'disabled' | 'toolTipContent' | 'toolTipProps'>;
 
+  /** If `true`, then only a single selection will be allowed. Default is `false` */
+  singleSelection?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -111,6 +119,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     useCheckbox = false,
     showPolicyLink = false,
     policyDisplayOptions,
+    singleSelection = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -123,14 +132,24 @@ export const PolicySelector = memo<PolicySelectorProps>(
       isFetching,
       isLoading,
       error,
-    } = useFetchIntegrationPolicyList({
-      kuery,
-      sortOrder,
-      sortField,
-      perPage,
-      withAgentCount,
-      page,
-    });
+    } = useFetchIntegrationPolicyList(
+      {
+        kuery,
+        sortOrder,
+        sortField,
+        perPage,
+        withAgentCount,
+        page,
+      },
+      { keepPreviousData: true }
+    );
+
+    const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
+      return {
+        bordered: true,
+        showIcons: !useCheckbox,
+      };
+    }, [useCheckbox]);
 
     const selectableOptions: Array<EuiSelectableOption<OptionPolicyData>> = useMemo(() => {
       if (!policyListResponse) {
@@ -239,20 +258,29 @@ export const PolicySelector = memo<PolicySelectorProps>(
           {'search bar here'}
         </EuiPanel>
 
-        <EuiSelectable<OptionPolicyData>
-          options={selectableOptions}
-          listProps={DEFAULT_LIST_PROPS}
-          onChange={handleOnPolicySelectChange}
-          searchable={false}
-          // searchProps={SEARCH_PROPS}
-          data-test-subj={getTestId('list')}
-        >
-          {listBuilderCallback}
-        </EuiSelectable>
+        <div className="selectable-container">
+          {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
+
+          <EuiSelectable<OptionPolicyData>
+            options={selectableOptions}
+            listProps={listProps}
+            onChange={handleOnPolicySelectChange}
+            searchable={false}
+            singleSelection={singleSelection}
+            isLoading={isLoading}
+            // searchProps={SEARCH_PROPS}
+            data-test-subj={getTestId('list')}
+          >
+            {listBuilderCallback}
+          </EuiSelectable>
+        </div>
 
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
           <EuiPagination
-            aria-label={'TODO: define label'}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.policySelector.policyListPagination',
+              { defaultMessage: 'Policy list pagination' }
+            )}
             pageCount={Math.ceil((policyListResponse?.total ?? 0) / perPage)}
             activePage={(policyListResponse?.page ?? 1) - 1}
             onPageClick={onPageClickHandler}
