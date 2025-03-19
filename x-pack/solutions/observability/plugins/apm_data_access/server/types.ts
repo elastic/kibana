@@ -7,7 +7,11 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { APMIndices } from '.';
+import type {
+  ApmSourcesAccessPluginStart,
+  ApmSourcesAccessPluginSetup,
+  APMIndices,
+} from '@kbn/apm-sources-access-plugin/server';
 import type { getServices } from './services/get_services';
 import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
 
@@ -17,15 +21,17 @@ export interface ApmDataAccessPluginSetup {
   getServices: typeof getServices;
 }
 
+export interface ApmDataAccessServerSetupDependencies {
+  apmSourcesAccess: ApmSourcesAccessPluginSetup;
+}
+
 export interface ApmDataAccessServerDependencies {
+  apmSourcesAccess: ApmSourcesAccessPluginStart;
   security?: SecurityPluginStart;
 }
 
 export interface ApmDataAccessPluginStart {
   hasPrivileges: (params: Pick<ApmDataAccessPrivilegesCheck, 'request'>) => Promise<boolean>;
-}
-export interface ApmDataAccessServerDependencies {
-  security?: SecurityPluginStart;
 }
 
 export type ApmDataAccessServices = ReturnType<typeof getServices>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APMIndices } from '../../../..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { APMEventESSearchRequest } from '.';
 import { getRequestBase } from './get_request_base';
 

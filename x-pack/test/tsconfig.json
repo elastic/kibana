@@ -131,6 +131,8 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
     "@kbn/apm-data-access-plugin",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
@@ -192,6 +194,7 @@
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-observability",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/apm-sources-access-plugin",
   ]
 }

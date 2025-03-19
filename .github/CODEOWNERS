@@ -1078,6 +1078,7 @@ src/platform/packages/shared/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
