@@ -30,6 +30,24 @@ const formProps: CreateMaintenanceWindowFormProps = {
   onSuccess: jest.fn(),
 };
 
+const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
+  onCancel: jest.fn(),
+  onSuccess: jest.fn(),
+  initialValue: {
+    title: 'test',
+    startDate: '2023-03-24',
+    endDate: '2023-03-26',
+    recurring: false,
+    solutionId: 'observability',
+    scopedQuery: {
+      kql: 'kibana.alert.job_errors_results.job_id : * ',
+      filters: [],
+      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+    },
+  },
+  maintenanceWindowId: 'fake_mw_id',
+};
+
 describe('CreateMaintenanceWindowForm', () => {
   let appMockRenderer: AppMockRenderer;
 
@@ -251,8 +269,21 @@ describe('CreateMaintenanceWindowForm', () => {
       ).not.toBeInTheDocument();
     });
 
+    expect(screen.queryByTestId('maintenanceWindowScopedQuerySwitch')).not.toBeInTheDocument();
+  });
+
+  it('should show warning when edit if "Filter alerts" toggle on when do not have access to chosen solution', async () => {
+    loadRuleTypes.mockResolvedValue([]);
+    const result = appMockRenderer.render(
+      <CreateMaintenanceWindowForm {...formPropsForEditMode} />
+    );
+
     await waitFor(() => {
-      expect(screen.queryByTestId('maintenanceWindowScopedQuerySwitch')).not.toBeInTheDocument();
+      expect(
+        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
+      ).not.toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('maintenanceWindowNoAvailableSolutionsWarning')).toBeInTheDocument();
   });
 });
