@@ -104,7 +104,8 @@ export class ScoutJestReporter extends BaseReporter {
 
     const metadata = jestGlobals.scout as ScoutJestMetadata;
 
-    if (metadata.reporter.name !== undefined) {
+    if (metadata.reporter?.name !== undefined) {
+      // A reporter name override has been set
       this.name = metadata.reporter.name;
     }
 
@@ -196,9 +197,12 @@ export class ScoutJestReporter extends BaseReporter {
     /**
      * Test execution ended
      */
-    // Load Scout metadata from Jest globals
-    const context = testContexts.values().next().value as TestContext;
-    this.loadMetadataFromJestGlobals(context.config.globals);
+    // Load Scout metadata from Jest globals if a test context is found
+    const testContext = Array.from(testContexts.values()).find((context) => context !== undefined);
+
+    if (testContext !== undefined) {
+      this.loadMetadataFromJestGlobals(testContext.config.globals);
+    }
 
     // Log "run start" event
     this.report.logEvent({

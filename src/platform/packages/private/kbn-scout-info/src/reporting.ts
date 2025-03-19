@@ -41,7 +41,7 @@ export enum ScoutTestRunConfigCategory {
 export interface ScoutJestMetadata {
   configFilePath: string;
   testRunConfigCategory: ScoutTestRunConfigCategory;
-  reporter: {
+  reporter?: {
     name?: string;
   };
 }
