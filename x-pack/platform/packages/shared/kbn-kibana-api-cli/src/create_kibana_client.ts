@@ -19,6 +19,5 @@ export async function createKibanaClient({
   const baseUrl = await discoverKibanaUrl({
     log,
   });
-
   return new KibanaClient({ baseUrl, signal });
 }

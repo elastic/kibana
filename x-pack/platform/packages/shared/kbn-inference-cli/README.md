@@ -23,7 +23,7 @@ const response = await inferenceClient.output({
     type: 'object',
     properties: {
       name: { type: 'string' },
-      age: { type: 'integer' },
+      age: { type: 'number' },
       city: { type: 'string' },
     },
     required: ['name'],
@@ -31,4 +31,10 @@ const response = await inferenceClient.output({
 });
 
 log.info(response.output);
+```
+
+Running a recipe:
+
+```
+$ yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
 ```

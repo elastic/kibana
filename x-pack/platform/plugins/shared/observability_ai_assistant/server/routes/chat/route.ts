@@ -208,15 +208,6 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
     const response$ = from(
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,
-        chat: (name, params) =>
-          client.chat(name, {
-            ...params,
-            stream: true,
-            connectorId,
-            simulateFunctionCalling,
-            signal,
-            tracer: new LangTracer(otelContext.active()),
-          }),
         context,
         logger: resources.logger,
         messages: [],

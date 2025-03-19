@@ -25,7 +25,9 @@ export async function selectConnector({
   const connectors = await getConnectors(kibanaClient);
 
   if (!connectors.length) {
-    throw new Error(`No connectors available`);
+    throw new Error(
+      `No connectors available for inference. See https://www.elastic.co/guide/en/kibana/current/action-types.html`
+    );
   }
 
   const connector = connectors.find((item) => item.connectorId === preferredConnectorId);

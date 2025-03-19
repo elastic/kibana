@@ -11,16 +11,10 @@ import Path from 'path';
 import { UrlWithParsedQuery } from 'url';
 import { FetchResponseError } from './kibana_fetch_response_error';
 import { createProxyTransport } from './proxy_transport';
+import { getInternalKibanaHeaders } from './get_internal_kibana_headers';
 
 type FetchInputOptions = string | URL;
 type FetchInitOptions = globalThis.RequestInit;
-
-function getInternalKibanaHeaders() {
-  return {
-    'kbn-xsrf': 'true',
-    'x-elastic-internal-origin': 'foo',
-  };
-}
 
 interface KibanaClientOptions {
   baseUrl: string;

@@ -12,7 +12,6 @@ import { partition } from 'lodash';
 import { scoreSuggestions } from './score_suggestions';
 import { MessageRole, type Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
-import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
 import { rewriteQuery } from '../rewrite_query';
 import {
@@ -20,10 +19,16 @@ import {
   KnowledgeBaseQueryContainer,
 } from '../../service/knowledge_base_service/types';
 
+export interface RecallAndScoreResult {
+  entries: KnowledgeBaseHit[];
+  selected: string[];
+  queries: KnowledgeBaseQueryContainer[];
+  scores?: Map<string, number>;
+}
+
 export async function recallAndScore({
   recall,
   inferenceClient,
-  chat,
   analytics,
   userPrompt,
   context,
@@ -33,19 +38,13 @@ export async function recallAndScore({
 }: {
   recall: ObservabilityAIAssistantClient['recall'];
   inferenceClient: BoundInferenceClient;
-  chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
   context: string;
   messages: Message[];
   logger: Logger;
   signal: AbortSignal;
-}): Promise<{
-  entries: KnowledgeBaseHit[];
-  selected: string[];
-  queries: KnowledgeBaseQueryContainer[];
-  scores?: Map<string, number>;
-}> {
+}): Promise<RecallAndScoreResult> {
   const [[systemMessage], otherMessages] = partition(
     messages,
     (message) => message.message.role === MessageRole.System
@@ -78,15 +77,13 @@ export async function recallAndScore({
       userPrompt,
       context,
       signal,
-      chat,
+      inferenceClient,
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
-      prompt: JSON.stringify(queries),
       scoredDocuments: entries.map((entry) => {
         const llmScore = scores?.get(entry.id);
         return {
-          content: entry.text,
           elserScore: entry.score,
           llmScore: llmScore ?? -1,
         };

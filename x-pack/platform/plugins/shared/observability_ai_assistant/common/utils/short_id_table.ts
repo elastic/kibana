@@ -60,6 +60,6 @@ export class ShortIdTable {
   }
 
   lookup(shortId: string) {
-    return this.byShortId.get(shortId);
+    return this.byShortId.get(shortId) || shortId;
   }
 }

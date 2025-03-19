@@ -23,6 +23,7 @@ export type {
   ScoutTestOptions,
   ScoutPage,
   PageObjects,
+  ApiServicesFixture,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
@@ -36,6 +37,8 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  KibanaRole,
+  ElasticsearchRoleDescriptor,
 } from './src/types';
 
 // re-export from Playwright

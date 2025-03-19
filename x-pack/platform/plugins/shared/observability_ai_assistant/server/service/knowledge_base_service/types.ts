@@ -16,19 +16,19 @@ export interface KnowledgeBaseConnector {
   status: ConnectorConnectorStatus;
 }
 
-interface KnowledgeBaseSourceInternal {
+export interface KnowledgeBaseSourceInternal {
   internal: {};
 }
 
-interface KnowledgeBaseSourceProductDocumentation {
+export interface KnowledgeBaseSourceProductDocumentation {
   product_documentation: {};
 }
 
-interface KnowledgeBaseSourceConnector {
+export interface KnowledgeBaseSourceConnector {
   connector: KnowledgeBaseConnector;
 }
 
-interface KnowledgeBaseSourceIndex {
+export interface KnowledgeBaseSourceIndex {
   index: {
     name: string;
   };
@@ -42,7 +42,7 @@ export type KnowledgeBaseSource =
 
 export type KnowledgeBaseSourceType = 'internal' | 'product_documentation' | 'connector' | 'index';
 
-export interface KnowledgeBaseHit {
+export interface KnowledgeBaseHit<TSource extends KnowledgeBaseSource = KnowledgeBaseSource> {
   id: string;
   title: string;
   score: number;
@@ -53,7 +53,7 @@ export interface KnowledgeBaseHit {
     originalTokenCount: number;
     truncatedTokenCount: number;
   };
-  source: KnowledgeBaseSource;
+  source: TSource;
 }
 
 export interface GetConnectorsResponse {

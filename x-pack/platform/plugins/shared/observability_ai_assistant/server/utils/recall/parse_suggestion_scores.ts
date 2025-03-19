@@ -16,7 +16,7 @@ export function parseSuggestionScores(scoresAsString: string) {
       const [id, score] = pair.split(',').map((str) => str.trim());
 
       return {
-        shortId: id,
+        id,
         score: parseInt(score, 10),
       };
     });

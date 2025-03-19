@@ -197,6 +197,12 @@ export function registerChatCompleteRoute({
   router.post(
     {
       path: '/internal/inference/chat_complete/stream',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the inference client',
+        },
+      },
       validate: {
         body: chatCompleteBodySchema,
       },

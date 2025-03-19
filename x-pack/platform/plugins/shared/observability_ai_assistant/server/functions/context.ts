@@ -163,7 +163,6 @@ export function registerContextFunction({
 
         const { scores, entries, selected, queries } = await recallAndScore({
           recall: client.recall,
-          chat,
           logger: resources.logger,
           userPrompt,
           context: screenDescription,

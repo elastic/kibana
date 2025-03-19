@@ -9,9 +9,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { omit } from 'lodash';
 import fetch from 'node-fetch';
 import { format, parse, Url } from 'url';
+import { getInternalKibanaHeaders } from './get_internal_kibana_headers';
 
 async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
-  const possibleCredentials = [`admin:changeme`, `elastic:changeme`];
+  const possibleCredentials = [`elastic:changeme`, `admin:changeme`];
   for (const auth of possibleCredentials) {
     const url = format({
       ...parsedTarget,
@@ -20,7 +21,9 @@ async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
     let status: number;
     try {
       log.debug(`Fetching ${url}`);
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: getInternalKibanaHeaders(),
+      });
       status = response.status;
     } catch (err) {
       log.debug(`${url} resulted in ${err.message}`);
@@ -45,12 +48,15 @@ async function getKibanaApiUrl({ baseUrl, log }: { baseUrl: string; log: Tooling
 
     log.debug(`Checking Kibana URL ${kibanaUrlWithoutAuth} for a redirect`);
 
+    const headers = {
+      ...getInternalKibanaHeaders(),
+      ...(parsedKibanaUrl.auth
+        ? { Authorization: `Basic ${Buffer.from(parsedKibanaUrl.auth).toString('base64')}` }
+        : {}),
+    };
+
     const unredirectedResponse = await fetch(kibanaUrlWithoutAuth, {
-      headers: {
-        ...(parsedKibanaUrl.auth
-          ? { Authorization: `Basic ${Buffer.from(parsedKibanaUrl.auth).toString('base64')}` }
-          : {}),
-      },
+      headers,
       method: 'HEAD',
       follow: 1,
       redirect: 'manual',
@@ -77,6 +83,7 @@ async function getKibanaApiUrl({ baseUrl, log }: { baseUrl: string; log: Tooling
 
     const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
       method: 'HEAD',
+      headers,
     });
 
     if (redirectedResponse.status !== 200) {
