@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { css, keyframes } from '@emotion/react';
-import { COLOR_MODES_STANDARD, UseEuiTheme } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, UseEuiTheme, euiCanAnimate } from '@elastic/eui';
 import bg_top_branded from '../assets/bg_top_branded.svg';
 import bg_top_branded_dark from '../assets/bg_top_branded_dark.svg';
 import bg_bottom_branded from '../assets/bg_bottom_branded.svg';
@@ -37,7 +37,9 @@ export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEu
     backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
     opacity: 0,
     overflow: 'auto',
-    animation: `${fullScreenGraphicsFadeIn} ${euiTheme.euiTheme.animation.extraSlow} ${euiTheme.euiTheme.animation.resistance} 0s forwards`,
+    [euiCanAnimate]: {
+      animation: `${fullScreenGraphicsFadeIn} ${euiTheme.euiTheme.animation.extraSlow} ${euiTheme.euiTheme.animation.resistance} 0s forwards`,
+    },
     '.kbnBody--hasHeaderBanner &': {
       top: 'var(--kbnHeaderBannerHeight)',
     },

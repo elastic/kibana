@@ -14,13 +14,7 @@
  */
 
 import React from 'react';
-import {
-  // @ts-ignore
-  EuiCard,
-  EuiButton,
-  EuiButtonEmpty,
-  UseEuiTheme,
-} from '@elastic/eui';
+import { EuiCard, EuiButton, EuiButtonEmpty, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getServices } from '../../kibana_services';
@@ -53,26 +47,10 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
       }
       footer={
         <footer>
-          <EuiButton
-            fill
-            css={({ euiTheme }: UseEuiTheme) =>
-              css({
-                marginRight: euiTheme.size.s,
-              })
-            }
-            onClick={onConfirm}
-          >
+          <EuiButton fill css={footerAction} onClick={onConfirm}>
             <FormattedMessage id="home.tryButtonLabel" defaultMessage="Add integrations" />
           </EuiButton>
-          <EuiButtonEmpty
-            css={({ euiTheme }: UseEuiTheme) =>
-              css({
-                marginRight: euiTheme.size.s,
-              })
-            }
-            onClick={onDecline}
-            data-test-subj="skipWelcomeScreen"
-          >
+          <EuiButtonEmpty css={footerAction} onClick={onDecline} data-test-subj="skipWelcomeScreen">
             <FormattedMessage id="home.exploreButtonLabel" defaultMessage="Explore on my own" />
           </EuiButtonEmpty>
         </footer>
@@ -80,3 +58,8 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
     />
   );
 }
+const footerAction = ({ euiTheme }: UseEuiTheme) => {
+  return css({
+    marginRight: euiTheme.size.s,
+  });
+};

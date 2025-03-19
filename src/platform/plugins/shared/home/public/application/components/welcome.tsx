@@ -44,6 +44,7 @@ interface WelcomeProps {
 export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: WelcomeProps) => {
   const services = getServices();
   const euiShadowM = useEuiShadow('m');
+  const theme = useEuiTheme();
 
   const redirectToAddData = () => {
     services.application.navigateToApp('integrations', { path: '/browse' });
@@ -83,10 +84,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
         data-test-subj="homeWelcomeInterstitial"
         css={[
           styles,
-          fullScreenGraphicsMixinStyles(
-            Number(useEuiTheme().euiTheme.levels.navigation),
-            useEuiTheme()
-          ),
+          fullScreenGraphicsMixinStyles(Number(theme.euiTheme.levels.navigation), theme),
         ]}
       >
         <header className="homeWelcome__header">
