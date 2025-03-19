@@ -112,7 +112,6 @@ export const BuildPackages: Task = {
     await buildWebpackBundlesWithMoon(log, {
       quiet: false,
       dist: true,
-      reactVersion: process.env.REACT_18 ? '18' : '17',
     });
 
     const transformConfig: TransformConfig = {
@@ -311,7 +310,7 @@ export const BuildPackages: Task = {
 
 export async function buildWebpackBundles(
   log: ToolingLog,
-  { quiet, dist, reactVersion }: { quiet: boolean; dist: boolean; reactVersion: string }
+  { quiet, dist }: { quiet: boolean; dist: boolean }
 ) {
   async function buildPackage(packagePath: string) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
@@ -321,8 +320,7 @@ export async function buildWebpackBundles(
     await execa('yarn', ['build', ...(dist ? ['--dist'] : [])], {
       cwd: path.resolve(REPO_ROOT, packagePath),
       env: {
-        ...process.env,
-        REACT_VERSION: reactVersion,
+        ...process.env
       },
       stdio: stdioOptions,
     });
@@ -341,7 +339,7 @@ export async function buildWebpackBundles(
 
 export async function buildWebpackBundlesWithMoon(
   log: ToolingLog,
-  { quiet, dist, reactVersion }: { quiet: boolean; dist: boolean; reactVersion: string }
+  { quiet, dist }: { quiet: boolean; dist: boolean }
 ) {
   const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
     ? ['ignore', 'pipe', 'pipe']
@@ -353,7 +351,6 @@ export async function buildWebpackBundlesWithMoon(
     cwd: REPO_ROOT,
     env: {
       ...process.env,
-      REACT_VERSION: reactVersion,
     },
     stdio: stdioOptions,
   });

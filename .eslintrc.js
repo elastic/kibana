@@ -1089,6 +1089,7 @@ module.exports = {
         'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/file_upload/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1470,7 +1471,8 @@ module.exports = {
         'playwright/no-slowed-test': 'error',
         'playwright/no-standalone-expect': 'error',
         'playwright/no-unsafe-references': 'error',
-        'playwright/no-wait-for-selector': 'warn',
+        'playwright/no-useless-await': 'error',
+        'playwright/no-wait-for-selector': 'error',
         'playwright/max-nested-describe': ['error', { max: 1 }],
         'playwright/missing-playwright-await': 'error',
         'playwright/prefer-comparison-matcher': 'error',
@@ -1606,9 +1608,9 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}',
       ],
@@ -1628,6 +1630,24 @@ module.exports = {
     },
 
     /**
+     * ResponseOps overrides
+     */
+
+    {
+      files: [
+        'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+
+    /**
      * Lens overrides
      */
     {
@@ -1642,10 +1662,11 @@ module.exports = {
      */
     {
       files: [
-        'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
-        'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
+        'src/platform/plugins/shared/saved_search/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/ban-ts-comment': [
           'error',

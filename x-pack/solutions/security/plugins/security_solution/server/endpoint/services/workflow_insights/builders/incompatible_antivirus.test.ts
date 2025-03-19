@@ -106,7 +106,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
           {
             list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
             name: 'AVGAntivirus',
-            description: 'Suggested by Security Workflow Insights',
+            description: 'Suggested by Automatic Troubleshooting',
             entries: [
               {
                 field: 'process.executable.caseless',

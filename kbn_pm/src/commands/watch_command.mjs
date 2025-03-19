@@ -29,10 +29,7 @@ export const command = {
     const watchesFinished = [];
     for (const packageName of packageNames) {
       watchesFinished.push(
-        watchPackage(packageName, {
-          quiet: false,
-          reactVersion: process.env.REACT_18 ? '18' : '17',
-        })
+        watchPackage(packageName, { quiet: false })
       );
     }
     await Promise.all(watchesFinished);

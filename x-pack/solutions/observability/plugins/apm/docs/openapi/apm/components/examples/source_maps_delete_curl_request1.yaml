@@ -1,0 +1,7 @@
+lang: Curl
+# label:
+source: |
+  curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9" \
+  -H 'Content-Type: application/json' \
+  -H 'kbn-xsrf: true' \
+  -H 'Authorization: ApiKey ${YOUR_API_KEY}'

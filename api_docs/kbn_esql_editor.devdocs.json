@@ -83,7 +83,15 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined) => Promise<",
+          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined, esqlVariables: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -193,6 +201,28 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.fetchFieldsFromESQL.$6",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,
@@ -692,9 +722,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },

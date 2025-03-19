@@ -60,7 +60,6 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const noCache = !(args.getBooleanValue('cache') ?? true);
 
-    const reactVersion = process.env.REACT_18 ? '18' : '17';
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
@@ -99,7 +98,7 @@ export const command = {
     await time('pre-build webpack bundles for packages', async () => {
       await buildPackagesWithMoon(
         ['@kbn/ui-shared-deps-npm', '@kbn/ui-shared-deps-src', '@kbn/monaco'],
-        { quiet, reactVersion, noCache }
+        { quiet, noCache }
       );
       log.success('build required webpack bundles for packages');
     });

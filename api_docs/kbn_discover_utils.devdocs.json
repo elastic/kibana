@@ -5222,6 +5222,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.FILTER_OUT_EXACT_FIELDS_FOR_CONTENT",
+        "type": "Array",
+        "tags": [],
+        "label": "FILTER_OUT_EXACT_FIELDS_FOR_CONTENT",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT",
         "type": "Array",
         "tags": [],

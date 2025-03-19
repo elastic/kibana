@@ -280,7 +280,7 @@ function createOrUpdateConfig(
     dryRun?: boolean;
     log: ToolingLog;
   }
-): 'create' | 'update' | 'skip' {
+): 'create' | 'update' | 'skip' | 'delete' {
   sortKeys(projectConfig);
   const name = projectConfig.id;
   const projectExists = fs.existsSync(targetPath);
@@ -301,6 +301,7 @@ function createOrUpdateConfig(
         log.info(`Deleting ${name} project configuration @ ${targetPath}`);
         fs.unlinkSync(targetPath);
       }
+      return 'delete';
     } else {
       log.info(`moon.yml already exists at ${targetPath} - skipping update.`);
       return 'skip';

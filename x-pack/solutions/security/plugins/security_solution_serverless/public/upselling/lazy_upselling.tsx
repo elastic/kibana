@@ -49,6 +49,16 @@ export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
   )
 );
 
+export const SiemMigrationsTranslatedRulesUpsellPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/siem_migrations_translated_rules').then(
+      ({ SiemMigrationsTranslatedRulesUpsellPage }) => ({
+        default: SiemMigrationsTranslatedRulesUpsellPage,
+      })
+    )
+  )
+);
+
 export const AttackDiscoveryUpsellingPageLazy = withSuspenseUpsell(
   lazy(() =>
     import('./pages/attack_discovery').then(({ AttackDiscoveryUpsellingPageServerless }) => ({
