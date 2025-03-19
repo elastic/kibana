@@ -7886,6 +7886,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/wci-browser@link:x-pack/solutions/search/packages/workchat/wci-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/wci-common@link:x-pack/solutions/search/packages/workchat/wci-common":
   version "0.0.0"
   uid ""
