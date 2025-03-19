@@ -170,8 +170,6 @@ export const reindexServiceFactory = (
     const { indexName, rollupJob } = reindexOp.attributes;
 
     if (rollupJob) {
-      // will wait up to 30 seconds for the job to stop.
-      // is that enough?
       await esClient.rollup.stopJob({ id: rollupJob, wait_for_completion: true });
     }
 
