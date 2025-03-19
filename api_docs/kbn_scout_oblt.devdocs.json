@@ -1081,8 +1081,14 @@
           "EsArchiverFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
@@ -1179,8 +1185,14 @@
           },
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; } & { fleetApi: ",
-          "FleetApiFixture",
+          "; } & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { log: ",
           {
             "pluginId": "@kbn/scout",
@@ -1211,11 +1223,11 @@
           },
           "; } & ",
           {
-            "pluginId": "@kbn/scout",
+            "pluginId": "@kbn/scout-oblt",
             "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutParallelWorkerFixtures",
-            "text": "ScoutParallelWorkerFixtures"
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltParallelWorkerFixtures",
+            "text": "ObltParallelWorkerFixtures"
           },
           ">"
         ],
@@ -1327,8 +1339,14 @@
           "UiSettingsFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { kbnUrl: ",
           {
             "pluginId": "@kbn/scout",
@@ -1347,11 +1365,11 @@
           },
           "; } & ",
           {
-            "pluginId": "@kbn/scout",
+            "pluginId": "@kbn/scout-oblt",
             "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutWorkerFixtures",
-            "text": "ScoutWorkerFixtures"
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltWorkerFixtures",
+            "text": "ObltWorkerFixtures"
           },
           ">"
         ],
@@ -5854,6 +5872,57 @@
       },
       {
         "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.ObltParallelWorkerFixtures",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObltParallelWorkerFixtures",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltParallelWorkerFixtures",
+            "text": "ObltParallelWorkerFixtures"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutParallelWorkerFixtures",
+            "text": "ScoutParallelWorkerFixtures"
+          }
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltParallelWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.ObltTestFixtures",
         "type": "Interface",
         "tags": [],
@@ -5894,6 +5963,57 @@
                 "docId": "kibKbnScoutObltPluginApi",
                 "section": "def-common.ObltPageObjects",
                 "text": "ObltPageObjects"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.ObltWorkerFixtures",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObltWorkerFixtures",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltWorkerFixtures",
+            "text": "ObltWorkerFixtures"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutWorkerFixtures",
+            "text": "ScoutWorkerFixtures"
+          }
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
               }
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
@@ -6249,39 +6369,18 @@
     "misc": [
       {
         "parentPluginId": "@kbn/scout-oblt",
-        "id": "def-common.ObltParallelWorkerFixtures",
+        "id": "def-common.ObltApiServicesFixture",
         "type": "Type",
         "tags": [],
-        "label": "ObltParallelWorkerFixtures",
+        "label": "ObltApiServicesFixture",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
             "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutParallelWorkerFixtures",
-            "text": "ScoutParallelWorkerFixtures"
-          }
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-oblt",
-        "id": "def-common.ObltWorkerFixtures",
-        "type": "Type",
-        "tags": [],
-        "label": "ObltWorkerFixtures",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutWorkerFixtures",
-            "text": "ScoutWorkerFixtures"
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
           }
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
