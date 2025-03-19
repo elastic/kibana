@@ -27,9 +27,33 @@ describe('Versioned router', () => {
   });
 
   it('can register multiple routes', () => {
-    versionedRouter.get({ path: '/test/{id}', access: 'internal' });
-    versionedRouter.post({ path: '/test', access: 'internal' });
-    versionedRouter.delete({ path: '/test', access: 'internal' });
+    versionedRouter.get({
+      path: '/test/{id}',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+      access: 'internal',
+    });
+    versionedRouter.post({
+      path: '/test',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+      access: 'internal',
+    });
+    versionedRouter.delete({
+      path: '/test',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+      access: 'internal',
+    });
     expect(versionedRouter.getRoutes()).toHaveLength(3);
   });
 
@@ -42,14 +66,32 @@ describe('Versioned router', () => {
       path: '/test/{id}',
       access: 'internal',
       discontinued: 'x.y.z',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     });
     versionedRouter.post({
       path: '/test',
       access: 'internal',
       summary: 'Post test',
       description: 'Post test description',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     });
-    versionedRouter.delete({ path: '/test', access: 'internal' });
+    versionedRouter.delete({
+      path: '/test',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    });
     expect(versionedRouter.getRoutes()).toMatchInlineSnapshot(`
       Array [
         Object {
