@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export * from './ingest';
-export * from './api';
-export * from './core';
-export * from './helpers';
-export * from './group';
-export * from './record_types';
-export * from './content';
+lexer grammar Rrf;
+
+DEV_RRF : {this.isDevVersion()}? 'rrf' -> pushMode(EXPRESSION_MODE);
