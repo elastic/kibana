@@ -82,22 +82,22 @@ export const getGuideCards = (
       telemetryId: 'onboarding--search--ai',
       order: 7,
     },
-  {
-    solution: 'search',
-    icon: 'wrench',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
-        defaultMessage="Build an application on {lineBreak} top of Elasticsearch"
-        values={{
-          lineBreak: <br />,
-        }}
-      />
-    ),
-    guideId: 'appSearch',
-    telemetryId: 'onboarding--search--application',
-    order: 10,
-  },
+    {
+      solution: 'search',
+      icon: 'wrench',
+      title: (
+        <FormattedMessage
+          id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
+          defaultMessage="Build an application on {lineBreak} top of Elasticsearch"
+          values={{
+            lineBreak: <br />,
+          }}
+        />
+      ),
+      guideId: 'appSearch',
+      telemetryId: 'onboarding--search--application',
+      order: 10,
+    },
     {
       solution: 'search',
       icon: 'search',
