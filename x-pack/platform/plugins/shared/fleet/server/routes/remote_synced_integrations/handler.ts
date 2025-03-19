@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { getOneRemoteSyncedIntegrationsRequestSchema } from '../../types';
 
 import type { GetOneRemoteSyncedIntegrationsResponse } from '../../../common/types';
-import { getFollowerIndexStats } from '../../tasks/sync_integrations_on_remote';
+import { getFollowerIndexInfo } from '../../tasks/sync_integrations_on_remote';
 import { appContextService } from '../../services';
 
 export const getRemoteSyncedIntegrationsInfoHandler: RequestHandler<
@@ -24,8 +24,7 @@ export const getRemoteSyncedIntegrationsInfoHandler: RequestHandler<
     return;
   }
   try {
-    const stats = await getFollowerIndexStats(esClient, request.params.outputId);
-    console.log('## stats', stats);
+    const info = await getFollowerIndexInfo(esClient, request.params.outputId);
 
     const body: GetOneRemoteSyncedIntegrationsResponse = {
       item: {},
@@ -33,12 +32,6 @@ export const getRemoteSyncedIntegrationsInfoHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    // if (error.isBoom && error.output.statusCode === 404) {
-    //   return response.notFound({
-    //     body: { message: `Synced integrations with outputId ${request.params.outputId} not found` },
-    //   });
-    // }
-
     throw error;
   }
 };

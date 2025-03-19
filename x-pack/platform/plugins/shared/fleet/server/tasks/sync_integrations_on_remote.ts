@@ -12,7 +12,7 @@ import semverGte from 'semver/functions/gte';
 import type { PackageClient } from '../services';
 import { appContextService, outputService } from '../services';
 
-import { PackageNotFoundError, FleetNotFoundError, FleetError } from '../errors';
+import { PackageNotFoundError, IndexNotFoundError } from '../errors';
 
 import type { SyncIntegrationsData } from './sync_integrations_task';
 
@@ -178,20 +178,24 @@ export const syncIntegrationsOnRemote = async (
   }
 };
 
-export const getFollowerIndexStats = async (esClient: ElasticsearchClient, outputId: string) => {
+export const getFollowerIndexInfo = async (esClient: ElasticsearchClient, outputId: string) => {
   const logger = appContextService.getLogger();
   const index = `${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`.replace('*', outputId);
 
   try {
-    const res = await esClient.ccr.followStats({
+    const res = await esClient.ccr.followInfo({
       index,
     });
+    if (!res?.follower_indices || res.follower_indices.length === 0)
+      throw new IndexNotFoundError(`Follower index ${index} not found`); // 404
 
-    return res.indices;
+    // if (res.follower_indices[0]?.status === 'paused') {
+    //   throw new IndexNotFoundError(`Follower index ${index} paused`); // error code ?
+    // }
+    // indices comparison
+    return res.follower_indices;
   } catch (err) {
     logger.error('error', err.message);
-    if (err?.body?.error?.type === 'resource_not_found_exception')
-      throw new FleetNotFoundError(`Index ${index} not found`);
-    throw new FleetError(`Error: ${err.message}`);
+    throw err;
   }
 };
