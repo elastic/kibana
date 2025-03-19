@@ -7,6 +7,7 @@
 
 import { ApiServicesFixture, spaceTest as spaceBase } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
+import { SamlAuth, ScoutLogger, ScoutTestConfig } from '@kbn/scout/src/playwright/fixtures/worker';
 import { extendPageObjects } from './test/page_objects';
 import {
   SecurityParallelTestFixtures,
@@ -25,10 +26,20 @@ export const spaceTest = spaceBase.extend<
   SecurityParallelWorkerFixtures
 >({
   browserAuth: async (
-    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    {
+      browserAuth,
+      config,
+      samlAuth,
+      log,
+    }: {
+      browserAuth: BrowserAuthFixture;
+      config: ScoutTestConfig;
+      samlAuth: SamlAuth;
+      log: ScoutLogger;
+    },
     use: (auth: SecurityBrowserAuthFixture) => Promise<void>
   ) => {
-    const extendedAuth = await extendBrowserAuth(browserAuth);
+    const extendedAuth = await extendBrowserAuth(browserAuth, config, samlAuth, log);
     await use(extendedAuth);
   },
   pageObjects: async (

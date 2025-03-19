@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { ApiServicesFixture, test as base } from '@kbn/scout';
+import { test as base, ScoutTestConfig } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
+import {
+  ApiServicesFixture,
+  SamlAuth,
+  ScoutLogger,
+} from '@kbn/scout/src/playwright/fixtures/worker';
 import { extendPageObjects } from './test/page_objects';
 import {
   SecurityApiServicesFixture,
@@ -19,10 +24,20 @@ import { getDetectionRuleApiService } from './worker/apis';
 
 export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
   browserAuth: async (
-    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    {
+      browserAuth,
+      config,
+      samlAuth,
+      log,
+    }: {
+      browserAuth: BrowserAuthFixture;
+      config: ScoutTestConfig;
+      samlAuth: SamlAuth;
+      log: ScoutLogger;
+    },
     use: (auth: SecurityBrowserAuthFixture) => Promise<void>
   ) => {
-    const extendedAuth = await extendBrowserAuth(browserAuth);
+    const extendedAuth = await extendBrowserAuth(browserAuth, config, samlAuth, log);
     await use(extendedAuth);
   },
   pageObjects: async (
