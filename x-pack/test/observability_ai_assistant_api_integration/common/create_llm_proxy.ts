@@ -158,9 +158,7 @@ export class LlmProxy {
     } = {}
   ) {
     return this.intercept(
-      `Conversation interceptor: "${
-        name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`
-      }"`,
+      `Conversation: "${name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`}"`,
       // @ts-expect-error
       (body) => body.tool_choice?.function?.name === undefined,
       msg
@@ -168,16 +166,18 @@ export class LlmProxy {
   }
 
   interceptWithFunctionRequest({
-    name: name,
+    name,
     arguments: argumentsCallback,
     when,
+    interceptorName,
   }: {
     name: string;
     arguments: (body: ChatCompletionStreamParams) => string;
     when: RequestInterceptor['when'];
+    interceptorName?: string;
   }) {
     // @ts-expect-error
-    return this.intercept(`Function request interceptor: "${name}"`, when, (body) => {
+    return this.intercept(interceptorName ?? `Function request: "${name}"`, when, (body) => {
       return {
         content: '',
         tool_calls: [
@@ -250,6 +250,7 @@ export class LlmProxy {
   interceptTitle(title: string) {
     return this.interceptWithFunctionRequest({
       name: TITLE_CONVERSATION_FUNCTION_NAME,
+      interceptorName: `Title: "${title}"`,
       arguments: () => JSON.stringify({ title }),
       // @ts-expect-error
       when: (body) => body.tool_choice?.function?.name === TITLE_CONVERSATION_FUNCTION_NAME,
@@ -281,7 +282,7 @@ export class LlmProxy {
               requestBody,
               status: once((status: number) => {
                 response.writeHead(status, {
-                  'Elastic-Interceptor': name,
+                  'Elastic-Interceptor': name.replace(/[^a-zA-Z0-9 ]/g, ''), // Keeps only alphanumeric characters and spaces
                   'Content-Type': 'text/event-stream',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',
