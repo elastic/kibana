@@ -262,7 +262,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -455,7 +455,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -483,7 +483,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -524,7 +524,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -549,7 +549,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -574,7 +574,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -610,7 +610,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: 'the-saved-search-id',
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -636,7 +636,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -666,7 +666,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -697,7 +697,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -728,7 +728,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -746,7 +746,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -762,7 +762,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -785,7 +785,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -801,7 +801,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -836,7 +836,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -863,7 +863,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: 'the-saved-search-id-with-timefield',
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -890,7 +890,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: {
             dataSource: createDataViewDataSource({ dataViewId: 'index-pattern-with-timefield-id' }),
           },
@@ -920,7 +920,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: { dataViewSpec: dataViewSpecMock },
+          dataViewSpec: dataViewSpecMock,
           defaultUrlState: undefined,
         })
       );
@@ -943,7 +943,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -963,7 +963,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -982,7 +982,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchAdHoc.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1005,7 +1005,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMockWithESQL.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1050,7 +1050,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1085,7 +1085,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1110,7 +1110,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1140,7 +1140,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1174,7 +1174,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1195,7 +1195,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1206,7 +1206,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: undefined,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1220,7 +1220,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1241,7 +1241,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
@@ -1293,7 +1293,7 @@ describe('Discover state', () => {
           stateContainer: state,
           mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
           discoverSessionId: savedSearchMock.id,
-          historyLocationState: undefined,
+          dataViewSpec: undefined,
           defaultUrlState: undefined,
         })
       );
