@@ -14,4 +14,9 @@ export {
   findCodeOwnersEntryForPath,
   getOwningTeamsForPath,
 } from './src/code_owners';
-export { KIBANA_GROUP_TEAMS_MAPPINGS, findGroupByOwner } from './src/code_owner_group';
+export {
+  type CodeOwnerArea,
+  CODE_OWNER_AREAS,
+  CODE_OWNER_AREA_MAPPINGS,
+  findAreaForCodeOwner,
+} from './src/code_owner_areas';

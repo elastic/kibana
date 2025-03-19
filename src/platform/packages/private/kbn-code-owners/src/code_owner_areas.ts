@@ -7,12 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaGroup, KIBANA_GROUPS } from '@kbn/projects-solutions-groups';
+/**
+ * Code owner area names
+ */
+export const CODE_OWNER_AREAS = [
+  'platform',
+  'search',
+  'observability',
+  'security',
+  'chat',
+] as const;
+export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 
 /**
- * Group => kibana team mappings
+ * Area mappings for code owners
  */
-export const KIBANA_GROUP_TEAMS_MAPPINGS: Record<KibanaGroup, string[]> = {
+export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   // BOOKMARK - List of Kibana solutions
   platform: [
     'elastic/appex-ai-infra',
@@ -76,21 +86,23 @@ export const KIBANA_GROUP_TEAMS_MAPPINGS: Record<KibanaGroup, string[]> = {
     'elastic/security-threat-hunting-investigations',
   ],
   chat: [
-    // BOOKMARK - List of Kibana solutions - TODO add owner teams here (once they exist)
+    // TODO add owner teams here (once they exist)
+    // https://github.com/elastic/kibana/issues/213469
   ],
 };
 
 /**
- * Find what group a code owner belongs to
+ * Find what area a code owner belongs to
  *
- * @param owner Owner to find a group for
- * @returns The code owner group if a match for the given owner is found
+ * @param owner Owner to find an area name
+ * @returns The code owner area if a match for the given owner is found
  */
-export function findGroupByOwner(owner: string): KibanaGroup | undefined {
-  for (const group of KIBANA_GROUPS) {
-    const owners = KIBANA_GROUP_TEAMS_MAPPINGS[group];
+export function findAreaForCodeOwner(owner: string): CodeOwnerArea | undefined {
+  for (const area of CODE_OWNER_AREAS) {
+    const owners = CODE_OWNER_AREA_MAPPINGS[area];
+
     if (owners.includes(owner)) {
-      return group;
+      return area;
     }
   }
 }

@@ -21,6 +21,5 @@
     "@kbn/repo-info",
     "@kbn/code-owners",
     "@kbn/repo-packages",
-    "@kbn/projects-solutions-groups",
   ]
 }

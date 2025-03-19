@@ -40,7 +40,7 @@ export async function findCodeOwnersForPath() {
 
       log.write(`Matching pattern: ${codeOwnersEntry.pattern}`);
       log.write('Teams:', codeOwnersEntry.teams);
-      log.write('Groups:', codeOwnersEntry.groups);
+      log.write('Areas:', codeOwnersEntry.areas);
     },
     {
       description: `Find code owners for a given path in this local Kibana repository`,

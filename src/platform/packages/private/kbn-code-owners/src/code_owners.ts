@@ -12,15 +12,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import ignore, { Ignore } from 'ignore';
-import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { CODE_OWNERS_FILE, throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
-import { findGroupByOwner } from './code_owner_group';
+import { CodeOwnerArea, findAreaForCodeOwner } from './code_owner_areas';
 
 export interface CodeOwnersEntry {
   pattern: string;
   matcher: Ignore;
   teams: string[];
-  groups: KibanaGroup[];
+  areas: CodeOwnerArea[];
   comment?: string;
 }
 
@@ -68,18 +67,18 @@ export function getCodeOwnersEntries(): CodeOwnersEntry[] {
     const pathPattern = rawPathPattern.replace(/\/$/, '');
 
     const teams = rawTeams.map((team) => team.replace('@', '')).filter((team) => team.length > 0);
-    const groups: KibanaGroup[] = [];
+    const areas: CodeOwnerArea[] = [];
 
     for (const team of teams) {
-      const group = findGroupByOwner(team);
-      if (group === undefined || groups.includes(group)) continue;
-      groups.push(group);
+      const area = findAreaForCodeOwner(team);
+      if (area === undefined || areas.includes(area)) continue;
+      areas.push(area);
     }
 
     entries.push({
       pattern: pathPattern,
       teams,
-      groups,
+      areas,
       comment,
 
       // Register code owner entry with the `ignores` lib for easy pattern matching later on

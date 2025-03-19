@@ -36,7 +36,9 @@ const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  // BOOKMARK - List of Kibana solutions - TODO add new 'chat' solution - https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
+  // TODO add new 'chat' solution
+  // https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
+  // https://github.com/elastic/kibana/issues/213469
 ]);
 
 const readServerlessRoles = (projectType: string) => {
