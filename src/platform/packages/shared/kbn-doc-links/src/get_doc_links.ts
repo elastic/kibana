@@ -24,8 +24,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
+  const API_DOCS = meta.apiDocsUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+  const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`
+  const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
@@ -171,7 +174,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       elser: `${ELASTICSEARCH_DOCS}semantic-search-semantic-text.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
-      inferenceApiCreate: `${ELASTICSEARCH_DOCS}put-inference-api.html`,
+      inferenceApiCreate: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
+        : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
       inferenceApisConfigureChunking: `${ELASTICSEARCH_DOCS}inference-apis.html#infer-chunking-config`,
       ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
@@ -706,79 +711,79 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     apis: {
       bulkIndexAlias: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-update-aliases`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-update-aliases`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-update-aliases`,
       indexStats: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-update-aliases`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-stats`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-stats`,
       byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
-      createAutoFollowPattern: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-put-auto-follow-pattern`,
-      createFollower: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ccr-follow`,
+      createAutoFollowPattern: `${ELASTICSEARCH_APIS}operation/operation-ccr-put-auto-follow-pattern`,
+      createFollower: `${ELASTICSEARCH_APIS}operation/operation-ccr-follow`,
       createIndex: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-create`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create`,
-      createSnapshotLifecyclePolicy: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-put-lifecycle`,
-      createRoleMapping: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-role-mapping`,
-      createRoleMappingTemplates: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-put-role-mapping`,
-      createRollupJobsRequest: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-rollup-put-job#operation-rollup-put-job-body-application-json`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-create`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-create`,
+      createSnapshotLifecyclePolicy: `${ELASTICSEARCH_APIS}operation/operation-slm-put-lifecycle`,
+      createRoleMapping: `${ELASTICSEARCH_APIS}operation/operation-security-put-role-mapping`,
+      createRoleMappingTemplates: `${ELASTICSEARCH_APIS}operation/operation-security-put-role-mapping`,
+      createRollupJobsRequest: `${ELASTICSEARCH_APIS}operation/operation-rollup-put-job#operation-rollup-put-job-body-application-json`,
       createApiKey: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-security-create-api-key`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-create-api-key`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key`,
       createPipeline: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ingest-put-pipeline`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-pipeline`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-put-pipeline`
+        : `${ELASTICSEARCH_APIS}operation/operation-ingest-put-pipeline`,
       createTransformRequest: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-transform-put-transform#operation-transform-put-transform-body-application-json`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-put-transform#operation-transform-put-transform-body-application-json`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-put-transform#operation-transform-put-transform-body-application-json`
+        : `${ELASTICSEARCH_APIS}operation/operation-transform-put-transform#operation-transform-put-transform-body-application-json`,
       cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
-      executeWatchActionModes: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-execute-watch#operation-watcher-execute-watch-body-application-json`,
+      executeWatchActionModes: `${ELASTICSEARCH_APIS}operation/operation-watcher-execute-watch#operation-watcher-execute-watch-body-application-json`,
       indexExists: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-exists`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-exists`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-exists`,
       inferTrainedModel: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-infer-trained-model`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-infer-trained-model`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ml-infer-trained-model`
+        : `${ELASTICSEARCH_APIS}operation/operation-ml-infer-trained-model`,
       multiSearch: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-msearch`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch`,
-      openIndex: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-open`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-msearch`
+        : `${ELASTICSEARCH_APIS}operation/operation-msearch`,
+      openIndex: `${ELASTICSEARCH_APIS}operation/operation-indices-open`,
       putComponentTemplate: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cluster-put-component-template`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-cluster-put-component-template`
+        : `${ELASTICSEARCH_APIS}operation/operation-cluster-put-component-template`,
       painlessExecute: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-scripts-painless-execute`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scripts-painless-execute`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-scripts-painless-execute`
+        : `${ELASTICSEARCH_APIS}operation/operation-scripts-painless-execute`,
       painlessExecuteAPIContexts: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-scripts-painless-execute#operation-scripts-painless-execute-body-application-json`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scripts-painless-execute#operation-scripts-painless-execute-body-application-json`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-scripts-painless-execute#operation-scripts-painless-execute-body-application-json`
+        : `${ELASTICSEARCH_APIS}operation/operation-scripts-painless-execute#operation-scripts-painless-execute-body-application-json`,
       putComponentTemplateMetadata: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cluster-put-component-template#operation-cluster-put-component-template-body-application-json-_meta`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template#operation-cluster-put-component-template-body-application-json-_meta`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-cluster-put-component-template#operation-cluster-put-component-template-body-application-json-_meta`
+        : `${ELASTICSEARCH_APIS}operation/operation-cluster-put-component-template#operation-cluster-put-component-template-body-application-json-_meta`,
       putEnrichPolicy: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-enrich-put-policy`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-put-policy`,
-      putIndexTemplateV1: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-template`,
-      putSnapshotLifecyclePolicy: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-put-lifecycle`,
-      putWatch: `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-put-watch`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-enrich-put-policy`
+        : `${ELASTICSEARCH_APIS}operation/operation-enrich-put-policy`,
+      putIndexTemplateV1: `${ELASTICSEARCH_APIS}operation/operation-indices-put-template`,
+      putSnapshotLifecyclePolicy: `${ELASTICSEARCH_APIS}operation/operation-slm-put-lifecycle`,
+      putWatch: `${ELASTICSEARCH_APIS}operation/operation-watcher-put-watch`,
       restApis: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}`
+        : `${ELASTICSEARCH_APIS}`,
       searchPreference: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-search#operation-search-preference`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search#operation-search-preference`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-search#operation-search-preference`
+        : `${ELASTICSEARCH_APIS}operation/operation-search#operation-search-preference`,
       securityApis: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/group/endpoint-security`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-security`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-security`
+        : `${ELASTICSEARCH_APIS}group/endpoint-security`,
       simulatePipeline: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ingest-simulate`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-simulate`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-simulate`
+        : `${ELASTICSEARCH_APIS}operation/operation-ingest-simulate`,
       tasks: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/group/endpoint-tasks`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-tasks`
+        : `${ELASTICSEARCH_APIS}group/endpoint-tasks`,
       timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
       updateTransform: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-transform-update-transform`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-update-transform`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-update-transform`
+        : `${ELASTICSEARCH_APIS}operation/operation-transform-update-transform`,
     },
     plugins: {
       azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
@@ -793,14 +798,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
       changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
       createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
-      getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
+      getSnapshot: `${ELASTICSEARCH_APIS}operation/operation-snapshot-get`,
       registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-filesystem-repository.html#filesystem-repository-settings`,
       registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-source-only-repository.html#source-only-repository-settings`,
       registerUrl: `${ELASTICSEARCH_DOCS}snapshots-read-only-repository.html#read-only-url-repository-settings`,
       restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
-      restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
+      restoreSnapshotApi: `${ELASTICSEARCH_APIS}operation/operation-snapshot-restore`,
       searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
-      slmStart: `${ELASTICSEARCH_DOCS}slm-api-start.html`,
+      slmStart: `${ELASTICSEARCH_APIS}operation/operation-slm-start`,
     },
     ingest: {
       append: `${ELASTICSEARCH_DOCS}append-processor.html`,
@@ -1012,7 +1017,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
     inferenceManagement: {
-      inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
+      inferenceAPIDocumentation: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
+        : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
     },
     cases: {
       legacyApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
