@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-oblt';
+import { z } from '@kbn/zod';
 
-// eslint-disable-next-line import/no-default-export
-export default createPlaywrightConfig({
-  testDir: './tests',
+interface ContentPack {
+  content: string;
+}
+
+const contentPackSchema: z.Schema<ContentPack> = z.object({
+  content: z.string(),
 });
+
+export { contentPackSchema, type ContentPack };
