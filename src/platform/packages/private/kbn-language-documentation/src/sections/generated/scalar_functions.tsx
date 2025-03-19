@@ -71,7 +71,7 @@ export const functions = {
   -->
 
   ### ACOS
-  Returns the arccosine of \`n\` as an angle, expressed in radians.
+  Returns the [arccosine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of \`n\` as an angle, expressed in radians.
 
   \`\`\`
   ROW a=.9
@@ -102,7 +102,7 @@ export const functions = {
   -->
 
   ### ASIN
-  Returns the arcsine of the input
+  Returns the [arcsine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of the input
   numeric expression as an angle, expressed in radians.
 
   \`\`\`
@@ -134,7 +134,7 @@ export const functions = {
   -->
 
   ### ATAN
-  Returns the arctangent of the input
+  Returns the [arctangent](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of the input
   numeric expression as an angle, expressed in radians.
 
   \`\`\`
@@ -168,7 +168,7 @@ export const functions = {
   -->
 
   ### ATAN2
-  The angle between the positive x-axis and the ray from the
+  The [angle](https://en.wikipedia.org/wiki/Atan2) between the positive x-axis and the ray from the
   origin to the point (x , y) in the Cartesian plane, expressed in radians.
 
   \`\`\`
@@ -353,7 +353,7 @@ export const functions = {
   ROW a=1.8
   | EVAL a=CEIL(a)
   \`\`\`
-  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Math.ceil.
+  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to [Math.ceil](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#ceil(double)).
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -483,7 +483,7 @@ export const functions = {
   -->
 
   ### COS
-  Returns the cosine of an angle.
+  Returns the [cosine](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
 
   \`\`\`
   ROW a=1.8
@@ -514,7 +514,7 @@ export const functions = {
   -->
 
   ### COSH
-  Returns the hyperbolic cosine of a number.
+  Returns the [hyperbolic cosine](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
 
   \`\`\`
   ROW a=1.8
@@ -718,7 +718,7 @@ export const functions = {
   -->
 
   ### E
-  Returns Euler’s number.
+  Returns [Euler’s number](https://en.wikipedia.org/wiki/E_(mathematical_constant)).
 
   \`\`\`
   ROW E()
@@ -824,7 +824,7 @@ export const functions = {
   \`\`\`
   Note: This is a noop for \`long\` (including unsigned) and \`integer\`.
   For \`double\` this picks the closest \`double\` value to the integer
-  similar to Math.floor.
+  similar to [Math.floor](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#floor(double)).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -887,7 +887,7 @@ export const functions = {
   -->
 
   ### GREATEST
-  Returns the maximum value from multiple columns. This is similar to \`MV_MAX\`
+  Returns the maximum value from multiple columns. This is similar to [\`MV_MAX\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_max)
   except it is intended to run on multiple columns at once.
 
   \`\`\`
@@ -1059,7 +1059,7 @@ export const functions = {
   -->
 
   ### LEAST
-  Returns the minimum value from multiple columns. This is similar to \`MV_MIN\` except it is intended to run on multiple columns at once.
+  Returns the minimum value from multiple columns. This is similar to [\`MV_MIN\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_min) except it is intended to run on multiple columns at once.
 
   \`\`\`
   ROW a = 10, b = 20
@@ -1306,16 +1306,16 @@ export const functions = {
   -->
 
   ### MATCH
-  Use \`MATCH\` to perform a match query on the specified field.
+  Use \`MATCH\` to perform a [match query](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-match-query) on the specified field.
   Using \`MATCH\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
 
-  Match can be used on fields from the text family like  text and  semantic_text,
+  Match can be used on fields from the text family like [text](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/text) and [semantic_text](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/semantic-text),
   as well as other field types like keyword, boolean, dates, and numeric types.
 
-  Match can use function named parameters to specify additional options for the match query.
-  All match query parameters are supported.
+  Match can use [function named parameters](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-syntax#esql-function-named-params) to specify additional options for the match query.
+  All [match query parameters](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-match-query#match-field-params) are supported.
 
-  For a simplified syntax, you can use the match operator \`:\` operator instead of \`MATCH\`.
+  For a simplified syntax, you can use the [match operator](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-search-operators) \`:\` operator instead of \`MATCH\`.
 
   \`MATCH\` returns true if the provided query matches the row.
 
@@ -1556,7 +1556,7 @@ export const functions = {
   ### MV_FIRST
   Converts a multivalued expression into a single valued column containing the
   first value. This is most useful when reading from a function that emits
-  multivalued columns in a known order like \`SPLIT\`.
+  multivalued columns in a known order like [\`SPLIT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-split).
 
   \`\`\`
   ROW a="foo;bar;baz"
@@ -1592,7 +1592,7 @@ export const functions = {
   ### MV_LAST
   Converts a multivalue expression into a single valued column containing the last
   value. This is most useful when reading from a function that emits multivalued
-  columns in a known order like \`SPLIT\`.
+  columns in a known order like [\`SPLIT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-split).
 
   \`\`\`
   ROW a="foo;bar;baz"
@@ -1839,7 +1839,7 @@ export const functions = {
   ### MV_SLICE
   Returns a subset of the multivalued field using the start and end index values.
   This is most useful when reading from a function that emits multivalued columns
-  in a known order like \`SPLIT\` or \`MV_SORT\`.
+  in a known order like [\`SPLIT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-split) or [\`MV_SORT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_sort).
 
   \`\`\`
   row a = [1, 2, 2, 3]
@@ -2004,7 +2004,7 @@ export const functions = {
   -->
 
   ### PI
-  Returns Pi, the ratio of a circle’s circumference to its diameter.
+  Returns [Pi](https://en.wikipedia.org/wiki/Pi), the ratio of a circle’s circumference to its diameter.
 
   \`\`\`
   ROW PI()
@@ -2066,7 +2066,7 @@ export const functions = {
   -->
 
   ### QSTR
-  Performs a query string query. Returns true if the provided query string matches the row.
+  Performs a [query string query](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-query-string-query). Returns true if the provided query string matches the row.
 
   \`\`\`
   FROM books
@@ -2419,7 +2419,7 @@ export const functions = {
   -->
 
   ### SIN
-  Returns the sine of an angle.
+  Returns the [sine](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
 
   \`\`\`
   ROW a=1.8
@@ -2450,7 +2450,7 @@ export const functions = {
   -->
 
   ### SINH
-  Returns the hyperbolic sine of a number.
+  Returns the [hyperbolic sine](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
 
   \`\`\`
   ROW a=1.8
@@ -2583,7 +2583,7 @@ export const functions = {
 
   ### ST_CONTAINS
   Returns whether the first geometry contains the second geometry.
-  This is the inverse of the \`ST_WITHIN\` function.
+  This is the inverse of the [ST_WITHIN](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_within) function.
 
   \`\`\`
   FROM airport_city_boundaries
@@ -2619,7 +2619,7 @@ export const functions = {
 
   ### ST_DISJOINT
   Returns whether the two geometries or geometry columns are disjoint.
-  This is the inverse of the \`ST_INTERSECTS\` function.
+  This is the inverse of the [ST_INTERSECTS](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_intersects) function.
   In mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅
 
   \`\`\`
@@ -2732,7 +2732,7 @@ export const functions = {
   Returns true if two geometries intersect.
   They intersect if they have any point in common, including their interior points
   (points along lines or within polygons).
-  This is the inverse of the \`ST_DISJOINT\` function.
+  This is the inverse of the [ST_DISJOINT](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_disjoint) function.
   In mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅
 
   \`\`\`
@@ -2768,7 +2768,7 @@ export const functions = {
 
   ### ST_WITHIN
   Returns whether the first geometry is within the second geometry.
-  This is the inverse of the \`ST_CONTAINS\` function.
+  This is the inverse of the [ST_CONTAINS](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_contains) function.
 
   \`\`\`
   FROM airport_city_boundaries
@@ -3087,7 +3087,7 @@ export const functions = {
   -->
 
   ### TAN
-  Returns the tangent of an angle.
+  Returns the [tangent](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
 
   \`\`\`
   ROW a=1.8
@@ -3118,7 +3118,7 @@ export const functions = {
   -->
 
   ### TANH
-  Returns the hyperbolic tangent of a number.
+  Returns the [hyperbolic tangent](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
 
   \`\`\`
   ROW a=1.8
@@ -3159,6 +3159,36 @@ export const functions = {
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             ignoreTag: true,
           })}
+        />
+      ),
+    },
+    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
+    {
+      label: i18n.translate('languageDocumentation.documentationESQL.to_aggregate_metric_double', {
+        defaultMessage: 'TO_AGGREGATE_METRIC_DOUBLE',
+      }),
+      preview: false,
+      description: (
+        <Markdown
+          openLinksInNewTab
+          readOnly
+          enableSoftLineBreaks
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.to_aggregate_metric_double.markdown',
+            {
+              defaultMessage: `<!--
+  This is generated by ESQL’s AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  -->
+
+  ### TO_AGGREGATE_METRIC_DOUBLE
+  Encode a numeric to an aggregate_metric_double.
+
+  `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
+            }
+          )}
         />
       ),
     },
@@ -3253,7 +3283,8 @@ export const functions = {
 
   ### TO_CARTESIANPOINT
   Converts an input value to a \`cartesian_point\` value.
-  A string will only be successfully converted if it respects WKT Point format.
+  A string will only be successfully converted if it respects the
+  [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\`
   ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
@@ -3289,7 +3320,8 @@ export const functions = {
 
   ### TO_CARTESIANSHAPE
   Converts an input value to a \`cartesian_shape\` value.
-  A string will only be successfully converted if it respects WKT format.
+  A string will only be successfully converted if it respects the
+  [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\`
   ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
@@ -3390,7 +3422,7 @@ export const functions = {
   ### TO_DATETIME
   Converts an input value to a date value.
   A string will only be successfully converted if it’s respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`.
-  To convert dates in other formats, use \`DATE_PARSE\`.
+  To convert dates in other formats, use [\`DATE_PARSE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-date_parse).
 
   \`\`\`
   ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
@@ -3425,7 +3457,7 @@ export const functions = {
   -->
 
   ### TO_DEGREES
-  Converts a number in radians to degrees.
+  Converts a number in [radians](https://en.wikipedia.org/wiki/Radian) to [degrees](https://en.wikipedia.org/wiki/Degree_(angle)).
 
   \`\`\`
   ROW rad = [1.57, 3.14, 4.71]
@@ -3460,7 +3492,7 @@ export const functions = {
 
   ### TO_DOUBLE
   Converts an input value to a double value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the Unix epoch,
+  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time),
   converted to double. Boolean \`true\` will be converted to double \`1.0\`, \`false\` to \`0.0\`.
 
   \`\`\`
@@ -3496,7 +3528,8 @@ export const functions = {
 
   ### TO_GEOPOINT
   Converts an input value to a \`geo_point\` value.
-  A string will only be successfully converted if it respects WKT Point format.
+  A string will only be successfully converted if it respects the
+  [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\`
   ROW wkt = "POINT(42.97109630194 14.7552534413725)"
@@ -3531,7 +3564,8 @@ export const functions = {
 
   ### TO_GEOSHAPE
   Converts an input value to a \`geo_shape\` value.
-  A string will only be successfully converted if it respects WKT format.
+  A string will only be successfully converted if it respects the
+  [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\`
   ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
@@ -3567,7 +3601,7 @@ export const functions = {
   ### TO_INTEGER
   Converts an input value to an integer value.
   If the input parameter is of a date type, its value will be interpreted as milliseconds
-  since the Unix epoch, converted to integer.
+  since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to integer.
   Boolean \`true\` will be converted to integer \`1\`, \`false\` to \`0\`.
 
   \`\`\`
@@ -3638,7 +3672,7 @@ export const functions = {
 
   ### TO_LONG
   Converts an input value to a long value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the Unix epoch, converted to long.
+  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to long.
   Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
 
   \`\`\`
@@ -3707,7 +3741,7 @@ export const functions = {
   -->
 
   ### TO_RADIANS
-  Converts a number in degrees to radians.
+  Converts a number in [degrees](https://en.wikipedia.org/wiki/Degree_(angle)) to [radians](https://en.wikipedia.org/wiki/Radian).
 
   \`\`\`
   ROW deg = [90.0, 180.0, 270.0]
@@ -3809,7 +3843,7 @@ export const functions = {
 
   ### TO_UNSIGNED_LONG
   Converts an input value to an unsigned long value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.
+  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to unsigned long.
   Boolean \`true\` will be converted to unsigned long \`1\`, \`false\` to \`0\`.
 
   \`\`\`
