@@ -134,17 +134,22 @@
           {
             "name": "size",
             "in": "query",
+            "description": "The page size to use for cursor-based pagination, must be greater or equal than 1",
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "default": 1
             },
-            "example": 25,
-            "description": "Size provided for cursor based pagination"
+            "example": 1
           },
           {
             "name": "searchAfter",
             "in": "query",
+            "description": "The cursor to use for fetching the results from, when using a cursor-base pagination.",
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           {
@@ -1254,8 +1259,7 @@
                       "type": "object",
                       "required": [
                         "name",
-                        "aggregation",
-                        "field"
+                        "aggregation"
                       ],
                       "properties": {
                         "name": {
@@ -1265,11 +1269,12 @@
                           "pattern": "^[A-Z]$"
                         },
                         "aggregation": {
-                          "description": "The aggregation type of the metric. Only valid option is \"sum\"",
+                          "description": "The aggregation type of the metric.",
                           "type": "string",
                           "example": "sum",
                           "enum": [
-                            "sum"
+                            "sum",
+                            "doc_count"
                           ]
                         },
                         "field": {
@@ -1307,8 +1312,7 @@
                       "type": "object",
                       "required": [
                         "name",
-                        "aggregation",
-                        "field"
+                        "aggregation"
                       ],
                       "properties": {
                         "name": {
@@ -1318,11 +1322,12 @@
                           "pattern": "^[A-Z]$"
                         },
                         "aggregation": {
-                          "description": "The aggregation type of the metric. Only valid option is \"sum\"",
+                          "description": "The aggregation type of the metric.",
                           "type": "string",
                           "example": "sum",
                           "enum": [
-                            "sum"
+                            "sum",
+                            "doc_count"
                           ]
                         },
                         "field": {
@@ -2418,26 +2423,71 @@
         "title": "Find SLO definitions response",
         "description": "A paginated response of SLO definitions matching the query.\n",
         "type": "object",
-        "properties": {
-          "page": {
-            "type": "number",
-            "example": 2
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "example": 1
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
+            }
           },
-          "perPage": {
-            "type": "number",
-            "example": 100
-          },
-          "total": {
-            "type": "number",
-            "example": 123
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/slo_definition_response"
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "default": 1,
+                "description": "for backward compability"
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25,
+                "description": "for backward compability"
+              },
+              "size": {
+                "type": "number",
+                "example": 25
+              },
+              "searchAfter": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "some-slo-id",
+                  "other-cursor-id"
+                ],
+                "description": "the cursor to provide to get the next paged results"
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
             }
           }
-        }
+        ]
       },
       "delete_slo_instances_request": {
         "title": "Delete SLO instances request",
