@@ -26,6 +26,7 @@ export type {
   PageObjects,
   ApiServicesFixture,
   BrowserAuthFixture,
+  SamlAuth,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,

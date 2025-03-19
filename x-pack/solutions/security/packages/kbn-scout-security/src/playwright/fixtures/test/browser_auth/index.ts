@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import {
-  browserAuthFixture,
-  mergeTests,
+import { browserAuthFixture, mergeTests } from '@kbn/scout';
+import type {
   ElasticsearchRoleDescriptor,
   KibanaRole,
   ScoutTestConfig,
   BrowserAuthFixture,
+  SamlAuth,
+  ScoutLogger,
+  EsClient,
 } from '@kbn/scout';
-import { SamlAuth, ScoutLogger, EsClient } from '@kbn/scout/src/playwright/fixtures/worker';
 import { roleDesciptorsFixture, RoleDescriptorsFixture } from '../../worker';
 
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
@@ -76,7 +77,7 @@ export const securityBrowserAuthFixture = mergeTests(
     });
 
     if (isCustomRoleCreated) {
-      log.info(`Deleting custom role with name ${samlAuth.customRoleName}`);
+      log.debug(`Deleting custom role with name ${samlAuth.customRoleName}`);
       await esClient.security.deleteRole({ name: samlAuth.customRoleName });
     }
   },

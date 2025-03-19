@@ -6,7 +6,7 @@
  */
 
 import { readRolesDescriptorsFromResource, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
-import { ElasticsearchRoleDescriptor, playwrightTest as base } from '@kbn/scout';
+import { ElasticsearchRoleDescriptor, ScoutLogger, playwrightTest as base } from '@kbn/scout';
 
 export interface RoleDescriptorsFixture {
   serverless: Map<string, ElasticsearchRoleDescriptor>;
@@ -16,9 +16,12 @@ export interface RoleDescriptorsFixture {
  * Fixture that provides the role descriptors for the serverless cluster.
  * Using worker scope to avoid reading the file for each test.
  */
-export const roleDesciptorsFixture = base.extend<{}, { roleDescriptors: RoleDescriptorsFixture }>({
+export const roleDesciptorsFixture = base.extend<
+  {},
+  { roleDescriptors: RoleDescriptorsFixture; log: ScoutLogger }
+>({
   roleDescriptors: [
-    async ({}, use) => {
+    ({ log }, use) => {
       const resourcePath = `${SERVERLESS_ROLES_ROOT_PATH}/security/roles.yml`;
       const serverless = new Map<string, ElasticsearchRoleDescriptor>(
         Object.entries(
@@ -28,7 +31,8 @@ export const roleDesciptorsFixture = base.extend<{}, { roleDescriptors: RoleDesc
           >
         )
       );
-      await use({ serverless });
+      log.serviceLoaded('roleDescriptors');
+      use({ serverless });
     },
     { scope: 'worker' },
   ],

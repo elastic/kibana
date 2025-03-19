@@ -41,5 +41,7 @@ export type {
 // can be extended with solution specific logic
 export { browserAuthFixture } from './fixtures/test';
 
+export type { SamlAuth } from './fixtures/worker';
+
 // use to tag tests
 export { tags } from './tags';
