@@ -8,10 +8,11 @@ synchronize_lexer_grammar () {
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_lexer.g4"
   destination_lib_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr/lexer"
 
-  # Copy the file
+  # Copy the files
   cp "$source_file" "$destination_file"
-  rm -rf "$destination_lib_dir/*"
-  cp -r "$source_lib_dir/*" "$destination_lib_dir"
+  rm -rf "$destination_lib_dir"
+  mkdir -p "$destination_lib_dir"
+  cp -r "$source_lib_dir/" "$destination_lib_dir"
 
   echo "Source files:"
   ls -l "$source_lib_dir"
