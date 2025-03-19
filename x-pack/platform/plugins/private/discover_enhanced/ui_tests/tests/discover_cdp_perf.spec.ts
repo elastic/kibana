@@ -67,6 +67,7 @@ test.describe(
         'Unexpected plugins were loaded on page'
       ).toStrictEqual([
         'aiops',
+        'data',
         'discover',
         'eventAnnotation',
         'expressionXY',
