@@ -64,7 +64,7 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
             closePopover={() => setIsPopoverOpen(false)}
             button={
               <EuiButtonEmpty
-                data-test-subj="syntheticsStatusRuleVizMonitorQueryIDsButton"
+                data-test-subj="syntheticsRuleVizMonitorQueryIDsButton"
                 size="xs"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               >
@@ -92,7 +92,7 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="syntheticsStatusRuleVizInspectButton"
+            data-test-subj="syntheticsRuleVizInspectButton"
             onClick={inspect}
             iconType="inspect"
             size="xs"
