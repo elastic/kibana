@@ -21,6 +21,7 @@ import { RiskScoreEnableSection } from '../components/risk_score_enable_section'
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useRiskEnginePrivileges } from '../api/hooks/use_risk_engine_privileges';
 import { RiskScoreUsefulLinksSection } from '../components/risk_score_useful_links_section';
 import { RiskScoreConfigurationSection } from '../components/risk_score_configuration_section';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
@@ -35,6 +36,7 @@ export const EntityAnalyticsManagementPage = () => {
   const { euiTheme } = useEuiTheme();
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
+  const { data: riskEnginePrivileges } = useRiskEnginePrivileges();
   const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
   const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30d');
   const [to, setTo] = useState(localStorage.getItem('dateEnd') || 'now');
@@ -47,10 +49,9 @@ export const EntityAnalyticsManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
-  const userHasRequiredPrivileges =
-    'hasAllRequiredPrivileges' in privileges && privileges.hasAllRequiredPrivileges;
-  const runEngineBtnIsDisabled =
-    !currentRiskEngineStatus || isLoading || !userHasRequiredPrivileges;
+  const userCanRunEngine =
+    riskEnginePrivileges?.privileges?.elasticsearch?.cluster?.manage_transform || false;
+  const runEngineBtnIsDisabled = !currentRiskEngineStatus || isLoading || !userCanRunEngine;
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
