@@ -17,6 +17,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/i18n-react",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/expression-utils"
   ],
   "exclude": [
     "target/**/*",

@@ -178,6 +178,10 @@ exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
 
+exports[`Error LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Error LINKS_TRACE_ID 1`] = `undefined`;
+
 exports[`Error LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
@@ -372,6 +376,8 @@ exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Error USER_AGENT_ORIGINAL 1`] = `undefined`;
 
+exports[`Error USER_AGENT_VERSION 1`] = `undefined`;
+
 exports[`Error USER_ID 1`] = `undefined`;
 
 exports[`Error VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
@@ -542,6 +548,10 @@ exports[`Span LABEL_NAME 1`] = `undefined`;
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span LABEL_TYPE 1`] = `undefined`;
+
+exports[`Span LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Span LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Span LOG_LEVEL 1`] = `undefined`;
 
@@ -733,6 +743,8 @@ exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Span USER_AGENT_ORIGINAL 1`] = `undefined`;
 
+exports[`Span USER_AGENT_VERSION 1`] = `undefined`;
+
 exports[`Span USER_ID 1`] = `undefined`;
 
 exports[`Span VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
@@ -917,6 +929,10 @@ exports[`Transaction LABEL_NAME 1`] = `undefined`;
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction LABEL_TYPE 1`] = `undefined`;
+
+exports[`Transaction LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Transaction LOG_LEVEL 1`] = `undefined`;
 
@@ -1111,6 +1127,8 @@ exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
 exports[`Transaction USER_AGENT_ORIGINAL 1`] = `"test original"`;
+
+exports[`Transaction USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;
 

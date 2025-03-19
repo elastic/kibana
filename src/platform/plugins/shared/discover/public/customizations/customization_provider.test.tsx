@@ -16,12 +16,12 @@ import {
   useDiscoverCustomization$,
   useDiscoverCustomizationService,
 } from './customization_provider';
-import {
-  createCustomizationService,
+import type {
   DiscoverCustomization,
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
+import { createCustomizationService } from './customization_service';
 
 describe('useDiscoverCustomizationService', () => {
   it('should provide customization service', async () => {
@@ -40,17 +40,14 @@ describe('useDiscoverCustomizationService', () => {
         customizationCallbacks: [callback],
       })
     );
-    expect(wrapper.result.current.isInitialized).toBe(false);
-    expect(wrapper.result.current.customizationService).toBeUndefined();
+    expect(wrapper.result.current).toBeUndefined();
     expect(callback).toHaveBeenCalledTimes(1);
     const cleanup = jest.fn();
     await act(async () => {
       resolveCallback(cleanup);
       await promise;
     });
-    expect(wrapper.result.current.isInitialized).toBe(true);
-    expect(wrapper.result.current.customizationService).toBeDefined();
-    expect(wrapper.result.current.customizationService).toBe(service);
+    expect(wrapper.result.current).toBe(service);
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
     wrapper.unmount();

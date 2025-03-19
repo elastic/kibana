@@ -28,6 +28,12 @@ export function alertStatusRoute(npRoute: RouteDependencies) {
           }),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES cluster client',
+        },
+      },
       options: {
         access: 'internal',
       },

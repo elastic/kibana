@@ -178,13 +178,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (elasticsearchInference) {
         return ASSISTANT_ELSER_INFERENCE_ID;
       }
-    } catch (error) {
-      this.options.logger.debug(
-        `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
-      );
+    } catch (_) {
+      /* empty */
     }
 
-    // Fallback to the dedicated inference endpoint
+    // Fallback to the default inference endpoint
     return ELASTICSEARCH_ELSER_INFERENCE_ID;
   };
 
@@ -233,7 +231,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         ?.some((stats) => isReadyESS(stats) || isReadyServerless(stats));
     } catch (error) {
       this.options.logger.debug(
-        `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
+        `Error checking if Inference endpoint ${inferenceId} exists: ${error}`
       );
       return false;
     }
@@ -363,37 +361,39 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       return;
     }
 
-    this.options.logger.debug('Checking if ML nodes are available...');
-    const mlNodesCount = await getMlNodeCount({ asInternalUser: esClient } as IScopedClusterClient);
-
-    if (mlNodesCount.count === 0 && mlNodesCount.lazyNodeCount === 0) {
-      throw new Error('No ML nodes available');
-    }
-
-    this.options.logger.debug('Starting Knowledge Base setup...');
-    this.options.setIsKBSetupInProgress(this.spaceId, true);
-    const elserId = await this.options.getElserId();
-
-    // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
     try {
-      const legacyESQL = await esClient.deleteByQuery({
-        index: this.indexTemplateAndPattern.alias,
-        query: {
-          bool: {
-            must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
-          },
-        },
-      });
-      if (legacyESQL?.total != null && legacyESQL?.total > 0) {
-        this.options.logger.info(
-          `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
-        );
+      this.options.logger.debug('Checking if ML nodes are available...');
+      const mlNodesCount = await getMlNodeCount({
+        asInternalUser: esClient,
+      } as IScopedClusterClient);
+
+      if (mlNodesCount.count === 0 && mlNodesCount.lazyNodeCount === 0) {
+        throw new Error('No ML nodes available');
       }
-    } catch (e) {
-      this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
-    }
 
-    try {
+      this.options.logger.debug('Starting Knowledge Base setup...');
+      this.options.setIsKBSetupInProgress(this.spaceId, true);
+      const elserId = await this.options.getElserId();
+
+      // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
+      try {
+        const legacyESQL = await esClient.deleteByQuery({
+          index: this.indexTemplateAndPattern.alias,
+          query: {
+            bool: {
+              must: [{ terms: { 'metadata.kbResource': ['esql', 'unknown'] } }],
+            },
+          },
+        });
+        if (legacyESQL?.total != null && legacyESQL?.total > 0) {
+          this.options.logger.info(
+            `Removed ${legacyESQL?.total} ESQL knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+          );
+        }
+      } catch (e) {
+        this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
+      }
+
       /*
         #1 Check if ELSER model is downloaded
         #2 Check if inference endpoint is deployed
@@ -409,7 +409,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
             (await this.isModelInstalled())
               ? Promise.resolve()
               : Promise.reject(new Error('Model not installed')),
-          { minTimeout: 10000, maxTimeout: 10000, retries: 10 }
+          { minTimeout: 30000, maxTimeout: 30000, retries: 20 }
         );
         this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
       } else {
@@ -420,11 +420,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (!inferenceExists) {
         await this.createInferenceEndpoint();
 
-        this.options.logger.error(
+        this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
         );
       } else {
-        this.options.logger.error(
+        this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' is already deployed`
         );
       }
@@ -453,7 +453,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           }
 
           this.options.logger.debug(`Loading Security Labs KB docs...`);
-          await loadSecurityLabs(this, this.options.logger);
+
+          void loadSecurityLabs(this, this.options.logger)?.then(() => {
+            this.options.setIsKBSetupInProgress(this.spaceId, false);
+          });
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
@@ -473,12 +476,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           );
         }
       }
+
+      // If loading security labs, we need to wait for the docs to be loaded
+      if (ignoreSecurityLabs) {
+        this.options.setIsKBSetupInProgress(this.spaceId, false);
+      }
     } catch (e) {
       this.options.setIsKBSetupInProgress(this.spaceId, false);
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
       throw new Error(`Error setting up Knowledge Base: ${e.message}`);
-    } finally {
-      this.options.setIsKBSetupInProgress(this.spaceId, false);
     }
   };
 

@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TabsBar } from './tabs_bar';
+import { servicesMock } from '../../../__mocks__/services';
 
 const items = Array.from({ length: 5 }).map((_, i) => ({
   id: `tab-${i}`,
@@ -22,6 +23,7 @@ describe('TabsBar', () => {
   it('renders tabs bar', async () => {
     const onAdd = jest.fn();
     const onSelect = jest.fn();
+    const onLabelEdited = jest.fn();
     const onClose = jest.fn();
 
     const selectedItem = items[0];
@@ -31,7 +33,9 @@ describe('TabsBar', () => {
         tabContentId={tabContentId}
         items={items}
         selectedItem={selectedItem}
+        services={servicesMock}
         onAdd={onAdd}
+        onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
       />

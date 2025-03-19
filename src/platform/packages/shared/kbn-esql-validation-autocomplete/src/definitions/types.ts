@@ -14,7 +14,7 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '@kbn/esql-ast';
-import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
 import type { ESQLPolicy } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
@@ -272,14 +272,17 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   previousCommands?: ESQLCommand[];
   callbacks?: ESQLCallbacks;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
-) => Promise<SuggestionRawDefinition[]>;
+) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
+/**
+ * @deprecated — use CommandDefinition instead
+ */
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;
 
@@ -298,7 +301,6 @@ export interface CommandBaseDefinition<CommandName extends string> {
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
-  suggest?: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
@@ -322,6 +324,9 @@ export interface CommandTypeDefinition {
   description?: string;
 }
 
+/**
+ * @deprecated options are going away
+ */
 export interface CommandOptionsDefinition<CommandName extends string = string>
   extends CommandBaseDefinition<CommandName> {
   wrapped?: string[];
@@ -345,6 +350,7 @@ export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
+  suggest: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   modes: CommandModeDefinition[];
   /** @deprecated this property will disappear in the future */

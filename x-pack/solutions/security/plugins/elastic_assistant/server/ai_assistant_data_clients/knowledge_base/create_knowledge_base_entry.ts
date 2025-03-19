@@ -120,7 +120,7 @@ export const transformToUpdateSchema = ({
   const base = {
     id: entry.id,
     updated_at: updatedAt,
-    updated_by: user.profile_uid ?? 'unknown',
+    updated_by: user.profile_uid ?? user.username ?? 'unknown',
     name: entry.name,
     type: entry.type,
     global: entry.global,
@@ -186,9 +186,9 @@ export const transformToCreateSchema = ({
   const base = {
     '@timestamp': createdAt,
     created_at: createdAt,
-    created_by: user.profile_uid ?? 'unknown',
+    created_by: user.profile_uid ?? user.username ?? 'unknown',
     updated_at: createdAt,
-    updated_by: user.profile_uid ?? 'unknown',
+    updated_by: user.profile_uid ?? user.username ?? 'unknown',
     name: entry.name,
     namespace: spaceId,
     type: entry.type,

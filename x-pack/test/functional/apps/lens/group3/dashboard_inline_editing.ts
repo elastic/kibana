@@ -7,18 +7,44 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, visualize, lens, timeToVisualize } = getPageObjects([
+  const { dashboard, visualize, lens, timeToVisualize, security } = getPageObjects([
     'dashboard',
     'visualize',
     'lens',
     'timeToVisualize',
+    'security',
   ]);
   const find = getService('find');
   const log = getService('log');
+  const securityService = getService('security');
   const listingTable = getService('listingTable');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
+  const toastsService = getService('toasts');
+
+  const loginWithReadOnlyUser = async () => {
+    await securityService.user.create('global_dashboard_read_privileges_user', {
+      password: 'global_dashboard_read_privileges_user-password',
+      roles: ['viewer'],
+      full_name: 'test user',
+    });
+
+    await security.forceLogout();
+
+    await security.login(
+      'global_dashboard_read_privileges_user',
+      'global_dashboard_read_privileges_user-password',
+      {
+        expectSpaceSelector: false,
+      }
+    );
+  };
+
+  const logoutAndDeleteReadOnlyUser = async () => {
+    await security.forceLogout();
+    await securityService.user.delete('global_dashboard_read_privileges_user');
+  };
 
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();
@@ -229,6 +255,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timeToVisualize.resetNewDashboard();
     });
 
+    it('should allow adding a by reference annotation', async () => {
+      const ANNOTATION_GROUP_TITLE = 'My by reference annotation group';
+      await loadExistingLens();
+      await lens.save('xyVisChart Copy 2', true, false, false, 'new');
+
+      await dashboard.waitForRenderComplete();
+      await elasticChart.setNewChartUiDebugFlag(true);
+
+      await dashboardPanelActions.clickInlineEdit();
+
+      log.debug('Adds by reference annotation');
+
+      await lens.createLayer('annotations');
+
+      await lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
+
+      await visualize.setSaveModalValues(ANNOTATION_GROUP_TITLE, {
+        description: 'my description',
+      });
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+
+      const toastContents = await toastsService.getContentByIndex(1);
+
+      expect(toastContents).to.be(
+        `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`
+      );
+
+      // now close
+      await testSubjects.click('applyFlyoutButton');
+
+      log.debug('Edit the by reference annotation');
+      // and try to edit again the by reference annotation layer event
+      await dashboardPanelActions.clickInlineEdit();
+
+      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      expect(
+        await (
+          await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+        ).getVisibleText()
+      ).to.eql('Event');
+
+      await dashboard.waitForRenderComplete();
+
+      await timeToVisualize.resetNewDashboard();
+    });
+
     it('should allow adding a reference line', async () => {
       await loadExistingLens();
       await lens.save('xyVisChart Copy', true, false, false, 'new');
@@ -257,6 +330,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('xyVisAnnotationIcon');
 
       await timeToVisualize.resetNewDashboard();
+    });
+
+    it('should not allow the show config action for a user with write permissions', async () => {
+      // create a chart and save the dashboard
+      await createNewLens();
+      // save it and add to a new dashboard
+      await lens.save('New Lens from Modal', false, false, false, 'new');
+      // now save the dashboard
+      await dashboard.saveDashboard('My read only testing dashboard', { saveAsNew: true });
+
+      await dashboardPanelActions.expectMissingShowConfigPanelAction();
+      // switch to view and check again
+      await dashboard.switchToViewMode();
+      await dashboardPanelActions.expectMissingShowConfigPanelAction();
+    });
+
+    it('should allow the show config action for a user without write permissions', async () => {
+      // setup a read only user and login with it
+      await loginWithReadOnlyUser();
+
+      // open the previous dashboard
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('My read only testing dashboard');
+      // now check the action is there
+      await dashboardPanelActions.expectExistsShowConfigPanelAction();
+      // clean up
+      await logoutAndDeleteReadOnlyUser();
     });
   });
 }

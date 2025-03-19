@@ -9,7 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction } from 'lodash';
+import { isString, once, pull, isFunction, last } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
@@ -36,6 +36,17 @@ export interface ToolMessage {
   content?: string;
   tool_calls?: ChatCompletionChunkToolCall[];
 }
+
+export interface RelevantField {
+  id: string;
+  name: string;
+}
+
+export interface KnowledgeBaseDocument {
+  id: string;
+  text: string;
+}
+
 export interface LlmResponseSimulator {
   requestBody: ChatCompletionStreamParams;
   status: (code: number) => void;
@@ -180,6 +191,59 @@ export class LlmProxy {
     }).completeAfterIntercept();
   }
 
+  interceptSelectRelevantFieldsToolChoice({
+    from = 0,
+    to = 5,
+  }: { from?: number; to?: number } = {}) {
+    let relevantFields: RelevantField[] = [];
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'select_relevant_fields',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+      arguments: (requestBody) => {
+        const messageWithFieldIds = last(requestBody.messages);
+        const matches = (messageWithFieldIds?.content as string).match(/\{[\s\S]*?\}/g)!;
+        relevantFields = matches
+          .slice(from, to)
+          .map((jsonStr) => JSON.parse(jsonStr) as RelevantField);
+
+        return JSON.stringify({ fieldIds: relevantFields.map(({ id }) => id) });
+      },
+    });
+
+    return {
+      simulator,
+      getRelevantFields: async () => {
+        await simulator;
+        return relevantFields;
+      },
+    };
+  }
+
+  interceptScoreToolChoice(log: ToolingLog) {
+    let documents: KnowledgeBaseDocument[] = [];
+
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'score',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
+      arguments: (requestBody) => {
+        documents = extractDocumentsFromMessage(last(requestBody.messages)?.content as string, log);
+        const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
+
+        return JSON.stringify({ scores });
+      },
+    });
+
+    return {
+      simulator,
+      getDocuments: async () => {
+        await simulator;
+        return documents;
+      },
+    };
+  }
+
   interceptTitle(title: string) {
     return this.interceptWithFunctionRequest({
       name: TITLE_CONVERSATION_FUNCTION_NAME,
@@ -315,4 +379,9 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
 
 function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
+}
+
+function extractDocumentsFromMessage(content: string, log: ToolingLog): KnowledgeBaseDocument[] {
+  const matches = content.match(/\{[\s\S]*?\}/g)!;
+  return matches.map((jsonStr) => JSON.parse(jsonStr));
 }

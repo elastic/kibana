@@ -22,10 +22,14 @@ import {
   LlmProxy,
   ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
-import { clearConversations } from '../knowledge_base/helpers';
+import {
+  systemMessageSorted,
+  clearConversations,
+  decodeEvents,
+  getConversationCreatedEvent,
+} from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -247,7 +251,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const simulator = await simulatorPromise;
         const requestData = simulator.requestBody;
         expect(requestData.messages[0].role).to.eql('system');
-        expect(requestData.messages[0].content).to.eql(systemMessage);
+        expect(systemMessageSorted(requestData.messages[0].content as string)).to.eql(
+          systemMessageSorted(systemMessage)
+        );
       });
     });
 

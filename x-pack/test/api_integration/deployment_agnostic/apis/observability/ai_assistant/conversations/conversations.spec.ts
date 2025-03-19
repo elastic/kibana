@@ -11,6 +11,7 @@ import {
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   MessageRole,
+  Conversation,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { SupertestReturnType } from '../../../../services/observability_ai_assistant_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -408,8 +409,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('conversation duplication', () => {
-      let publicConversationId: string;
-      let privateConversationId: string;
+      let publicConversation: Conversation;
+      let privateConversation: Conversation;
 
       before(async () => {
         const publicCreateResp = await observabilityAIAssistantAPIClient.editor({
@@ -428,7 +429,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
         expect(publicCreateResp.status).to.be(200);
-        publicConversationId = publicCreateResp.body.conversation.id;
+        publicConversation = publicCreateResp.body;
 
         const privateCreateResp = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/conversation',
@@ -446,80 +447,122 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
         expect(privateCreateResp.status).to.be(200);
-        privateConversationId = privateCreateResp.body.conversation.id;
+        privateConversation = privateCreateResp.body;
       });
 
       after(async () => {
-        for (const id of [publicConversationId, privateConversationId]) {
+        for (const conversation of [publicConversation, privateConversation]) {
           const { status } = await observabilityAIAssistantAPIClient.editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-            params: { path: { conversationId: id } },
+            params: { path: { conversationId: conversation.conversation.id } },
           });
           expect(status).to.be(200);
         }
       });
 
-      it('allows the owner to duplicate their own private conversation', async () => {
-        const duplicateResponse = await observabilityAIAssistantAPIClient.editor({
-          endpoint:
-            'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
-          params: {
-            path: { conversationId: privateConversationId },
-          },
-        });
-        expect(duplicateResponse.status).to.be(200);
+      describe('allows the owner to duplicate their own private conversation', () => {
+        let duplicatedConversation: Conversation;
+        before(async () => {
+          const duplicateResponse = await observabilityAIAssistantAPIClient.editor({
+            endpoint:
+              'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
+            params: {
+              path: { conversationId: privateConversation.conversation.id },
+            },
+          });
+          expect(duplicateResponse.status).to.be(200);
 
-        const duplicatedId = duplicateResponse.body.conversation.id;
-        expect(duplicatedId).not.to.eql(privateConversationId);
-        expect(duplicateResponse.body.user?.name).to.eql('elastic_editor');
-
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: { path: { conversationId: duplicatedId } },
+          duplicatedConversation = duplicateResponse.body;
         });
-        expect(status).to.be(200);
+
+        after(async () => {
+          // cleanup
+          const { status } = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+            params: { path: { conversationId: duplicatedConversation.conversation.id } },
+          });
+          expect(status).to.be(200);
+        });
+
+        it('it should not be the same id', () => {
+          expect(duplicatedConversation.conversation.id).not.to.eql(
+            privateConversation.conversation.id
+          );
+        });
+
+        it('it should be the same user', () => {
+          expect(duplicatedConversation.user?.name).to.eql(publicConversation.user?.name);
+        });
       });
 
-      it('allows the owner to duplicate their own public conversation', async () => {
-        const duplicateResponse = await observabilityAIAssistantAPIClient.editor({
-          endpoint:
-            'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
-          params: {
-            path: { conversationId: publicConversationId },
-          },
-        });
-        expect(duplicateResponse.status).to.be(200);
+      describe('allows the owner to duplicate their own public conversation', () => {
+        let duplicatedConversation: Conversation;
+        before(async () => {
+          const duplicateResponse = await observabilityAIAssistantAPIClient.editor({
+            endpoint:
+              'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
+            params: {
+              path: { conversationId: publicConversation.conversation.id },
+            },
+          });
+          expect(duplicateResponse.status).to.be(200);
 
-        const duplicatedId = duplicateResponse.body.conversation.id;
-        expect(duplicatedId).not.to.eql(publicConversationId);
-        expect(duplicateResponse.body.user?.name).to.eql('elastic_editor');
-
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: { path: { conversationId: duplicatedId } },
+          duplicatedConversation = duplicateResponse.body;
         });
-        expect(status).to.be(200);
+
+        after(async () => {
+          // cleanup
+          const { status } = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+            params: { path: { conversationId: duplicatedConversation.conversation.id } },
+          });
+          expect(status).to.be(200);
+        });
+
+        it('it should not be the same id', () => {
+          expect(duplicatedConversation.conversation.id).not.to.eql(
+            publicConversation.conversation.id
+          );
+        });
+
+        it('it should be the same user', () => {
+          expect(duplicatedConversation.user?.name).to.eql(publicConversation.user?.name);
+        });
       });
 
-      it('allows another user to duplicate a public conversation, making them the new owner', async () => {
-        const duplicateResponse = await observabilityAIAssistantAPIClient.admin({
-          endpoint:
-            'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
-          params: {
-            path: { conversationId: publicConversationId },
-          },
-        });
-        expect(duplicateResponse.status).to.be(200);
+      describe('allows another user to duplicate a public conversation, making them the new owner', () => {
+        let duplicatedConversation: Conversation;
+        before(async () => {
+          const duplicateResponse = await observabilityAIAssistantAPIClient.admin({
+            endpoint:
+              'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
+            params: {
+              path: { conversationId: publicConversation.conversation.id },
+            },
+          });
+          expect(duplicateResponse.status).to.be(200);
 
-        const duplicatedId = duplicateResponse.body.conversation.id;
-        expect(duplicatedId).not.to.eql(publicConversationId);
-        expect(duplicateResponse.body.user?.name).to.eql('elastic_admin');
-
-        const { status } = await observabilityAIAssistantAPIClient.admin({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: { path: { conversationId: duplicatedId } },
+          duplicatedConversation = duplicateResponse.body;
         });
-        expect(status).to.be(200);
+
+        after(async () => {
+          // cleanup
+          const { status } = await observabilityAIAssistantAPIClient.admin({
+            endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+            params: { path: { conversationId: duplicatedConversation.conversation.id } },
+          });
+          expect(status).to.be(200);
+        });
+
+        it('it should not be the same id', () => {
+          expect(duplicatedConversation.conversation.id).not.to.eql(
+            publicConversation.conversation.id
+          );
+        });
+
+        it('it should not be the same user', () => {
+          expect(duplicatedConversation.user?.name).to.not.eql(publicConversation.user?.name);
+        });
       });
 
       it('does not allow another user to duplicate a private conversation', async () => {
@@ -527,7 +570,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint:
             'POST /internal/observability_ai_assistant/conversation/{conversationId}/duplicate',
           params: {
-            path: { conversationId: privateConversationId },
+            path: { conversationId: privateConversation.conversation.id },
           },
         });
         expect(duplicateResponse.status).to.be(404);
@@ -623,6 +666,162 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
           expect(status).to.be(403);
         });
+      });
+    });
+
+    describe('conversation sharing', () => {
+      let createdConversationId: string;
+      const patchConversationRoute =
+        'PATCH /internal/observability_ai_assistant/conversation/{conversationId}';
+
+      before(async () => {
+        const { status, body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/conversation',
+          params: {
+            body: {
+              conversation: conversationCreate,
+            },
+          },
+        });
+
+        expect(status).to.be(200);
+        createdConversationId = body.conversation.id;
+      });
+
+      after(async () => {
+        const { status } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: { conversationId: createdConversationId },
+          },
+        });
+        expect(status).to.be(200);
+      });
+
+      it('allows the owner to update the access of their conversation', async () => {
+        const updateResponse = await observabilityAIAssistantAPIClient.editor({
+          endpoint: patchConversationRoute,
+          params: {
+            path: { conversationId: createdConversationId },
+            body: { public: true },
+          },
+        });
+
+        expect(updateResponse.status).to.be(200);
+        expect(updateResponse.body.public).to.be(true);
+      });
+
+      it('does not allow a different user (admin) to update access of a conversation they do not own', async () => {
+        const updateResponse = await observabilityAIAssistantAPIClient.admin({
+          endpoint: patchConversationRoute,
+          params: {
+            path: { conversationId: createdConversationId },
+            body: { public: true },
+          },
+        });
+
+        expect(updateResponse.status).to.be(403);
+      });
+
+      it('returns 404 when updating access for a non-existing conversation', async () => {
+        const updateResponse = await observabilityAIAssistantAPIClient.editor({
+          endpoint: patchConversationRoute,
+          params: {
+            path: { conversationId: 'non-existing-conversation-id' },
+            body: { public: true },
+          },
+        });
+
+        expect(updateResponse.status).to.be(404);
+      });
+
+      it('returns 400 for invalid access value', async () => {
+        const { status } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: patchConversationRoute,
+          params: {
+            path: { conversationId: createdConversationId },
+            // @ts-expect-error
+            body: { access: 'invalid_access' }, // Invalid value
+          },
+        });
+
+        expect(status).to.be(400);
+      });
+    });
+
+    describe('conversation deletion', () => {
+      let createdConversationId: string;
+      const deleteConversationRoute =
+        'DELETE /internal/observability_ai_assistant/conversation/{conversationId}';
+
+      before(async () => {
+        // Create a conversation to delete
+        const { status, body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/conversation',
+          params: {
+            body: {
+              conversation: conversationCreate,
+            },
+          },
+        });
+
+        expect(status).to.be(200);
+        createdConversationId = body.conversation.id;
+      });
+
+      it('allows the owner to delete their conversation', async () => {
+        const deleteResponse = await observabilityAIAssistantAPIClient.editor({
+          endpoint: deleteConversationRoute,
+          params: {
+            path: { conversationId: createdConversationId },
+          },
+        });
+
+        expect(deleteResponse.status).to.be(200);
+
+        // Ensure the conversation no longer exists
+        const getResponse = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: { conversationId: createdConversationId },
+          },
+        });
+
+        expect(getResponse.status).to.be(404);
+      });
+
+      it('does not allow a different user (admin) to delete a conversation they do not own', async () => {
+        // Create another conversation (editor)
+        const { body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/conversation',
+          params: {
+            body: {
+              conversation: conversationCreate,
+            },
+          },
+        });
+
+        const unauthorizedConversationId = body.conversation.id;
+
+        // try deleting as an admin
+        const deleteResponse = await observabilityAIAssistantAPIClient.admin({
+          endpoint: deleteConversationRoute,
+          params: {
+            path: { conversationId: unauthorizedConversationId },
+          },
+        });
+
+        expect(deleteResponse.status).to.be(404);
+
+        // Ensure the owner can still delete the conversation
+        const ownerDeleteResponse = await observabilityAIAssistantAPIClient.editor({
+          endpoint: deleteConversationRoute,
+          params: {
+            path: { conversationId: unauthorizedConversationId },
+          },
+        });
+
+        expect(ownerDeleteResponse.status).to.be(200);
       });
     });
   });
