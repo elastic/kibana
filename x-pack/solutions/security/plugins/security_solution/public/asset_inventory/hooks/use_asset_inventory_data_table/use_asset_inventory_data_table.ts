@@ -74,7 +74,6 @@ export const useAssetInventoryDataTable = ({
 
   const onChangeItemsPerPage = useCallback(
     (newPageSize: number) => {
-      console.log('onChangeItemsPerPage');
       setPageSize(newPageSize);
       setUrlQuery({
         pageIndex: 0,
@@ -97,7 +96,6 @@ export const useAssetInventoryDataTable = ({
 
   const onChangePage = useCallback(
     (newPageIndex: number) => {
-      console.log('onChangePage');
       setUrlQuery({
         pageIndex: newPageIndex,
       });

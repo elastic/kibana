@@ -265,10 +265,6 @@ export interface UnifiedDataTableProps {
    */
   isPlainRecord?: boolean;
   /**
-   * Current state value for pageIndex
-   */
-  pageIndexState?: number;
-  /**
    * Current state value for rowsPerPage
    */
   rowsPerPageState?: number;
@@ -488,7 +484,6 @@ export const UnifiedDataTable = ({
   sampleSizeState,
   onUpdateSampleSize,
   isPlainRecord = false,
-  pageIndexState,
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
@@ -549,9 +544,7 @@ export const UnifiedDataTable = ({
     docIdsInSelectionOrder,
   } = selectedDocsState;
 
-  const [currentPageIndex, setCurrentPageIndex] = useState(
-    typeof pageIndexState === 'number' && pageIndexState >= 0 ? pageIndexState : 0 // Prevent negative pageIndex
-  );
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   const changeCurrentPageIndex = useCallback(
     (value: number) => {
@@ -642,16 +635,11 @@ export const UnifiedDataTable = ({
       ? rowsPerPageState
       : DEFAULT_ROWS_PER_PAGE;
 
-  console.log({ currentPageSize });
-  console.log({ currentPageIndex });
-
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(
     () => Math.ceil(rowCount / currentPageSize),
     [rowCount, currentPageSize]
   );
-
-  console.log({ pageCount });
 
   useEffect(() => {
     /**
@@ -659,32 +647,14 @@ export const UnifiedDataTable = ({
      * to the consumer.
      *
      */
-    setCurrentPageIndex((pageIndex: number) => {
-      // Skip pagination logic when data is still loading and calculated `pageCount` is still 0
-      if (loadingState === DataLoadingState.loading) {
-        return pageIndex;
+    setCurrentPageIndex((previousPageIndex: number) => {
+      const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
+      if (calculatedPageIndex !== previousPageIndex) {
+        onUpdatePageIndex?.(calculatedPageIndex);
       }
-
-      // Sync local `pageIndex` with controlled `pageIndexState` prop if within bounds
-      if (
-        typeof pageIndexState === 'number' &&
-        pageIndexState !== pageIndex &&
-        pageIndexState >= 0 &&
-        pageIndexState < pageCount
-      ) {
-        return pageIndexState;
-      }
-
-      // Reset to first page when local `pageIndex` is out-of-bounds
-      if (pageIndex >= pageCount) {
-        onUpdatePageIndex?.(0);
-        return 0;
-      }
-
-      // Keep current `pageIndex` otherwise
-      return pageIndex;
+      return calculatedPageIndex;
     });
-  }, [onUpdatePageIndex, pageCount, pageIndexState, loadingState]);
+  }, [onUpdatePageIndex, pageCount]);
 
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {
@@ -708,9 +678,6 @@ export const UnifiedDataTable = ({
     currentPageIndex,
     changeCurrentPageIndex,
   ]);
-
-  console.log('!!!!!!!!');
-  console.log({ paginationObj });
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({

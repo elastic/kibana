@@ -187,14 +187,14 @@ export const useAssetInventoryGrouping = ({
   state,
   groupPanelRenderer,
   getGroupStats,
-  groupingLevel = 0,
+  // groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   state: AssetInventoryDataTableResult;
   groupPanelRenderer?: GroupPanelRenderer<AssetsGroupingAggregation>;
   getGroupStats?: GetGroupStats<AssetsGroupingAggregation>;
-  groupingLevel?: number;
+  // groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
 }) => {
@@ -224,12 +224,11 @@ export const useAssetInventoryGrouping = ({
   });
 
   // const selectedGroup = groupingLevel
-  const currentSelectedGroup = groupingLevel
-    ? grouping.selectedGroups[groupingLevel]
-    : grouping.selectedGroups[0];
+  //   ? grouping.selectedGroups[groupingLevel]
+  //   : grouping.selectedGroups[0];
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
-  // const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
+  const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
   const isNoneSelected = isNoneGroup(grouping.selectedGroups);
   // This is recommended by the grouping component to cover an edge case where `selectedGroup` has multiple values
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
