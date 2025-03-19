@@ -459,6 +459,7 @@ src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
+src/platform/packages/shared/kbn-grok-ui @elastic/streams-program-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
@@ -824,8 +825,10 @@ x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generati
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
@@ -885,6 +888,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
 x-pack/platform/plugins/shared/cases @elastic/response-ops
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
@@ -932,7 +936,9 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-manag
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
+x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-knowledge-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
@@ -1390,6 +1396,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics/ @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/incident_management/ @elastic/obs-ux-management-team
 /x-pack/test/functional/page_objects/alert_controls.ts @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
@@ -1620,12 +1627,14 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
+.buildkite/scout_ci_config.yml @elastic/appex-qa
 /x-pack/test/.gitignore @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/ui_tests/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
@@ -2214,6 +2223,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+
+# AI4DSOC in Security Solution
+/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting

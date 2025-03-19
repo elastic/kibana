@@ -1,0 +1,2 @@
+Takes the patterns from ./patterns and generates an object that can later be used with a GrokCollection instance.
+The patterns held in ./patterns are just a replica of: https://github.com/elastic/elasticsearch/tree/main/libs/grok/src/main/resources/patterns/ecs-v1
