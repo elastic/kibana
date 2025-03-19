@@ -9,7 +9,7 @@ import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 import { streamUpsertRequestSchema } from './api';
 import { streamDefinitionSchema } from './core';
 import {
-  groupStreamDefinitionBaseSchema,
+  groupStreamDefinitionSchemaBase,
   groupStreamDefinitionSchema,
   groupStreamUpsertRequestSchema,
 } from './group';
@@ -68,7 +68,7 @@ export const isWiredStreamUpsertRequest = createIsNarrowSchema(
 
 export const isGroupStreamDefinitionBase = createIsNarrowSchema(
   z.unknown(),
-  groupStreamDefinitionBaseSchema
+  groupStreamDefinitionSchemaBase
 );
 
 export const isRootStreamDefinition = createIsNarrowSchema(
