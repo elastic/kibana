@@ -8,9 +8,8 @@
 import { IntegrationComponentDescriptor, IntegrationType } from '@kbn/wci-common';
 import { ExternalServerTool } from './tool';
 import { ExternalServerConfigurationForm } from './configuration';
-import { WCIExternalServerConfiguration } from '../../common/types';
 
-export function getExternalServerIntegrationComponents(): IntegrationComponentDescriptor<WCIExternalServerConfiguration> {
+export function getExternalServerIntegrationComponents(): IntegrationComponentDescriptor {
   return {
     getType: () => IntegrationType.external_server,
     getTool: () => ExternalServerTool,

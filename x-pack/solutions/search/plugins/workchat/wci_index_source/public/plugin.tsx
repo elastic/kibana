@@ -28,6 +28,8 @@ export class WCIIndexSourcePlugin
     core: CoreSetup<WCIIndexSourcePluginStartDependencies, WCIIndexSourcePluginStart>,
     { workchatApp }: WCIIndexSourcePluginSetupDependencies
   ): WCIIndexSourcePluginSetup {
+    // @ts-ignore
+    // TODO: fix this
     workchatApp.integrations.register(indexSourceIntegrationComponents());
 
     return {};

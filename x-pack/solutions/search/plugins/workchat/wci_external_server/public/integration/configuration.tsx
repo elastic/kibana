@@ -11,11 +11,10 @@ import { EuiDescribedFormGroup } from '@elastic/eui';
 import { EuiTextArea } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { Controller } from 'react-hook-form';
-import { WCIExternalServerConfiguration } from '../../common/types';
 
-export const ExternalServerConfigurationForm: React.FC<
-  IntegrationConfigurationFormProps<WCIExternalServerConfiguration>
-> = ({ form }) => {
+export const ExternalServerConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
+  form,
+}) => {
   const { control } = form;
 
   return (

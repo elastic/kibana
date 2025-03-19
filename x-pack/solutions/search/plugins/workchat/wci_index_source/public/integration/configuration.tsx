@@ -11,11 +11,10 @@ import { EuiTextArea } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import { Controller } from 'react-hook-form';
-import { WCIIndexSourceConfiguration } from '../../common/types';
 
-export const IndexSourceConfigurationForm: React.FC<
-  IntegrationConfigurationFormProps<WCIIndexSourceConfiguration>
-> = ({ form }) => {
+export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
+  form,
+}) => {
   const { control } = form;
 
   return (

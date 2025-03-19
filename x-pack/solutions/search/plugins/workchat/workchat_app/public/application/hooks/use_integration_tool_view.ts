@@ -19,11 +19,10 @@ export const useIntegrationToolView = (toolName: string) => {
 
   const { integrationRegistry, integrationService } = useWorkChatServices();
 
-  // const [toolView, setToolView] = useState<React.ComponentType<IntegrationToolComponentProps> | null>(null);
   const [integrationType, setIntegrationType] = useState<IntegrationType | null>(null);
 
   useEffect(() => {
-    const fetchToolView = async () => {
+    const fetchIntegration = async () => {
       try {
         const integration = await integrationService.get(integrationId);
         setIntegrationType(integration?.type as IntegrationType);
@@ -32,7 +31,7 @@ export const useIntegrationToolView = (toolName: string) => {
       }
     };
 
-    fetchToolView();
+    fetchIntegration();
   }, [integrationId, integrationService]);
 
   return useMemo(() => {
@@ -41,8 +40,8 @@ export const useIntegrationToolView = (toolName: string) => {
     }
 
     const integrationDefinition = integrationRegistry.get(integrationType as IntegrationType);
-    const toolView = integrationDefinition?.getTool?.();
+    const toolView = integrationDefinition?.getTool?.(name);
 
     return toolView;
-  }, [integrationType]);
+  }, [integrationType, name]);
 };

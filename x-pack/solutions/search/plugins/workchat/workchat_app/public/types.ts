@@ -6,11 +6,11 @@
  */
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { IntegrationComponentDescriptor } from '@kbn/wci-common';
 
-// todo: add types for integrations
 export interface WorkChatAppPluginSetup {
   integrations: {
-    register: (integration: any) => void;
+    register: (integration: IntegrationComponentDescriptor) => void;
   };
 }
 
