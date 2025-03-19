@@ -10935,10 +10935,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/status/server-internal/src/routes/status_preboot.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/i18n/server-internal/src/routes/translations.ts"
               },
               {
@@ -10972,10 +10968,6 @@
               {
                 "plugin": "monitoringCollection",
                 "path": "x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/prometheus/get_metrics.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/routes/public_facing/download.ts"
               },
               {
                 "plugin": "banners",
