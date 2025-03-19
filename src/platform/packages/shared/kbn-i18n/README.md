@@ -344,4 +344,4 @@ In order to simplify localization process, some additional tools were implemente
 - tool for verifying all translations have translatable strings and extracting default messages from templates
 - tool for verifying translation files and integrating them to Kibana
 
-[I18n tools documentation](../../../../../src/dev/i18n/README.md)
+[I18n tools documentation](../../../../../src/dev/i18n_tools/README.md)
