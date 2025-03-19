@@ -1735,7 +1735,7 @@
     "css-loader": "^7.1.2",
     "cssnano": "^5.1.12",
     "cssnano-preset-default": "^5.2.12",
-    "cssstyle": "^4.1.0",
+    "cssstyle": "^4.3.0",
     "csstype": "^3.0.2",
     "cypress": "13.17.0",
     "cypress-axe": "^1.5.0",
