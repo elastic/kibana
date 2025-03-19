@@ -84,7 +84,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           when: () => true,
         });
 
-        void llmProxy.interceptConversation({ content: 'Hello from user' });
+        void llmProxy.interceptConversation('Hello from user');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: 'Please retrieve the most recent Apache log messages',
