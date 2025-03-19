@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
-import type { APMIndices } from '..';
+import type { APMIndices } from '../../common/config_schema';
 
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE = 'apm-indices';
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_ID = 'apm-indices';
@@ -40,7 +40,7 @@ export const apmIndicesSavedObjectDefinition: SavedObjectsType = {
     importableAndExportable: true,
     icon: 'apmApp',
     getTitle: () =>
-      i18n.translate('xpack.apmDataAccess.apmSettings.index', {
+      i18n.translate('xpack.apmSourcesAccess.apmSettings.index', {
         defaultMessage: 'APM Settings - Index',
       }),
   },
@@ -88,13 +88,15 @@ export function saveApmIndices(
 
 // remove empty/undefined values
 function removeEmpty(apmIndices: Partial<APMIndices>) {
-  return Object.entries(apmIndices)
-    .map(([key, value]) => [key, value?.trim()])
-    .filter(([_, value]) => !!value)
-    .reduce((obj, [key, value]) => {
+  return Object.entries<string | undefined>(apmIndices).reduce((obj, [key, value]) => {
+    value = value?.trim();
+
+    if (value) {
       obj[key] = value;
-      return obj;
-    }, {} as Record<string, unknown>);
+    }
+
+    return obj;
+  }, {} as Record<string, unknown>);
 }
 
 export async function getApmIndicesSavedObject(savedObjectsClient: SavedObjectsClientContract) {
