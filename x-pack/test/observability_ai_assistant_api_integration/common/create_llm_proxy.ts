@@ -122,6 +122,7 @@ export class LlmProxy {
     this.log.debug(`Closing LLM Proxy on port ${this.port}`);
     clearInterval(this.interval);
     this.server.close();
+    this.clear();
   }
 
   waitForAllInterceptorsToHaveBeenCalled() {
@@ -149,7 +150,7 @@ export class LlmProxy {
   }
 
   interceptConversation(
-    msg: LLMMessage,
+    msg: string | string[],
     {
       name,
     }: {
@@ -157,7 +158,9 @@ export class LlmProxy {
     } = {}
   ) {
     return this.intercept(
-      `Conversation interceptor: "${name ?? 'Unnamed'}"`,
+      `Conversation interceptor: "${
+        name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`
+      }"`,
       // @ts-expect-error
       (body) => body.tool_choice?.function?.name === undefined,
       msg

@@ -44,6 +44,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
     // Calling `get_dataset_info` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
       let messageAddedEvents: MessageAddEvent[];
@@ -84,6 +88,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await logsSynthtraceEsClient.clean();
+      });
+
+      afterEach(async () => {
+        llmProxy.clear();
       });
 
       it('makes 3 requests to the LLM', () => {

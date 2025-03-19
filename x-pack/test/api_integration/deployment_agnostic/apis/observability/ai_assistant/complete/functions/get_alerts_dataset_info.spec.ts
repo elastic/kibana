@@ -95,6 +95,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
     describe('POST /internal/observability_ai_assistant/chat/complete', () => {
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;

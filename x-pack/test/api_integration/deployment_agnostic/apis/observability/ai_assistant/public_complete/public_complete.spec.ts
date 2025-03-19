@@ -39,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('/api/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
-    let proxy: LlmProxy;
+    let llmProxy: LlmProxy;
     let connectorId: string;
 
     async function callPublicChatComplete({
@@ -71,9 +71,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     }
 
     before(async () => {
-      proxy = await createLlmProxy(log);
+      llmProxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
-        port: proxy.getPort(),
+        port: llmProxy.getPort(),
       });
     });
 
@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      proxy.close();
+      llmProxy.close();
     });
 
     const action = {
@@ -98,15 +98,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     } as const;
 
     afterEach(async () => {
-      proxy.clear();
+      llmProxy.clear();
     });
 
     describe('after executing an action and closing the stream', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        void proxy.interceptTitle('My Title');
-        void proxy.interceptWithFunctionRequest({
+        void llmProxy.interceptTitle('My Title');
+        void llmProxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
           when: () => true,
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           actions: [action],
         });
 
-        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
         events = decodeEvents(responseBody);
       });
@@ -135,7 +135,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('after adding an instruction', () => {
       before(async () => {
-        void proxy.interceptWithFunctionRequest({
+        void llmProxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
           when: () => true,
@@ -147,11 +147,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           persist: false,
         });
 
-        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       it('includes the instruction in the system message', async () => {
-        const { requestBody } = proxy.interceptedRequests[0];
+        const { requestBody } = llmProxy.interceptedRequests[0];
         expect(requestBody.messages[0].content).to.contain('This is a random instruction');
       });
     });
@@ -160,12 +160,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let responseBody: string;
 
       before(async () => {
-        void proxy.interceptTitle('My Title');
-        void proxy.interceptConversation('Hello');
+        void llmProxy.interceptTitle('My Title');
+        void llmProxy.interceptConversation('Hello');
 
         responseBody = await callPublicChatComplete({ format: 'openai' });
 
-        await proxy.waitForAllInterceptorsToHaveBeenCalled();
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       function extractDataParts(lines: string[]) {
