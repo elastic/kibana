@@ -90,8 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         void llmProxy.interceptWithFunctionRequest({
           name: 'retrieve_elastic_doc',
-          arguments: () => JSON.stringify({}),
-          when: () => true,
+          arguments: () => JSON.stringify({ query: 'kibana lens' }),
         });
 
         void llmProxy.interceptConversation('Hello from LLM Proxy');

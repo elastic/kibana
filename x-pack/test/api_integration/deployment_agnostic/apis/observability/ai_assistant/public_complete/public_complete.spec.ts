@@ -109,7 +109,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
-          when: () => true,
         });
 
         const responseBody = await callPublicChatComplete({
@@ -138,7 +137,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
-          when: () => true,
         });
 
         await callPublicChatComplete({

@@ -66,7 +66,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'get_dataset_info',
           arguments: () => JSON.stringify({ index: 'logs*' }),
-          when: () => true,
         });
 
         ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());

@@ -168,12 +168,12 @@ export class LlmProxy {
   interceptWithFunctionRequest({
     name,
     arguments: argumentsCallback,
-    when,
+    when = () => true,
     interceptorName,
   }: {
     name: string;
     arguments: (body: ChatCompletionStreamParams) => string;
-    when: RequestInterceptor['when'];
+    when?: RequestInterceptor['when'];
     interceptorName?: string;
   }) {
     // @ts-expect-error
@@ -282,7 +282,7 @@ export class LlmProxy {
               requestBody,
               status: once((status: number) => {
                 response.writeHead(status, {
-                  'Elastic-Interceptor': name.replace(/[^a-zA-Z0-9 ]/g, ' '), // Keeps only alphanumeric characters and spaces
+                  'Elastic-Interceptor': name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
                   'Content-Type': 'text/event-stream',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',

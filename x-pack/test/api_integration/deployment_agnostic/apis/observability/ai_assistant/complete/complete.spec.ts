@@ -316,7 +316,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void proxy.interceptWithFunctionRequest({
           name: 'my_action',
           arguments: () => JSON.stringify({ foo: 'bar' }),
-          when: () => true,
         });
 
         events = await getEvents({

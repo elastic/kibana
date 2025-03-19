@@ -54,7 +54,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       void llmProxy.interceptWithFunctionRequest({
         name: 'get_alerts_dataset_info',
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
-        when: () => true,
       });
 
       ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
@@ -62,7 +61,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       void llmProxy.interceptWithFunctionRequest({
         name: 'alerts',
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
-        when: () => true,
       });
 
       void llmProxy.interceptConversation(

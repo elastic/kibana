@@ -66,7 +66,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'query',
           arguments: () => JSON.stringify({}),
-          when: () => true,
         });
 
         void llmProxy.interceptWithFunctionRequest({
@@ -85,7 +84,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             | SORT @timestamp DESC
             | LIMIT 10`,
             }),
-          when: () => true,
         });
 
         void llmProxy.interceptConversation('Hello from user');
