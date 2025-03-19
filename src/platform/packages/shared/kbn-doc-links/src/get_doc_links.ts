@@ -24,9 +24,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
+  const ELASTIC_DOCS = meta.docsWebsiteUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
+  const KIBANA_REF = `${ELASTIC_DOCS}reference/kibana/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
@@ -42,10 +44,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
-    settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
     elasticStackGetStarted: isServerless
-      ? `${SERVERLESS_DOCS}intro.html`
-      : `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
+      ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
+      : `${ELASTIC_DOCS}get-started`,
     apiReference: `${ELASTIC_WEBSITE_URL}guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/api-reference.html`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
@@ -416,6 +417,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     server: {
       protocol: `${KIBANA_DOCS}settings.html#server-protocol`,
+      publicBaseUrl: `${KIBANA_DOCS}settings.html#server-publicBaseUrl`,
     },
     logging: {
       enableDeprecationHttpDebugLogs: `${KIBANA_DOCS}logging-settings.html#enable-http-debug-logs`,

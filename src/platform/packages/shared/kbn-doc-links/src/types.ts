@@ -23,7 +23,6 @@ export interface DocLinksMeta {
  * @public
  */
 export interface DocLinks {
-  readonly settings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
   readonly upgrade: {
@@ -281,6 +280,7 @@ export interface DocLinks {
   };
   readonly server: {
     readonly protocol: string;
+    readonly publicBaseUrl: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
