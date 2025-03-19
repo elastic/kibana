@@ -1502,6 +1502,72 @@ describe('UnifiedDataTable', () => {
 
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
     });
+
+    // test('should keep local state of itemsPerPage to work in uncontrolled mode', async () => {
+    //   const component = await getComponent({
+    //     ...getProps(),
+    //     onUpdatePageIndex: onChangePageMock,
+    //     rowsPerPageState: 1,
+    //     rowsPerPageOptions: [1, 4],
+    //   });
+
+    //   expect(findTestSubject(component, 'pagination-button-4').exists()).toBeTruthy();
+    //   onChangePageMock.mockClear();
+    //   // go to last page
+    //   findTestSubject(component, 'pagination-button-4').simulate('click');
+    //   expect(onChangePageMock).toHaveBeenNthCalledWith(1, 4);
+    //   onChangePageMock.mockClear();
+
+    //   // Change items per Page so that pageIndex autoamtically changes.
+    //   expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+    //     'Rows per page: 1'
+    //   );
+    //   findTestSubject(component, 'tablePaginationPopoverButton').simulate('click');
+    //   component.setProps({
+    //     rowsPerPageState: 5,
+    //   });
+
+    //   await waitFor(() => {
+    //     expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+    //       'Rows per page: 5'
+    //     );
+    //   });
+
+    //   expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
+    // });
+
+    // test('should override local state of itemsPerPage with given prop to work in controlled mode', async () => {
+    //   const component = await getComponent({
+    //     ...getProps(),
+    //     onUpdatePageIndex: onChangePageMock,
+    //     rowsPerPageState: 1,
+    //     rowsPerPageOptions: [1, 4],
+    //   });
+
+    //   expect(findTestSubject(component, 'pagination-button-4').exists()).toBeTruthy();
+    //   onChangePageMock.mockClear();
+    //   // go to last page
+    //   findTestSubject(component, 'pagination-button-4').simulate('click');
+    //   expect(onChangePageMock).toHaveBeenNthCalledWith(1, 4);
+    //   onChangePageMock.mockClear();
+
+    //   // Change items per Page so that pageIndex autoamtically changes.
+    //   expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+    //     'Rows per page: 1'
+    //   );
+    //   findTestSubject(component, 'tablePaginationPopoverButton').simulate('click');
+    //   component.setProps({
+    //     rowsPerPageState: 5,
+    //   });
+
+    //   await waitFor(() => {
+    //     expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+    //       'Rows per page: 5'
+    //     );
+    //   });
+
+    //   expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
+    // });
   });
 
   describe('enableInTableSearch', () => {

@@ -630,10 +630,11 @@ export const UnifiedDataTable = ({
   /**
    * Pagination
    */
-  const currentPageSize =
+  const [currentPageSize, setCurrentPageSize] = useState(
     typeof rowsPerPageState === 'number' && rowsPerPageState > 0
       ? rowsPerPageState
-      : DEFAULT_ROWS_PER_PAGE;
+      : DEFAULT_ROWS_PER_PAGE
+  );
 
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(
@@ -659,6 +660,7 @@ export const UnifiedDataTable = ({
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {
       onUpdateRowsPerPage?.(pageSize);
+      setCurrentPageSize(pageSize);
     };
 
     return isPaginationEnabled
