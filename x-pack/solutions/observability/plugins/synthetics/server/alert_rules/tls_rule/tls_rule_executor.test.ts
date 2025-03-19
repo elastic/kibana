@@ -65,7 +65,9 @@ describe('tlsRuleExecutor', () => {
       soClient,
       mockEsClient,
       serverMock,
-      monitorClient
+      monitorClient,
+      'test-space',
+      'rule-name'
     );
     const configRepo = tlsRule.monitorConfigRepository;
     const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
