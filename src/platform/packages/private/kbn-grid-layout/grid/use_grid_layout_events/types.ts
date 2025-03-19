@@ -9,7 +9,7 @@
 
 export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;
 
-export interface MousePosition {
+export interface PointerPosition {
   clientX: number;
   clientY: number;
 }

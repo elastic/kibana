@@ -14,19 +14,19 @@ import { MutableRefObject } from 'react';
 import { GridLayoutStateManager } from '../types';
 import { getRowKeysInOrder } from '../utils/resolve_grid_row';
 import { getPointerPosition } from './sensors';
-import { MousePosition, UserInteractionEvent } from './types';
+import { PointerPosition, UserInteractionEvent } from './types';
 
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   rowId: string,
-  startingMouse: MutableRefObject<MousePosition>
+  startingPointer: MutableRefObject<PointerPosition>
 ) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   if (!headerRef) return;
 
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
-  startingMouse.current = getPointerPosition(e);
+  startingPointer.current = getPointerPosition(e);
   gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,
@@ -52,8 +52,8 @@ export const commitAction = ({
 
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
-  startingMouse: MousePosition,
-  currentMouse: MousePosition
+  startingPointer: PointerPosition,
+  currentPointer: PointerPosition
 ) => {
   const currentActiveRowEvent = gridLayoutStateManager.activeRowEvent$.getValue();
   if (!currentActiveRowEvent) return;
@@ -95,8 +95,8 @@ export const moveAction = (
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
     translate: {
-      top: currentMouse.clientY - startingMouse.clientY,
-      left: currentMouse.clientX - startingMouse.clientX,
+      top: currentPointer.clientY - startingPointer.clientY,
+      left: currentPointer.clientX - startingPointer.clientX,
     },
   });
 };

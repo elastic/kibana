@@ -19,7 +19,7 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
-import { MousePosition, UserInteractionEvent } from './types';
+import { PointerPosition, UserInteractionEvent } from './types';
 
 /*
  * This hook sets up and manages interaction logic for dragging grid rows.
@@ -30,20 +30,20 @@ import { MousePosition, UserInteractionEvent } from './types';
 export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
-  const pointerPixel = useRef<MousePosition>({ clientX: 0, clientY: 0 });
-  const startingMouse = useRef<MousePosition>({ clientX: 0, clientY: 0 });
+  const pointerPixel = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
+  const startingPointer = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
 
-      const onStart = () => startAction(e, gridLayoutStateManager, rowId, startingMouse);
+      const onStart = () => startAction(e, gridLayoutStateManager, rowId, startingPointer);
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getPointerPosition(ev);
         }
-        moveAction(gridLayoutStateManager, startingMouse.current, pointerPixel.current);
+        moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
       };
 
       const onEnd = () => commitAction(gridLayoutStateManager);

@@ -19,7 +19,7 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
-import { MousePosition, UserInteractionEvent } from './types';
+import { PointerPosition, UserInteractionEvent } from './types';
 
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
@@ -39,7 +39,7 @@ export const useGridLayoutPanelEvents = ({
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
-  const pointerPixel = useRef<MousePosition>({ clientX: 0, clientY: 0 });
+  const pointerPixel = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {

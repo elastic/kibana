@@ -9,14 +9,14 @@
 
 import { PanelInteractionEvent } from '../types';
 import { getPointerPosition } from './sensors';
-import { MousePosition, UserInteractionEvent } from './types';
+import { PointerPosition, UserInteractionEvent } from './types';
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   interactionEvent,
   pointerPixel,
 }: {
-  pointerPixel: MousePosition;
+  pointerPixel: PointerPosition;
   interactionEvent: PanelInteractionEvent;
 }) => {
   const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
@@ -34,7 +34,7 @@ export const getDragPreviewRect = ({
   pointerPixel,
   interactionEvent,
 }: {
-  pointerPixel: MousePosition;
+  pointerPixel: PointerPosition;
   interactionEvent: PanelInteractionEvent;
 }) => {
   return {
