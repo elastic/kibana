@@ -9,7 +9,6 @@
 
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import type { CoreStart } from '@kbn/core/public';
 import { containsIndexPattern } from '../../utils';
 
 export interface TracesContextService {
@@ -19,7 +18,6 @@ export interface TracesContextService {
 }
 
 export interface TracesContextServiceDeps {
-  core: CoreStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
 
@@ -31,36 +29,45 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFr
 );
 
 export const createTracesContextService = async ({
-  core,
   apmSourcesAccess,
 }: TracesContextServiceDeps): Promise<TracesContextService> => {
-  if (core.application.capabilities.apm?.show && apmSourcesAccess) {
-    const indices = await apmSourcesAccess.getApmIndices();
-
-    if (indices) {
-      const { transaction, span } = indices;
-
-      const allIndices = [transaction, span]
-        .flatMap((index) => index.split(','))
-        .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
-      const uniqueIndices = Array.from(new Set(allIndices));
-
-      const traces = uniqueIndices.join();
-      const allowedDataSources = [createRegExpPatternFrom(uniqueIndices, 'data')];
-      return getTracesContextService(traces, allowedDataSources);
-    } else {
-      return getTracesContextService('', []);
-    }
+  if (!apmSourcesAccess) {
+    return defaultTracesContextService;
   }
 
-  const traces = DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join();
-  const allowedDataSources = [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+  try {
+    const indices = await apmSourcesAccess.getApmIndices();
 
-  return getTracesContextService(traces, allowedDataSources);
+    if (!indices) {
+      return defaultTracesContextService;
+    }
+
+    const { transaction, span } = indices;
+    const allIndices = getAllIndices(transaction, span);
+    const uniqueIndices = Array.from(new Set(allIndices));
+
+    const traces = uniqueIndices.join();
+    const allowedDataSources = [createRegExpPatternFrom(uniqueIndices, 'data')];
+
+    return getTracesContextService(traces, allowedDataSources);
+  } catch (error) {
+    return defaultTracesContextService;
+  }
 };
+
+function getAllIndices(transaction: string, span: string) {
+  return [transaction, span]
+    .flatMap((index) => index.split(','))
+    .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
+}
 
 export const getTracesContextService = (traces: string, allowedDataSources: RegExp[]) => ({
   getAllTracesIndexPattern: () => traces,
   isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),
   containsTracesIndexPattern: containsIndexPattern(allowedDataSources),
 });
+
+const defaultTracesContextService = getTracesContextService(
+  DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join(),
+  [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP]
+);

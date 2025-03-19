@@ -51,7 +51,6 @@ export const createProfileProviderServices = async (
       logsDataAccess: discoverServices.logsDataAccess,
     }),
     tracesContextService: await createTracesContextService({
-      core: discoverServices.core,
       apmSourcesAccess: discoverServices.apmSourcesAccess,
     }),
   };
