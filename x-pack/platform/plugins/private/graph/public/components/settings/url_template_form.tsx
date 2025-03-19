@@ -20,7 +20,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { css } from '@emotion/react';
 import { UrlTemplate } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
