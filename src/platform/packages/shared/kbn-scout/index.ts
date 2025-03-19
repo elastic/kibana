@@ -42,3 +42,12 @@ export type {
 export type { Locator, CDPSession } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
+
+export { apiExpect } from './src/vitest_api_tests';
+
+export {
+  getEsArchiver,
+  getEsClient,
+  getKbnClient,
+  getLogger,
+} from './src/common';
