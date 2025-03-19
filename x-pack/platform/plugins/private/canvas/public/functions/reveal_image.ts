@@ -1,15 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionRevealImageFunction, Origin, Position } from '../types';
-import { BASE64, URL } from '../constants';
+import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../types';
+
+const BASE64 = '`base64`';
+const URL = 'URL';
+
+export enum Origin {
+  TOP = 'top',
+  LEFT = 'left',
+  BOTTOM = 'bottom',
+  RIGHT = 'right',
+}
+
+interface Arguments {
+  image: string | null;
+  emptyImage: string | null;
+  origin: Origin;
+}
+
+interface Output {
+  image: string;
+  emptyImage: string;
+  origin: Origin;
+  percent: number;
+}
+
+type ExpressionRevealImageFunction = () => ExpressionFunctionDefinition<
+  'revealImage',
+  number,
+  Arguments,
+  Promise<ExpressionValueRender<Output>>
+>;
+
+enum Position {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+  RIGHT = 'right',
+}
 
 const strings = {
   help: i18n.translate('expressionRevealImage.functions.revealImageHelpText', {
@@ -32,7 +66,7 @@ const strings = {
           'An optional background image to reveal over. ' +
           'Provide an image asset as a `{BASE64}` data {URL}, or pass in a sub-expression.',
         values: {
-          BASE64,
+          BASE64: '`base64`',
           URL,
         },
       }
@@ -71,7 +105,7 @@ export const errors = {
     ),
 };
 
-export const revealImageFunction: ExpressionRevealImageFunction = () => {
+export const revealImage: ExpressionRevealImageFunction = () => {
   const { help, args: argHelp } = strings;
 
   return {
