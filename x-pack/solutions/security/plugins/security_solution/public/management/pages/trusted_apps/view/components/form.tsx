@@ -29,7 +29,6 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { PolicySelector } from '../../../../components/policy_selector/policy_selector';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
@@ -553,26 +552,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFormRow>
           </>
         ) : null}
-
-        <EuiText>
-          <EuiSpacer size="xxl" />
-          <EuiSpacer size="xxl" />
-          <EuiSpacer size="xxl" />
-          <h2>{'TEST - DO NOT COMMIT'}</h2>
-
-          <h3>{'PolicySelector'}</h3>
-        </EuiText>
-
-        <PolicySelector
-          selectedPolicyIds={[]}
-          showPolicyLink
-          useCheckbox
-          // queryOptions={{
-          //   kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: m365_defender`,
-          // }}
-        />
-
-        <EuiSpacer size="xxl" />
       </EuiForm>
     );
   }
