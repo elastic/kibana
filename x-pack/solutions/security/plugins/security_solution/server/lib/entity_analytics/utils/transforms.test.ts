@@ -210,7 +210,7 @@ describe('transforms utils', () => {
   });
 
   describe('checkTransformNameLength', () => {
-    it('should limit the length of tranformId to less than or equal 36 characters', async () => {
+    it('should limit the length of tranformId to less than or equal 64 characters', async () => {
       const longTransformId = 'a_a-'.repeat(1000);
       const response = await getLatestTransformId(longTransformId);
       expect(response.length).toBeLessThanOrEqual(36);

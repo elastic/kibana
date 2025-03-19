@@ -21,7 +21,7 @@ describe('getTransformOptions', () => {
           "managed": true,
           "managed_by": "security-entity-analytics",
           "space_id": "tests",
-          "version": 4,
+          "version": 3,
         },
         "dest": Object {
           "index": "dest",

@@ -455,7 +455,7 @@ const assertTransform = (namespace: string) => {
         unattended: true,
       },
       _meta: {
-        version: 4,
+        version: 3,
         managed: true,
         managed_by: 'security-entity-analytics',
         space_id: namespace,

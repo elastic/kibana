@@ -118,12 +118,12 @@ export const reinstallTransform = async ({
 };
 
 export const getLatestTransformId = (namespace: string): string => {
-  const maxNamespaceLength = 36;
+  const maxTransformId = 64;
   const prefix = `risk_score_latest_transform_`;
   const fullName = `${prefix}${namespace}`;
 
   const processedNamespace =
-    fullName.length > maxNamespaceLength ? murmurhash.v3(namespace).toString(36) : namespace;
+    fullName.length > maxTransformId ? murmurhash.v3(namespace).toString(16) : namespace;
   return `${prefix}${processedNamespace}`;
 };
 
