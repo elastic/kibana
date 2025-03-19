@@ -8,9 +8,8 @@
 import { IntegrationComponentDescriptor, IntegrationType } from '@kbn/wci-common';
 import { SalesforceTool } from './tool';
 import { SalesforceConfigurationForm } from './configuration';
-import { SalesforceConfiguration } from '../../common/types';
 
-export function getSalesforceIntegrationComponents(): IntegrationComponentDescriptor<SalesforceConfiguration> {
+export function getSalesforceIntegrationComponents(): IntegrationComponentDescriptor {
   return {
     getType: () => IntegrationType.salesforce,
     getTool: () => SalesforceTool,

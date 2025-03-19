@@ -90,8 +90,6 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     })),
   ];
 
-  const ConfigurationForm = useIntegrationConfigurationForm(state.type);
-
   const onDeleteSuccess = useCallback(() => {
     notifications.toasts.addSuccess(integrationLabels.notifications.integrationDeletedToastText);
     navigateToWorkchatUrl('/integrations');
@@ -134,7 +132,11 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     handleSubmit,
     formState: { isSubmitting },
     control,
+    watch,
   } = formMethods;
+
+  const ConfigurationForm = useIntegrationConfigurationForm(watch('type'));
+
   return (
     <KibanaPageTemplate panelled>
       <KibanaPageTemplate.Header

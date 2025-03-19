@@ -65,10 +65,8 @@ export interface IntegrationClient {
   disconnect: () => Promise<void>;
 }
 
-export interface IntegrationComponentDescriptor<
-  T extends IntegrationConfiguration = IntegrationConfiguration
-> {
-  getConfigurationForm: () => React.ComponentType<IntegrationConfigurationFormProps<T>>;
+export interface IntegrationComponentDescriptor {
+  getConfigurationForm: () => React.ComponentType<IntegrationConfigurationFormProps>;
   getTool: () => React.ComponentType<IntegrationToolComponentProps>;
   getType: () => IntegrationType;
 }
@@ -78,9 +76,8 @@ export interface IntegrationToolComponentProps {
   complete: boolean;
 }
 
-export interface IntegrationConfigurationFormProps<
-  T extends IntegrationConfiguration = IntegrationConfiguration
-> {
-  configuration: T;
+export interface IntegrationConfigurationFormProps {
+  // TODO: fix this 
+  // shouldn't need this and use the useFormContext vs passing down as prop
   form: UseFormReturn<any>;
 }
