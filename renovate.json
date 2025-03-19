@@ -158,6 +158,7 @@
         "@types/supertest",
         "@types/react-test-renderer",
         "babel-plugin-istanbul",
+        "lighthouse",
         "nyc",
         "oboe",
         "pixelmatch",
